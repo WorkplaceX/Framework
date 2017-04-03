@@ -1,3 +1,0 @@
-﻿Open XML SDK 2.5 for Microsoft Office
-
-http://www.microsoft.com/en-us/download/details.aspx?id=30425
