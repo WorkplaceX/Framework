@@ -31,7 +31,14 @@
                 }
                 else
                 {
-                    throw new Exception("FileName unknown!");
+                    if (uri.AbsolutePath.EndsWith("Submodule/Server/bin/Debug/netcoreapp1.1/Framework.dll"))
+                    {
+                        result = new Uri(uri, "../../../../../").AbsolutePath;
+                    }
+                    else
+                    {
+                        throw new Exception("FileName unknown!");
+                    }
                 }
                 return result;
             }
