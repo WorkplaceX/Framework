@@ -1,0 +1,6 @@
+﻿{
+  "NodeFileName": [ "C:/Program Files/nodejs/node.exe", "C:/Program Files (x86)/nodejs/node.exe" ],
+  "NpmFileName": [ "C:/Program Files/nodejs/npm.cmd", "C:/Program Files (x86)/nodejs/npm.cmd" ],
+  "VisualStudioCodeFileName": [ "C:/Program Files/Microsoft VS Code/code.exe", "C:/Program Files (x86)/Microsoft VS Code/code.exe" ],
+  "MSBuildFileName": [ "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe", "C:/Program Files (x86)/MSBuild/14.0/Bin/MSBuild.exe" ]
+}

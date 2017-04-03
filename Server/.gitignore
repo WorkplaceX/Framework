@@ -1,0 +1,8 @@
+/bin/
+/obj/
+/project.lock.json
+/*.user
+/Universal/
+/node_modules/
+/**/*.log
+/Properties/PublishProfiles/

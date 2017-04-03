@@ -1,0 +1,5 @@
+﻿ALTER INDEX IX_TempExcelCell ON TempExcel REBUILD
+
+GO
+
+ALTER INDEX IX_TempExcelRow ON TempExcel REBUILD
