@@ -17,7 +17,7 @@ Bundle to create applications based on Angular 2 with server side rendering, ASP
 
 ## Build CLI
 Command line interface containing all scripts and tools to build and deploy. Can also be used for CI.
-![alt tag](Build/Doc/CommandLineInterface.png)
+![alt tag](Framework/Build/Doc/CommandLineInterface.png)
 
 ## Visual Studio
 * Open Framework.sln
