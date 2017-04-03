@@ -25,13 +25,13 @@
             {
                 Uri uri = new Uri(typeof(Util).GetTypeInfo().Assembly.CodeBase);
                 string result;
-                if (uri.AbsolutePath.Contains("/bin/Debug/")) // Running in Visual Studio
+                if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
                 {
-                    result = new Uri(uri, "../../../../../").AbsolutePath;
+                    result = new Uri(uri, "../../../../").AbsolutePath;
                 }
                 else
                 {
-                    result = new Uri(uri, "./").AbsolutePath;
+                    throw new Exception("FileName unknown!");
                 }
                 return result;
             }
