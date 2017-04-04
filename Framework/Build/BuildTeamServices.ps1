@@ -1,3 +1,5 @@
+Write-Output $A 
+
 $FolderName = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.FullName + "\"
 $FolderNameDotNetZip = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.Parent.FullName + "\"
 cd $FolderNameDotNetZip
