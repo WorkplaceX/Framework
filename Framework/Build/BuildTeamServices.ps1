@@ -16,6 +16,10 @@ cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe build
 
 cd $FolderName
 cd Server
+cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe restore
+cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe publish
+
+
 
 
