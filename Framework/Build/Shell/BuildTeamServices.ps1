@@ -1,6 +1,8 @@
+param($ConnectionString)
+
 # Init
-$FolderName = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.FullName + "\"
-$FolderNameDotNetZip = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.Parent.FullName + "\"
+$FolderName = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.Parent.FullName + "\"
+$FolderNameDotNetZip = (get-item $PSCommandPath).Directory.FullName + "\"
 
 # Download .NET Core 1.1 compiler
 cd $FolderNameDotNetZip
