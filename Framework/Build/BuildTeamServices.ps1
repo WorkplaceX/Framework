@@ -7,7 +7,7 @@ Invoke-WebRequest https://go.microsoft.com/fwlink/?linkid=843454 -OutFile dotnet
 
 # Extract zip
 Add-Type -assembly "system.io.compression.filesystem"
-[io.compression.zipfile]::ExtractToDirectory($FolderNameDotNetZip + "dotnet.zip", $FolderNameDotNetZip + "dotnet\")
+[io.compression.zipfile]::ExtractToDirectory("$($FolderNameDotNetZip)dotnet.zip", "$($FolderNameDotNetZip)dotnet\")
 
 cd $FolderName
 cd Build
