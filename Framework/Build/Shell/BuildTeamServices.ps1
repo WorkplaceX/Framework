@@ -23,6 +23,18 @@ cd $FolderName
 cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 01 $ConnectionString
 
+
+# InstallAll
+cd $FolderName
+cd Build
+cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 02
+
+
+# RunSql
+cd $FolderName
+cd Build
+cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 11
+
 # Server
 cd $FolderName
 cd Server

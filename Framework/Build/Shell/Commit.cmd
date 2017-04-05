@@ -1,8 +1,13 @@
+cd ..\..\..
+git status --short
+cd ..
+git status --short
 set /p m=Commit message: 
+cd Submodule
 git add .
 git commit -m "%m%"
 git push
-cd ..\..\..\..\
+cd ..
 git add .
 git commit -m "%m%"
 git push
