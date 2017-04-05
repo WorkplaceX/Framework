@@ -135,7 +135,7 @@ namespace Framework.Build
         {
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
-            var fileNameList = Framework.Util.FileNameList(Framework.Util.FolderName + "Submodule/Build/Sql/");
+            var fileNameList = Framework.Util.FileNameList(Framework.Util.FolderName + "Build/Sql/");
             foreach (string fileName in fileNameList)
             {
                 string text = Framework.Util.FileRead(fileName);
