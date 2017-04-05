@@ -11,4 +11,4 @@ cd ..
 git add .
 git commit -m "%m%"
 git push
-set /p m=
+set /p m=Press enter to continue
