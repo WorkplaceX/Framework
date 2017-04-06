@@ -31,13 +31,27 @@
                 }
                 else
                 {
-                    if (uri.AbsolutePath.EndsWith("Submodule/Server/bin/Debug/netcoreapp1.1/Framework.dll"))
+                    if (uri.AbsolutePath.EndsWith("Submodule/Server/bin/Debug/netcoreapp1.1/Framework.dll")) // TODO remove
                     {
                         result = new Uri(uri, "../../../../../").AbsolutePath;
                     }
                     else
                     {
-                        throw new Exception("FileName unknown!");
+                        if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+                        {
+                            result = new Uri(uri, "../../../../").AbsolutePath;
+                        }
+                        else
+                        {
+                            if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
+                            {
+                                result = new Uri(uri, "./").AbsolutePath;
+                            }
+                            else
+                            {
+                                throw new Exception("FileName unknown!");
+                            }
+                        }
                     }
                 }
                 return result;
