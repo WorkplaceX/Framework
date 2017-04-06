@@ -131,7 +131,7 @@
         public static void NpmInstall(string workingDirectory, bool isThrowException = true)
         {
             string fileName = Framework.Build.ConnectionManager.NpmFileName;
-            Start(workingDirectory, fileName, "install", isThrowException);
+            Start(workingDirectory, fileName, "install --silent", isThrowException);
         }
 
         public static void NpmRun(string workingDirectory, string script)
