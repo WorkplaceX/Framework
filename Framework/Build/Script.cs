@@ -100,7 +100,7 @@ namespace Framework.Build
         public void RunGulp()
         {
             Util.Log("Server>npm run gulp");
-            Util.NpmRun(Framework.Util.FolderName + "Submodule/Server/", "gulp");
+            Util.NpmRun(Framework.Util.FolderName + "Server/", "gulp");
         }
 
         [Description("VS Code", 6)]
