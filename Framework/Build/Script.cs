@@ -58,7 +58,8 @@ namespace Framework.Build
             Util.Log("Client>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Client/");
             Util.Log("Server>npm install");
-            Util.NpmInstall(Framework.Util.FolderName + "Submodule/Server/");
+            Util.NpmInstall(Framework.Util.FolderName + "Submodule/Server/"); // TODO remove
+            Util.NpmInstall(Framework.Util.FolderName + "Server/"); 
             Util.Log("Universal>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Universal/", false); // Throws always an exception!
             // Application
