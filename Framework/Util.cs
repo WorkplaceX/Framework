@@ -16,6 +16,44 @@
             }
         }
 
+        private static void FolderNamePrivate(out string folderName, out bool isIss)
+        {
+            Uri uri = new Uri(typeof(Util).GetTypeInfo().Assembly.CodeBase);
+            string result;
+            isIss = false;
+            if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+            {
+                result = new Uri(uri, "../../../../").AbsolutePath;
+            }
+            else
+            {
+                if (uri.AbsolutePath.EndsWith("Submodule/Server/bin/Debug/netcoreapp1.1/Framework.dll")) // TODO remove
+                {
+                    result = new Uri(uri, "../../../../../").AbsolutePath;
+                }
+                else
+                {
+                    if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+                    {
+                        result = new Uri(uri, "../../../../").AbsolutePath;
+                    }
+                    else
+                    {
+                        if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
+                        {
+                            result = new Uri(uri, "./").AbsolutePath;
+                            isIss = true;
+                        }
+                        else
+                        {
+                            throw new Exception("FileName unknown!");
+                        }
+                    }
+                }
+            }
+            folderName = result;
+        }
+
         /// <summary>
         /// Gets root FolderName.
         /// </summary>
@@ -23,38 +61,24 @@
         {
             get
             {
-                Uri uri = new Uri(typeof(Util).GetTypeInfo().Assembly.CodeBase);
-                string result;
-                if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
-                {
-                    result = new Uri(uri, "../../../../").AbsolutePath;
-                }
-                else
-                {
-                    if (uri.AbsolutePath.EndsWith("Submodule/Server/bin/Debug/netcoreapp1.1/Framework.dll")) // TODO remove
-                    {
-                        result = new Uri(uri, "../../../../../").AbsolutePath;
-                    }
-                    else
-                    {
-                        if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
-                        {
-                            result = new Uri(uri, "../../../../").AbsolutePath;
-                        }
-                        else
-                        {
-                            if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
-                            {
-                                result = new Uri(uri, "./").AbsolutePath;
-                            }
-                            else
-                            {
-                                throw new Exception("FileName unknown!");
-                            }
-                        }
-                    }
-                }
-                return result;
+                string folderName;
+                bool isIss;
+                FolderNamePrivate(out folderName, out isIss);
+                return folderName;
+            }
+        }
+
+        /// <summary>
+        /// Gets FolderNameIsIss. True, if running on ISS server.
+        /// </summary>
+        public static bool FolderNameIsIss
+        {
+            get
+            {
+                string folderName;
+                bool isIss;
+                FolderNamePrivate(out folderName, out isIss);
+                return isIss;
             }
         }
 

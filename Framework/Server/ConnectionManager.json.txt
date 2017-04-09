@@ -1,5 +1,5 @@
 ﻿{
-  "ConnectionStringDev": "Data Source=(LocalDB)\\MSSQLLocalDB; Initial Catalog=Database; Integrated Security=True",
+  "ConnectionStringDev": "Data Source=localhost; Initial Catalog=Database; Integrated Security=True;",
   "ConnectionStringTest": "",
   "ConnectionStringProd": "",
   "ConnectionStringSwitch": "ConnectionStringDev",
