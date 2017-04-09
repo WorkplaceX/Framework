@@ -12,4 +12,8 @@ cd ..
 git add .
 git commit -m "%m%"
 git push
+echo ### Status ###
+git status
+cd Submodule
+git status
 set /p m=Press Enter...
