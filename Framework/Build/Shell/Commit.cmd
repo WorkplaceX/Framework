@@ -1,4 +1,6 @@
+@echo off
 cd ..\..\..
+echo ### Git Status ###
 git status --short
 cd ..
 git status --short
@@ -12,8 +14,8 @@ cd ..
 git add .
 git commit -m "%m%"
 git push
-echo ### Status ###
-git status
+echo ### Git Status ###
+git status --short
 cd Submodule
-git status
+git status --short
 set /p m=Press Enter...
