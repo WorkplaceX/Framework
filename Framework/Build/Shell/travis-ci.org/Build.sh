@@ -2,7 +2,7 @@ PATH="/home/travis/.dotnet":$PATH
 
 FolderName=$(pwd)
 
-# Build
+echo \#\#\# Build
 cd $FolderName
 cd Build
 dotnet restore
@@ -13,11 +13,13 @@ dotnet run 01 "$ConnectionString"
 dotnet run 02 
 
 # Build RunSql
+echo \#\#\# RunSql
 cd $FolderName
 cd Build
 dotnet run 11
 
 # Publish Server
+echo \#\#\# Publish Server
 cd $FolderName
 cd Server
 dotnet restore
