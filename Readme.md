@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo)
 # Framework
 Bundle to create applications based on Angular 2 with server side rendering, ASP.NET Core and SQL.
 
