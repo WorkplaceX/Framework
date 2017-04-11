@@ -5,17 +5,17 @@ dotnet --version
 
 # npm, node version check
 echo npm version:
-npm -version
+npm --version
 echo node version:
-node -version
+node --version
 
 #npm update
 npm install npm@latest -g
 
 # npm, node version check
 echo npm version:
-npm -version
+npm --version
 echo node version:
-node -version
+node --version
 
 npm install gulp
