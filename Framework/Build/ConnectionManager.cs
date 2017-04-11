@@ -44,6 +44,10 @@
             get
             {
                 string result = "npm.cmd";
+                if (Framework.Util.IsLinux)
+                {
+                    result = "npm";
+                }
                 foreach (string fileName in Config.Instance.NpmFileName)
                 {
                     if (File.Exists(fileName))

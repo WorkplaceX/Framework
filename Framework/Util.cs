@@ -69,6 +69,17 @@
         }
 
         /// <summary>
+        /// Gets IsLinux. True, if running for example on Ubuntu.
+        /// </summary>
+        public static bool IsLinux
+        {
+            get
+            {
+                return FolderName.StartsWith("/");
+            }
+        }
+
+        /// <summary>
         /// Gets FolderNameIsIss. True, if running on ISS server.
         /// </summary>
         public static bool FolderNameIsIss
