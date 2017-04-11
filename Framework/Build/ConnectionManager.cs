@@ -3,6 +3,7 @@
     using Newtonsoft.Json;
     using System.IO;
     using System.Data.SqlClient;
+    using System;
 
     /// <summary>
     /// Build config json.
@@ -134,9 +135,9 @@
                 }
                 Util.Log("SQL Connection [ok]");
             }
-            catch
+            catch (Exception exception)
             {
-                Util.Log(string.Format("Error: SQL Connection failed! ({0})", Server.Config.JsonFileName));
+                Util.Log(string.Format("Error: SQL Connection failed! ({0} - {1})", Server.Config.JsonFileName, exception.Message));
             }
         }
 
