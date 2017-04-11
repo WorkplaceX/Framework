@@ -63,7 +63,12 @@
         {
             get
             {
-                return "dotnet.exe";
+                string result = "dotnet.exe";
+                if (Framework.Util.IsLinux)
+                {
+                    result = "dotnet";
+                }
+                return result;
             }
         }
 
