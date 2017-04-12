@@ -8,7 +8,9 @@ cd Build
 dotnet restore
 dotnet build
 # Set ConnectionString
+set +x
 dotnet run 01 "$ConnectionString" 
+set -x
 # InstallAll
 dotnet run 02 
 

@@ -5,7 +5,9 @@ echo $AzureGitUrl
 find
 
 git init
+set +x
 git remote add azure "$AzureGitUrl"
+set -x
 git fetch --all
 git add .
 git commit -m Deploy
