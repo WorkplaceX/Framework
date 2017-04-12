@@ -1,7 +1,5 @@
 set -x
 
-PATH="/home/travis/.dotnet":$PATH
-
 FolderName=$(pwd)
 
 echo \#\#\# Build
