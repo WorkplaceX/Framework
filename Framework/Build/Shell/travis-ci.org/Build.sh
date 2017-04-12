@@ -25,3 +25,8 @@ cd Server
 dotnet restore
 dotnet build
 dotnet publish
+
+# Deploy
+cd $FolderName
+echo \#\#\# Deploy
+./Submodule/Framework/Build/Shell/travis-ci.org/Deploy.sh
