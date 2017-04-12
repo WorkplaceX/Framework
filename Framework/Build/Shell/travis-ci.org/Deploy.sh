@@ -1,7 +1,6 @@
 set -x
 cd ./Server/bin/Debug/netcoreapp1.1/publish/
 echo $(pwd)
-echo $AzureGitUrl
 find
 
 git init
