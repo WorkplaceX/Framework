@@ -1,4 +1,4 @@
-#!/bin/bash
+set -x
 
 # https://www.microsoft.com/net/core#linuxubuntu
 sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
