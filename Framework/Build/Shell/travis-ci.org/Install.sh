@@ -1,5 +1,4 @@
-# sudo apt-get install libunwind8
-# ./Submodule/Framework/Build/Shell/travis-ci.org/dotnet-install.sh
+#!/bin/bash
 
 # https://www.microsoft.com/net/core#linuxubuntu
 sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'

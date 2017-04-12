@@ -1,3 +1,5 @@
+#!/bin/bash
+
 PATH="/home/travis/.dotnet":$PATH
 
 FolderName=$(pwd)
