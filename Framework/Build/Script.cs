@@ -73,7 +73,10 @@ namespace Framework.Build
             Util.Log("Server>dotnet build");
             Util.DotNetBuild(Framework.Util.FolderName + "Submodule/Server/");
             // Office
-            Util.MSBuild(Framework.Util.FolderName + "Submodule/Office/Office.csproj");
+            if (Framework.Util.IsLinux == false)
+            {
+                Util.MSBuild(Framework.Util.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
+            }
             RunGulp();
         }
 
