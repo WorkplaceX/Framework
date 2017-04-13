@@ -114,7 +114,6 @@ namespace Framework.Build
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.html", false);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.css", false);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.js", false);
-            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/dist/", Framework.Util.FolderName + "Server/Universal/dist/", "*.js", true);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Universal/publish/", Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/", "*.*", true);
             Util.FileCopy(Framework.Util.FolderName + "Submodule/Client/node_modules/bootstrap/dist/css/bootstrap.min.css", Framework.Util.FolderName + "Server/wwwroot/node_modules/bootstrap/dist/css/bootstrap.min.css");
         }

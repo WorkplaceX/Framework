@@ -161,7 +161,7 @@
             foreach (FileInfo file in source.GetFiles(searchPattern, searchOption))
             {
                 string fileNameSource = file.FullName;
-                string fileNameDest = Path.Combine(dest.FullName, file.Name);
+                string fileNameDest = Path.Combine(dest.FullName, file.FullName.Substring(source.FullName.Length));
                 FileCopy(fileNameSource, fileNameDest);
             }
         }
