@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.21 Server";
+                return "v0.211 Server";
             }
         }
 
@@ -27,27 +27,20 @@
             }
             else
             {
-                if (uri.AbsolutePath.EndsWith("Submodule/Server/bin/Debug/netcoreapp1.1/Framework.dll")) // TODO remove
+                if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
                 {
-                    result = new Uri(uri, "../../../../../").AbsolutePath;
+                    result = new Uri(uri, "../../../../").AbsolutePath;
                 }
                 else
                 {
-                    if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+                    if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
                     {
-                        result = new Uri(uri, "../../../../").AbsolutePath;
+                        result = new Uri(uri, "./").AbsolutePath;
+                        isIss = true;
                     }
                     else
                     {
-                        if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
-                        {
-                            result = new Uri(uri, "./").AbsolutePath;
-                            isIss = true;
-                        }
-                        else
-                        {
-                            throw new Exception("FileName unknown!");
-                        }
+                        throw new Exception("FileName unknown!");
                     }
                 }
             }

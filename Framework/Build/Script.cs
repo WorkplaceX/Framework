@@ -58,7 +58,6 @@ namespace Framework.Build
             Util.Log("Client>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Client/");
             Util.Log("Server>npm install");
-            Util.NpmInstall(Framework.Util.FolderName + "Submodule/Server/"); // TODO remove
             Util.NpmInstall(Framework.Util.FolderName + "Server/"); 
             Util.Log("Universal>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Universal/", false); // Throws always an exception!
@@ -69,9 +68,9 @@ namespace Framework.Build
             Util.DotNetBuild(Framework.Util.FolderName + "Application/");
             // Server
             Util.Log("Server>dotnet restore");
-            Util.DotNetRestore(Framework.Util.FolderName + "Submodule/Server/");
+            Util.DotNetRestore(Framework.Util.FolderName + "Server/");
             Util.Log("Server>dotnet build");
-            Util.DotNetBuild(Framework.Util.FolderName + "Submodule/Server/");
+            Util.DotNetBuild(Framework.Util.FolderName + "Server/");
             // Office
             if (Framework.Util.IsLinux == false)
             {
@@ -83,7 +82,7 @@ namespace Framework.Build
         [Description("Start Server and UniversalExpress", 2)]
         public void StartServerAndClient()
         {
-            Util.DotNetRun(Framework.Util.FolderName + "Submodule/Server/", false);
+            Util.DotNetRun(Framework.Util.FolderName + "Server/", false);
             Util.Node(Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/", "index.js", false);
             Util.OpenBrowser("http://localhost:5000");
         }
@@ -110,7 +109,7 @@ namespace Framework.Build
         [Description("VS Code", 6)]
         public void OpenServer()
         {
-            Util.OpenVisualStudioCode(Framework.Util.FolderName + "Submodule/Server/");
+            Util.OpenVisualStudioCode(Framework.Util.FolderName + "Server/");
         }
 
         [Description("VS Code", 7)]
