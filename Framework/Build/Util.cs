@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
@@ -138,6 +139,41 @@
         {
             string fileName = Framework.Build.ConnectionManager.NpmFileName;
             Start(workingDirectory, fileName, "run " + script);
+        }
+
+        public static void DirectoryDelete(string folderName)
+        {
+            if (Directory.Exists(folderName))
+            {
+                Directory.Delete(folderName, true);
+            }
+        }
+
+        public static void DirectoryCopy(string folderNameSource, string folderNameDest, string searchPattern, bool isAllDirectory)
+        {
+            var source = new DirectoryInfo(folderNameSource);
+            var dest = new DirectoryInfo(folderNameDest);
+            SearchOption searchOption = SearchOption.TopDirectoryOnly;
+            if (isAllDirectory)
+            {
+                searchOption = SearchOption.AllDirectories;
+            }
+            foreach (FileInfo file in source.GetFiles(searchPattern, searchOption))
+            {
+                string fileNameSource = file.FullName;
+                string fileNameDest = Path.Combine(dest.FullName, file.Name);
+                FileCopy(fileNameSource, fileNameDest);
+            }
+        }
+
+        public static void FileCopy(string fileNameSource, string fileNameDest)
+        {
+            string folderNameDest = new FileInfo(fileNameDest).DirectoryName;
+            if (!Directory.Exists(folderNameDest))
+            {
+                Directory.CreateDirectory(folderNameDest);
+            }
+            File.Copy(fileNameSource, fileNameDest, true);
         }
 
         public static void Node(string workingDirectory, string fileName, bool isWait = true)

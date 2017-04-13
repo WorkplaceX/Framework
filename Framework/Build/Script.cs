@@ -57,8 +57,6 @@ namespace Framework.Build
         {
             Util.Log("Client>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Client/");
-            Util.Log("Server>npm install");
-            Util.NpmInstall(Framework.Util.FolderName + "Server/"); 
             Util.Log("Universal>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Universal/", false); // Throws always an exception!
             // Application
@@ -102,8 +100,23 @@ namespace Framework.Build
         [Description("npm run gulp; Run everytime when Client changes", 5)]
         public void RunGulp()
         {
-            Util.Log("Server>npm run gulp");
-            Util.NpmRun(Framework.Util.FolderName + "Server/", "gulp");
+            Util.Log("Universal>npm run gulp");
+            Util.NpmRun(Framework.Util.FolderName + "Submodule/Universal/", "gulp");
+            //
+            Util.Log("Server>Directory Universal/ clean");
+            Util.DirectoryDelete(Framework.Util.FolderName + "Server/Universal");
+            //
+            Util.Log("UniversalExpress>Directory Universal/ clean");
+            Util.DirectoryDelete(Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/");
+            //
+            Util.Log("Universal>Copy Universal to Server and UniversalExpress");
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Universal/publish/", Framework.Util.FolderName + "Server/Universal/", "*.*", true);
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.html", false);
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.css", false);
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.js", false);
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/dist/", Framework.Util.FolderName + "Server/Universal/dist/", "*.js", true);
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Universal/publish/", Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/", "*.*", true);
+            Util.FileCopy(Framework.Util.FolderName + "Submodule/Client/node_modules/bootstrap/dist/css/bootstrap.min.css", Framework.Util.FolderName + "Server/wwwroot/node_modules/bootstrap/dist/css/bootstrap.min.css");
         }
 
         [Description("VS Code", 6)]
