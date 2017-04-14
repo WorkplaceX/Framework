@@ -101,7 +101,7 @@ namespace Framework.Build
         public void RunGulp()
         {
             Util.Log("Universal>npm run gulp");
-            Util.NpmRun(Framework.Util.FolderName + "Submodule/Universal/", "gulp");
+            // Util.NpmRun(Framework.Util.FolderName + "Submodule/Universal/", "gulp");
             //
             Util.Log("Server>Directory Universal/ clean");
             Util.DirectoryDelete(Framework.Util.FolderName + "Server/Universal");
@@ -114,6 +114,7 @@ namespace Framework.Build
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.html", false);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.css", false);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.js", false);
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client2/", Framework.Util.FolderName + "Server/Universal/", "*.js", false);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Universal/publish/", Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/", "*.*", true);
             Util.FileCopy(Framework.Util.FolderName + "Submodule/Client/node_modules/bootstrap/dist/css/bootstrap.min.css", Framework.Util.FolderName + "Server/wwwroot/node_modules/bootstrap/dist/css/bootstrap.min.css");
         }
