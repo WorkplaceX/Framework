@@ -5,7 +5,7 @@ echo "Hello1"
 function Install()
 {
 	echo "Hello2"
-	# >&2 echo "Error2"
+	>&2 echo "Error2"
 }
 
 Install 2> Error.txt # stderr to Error.txt
