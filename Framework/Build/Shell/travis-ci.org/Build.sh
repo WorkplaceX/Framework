@@ -43,6 +43,7 @@ Build 2> >(tee Error.txt) # stderr to Error.txt
 cd $FolderName
 if [ -s Error.txt ] # If Error.txt not empty
 then
+    set +x
 	echo "### Error"
 	echo "$(<Error.txt)" # Print file Error.txt 
 	exit 1 # Set exit code
