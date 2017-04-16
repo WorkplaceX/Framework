@@ -25,7 +25,7 @@ function Install()
     npm install gulp --loglevel error
 }
 
-Install 2> Error.txt # stderr to Error.txt
+Install 2>&1 Error.txt # stderr to Error.txt
 if [ -s Error.txt ] # If Error.txt not empty
 then
 	echo "### Error"

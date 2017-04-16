@@ -56,7 +56,7 @@ function Deploy
     git push azure master -f
 }
 
-Build 2> Error.txt # stderr to Error.txt
+Build 2>&1 Error.txt # stderr to Error.txt
 if [ -s Error.txt ] # If Error.txt not empty
 then
 	echo "### Error"
