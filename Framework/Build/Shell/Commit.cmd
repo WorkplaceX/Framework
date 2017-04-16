@@ -12,13 +12,11 @@ git checkout master & REM Prevent detached branch
 git checkout -B "%branchName%"
 git add .
 git commit -m "%m%"
-git pull
 git push -u origin "%branchName%"
 cd ..
 git checkout -B "%branchName%"
 git add .
 git commit -m "%m%"
-git pull
 git push -u origin "%branchName%"
 echo ### Git Status ###
 git status --short
