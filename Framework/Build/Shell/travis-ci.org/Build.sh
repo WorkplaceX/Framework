@@ -38,7 +38,9 @@ function Deploy
     git push azure master -f
 }
 
-Build 2> Error.txt # stderr to Error.txt
+cd $FolderName
+Build 2> >(tee Error.txt) # stderr to Error.txt
+cd $FolderName
 if [ -s Error.txt ] # If Error.txt not empty
 then
 	echo "### Error"
