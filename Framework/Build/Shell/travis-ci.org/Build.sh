@@ -35,6 +35,8 @@ function Build
     cd $FolderName
     echo \#\#\# Deploy
     Deploy
+	
+    cd $FolderName
 }
 
 function Deploy
