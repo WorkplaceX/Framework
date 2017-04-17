@@ -121,7 +121,7 @@
                 Console.WriteLine("### Exit code={3} (WorkingDirectory={0}; FileName={1}; Arguments={2};)", workingDirectory, fileName, arguments, process.ExitCode);
                 if (isThrowException && process.ExitCode != 0)
                 {
-                    throw new Exception("Script failed!");
+                    throw new Exception("Script failed!"); // TODO Make sure it's passed to stderr. See also try, catch in method Util.MethodExecute();
                 }
             }
         }
