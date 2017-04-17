@@ -54,7 +54,7 @@ function Deploy
 }
 
 cd $FolderName
-Main 2> >(tee Error.txt) # stderr to stdout and Error.txt.
+Main 2>Error.txt #Main 2> >(tee Error.txt) # stderr to stdout and Error.txt.
 cd $FolderName
 if [ -s Error.txt ] # If Error.txt not empty
 then
