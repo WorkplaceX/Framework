@@ -47,11 +47,11 @@ function Deploy
     set +x # Prevent AzureGitUrl password in log
     git remote add azure "$AzureGitUrl"
     set -x
-    git fetch --all >& 2>&1 # do not write to stderr
+    git fetch --all 2>&1 # do not write to stderr
     git add .
     git commit -m Deploy
 	# do not write to stderr
-    git push azure master -f >& 2>&1 # do not write to stderr
+    git push azure master -f 2>&1 # do not write to stderr
 }
 
 cd $FolderName
