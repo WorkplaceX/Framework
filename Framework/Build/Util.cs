@@ -113,13 +113,10 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
-            info.RedirectStandardError = true;
-            info.UseShellExecute = false;
             var process = Process.Start(info);
             if (isWait == true)
             {
                 process.WaitForExit();
-                Console.WriteLine("STDERR=" + process.StandardError.ReadToEnd());
                 if (isThrowException && process.ExitCode != 0)
                 {
                     throw new Exception("Script failed!");
@@ -135,7 +132,7 @@
         public static void NpmInstall(string workingDirectory, bool isThrowException = true)
         {
             string fileName = Framework.Build.ConnectionManager.NpmFileName;
-            Start(workingDirectory, fileName, "install --loglevel error", false); // Do not show npm warnings.
+            Start(workingDirectory, fileName, "install --loglevel error", isThrowException); // Do not show npm warnings.
         }
 
         public static void NpmRun(string workingDirectory, string script)
