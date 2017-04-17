@@ -15,7 +15,7 @@ function Main
     set -x
     # InstallAll
     echo \#\#\# InstallAll
-    ##dotnet run 02 
+    dotnet run 02 
 
     # Build RunSql
     ##echo \#\#\# RunSql
