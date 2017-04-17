@@ -116,6 +116,7 @@
             if (Framework.Util.IsLinux)
             {
                 // info.UseShellExecute = true;
+                info.RedirectStandardError = true;
             }
             var process = Process.Start(info);
             if (isWait == true)
