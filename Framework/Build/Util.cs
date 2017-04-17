@@ -113,10 +113,12 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
+            info.RedirectStandardError = true;
             var process = Process.Start(info);
             if (isWait == true)
             {
                 process.WaitForExit();
+                Console.WriteLine("STDERR=" + process.StandardError.ReadToEnd());
                 if (isThrowException && process.ExitCode != 0)
                 {
                     throw new Exception("Script failed!");
