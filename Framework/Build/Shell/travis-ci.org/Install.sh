@@ -10,6 +10,7 @@ sudo apt-get install dotnet-dev-1.0.1
 
 function Main
 {
+	bash --version
     dotnet --version
 
     # npm, node version check
