@@ -17,13 +17,13 @@ function Main
     node --version
 
     #npm update
-    npm install npm@latest 
+    npm install npm@latest --loglevel error
 
     # npm, node version check
     npm --version
     node --version
 
-    npm install gulp 
+    npm install gulp --loglevel error
 }
 
 cd $FolderName
