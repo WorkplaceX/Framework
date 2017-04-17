@@ -57,24 +57,24 @@ namespace Framework.Build
         {
             Util.Log("Client>npm install");
             Util.NpmInstall(Framework.Util.FolderName + "Submodule/Client/");
-            //Util.Log("Universal>npm install");
-            //Util.NpmInstall(Framework.Util.FolderName + "Submodule/Universal/", false); // Throws always an exception!
-            //// Application
-            //Util.Log("Application>dotnet restore");
-            //Util.DotNetRestore(Framework.Util.FolderName + "Application/");
-            //Util.Log("Application>dotnet build");
-            //Util.DotNetBuild(Framework.Util.FolderName + "Application/");
-            //// Server
-            //Util.Log("Server>dotnet restore");
-            //Util.DotNetRestore(Framework.Util.FolderName + "Server/");
-            //Util.Log("Server>dotnet build");
-            //Util.DotNetBuild(Framework.Util.FolderName + "Server/");
-            //// Office
-            //if (Framework.Util.IsLinux == false)
-            //{
-            //    Util.MSBuild(Framework.Util.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
-            //}
-            //RunGulp();
+            Util.Log("Universal>npm install");
+            Util.NpmInstall(Framework.Util.FolderName + "Submodule/Universal/", false); // Throws always an exception!
+            // Application
+            Util.Log("Application>dotnet restore");
+            Util.DotNetRestore(Framework.Util.FolderName + "Application/");
+            Util.Log("Application>dotnet build");
+            Util.DotNetBuild(Framework.Util.FolderName + "Application/");
+            // Server
+            Util.Log("Server>dotnet restore");
+            Util.DotNetRestore(Framework.Util.FolderName + "Server/");
+            Util.Log("Server>dotnet build");
+            Util.DotNetBuild(Framework.Util.FolderName + "Server/");
+            // Office
+            if (Framework.Util.IsLinux == false)
+            {
+                Util.MSBuild(Framework.Util.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
+            }
+            RunGulp();
         }
 
         [Description("Start Server and UniversalExpress", 2)]

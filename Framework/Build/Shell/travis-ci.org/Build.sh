@@ -18,21 +18,21 @@ function Main
     dotnet run 02 
 
     # Build RunSql
-    ##echo \#\#\# RunSql
-    ##cd $FolderName
-    ##cd Build
-    ##dotnet run 11
+    echo \#\#\# RunSql
+    cd $FolderName
+    cd Build
+    dotnet run 11
 
     # Publish Server
-    ##echo \#\#\# Publish Server
-    ##cd $FolderName
-    ##cd Server
-    ##dotnet restore
-    ##dotnet build
-    ##dotnet publish
+    echo \#\#\# Publish Server
+    cd $FolderName
+    cd Server
+    dotnet restore
+    dotnet build
+    dotnet publish
 
     # Deploy
-    ##Deploy
+    Deploy
 }
 
 function Deploy
