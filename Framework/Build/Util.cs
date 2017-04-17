@@ -118,7 +118,7 @@
             if (isWait == true)
             {
                 process.WaitForExit();
-                Console.WriteLine("### Exit code={0} (WorkingDirectory={1}; FileName={2}; Arguments={3};)", workingDirectory, process.ExitCode, fileName, arguments);
+                Console.WriteLine("### Exit code={3} (WorkingDirectory={0}; FileName={1}; Arguments={2};)", workingDirectory, fileName, arguments, process.ExitCode);
                 if (isThrowException && process.ExitCode != 0)
                 {
                     throw new Exception("Script failed!");
