@@ -113,7 +113,9 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
+            info.RedirectStandardError = true;
             var process = Process.Start(info);
+            process.ErrorDataReceived += Process_ErrorDataReceived;
             if (isWait == true)
             {
                 process.WaitForExit();
@@ -122,6 +124,11 @@
                     throw new Exception("Script failed!");
                 }
             }
+        }
+
+        private static void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
         }
 
         private static void Process_Exited(object sender, EventArgs e)
