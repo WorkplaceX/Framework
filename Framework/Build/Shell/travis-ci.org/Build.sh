@@ -48,11 +48,11 @@ function Deploy
     git remote add azure "$AzureGitUrl"
     set -x
 	# do not write to stderr
-    git fetch --all >& 
+    git fetch --all >&
     git add .
     git commit -m Deploy
 	# do not write to stderr
-    git push azure master -f >& 
+    git push azure master -f >&
 }
 
 cd $FolderName
