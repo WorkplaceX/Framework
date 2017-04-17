@@ -1,14 +1,16 @@
 # Framework
-Bundle to create applications based on Angular 2 with server side rendering, ASP.NET Core and SQL.
+Submodule to create applications based on Angular 2 with server side rendering, ASP.NET Core and SQL. Only to be used in connection with
+* [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo)
 
 ## Folder Structure
-* **Build/** (Build and deploy scripts with command line interface CLI. Also used for CI)
 * **Application/** (Contains .NET Core business logic)
-* **Client/** (Angular 2 client)
-* **Office/** (ETL to load (*.xlsx) files into database. It's ".NET". Not ".NET Core"!)
+* **Build/** (Build and deploy scripts with command line interface CLI. Also used for CI)
 * **Server/** (ASP.NET Core server)
-* **Universal/** (Angular 2 server side rendering)
-* **UniversalExpress/** (Used for debug in Visual Studio only. Runs Universal in Express server)
+* **Submodule/Client/** (Angular 2 client)
+* **Submodule/Framework/** (Framework with generic functions)
+* **Submodule/Office/** (ETL to load (*.xlsx) files into database. It's ".NET". Not ".NET Core"!)
+* **Submodule/Universal/** (Angular 2 server side rendering)
+* **Submodule/UniversalExpress/** (Used for debug in Visual Studio only. Runs Universal in Express server)
 
 ## Install
 * run /build.cmd
@@ -19,12 +21,10 @@ Bundle to create applications based on Angular 2 with server side rendering, ASP
 Command line interface containing all scripts and tools to build and deploy. Can also be used for CI.
 ![alt tag](Framework/Build/Doc/CommandLineInterface.png)
 
-## Visual Studio
-* Open Framework.sln
+## Visual Studio 2017
+* Prerequisite
+![alt tag](Framework/Build/Doc/VisualStudioPrerequisite.png)
+
+* Open Application.sln
 * Configure multiple start up projects (Server, UniversalExpress)
-
-## Server
-![alt tag](Server/Doc/Startup.png)
-
-## UniversalExpress
-![alt tag](UniversalExpress/Doc/Extension.png)
+![alt tag](Framework/Build/Doc/VisualStudioStartup.png)
