@@ -113,10 +113,12 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
+            Console.WriteLine("### Start (FileName={0}; Arguments={1};)", fileName, arguments);
             var process = Process.Start(info);
             if (isWait == true)
             {
                 process.WaitForExit();
+                Console.WriteLine("### Exit code={0} (FileName={1}; Arguments={2};)", process.ExitCode, fileName, arguments);
                 if (isThrowException && process.ExitCode != 0)
                 {
                     throw new Exception("Script failed!");
