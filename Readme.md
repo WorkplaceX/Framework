@@ -14,8 +14,13 @@ Framework to create applications based on Angular 2 with server side rendering, 
 
 ## Install
 * run /build.cmd
-* 01=InstallAll
+* 01=ConnectionString (Enter ConnectionString of an empty database)
+* 02=InstallAll
 * 07=StartServerAndClient
+
+## Build CLI
+Command line interface containing all scripts and tools to build and deploy. Is also used for CI.
+![alt tag](Framework/Build/Doc/CommandLineInterface.png)
 
 ## Visual Studio 2017
 * Install the following VS2017 components:
@@ -28,6 +33,3 @@ Framework to create applications based on Angular 2 with server side rendering, 
 
 ![alt tag](Framework/Build/Doc/VisualStudioStartup.png)
 
-## Build CLI
-Command line interface containing all scripts and tools to build and deploy. Can also be used for CI.
-![alt tag](Framework/Build/Doc/CommandLineInterface.png)
