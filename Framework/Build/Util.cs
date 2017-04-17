@@ -113,10 +113,6 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
-            if (Framework.Util.IsLinux)
-            {
-                info.UseShellExecute = true;
-            }
             var process = Process.Start(info);
             if (isWait == true)
             {
@@ -136,7 +132,7 @@
         public static void NpmInstall(string workingDirectory, bool isThrowException = true)
         {
             string fileName = Framework.Build.ConnectionManager.NpmFileName;
-            Start(workingDirectory, fileName, "install", isThrowException); // Do not show npm warnings.
+            Start(workingDirectory, fileName, "install --loglevel error", isThrowException); // Do not show npm warnings.
         }
 
         public static void NpmRun(string workingDirectory, string script)

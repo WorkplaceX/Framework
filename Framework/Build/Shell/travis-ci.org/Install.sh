@@ -1,4 +1,5 @@
-BASH_XTRACEFD=1 # Execute command to stdout. Not stderr.
+FolderName=$(pwd) # Working directory
+BASH_XTRACEFD=1 # Print execute command to stdout. Not to stderr.
 set -x # Enable print execute cammands to stdout.
 
 # https://www.microsoft.com/net/core#linuxubuntu
@@ -7,7 +8,7 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
 sudo apt-get update
 sudo apt-get install dotnet-dev-1.0.1
 
-function Install()
+function Main
 {
     dotnet --version
 
@@ -16,7 +17,7 @@ function Install()
     node --version
 
     #npm update
-    npm install npm@latest -g --loglevel error
+    npm install npm@latest --loglevel error
 
     # npm, node version check
     npm --version
@@ -25,9 +26,12 @@ function Install()
     npm install gulp --loglevel error
 }
 
-Install 2>&1 Error.txt # stderr to Error.txt
+cd $FolderName
+Main 2> >(tee Error.txt) # stderr to stdout and Error.txt.
+cd $FolderName
 if [ -s Error.txt ] # If Error.txt not empty
 then
+    set +x # Disable print command to avoid Error.txt double in log.
 	echo "### Error"
 	echo "$(<Error.txt)" # Print file Error.txt 
 	exit 1 # Set exit code
