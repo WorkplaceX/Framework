@@ -113,11 +113,6 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
-            if (Framework.Util.IsLinux)
-            {
-                // info.UseShellExecute = true;
-                info.UseShellExecute = false;
-            }
             var process = Process.Start(info);
             if (isWait == true)
             {
