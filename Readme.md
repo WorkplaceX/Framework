@@ -1,5 +1,5 @@
 # Framework
-Submodule to create applications based on Angular 2 with server side rendering, ASP.NET Core and SQL. Only to be used in connection with
+Framework to create applications based on Angular 2 with server side rendering, ASP.NET Core and MS-SQL. This repo contains no business logic. Business logic goes into your repo like this:
 * [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo)
 
 ## Folder Structure
@@ -17,14 +17,17 @@ Submodule to create applications based on Angular 2 with server side rendering, 
 * 01=InstallAll
 * 07=StartServerAndClient
 
-## Build CLI
-Command line interface containing all scripts and tools to build and deploy. Can also be used for CI.
-![alt tag](Framework/Build/Doc/CommandLineInterface.png)
-
 ## Visual Studio 2017
-* Prerequisite
+* Install the following VS2017 components:
+
 ![alt tag](Framework/Build/Doc/VisualStudioPrerequisite.png)
 
 * Open Application.sln
+
 * Configure multiple start up projects (Server, UniversalExpress)
+
 ![alt tag](Framework/Build/Doc/VisualStudioStartup.png)
+
+## Build CLI
+Command line interface containing all scripts and tools to build and deploy. Can also be used for CI.
+![alt tag](Framework/Build/Doc/CommandLineInterface.png)
