@@ -3,6 +3,7 @@
     using Framework.Server.Application;
     using Microsoft.AspNetCore.Mvc;
     using System;
+    using System.IO;
     using System.Net.Http;
     using System.Reflection;
     using System.Text;
@@ -50,6 +51,15 @@
                 }
                 return Controller.Content(jsonOutText, "application/json");
             }
+            // Framework/Server/wwwroot/
+            {
+                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                fileName = Server.Util.FileNameToWwwRoot(fileName);
+                if (File.Exists(fileName))
+                {
+                    return Server.Util.FileNameToFileContentResult(Controller, fileName);
+                }
+            }
             // node_modules
             if (Controller.HttpContext.Request.Path.ToString().StartsWith("/node_modules/"))
             {
@@ -58,7 +68,7 @@
             // (*.css; *.js)
             if (Controller.HttpContext.Request.Path.ToString().EndsWith(".css") || Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
             {
-                return Util.FileGet(Controller, "", "Universal/", "Universal/");
+                return Util.FileGet(Controller, RoutePath, "Universal/", "Universal/");
             }
             return Controller.NotFound();
         }
@@ -155,16 +165,8 @@
             }
             else
             {
-                string fileName = "indexBundle.html";
-                if (Framework.Util.FolderNameIsIss == false)
-                {
-                    fileName = Framework.Util.FolderName + "Submodule/Framework/Server/wwwroot/" + fileName;
-                }
-                else
-                {
-                    fileName = Framework.Util.FolderName + "Server/wwwroot/" + fileName;
-                }
-                return System.IO.File.ReadAllText(fileName); // Original source: Client/index.html
+                string fileName = Server.Util.FileNameToWwwRoot("indexBundle.html"); // Original source: Framework/Server/wwwroot/indexBundle.html
+                return System.IO.File.ReadAllText(fileName);
             }
         }
     }

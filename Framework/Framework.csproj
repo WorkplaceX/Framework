@@ -26,6 +26,12 @@
     <None Update="Server\ConnectionManager.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Server\wwwroot\ArrowDown.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Server\wwwroot\bootstrap.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Server\wwwroot\indexBundle.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

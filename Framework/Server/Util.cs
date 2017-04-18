@@ -76,6 +76,10 @@
             {
                 requestFolderNameMatch += "/";
             }
+            if (requestFolderName.StartsWith("/"))
+            {
+                requestFolderName = requestFolderName.Substring(1);
+            }
             if (requestFolderNameMatch.StartsWith("/" + requestFolderName))
             {
                 requestFileName = requestFileName.Substring(requestFolderName.Length + 1);
@@ -112,6 +116,48 @@
                 result = controller.File(byteList, contentType);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Returns FileContentResult.
+        /// </summary>
+        public static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName)
+        {
+            // ContentType
+            string fileNameExtension = Path.GetExtension(fileName);
+            string contentType; // https://wiki.selfhtml.org/wiki/Referenz:MIME-Typen
+            switch (fileNameExtension)
+            {
+                case ".html": contentType = "text/html"; break;
+                case ".css": contentType = "text/css"; break;
+                case ".js": contentType = "text/javascript"; break;
+                case ".map": contentType = "text/plain"; break;
+                case ".scss": contentType = "text/plain"; break; // Used only if internet explorer is in debug mode!
+                case ".png": contentType = "image/png"; break;
+                default:
+                    throw new Exception("Unknown!");
+            }
+            // Read file
+            var byteList = File.ReadAllBytes(fileName);
+            var result = controller.File(byteList, contentType);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns FileName in Framework/Server/wwwroot/ folder.
+        /// </summary>
+        /// <param name="fileName">For example: index.html</param>
+        public static string FileNameToWwwRoot(string fileName)
+        {
+            if (Framework.Util.FolderNameIsIss == false)
+            {
+                fileName = Framework.Util.FolderName + "Submodule/Framework/Server/wwwroot/" + fileName;
+            }
+            else
+            {
+                fileName = Framework.Util.FolderName + "Server/wwwroot/" + fileName;
+            }
+            return fileName;
         }
     }
 }
