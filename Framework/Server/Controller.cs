@@ -155,7 +155,16 @@
             }
             else
             {
-                return System.IO.File.ReadAllText("indexBundle.html"); // Original source: Client/index.html
+                string fileName = "indexBundle.html";
+                if (Framework.Util.FolderNameIsIss == false)
+                {
+                    fileName = Framework.Util.FolderName + "Submodule/Framework/Server/wwwroot/" + fileName;
+                }
+                else
+                {
+                    fileName = Framework.Util.FolderName + "Server/wwwroot/" + fileName;
+                }
+                return System.IO.File.ReadAllText(fileName); // Original source: Client/index.html
             }
         }
     }
