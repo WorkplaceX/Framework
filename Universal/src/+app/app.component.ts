@@ -7,39 +7,16 @@ import  * as util from './util';
 @Component({
   selector: 'app',
   template: `
-  <p>json.IsBrowser=({{ dataService.json.IsBrowser }})</p>
-  <p>RequestCount=({{ dataService.RequestCount }})</p>
-  <p>json.ResponseCount=({{ dataService.json.ResponseCount }})</p>
-  <p>log=({{ dataService.log }})</p>
+  <p>
+  json.Name=({{ dataService.json.Name }})<br />
+  json.Session=({{ dataService.json.Session }})<br />
+  json.IsBrowser=({{ dataService.json.IsBrowser }})<br />
+  RequestCount=({{ dataService.RequestCount }})<br />
+  json.ResponseCount=({{ dataService.json.ResponseCount }})<br />
+  Version=({{ dataService.json.VersionClient + '; ' + dataService.json.VersionServer }})<br />
+  log=({{ dataService.log }})
+  </p>
   <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy:fn"></Selector>
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-12">
-        <h1>Application</h1>
-      </div>
-    </div>    
-    <div class="row">
-      <div class="col-sm-4">
-        <p>json.Name=({{ dataService.json.Name }})</p>
-        <p>json.Session=({{ dataService.json.Session }})</p>
-        <p>json.IsBrowser=({{ dataService.json.IsBrowser }})</p>
-        <p>Version=({{ dataService.json.VersionClient + '; ' + dataService.json.VersionServer }})</p>
-        <p>json=({{ jsonText }})</p>
-      </div>
-      <div class="col-sm-4">
-        Second of three columns
-        <button class="btn btn-primary" (click)="clickClient()">Client Update</button>
-        <button class="btn btn-primary" (click)="clickServer()">Server Update</button>
-        <button class="btn btn-primary" (click)="clickJson()">Json</button>
-      </div>
-      <div class="col-sm-4">
-        Third of three columns
-        <label class="btn btn-primary" >
-          <input type="checkbox" /> Button
-        </label>
-      </div>
-    </div>
-  </div>  
 `,
   providers: [DataService]  
 })
@@ -76,6 +53,7 @@ export class AppComponent {
   <LayoutRow *ngIf="json.Type=='LayoutRow'" [json]=json></LayoutRow>
   <LayoutCell *ngIf="json.Type=='LayoutCell'" [json]=json></LayoutCell>
   <ButtonX *ngIf="json.Type=='Button'" [json]=json></ButtonX>
+  <Literal *ngIf="json.Type=='Literal'" [json]=json></Literal>
   <InputX *ngIf="json.Type=='Input'" [json]=json></InputX>
   <Label *ngIf="json.Type=='Label'" [json]=json></Label>
   <Grid *ngIf="json.Type=='Grid'" [json]=json></Grid>
@@ -92,7 +70,7 @@ export class Selector {
 @Component({
   selector: 'LayoutContainer',
   template: `
-  <div style='background-color:yellow;' class='container' removeSelector>
+  <div style='background-color:#F2F5A9;' class='container' removeSelector>
     Text={{ json.Text }}
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
@@ -110,7 +88,7 @@ export class LayoutContainer {
 @Component({
   selector: 'LayoutRow',
   template: `
-  <div style='background-color:red;' class='row' removeSelector>
+  <div style='background-color:#F6D8CE;' class='row' removeSelector>
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
 `
@@ -127,7 +105,7 @@ export class LayoutRow {
 @Component({
   selector: 'LayoutCell',
   template: `
-  <div style='background-color:green;' [class.col-sm-6]='true' removeSelector>
+  <div style='background-color:#CEF6CE;' [class.col-sm-6]='true' removeSelector>
     <p>
     Text={{ json.Text }}
     </p>
@@ -178,6 +156,20 @@ export class Button {
     this.json.IsClick = true;
     this.dataService.update();
   } 
+}
+
+/* Literal */
+@Component({
+  selector: 'Literal',
+  template: `<div [innerHTML]=json.Text></div>`
+})
+export class Literal {
+  constructor(dataService: DataService){
+    this.dataService = dataService;
+  }
+
+  @Input() json: any
+  dataService: DataService;
 }
 
 /* InputX */
@@ -483,7 +475,6 @@ export class GridField {
 @Component({
   selector: 'GridKeyboard',
   template: `
-  {{x}}
   `,
   host: {
     '(document:keydown)': '_keydown($event)',
@@ -492,11 +483,9 @@ export class GridField {
 export class GridKeyboard {
   constructor(dataService: DataService){
     this.dataService = dataService;
-    this.x = "";
   }
   @Input() json: any;
   dataService: DataService;
-  x: string;
 
   next(list: any, current: string, propertyName: string){
     let result : any = {}; // Returns First, Last, Next, Previous

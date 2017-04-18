@@ -1,4 +1,5 @@
 ToDo
+-Include build number into version https://docs.travis-ci.com/user/environment-variables/
 -https://github.com/azure/iisnode/wiki/iisnode-releases, https://www.youtube.com/watch?v=JUYCDnqR8p0 (Document install iisnode)
 -Rename Cell.V to Cell.T (Text)
 -Include SchemaName into TableName

@@ -88,13 +88,21 @@
                 string url = "http://" + Controller.Request.Host.ToUriComponent() + "/Universal/index.js";
                 jsonApplication.IsBrowser = false; // Server side rendering mode.
                 string jsonText = Framework.Server.Json.Util.Serialize(jsonApplication);
-                htmlUniversal = await Post(url, jsonText, false); // Call Angular Universal server side rendering service.
-                if (htmlUniversal == null)
+                // Universal rendering
                 {
-                    url = "http://localhost:1337/"; // Application not running on IIS. Divert to UniversalExpress when running in Visual Studio.
-                    htmlUniversal = await Post(url, jsonText, true);
-                    Framework.Util.Assert(htmlUniversal != "<app></app>"); // Catch java script errors. See UniversalExpress console for errors!
+                    if (Framework.Util.FolderNameIsIss)
+                    {
+                        // Running on IIS Server.
+                        htmlUniversal = await Post(url, jsonText, false); // Call Angular Universal server side rendering service.
+                    }
+                    else
+                    {
+                        // Running in Visual Studio
+                        url = "http://localhost:1337/"; // Call UniversalExpress when running in Visual Studio.
+                        htmlUniversal = await Post(url, jsonText, true);
+                    }
                 }
+                Framework.Util.Assert(htmlUniversal != "<app></app>"); // Catch java script errors. See UniversalExpress console for errors!
                 //
                 string result = null;
                 // Replace <app> on index.html

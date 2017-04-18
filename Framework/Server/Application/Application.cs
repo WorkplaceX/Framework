@@ -322,7 +322,6 @@
 
         public List<JsonComponent> List = new List<JsonComponent>();
 
-
         private void ListAll(List<JsonComponent> result)
         {
             result.AddRange(List);
@@ -393,6 +392,17 @@
         }
 
         public bool IsClick;
+    }
+
+    public class Literal : JsonComponent
+    {
+        public Literal() : this(null, null) { }
+
+        public Literal(JsonComponent owner, string text)
+            : base(owner, text)
+        {
+
+        }
     }
 
     public class Input : JsonComponent
