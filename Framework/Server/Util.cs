@@ -125,7 +125,7 @@
         {
             // ContentType
             string fileNameExtension = Path.GetExtension(fileName);
-            string contentType; // https://wiki.selfhtml.org/wiki/Referenz:MIME-Typen
+            string contentType; // https://www.sitepoint.com/web-foundations/mime-types-complete-list/
             switch (fileNameExtension)
             {
                 case ".html": contentType = "text/html"; break;
