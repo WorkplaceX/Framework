@@ -12,8 +12,21 @@
         {
             get
             {
-                return "v0.212 Server";
+                return "v0.213 Server";
             }
+        }
+
+        public static void Assert(bool isAssert, string exceptionText)
+        {
+            if (!isAssert)
+            {
+                throw new Exception(exceptionText);
+            }
+        }
+
+        public static void Assert(bool isAssert)
+        {
+            Assert(isAssert, "Assert!");
         }
 
         private static void FolderNamePrivate(out string folderName, out bool isIss)

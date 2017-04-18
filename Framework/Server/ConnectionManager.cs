@@ -23,13 +23,13 @@ namespace Framework.Server
         {
             get
             {
-                if (Util.FolderNameIsIss == false)
+                if (Framework.Util.FolderNameIsIss == false)
                 {
-                    return Util.FolderName + "Submodule/Framework/Server/ConnectionManager.json"; // See also .gitignore
+                    return Framework.Util.FolderName + "Submodule/Framework/Server/ConnectionManager.json"; // See also .gitignore
                 }
                 else
                 {
-                    return Util.FolderName + "Server/ConnectionManager.json"; // See also .gitignore
+                    return Framework.Util.FolderName + "Server/ConnectionManager.json"; // See also .gitignore
                 }
             }
         }
@@ -38,7 +38,7 @@ namespace Framework.Server
         {
             get
             {
-                return Util.FolderName + "Submodule/Framework/Server/ConnectionManager.json.txt"; // See also .gitignore
+                return Framework.Util.FolderName + "Submodule/Framework/Server/ConnectionManager.json.txt"; // See also .gitignore
             }
         }
 
@@ -46,7 +46,7 @@ namespace Framework.Server
         {
             get
             {
-                string json = Util.FileRead(JsonFileName);
+                string json = Framework.Util.FileRead(JsonFileName);
                 var result = JsonConvert.DeserializeObject<Config>(json);
                 return result;
             }
