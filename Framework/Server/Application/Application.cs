@@ -320,6 +320,11 @@
 
         public string Text;
 
+        /// <summary>
+        /// Gets or sets custom html style classes.
+        /// </summary>
+        public string Class;
+
         public List<JsonComponent> List = new List<JsonComponent>();
 
         private void ListAll(List<JsonComponent> result)
