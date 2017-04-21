@@ -104,18 +104,16 @@ namespace Framework.Build
             Util.NpmRun(Framework.Util.FolderName + "Submodule/Universal/", "gulp");
             //
             Util.Log("Server>Directory Universal/ clean");
-            Util.DirectoryDelete(Framework.Util.FolderName + "Server/Universal");
+            Util.DirectoryDelete(Framework.Util.FolderName + "Server/Universal/");
             //
             Util.Log("UniversalExpress>Directory Universal/ clean");
             Util.DirectoryDelete(Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/");
             //
             Util.Log("Universal>Copy Universal to Server and UniversalExpress");
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Universal/publish/", Framework.Util.FolderName + "Server/Universal/", "*.*", true);
-            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.html", false);
-            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.css", false);
-            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Server/Universal/", "*.js", false);
             Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Universal/publish/", Framework.Util.FolderName + "Submodule/UniversalExpress/Universal/", "*.*", true);
             Util.FileCopy(Framework.Util.FolderName + "Submodule/Client/node_modules/bootstrap/dist/css/bootstrap.min.css", Framework.Util.FolderName + "Submodule/Framework/Server/wwwroot/bootstrap.min.css");
+            Util.DirectoryCopy(Framework.Util.FolderName + "Submodule/Client/", Framework.Util.FolderName + "Submodule/Framework/Server/wwwroot/", "*.css", false);
         }
 
         [Description("VS Code", 6)]
