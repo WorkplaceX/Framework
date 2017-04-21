@@ -29,7 +29,7 @@ export class AppComponent {
   } 
 
   fn() {
-    return 0;
+    return "0";
   }
 
   clickClient(){
@@ -70,7 +70,7 @@ export class Selector {
 @Component({
   selector: 'LayoutContainer',
   template: `
-  <div style='background-color:#F2F5A9;' class='container' removeSelector>
+  <div [ngClass]="json.Class" class='container' removeSelector>
     Text={{ json.Text }}
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
@@ -80,7 +80,7 @@ export class LayoutContainer {
   @Input() json: any
 
   trackBy(index: any, item: any) {
-    return item.Type;
+    return item.Key;
   }
 }
 
@@ -88,7 +88,7 @@ export class LayoutContainer {
 @Component({
   selector: 'LayoutRow',
   template: `
-  <div style='background-color:#F6D8CE;' class='row' removeSelector>
+  <div [ngClass]="json.Class" class='row' removeSelector>
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
 `
@@ -105,10 +105,8 @@ export class LayoutRow {
 @Component({
   selector: 'LayoutCell',
   template: `
-  <div style='background-color:#CEF6CE;' [class.col-sm-6]='true' removeSelector>
-    <p>
+  <div [ngClass]="json.Class" [class.col-sm-6]='true' removeSelector>
     Text={{ json.Text }}
-    </p>
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
 `
@@ -125,7 +123,7 @@ export class LayoutCell {
 @Component({
   selector: 'LayoutDebug',
   template: `
-  <div style='border:1px solid; padding:2px; margin:2px; background-color:yellow;'>
+  <div [ngClass]="json.Class" style='border:1px solid; padding:2px; margin:2px; background-color:yellow;'>
     Text={{ json.Text }}
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
@@ -142,7 +140,7 @@ export class LayoutDebug {
 /* Button */
 @Component({
   selector: 'ButtonX',
-  template: `<button type="text" class="btn btn-primary" (click)="click()">{{ json.Text }}</button>`
+  template: `<button type="text" [ngClass]="json.Class" class="btn btn-primary" (click)="click()">{{ json.Text }}</button>`
 })
 export class Button {
   constructor(dataService: DataService){
@@ -161,7 +159,7 @@ export class Button {
 /* Literal */
 @Component({
   selector: 'Literal',
-  template: `<div [innerHTML]=json.Text></div>`
+  template: `<div [ngClass]="json.Class" [innerHTML]=json.Html></div>`
 })
 export class Literal {
   constructor(dataService: DataService){
@@ -176,7 +174,7 @@ export class Literal {
 @Component({
   selector: 'InputX',
   template: `
-  <input type="text" class="form-control" [(ngModel)]="text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" placeholder="Empty"/>
+  <input [ngClass]="json.Class" type="text" class="form-control" [(ngModel)]="text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" placeholder="Empty"/>
   <p>
     Text={{ json.Text }}<br/>
     TextNew={{ json.TextNew}}<br/>
@@ -227,7 +225,7 @@ export class Label {
 @Component({
   selector: 'Grid',
   template: `
-  <div style="white-space: nowrap;">
+  <div [ngClass]="json.Class" style="white-space: nowrap;">
   <GridHeader [json]=item *ngFor="let item of dataService.json.GridData.ColumnList[json.GridName]; trackBy trackBy"></GridHeader>
   </div>
   <GridRow [jsonGridData]=dataService.json.GridData [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridData.RowList[json.GridName]; trackBy trackBy"></GridRow>

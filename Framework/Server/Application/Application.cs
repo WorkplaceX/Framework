@@ -5,6 +5,9 @@
     using System.Reflection;
     using System.Linq;
 
+    /// <summary>
+    /// Rendered as html div element.
+    /// </summary>
     public class Grid : JsonComponent
     {
         public Grid() { }
@@ -314,6 +317,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets Key. Used for Angular trackby. Value is set by Framework before sending to client.
+        /// </summary>
         public string Key;
 
         public string Type;
@@ -350,6 +356,9 @@
         }
     }
 
+    /// <summary>
+    /// Rendered as html div element.
+    /// </summary>
     public class LayoutContainer : JsonComponent
     {
         public LayoutContainer() : this(null, null) { }
@@ -361,6 +370,9 @@
         }
     }
 
+    /// <summary>
+    /// Rendered as html div element.
+    /// </summary>
     public class LayoutRow : JsonComponent
     {
         public LayoutRow() : this(null, null) { }
@@ -372,6 +384,9 @@
         }
     }
 
+    /// <summary>
+    /// Rendered as html div element.
+    /// </summary>
     public class LayoutCell : JsonComponent
     {
         public LayoutCell() : this(null, null) { }
@@ -383,6 +398,9 @@
         }
     }
 
+    /// <summary>
+    /// Rendered as html button element.
+    /// </summary>
     public class Button : JsonComponent
     {
         public Button() : this(null, null) { }
@@ -399,6 +417,9 @@
         public bool IsClick;
     }
 
+    /// <summary>
+    /// Rendered as html div element.
+    /// </summary>
     public class Literal : JsonComponent
     {
         public Literal() : this(null, null) { }
@@ -408,6 +429,8 @@
         {
 
         }
+
+        public string Html;
     }
 
     public class Input : JsonComponent
