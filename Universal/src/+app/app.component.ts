@@ -308,13 +308,11 @@ export class GridRow {
   .select-class {
     border:solid 2px blue;
   }
-  :host {
-    display:inline-block; 
-    position:relative;
-  }
   `],
   host: {
-    '[style.width.%]' : "json.WidthPercent",
+    '[style.display]' : "'inline-block'",
+    '[style.position]' : "'relative'",
+    '[style.width.%]' : "json.WidthPercent"
   }
 })
 export class GridCell {
@@ -323,11 +321,9 @@ export class GridCell {
   @Input() jsonGrid: any; // Used for GridName
   @Input() jsonGridData: any; // Used for Value
   dataService: DataService;
-  w: any;
 
   constructor(dataService: DataService){
     this.dataService = dataService;
-    this.w = 20;
   }
 
   trackBy(index: any, item: any) {
