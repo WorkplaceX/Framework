@@ -123,7 +123,7 @@ export class LayoutCell {
 @Component({
   selector: 'LayoutDebug',
   template: `
-  <div [ngClass]="json.Class" style='border:1px solid; padding:2px; margin:2px; background-color:yellow;'>
+  <div style='border:1px solid; padding:2px; margin:2px; background-color:yellow;'>
     Text={{ json.Text }}
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
@@ -249,7 +249,7 @@ export class Grid {
   selector: 'GridRow',
   template: `
   <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="white-space: nowrap;">
-  <GridCell [jsonGrid]=jsonGrid [jsonGridData]=jsonGridData [jsonRow]=json [json]=item *ngFor="let item of jsonGridData.ColumnList[jsonGrid.GridName]; trackBy trackBy"></GridCell>
+  <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridData]=jsonGridData [jsonRow]=json [json]=item *ngFor="let item of jsonGridData.ColumnList[jsonGrid.GridName]; trackBy trackBy"></div>
   </div>
   `,
   styles: [`
@@ -294,20 +294,28 @@ export class GridRow {
 
 /* GridCell */
 @Component({
-  selector: 'GridCell',
+  selector: '.GridCell',
   template: `
-  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" style="display:inline-block; position:relative;" [style.width.%]=json.WidthPercent>
+  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" >
   <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
   {{ jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].V }}
   <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
   </div>
   <GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></GridField>
+  </div>
   `,
   styles: [`
   .select-class {
     border:solid 2px blue;
   }
-  `]
+  :host {
+    display:inline-block; 
+    position:relative;
+  }
+  `],
+  host: {
+    '[style.width.%]' : "json.WidthPercent",
+  }
 })
 export class GridCell {
   @Input() json: any; // Column // Used for FieldName
@@ -315,9 +323,11 @@ export class GridCell {
   @Input() jsonGrid: any; // Used for GridName
   @Input() jsonGridData: any; // Used for Value
   dataService: DataService;
+  w: any;
 
   constructor(dataService: DataService){
     this.dataService = dataService;
+    this.w = 20;
   }
 
   trackBy(index: any, item: any) {
