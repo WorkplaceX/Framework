@@ -97,7 +97,7 @@ export class LayoutRow {
   @Input() json: any
 
   trackBy(index: any, item: any) {
-    return item.Type;
+    return item.Key;
   }
 }
 
@@ -114,8 +114,8 @@ export class LayoutRow {
 export class LayoutCell {
   @Input() json: any
 
-  trackBy(index: any, item: any): any {
-    return item.Type;
+  trackBy(index: any, item: any) {
+    return item.Key;
   }
 }
 
@@ -132,8 +132,8 @@ export class LayoutCell {
 export class LayoutDebug {
   @Input() json: any
 
-  trackBy(index: any, item: any): any {
-    return item.Type;
+  trackBy(index: any, item: any) {
+    return item.Key;
   }
 }
 
@@ -240,7 +240,7 @@ export class Grid {
   @Input() json: any
 
   trackBy(index: any, item: any) {
-    return item.Type;
+    return item.Key;
   }
 }
 
@@ -283,7 +283,7 @@ export class GridRow {
   }
 
   trackBy(index: any, item: any) {
-    return item.Type;
+    return item.Key;
   }
 
   click(){
@@ -327,7 +327,7 @@ export class GridCell {
   }
 
   trackBy(index: any, item: any) {
-    return item.Type;
+    return item.Key;
   }
 
   click(event: MouseEvent){
@@ -351,14 +351,17 @@ export class GridCell {
   `]
 })
 export class GridHeader {
-  @Input() json: any; // Column
+  @Input() json: any; // GridColumn
+  dataService: DataService;
 
-  trackBy(index: any, item: any) {
-    return item.Type;
+  constructor(dataService: DataService){
+    this.dataService = dataService;
   }
 
   click(){
     this.json.IsSelect = !this.json.IsSelect;
+    this.json.IsClick = true;
+    this.dataService.update();
   }
 }
 

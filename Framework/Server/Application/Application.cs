@@ -5,6 +5,73 @@
     using System.Reflection;
     using System.Linq;
 
+    public class ProcessGridOrderBy : ProcessBase
+    {
+        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        {
+            foreach (string gridName in jsonApplication.GridData.ColumnList.Keys)
+            {
+                foreach (GridColumn gridColumn in jsonApplication.GridData.ColumnList[gridName])
+                {
+                    if (gridColumn.IsClick)
+                    {
+                        GridLoad gridLoad = jsonApplication.GridData.GridLoadList[gridName];
+                        if (gridLoad.FieldNameOrderBy == gridColumn.FieldName)
+                        {
+                            gridLoad.IsOrderByDesc = !gridLoad.IsOrderByDesc;
+                        }
+                        else
+                        {
+                            gridLoad.FieldNameOrderBy = gridColumn.FieldName;
+                            gridLoad.IsOrderByDesc = true;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        {
+            foreach (string gridName in jsonApplication.GridData.ColumnList.Keys)
+            {
+                GridLoad gridLoad = jsonApplication.GridData.GridLoadList[gridName];
+                foreach (GridColumn gridColumn in jsonApplication.GridData.ColumnList[gridName])
+                {
+                    gridColumn.IsClick = false;
+                    if (gridColumn.FieldName == gridLoad.FieldNameOrderBy)
+                    {
+                        if (gridLoad.IsOrderByDesc)
+                        {
+                            gridColumn.Text = "▼" + " " + gridColumn.FieldName;
+                        }
+                        else
+                        {
+                            gridColumn.Text = "▲" + " " + gridColumn.FieldName;
+                        }
+                    }
+                    else
+                    {
+                        gridColumn.Text = gridColumn.FieldName;
+                    }
+                }
+            }
+        }
+    }
+
+    public abstract class ProcessBase
+    {
+        protected virtual internal void ProcessBegin(JsonApplication jsonApplication)
+        {
+
+        }
+
+        protected virtual internal void ProcessEnd(JsonApplication jsonApplication)
+        {
+
+        }
+    }
+
     /// <summary>
     /// Rendered as html div element.
     /// </summary>
@@ -111,6 +178,9 @@
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Load data into CellList. Not visual.
+        /// </summary>
         public void LoadToJsonGrid(string gridName, Type typeRow)
         {
             if (GridLoadList == null)
@@ -214,6 +284,11 @@
         public double WidthPercent;
 
         /// <summary>
+        /// Gets or sets IsClick. Used to switch the sort order of a data grid.
+        /// </summary>
+        public bool IsClick;
+
+        /// <summary>
         /// Gets or sets IsUpdate. If true, postback to server is done after every key stroke. Used for example for Typeahead.
         /// </summary>
         public bool IsUpdate;
@@ -248,11 +323,18 @@
         }
     }
 
+    /// <summary>
+    /// Parameter used to load grid.
+    /// </summary>
     public class GridLoad
     {
         public string GridName;
 
         public string TypeRowName;
+
+        public string FieldNameOrderBy;
+
+        public bool IsOrderByDesc;
     }
 
     public class JsonApplication : JsonComponent
@@ -282,6 +364,9 @@
 
         public int ResponseCount;
 
+        /// <summary>
+        /// Gets or sets GridData.
+        /// </summary>
         public GridData GridData;
     }
 
@@ -318,7 +403,7 @@
         }
 
         /// <summary>
-        /// Gets or sets Key. Used for Angular trackby. Value is set by Framework before sending to client.
+        /// Gets or sets Key. Used by Angular trackBy. Value is set by Framework before sending to client.
         /// </summary>
         public string Key;
 
@@ -463,6 +548,11 @@
 
     public class ApplicationBase
     {
+        public ApplicationBase()
+        {
+            this.ProcessInit();
+        }
+
         private void ProcessGridSelectRowClear(JsonApplication jsonApplicationOut)
         {
             foreach (string gridName in jsonApplicationOut.GridData.RowList.Keys)
@@ -548,6 +638,13 @@
 
         }
 
+        public List<ProcessBase> ProcessList = new List<ProcessBase>();
+
+        protected virtual void ProcessInit()
+        {
+            ProcessList.Add(new ProcessGridOrderBy());
+        }
+
         public JsonApplication Process(JsonApplication jsonApplicationIn, string requestPath)
         {
             JsonApplication jsonApplicationOut = Framework.Server.DataAccessLayer.Util.JsonObjectClone<JsonApplication>(jsonApplicationIn);
@@ -564,6 +661,14 @@
             ProcessGridIsClickReset(jsonApplicationOut);
             jsonApplicationOut.Name = ".NET Core=" + DateTime.Now.ToString("HH:mm:ss.fff");
             jsonApplicationOut.VersionServer = Framework.Util.VersionServer;
+            foreach (ProcessBase process in ProcessList)
+            {
+                process.ProcessBegin(jsonApplicationOut);
+            }
+            foreach (ProcessBase process in ProcessList)
+            {
+                process.ProcessEnd(jsonApplicationOut);
+            }
             return jsonApplicationOut;
         }
 
