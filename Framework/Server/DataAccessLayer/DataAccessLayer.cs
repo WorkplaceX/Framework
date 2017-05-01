@@ -1,6 +1,7 @@
 ﻿namespace Framework.Server.DataAccessLayer
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Base class for every database row.
@@ -98,6 +99,12 @@
         protected virtual internal void ColumnWidthPercent(ref double widthPercent)
         {
 
+        }
+
+        protected virtual internal void LookUp(out Type typeRow, out List<DataAccessLayer.Row> rowList)
+        {
+            typeRow = null;
+            rowList = null;
         }
 
         protected virtual internal void ColumnIsVisible(ref bool isVisible)

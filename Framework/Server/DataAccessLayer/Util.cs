@@ -19,16 +19,24 @@
 
         public static string TypeRowToName(Type typeRow)
         {
-            return typeRow.Name;
+            string result = null;
+            if (typeRow != null)
+            {
+                result = typeRow.FullName;
+            }
+            return result;
         }
 
         public static Type TypeRowFromName(string typeRowName, Type typeInAssembly)
         {
-            typeRowName = "Database.dbo." + typeRowName;
-            Type result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeRowName);
-            if (result == null)
+            Type result = null;
+            if (typeRowName != null)
             {
-                throw new Exception("Type not found!");
+                result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeRowName);
+                if (result == null)
+                {
+                    throw new Exception("Type not found!");
+                }
             }
             return result;
         }
@@ -52,14 +60,17 @@
         public static List<Cell> ColumnList(Type typeRow)
         {
             List<Cell> result = new List<Cell>();
-            SqlNameAttribute attributeRow = (SqlNameAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlNameAttribute));
-            foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
+            if (typeRow != null)
             {
-                SqlNameAttribute attributePropertySql = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
-                TypeCellAttribute attributePropertyCell = (TypeCellAttribute)propertyInfo.GetCustomAttribute(typeof(TypeCellAttribute));
-                Cell cell = (Cell)Activator.CreateInstance(attributePropertyCell.TypeCell);
-                cell.Constructor(attributeRow.SqlName, attributePropertySql.SqlName, propertyInfo.Name);
-                result.Add(cell);
+                SqlNameAttribute attributeRow = (SqlNameAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlNameAttribute));
+                foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
+                {
+                    SqlNameAttribute attributePropertySql = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
+                    TypeCellAttribute attributePropertyCell = (TypeCellAttribute)propertyInfo.GetCustomAttribute(typeof(TypeCellAttribute));
+                    Cell cell = (Cell)Activator.CreateInstance(attributePropertyCell.TypeCell);
+                    cell.Constructor(attributeRow.SqlName, attributePropertySql.SqlName, propertyInfo.Name);
+                    result.Add(cell);
+                }
             }
             return result;
         }
@@ -115,10 +126,15 @@
             return query.Where("Id = @0", id).ToDynamicArray();
         }
 
-        public static object[] Select(Type typeRow, int pageIndex, int pageRowCount)
+        public static List<Row> Select(Type typeRow, int pageIndex, int pageRowCount)
         {
             var query = SelectQuery(typeRow).Skip(pageIndex * pageRowCount).Take(pageRowCount);
-            object[] result = query.ToDynamicArray().ToArray();
+            object[] resultArray = query.ToDynamicArray().ToArray();
+            List<Row> result = new List<Row>();
+            foreach (var row in resultArray)
+            {
+                result.Add((Row)row);
+            }
             return result;
         }
 
@@ -153,6 +169,10 @@
 
         public static object ValueFromText(string text, Type type)
         {
+            if (text == null)
+            {
+                return null;
+            }
             if (Nullable.GetUnderlyingType(type) != null)
             {
                 type = Nullable.GetUnderlyingType(type);
