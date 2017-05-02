@@ -155,12 +155,6 @@
 
     public class ProcessGridOrderBy : ProcessBase
     {
-        public ProcessGridOrderBy(ApplicationBase application) 
-            : base(application)
-        {
-
-        }
-
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
             foreach (string gridName in jsonApplication.GridData.ColumnList.Keys)
@@ -213,13 +207,146 @@
         }
     }
 
+    public class ProcessGridIsIsClick : ProcessBase
+    {
+        private void ProcessGridSelectRowClear(JsonApplication jsonApplicatio, string gridName)
+        {
+            foreach (GridRow gridRow in jsonApplicatio.GridData.RowList[gridName])
+            {
+                gridRow.IsSelectSet(false);
+            }
+        }
+
+        private void ProcessGridSelectCell(JsonApplication jsonApplication, string gridName, string index, string fieldName)
+        {
+            GridData gridData = jsonApplication.GridData;
+            gridData.FocusGridName = gridName;
+            gridData.FocusIndex = index;
+            gridData.FocusFieldName = fieldName;
+            ProcessGridSelectCellClear(jsonApplication);
+            gridData.CellList[gridName][fieldName][index].IsSelect = true;
+        }
+
+        private void ProcessGridSelectCellClear(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            foreach (string gridName in gridData.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridData.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridData.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        gridCell.IsSelect = false;
+                    }
+                }
+            }
+        }
+
+        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            foreach (GridLoad gridLoad in gridData.GridLoadList.Values)
+            {
+                string gridName = gridLoad.GridName;
+                foreach (GridRow gridRow in gridData.RowList[gridName])
+                {
+                    if (gridRow.IsClick)
+                    {
+                        ProcessGridSelectRowClear(jsonApplication, gridName);
+                        gridRow.IsSelectSet(true);
+                    }
+                    foreach (var gridColumn in gridData.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsClick == true)
+                        {
+                            ProcessGridSelectCell(jsonApplication, gridName, gridRow.Index, gridColumn.FieldName);
+                        }
+                    }
+                }
+            }
+        }
+
+        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            foreach (GridLoad gridLoad in gridData.GridLoadList.Values)
+            {
+                string gridName = gridLoad.GridName;
+                foreach (GridRow gridRow in gridData.RowList[gridName])
+                {
+                    gridRow.IsClick = false;
+                    foreach (var gridColumn in gridData.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        gridCell.IsClick = false;
+                    }
+                }
+            }
+        }
+    }
+
+    public class ProcessGridSave : ProcessBase
+    {
+        public bool? IsModify;
+
+        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            foreach (string gridName in gridData.GridLoadList.Keys)
+            {
+                foreach (GridRow gridRow in gridData.RowList[gridName])
+                {
+                    foreach (GridColumn gridColumn in gridData.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                    }
+                }
+            }
+        }
+    }
+
+    public class ProcessGridRowFirstIsClick : ProcessBase
+    {
+        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            foreach (string gridName in gridData.RowList.Keys)
+            {
+                bool isSelect = false; // A row is selected
+                foreach (GridRow gridRow in gridData.RowList[gridName])
+                {
+                    if (gridRow.IsSelectGet() || gridRow.IsClick)
+                    {
+                        isSelect = true;
+                        break;
+                    }
+                }
+                if (isSelect == false)
+                {
+                    foreach (GridRow gridRow in gridData.RowList[gridName])
+                    {
+                        int index;
+                        if (int.TryParse(gridRow.Index, out index)) // Exclude "Header"
+                        {
+                            gridRow.IsClick = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public class ProcessGridLookUp : ProcessBase
     {
         public ProcessGridLookUp(ApplicationBase application) 
-            : base(application)
         {
-
+            this.Application = application;
         }
+
+        public readonly ApplicationBase Application;
 
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
@@ -266,13 +393,6 @@
 
     public abstract class ProcessBase
     {
-        public ProcessBase(ApplicationBase application)
-        {
-            this.Application = application;
-        }
-
-        public readonly ApplicationBase Application;
-
         protected virtual internal void ProcessBegin(JsonApplication jsonApplication)
         {
 
@@ -671,101 +791,29 @@
             this.ProcessInit();
         }
 
-        private void ProcessGridSelectRowClear(JsonApplication jsonApplicationOut)
-        {
-            foreach (string gridName in jsonApplicationOut.GridData.RowList.Keys)
-            {
-                foreach (GridRow gridRow in jsonApplicationOut.GridData.RowList[gridName])
-                {
-                    gridRow.IsSelectSet(false);
-                }
-            }
-        }
-
-        private void ProcessGridSelectCellClear(JsonApplication jsonApplicationOut)
-        {
-            GridData gridData = jsonApplicationOut.GridData;
-            foreach (string gridName in gridData.RowList.Keys)
-            {
-                foreach (GridRow gridRow in gridData.RowList[gridName])
-                {
-                    foreach (var gridColumn in gridData.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        gridCell.IsSelect = false;
-                    }
-                }
-            }
-        }
-
-        private void ProcessGridSelectCell(JsonApplication jsonApplicationOut, string gridName, string index, string fieldName)
-        {
-            GridData gridData = jsonApplicationOut.GridData;
-            gridData.FocusGridName = gridName;
-            gridData.FocusIndex = index;
-            gridData.FocusFieldName = fieldName;
-            ProcessGridSelectCellClear(jsonApplicationOut);
-            gridData.CellList[gridName][fieldName][index].IsSelect = true;
-        }
-
-        private void ProcessGridSelect(JsonApplication jsonApplicationOut)
-        {
-            GridData gridData = jsonApplicationOut.GridData;
-            foreach (GridLoad gridLoad in gridData.GridLoadList.Values)
-            {
-                string gridName = gridLoad.GridName;
-                foreach (GridRow gridRow in gridData.RowList[gridName])
-                {
-                    if (gridRow.IsClick)
-                    {
-                        ProcessGridSelectRowClear(jsonApplicationOut);
-                        gridRow.IsSelectSet(true);
-                    }
-                    foreach (var gridColumn in gridData.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        if (gridCell.IsClick == true)
-                        {
-                            ProcessGridSelectCell(jsonApplicationOut, gridName, gridRow.Index, gridColumn.FieldName);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void ProcessGridIsClickReset(JsonApplication jsonApplicationOut)
-        {
-            GridData gridData = jsonApplicationOut.GridData;
-            foreach (GridLoad gridLoad in gridData.GridLoadList.Values)
-            {
-                string gridName = gridLoad.GridName;
-                foreach (GridRow gridRow in gridData.RowList[gridName])
-                {
-                    gridRow.IsClick = false;
-                    foreach (var gridColumn in gridData.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        gridCell.IsClick = false;
-                    }
-                }
-            }
-        }
-
-        protected virtual void ProcessGridIsClick(JsonApplication jsonApplicationOut)
-        {
-
-        }
-
         public List<ProcessBase> ProcessList = new List<ProcessBase>();
 
-        public T ProcessGet<T>() where T : ProcessBase
+        public void ProcessListInsertAfter<T>(ProcessBase process) where T : ProcessBase
         {
-            return (T)ProcessList.Where(item => item.GetType() == typeof(T)).First();
+            int index = -1;
+            int count = 0;
+            foreach (var item in ProcessList)
+            {
+                if (item.GetType() == typeof(T))
+                {
+                    index = count;
+                }
+                count += 1;
+            }
+            Framework.Util.Assert(index != -1, "Process not found!");
+            ProcessList.Insert(index, process);
         }
 
         protected virtual void ProcessInit()
         {
-            ProcessList.Add(new ProcessGridOrderBy(this));
+            ProcessList.Add(new ProcessGridRowFirstIsClick());
+            ProcessList.Add(new ProcessGridIsIsClick());
+            ProcessList.Add(new ProcessGridOrderBy());
             ProcessList.Add(new ProcessGridLookUp(this));
         }
 
@@ -780,9 +828,6 @@
             {
                 jsonApplicationOut.ResponseCount += 1;
             }
-            ProcessGridSelect(jsonApplicationOut);
-            ProcessGridIsClick(jsonApplicationOut);
-            ProcessGridIsClickReset(jsonApplicationOut);
             jsonApplicationOut.Name = ".NET Core=" + DateTime.Now.ToString("HH:mm:ss.fff");
             jsonApplicationOut.VersionServer = Framework.Util.VersionServer;
             // Process
