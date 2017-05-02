@@ -237,6 +237,31 @@
                 var d = Util.GridFromJson(jsonApplication, "LookUp", Application.GetType()); // TODO
             }
         }
+
+        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            bool isExist = false; // Focused field exists
+            if (gridData.FocusFieldName != null)
+            {
+                if (gridData.RowList[gridData.FocusGridName].Exists(item => item.Index == gridData.FocusIndex)) // Focused row exists
+                {
+                    if (gridData.ColumnList[gridData.FocusGridName].Exists(item => item.FieldName == gridData.FocusFieldName)) // Focused column exists
+                    {
+                        isExist = true;
+                    }
+                }
+            }
+            if (isExist == false)
+            {
+                if (jsonApplication.GridData != null)
+                {
+                    jsonApplication.GridData.FocusFieldName = null;
+                    jsonApplication.GridData.FocusGridName = null;
+                    jsonApplication.GridData.FocusIndex = null;
+                }
+            }
+        }
     }
 
     public abstract class ProcessBase
