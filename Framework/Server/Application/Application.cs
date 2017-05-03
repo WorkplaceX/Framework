@@ -207,6 +207,24 @@
         }
     }
 
+    public class ProcessJson : ProcessBase
+    {
+        public ProcessJson(ApplicationBase application)
+        {
+            this.Application = application;
+        }
+
+        public readonly ApplicationBase Application;
+
+        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        {
+            foreach (JsonComponent jsonComponent in jsonApplication.ListAll())
+            {
+                jsonComponent.Process(Application, jsonApplication);
+            }
+        }
+    }
+
     public class ProcessGridIsIsClick : ProcessBase
     {
         private void ProcessGridSelectRowClear(JsonApplication jsonApplicatio, string gridName)
@@ -705,6 +723,11 @@
             List<JsonComponent> result = ListAll();
             return result.OfType<T>().ToList();
         }
+
+        protected virtual internal void Process(ApplicationBase application, JsonApplication jsonApplication)
+        {
+
+        }
     }
 
     /// <summary>
@@ -795,14 +818,20 @@
         }
     }
 
-    public class GridSaveState : Label
+    public class LabelGridSaveState : Label
     {
-        public GridSaveState() : this(null, null) { }
+        public LabelGridSaveState() : this(null, null) { }
 
-        public GridSaveState(JsonComponent owner, string text)
+        public LabelGridSaveState(JsonComponent owner, string text)
             : base(owner, text)
         {
-            TypeSet(typeof(Label));
+            TypeSet(typeof(Label)); // Render as Label.
+        }
+
+        protected internal override void Process(ApplicationBase application, JsonApplication jsonApplication)
+        {
+            Text = string.Format("IsModify={0};", application.ProcessListGet<ProcessGridSave>().IsModify);
+            base.Process(application, jsonApplication);
         }
     }
 
@@ -843,6 +872,7 @@
             ProcessList.Add(new ProcessGridIsIsClick());
             ProcessList.Add(new ProcessGridOrderBy());
             ProcessList.Add(new ProcessGridLookUp(this));
+            ProcessList.Add(new ProcessJson(this));
         }
 
         public JsonApplication Process(JsonApplication jsonApplicationIn, string requestPath)
