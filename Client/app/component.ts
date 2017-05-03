@@ -54,7 +54,6 @@ export class AppComponent {
   <LayoutCell *ngIf="json.Type=='LayoutCell'" [json]=json></LayoutCell>
   <ButtonX *ngIf="json.Type=='Button'" [json]=json></ButtonX>
   <Literal *ngIf="json.Type=='Literal'" [json]=json></Literal>
-  <InputX *ngIf="json.Type=='Input'" [json]=json></InputX>
   <Label *ngIf="json.Type=='Label'" [json]=json></Label>
   <Grid *ngIf="json.Type=='Grid'" [json]=json></Grid>
   <GridKeyboard *ngIf="json.Type=='GridKeyboard'" [json]=json></GridKeyboard>
@@ -170,48 +169,6 @@ export class Literal {
   dataService: DataService;
 }
 
-/* InputX */
-@Component({
-  selector: 'InputX',
-  template: `
-  <input [ngClass]="json.Class" type="text" class="form-control" [(ngModel)]="text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" placeholder="Empty"/>
-  <p>
-    Text={{ json.Text }}<br/>
-    TextNew={{ json.TextNew}}<br/>
-    Focus={{json.IsFocus}}<br/>
-    AutoComplete={{json.AutoComplete}}
-  </p>`
-})
-export class InputX {
-  @Input() json: any
-  dataService: DataService;
-  text: string;
-  inputFocused: any;
-
-  constructor( dataService: DataService){
-    this.dataService = dataService;
-  }
-
-  ngOnInit() {
-    this.text = this.json.Text;
-  }  
-
-  onChange() {
-    this.json.TextNew = this.text;
-    this.dataService.update();
-  }
-
-  onKey(event:any) {
-    this.text = event.target.value;
-    this.json.TextNew = this.text;
-    this.dataService.update();
-  }
-
-  focus(isFocus: boolean) {
-    this.json.IsFocus = isFocus;
-  }  
-}
-
 /* Label */
 @Component({
   selector: 'Label',
@@ -298,7 +255,7 @@ export class GridRow {
   template: `
   <div (click)="click($event)" [ngClass]="{'select-class':jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" >
   <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
-  {{ jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].V }}
+  {{ jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}
   <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
   </div>
   <GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></GridField>
@@ -398,7 +355,7 @@ export class RemoveSelectorDirective {
 @Component({
   selector: 'GridField',
   template: `
-  <input type="text" class="form-control" [(ngModel)]="gridCell().V" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridData.FocusIndex==index && dataService.json.GridData.FocusFieldName == fieldName" placeholder="Empty" />
+  <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridData.FocusIndex==index && dataService.json.GridData.FocusFieldName == fieldName" placeholder="Empty" />
   `
 })
 export class GridField {
@@ -453,6 +410,25 @@ export class GridField {
     return result;
   }
 
+  get Text(): string {
+    return this.gridCell().T;
+  }
+
+  set Text(textNew: string) {
+    let gridCell = this.gridCell();
+    // Backup old text.
+    if (gridCell.IsO == null) { 
+      gridCell.IsO = true;
+      gridCell.O = gridCell.T;
+    }
+    // New text back to old text.
+    if (gridCell.IsO == true && gridCell.O == textNew) {
+      gridCell.IsO = null;
+      gridCell.O = null;
+    }
+    gridCell.T = textNew;
+  }
+
   onChange() {
     let isUpdate = false;
     let point = this.point();
@@ -461,6 +437,7 @@ export class GridField {
       for (let column of point.gridData.ColumnList[point.gridName]) {
         if (column.FieldName == point.fieldName) {
           isUpdate = column.IsUpdate;
+          isUpdate = true; // Always post back.
           break;
         }
       }

@@ -97,12 +97,12 @@
                     {
                         string fieldName = propertyInfo.Name;
                         object value = propertyInfo.GetValue(row);
-                        object valueJson = DataAccessLayer.Util.ValueToText(value); // Framework.Server.DataAccessLayer.Util.ValueToJson(value);
+                        string textJson = DataAccessLayer.Util.ValueToText(value); // Framework.Server.DataAccessLayer.Util.ValueToJson(value);
                         if (!gridData.CellList[gridName].ContainsKey(fieldName))
                         {
                             gridData.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                         }
-                        gridData.CellList[gridName][fieldName][index.ToString()] = new GridCell() { V = valueJson };
+                        gridData.CellList[gridName][fieldName][index.ToString()] = new GridCell() { T = textJson };
                     }
                 }
             }
@@ -143,7 +143,7 @@
                 result.RowList.Add(resultRow);
                 foreach (var column in gridData.ColumnList[gridName])
                 {
-                    string text = (string)gridData.CellList[gridName][column.FieldName][row.Index].V;
+                    string text = gridData.CellList[gridName][column.FieldName][row.Index].T;
                     PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
                     object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
                     propertyInfo.SetValue(resultRow, value);
@@ -289,10 +289,11 @@
 
     public class ProcessGridSave : ProcessBase
     {
-        public bool? IsModify;
+        public bool IsModify;
 
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
+            IsModify = false;
             GridData gridData = jsonApplication.GridData;
             foreach (string gridName in gridData.GridLoadList.Keys)
             {
@@ -301,6 +302,10 @@
                     foreach (GridColumn gridColumn in gridData.ColumnList[gridName])
                     {
                         GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsO)
+                        {
+                            IsModify = true;
+                        }
                     }
                 }
             }
@@ -504,9 +509,19 @@
     public class GridCell
     {
         /// <summary>
-        /// Value.
+        /// Text.
         /// </summary>
-        public object V;
+        public string T;
+
+        /// <summary>
+        /// Gets or sets IsO. If true, old text has been stored.
+        /// </summary>
+        public bool IsO;
+
+        /// <summary>
+        /// Old text.
+        /// </summary>
+        public string O;
 
         public bool IsSelect;
 
@@ -756,23 +771,6 @@
         public string Html;
     }
 
-    public class Input : JsonComponent
-    {
-        public Input() : this(null, null) { }
-
-        public Input(JsonComponent owner, string text)
-            : base(owner, text)
-        {
-
-        }
-
-        public bool IsFocus;
-
-        public string TextNew;
-
-        public string AutoComplete;
-    }
-
     public class Label : JsonComponent
     {
         public Label() : this(null, null) { }
@@ -809,8 +807,14 @@
             ProcessList.Insert(index, process);
         }
 
+        public T ProcessListGet<T>() where T : ProcessBase
+        {
+            return (T)ProcessList.Where(item => item.GetType() == typeof(T)).First();
+        }
+
         protected virtual void ProcessInit()
         {
+            ProcessList.Add(new ProcessGridSave());
             ProcessList.Add(new ProcessGridRowFirstIsClick());
             ProcessList.Add(new ProcessGridIsIsClick());
             ProcessList.Add(new ProcessGridOrderBy());
@@ -858,7 +862,6 @@
             var cellContent1 = new LayoutCell(rowContent, "ContentCell1");
             var cellContent2 = new LayoutCell(rowContent, "ContentCell2");
             new Label(cellContent2, "Enter text");
-            new Input(cellContent2, "MyTest");
             var rowFooter = new LayoutRow(container, "Footer");
             var cellFooter1 = new LayoutCell(rowFooter, "FooterCell1");
             var button = new Button(cellFooter1, "Hello");
