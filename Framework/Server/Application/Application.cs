@@ -662,6 +662,19 @@
 
         public string Type;
 
+        /// <summary>
+        /// Overwrite default type. Used to change Angular Selector.
+        /// </summary>
+        public void TypeSet(Type type)
+        {
+            Type = type.Name;
+        }
+
+        /// <summary>
+        /// Gets or sets TypeCSharp. Used when default property Type has been changed.
+        /// </summary>
+        public string TypeCSharp;
+
         public string Text;
 
         /// <summary>
@@ -779,6 +792,17 @@
             : base(owner, text)
         {
 
+        }
+    }
+
+    public class GridSaveState : Label
+    {
+        public GridSaveState() : this(null, null) { }
+
+        public GridSaveState(JsonComponent owner, string text)
+            : base(owner, text)
+        {
+            TypeSet(typeof(Label));
         }
     }
 

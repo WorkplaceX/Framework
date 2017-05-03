@@ -431,5 +431,62 @@ namespace UnitTest.Json
             var data2 = Framework.Server.Json.Util.Deserialize<DataBool>(json);
             Util.Assert((bool)data2.H == true);
         }
+
+        public class DataSelector
+        {
+            public string Type;
+
+            public Label L;
+        }
+
+        public class Label
+        {
+
+        }
+
+        public class MyLabel : Label
+        {
+            public MyLabel()
+            {
+                Type = "Label";
+            }
+
+            public string Type;
+        }
+
+        public void Test24()
+        {
+            var data = new DataSelector();
+            data.L = new MyLabel();
+            try
+            {
+                string json = Framework.Server.Json.Util.Serialize(data);
+            }
+            catch (Framework.Server.Json.JsonException exception)
+            {
+                Util.Assert(exception.Message == "Object has no TypeCSharp field!");
+            }
+        }
+
+        public class MyLabel2 : Label
+        {
+            public MyLabel2()
+            {
+                Type = "Label";
+            }
+
+            public string Type;
+
+            public string TypeCSharp;
+        }
+
+        public void Test25()
+        {
+            var data = new DataSelector();
+            data.L = new MyLabel2();
+            string json = Framework.Server.Json.Util.Serialize(data);
+            var data2 = Framework.Server.Json.Util.Deserialize<DataSelector>(json);
+            Util.Assert(data2.L is MyLabel2);
+        }
     }
 }

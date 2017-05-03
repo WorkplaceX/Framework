@@ -266,6 +266,10 @@
             }
         }
 
+        /// <summary>
+        /// Prepare objects for serialization.
+        /// </summary>
+        /// <param name="isAfter">After serialization or before serialization.</param>
         private static void SerializePrepare(object value, Type fieldType, bool isAfter)
         {
             if (value != null)
@@ -293,10 +297,21 @@
                             var valueList = ValueListGet(value);
                             foreach (UtilValue item in valueList)
                             {
+                                object itemValue = item.Value;
                                 if (isSetType && item.FieldName == "Type")
                                 {
                                     isSetType = false;
                                     item.Value = value.GetType().Name;
+                                }
+                                if (item.FieldName == "Type" && itemValue is string && (string)itemValue != value.GetType().Name) // Type has been overwritten for Angular Selector
+                                {
+                                    valueList.Where(item2 => item2.FieldName == "Type").First().Value = itemValue; // For example Label
+                                    UtilValue utilValue = valueList.Where(item2 => item2.FieldName == "TypeCSharp").FirstOrDefault();
+                                    if (utilValue == null)
+                                    {
+                                        throw new JsonException("Object has no TypeCSharp field!");
+                                    }
+                                    utilValue.Value = value.GetType().Name; // For example MyLabel
                                 }
                                 SerializePrepareListReset(item, isAfter);
                                 SerializePrepare(item.Value, item.FieldType, isAfter);
@@ -388,6 +403,18 @@
             return Convert.ChangeType(value, type);
         }
 
+        public static Type TypeGet(string objectTypeString, Type rootType)
+        {
+            string ns = rootType.Namespace + ".";
+            if (rootType.DeclaringType != null)
+            {
+                ns = rootType.DeclaringType.FullName + "+";
+            }
+            Type result = Type.GetType(ns + objectTypeString + ", " + rootType.GetTypeInfo().Assembly.FullName);
+            Util.Assert(result != null);
+            return result;
+        }
+
         private static Type DeserializeTokenObjectType(JObject jObject, Type fieldType, Type rootType)
         {
             Type result = null;
@@ -400,7 +427,17 @@
                     string objectTypeString = jValue.Value as string;
                     if (objectTypeString != null)
                     {
-                        result = Type.GetType(rootType.Namespace + "." + objectTypeString + ", " + rootType.GetTypeInfo().Assembly.FullName);
+                        result = Util.TypeGet(objectTypeString, rootType);
+                    }
+                }
+                //
+                if (jObject.Property("TypeCSharp") != null)
+                {
+                    JValue jValue = jObject.Property("TypeCSharp").Value as JValue;
+                    string objectTypeString = jValue.Value as string;
+                    if (objectTypeString != null)
+                    {
+                        result = Util.TypeGet(objectTypeString, rootType);
                     }
                 }
             }
