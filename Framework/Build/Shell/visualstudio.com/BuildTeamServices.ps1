@@ -14,30 +14,30 @@ Add-Type -assembly "system.io.compression.filesystem"
 
 #Build
 cd $FolderName
-cd Build
+cd Framework/Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe restore
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe build
 
 # ConnectionString
 cd $FolderName
-cd Build
+cd Framework/Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 01 $ConnectionString
 
 
 # InstallAll
 cd $FolderName
-cd Build
+cd Framework/Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 02
 
 
 # RunSql
 cd $FolderName
-cd Build
+cd Framework/Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 11
 
 # Server
 cd $FolderName
-cd Server
+cd Framework/Server
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe restore
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe publish
