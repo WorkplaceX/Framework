@@ -17,7 +17,7 @@ function Main
     node --version
 
     #npm update
-    npm install npm@latest -g --loglevel error
+    npm install npm@4.6.1 -g --loglevel error # npm install npm@latest
 
     # npm, node version check
     npm --version
