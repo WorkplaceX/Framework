@@ -130,6 +130,22 @@
             public readonly Type TypeRow;
         }
 
+        /// <summary>
+        /// Returns row index. Excludes Header and Total.
+        /// </summary>
+        public static int? GridIndexFromJson(GridRow gridRow)
+        {
+            int result;
+            if (int.TryParse(gridRow.Index, out result))
+            {
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static Grid GridFromJson(JsonApplication jsonApplication, string gridName, Type typeInAssembly)
         {
             GridData gridData = jsonApplication.GridData;
@@ -207,6 +223,9 @@
         }
     }
 
+    /// <summary>
+    /// Call method Process(); on class JsonComponent.
+    /// </summary>
     public class ProcessJson : ProcessBase
     {
         public ProcessJson(ApplicationBase application)
@@ -307,7 +326,23 @@
 
     public class ProcessGridSave : ProcessBase
     {
+        public ProcessGridSave(ApplicationBase application)
+        {
+           this.Application = application;
+        }
+
+        public readonly ApplicationBase Application;
+
         public bool IsModify;
+
+        private void TextToValue(JsonApplication jsonApplication)
+        {
+            GridData gridData = jsonApplication.GridData;
+            foreach (string gridName in gridData.GridLoadList.Keys)
+            {
+                var grid = Util.GridFromJson(jsonApplication, gridName, Application.GetType());
+            }
+        }
 
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
@@ -315,6 +350,7 @@
             GridData gridData = jsonApplication.GridData;
             foreach (string gridName in gridData.GridLoadList.Keys)
             {
+                var grid = Util.GridFromJson(jsonApplication, gridName, Application.GetType());
                 foreach (GridRow gridRow in gridData.RowList[gridName])
                 {
                     foreach (GridColumn gridColumn in gridData.ColumnList[gridName])
@@ -532,7 +568,7 @@
         public string T;
 
         /// <summary>
-        /// Gets or sets IsO. If true, old text has been stored.
+        /// Gets or sets IsO. If true, old text has been stored in property O.
         /// </summary>
         public bool IsO;
 
@@ -561,6 +597,7 @@
 
         /// <summary>
         /// Gets or sets IsUpdate. If true, postback to server is done after every key stroke. Used for example for Typeahead.
+        /// (Currently in client handled always as true).
         /// </summary>
         public bool IsUpdate;
     }
@@ -867,7 +904,7 @@
 
         protected virtual void ProcessInit()
         {
-            ProcessList.Add(new ProcessGridSave());
+            ProcessList.Add(new ProcessGridSave(this));
             ProcessList.Add(new ProcessGridRowFirstIsClick());
             ProcessList.Add(new ProcessGridIsIsClick());
             ProcessList.Add(new ProcessGridOrderBy());
