@@ -1,7 +1,7 @@
 param($ConnectionString)
 
 # Init
-$FolderName = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.Parent.FullName + "\"
+$FolderName = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.Parent.Parent.FullName + "\"
 $FolderNameDotNetZip = (get-item $PSCommandPath).Directory.FullName + "\"
 
 # Download .NET Core 1.1 compiler
@@ -14,30 +14,28 @@ Add-Type -assembly "system.io.compression.filesystem"
 
 #Build
 cd $FolderName
-cd Framework/Build
+cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe restore
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe build
 
 # ConnectionString
 cd $FolderName
-cd Framework/Build
+cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 01 $ConnectionString
-
 
 # InstallAll
 cd $FolderName
-cd Framework/Build
+cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 02
-
 
 # RunSql
 cd $FolderName
-cd Framework/Build
+cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 11
 
 # Server
 cd $FolderName
-cd Framework/Server
+cd Server
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe restore
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe publish
