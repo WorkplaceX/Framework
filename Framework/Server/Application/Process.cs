@@ -7,6 +7,13 @@
 
     public abstract class ProcessBase
     {
+        public ProcessBase(BusinessApplicationBase businessApplication)
+        {
+            this.BusinessApplication = businessApplication;
+        }
+
+        public readonly BusinessApplicationBase BusinessApplication;
+
         protected virtual internal void ProcessBegin(JsonApplication jsonApplication)
         {
 
@@ -30,6 +37,12 @@
 
     public class ProcessGridOrderBy : ProcessBase
     {
+        public ProcessGridOrderBy(BusinessApplicationBase businessApplication) 
+            : base(businessApplication)
+        {
+
+        }
+
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
             foreach (string gridName in jsonApplication.GridData.ColumnList.Keys)
@@ -88,11 +101,10 @@
     public class ProcessJson : ProcessBase
     {
         public ProcessJson(BusinessApplicationBase businessApplication)
+            : base(businessApplication)
         {
-            this.BusinessApplication = businessApplication;
-        }
 
-        public readonly BusinessApplicationBase BusinessApplication;
+        }
 
         protected internal override void ProcessEnd(JsonApplication jsonApplication)
         {
@@ -105,6 +117,12 @@
 
     public class ProcessGridIsIsClick : ProcessBase
     {
+        public ProcessGridIsIsClick(BusinessApplicationBase businessApplication)
+            : base(businessApplication)
+        {
+
+        }
+
         private void ProcessGridSelectRowClear(JsonApplication jsonApplicatio, string gridName)
         {
             foreach (GridRow gridRow in jsonApplicatio.GridData.RowList[gridName])
@@ -185,31 +203,21 @@
 
     public class ProcessGridSave : ProcessBase
     {
-        public ProcessGridSave(BusinessApplicationBase businessApplication)
+        public ProcessGridSave(BusinessApplicationBase businessApplication) 
+            : base(businessApplication)
         {
-            this.BusinessApplication = businessApplication;
-        }
 
-        public readonly BusinessApplicationBase BusinessApplication;
+        }
 
         public bool IsModify;
-
-        private void TextToValue(JsonApplication jsonApplication)
-        {
-            GridData gridData = jsonApplication.GridData;
-            foreach (string gridName in gridData.GridLoadList.Keys)
-            {
-                var grid = Util.GridFromJson(jsonApplication, gridName, BusinessApplication.GetType());
-            }
-        }
 
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
             IsModify = false;
             GridData gridData = jsonApplication.GridData;
+            GridDataProcess gridDataProcess = Util.GridDataProcessFromJson(jsonApplication, BusinessApplication.GetType());
             foreach (string gridName in gridData.GridLoadList.Keys)
             {
-                var grid = Util.GridFromJson(jsonApplication, gridName, BusinessApplication.GetType());
                 foreach (GridRow gridRow in gridData.RowList[gridName])
                 {
                     foreach (GridColumn gridColumn in gridData.ColumnList[gridName])
@@ -227,6 +235,12 @@
 
     public class ProcessGridRowFirstIsClick : ProcessBase
     {
+        public ProcessGridRowFirstIsClick(BusinessApplicationBase businessApplication) 
+            : base(businessApplication)
+        {
+
+        }
+
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
             GridData gridData = jsonApplication.GridData;
@@ -260,11 +274,10 @@
     public class ProcessGridLookUp : ProcessBase
     {
         public ProcessGridLookUp(BusinessApplicationBase businessApplication)
+            : base(businessApplication)
         {
-            this.BusinessApplication = businessApplication;
-        }
 
-        public readonly BusinessApplicationBase BusinessApplication;
+        }
 
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
@@ -279,7 +292,6 @@
                 cell.LookUp(out typeRow, out rowList);
                 Util.TypeRowValidate(typeRow, ref rowList);
                 Util.GridToJson(jsonApplication, "LookUp", typeRow, rowList);
-                var d = Util.GridFromJson(jsonApplication, "LookUp", BusinessApplication.GetType()); // TODO
             }
         }
 

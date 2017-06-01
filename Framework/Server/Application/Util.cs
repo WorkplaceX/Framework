@@ -1,9 +1,121 @@
 ﻿namespace Framework.Server.Application
 {
     using Framework.Server.Application.Json;
+    using Framework.Server.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+
+    public class GridDataProcessRow
+    {
+        public string GridName;
+
+        public string Index;
+
+        public Row Row;
+
+        public Row RowNew;
+    }
+
+    public class GridDataProcess
+    {
+        /// <summary>
+        /// (GridName, TypeRow)
+        /// </summary>
+        public Dictionary<string, Type> TypeRowList = new Dictionary<string, Type>();
+
+        /// <summary>
+        /// (GridName, Index). Original row.
+        /// </summary>
+        public Dictionary<string, Dictionary<string, GridDataProcessRow>> RowList = new Dictionary<string, Dictionary<string, GridDataProcessRow>>();
+
+        public void RowListSet(GridDataProcessRow gridDataProcessRow)
+        {
+            string gridName = gridDataProcessRow.GridName;
+            string index = gridDataProcessRow.Index;
+            if (!RowList.ContainsKey(gridName))
+            {
+                RowList[gridName] = new Dictionary<string, GridDataProcessRow>();
+            }
+            RowList[gridName][index] = gridDataProcessRow;
+        }
+
+        /// <summary>
+        /// (GridName, Index, FieldName, Text).
+        /// </summary>
+        public Dictionary<string, Dictionary<string, Dictionary<string, string>>> TextList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+
+        /// <summary>
+        /// (GridName, Index, FieldName, Text).
+        /// </summary>
+        public Dictionary<string, Dictionary<string, Dictionary<string, string>>> ErrorList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+
+        /// <summary>
+        /// Gets user entered text.
+        /// </summary>
+        /// <returns>If null, user has not changed text.</returns>
+        public string TextGet(string gridName, string index, string fieldName)
+        {
+            string result = null;
+            if (TextList.ContainsKey(gridName))
+            {
+                if (TextList[gridName].ContainsKey(index))
+                {
+                    if (TextList[gridName][index].ContainsKey(fieldName))
+                    {
+                        result = TextList[gridName][index][fieldName];
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Sets user entered text.
+        /// </summary>
+        /// <param name="text">If null, user has not changed text.</param>
+        public void TextSet(string gridName, string index, string fieldName, string text)
+        {
+            if (!TextList.ContainsKey(gridName))
+            {
+                TextList[gridName] = new Dictionary<string, Dictionary<string, string>>();
+            }
+            if (!TextList[gridName].ContainsKey(index))
+            {
+                TextList[gridName][index] = new Dictionary<string, string>();
+            }
+            TextList[gridName][index][fieldName] = text;
+        }
+
+        public string ErrorGet(string gridName, string index, string fieldName)
+        {
+            string result = null;
+            if (ErrorList.ContainsKey(gridName))
+            {
+                if (ErrorList[gridName].ContainsKey(index))
+                {
+                    if (ErrorList[gridName][index].ContainsKey(fieldName))
+                    {
+                        result = ErrorList[gridName][index][fieldName];
+                    }
+                }
+            }
+            return result;
+        }
+
+        public void ErrorSet(string gridName, string index, string fieldName, string text)
+        {
+            if (!ErrorList.ContainsKey(gridName))
+            {
+                ErrorList[gridName] = new Dictionary<string, Dictionary<string, string>>();
+            }
+            if (!ErrorList[gridName].ContainsKey(index))
+            {
+                ErrorList[gridName][index] = new Dictionary<string, string>();
+            }
+            ErrorList[gridName][index][fieldName] = text;
+        }
+    }
 
     public static class Util
     {
@@ -144,6 +256,75 @@
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Returns unmodified data row.
+        /// </summary>
+        private static Row GridDataProcessFromJson(GridData gridData, string gridName, GridRow gridRow, Type typeRow)
+        {
+            Row result = (Row)Activator.CreateInstance(typeRow);
+            foreach (var column in gridData.ColumnList[gridName])
+            {
+                string text;
+                if (gridData.CellList[gridName][column.FieldName][gridRow.Index].IsO)
+                {
+                    text = gridData.CellList[gridName][column.FieldName][gridRow.Index].O;
+                }
+                else
+                {
+                    text = gridData.CellList[gridName][column.FieldName][gridRow.Index].T;
+                }
+                PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
+                object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
+                propertyInfo.SetValue(result, value);
+            }
+            return result;
+        }
+
+        private static void GridDataProcessFromJson(JsonApplication jsonApplication, string gridName, GridDataProcess result, Type typeInAssembly)
+        {
+            GridData gridData = jsonApplication.GridData;
+            string typeRowName = gridData.GridLoadList[gridName].TypeRowName;
+            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
+            result.TypeRowList[gridName] = typeRow;
+            //
+            foreach (GridRow gridRow in gridData.RowList[gridName])
+            {
+                Row row = GridDataProcessFromJson(gridData, gridName, gridRow, typeRow);
+                Row rowNew = GridDataProcessFromJson(gridData, gridName, gridRow, typeRow);
+                GridDataProcessRow gridDataProcessRow = new GridDataProcessRow() { GridName = gridName, Index = gridRow.Index, Row = row, RowNew = rowNew };
+                result.RowListSet(gridDataProcessRow);
+            }
+            //
+            foreach (GridRow gridRow in gridData.RowList[gridName])
+            {
+                foreach (var column in gridData.ColumnList[gridName])
+                {
+                    if (gridData.CellList[gridName][column.FieldName][gridRow.Index].IsO)
+                    {
+                        string text = gridData.CellList[gridName][column.FieldName][gridRow.Index].T;
+                        if (text == null)
+                        {
+                            text = ""; // User changed text.
+                            result.TextSet(gridName, gridRow.Index, column.FieldName, text);
+                        }
+                        string textError = gridData.CellList[gridName][column.FieldName][gridRow.Index].E;
+                        result.ErrorSet(gridName, gridRow.Index, column.FieldName, textError);
+                    }
+                }
+            }
+        }
+
+        public static GridDataProcess GridDataProcessFromJson(JsonApplication jsonApplication, Type typeInAssembly)
+        {
+            GridDataProcess result = new GridDataProcess();
+            GridData gridData = jsonApplication.GridData;
+            foreach (string gridName in gridData.GridLoadList.Keys)
+            {
+                GridDataProcessFromJson(jsonApplication, gridName, result, typeInAssembly);
+            }
+            return result;
         }
 
         public static Grid GridFromJson(JsonApplication jsonApplication, string gridName, Type typeInAssembly)

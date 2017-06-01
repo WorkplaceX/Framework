@@ -209,6 +209,11 @@
         /// </summary>
         public string O;
 
+        /// <summary>
+        /// Gets or sets error message.
+        /// </summary>
+        public string E;
+
         public bool IsSelect;
 
         public bool IsClick;
