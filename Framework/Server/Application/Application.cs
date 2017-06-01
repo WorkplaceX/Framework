@@ -1,12 +1,16 @@
 ﻿namespace Framework.Server.Application
 {
+    using Framework.Server.Application.Json;
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    public class ApplicationBase
+    /// <summary>
+    /// Server side root object.
+    /// </summary>
+    public class BusinessApplicationBase
     {
-        public ApplicationBase()
+        public BusinessApplicationBase()
         {
             this.ProcessInit();
         }

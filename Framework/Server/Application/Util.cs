@@ -1,5 +1,6 @@
 ﻿namespace Framework.Server.Application
 {
+    using Framework.Server.Application.Json;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
@@ -59,27 +60,27 @@
             //
             if (gridData.GridLoadList == null)
             {
-                gridData.GridLoadList = new Dictionary<string, Application.GridLoad>();
+                gridData.GridLoadList = new Dictionary<string, GridLoad>();
             }
-            gridData.GridLoadList[gridName] = new Application.GridLoad() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
+            gridData.GridLoadList[gridName] = new GridLoad() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
             // Row
             if (gridData.RowList == null)
             {
-                gridData.RowList = new Dictionary<string, List<Application.GridRow>>();
+                gridData.RowList = new Dictionary<string, List<GridRow>>();
             }
             gridData.RowList[gridName] = new List<GridRow>();
             // Column
             if (gridData.ColumnList == null)
             {
-                gridData.ColumnList = new Dictionary<string, List<Application.GridColumn>>();
+                gridData.ColumnList = new Dictionary<string, List<GridColumn>>();
             }
             gridData.ColumnList[gridName] = GridToJsonColumnList(typeRow);
             // Cell
             if (gridData.CellList == null)
             {
-                gridData.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, Application.GridCell>>>();
+                gridData.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>>();
             }
-            gridData.CellList[gridName] = new Dictionary<string, Dictionary<string, Application.GridCell>>();
+            gridData.CellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
             //
             PropertyInfo[] propertyInfoList = null;
             for (int index = 0; index < rowList.Count; index++)

@@ -1,236 +1,22 @@
-﻿namespace Framework.Server.Application
+﻿namespace Framework.Server.Application.Json
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
-    /// Rendered as html div element.
+    /// Json Component.
     /// </summary>
-    public class Grid : JsonComponent
+    public class Component
     {
-        public Grid() { }
+        public Component() : this(null, null) { }
 
-        public Grid(JsonComponent owner, string text, string gridName)
-            : base(owner, text)
-        {
-            this.GridName = gridName;
-        }
-
-        public string GridName;
-    }
-
-    /// <summary>
-    /// Grid keyboard handler (Singleton). Manages grid navigation. For example arrow up, down and tab.
-    /// </summary>
-    public class GridKeyboard : JsonComponent
-    {
-        public GridKeyboard() { }
-
-        public GridKeyboard(JsonComponent owner, string text)
-            : base(owner, text)
-        {
-
-        }
-    }
-
-    public class GridField : JsonComponent
-    {
-        public GridField() { }
-
-        public GridField(JsonComponent owner, string text, string gridName, string fieldName, string gridIndex)
-            : base(owner, text)
-        {
-            this.GridName = gridName;
-            this.FieldName = fieldName;
-            this.GridIndex = gridIndex;
-        }
-
-        public string GridName;
-
-        public string FieldName;
-
-        public string GridIndex;
-    }
-
-    /// <summary>
-    /// Json data.
-    /// </summary>
-    public class GridData
-    {
-        /// <summary>
-        /// (GridName, GridLoad) List of all loaded data grids.
-        /// </summary>
-        public Dictionary<string, GridLoad> GridLoadList;
-
-        /// <summary>
-        /// (GridName, GridRow)
-        /// </summary>
-        public Dictionary<string, List<GridRow>> RowList;
-
-        /// <summary>
-        /// (GridName, GridColumn)
-        /// </summary>
-        public Dictionary<string, List<GridColumn>> ColumnList;
-
-        /// <summary>
-        /// (GridName, FieldName, Index(Filter, 0..99, Total), GridCell)
-        /// </summary>
-        public Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>> CellList;
-
-        /// <summary>
-        /// Focused grid cell.
-        /// </summary>
-        public string FocusGridName;
-
-        /// <summary>
-        /// Focused grid cell.
-        /// </summary>
-        public string FocusIndex;
-
-        /// <summary>
-        /// Focused grid cell.
-        /// </summary>
-        public string FocusFieldName;
-    }
-
-    /// <summary>
-    /// Json data.
-    /// </summary>
-    public class GridCell
-    {
-        /// <summary>
-        /// Text.
-        /// </summary>
-        public string T;
-
-        /// <summary>
-        /// Gets or sets IsO. If true, old text has been stored in property O.
-        /// </summary>
-        public bool IsO;
-
-        /// <summary>
-        /// Old text.
-        /// </summary>
-        public string O;
-
-        public bool IsSelect;
-
-        public bool IsClick;
-    }
-
-    /// <summary>
-    /// Json data.
-    /// </summary>
-    public class GridColumn
-    {
-        public string FieldName;
-
-        public string Text;
-
-        public double WidthPercent;
-
-        /// <summary>
-        /// Gets or sets IsClick. Used to switch the sort order of a data grid.
-        /// </summary>
-        public bool IsClick;
-
-        /// <summary>
-        /// Gets or sets IsUpdate. If true, postback to server is done after every key stroke. Used for example for Typeahead.
-        /// (Currently in client handled always as true).
-        /// </summary>
-        public bool IsUpdate;
-    }
-
-    /// <summary>
-    /// Json data.
-    /// </summary>
-    public class GridRow
-    {
-        public string Index;
-
-        public bool IsClick;
-
-        /// <summary>
-        /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
-        /// </summary>
-        public int IsSelect;
-
-        public bool IsSelectGet()
-        {
-            return (IsSelect & 1) == 1;
-        }
-
-        public void IsSelectSet(bool value)
-        {
-            if (value)
-            {
-                IsSelect = IsSelect | 1;
-            }
-            else
-            {
-                IsSelect = IsSelect & 2;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Parameter used to load grid.
-    /// </summary>
-    public class GridLoad
-    {
-        public string GridName;
-
-        public string TypeRowName;
-
-        public string FieldNameOrderBy;
-
-        public bool IsOrderByDesc;
-    }
-
-    public class JsonApplication : JsonComponent
-    {
-        public JsonApplication()
-            : base(null, "Json")
-        {
-
-        }
-
-        /// <summary>
-        /// GET not POST json when debugging client. See also file json.json.
-        /// </summary>
-        public bool IsJsonGet;
-
-        public string Name;
-
-        public Guid Session;
-
-        public bool IsBrowser;
-
-        public string VersionServer;
-
-        public string VersionClient;
-
-        public int RequestCount; // Set by client.
-
-        public int ResponseCount;
-
-        /// <summary>
-        /// Gets or sets GridData.
-        /// </summary>
-        public GridData GridData;
-    }
-
-    public class JsonComponent
-    {
-        public JsonComponent() : this(null, null) { }
-
-        public JsonComponent(JsonComponent owner, string text)
+        public Component(Component owner, string text)
         {
             Constructor(owner, text);
         }
 
-        private void Constructor(JsonComponent owner, string text)
+        private void Constructor(Component owner, string text)
         {
             this.Type = GetType().Name;
             this.Text = text;
@@ -238,7 +24,7 @@
             {
                 if (owner.List == null)
                 {
-                    owner.List = new List<JsonComponent>();
+                    owner.List = new List<Component>();
                 }
                 int count = 0;
                 foreach (var item in owner.List)
@@ -280,9 +66,9 @@
         /// </summary>
         public string Class;
 
-        public List<JsonComponent> List = new List<JsonComponent>();
+        public List<Component> List = new List<Component>();
 
-        private void ListAll(List<JsonComponent> result)
+        private void ListAll(List<Component> result)
         {
             result.AddRange(List);
             foreach (var item in List)
@@ -291,33 +77,49 @@
             }
         }
 
-        public List<JsonComponent> ListAll()
+        public List<Component> ListAll()
         {
-            List<JsonComponent> result = new List<JsonComponent>();
+            List<Component> result = new List<Component>();
             ListAll(result);
             return result;
         }
 
-        public List<T> ListAll<T>() where T : JsonComponent
+        public List<T> ListAll<T>() where T : Component
         {
-            List<JsonComponent> result = ListAll();
+            List<Component> result = ListAll();
             return result.OfType<T>().ToList();
         }
 
-        protected virtual internal void Process(ApplicationBase application, JsonApplication jsonApplication)
+        protected virtual internal void Process(BusinessApplicationBase businessApplication, JsonApplication jsonApplication)
         {
 
         }
     }
 
     /// <summary>
-    /// Rendered as html div element.
+    /// Json Grid. Rendered as html div element.
     /// </summary>
-    public class LayoutContainer : JsonComponent
+    public class Grid : Component
     {
-        public LayoutContainer() : this(null, null) { }
+        public Grid() { }
 
-        public LayoutContainer(JsonComponent owner, string text)
+        public Grid(Component owner, string text, string gridName)
+            : base(owner, text)
+        {
+            this.GridName = gridName;
+        }
+
+        public string GridName;
+    }
+
+    /// <summary>
+    /// Json GridKeyboard. Grid keyboard handler (Singleton). Manages grid navigation. For example arrow up, down and tab.
+    /// </summary>
+    public class GridKeyboard : Component
+    {
+        public GridKeyboard() { }
+
+        public GridKeyboard(Component owner, string text)
             : base(owner, text)
         {
 
@@ -325,9 +127,216 @@
     }
 
     /// <summary>
-    /// Rendered as html div element.
+    /// Json GridField.
     /// </summary>
-    public class LayoutRow : JsonComponent
+    public class GridField : Component
+    {
+        public GridField() { }
+
+        public GridField(Component owner, string text, string gridName, string fieldName, string gridIndex)
+            : base(owner, text)
+        {
+            this.GridName = gridName;
+            this.FieldName = fieldName;
+            this.GridIndex = gridIndex;
+        }
+
+        public string GridName;
+
+        public string FieldName;
+
+        public string GridIndex;
+    }
+
+    /// <summary>
+    /// Json GridData.
+    /// </summary>
+    public class GridData
+    {
+        /// <summary>
+        /// (GridName, GridLoad) List of all loaded data grids.
+        /// </summary>
+        public Dictionary<string, GridLoad> GridLoadList;
+
+        /// <summary>
+        /// (GridName, GridRow)
+        /// </summary>
+        public Dictionary<string, List<GridRow>> RowList;
+
+        /// <summary>
+        /// (GridName, GridColumn)
+        /// </summary>
+        public Dictionary<string, List<GridColumn>> ColumnList;
+
+        /// <summary>
+        /// (GridName, FieldName, Index(Filter, 0..99, Total), GridCell)
+        /// </summary>
+        public Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>> CellList;
+
+        /// <summary>
+        /// Focused grid cell.
+        /// </summary>
+        public string FocusGridName;
+
+        /// <summary>
+        /// Focused grid cell.
+        /// </summary>
+        public string FocusIndex;
+
+        /// <summary>
+        /// Focused grid cell.
+        /// </summary>
+        public string FocusFieldName;
+    }
+
+    /// <summary>
+    /// Json GridCell.
+    /// </summary>
+    public class GridCell
+    {
+        /// <summary>
+        /// Text.
+        /// </summary>
+        public string T;
+
+        /// <summary>
+        /// Gets or sets IsO. If true, old text has been stored in property O.
+        /// </summary>
+        public bool IsO;
+
+        /// <summary>
+        /// Old text.
+        /// </summary>
+        public string O;
+
+        public bool IsSelect;
+
+        public bool IsClick;
+    }
+
+    /// <summary>
+    /// Json GridColumn.
+    /// </summary>
+    public class GridColumn
+    {
+        public string FieldName;
+
+        public string Text;
+
+        public double WidthPercent;
+
+        /// <summary>
+        /// Gets or sets IsClick. Used to switch the sort order of a data grid.
+        /// </summary>
+        public bool IsClick;
+
+        /// <summary>
+        /// Gets or sets IsUpdate. If true, postback to server is done after every key stroke. Used for example for Typeahead.
+        /// (Currently in client handled always as true).
+        /// </summary>
+        public bool IsUpdate;
+    }
+
+    /// <summary>
+    /// Json GridRow.
+    /// </summary>
+    public class GridRow
+    {
+        public string Index;
+
+        public bool IsClick;
+
+        /// <summary>
+        /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
+        /// </summary>
+        public int IsSelect;
+
+        public bool IsSelectGet()
+        {
+            return (IsSelect & 1) == 1;
+        }
+
+        public void IsSelectSet(bool value)
+        {
+            if (value)
+            {
+                IsSelect = IsSelect | 1;
+            }
+            else
+            {
+                IsSelect = IsSelect & 2;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Json GridLoad. Parameter used to load grid.
+    /// </summary>
+    public class GridLoad
+    {
+        public string GridName;
+
+        public string TypeRowName;
+
+        public string FieldNameOrderBy;
+
+        public bool IsOrderByDesc;
+    }
+
+    /// <summary>
+    /// Json Application. Root object being transferred between server and client.
+    /// </summary>
+    public class JsonApplication : Component
+    {
+        public JsonApplication()
+            : base(null, "Json")
+        {
+
+        }
+
+        /// <summary>
+        /// GET not POST json when debugging client. See also file json.json.
+        /// </summary>
+        public bool IsJsonGet;
+
+        public string Name;
+
+        public Guid Session;
+
+        public bool IsBrowser;
+
+        public string VersionServer;
+
+        public string VersionClient;
+
+        public int RequestCount; // Set by client.
+
+        public int ResponseCount;
+
+        /// <summary>
+        /// Gets or sets GridData.
+        /// </summary>
+        public GridData GridData;
+    }
+
+    /// <summary>
+    /// Json LayoutContainer. Rendered as html div element.
+    /// </summary>
+    public class LayoutContainer : Component
+    {
+        public LayoutContainer() : this(null, null) { }
+
+        public LayoutContainer(Component owner, string text)
+            : base(owner, text)
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Json LayoutRow. Rendered as html div element.
+    /// </summary>
+    public class LayoutRow : Component
     {
         public LayoutRow() : this(null, null) { }
 
@@ -339,9 +348,9 @@
     }
 
     /// <summary>
-    /// Rendered as html div element.
+    /// Json LayoutCell. Rendered as html div element.
     /// </summary>
-    public class LayoutCell : JsonComponent
+    public class LayoutCell : Component
     {
         public LayoutCell() : this(null, null) { }
 
@@ -353,13 +362,13 @@
     }
 
     /// <summary>
-    /// Rendered as html button element.
+    /// Json Button. Rendered as html button element.
     /// </summary>
-    public class Button : JsonComponent
+    public class Button : Component
     {
         public Button() : this(null, null) { }
 
-        public Button(JsonComponent owner, string text)
+        public Button(Component owner, string text)
             : base(owner, text)
         {
             if (IsClick)
@@ -372,13 +381,13 @@
     }
 
     /// <summary>
-    /// Rendered as html div element.
+    /// Json Literal. Rendered as html div element.
     /// </summary>
-    public class Literal : JsonComponent
+    public class Literal : Component
     {
         public Literal() : this(null, null) { }
 
-        public Literal(JsonComponent owner, string text)
+        public Literal(Component owner, string text)
             : base(owner, text)
         {
 
@@ -387,31 +396,37 @@
         public string Html;
     }
 
-    public class Label : JsonComponent
+    /// <summary>
+    /// Json Label.
+    /// </summary>
+    public class Label : Component
     {
         public Label() : this(null, null) { }
 
-        public Label(JsonComponent owner, string text)
+        public Label(Component owner, string text)
             : base(owner, text)
         {
 
         }
     }
 
+    /// <summary>
+    /// Json LabelGridSaveState.
+    /// </summary>
     public class LabelGridSaveState : Label
     {
         public LabelGridSaveState() : this(null, null) { }
 
-        public LabelGridSaveState(JsonComponent owner, string text)
+        public LabelGridSaveState(Component owner, string text)
             : base(owner, text)
         {
             TypeSet(typeof(Label)); // Render as Label.
         }
 
-        protected internal override void Process(ApplicationBase application, JsonApplication jsonApplication)
+        protected internal override void Process(BusinessApplicationBase businessApplication, JsonApplication jsonApplication)
         {
-            Text = string.Format("IsModify={0};", application.ProcessListGet<ProcessGridSave>().IsModify);
-            base.Process(application, jsonApplication);
+            Text = string.Format("IsModify={0};", businessApplication.ProcessListGet<ProcessGridSave>().IsModify);
+            base.Process(businessApplication, jsonApplication);
         }
     }
 }

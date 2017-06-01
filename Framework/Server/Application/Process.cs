@@ -1,5 +1,6 @@
 ﻿namespace Framework.Server.Application
 {
+    using Framework.Server.Application.Json;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -86,18 +87,18 @@
     /// </summary>
     public class ProcessJson : ProcessBase
     {
-        public ProcessJson(ApplicationBase application)
+        public ProcessJson(BusinessApplicationBase businessApplication)
         {
-            this.Application = application;
+            this.BusinessApplication = businessApplication;
         }
 
-        public readonly ApplicationBase Application;
+        public readonly BusinessApplicationBase BusinessApplication;
 
         protected internal override void ProcessEnd(JsonApplication jsonApplication)
         {
-            foreach (JsonComponent jsonComponent in jsonApplication.ListAll())
+            foreach (Component jsonComponent in jsonApplication.ListAll())
             {
-                jsonComponent.Process(Application, jsonApplication);
+                jsonComponent.Process(BusinessApplication, jsonApplication);
             }
         }
     }
@@ -184,12 +185,12 @@
 
     public class ProcessGridSave : ProcessBase
     {
-        public ProcessGridSave(ApplicationBase application)
+        public ProcessGridSave(BusinessApplicationBase businessApplication)
         {
-            this.Application = application;
+            this.BusinessApplication = businessApplication;
         }
 
-        public readonly ApplicationBase Application;
+        public readonly BusinessApplicationBase BusinessApplication;
 
         public bool IsModify;
 
@@ -198,7 +199,7 @@
             GridData gridData = jsonApplication.GridData;
             foreach (string gridName in gridData.GridLoadList.Keys)
             {
-                var grid = Util.GridFromJson(jsonApplication, gridName, Application.GetType());
+                var grid = Util.GridFromJson(jsonApplication, gridName, BusinessApplication.GetType());
             }
         }
 
@@ -208,7 +209,7 @@
             GridData gridData = jsonApplication.GridData;
             foreach (string gridName in gridData.GridLoadList.Keys)
             {
-                var grid = Util.GridFromJson(jsonApplication, gridName, Application.GetType());
+                var grid = Util.GridFromJson(jsonApplication, gridName, BusinessApplication.GetType());
                 foreach (GridRow gridRow in gridData.RowList[gridName])
                 {
                     foreach (GridColumn gridColumn in gridData.ColumnList[gridName])
@@ -258,19 +259,19 @@
 
     public class ProcessGridLookUp : ProcessBase
     {
-        public ProcessGridLookUp(ApplicationBase application)
+        public ProcessGridLookUp(BusinessApplicationBase businessApplication)
         {
-            this.Application = application;
+            this.BusinessApplication = businessApplication;
         }
 
-        public readonly ApplicationBase Application;
+        public readonly BusinessApplicationBase BusinessApplication;
 
         protected internal override void ProcessBegin(JsonApplication jsonApplication)
         {
             GridData gridData = jsonApplication.GridData;
             if (gridData.FocusFieldName != null)
             {
-                var grid = Util.GridFromJson(jsonApplication, gridData.FocusGridName, Application.GetType());
+                var grid = Util.GridFromJson(jsonApplication, gridData.FocusGridName, BusinessApplication.GetType());
                 var row = grid.RowList[int.Parse(gridData.FocusIndex)];
                 DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row).Where(item => item.FieldNameCSharp == gridData.FocusFieldName).First();
                 Type typeRow;
@@ -278,7 +279,7 @@
                 cell.LookUp(out typeRow, out rowList);
                 Util.TypeRowValidate(typeRow, ref rowList);
                 Util.GridToJson(jsonApplication, "LookUp", typeRow, rowList);
-                var d = Util.GridFromJson(jsonApplication, "LookUp", Application.GetType()); // TODO
+                var d = Util.GridFromJson(jsonApplication, "LookUp", BusinessApplication.GetType()); // TODO
             }
         }
 

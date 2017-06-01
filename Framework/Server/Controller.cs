@@ -1,6 +1,7 @@
 ﻿namespace Framework.Server
 {
     using Framework.Server.Application;
+    using Framework.Server.Application.Json;
     using Microsoft.AspNetCore.Mvc;
     using System;
     using System.IO;
@@ -11,25 +12,25 @@
 
     public class WebController
     {
-        public WebController(ControllerBase controller, string routePath, ApplicationBase application)
+        public WebController(ControllerBase controller, string routePath, BusinessApplicationBase businessApplication)
         {
             this.Controller = controller;
             this.RoutePath = routePath;
-            this.Application = application;
+            this.BusinessApplication = businessApplication;
         }
 
         public readonly ControllerBase Controller;
 
         public readonly string RoutePath;
 
-        public readonly ApplicationBase Application;
+        public readonly BusinessApplicationBase BusinessApplication;
 
         public async Task<IActionResult> Web()
         {
             // Html
             if (Controller.HttpContext.Request.Path == RoutePath)
             {
-                JsonApplication jsonApplicationOut = Application.Process(null, Controller.HttpContext.Request.Path);
+                JsonApplication jsonApplicationOut = BusinessApplication.Process(null, Controller.HttpContext.Request.Path);
                 string htmlUniversal = null;
                 string html = IndexHtml(true);
                 htmlUniversal = await HtmlUniversal(html, jsonApplicationOut, true); // Angular Universal server side rendering.
@@ -40,7 +41,7 @@
             {
                 string jsonInText = Util.StreamToString(Controller.Request.Body);
                 JsonApplication jsonApplicationIn = Framework.Server.Json.Util.Deserialize<JsonApplication>(jsonInText);
-                JsonApplication jsonApplicationOut = Application.Process(jsonApplicationIn, Controller.HttpContext.Request.Path);
+                JsonApplication jsonApplicationOut = BusinessApplication.Process(jsonApplicationIn, Controller.HttpContext.Request.Path);
                 jsonApplicationOut.IsJsonGet = false;
                 string jsonOutText = Framework.Server.Json.Util.Serialize(jsonApplicationOut);
                 if (Framework.Server.Config.Instance.IsDebugJson)
