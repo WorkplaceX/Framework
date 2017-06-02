@@ -8,9 +8,9 @@
     /// <summary>
     /// Server side root object.
     /// </summary>
-    public class BusinessApplicationBase
+    public class ApplicationServerBase
     {
-        public BusinessApplicationBase()
+        public ApplicationServerBase()
         {
             this.ProcessInit();
         }
@@ -48,38 +48,38 @@
             ProcessList.Add(new ProcessJson(this));
         }
 
-        public JsonApplication Process(JsonApplication jsonApplicationIn, string requestPath)
+        public ApplicationJson Process(ApplicationJson applicationJsonIn, string requestPath)
         {
-            JsonApplication jsonApplicationOut = Framework.Server.DataAccessLayer.Util.JsonObjectClone<JsonApplication>(jsonApplicationIn);
-            if (jsonApplicationOut == null || jsonApplicationOut.Session == Guid.Empty)
+            ApplicationJson applicationJsonOut = Framework.Server.DataAccessLayer.Util.JsonObjectClone<ApplicationJson>(applicationJsonIn);
+            if (applicationJsonOut == null || applicationJsonOut.Session == Guid.Empty)
             {
-                jsonApplicationOut = JsonApplicationCreate();
+                applicationJsonOut = applicationJsonCreate();
             }
             else
             {
-                jsonApplicationOut.ResponseCount += 1;
+                applicationJsonOut.ResponseCount += 1;
             }
-            jsonApplicationOut.Name = ".NET Core=" + DateTime.Now.ToString("HH:mm:ss.fff");
-            jsonApplicationOut.VersionServer = Framework.Util.VersionServer;
+            applicationJsonOut.Name = ".NET Core=" + DateTime.Now.ToString("HH:mm:ss.fff");
+            applicationJsonOut.VersionServer = Framework.Util.VersionServer;
             // Process
             {
                 foreach (ProcessBase process in ProcessList)
                 {
-                    process.ProcessBegin(jsonApplicationIn, jsonApplicationOut);
-                    process.ProcessBegin(jsonApplicationOut);
+                    process.ProcessBegin(applicationJsonIn, applicationJsonOut);
+                    process.ProcessBegin(applicationJsonOut);
                 }
                 foreach (ProcessBase process in ProcessList)
                 {
-                    process.ProcessEnd(jsonApplicationIn, jsonApplicationOut);
-                    process.ProcessEnd(jsonApplicationOut);
+                    process.ProcessEnd(applicationJsonIn, applicationJsonOut);
+                    process.ProcessEnd(applicationJsonOut);
                 }
             }
-            return jsonApplicationOut;
+            return applicationJsonOut;
         }
 
-        protected virtual JsonApplication JsonApplicationCreate()
+        protected virtual ApplicationJson applicationJsonCreate()
         {
-            JsonApplication result = new JsonApplication();
+            ApplicationJson result = new ApplicationJson();
             result.Session = Guid.NewGuid();
             //
             var container = new LayoutContainer(result, "Container");

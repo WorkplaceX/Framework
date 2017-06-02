@@ -183,9 +183,9 @@ export class Label {
   selector: 'Grid',
   template: `
   <div [ngClass]="json.Class" style="white-space: nowrap;">
-  <GridHeader [json]=item *ngFor="let item of dataService.json.GridData.ColumnList[json.GridName]; trackBy trackBy"></GridHeader>
+  <GridHeader [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName]; trackBy trackBy"></GridHeader>
   </div>
-  <GridRow [jsonGridData]=dataService.json.GridData [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridData.RowList[json.GridName]; trackBy trackBy"></GridRow>
+  <GridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></GridRow>
   `
 })
 export class Grid {
@@ -206,7 +206,7 @@ export class Grid {
   selector: 'GridRow',
   template: `
   <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="white-space: nowrap;">
-  <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridData]=jsonGridData [jsonRow]=json [json]=item *ngFor="let item of jsonGridData.ColumnList[jsonGrid.GridName]; trackBy trackBy"></div>
+  <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName]; trackBy trackBy"></div>
   </div>
   `,
   styles: [`
@@ -224,7 +224,7 @@ export class Grid {
 export class GridRow {
   @Input() json: any;
   @Input() jsonGrid: any;
-  @Input() jsonGridData: any;
+  @Input() jsonGridDataJson: any;
   dataService: DataService;
 
   constructor(dataService: DataService){
@@ -253,9 +253,9 @@ export class GridRow {
 @Component({
   selector: '.GridCell',
   template: `
-  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" >
+  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" >
   <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
-  {{ jsonGridData.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}
+  {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}
   <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
   </div>
   <GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></GridField>
@@ -276,7 +276,7 @@ export class GridCell {
   @Input() json: any; // Column // Used for FieldName
   @Input() jsonRow: any; // Used for Index
   @Input() jsonGrid: any; // Used for GridName
-  @Input() jsonGridData: any; // Used for Value
+  @Input() jsonGridDataJson: any; // Used for Value
   dataService: DataService;
 
   constructor(dataService: DataService){
@@ -288,7 +288,7 @@ export class GridCell {
   }
 
   click(event: MouseEvent){
-    this.jsonGridData.CellList[this.jsonGrid.GridName][this.json.FieldName][this.jsonRow.Index].IsClick = true;
+    this.jsonGridDataJson.CellList[this.jsonGrid.GridName][this.json.FieldName][this.jsonRow.Index].IsClick = true;
     this.jsonRow.IsClick = true;
     this.dataService.update();
     event.stopPropagation();
@@ -355,7 +355,7 @@ export class RemoveSelectorDirective {
 @Component({
   selector: 'GridField',
   template: `
-  <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridData.FocusIndex==index && dataService.json.GridData.FocusFieldName == fieldName" placeholder="Empty" />
+  <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
   `
 })
 export class GridField {
@@ -370,7 +370,7 @@ export class GridField {
   @Input() json: any;
 
   point() {
-    let gridData: any = this.dataService.json.GridData;
+    let gridData: any = this.dataService.json.GridDataJson;
     let gridName: string = gridData.FocusGridName;
     let fieldName: string = gridData.FocusFieldName;
     let index: string = gridData.FocusIndex;
@@ -503,7 +503,7 @@ export class GridKeyboard {
   }
 
   select() {
-    let gridData: any = this.dataService.json.GridData;
+    let gridData: any = this.dataService.json.GridDataJson;
     // GridName
     for (let keyGridLoad in gridData.GridLoadList) {
       let gridName = gridData.GridLoadList[keyGridLoad].GridName;
@@ -521,7 +521,7 @@ export class GridKeyboard {
   }
 
   public _keydown(event: KeyboardEvent) {
-    var gridData: any = this.dataService.json.GridData;
+    var gridData: any = this.dataService.json.GridDataJson;
     if (gridData.FocusGridName != null) {
       // Tab
       if (event.keyCode == 9 && event.shiftKey == false) { 

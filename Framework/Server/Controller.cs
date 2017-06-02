@@ -12,42 +12,42 @@
 
     public class WebController
     {
-        public WebController(ControllerBase controller, string routePath, BusinessApplicationBase businessApplication)
+        public WebController(ControllerBase controller, string routePath, ApplicationServerBase applicationServer)
         {
             this.Controller = controller;
             this.RoutePath = routePath;
-            this.BusinessApplication = businessApplication;
+            this.ApplicationServer = applicationServer;
         }
 
         public readonly ControllerBase Controller;
 
         public readonly string RoutePath;
 
-        public readonly BusinessApplicationBase BusinessApplication;
+        public readonly ApplicationServerBase ApplicationServer;
 
         public async Task<IActionResult> Web()
         {
             // Html
             if (Controller.HttpContext.Request.Path == RoutePath)
             {
-                JsonApplication jsonApplicationOut = BusinessApplication.Process(null, Controller.HttpContext.Request.Path);
+                ApplicationJson applicationJsonOut = ApplicationServer.Process(null, Controller.HttpContext.Request.Path);
                 string htmlUniversal = null;
                 string html = IndexHtml(true);
-                htmlUniversal = await HtmlUniversal(html, jsonApplicationOut, true); // Angular Universal server side rendering.
+                htmlUniversal = await HtmlUniversal(html, applicationJsonOut, true); // Angular Universal server side rendering.
                 return Controller.Content(htmlUniversal, "text/html");
             }
             // Json API
             if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
             {
                 string jsonInText = Util.StreamToString(Controller.Request.Body);
-                JsonApplication jsonApplicationIn = Framework.Server.Json.Util.Deserialize<JsonApplication>(jsonInText);
-                JsonApplication jsonApplicationOut = BusinessApplication.Process(jsonApplicationIn, Controller.HttpContext.Request.Path);
-                jsonApplicationOut.IsJsonGet = false;
-                string jsonOutText = Framework.Server.Json.Util.Serialize(jsonApplicationOut);
+                ApplicationJson applicationJsonIn = Framework.Server.Json.Util.Deserialize<ApplicationJson>(jsonInText);
+                ApplicationJson applicationJsonOut = ApplicationServer.Process(applicationJsonIn, Controller.HttpContext.Request.Path);
+                applicationJsonOut.IsJsonGet = false;
+                string jsonOutText = Framework.Server.Json.Util.Serialize(applicationJsonOut);
                 if (Framework.Server.Config.Instance.IsDebugJson)
                 {
-                    jsonApplicationOut.IsJsonGet = true;
-                    string jsonOutDebug = Framework.Server.Json.Util.Serialize(jsonApplicationOut);
+                    applicationJsonOut.IsJsonGet = true;
+                    string jsonOutDebug = Framework.Server.Json.Util.Serialize(applicationJsonOut);
                     Framework.Util.FileWrite(Framework.Util.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
                 }
                 return Controller.Content(jsonOutText, "application/json");
@@ -77,7 +77,7 @@
         /// <summary>
         /// Returns server side rendered index.html.
         /// </summary>
-        private async Task<string> HtmlUniversal(string html, JsonApplication jsonApplication, bool isUniversal)
+        private async Task<string> HtmlUniversal(string html, ApplicationJson applicationJson, bool isUniversal)
         {
             if (isUniversal == false)
             {
@@ -87,8 +87,8 @@
             {
                 string htmlUniversal = null;
                 string url = "http://" + Controller.Request.Host.ToUriComponent() + "/Universal/index.js";
-                jsonApplication.IsBrowser = false; // Server side rendering mode.
-                string jsonText = Framework.Server.Json.Util.Serialize(jsonApplication);
+                applicationJson.IsBrowser = false; // Server side rendering mode.
+                string jsonText = Framework.Server.Json.Util.Serialize(applicationJson);
                 // Universal rendering
                 {
                     if (Framework.Util.FolderNameIsIss)
@@ -113,8 +113,8 @@
                     string htmlUniversalClean = htmlUniversal.Substring(indexBegin, (indexEnd - indexBegin));
                     result = html.Replace("<app>Loading AppComponent content here ...</app>", htmlUniversalClean);
                 }
-                jsonApplication.IsBrowser = true; // Client side rendering mode.
-                string jsonTextBrowser = Framework.Server.Json.Util.Serialize(jsonApplication);
+                applicationJson.IsBrowser = true; // Client side rendering mode.
+                string jsonTextBrowser = Framework.Server.Json.Util.Serialize(applicationJson);
                 string resultAssert = result;
                 // Add json to index.html (Client/index.html)
                 {

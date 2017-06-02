@@ -7,7 +7,7 @@
     using System.Linq;
     using System.Reflection;
 
-    public class GridDataProcessRow
+    public class GridDataServerRow
     {
         public string GridName;
 
@@ -18,7 +18,7 @@
         public Row RowNew;
     }
 
-    public class GridDataProcess
+    public class GridDataServer
     {
         /// <summary>
         /// (GridName, TypeRow)
@@ -28,11 +28,11 @@
         /// <summary>
         /// (GridName, Index). Original row.
         /// </summary>
-        public Dictionary<string, Dictionary<string, GridDataProcessRow>> RowList = new Dictionary<string, Dictionary<string, GridDataProcessRow>>();
+        public Dictionary<string, Dictionary<string, GridDataServerRow>> RowList = new Dictionary<string, Dictionary<string, GridDataServerRow>>();
 
-        public GridDataProcessRow RowGet(string gridName, string index)
+        public GridDataServerRow RowGet(string gridName, string index)
         {
-            GridDataProcessRow result = null;
+            GridDataServerRow result = null;
             if (RowList.ContainsKey(gridName))
             {
                 if (RowList[gridName].ContainsKey(index))
@@ -43,15 +43,15 @@
             return result;
         }
 
-        public void RowSet(GridDataProcessRow gridDataProcessRow)
+        public void RowSet(GridDataServerRow gridDataServerRow)
         {
-            string gridName = gridDataProcessRow.GridName;
-            string index = gridDataProcessRow.Index;
+            string gridName = gridDataServerRow.GridName;
+            string index = gridDataServerRow.Index;
             if (!RowList.ContainsKey(gridName))
             {
-                RowList[gridName] = new Dictionary<string, GridDataProcessRow>();
+                RowList[gridName] = new Dictionary<string, GridDataServerRow>();
             }
-            RowList[gridName][index] = gridDataProcessRow;
+            RowList[gridName][index] = gridDataServerRow;
         }
 
         /// <summary>
@@ -142,7 +142,7 @@
             RowList.Remove(gridName);
             for (int index = 0; index < rowList.Count; index++)
             {
-                RowSet(new GridDataProcessRow() { GridName = gridName, Index = index.ToString(), Row = rowList[index], RowNew = null });
+                RowSet(new GridDataServerRow() { GridName = gridName, Index = index.ToString(), Row = rowList[index], RowNew = null });
             }
         }
 
@@ -266,39 +266,39 @@
             }
         }
 
-        public static void GridToJson(JsonApplication jsonApplication, string gridName, Type typeRow, List<DataAccessLayer.Row> rowList)
+        public static void GridToJson(ApplicationJson applicationJson, string gridName, Type typeRow, List<DataAccessLayer.Row> rowList)
         {
-            GridData gridData = jsonApplication.GridData;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            if (gridData.GridLoadList == null)
+            if (gridDataJson.GridLoadList == null)
             {
-                gridData.GridLoadList = new Dictionary<string, GridLoad>();
+                gridDataJson.GridLoadList = new Dictionary<string, GridLoad>();
             }
-            gridData.GridLoadList[gridName] = new GridLoad() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
+            gridDataJson.GridLoadList[gridName] = new GridLoad() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
             // Row
-            if (gridData.RowList == null)
+            if (gridDataJson.RowList == null)
             {
-                gridData.RowList = new Dictionary<string, List<GridRow>>();
+                gridDataJson.RowList = new Dictionary<string, List<GridRow>>();
             }
-            gridData.RowList[gridName] = new List<GridRow>();
+            gridDataJson.RowList[gridName] = new List<GridRow>();
             // Column
-            if (gridData.ColumnList == null)
+            if (gridDataJson.ColumnList == null)
             {
-                gridData.ColumnList = new Dictionary<string, List<GridColumn>>();
+                gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
             }
-            gridData.ColumnList[gridName] = GridToJsonColumnList(typeRow);
+            gridDataJson.ColumnList[gridName] = GridToJsonColumnList(typeRow);
             // Cell
-            if (gridData.CellList == null)
+            if (gridDataJson.CellList == null)
             {
-                gridData.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>>();
+                gridDataJson.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>>();
             }
-            gridData.CellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
+            gridDataJson.CellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
             //
             PropertyInfo[] propertyInfoList = null;
             for (int index = 0; index < rowList.Count; index++)
             {
                 object row = rowList[index];
-                gridData.RowList[gridName].Add(new GridRow() { Index = index.ToString() });
+                gridDataJson.RowList[gridName].Add(new GridRow() { Index = index.ToString() });
                 if (propertyInfoList == null && typeRow != null)
                 {
                     propertyInfoList = typeRow.GetTypeInfo().GetProperties();
@@ -310,11 +310,11 @@
                         string fieldName = propertyInfo.Name;
                         object value = propertyInfo.GetValue(row);
                         string textJson = DataAccessLayer.Util.ValueToText(value); // Framework.Server.DataAccessLayer.Util.ValueToJson(value);
-                        if (!gridData.CellList[gridName].ContainsKey(fieldName))
+                        if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))
                         {
-                            gridData.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
+                            gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                         }
-                        gridData.CellList[gridName][fieldName][index.ToString()] = new GridCell() { T = textJson };
+                        gridDataJson.CellList[gridName][fieldName][index.ToString()] = new GridCell() { T = textJson };
                     }
                 }
             }
@@ -323,10 +323,10 @@
         /// <summary>
         /// Load data into CellList. Not visual.
         /// </summary>
-        public static void GridToJson(JsonApplication jsonApplication, string gridName, Type typeRow)
+        public static void GridToJson(ApplicationJson applicationJson, string gridName, Type typeRow)
         {
             List<DataAccessLayer.Row> rowList = Framework.Server.DataAccessLayer.Util.Select(typeRow, 0, 15);
-            GridToJson(jsonApplication, gridName, typeRow, rowList);
+            GridToJson(applicationJson, gridName, typeRow, rowList);
         }
 
         public class Grid
@@ -361,19 +361,19 @@
         /// <summary>
         /// Returns unmodified data row.
         /// </summary>
-        private static Row GridDataProcessFromJson(GridData gridData, string gridName, GridRow gridRow, Type typeRow)
+        private static Row GridDataServerFromJson(GridDataJson gridDataJson, string gridName, GridRow gridRow, Type typeRow)
         {
             Row result = (Row)Activator.CreateInstance(typeRow);
-            foreach (var column in gridData.ColumnList[gridName])
+            foreach (var column in gridDataJson.ColumnList[gridName])
             {
                 string text;
-                if (gridData.CellList[gridName][column.FieldName][gridRow.Index].IsO)
+                if (gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].IsO)
                 {
-                    text = gridData.CellList[gridName][column.FieldName][gridRow.Index].O;
+                    text = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].O;
                 }
                 else
                 {
-                    text = gridData.CellList[gridName][column.FieldName][gridRow.Index].T;
+                    text = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].T;
                 }
                 PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
                 object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
@@ -382,64 +382,64 @@
             return result;
         }
 
-        private static void GridDataProcessFromJson(JsonApplication jsonApplication, string gridName, GridDataProcess result, Type typeInAssembly)
+        private static void GridDataServerFromJson(ApplicationJson applicationJson, string gridName, GridDataServer result, Type typeInAssembly)
         {
-            GridData gridData = jsonApplication.GridData;
-            string typeRowName = gridData.GridLoadList[gridName].TypeRowName;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            string typeRowName = gridDataJson.GridLoadList[gridName].TypeRowName;
             Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
             result.TypeRowList[gridName] = typeRow;
             //
-            foreach (GridRow gridRow in gridData.RowList[gridName])
+            foreach (GridRow gridRow in gridDataJson.RowList[gridName])
             {
-                Row row = GridDataProcessFromJson(gridData, gridName, gridRow, typeRow);
-                GridDataProcessRow gridDataProcessRow = new GridDataProcessRow() { GridName = gridName, Index = gridRow.Index, Row = row, RowNew = null };
-                result.RowSet(gridDataProcessRow);
+                Row row = GridDataServerFromJson(gridDataJson, gridName, gridRow, typeRow);
+                GridDataServerRow gridDataServerRow = new GridDataServerRow() { GridName = gridName, Index = gridRow.Index, Row = row, RowNew = null };
+                result.RowSet(gridDataServerRow);
             }
             //
-            foreach (GridRow gridRow in gridData.RowList[gridName])
+            foreach (GridRow gridRow in gridDataJson.RowList[gridName])
             {
-                foreach (var column in gridData.ColumnList[gridName])
+                foreach (var column in gridDataJson.ColumnList[gridName])
                 {
-                    if (gridData.CellList[gridName][column.FieldName][gridRow.Index].IsO)
+                    if (gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].IsO)
                     {
-                        string text = gridData.CellList[gridName][column.FieldName][gridRow.Index].T;
+                        string text = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].T;
                         if (text == null)
                         {
                             text = ""; // User changed text.
                         }
                         result.TextSet(gridName, gridRow.Index, column.FieldName, text);
-                        string textError = gridData.CellList[gridName][column.FieldName][gridRow.Index].E;
+                        string textError = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].E;
                         result.ErrorSet(gridName, gridRow.Index, column.FieldName, textError);
                     }
                 }
             }
         }
 
-        public static GridDataProcess GridDataProcessFromJson(JsonApplication jsonApplication, Type typeInAssembly)
+        public static GridDataServer GridDataServerFromJson(ApplicationJson applicationJson, Type typeInAssembly)
         {
-            GridDataProcess result = new GridDataProcess();
-            GridData gridData = jsonApplication.GridData;
-            foreach (string gridName in gridData.GridLoadList.Keys)
+            GridDataServer result = new GridDataServer();
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.GridLoadList.Keys)
             {
-                GridDataProcessFromJson(jsonApplication, gridName, result, typeInAssembly);
+                GridDataServerFromJson(applicationJson, gridName, result, typeInAssembly);
             }
             return result;
         }
 
-        public static Grid GridFromJson(JsonApplication jsonApplication, string gridName, Type typeInAssembly)
+        public static Grid GridFromJson(ApplicationJson applicationJson, string gridName, Type typeInAssembly)
         {
-            GridData gridData = jsonApplication.GridData;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            string typeRowName = gridData.GridLoadList[gridName].TypeRowName;
+            string typeRowName = gridDataJson.GridLoadList[gridName].TypeRowName;
             Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
             Grid result = new Grid(typeRow);
-            foreach (GridRow row in gridData.RowList[gridName])
+            foreach (GridRow row in gridDataJson.RowList[gridName])
             {
                 DataAccessLayer.Row resultRow = (DataAccessLayer.Row)Activator.CreateInstance(typeRow);
                 result.RowList.Add(resultRow);
-                foreach (var column in gridData.ColumnList[gridName])
+                foreach (var column in gridDataJson.ColumnList[gridName])
                 {
-                    string text = gridData.CellList[gridName][column.FieldName][row.Index].T;
+                    string text = gridDataJson.CellList[gridName][column.FieldName][row.Index].T;
                     PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
                     object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
                     propertyInfo.SetValue(resultRow, value);

@@ -7,29 +7,29 @@
 
     public abstract class ProcessBase
     {
-        public ProcessBase(BusinessApplicationBase businessApplication)
+        public ProcessBase(ApplicationServerBase applicationServer)
         {
-            this.BusinessApplication = businessApplication;
+            this.ApplicationServer = applicationServer;
         }
 
-        public readonly BusinessApplicationBase BusinessApplication;
+        public readonly ApplicationServerBase ApplicationServer;
 
-        protected virtual internal void ProcessBegin(JsonApplication jsonApplication)
-        {
-
-        }
-
-        protected virtual internal void ProcessBegin(JsonApplication jsonApplicationIn, JsonApplication jsonApplicationOut)
+        protected virtual internal void ProcessBegin(ApplicationJson applicationJson)
         {
 
         }
 
-        protected virtual internal void ProcessEnd(JsonApplication jsonApplication)
+        protected virtual internal void ProcessBegin(ApplicationJson applicationJsonIn, ApplicationJson applicationJsonOut)
         {
 
         }
 
-        protected virtual internal void ProcessEnd(JsonApplication jsonApplicationIn, JsonApplication jsonApplicationOut)
+        protected virtual internal void ProcessEnd(ApplicationJson applicationJson)
+        {
+
+        }
+
+        protected virtual internal void ProcessEnd(ApplicationJson applicationJsonIn, ApplicationJson applicationJsonOut)
         {
 
         }
@@ -37,21 +37,21 @@
 
     public class ProcessGridOrderBy : ProcessBase
     {
-        public ProcessGridOrderBy(BusinessApplicationBase businessApplication) 
-            : base(businessApplication)
+        public ProcessGridOrderBy(ApplicationServerBase applicationServer) 
+            : base(applicationServer)
         {
 
         }
 
-        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
-            foreach (string gridName in jsonApplication.GridData.ColumnList.Keys)
+            foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys)
             {
-                foreach (GridColumn gridColumn in jsonApplication.GridData.ColumnList[gridName])
+                foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
                 {
                     if (gridColumn.IsClick)
                     {
-                        GridLoad gridLoad = jsonApplication.GridData.GridLoadList[gridName];
+                        GridLoad gridLoad = applicationJson.GridDataJson.GridLoadList[gridName];
                         if (gridLoad.FieldNameOrderBy == gridColumn.FieldName)
                         {
                             gridLoad.IsOrderByDesc = !gridLoad.IsOrderByDesc;
@@ -67,12 +67,12 @@
             }
         }
 
-        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        protected internal override void ProcessEnd(ApplicationJson applicationJson)
         {
-            foreach (string gridName in jsonApplication.GridData.ColumnList.Keys)
+            foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys)
             {
-                GridLoad gridLoad = jsonApplication.GridData.GridLoadList[gridName];
-                foreach (GridColumn gridColumn in jsonApplication.GridData.ColumnList[gridName])
+                GridLoad gridLoad = applicationJson.GridDataJson.GridLoadList[gridName];
+                foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
                 {
                     gridColumn.IsClick = false;
                     if (gridColumn.FieldName == gridLoad.FieldNameOrderBy)
@@ -100,100 +100,100 @@
     /// </summary>
     public class ProcessJson : ProcessBase
     {
-        public ProcessJson(BusinessApplicationBase businessApplication)
-            : base(businessApplication)
+        public ProcessJson(ApplicationServerBase applicationServer)
+            : base(applicationServer)
         {
 
         }
 
-        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        protected internal override void ProcessEnd(ApplicationJson applicationJson)
         {
-            foreach (Component jsonComponent in jsonApplication.ListAll())
+            foreach (Component jsonComponent in applicationJson.ListAll())
             {
-                jsonComponent.Process(BusinessApplication, jsonApplication);
+                jsonComponent.Process(ApplicationServer, applicationJson);
             }
         }
     }
 
     public class ProcessGridIsIsClick : ProcessBase
     {
-        public ProcessGridIsIsClick(BusinessApplicationBase businessApplication)
-            : base(businessApplication)
+        public ProcessGridIsIsClick(ApplicationServerBase applicationServer)
+            : base(applicationServer)
         {
 
         }
 
-        private void ProcessGridSelectRowClear(JsonApplication jsonApplicatio, string gridName)
+        private void ProcessGridSelectRowClear(ApplicationJson applicationJson, string gridName)
         {
-            foreach (GridRow gridRow in jsonApplicatio.GridData.RowList[gridName])
+            foreach (GridRow gridRow in applicationJson.GridDataJson.RowList[gridName])
             {
                 gridRow.IsSelectSet(false);
             }
         }
 
-        private void ProcessGridSelectCell(JsonApplication jsonApplication, string gridName, string index, string fieldName)
+        private void ProcessGridSelectCell(ApplicationJson applicationJson, string gridName, string index, string fieldName)
         {
-            GridData gridData = jsonApplication.GridData;
-            gridData.FocusGridName = gridName;
-            gridData.FocusIndex = index;
-            gridData.FocusFieldName = fieldName;
-            ProcessGridSelectCellClear(jsonApplication);
-            gridData.CellList[gridName][fieldName][index].IsSelect = true;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            gridDataJson.FocusGridName = gridName;
+            gridDataJson.FocusIndex = index;
+            gridDataJson.FocusFieldName = fieldName;
+            ProcessGridSelectCellClear(applicationJson);
+            gridDataJson.CellList[gridName][fieldName][index].IsSelect = true;
         }
 
-        private void ProcessGridSelectCellClear(JsonApplication jsonApplication)
+        private void ProcessGridSelectCellClear(ApplicationJson applicationJson)
         {
-            GridData gridData = jsonApplication.GridData;
-            foreach (string gridName in gridData.RowList.Keys)
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.RowList.Keys)
             {
-                foreach (GridRow gridRow in gridData.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
-                    foreach (var gridColumn in gridData.ColumnList[gridName])
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         gridCell.IsSelect = false;
                     }
                 }
             }
         }
 
-        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
-            GridData gridData = jsonApplication.GridData;
-            foreach (GridLoad gridLoad in gridData.GridLoadList.Values)
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (GridLoad gridLoad in gridDataJson.GridLoadList.Values)
             {
                 string gridName = gridLoad.GridName;
-                foreach (GridRow gridRow in gridData.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
                     if (gridRow.IsClick)
                     {
-                        ProcessGridSelectRowClear(jsonApplication, gridName);
+                        ProcessGridSelectRowClear(applicationJson, gridName);
                         gridRow.IsSelectSet(true);
                     }
-                    foreach (var gridColumn in gridData.ColumnList[gridName])
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         if (gridCell.IsClick == true)
                         {
-                            ProcessGridSelectCell(jsonApplication, gridName, gridRow.Index, gridColumn.FieldName);
+                            ProcessGridSelectCell(applicationJson, gridName, gridRow.Index, gridColumn.FieldName);
                         }
                     }
                 }
             }
         }
 
-        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        protected internal override void ProcessEnd(ApplicationJson applicationJson)
         {
-            GridData gridData = jsonApplication.GridData;
-            foreach (GridLoad gridLoad in gridData.GridLoadList.Values)
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (GridLoad gridLoad in gridDataJson.GridLoadList.Values)
             {
                 string gridName = gridLoad.GridName;
-                foreach (GridRow gridRow in gridData.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
                     gridRow.IsClick = false;
-                    foreach (var gridColumn in gridData.ColumnList[gridName])
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         gridCell.IsClick = false;
                     }
                 }
@@ -203,30 +203,30 @@
 
     public class ProcessGridSave : ProcessBase
     {
-        public ProcessGridSave(BusinessApplicationBase businessApplication) 
-            : base(businessApplication)
+        public ProcessGridSave(ApplicationServerBase applicationServer) 
+            : base(applicationServer)
         {
 
         }
 
         public bool IsModify;
 
-        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
             IsModify = false;
-            GridData gridData = jsonApplication.GridData;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            GridDataProcess gridDataProcess = Util.GridDataProcessFromJson(jsonApplication, BusinessApplication.GetType());
-            gridDataProcess.TextParse();
-            gridDataProcess.SaveDatabase();
+            GridDataServer gridDataServer = Util.GridDataServerFromJson(applicationJson, ApplicationServer.GetType());
+            gridDataServer.TextParse();
+            gridDataServer.SaveDatabase();
             //
-            foreach (string gridName in gridData.GridLoadList.Keys)
+            foreach (string gridName in gridDataJson.GridLoadList.Keys)
             {
-                foreach (GridRow gridRow in gridData.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
-                    foreach (GridColumn gridColumn in gridData.ColumnList[gridName])
+                    foreach (GridColumn gridColumn in gridDataJson.ColumnList[gridName])
                     {
-                        GridCell gridCell = gridData.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         if (gridCell.IsO)
                         {
                             IsModify = true;
@@ -239,19 +239,19 @@
 
     public class ProcessGridRowFirstIsClick : ProcessBase
     {
-        public ProcessGridRowFirstIsClick(BusinessApplicationBase businessApplication) 
-            : base(businessApplication)
+        public ProcessGridRowFirstIsClick(ApplicationServerBase applicationServer) 
+            : base(applicationServer)
         {
 
         }
 
-        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
-            GridData gridData = jsonApplication.GridData;
-            foreach (string gridName in gridData.RowList.Keys)
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.RowList.Keys)
             {
                 bool isSelect = false; // A row is selected
-                foreach (GridRow gridRow in gridData.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
                     if (gridRow.IsSelectGet() || gridRow.IsClick)
                     {
@@ -261,7 +261,7 @@
                 }
                 if (isSelect == false)
                 {
-                    foreach (GridRow gridRow in gridData.RowList[gridName])
+                    foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                     {
                         int index;
                         if (int.TryParse(gridRow.Index, out index)) // Exclude "Header"
@@ -277,37 +277,37 @@
 
     public class ProcessGridLookUp : ProcessBase
     {
-        public ProcessGridLookUp(BusinessApplicationBase businessApplication)
-            : base(businessApplication)
+        public ProcessGridLookUp(ApplicationServerBase applicationServer)
+            : base(applicationServer)
         {
 
         }
 
-        protected internal override void ProcessBegin(JsonApplication jsonApplication)
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
-            GridData gridData = jsonApplication.GridData;
-            if (gridData.FocusFieldName != null)
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            if (gridDataJson.FocusFieldName != null)
             {
-                var grid = Util.GridFromJson(jsonApplication, gridData.FocusGridName, BusinessApplication.GetType());
-                var row = grid.RowList[int.Parse(gridData.FocusIndex)];
-                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row).Where(item => item.FieldNameCSharp == gridData.FocusFieldName).First();
+                var grid = Util.GridFromJson(applicationJson, gridDataJson.FocusGridName, ApplicationServer.GetType());
+                var row = grid.RowList[int.Parse(gridDataJson.FocusIndex)];
+                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                 Type typeRow;
                 List<DataAccessLayer.Row> rowList;
                 cell.LookUp(out typeRow, out rowList);
                 Util.TypeRowValidate(typeRow, ref rowList);
-                Util.GridToJson(jsonApplication, "LookUp", typeRow, rowList);
+                Util.GridToJson(applicationJson, "LookUp", typeRow, rowList);
             }
         }
 
-        protected internal override void ProcessEnd(JsonApplication jsonApplication)
+        protected internal override void ProcessEnd(ApplicationJson applicationJson)
         {
-            GridData gridData = jsonApplication.GridData;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
             bool isExist = false; // Focused field exists
-            if (gridData.FocusFieldName != null)
+            if (gridDataJson.FocusFieldName != null)
             {
-                if (gridData.RowList[gridData.FocusGridName].Exists(item => item.Index == gridData.FocusIndex)) // Focused row exists
+                if (gridDataJson.RowList[gridDataJson.FocusGridName].Exists(item => item.Index == gridDataJson.FocusIndex)) // Focused row exists
                 {
-                    if (gridData.ColumnList[gridData.FocusGridName].Exists(item => item.FieldName == gridData.FocusFieldName)) // Focused column exists
+                    if (gridDataJson.ColumnList[gridDataJson.FocusGridName].Exists(item => item.FieldName == gridDataJson.FocusFieldName)) // Focused column exists
                     {
                         isExist = true;
                     }
@@ -315,11 +315,11 @@
             }
             if (isExist == false)
             {
-                if (jsonApplication.GridData != null)
+                if (applicationJson.GridDataJson != null)
                 {
-                    jsonApplication.GridData.FocusFieldName = null;
-                    jsonApplication.GridData.FocusGridName = null;
-                    jsonApplication.GridData.FocusIndex = null;
+                    applicationJson.GridDataJson.FocusFieldName = null;
+                    applicationJson.GridDataJson.FocusGridName = null;
+                    applicationJson.GridDataJson.FocusIndex = null;
                 }
             }
         }

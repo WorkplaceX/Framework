@@ -90,7 +90,7 @@
             return result.OfType<T>().ToList();
         }
 
-        protected virtual internal void Process(BusinessApplicationBase businessApplication, JsonApplication jsonApplication)
+        protected virtual internal void Process(ApplicationServerBase applicationServer, ApplicationJson applicationJson)
         {
 
         }
@@ -149,9 +149,9 @@
     }
 
     /// <summary>
-    /// Json GridData.
+    /// Json GridData. There is also a GridDataServer object.
     /// </summary>
-    public class GridData
+    public class GridDataJson
     {
         /// <summary>
         /// (GridName, GridLoad) List of all loaded data grids.
@@ -289,11 +289,11 @@
     }
 
     /// <summary>
-    /// Json Application. Root object being transferred between server and client.
+    /// Json Application. Root object being transferred between server and client. There is also a ApplicationServer object.
     /// </summary>
-    public class JsonApplication : Component
+    public class ApplicationJson : Component
     {
-        public JsonApplication()
+        public ApplicationJson()
             : base(null, "Json")
         {
 
@@ -321,7 +321,7 @@
         /// <summary>
         /// Gets or sets GridData.
         /// </summary>
-        public GridData GridData;
+        public GridDataJson GridDataJson;
     }
 
     /// <summary>
@@ -428,10 +428,10 @@
             TypeSet(typeof(Label)); // Render as Label.
         }
 
-        protected internal override void Process(BusinessApplicationBase businessApplication, JsonApplication jsonApplication)
+        protected internal override void Process(ApplicationServerBase applicationServer, ApplicationJson applicationJson)
         {
-            Text = string.Format("IsModify={0};", businessApplication.ProcessListGet<ProcessGridSave>().IsModify);
-            base.Process(businessApplication, jsonApplication);
+            Text = string.Format("IsModify={0};", applicationServer.ProcessListGet<ProcessGridSave>().IsModify);
+            base.Process(applicationServer, applicationJson);
         }
     }
 }
