@@ -4,6 +4,7 @@
     using Framework.Server.DataAccessLayer;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
 
     public class GridDataProcessRow
@@ -201,7 +202,15 @@
                     var row = RowList[gridName][index];
                     if (row.RowNew != null)
                     {
-                        DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                        try
+                        {
+                            DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                        }
+                        catch (Exception exception)
+                        {
+                            string fieldName = row.Row.GetType().GetProperties().First().Name; // First field
+                            ErrorSet(gridName, index, fieldName, exception.Message);
+                        }
                     }
                 }
             }

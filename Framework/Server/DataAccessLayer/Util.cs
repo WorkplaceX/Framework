@@ -86,7 +86,10 @@
             return result;
         }
 
-        private static IQueryable SelectQuery(Type typeRow)
+        /// <summary>
+        /// Returns DbContext with ConnectionString and model for row defined in typeRow.
+        /// </summary>
+        private static DbContext DbContext(Type typeRow)
         {
             var conventionBuilder = new CoreConventionSetBuilder();
             var conventionSet = conventionBuilder.CreateConventionSet();
@@ -104,7 +107,15 @@
             var options = new DbContextOptionsBuilder<DbContext>();
             options.UseSqlServer(Framework.Server.ConnectionManager.ConnectionString);
             options.UseModel(builder.Model);
-            DbContext dbContext = new DbContext(options.Options);
+            DbContext result = new DbContext(options.Options);
+            result.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.
+            //
+            return result;
+        }
+
+        private static IQueryable SelectQuery(Type typeRow)
+        {
+            DbContext dbContext = DbContext(typeRow);
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.
             IQueryable query = (IQueryable)(dbContext.GetType().GetTypeInfo().GetMethod("Set").MakeGenericMethod(typeRow).Invoke(dbContext, null));
             return query;
@@ -143,7 +154,31 @@
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
+            Framework.Util.Assert(row.GetType() == rowNew.GetType());
+            DbContext dbContext = DbContext(row.GetType());
+            var tracking = dbContext.Attach(row);
+            tracking.CurrentValues.SetValues(rowNew);
+            dbContext.SaveChanges();
+        }
 
+        /// <summary>
+        /// Insert data record. Primary key needs to be 0!
+        /// </summary>
+        public static void Insert(Row row)
+        {
+            DbContext dbContext = DbContext(row.GetType());
+            dbContext.Add(row);
+            dbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// Delete data record.
+        /// </summary>
+        public static void Delete(Row row)
+        {
+            DbContext dbContext = DbContext(row.GetType());
+            dbContext.Remove(row);
+            dbContext.SaveChanges();
         }
 
         public static T JsonObjectClone<T>(T data)
