@@ -29,7 +29,20 @@
         /// </summary>
         public Dictionary<string, Dictionary<string, GridDataProcessRow>> RowList = new Dictionary<string, Dictionary<string, GridDataProcessRow>>();
 
-        public void RowListSet(GridDataProcessRow gridDataProcessRow)
+        public GridDataProcessRow RowGet(string gridName, string index)
+        {
+            GridDataProcessRow result = null;
+            if (RowList.ContainsKey(gridName))
+            {
+                if (RowList[gridName].ContainsKey(index))
+                {
+                    result = RowList[gridName][index];
+                }
+            }
+            return result;
+        }
+
+        public void RowSet(GridDataProcessRow gridDataProcessRow)
         {
             string gridName = gridDataProcessRow.GridName;
             string index = gridDataProcessRow.Index;
@@ -41,12 +54,12 @@
         }
 
         /// <summary>
-        /// (GridName, Index, FieldName, Text).
+        /// (GridName, Index, FieldName, Text). User modified text.
         /// </summary>
         public Dictionary<string, Dictionary<string, Dictionary<string, string>>> TextList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
 
         /// <summary>
-        /// (GridName, Index, FieldName, Text).
+        /// (GridName, Index, FieldName, Text). Error attached to field.
         /// </summary>
         public Dictionary<string, Dictionary<string, Dictionary<string, string>>> ErrorList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
 
@@ -114,6 +127,84 @@
                 ErrorList[gridName][index] = new Dictionary<string, string>();
             }
             ErrorList[gridName][index][fieldName] = text;
+        }
+
+        /// <summary>
+        /// Load data from database.
+        /// </summary>
+        public void LoadDatabase(string gridName, Type typeRow)
+        {
+            TypeRowList[gridName] = typeRow;
+            List<Row> rowList = DataAccessLayer.Util.Select(typeRow, 0, 15);
+            TextList.Remove(gridName); // Clear user modified text.
+            ErrorList.Remove(gridName); // Clear errors attached to fields.
+            RowList.Remove(gridName);
+            for (int index = 0; index < rowList.Count; index++)
+            {
+                RowSet(new GridDataProcessRow() { GridName = gridName, Index = index.ToString(), Row = rowList[index], RowNew = null });
+            }
+        }
+
+        /// <summary>
+        /// Parse user input text. See also method TextSet(); when parse error occurs method ErrorSet(); is called for the field.
+        /// </summary>
+        public void TextParse()
+        {
+            foreach (string gridName in TextList.Keys)
+            {
+                foreach (string index in TextList[gridName].Keys)
+                {
+                    var row = RowGet(gridName, index);
+                    if (row != null)
+                    {
+                        foreach (string fieldName in TextList[gridName][index].Keys)
+                        {
+                            if (row.RowNew == null)
+                            {
+                                row.RowNew = DataAccessLayer.Util.Clone(row.Row);
+                            }
+                            string text = TextGet(gridName, index, fieldName);
+                            if (text != null)
+                            {
+                                if (text == "")
+                                {
+                                    text = null;
+                                }
+                                object value;
+                                try
+                                {
+                                    value = DataAccessLayer.Util.ValueFromText(text, row.RowNew.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                }
+                                catch (Exception exception)
+                                {
+                                    ErrorSet(gridName, index, fieldName, exception.Message);
+                                    row.RowNew = null; // Do not save.
+                                    break;
+                                }
+                                row.RowNew.GetType().GetProperty(fieldName).SetValue(row.RowNew, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save data to database.
+        /// </summary>
+        public void SaveDatabase()
+        {
+            foreach (string gridName in RowList.Keys)
+            {
+                foreach (string index in RowList[gridName].Keys)
+                {
+                    var row = RowList[gridName][index];
+                    if (row.RowNew != null)
+                    {
+                        DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                    }
+                }
+            }
         }
     }
 
@@ -292,9 +383,8 @@
             foreach (GridRow gridRow in gridData.RowList[gridName])
             {
                 Row row = GridDataProcessFromJson(gridData, gridName, gridRow, typeRow);
-                Row rowNew = GridDataProcessFromJson(gridData, gridName, gridRow, typeRow);
-                GridDataProcessRow gridDataProcessRow = new GridDataProcessRow() { GridName = gridName, Index = gridRow.Index, Row = row, RowNew = rowNew };
-                result.RowListSet(gridDataProcessRow);
+                GridDataProcessRow gridDataProcessRow = new GridDataProcessRow() { GridName = gridName, Index = gridRow.Index, Row = row, RowNew = null };
+                result.RowSet(gridDataProcessRow);
             }
             //
             foreach (GridRow gridRow in gridData.RowList[gridName])
@@ -307,8 +397,8 @@
                         if (text == null)
                         {
                             text = ""; // User changed text.
-                            result.TextSet(gridName, gridRow.Index, column.FieldName, text);
                         }
+                        result.TextSet(gridName, gridRow.Index, column.FieldName, text);
                         string textError = gridData.CellList[gridName][column.FieldName][gridRow.Index].E;
                         result.ErrorSet(gridName, gridRow.Index, column.FieldName, textError);
                     }

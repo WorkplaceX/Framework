@@ -215,7 +215,11 @@
         {
             IsModify = false;
             GridData gridData = jsonApplication.GridData;
+            //
             GridDataProcess gridDataProcess = Util.GridDataProcessFromJson(jsonApplication, BusinessApplication.GetType());
+            gridDataProcess.TextParse();
+            gridDataProcess.SaveDatabase();
+            //
             foreach (string gridName in gridData.GridLoadList.Keys)
             {
                 foreach (GridRow gridRow in gridData.RowList[gridName])

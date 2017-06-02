@@ -138,6 +138,14 @@
             return result;
         }
 
+        /// <summary>
+        /// Update data record on database.
+        /// </summary>
+        public static void Update(Row row, Row rowNew)
+        {
+
+        }
+
         public static T JsonObjectClone<T>(T data)
         {
             string json = JsonConvert.SerializeObject(data, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
@@ -178,6 +186,22 @@
                 type = Nullable.GetUnderlyingType(type);
             }
             return Convert.ChangeType(text, type);
+        }
+
+        /// <summary>
+        /// Clone data row.
+        /// </summary>
+        public static Row Clone(Row row)
+        {
+            Row result = (Row)Activator.CreateInstance(row.GetType());
+            var propertyInfoList = row.GetType().GetProperties();
+            foreach (PropertyInfo propertyInfo in propertyInfoList)
+            {
+                string fieldName = propertyInfo.Name;
+                object value = propertyInfo.GetValue(row);
+                propertyInfo.SetValue(result, value);
+            }
+            return result;
         }
     }
 }
