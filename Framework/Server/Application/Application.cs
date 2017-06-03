@@ -40,6 +40,8 @@
 
         protected virtual void ProcessInit()
         {
+            ProcessList.Add(new ProcessApplicationInit(this));
+            ProcessList.Add(new ProcessGridDataServerLoadJson(this));
             ProcessList.Add(new ProcessGridSave(this));
             ProcessList.Add(new ProcessGridRowFirstIsClick(this));
             ProcessList.Add(new ProcessGridIsIsClick(this));
@@ -48,41 +50,29 @@
             ProcessList.Add(new ProcessJson(this));
         }
 
-        public ApplicationJson Process(ApplicationJson applicationJsonIn, string requestPath)
+        public ApplicationJson Process(ApplicationJson applicationJson, string requestPath)
         {
-            ApplicationJson applicationJsonOut = Framework.Server.DataAccessLayer.Util.JsonObjectClone<ApplicationJson>(applicationJsonIn);
-            if (applicationJsonOut == null || applicationJsonOut.Session == Guid.Empty)
+            if (applicationJson == null) // First request.
             {
-                applicationJsonOut = applicationJsonCreate();
+                applicationJson = new ApplicationJson();
             }
-            else
-            {
-                applicationJsonOut.ResponseCount += 1;
-            }
-            applicationJsonOut.Name = ".NET Core=" + DateTime.Now.ToString("HH:mm:ss.fff");
-            applicationJsonOut.VersionServer = Framework.Util.VersionServer;
             // Process
             {
                 foreach (ProcessBase process in ProcessList)
                 {
-                    process.ProcessBegin(applicationJsonIn, applicationJsonOut);
-                    process.ProcessBegin(applicationJsonOut);
+                    process.ProcessBegin(applicationJson);
                 }
                 foreach (ProcessBase process in ProcessList)
                 {
-                    process.ProcessEnd(applicationJsonIn, applicationJsonOut);
-                    process.ProcessEnd(applicationJsonOut);
+                    process.ProcessEnd(applicationJson);
                 }
             }
-            return applicationJsonOut;
+            return applicationJson;
         }
 
-        protected virtual ApplicationJson applicationJsonCreate()
+        protected virtual internal void ApplicationJsonInit(ApplicationJson applicationJson)
         {
-            ApplicationJson result = new ApplicationJson();
-            result.Session = Guid.NewGuid();
-            //
-            var container = new LayoutContainer(result, "Container");
+            var container = new LayoutContainer(applicationJson, "Container");
             var rowHeader = new LayoutRow(container, "Header");
             var cellHeader1 = new LayoutCell(rowHeader, "HeaderCell1");
             var rowContent = new LayoutRow(container, "Content");
@@ -92,8 +82,6 @@
             var rowFooter = new LayoutRow(container, "Footer");
             var cellFooter1 = new LayoutCell(rowFooter, "FooterCell1");
             var button = new Button(cellFooter1, "Hello");
-            //
-            return result;
         }
     }
 }

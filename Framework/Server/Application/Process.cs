@@ -19,17 +19,7 @@
 
         }
 
-        protected virtual internal void ProcessBegin(ApplicationJson applicationJsonIn, ApplicationJson applicationJsonOut)
-        {
-
-        }
-
         protected virtual internal void ProcessEnd(ApplicationJson applicationJson)
-        {
-
-        }
-
-        protected virtual internal void ProcessEnd(ApplicationJson applicationJsonIn, ApplicationJson applicationJsonOut)
         {
 
         }
@@ -198,6 +188,61 @@
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Process first application request coming from client.
+    /// </summary>
+    public class ProcessApplicationInit : ProcessBase
+    {
+        public ProcessApplicationInit(ApplicationServerBase applicationServer)
+            : base(applicationServer)
+        {
+
+        }
+
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
+        {
+            if (applicationJson.Session == Guid.Empty) // First application request coming from client.
+            {
+                applicationJson.Session = Guid.NewGuid();
+                ApplicationServer.ApplicationJsonInit(applicationJson);
+            }
+            else
+            {
+                applicationJson.ResponseCount += 1;
+            }
+            applicationJson.Name = ".NET Core=" + DateTime.Now.ToString("HH:mm:ss.fff");
+            applicationJson.VersionServer = Framework.Util.VersionServer;
+        }
+    }
+
+        /// <summary>
+        /// Load incoming Json request into class GridDataServer.
+        /// </summary>
+    public class ProcessGridDataServerLoadJson : ProcessBase
+    {
+        public ProcessGridDataServerLoadJson(ApplicationServerBase applicationServer)
+            : base(applicationServer)
+        {
+
+        }
+
+        private GridDataServer gridDataServer;
+
+        public GridDataServer GridDataServer
+        {
+            get
+            {
+                return gridDataServer;
+            }
+        }
+
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
+        {
+            gridDataServer = new GridDataServer();
+            gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
         }
     }
 
