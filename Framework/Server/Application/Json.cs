@@ -200,12 +200,12 @@
         public string T;
 
         /// <summary>
-        /// Gets or sets IsO. If true, old text has been stored in property O.
+        /// Gets or sets IsO. If true, original text has been stored in property O.
         /// </summary>
         public bool IsO;
 
         /// <summary>
-        /// Old text.
+        /// Original text. (Not user modified).
         /// </summary>
         public string O;
 
@@ -272,6 +272,11 @@
                 IsSelect = IsSelect & 2;
             }
         }
+
+        /// <summary>
+        /// Gets or sets error text for row.
+        /// </summary>
+        public string Error;
     }
 
     /// <summary>
