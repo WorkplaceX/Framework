@@ -177,7 +177,15 @@
         /// </summary>
         public void Load(string gridName, Type typeRow, List<Row> rowList)
         {
-            Util.TypeRowValidate(typeRow, ref rowList);
+            if (rowList == null)
+            {
+                rowList = new List<Row>();
+            }
+            foreach (Row row in rowList)
+            {
+                Framework.Util.Assert(row.GetType() == typeRow);
+            }
+            //
             TextList.Remove(gridName); // Clear user modified text
             ErrorFieldList.Remove(gridName); // Clear errors attached to fields
             RowList[gridName] = new Dictionary<string, GridDataServerRow>(); // Clear data
@@ -318,6 +326,9 @@
             }
         }
 
+        /// <summary>
+        /// Returns row's columns.
+        /// </summary>
         private static List<GridColumn> TypeRowToGridColumn(Type typeRow)
         {
             var result = new List<GridColumn>();
@@ -413,238 +424,6 @@
                     }
                 }
             }
-        }
-    }
-
-    public static class Util
-    {
-        private static List<GridColumn> GridToJsonColumnList(Type typeRow)
-        {
-            var result = new List<GridColumn>();
-            //
-            var cellList = Framework.Server.DataAccessLayer.Util.ColumnList(typeRow);
-            double widthPercentTotal = 0;
-            bool isLast = false;
-            for (int i = 0; i < cellList.Count; i++)
-            {
-                // Text
-                string text = cellList[i].FieldNameSql;
-                cellList[i].ColumnText(ref text);
-                // WidthPercent
-                isLast = i == cellList.Count;
-                double widthPercentAvg = Math.Round(((double)100 - widthPercentTotal) / ((double)cellList.Count - (double)i), 2);
-                double widthPercent = widthPercentAvg;
-                cellList[i].ColumnWidthPercent(ref widthPercent);
-                widthPercent = Math.Round(widthPercent, 2);
-                if (isLast)
-                {
-                    widthPercent = 100 - widthPercentTotal;
-                }
-                else
-                {
-                    if (widthPercentTotal + widthPercent > 100)
-                    {
-                        widthPercent = widthPercentAvg;
-                    }
-                }
-                widthPercentTotal = widthPercentTotal + widthPercent;
-                result.Add(new GridColumn() { FieldName = cellList[i].FieldNameSql, Text = text, WidthPercent = widthPercent });
-            }
-            return result;
-        }
-
-        public static void TypeRowValidate(Type typeRow, ref List<DataAccessLayer.Row> rowList)
-        {
-            if (rowList == null)
-            {
-                rowList = new List<DataAccessLayer.Row>();
-            }
-            foreach (DataAccessLayer.Row row in rowList)
-            {
-                Framework.Util.Assert(row.GetType() == typeRow);
-            }
-        }
-
-        public static void GridToJson(ApplicationJson applicationJson, string gridName, Type typeRow, List<DataAccessLayer.Row> rowList)
-        {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
-            //
-            if (gridDataJson.GridLoadList == null)
-            {
-                gridDataJson.GridLoadList = new Dictionary<string, GridLoad>();
-            }
-            gridDataJson.GridLoadList[gridName] = new GridLoad() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
-            // Row
-            if (gridDataJson.RowList == null)
-            {
-                gridDataJson.RowList = new Dictionary<string, List<GridRow>>();
-            }
-            gridDataJson.RowList[gridName] = new List<GridRow>();
-            // Column
-            if (gridDataJson.ColumnList == null)
-            {
-                gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
-            }
-            gridDataJson.ColumnList[gridName] = GridToJsonColumnList(typeRow);
-            // Cell
-            if (gridDataJson.CellList == null)
-            {
-                gridDataJson.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>>();
-            }
-            gridDataJson.CellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
-            //
-            PropertyInfo[] propertyInfoList = null;
-            for (int index = 0; index < rowList.Count; index++)
-            {
-                object row = rowList[index];
-                gridDataJson.RowList[gridName].Add(new GridRow() { Index = index.ToString() });
-                if (propertyInfoList == null && typeRow != null)
-                {
-                    propertyInfoList = typeRow.GetTypeInfo().GetProperties();
-                }
-                if (propertyInfoList != null)
-                {
-                    foreach (PropertyInfo propertyInfo in propertyInfoList)
-                    {
-                        string fieldName = propertyInfo.Name;
-                        object value = propertyInfo.GetValue(row);
-                        string textJson = DataAccessLayer.Util.ValueToText(value); // Framework.Server.DataAccessLayer.Util.ValueToJson(value);
-                        if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))
-                        {
-                            gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
-                        }
-                        gridDataJson.CellList[gridName][fieldName][index.ToString()] = new GridCell() { T = textJson };
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Load data into CellList. Not visual.
-        /// </summary>
-        public static void GridToJson(ApplicationJson applicationJson, string gridName, Type typeRow)
-        {
-            List<DataAccessLayer.Row> rowList = Framework.Server.DataAccessLayer.Util.Select(typeRow, 0, 15);
-            GridToJson(applicationJson, gridName, typeRow, rowList);
-        }
-
-        public class Grid
-        {
-            public Grid(Type typeRow)
-            {
-                this.TypeRow = typeRow;
-                this.RowList = new List<DataAccessLayer.Row>();
-            }
-
-            public List<DataAccessLayer.Row> RowList;
-
-            public readonly Type TypeRow;
-        }
-
-        /// <summary>
-        /// Returns row index. Excludes Header and Total.
-        /// </summary>
-        public static int? GridIndexFromJson(GridRow gridRow)
-        {
-            int result;
-            if (int.TryParse(gridRow.Index, out result))
-            {
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Returns unmodified data row.
-        /// </summary>
-        private static Row GridDataServerFromJson(GridDataJson gridDataJson, string gridName, GridRow gridRow, Type typeRow)
-        {
-            Row result = (Row)Activator.CreateInstance(typeRow);
-            foreach (var column in gridDataJson.ColumnList[gridName])
-            {
-                string text;
-                if (gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].IsO)
-                {
-                    text = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].O;
-                }
-                else
-                {
-                    text = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].T;
-                }
-                PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
-                object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
-                propertyInfo.SetValue(result, value);
-            }
-            return result;
-        }
-
-        private static void GridDataServerFromJson(ApplicationJson applicationJson, string gridName, GridDataServer result, Type typeInAssembly)
-        {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
-            string typeRowName = gridDataJson.GridLoadList[gridName].TypeRowName;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
-            result.TypeRowList[gridName] = typeRow;
-            //
-            foreach (GridRow gridRow in gridDataJson.RowList[gridName])
-            {
-                Row row = GridDataServerFromJson(gridDataJson, gridName, gridRow, typeRow);
-                GridDataServerRow gridDataServerRow = new GridDataServerRow() { GridName = gridName, Index = gridRow.Index, Row = row, RowNew = null };
-                result.RowSet(gridDataServerRow);
-            }
-            //
-            foreach (GridRow gridRow in gridDataJson.RowList[gridName])
-            {
-                foreach (var column in gridDataJson.ColumnList[gridName])
-                {
-                    if (gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].IsO)
-                    {
-                        string text = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].T;
-                        if (text == null)
-                        {
-                            text = ""; // User changed text.
-                        }
-                        result.TextSet(gridName, gridRow.Index, column.FieldName, text);
-                        string textError = gridDataJson.CellList[gridName][column.FieldName][gridRow.Index].E;
-                        result.ErrorFieldSet(gridName, gridRow.Index, column.FieldName, textError);
-                    }
-                }
-            }
-        }
-
-        public static GridDataServer GridDataServerFromJson(ApplicationJson applicationJson, Type typeInAssembly)
-        {
-            GridDataServer result = new GridDataServer();
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
-            foreach (string gridName in gridDataJson.GridLoadList.Keys)
-            {
-                GridDataServerFromJson(applicationJson, gridName, result, typeInAssembly);
-            }
-            return result;
-        }
-
-        public static Grid GridFromJson(ApplicationJson applicationJson, string gridName, Type typeInAssembly)
-        {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
-            //
-            string typeRowName = gridDataJson.GridLoadList[gridName].TypeRowName;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
-            Grid result = new Grid(typeRow);
-            foreach (GridRow row in gridDataJson.RowList[gridName])
-            {
-                DataAccessLayer.Row resultRow = (DataAccessLayer.Row)Activator.CreateInstance(typeRow);
-                result.RowList.Add(resultRow);
-                foreach (var column in gridDataJson.ColumnList[gridName])
-                {
-                    string text = gridDataJson.CellList[gridName][column.FieldName][row.Index].T;
-                    PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
-                    object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
-                    propertyInfo.SetValue(resultRow, value);
-                }
-            }
-            return result;
         }
     }
 }
