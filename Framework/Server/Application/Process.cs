@@ -218,34 +218,6 @@
         }
     }
 
-        /// <summary>
-        /// Load incoming Json request into class GridDataServer.
-        /// </summary>
-    public class ProcessGridDataServerLoadJson : ProcessBase
-    {
-        public ProcessGridDataServerLoadJson(ApplicationServerBase applicationServer)
-            : base(applicationServer)
-        {
-
-        }
-
-        private GridDataServer gridDataServer;
-
-        public GridDataServer GridDataServer
-        {
-            get
-            {
-                return gridDataServer;
-            }
-        }
-
-        protected internal override void ProcessBegin(ApplicationJson applicationJson)
-        {
-            gridDataServer = new GridDataServer();
-            gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
-        }
-    }
-
     public class ProcessGridSave : ProcessBase
     {
         public ProcessGridSave(ApplicationServerBase applicationServer) 
@@ -261,7 +233,8 @@
             IsModify = false;
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            GridDataServer gridDataServer = Util.GridDataServerFromJson(applicationJson, ApplicationServer.GetType());
+            GridDataServer gridDataServer = new GridDataServer();
+            gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
             gridDataServer.TextParse();
             gridDataServer.SaveDatabase();
             //
@@ -333,14 +306,16 @@
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             if (gridDataJson.FocusFieldName != null)
             {
-                var grid = Util.GridFromJson(applicationJson, gridDataJson.FocusGridName, ApplicationServer.GetType());
-                var row = grid.RowList[int.Parse(gridDataJson.FocusIndex)];
-                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                GridDataServer gridDataServer = new GridDataServer();
+                gridDataServer.LoadJson(applicationJson, gridDataJson.FocusGridName, ApplicationServer.GetType());
+                var row = gridDataServer.RowGet(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
+                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row.Row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                 Type typeRow;
                 List<DataAccessLayer.Row> rowList;
                 cell.LookUp(out typeRow, out rowList);
-                Util.TypeRowValidate(typeRow, ref rowList);
-                Util.GridToJson(applicationJson, "LookUp", typeRow, rowList);
+                gridDataServer = new GridDataServer();
+                gridDataServer.Load("LookUp", typeRow, rowList);
+                gridDataServer.SaveJson(applicationJson);
             }
         }
 

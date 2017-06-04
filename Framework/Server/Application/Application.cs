@@ -41,7 +41,6 @@
         protected virtual void ProcessInit()
         {
             ProcessList.Add(new ProcessApplicationInit(this));
-            ProcessList.Add(new ProcessGridDataServerLoadJson(this));
             ProcessList.Add(new ProcessGridSave(this));
             ProcessList.Add(new ProcessGridRowFirstIsClick(this));
             ProcessList.Add(new ProcessGridIsIsClick(this));
