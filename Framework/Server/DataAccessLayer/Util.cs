@@ -154,6 +154,7 @@
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
+            row = Util.Clone(row); // Prevent modifications on SetValues(rowNew);
             Framework.Util.Assert(row.GetType() == rowNew.GetType());
             DbContext dbContext = DbContext(row.GetType());
             var tracking = dbContext.Attach(row);

@@ -237,6 +237,7 @@
             gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
             gridDataServer.TextParse();
             gridDataServer.SaveDatabase();
+            // gridDataServer.SaveJson(applicationJson); // TODO
             //
             foreach (string gridName in gridDataJson.GridLoadList.Keys)
             {
@@ -314,7 +315,7 @@
                 List<DataAccessLayer.Row> rowList;
                 cell.LookUp(out typeRow, out rowList);
                 gridDataServer = new GridDataServer();
-                gridDataServer.Load("LookUp", typeRow, rowList);
+                gridDataServer.LoadRow("LookUp", typeRow, rowList);
                 gridDataServer.SaveJson(applicationJson);
             }
         }

@@ -22,12 +22,12 @@
         /// <summary>
         /// (GridName, TypeRow)
         /// </summary>
-        public Dictionary<string, Type> TypeRowList = new Dictionary<string, Type>();
+        private Dictionary<string, Type> TypeRowList = new Dictionary<string, Type>();
 
         /// <summary>
         /// (GridName, Index). Original row.
         /// </summary>
-        public Dictionary<string, Dictionary<string, GridDataServerRow>> RowList = new Dictionary<string, Dictionary<string, GridDataServerRow>>();
+        private Dictionary<string, Dictionary<string, GridDataServerRow>> RowList = new Dictionary<string, Dictionary<string, GridDataServerRow>>();
 
         public GridDataServerRow RowGet(string gridName, string index)
         {
@@ -42,7 +42,7 @@
             return result;
         }
 
-        public void RowSet(GridDataServerRow gridDataServerRow)
+        private void RowSet(GridDataServerRow gridDataServerRow)
         {
             string gridName = gridDataServerRow.GridName;
             string index = gridDataServerRow.Index;
@@ -56,22 +56,22 @@
         /// <summary>
         /// (GridName, Index, FieldName, Text). User modified text.
         /// </summary>
-        public Dictionary<string, Dictionary<string, Dictionary<string, string>>> TextList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+        private Dictionary<string, Dictionary<string, Dictionary<string, string>>> TextList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
 
         /// <summary>
         /// (GridName, Index, FieldName, Text). Error attached to field.
         /// </summary>
-        public Dictionary<string, Dictionary<string, Dictionary<string, string>>> ErrorFieldList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+        private Dictionary<string, Dictionary<string, Dictionary<string, string>>> ErrorFieldList = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
 
         /// <summary>
         /// (GridName, Index, Text). Error attached to data row.
         /// </summary>
-        public Dictionary<string, Dictionary<string, string>> ErrorRowList = new Dictionary<string, Dictionary<string, string>>();
+        private Dictionary<string, Dictionary<string, string>> ErrorRowList = new Dictionary<string, Dictionary<string, string>>();
 
         /// <summary>
         /// Returns error attached to data row.
         /// </summary>
-        public string ErrorRowGet(string gridName, string index)
+        private string ErrorRowGet(string gridName, string index)
         {
             string result = null;
             if (ErrorRowList.ContainsKey(gridName))
@@ -87,7 +87,7 @@
         /// <summary>
         /// Set error on data row.
         /// </summary>
-        public void ErrorRowSet(string gridName, string index, string text)
+        private void ErrorRowSet(string gridName, string index, string text)
         {
             if (!ErrorRowList.ContainsKey(gridName))
             {
@@ -100,7 +100,7 @@
         /// Gets user entered text.
         /// </summary>
         /// <returns>If null, user has not changed text.</returns>
-        public string TextGet(string gridName, string index, string fieldName)
+        private string TextGet(string gridName, string index, string fieldName)
         {
             string result = null;
             if (TextList.ContainsKey(gridName))
@@ -120,7 +120,7 @@
         /// Sets user entered text.
         /// </summary>
         /// <param name="text">If null, user has not changed text.</param>
-        public void TextSet(string gridName, string index, string fieldName, string text)
+        private void TextSet(string gridName, string index, string fieldName, string text)
         {
             if (!TextList.ContainsKey(gridName))
             {
@@ -133,7 +133,22 @@
             TextList[gridName][index][fieldName] = text;
         }
 
-        public string ErrorFieldGet(string gridName, string index, string fieldName)
+        private void TextClear(string gridName, string index)
+        {
+            if (TextList.ContainsKey(gridName))
+            {
+                if (TextList[gridName].ContainsKey(index))
+                {
+                    TextList[gridName].Remove(index);
+                }
+            }
+            if (TextList[gridName].Count == 0)
+            {
+                TextList.Remove(gridName);
+            }
+        }
+
+        private string ErrorFieldGet(string gridName, string index, string fieldName)
         {
             string result = null;
             if (ErrorFieldList.ContainsKey(gridName))
@@ -149,7 +164,7 @@
             return result;
         }
 
-        public void ErrorFieldSet(string gridName, string index, string fieldName, string text)
+        private void ErrorFieldSet(string gridName, string index, string fieldName, string text)
         {
             if (!ErrorFieldList.ContainsKey(gridName))
             {
@@ -169,13 +184,13 @@
         {
             TypeRowList[gridName] = typeRow;
             List<Row> rowList = DataAccessLayer.Util.Select(typeRow, 0, 15);
-            Load(gridName, typeRow, rowList);
+            LoadRow(gridName, typeRow, rowList);
         }
 
         /// <summary>
         /// Load data from list.
         /// </summary>
-        public void Load(string gridName, Type typeRow, List<Row> rowList)
+        public void LoadRow(string gridName, Type typeRow, List<Row> rowList)
         {
             if (rowList == null)
             {
@@ -212,6 +227,7 @@
                         try
                         {
                             DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                            TextClear(gridName, index);
                         }
                         catch (Exception exception)
                         {
@@ -403,7 +419,7 @@
                 foreach (string index in RowList[gridName].Keys)
                 {
                     GridDataServerRow row = RowList[gridName][index];
-                    gridDataJson.RowList[gridName].Add(new GridRow() { Index = index.ToString() });
+                    gridDataJson.RowList[gridName].Add(new GridRow() { Index = index });
                     if (propertyInfoList == null && typeRow != null)
                     {
                         propertyInfoList = typeRow.GetTypeInfo().GetProperties();
@@ -414,12 +430,20 @@
                         {
                             string fieldName = propertyInfo.Name;
                             object value = propertyInfo.GetValue(row.Row);
-                            string textJson = DataAccessLayer.Util.ValueToText(value); // Framework.Server.DataAccessLayer.Util.ValueToJson(value);
+                            string textJson = DataAccessLayer.Util.ValueToText(value);
+                            string text = TextGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))
                             {
                                 gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                             }
-                            gridDataJson.CellList[gridName][fieldName][index.ToString()] = new GridCell() { T = textJson };
+                            if (text == null)
+                            {
+                                gridDataJson.CellList[gridName][fieldName][index] = new GridCell() { T = textJson };
+                            }
+                            else
+                            {
+                                gridDataJson.CellList[gridName][fieldName][index] = new GridCell() { O = textJson, T = text, IsO = true };
+                            }
                         }
                     }
                 }
