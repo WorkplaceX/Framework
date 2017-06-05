@@ -237,7 +237,7 @@
             gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
             gridDataServer.TextParse();
             gridDataServer.SaveDatabase();
-            // gridDataServer.SaveJson(applicationJson); // TODO
+            gridDataServer.SaveJson(applicationJson);
             //
             foreach (string gridName in gridDataJson.GridLoadList.Keys)
             {
