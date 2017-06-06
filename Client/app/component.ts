@@ -511,8 +511,8 @@ export class GridKeyboard {
   select() {
     let gridData: any = this.dataService.json.GridDataJson;
     // GridName
-    for (let keyGridLoad in gridData.GridLoadList) {
-      let gridName = gridData.GridLoadList[keyGridLoad].GridName;
+    for (let keyGridQuery in gridData.GridQueryList) {
+      let gridName = gridData.GridQueryList[keyGridQuery].GridName;
       // FieldName
       for (let keyColumn in gridData.ColumnList[gridName]) {
         let fieldName = gridData.ColumnList[gridName][keyColumn].FieldName;

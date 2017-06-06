@@ -48,7 +48,7 @@
         public bool IsClick;
     }
 
-    internal class GridLoadServer
+    internal class GridQueryServer
     {
         public string FieldNameOrderBy;
 
@@ -62,15 +62,15 @@
         /// </summary>
         private Dictionary<string, Type> TypeRowList = new Dictionary<string, Type>();
 
-        private Dictionary<string, GridLoadServer> GridLoadList = new Dictionary<string, GridLoadServer>();
+        private Dictionary<string, GridQueryServer> QueryList = new Dictionary<string, GridQueryServer>();
 
-        private GridLoadServer GridLoadGet(string gridName)
+        private GridQueryServer QueryGet(string gridName)
         {
-            if (!GridLoadList.ContainsKey(gridName))
+            if (!QueryList.ContainsKey(gridName))
             {
-                GridLoadList[gridName] = new GridLoadServer();
+                QueryList[gridName] = new GridQueryServer();
             }
-            return GridLoadList[gridName];
+            return QueryList[gridName];
         }
 
         private Dictionary<string, Dictionary<string, GridColumnServer>> ColumnList = new Dictionary<string, Dictionary<string, GridColumnServer>>();
@@ -375,18 +375,18 @@
         }
 
         /// <summary>
-        /// Load GridLoad data from json.
+        /// Load Query data from json.
         /// </summary>
-        private void LoadJsonGridLoad(ApplicationJson applicationJson)
+        private void LoadJsonQuery(ApplicationJson applicationJson)
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            foreach (string gridName in gridDataJson.GridLoadList.Keys)
+            foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
-                GridLoad gridLoad = gridDataJson.GridLoadList[gridName];
-                GridLoadServer gridLoadServer = GridLoadGet(gridName);
-                gridLoadServer.FieldNameOrderBy = gridLoad.FieldNameOrderBy;
-                gridLoadServer.IsOrderByDesc = gridLoad.IsOrderByDesc;
+                GridQuery gridQuery = gridDataJson.GridQueryList[gridName];
+                GridQueryServer gridQueryServer = QueryGet(gridName);
+                gridQueryServer.FieldNameOrderBy = gridQuery.FieldNameOrderBy;
+                gridQueryServer.IsOrderByDesc = gridQuery.IsOrderByDesc;
             }
         }
 
@@ -412,12 +412,12 @@
         /// </summary>
         public void LoadJson(ApplicationJson applicationJson, string gridName, Type typeInAssembly)
         {
-            LoadJsonGridLoad(applicationJson);
+            LoadJsonQuery(applicationJson);
             LoadJsonColumn(applicationJson);
             //
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            string typeRowName = gridDataJson.GridLoadList[gridName].TypeRowName;
+            string typeRowName = gridDataJson.GridQueryList[gridName].TypeRowName;
             Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
             TypeRowList[gridName] = typeRow;
             //
@@ -467,7 +467,7 @@
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            foreach (string gridName in gridDataJson.GridLoadList.Keys)
+            foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
                 LoadJson(applicationJson, gridName, typeInAssembly);
             }
@@ -529,18 +529,18 @@
         }
 
         /// <summary>
-        /// Save GridLoad back to Json.
+        /// Save Query back to Json.
         /// </summary>
-        private void SaveJsonGridLoad(ApplicationJson applicationJson)
+        private void SaveJsonQuery(ApplicationJson applicationJson)
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            foreach (string gridName in GridLoadList.Keys)
+            foreach (string gridName in QueryList.Keys)
             {
-                GridLoadServer gridLoadServer = GridLoadList[gridName];
-                GridLoad gridLoad = gridDataJson.GridLoadList[gridName];
-                gridLoad.FieldNameOrderBy = gridLoadServer.FieldNameOrderBy;
-                gridLoad.IsOrderByDesc = gridLoadServer.IsOrderByDesc;
+                GridQueryServer gridQueryServer = QueryList[gridName];
+                GridQuery gridQuery = gridDataJson.GridQueryList[gridName];
+                gridQuery.FieldNameOrderBy = gridQueryServer.FieldNameOrderBy;
+                gridQuery.IsOrderByDesc = gridQueryServer.IsOrderByDesc;
             }
         }
 
@@ -551,15 +551,15 @@
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            if (gridDataJson.GridLoadList == null)
+            if (gridDataJson.GridQueryList == null)
             {
-                gridDataJson.GridLoadList = new Dictionary<string, GridLoad>();
+                gridDataJson.GridQueryList = new Dictionary<string, GridQuery>();
             }
             //
             foreach (string gridName in RowList.Keys)
             {
                 Type typeRow = TypeRowList[gridName];
-                gridDataJson.GridLoadList[gridName] = new GridLoad() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
+                gridDataJson.GridQueryList[gridName] = new GridQuery() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
                 {
@@ -621,7 +621,7 @@
                 }
             }
             SaveJsonColumn(applicationJson);
-            SaveJsonGridLoad(applicationJson);
+            SaveJsonQuery(applicationJson);
         }
     }
 }

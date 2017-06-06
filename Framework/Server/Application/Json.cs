@@ -154,9 +154,9 @@
     public class GridDataJson
     {
         /// <summary>
-        /// (GridName, GridLoad) List of all loaded data grids.
+        /// (GridName, GridQuery) List of all loaded data grids.
         /// </summary>
-        public Dictionary<string, GridLoad> GridLoadList;
+        public Dictionary<string, GridQuery> GridQueryList;
 
         /// <summary>
         /// (GridName, GridRow)
@@ -280,9 +280,9 @@
     }
 
     /// <summary>
-    /// Json GridLoad. Parameter used to load grid.
+    /// Json GridQuery. Parameter used to load grid.
     /// </summary>
-    public class GridLoad
+    public class GridQuery
     {
         public string GridName;
 

@@ -41,15 +41,15 @@
                 {
                     if (gridColumn.IsClick)
                     {
-                        GridLoad gridLoad = applicationJson.GridDataJson.GridLoadList[gridName];
-                        if (gridLoad.FieldNameOrderBy == gridColumn.FieldName)
+                        GridQuery gridQuery = applicationJson.GridDataJson.GridQueryList[gridName];
+                        if (gridQuery.FieldNameOrderBy == gridColumn.FieldName)
                         {
-                            gridLoad.IsOrderByDesc = !gridLoad.IsOrderByDesc;
+                            gridQuery.IsOrderByDesc = !gridQuery.IsOrderByDesc;
                         }
                         else
                         {
-                            gridLoad.FieldNameOrderBy = gridColumn.FieldName;
-                            gridLoad.IsOrderByDesc = true;
+                            gridQuery.FieldNameOrderBy = gridColumn.FieldName;
+                            gridQuery.IsOrderByDesc = true;
                         }
                         break;
                     }
@@ -61,13 +61,13 @@
         {
             foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys)
             {
-                GridLoad gridLoad = applicationJson.GridDataJson.GridLoadList[gridName];
+                GridQuery gridQuery = applicationJson.GridDataJson.GridQueryList[gridName];
                 foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
                 {
                     gridColumn.IsClick = false;
-                    if (gridColumn.FieldName == gridLoad.FieldNameOrderBy)
+                    if (gridColumn.FieldName == gridQuery.FieldNameOrderBy)
                     {
-                        if (gridLoad.IsOrderByDesc)
+                        if (gridQuery.IsOrderByDesc)
                         {
                             gridColumn.Text = "▼" + " " + gridColumn.FieldName;
                         }
@@ -150,9 +150,9 @@
         protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
-            foreach (GridLoad gridLoad in gridDataJson.GridLoadList.Values)
+            foreach (GridQuery gridQuery in gridDataJson.GridQueryList.Values)
             {
-                string gridName = gridLoad.GridName;
+                string gridName = gridQuery.GridName;
                 foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
                     if (gridRow.IsClick)
@@ -175,9 +175,9 @@
         protected internal override void ProcessEnd(ApplicationJson applicationJson)
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
-            foreach (GridLoad gridLoad in gridDataJson.GridLoadList.Values)
+            foreach (GridQuery gridQuery in gridDataJson.GridQueryList.Values)
             {
-                string gridName = gridLoad.GridName;
+                string gridName = gridQuery.GridName;
                 foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
                     gridRow.IsClick = false;
@@ -239,7 +239,7 @@
             gridDataServer.SaveDatabase();
             gridDataServer.SaveJson(applicationJson);
             //
-            foreach (string gridName in gridDataJson.GridLoadList.Keys)
+            foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
                 foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
