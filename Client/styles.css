@@ -1,4 +1,7 @@
 /* Master Styles */
+body {
+  margin: 2em;
+}
 h1 {
   color: #369;
   font-family: Arial, Helvetica, sans-serif;
@@ -8,9 +11,6 @@ h2, h3 {
   color: #444;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
-}
-body {
-  margin: 2em;
 }
 .y {
   background-color: yellow;
@@ -29,4 +29,10 @@ body {
 }
 .c2 {
     background-color: #abf7ab
+}
+.ErrorRow {
+  color: red;
+}
+.ErrorCell {
+  color: red;
 }

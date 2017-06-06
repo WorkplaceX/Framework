@@ -127,7 +127,7 @@
     }
 
     /// <summary>
-    /// Json GridField.
+    /// Json GridField. Independent from data grid. Displays focused cell.
     /// </summary>
     public class GridField : Component
     {
@@ -190,7 +190,7 @@
     }
 
     /// <summary>
-    /// Json GridCell.
+    /// Json GridCell. Cell in data grid.
     /// </summary>
     public class GridCell
     {

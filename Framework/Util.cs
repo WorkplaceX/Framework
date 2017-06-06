@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.225 Server";
+                return "v0.226 Server";
             }
         }
 
@@ -137,6 +137,24 @@
             catch (Exception exception)
             {
                 result = exception.Message;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns Exception as text including InnerException.
+        /// </summary>
+        public static string ExceptionToText(Exception exception)
+        {
+            string result = null;
+            while (exception != null)
+            {
+                if (result != null)
+                {
+                    result += "; ";
+                }
+                result += exception.Message;
+                exception = exception.InnerException;
             }
             return result;
         }

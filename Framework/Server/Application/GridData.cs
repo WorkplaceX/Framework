@@ -147,6 +147,9 @@
             CellGet(gridName, index, fieldName).Text = text;
         }
 
+        /// <summary>
+        /// Clear all user modified text for row.
+        /// </summary>
         private void TextClear(string gridName, string index)
         {
             if (CellList.ContainsKey(gridName))
@@ -162,7 +165,7 @@
         }
 
         /// <summary>
-        /// Returns true, if user modified text.
+        /// Returns true, if user modified text on row.
         /// </summary>
         private bool IsTextModify(string gridName, string index)
         {
@@ -184,14 +187,31 @@
             return result;
         }
 
-        private string ErrorFieldGet(string gridName, string index, string fieldName)
+        private string ErrorCellGet(string gridName, string index, string fieldName)
         {
             return CellGet(gridName, index, fieldName).Error;
         }
 
-        private void ErrorFieldSet(string gridName, string index, string fieldName, string text)
+        private void ErrorCellSet(string gridName, string index, string fieldName, string text)
         {
             CellGet(gridName, index, fieldName).Error = text;
+        }
+
+        /// <summary>
+        /// Delete all errors on row.
+        /// </summary>
+        private void ErrorCellClear(string gridName, string index)
+        {
+            if (CellList.ContainsKey(gridName))
+            {
+                if (CellList[gridName].ContainsKey(index))
+                {
+                    foreach (string fieldName in CellList[gridName][index].Keys)
+                    {
+                        CellList[gridName][index][fieldName].Error = null;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -237,6 +257,14 @@
             {
                 foreach (string index in RowList[gridName].Keys)
                 {
+                    ErrorRowSet(gridName, index, null);
+                }
+            }
+            //
+            foreach (string gridName in RowList.Keys)
+            {
+                foreach (string index in RowList[gridName].Keys)
+                {
                     var row = RowList[gridName][index];
                     if (row.RowNew != null)
                     {
@@ -248,7 +276,7 @@
                         }
                         catch (Exception exception)
                         {
-                            ErrorRowSet(gridName, index, exception.Message);
+                            ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
                         }
                     }
                 }
@@ -260,6 +288,14 @@
         /// </summary>
         public void TextParse()
         {
+            foreach (string gridName in RowList.Keys)
+            {
+                foreach (string index in RowList[gridName].Keys)
+                {
+                    ErrorCellClear(gridName, index);
+                }
+            }
+            //
             foreach (string gridName in RowList.Keys)
             {
                 foreach (string index in RowList[gridName].Keys)
@@ -287,7 +323,7 @@
                                 }
                                 catch (Exception exception)
                                 {
-                                    ErrorFieldSet(gridName, index, fieldName, exception.Message);
+                                    ErrorCellSet(gridName, index, fieldName, exception.Message);
                                     row.RowNew = null; // Do not save.
                                     break;
                                 }
@@ -334,7 +370,7 @@
                     string errorFieldText = gridDataJson.CellList[gridName][column.FieldName][row.Index].E;
                     if (errorFieldText != null)
                     {
-                        ErrorFieldSet(gridName, row.Index, column.FieldName, errorFieldText);
+                        ErrorCellSet(gridName, row.Index, column.FieldName, errorFieldText);
                     }
                     // ErrorRow
                     string errorRowText = row.Error;
@@ -439,7 +475,9 @@
                 foreach (string index in RowList[gridName].Keys)
                 {
                     GridDataServerRow row = RowList[gridName][index];
-                    gridDataJson.RowList[gridName].Add(new GridRow() { Index = index, IsSelect = row.IsSelect, IsClick = row.IsClick });
+                    string errorRow = ErrorRowGet(gridName, index);
+                    GridRow gridRow = new GridRow() { Index = index, IsSelect = row.IsSelect, IsClick = row.IsClick, Error = errorRow };
+                    gridDataJson.RowList[gridName].Add(gridRow);
                     if (propertyInfoList == null && typeRow != null)
                     {
                         propertyInfoList = typeRow.GetTypeInfo().GetProperties();
@@ -457,7 +495,8 @@
                             {
                                 gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                             }
-                            GridCell gridCell = new GridCell() { IsSelect = gridDataServerCell.IsSelect, IsClick = gridDataServerCell.IsClick };
+                            string errorCell = ErrorCellGet(gridName, index, fieldName);
+                            GridCell gridCell = new GridCell() { IsSelect = gridDataServerCell.IsSelect, IsClick = gridDataServerCell.IsClick, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCell;
                             if (text == null)
                             {
