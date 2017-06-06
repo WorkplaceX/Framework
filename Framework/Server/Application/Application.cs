@@ -35,16 +35,16 @@
 
         public T ProcessListGet<T>() where T : ProcessBase
         {
-            return (T)ProcessList.Where(item => item.GetType() == typeof(T)).First();
+            return (T)ProcessList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
         }
 
         protected virtual void ProcessInit()
         {
             ProcessList.Add(new ProcessApplicationInit(this));
+            ProcessList.Add(new ProcessGridOrderBy(this));
             ProcessList.Add(new ProcessGridSave(this));
             ProcessList.Add(new ProcessGridRowFirstIsClick(this));
             ProcessList.Add(new ProcessGridIsIsClick(this));
-            ProcessList.Add(new ProcessGridOrderBy(this));
             ProcessList.Add(new ProcessGridLookUp(this));
             ProcessList.Add(new ProcessJson(this));
         }

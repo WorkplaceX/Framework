@@ -435,7 +435,9 @@
 
         protected internal override void Process(ApplicationServerBase applicationServer, ApplicationJson applicationJson)
         {
-            Text = string.Format("IsModify={0};", applicationServer.ProcessListGet<ProcessGridSave>().IsModify);
+            ProcessGridSave processGridSave = applicationServer.ProcessListGet<ProcessGridSave>();
+            string isModify = processGridSave != null ? processGridSave.IsModify.ToString() : false.ToString();
+            Text = string.Format("IsModify={0};", isModify);
             base.Process(applicationServer, applicationJson);
         }
     }
