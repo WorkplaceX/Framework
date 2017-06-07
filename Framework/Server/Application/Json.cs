@@ -323,6 +323,8 @@
 
         public int ResponseCount;
 
+        public string ErrorProcess;
+
         /// <summary>
         /// Gets or sets GridData.
         /// </summary>

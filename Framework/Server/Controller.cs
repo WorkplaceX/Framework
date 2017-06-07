@@ -41,7 +41,16 @@
             {
                 string jsonInText = Util.StreamToString(Controller.Request.Body);
                 ApplicationJson applicationJsonIn = Framework.Server.Json.Util.Deserialize<ApplicationJson>(jsonInText);
-                ApplicationJson applicationJsonOut = ApplicationServer.Process(applicationJsonIn, Controller.HttpContext.Request.Path);
+                ApplicationJson applicationJsonOut;
+                try
+                {
+                    applicationJsonOut = ApplicationServer.Process(applicationJsonIn, Controller.HttpContext.Request.Path);
+                }
+                catch (Exception exception)
+                {
+                    applicationJsonOut = applicationJsonIn;
+                    applicationJsonOut.ErrorProcess = Framework.Util.ExceptionToText(exception);
+                }
                 applicationJsonOut.IsJsonGet = false;
                 string jsonOutText = Framework.Server.Json.Util.Serialize(applicationJsonOut);
                 if (Framework.Server.Config.Instance.IsDebugJson)

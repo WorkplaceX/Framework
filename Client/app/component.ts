@@ -14,6 +14,7 @@ import  * as util from './util';
   RequestCount=({{ dataService.RequestCount }})<br />
   json.ResponseCount=({{ dataService.json.ResponseCount }})<br />
   Version=({{ dataService.json.VersionClient + '; ' + dataService.json.VersionServer }})<br />
+  json.ErrorProcess=({{ dataService.json.ErrorProcess }})<br />
   log=({{ dataService.log }})
   </p>
   <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy:fn"></Selector>
