@@ -75,10 +75,17 @@
             return result;
         }
 
-        public static List<Cell> CellList(object row)
+        /// <summary>
+        /// Returns cell list. Or column list, if row is null.
+        /// </summary>
+        public static List<Cell> CellList(Type typeRow, object row)
         {
+            if (row != null)
+            {
+                Framework.Util.Assert(row.GetType() == typeRow);
+            }
             List<Cell> result = new List<Cell>();
-            result = ColumnList(row.GetType());
+            result = ColumnList(typeRow);
             foreach (Cell cell in result)
             {
                 cell.Constructor(row);
@@ -164,7 +171,7 @@
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
-            row = Util.Clone(row); // Prevent modifications on SetValues(rowNew);
+            row = Util.RowClone(row); // Prevent modifications on SetValues(rowNew);
             Framework.Util.Assert(row.GetType() == rowNew.GetType());
             DbContext dbContext = DbContext(row.GetType());
             var tracking = dbContext.Attach(row);
@@ -223,13 +230,14 @@
 
         public static object ValueFromText(string text, Type type)
         {
-            if (text == null)
+            Type typeUnderlying = Nullable.GetUnderlyingType(type);
+            if (text == null && typeUnderlying != null) // Type is nullable
             {
                 return null;
             }
-            if (Nullable.GetUnderlyingType(type) != null)
+            if (typeUnderlying != null)
             {
-                type = Nullable.GetUnderlyingType(type);
+                type = typeUnderlying;
             }
             return Convert.ChangeType(text, type);
         }
@@ -237,7 +245,7 @@
         /// <summary>
         /// Clone data row.
         /// </summary>
-        public static Row Clone(Row row)
+        public static Row RowClone(Row row)
         {
             Row result = (Row)Activator.CreateInstance(row.GetType());
             var propertyInfoList = row.GetType().GetProperties();
@@ -248,6 +256,14 @@
                 propertyInfo.SetValue(result, value);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Returns new data row.
+        /// </summary>
+        public static Row RowCreate(Type typeRow)
+        {
+            return (Row)Activator.CreateInstance(typeRow);
         }
     }
 }

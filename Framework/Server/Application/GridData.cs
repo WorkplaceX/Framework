@@ -3,15 +3,12 @@
     using Framework.Server.Application.Json;
     using Framework.Server.DataAccessLayer;
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Reflection;
 
     public class GridRowServer
     {
-        public string GridName;
-
-        public string Index;
-
         public Row Row;
 
         public Row RowNew;
@@ -114,10 +111,8 @@
             return result;
         }
 
-        private void RowSet(GridRowServer gridRowServer)
+        private void RowSet(string gridName, string index, GridRowServer gridRowServer)
         {
-            string gridName = gridRowServer.GridName;
-            string index = gridRowServer.Index;
             if (!RowList.ContainsKey(gridName))
             {
                 RowList[gridName] = new Dictionary<string, GridRowServer>();
@@ -290,7 +285,49 @@
             //
             for (int index = 0; index < rowList.Count; index++)
             {
-                RowSet(new GridRowServer() { GridName = gridName, Index = index.ToString(), Row = rowList[index], RowNew = null });
+                RowSet(gridName, index.ToString(), new GridRowServer() { Row = rowList[index], RowNew = null });
+            }
+            RowNewAdd(gridName);
+        }
+
+        /// <summary>
+        /// Add data row of enum New to RowList.
+        /// </summary>
+        private void RowNewAdd(string gridName)
+        {
+            // (Index)
+            Dictionary<string, GridRowServer> rowListCopy = RowList[gridName];
+            RowList[gridName] = new Dictionary<string, GridRowServer>();
+            // Header
+            foreach (string index in rowListCopy.Keys)
+            {
+                if (Util.IndexToIndexEnum(index) == IndexEnum.Header)
+                {
+                    RowSet(gridName, index, rowListCopy[index]);
+                    break;
+                }
+            }
+            // Index
+            int indexInt = 0;
+            foreach (string index in rowListCopy.Keys)
+            {
+                IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
+                {
+                    RowSet(gridName, indexInt.ToString(), rowListCopy[index]); // New becomes Index
+                    indexInt += 1;
+                }
+            }
+            // New
+            RowSet(gridName, Util.IndexEnumToString(IndexEnum.New), new GridRowServer() { Row = null, RowNew = null }); // New row
+            // Total
+            foreach (string index in rowListCopy.Keys)
+            {
+                if (Util.IndexToIndexEnum(index) == IndexEnum.Total)
+                {
+                    RowSet(gridName, index, rowListCopy[index]);
+                    break;
+                }
             }
         }
 
@@ -307,18 +344,32 @@
                 }
             }
             //
-            foreach (string gridName in RowList.Keys)
+            foreach (string gridName in RowList.Keys.ToArray())
             {
-                foreach (string index in RowList[gridName].Keys)
+                foreach (string index in RowList[gridName].Keys.ToArray())
                 {
                     var row = RowList[gridName][index];
-                    if (row.RowNew != null)
+                    if (row.Row != null && row.RowNew != null) // Database Update
                     {
                         try
                         {
                             DataAccessLayer.Util.Update(row.Row, row.RowNew);
                             row.Row = row.RowNew;
                             TextClear(gridName, index);
+                        }
+                        catch (Exception exception)
+                        {
+                            ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                        }
+                    }
+                    if (row.Row == null && row.RowNew != null) // Database Insert
+                    {
+                        try
+                        {
+                            DataAccessLayer.Util.Insert(row.RowNew);
+                            row.Row = row.RowNew;
+                            TextClear(gridName, index);
+                            RowNewAdd(gridName); // Make "New" to "Index" and add "New"
                         }
                         catch (Exception exception)
                         {
@@ -348,13 +399,26 @@
                 {
                     if (IsTextModify(gridName, index))
                     {
+                        Type typeRow = TypeRowGet(gridName);
                         var row = RowGet(gridName, index);
+                        if (row.Row != null)
+                        {
+                            Framework.Util.Assert(row.Row.GetType() == typeRow);
+                        }
+                        IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                        switch (indexEnum)
+                        {
+                            case IndexEnum.Index:
+                                row.RowNew = DataAccessLayer.Util.RowClone(row.Row);
+                                break;
+                            case IndexEnum.New:
+                                row.RowNew = DataAccessLayer.Util.RowCreate(typeRow);
+                                break;
+                            default:
+                                throw new Exception("Enum unknown!");
+                        }
                         foreach (string fieldName in CellList[gridName][index].Keys)
                         {
-                            if (row.RowNew == null)
-                            {
-                                row.RowNew = DataAccessLayer.Util.Clone(row.Row);
-                            }
                             string text = TextGet(gridName, index, fieldName);
                             if (text != null)
                             {
@@ -430,9 +494,14 @@
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
             {
-                Row resultRow = (Row)Activator.CreateInstance(typeRow);
-                GridRowServer gridRowServer = new GridRowServer() { GridName = gridName, Index = row.Index, Row = resultRow, IsSelect = row.IsSelect, IsClick = row.IsClick };
-                RowSet(gridRowServer);
+                IndexEnum indexEnum = Util.IndexToIndexEnum(row.Index);
+                Row resultRow = null;
+                if (indexEnum == IndexEnum.Index)
+                {
+                    resultRow = (Row)Activator.CreateInstance(typeRow);
+                }
+                GridRowServer gridRowServer = new GridRowServer() { Row = resultRow, IsSelect = row.IsSelect, IsClick = row.IsClick };
+                RowSet(gridName, row.Index, gridRowServer);
                 foreach (var column in gridDataJson.ColumnList[gridName])
                 {
                     CellGet(gridName, row.Index, column.FieldName).IsSelect = gridDataJson.CellList[gridName][column.FieldName][row.Index].IsSelect;
@@ -460,9 +529,12 @@
                     {
                         ErrorRowSet(gridName, row.Index, errorRowText);
                     }
-                    PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
-                    object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
-                    propertyInfo.SetValue(resultRow, value);
+                    if (indexEnum == IndexEnum.Index)
+                    {
+                        PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
+                        object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
+                        propertyInfo.SetValue(resultRow, value);
+                    }
                 }
             }
         }
@@ -602,7 +674,15 @@
                         foreach (PropertyInfo propertyInfo in propertyInfoList)
                         {
                             string fieldName = propertyInfo.Name;
-                            object value = propertyInfo.GetValue(gridRowServer.Row);
+                            object value = null;
+                            if (gridRowServer.Row != null)
+                            {
+                                value = propertyInfo.GetValue(gridRowServer.Row);
+                            }
+                            if (gridRowServer.Row == null)
+                            {
+                                value = "X";
+                            }
                             string textJson = DataAccessLayer.Util.ValueToText(value);
                             string text = TextGet(gridName, index, fieldName);
                             GridCellServer gridCellServer = CellGet(gridName, index, fieldName);

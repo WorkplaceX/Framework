@@ -321,9 +321,9 @@
             {
                 GridDataServer gridDataServer = new GridDataServer();
                 gridDataServer.LoadJson(applicationJson, gridDataJson.FocusGridName, ApplicationServer.GetType());
+                Type typeRow = gridDataServer.TypeRowGet(gridDataJson.FocusGridName);
                 var row = gridDataServer.RowGet(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
-                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row.Row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
-                Type typeRow;
+                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(typeRow, row.Row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                 List<DataAccessLayer.Row> rowList;
                 cell.LookUp(out typeRow, out rowList);
                 gridDataServer = new GridDataServer();
