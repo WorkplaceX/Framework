@@ -45,9 +45,11 @@
                 try
                 {
                     applicationJsonOut = ApplicationServer.Process(applicationJsonIn, Controller.HttpContext.Request.Path);
+                    applicationJsonOut.ErrorProcess = null;
                 }
                 catch (Exception exception)
                 {
+                    // Prevent Internal Error 500 on process exception.
                     applicationJsonOut = applicationJsonIn;
                     applicationJsonOut.ErrorProcess = Framework.Util.ExceptionToText(exception);
                 }
