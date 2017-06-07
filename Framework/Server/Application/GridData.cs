@@ -62,6 +62,13 @@
         /// </summary>
         private Dictionary<string, Type> TypeRowList = new Dictionary<string, Type>();
 
+        public Type TypeRowGet(string gridName)
+        {
+            Type result;
+            TypeRowList.TryGetValue(gridName, out result);
+            return result;
+        }
+
         private Dictionary<string, GridQueryServer> QueryList = new Dictionary<string, GridQueryServer>();
 
         private GridQueryServer QueryGet(string gridName)
@@ -256,10 +263,10 @@
         /// <summary>
         /// Load data from database.
         /// </summary>
-        public void LoadDatabase(string gridName, Type typeRow)
+        public void LoadDatabase(string gridName, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
         {
             TypeRowList[gridName] = typeRow;
-            List<Row> rowList = DataAccessLayer.Util.Select(typeRow, 0, 15);
+            List<Row> rowList = DataAccessLayer.Util.Select(typeRow, fieldNameOrderBy, isOrderByDesc, 0, 15);
             LoadRow(gridName, typeRow, rowList);
         }
 

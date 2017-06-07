@@ -33,9 +33,20 @@
 
         }
 
+        private void DatabaseLoad(ApplicationJson applicationJson, string gridName, string fieldNameOrderBy, bool isOrderByDesc)
+        {
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            //
+            GridDataServer gridDataServer = new GridDataServer();
+            gridDataServer.LoadJson(applicationJson, gridName, ApplicationServer.GetType());
+            Type typeRow = gridDataServer.TypeRowGet(gridName);
+            gridDataServer.LoadDatabase(gridName, fieldNameOrderBy, isOrderByDesc, typeRow);
+            gridDataServer.SaveJson(applicationJson);
+        }
+
         protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
-            foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys)
+            foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys.ToArray())
             {
                 foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
                 {
@@ -51,6 +62,7 @@
                             gridQuery.FieldNameOrderBy = gridColumn.FieldName;
                             gridQuery.IsOrderByDesc = true;
                         }
+                        DatabaseLoad(applicationJson, gridName, gridQuery.FieldNameOrderBy, gridQuery.IsOrderByDesc);
                         break;
                     }
                 }

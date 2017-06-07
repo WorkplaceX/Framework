@@ -137,9 +137,19 @@
             return query.Where("Id = @0", id).ToDynamicArray();
         }
 
-        public static List<Row> Select(Type typeRow, int pageIndex, int pageRowCount)
+        public static List<Row> Select(Type typeRow, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount)
         {
-            var query = SelectQuery(typeRow).Skip(pageIndex * pageRowCount).Take(pageRowCount);
+            IQueryable query = SelectQuery(typeRow);
+            if (fieldNameOrderBy != null)
+            {
+                string ordering = fieldNameOrderBy;
+                if (isOrderByDesc)
+                {
+                    ordering = ordering + " DESC";
+                }
+                query = query.OrderBy(ordering);
+            }
+            query = query.Skip(pageIndex * pageRowCount).Take(pageRowCount);
             object[] resultArray = query.ToDynamicArray().ToArray();
             List<Row> result = new List<Row>();
             foreach (var row in resultArray)
