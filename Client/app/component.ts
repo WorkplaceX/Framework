@@ -434,20 +434,7 @@ export class GridField {
       gridCell.O = null;
     }
     gridCell.T = textNew;
-    gridCell.E = null; // Clear cell error
-    this.rowErrorClear(); // Clear row error
-  }
-
-  rowErrorClear() {
-    let gridData: any = this.dataService.json.GridDataJson;
-    if (this.gridName in gridData.RowList) {
-      for (let keyRow in gridData.RowList[this.gridName]) {
-        let index = gridData.RowList[this.gridName][keyRow].Index;
-        if (index == this.index) {
-          gridData.RowList[this.gridName][keyRow].Error = null;
-        }
-      }
-    }
+    gridCell.IsModify = true;
   }
 
   onChange() {

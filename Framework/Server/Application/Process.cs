@@ -50,7 +50,7 @@
                         foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
                         {
                             GridCell gridCell = applicationJson.GridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                            if (gridCell.E == null && gridCell.IsO)
+                            if (gridCell.IsModify)
                             {
 
                             }

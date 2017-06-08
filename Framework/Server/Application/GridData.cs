@@ -207,29 +207,6 @@
             }
         }
 
-        /// <summary>
-        /// Returns true, if user modified text on row.
-        /// </summary>
-        private bool IsTextModify(string gridName, string index)
-        {
-            bool result = false;
-            if (CellList.ContainsKey(gridName))
-            {
-                if (CellList[gridName].ContainsKey(index))
-                {
-                    foreach (GridCellServer gridCellServer in CellList[gridName][index].Values)
-                    {
-                        if (gridCellServer.Text != null)
-                        {
-                            result = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-
         private string ErrorCellGet(string gridName, string index, string fieldName)
         {
             return CellGet(gridName, index, fieldName).Error;
@@ -243,7 +220,7 @@
         /// <summary>
         /// Returns true, if data row contains text parse error.
         /// </summary>
-        private bool IsErrorCell(string gridName, string index)
+        private bool IsErrorRowCell(string gridName, string index)
         {
             bool result = false;
             if (CellList.ContainsKey(gridName))
@@ -264,20 +241,26 @@
         }
 
         /// <summary>
-        /// Delete all errors on row.
+        /// Returns true, if text on row has been modified.
         /// </summary>
-        private void ErrorCellClear(string gridName, string index)
+        private bool IsModifyRowCell(string gridName, string index)
         {
+            bool result = false;
             if (CellList.ContainsKey(gridName))
             {
                 if (CellList[gridName].ContainsKey(index))
                 {
                     foreach (string fieldName in CellList[gridName][index].Keys)
                     {
-                        CellList[gridName][index][fieldName].Error = null;
+                        if (CellList[gridName][index][fieldName].IsModify)
+                        {
+                            result = true;
+                            break;
+                        }
                     }
                 }
             }
+            return result;
         }
 
         /// <summary>
@@ -377,9 +360,9 @@
                     IndexEnum indexEnum = Util.IndexToIndexEnum(index);
                     if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New) // Exclude Header and Total.
                     {
-                        if (!IsErrorCell(gridName, index)) // No save if data row has text parse error!
+                        if (!IsErrorRowCell(gridName, index)) // No save if data row has text parse error!
                         {
-                            if (ErrorRowGet(gridName, index) == null) // No save if data row error exists. Is set to false by client on text modify.
+                            if (IsModifyRowCell(gridName, index)) // Only save row if user modified row on latest request.
                             {
                                 var row = RowList[gridName][index];
                                 if (row.Row != null && row.RowNew != null) // Database Update
@@ -427,7 +410,7 @@
             {
                 foreach (string index in RowList[gridName].Keys)
                 {
-                    if (IsTextModify(gridName, index))
+                    if (IsModifyRowCell(gridName, index))
                     {
                         Type typeRow = TypeRowGet(gridName);
                         var row = RowGet(gridName, index);
@@ -459,7 +442,7 @@
                                 {
                                     text = null;
                                 }
-                                if (ErrorCellGet(gridName, index, fieldName) == null) // Do not parse text if it comes from client with error. Client removes error on text modify.
+                                if (!(text == null && indexEnum == IndexEnum.Header)) // Do not parse text null for header.
                                 {
                                     object value;
                                     try
@@ -475,6 +458,7 @@
                                     row.RowNew.GetType().GetProperty(fieldName).SetValue(row.RowNew, value);
                                 }
                             }
+                            ErrorCellSet(gridName, index, fieldName, null); // Clear error.
                         }
                     }
                 }
