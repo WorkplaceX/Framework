@@ -274,6 +274,20 @@
         }
 
         /// <summary>
+        /// Load data from database with current grid header filter and current sorting.
+        /// </summary>
+        public void LoadDatabase(string gridName)
+        {
+            if (!IsErrorRowCell(gridName, Util.IndexEnumToString(IndexEnum.Header))) // Do not reload data grid if there is text parse error in header.
+            {
+                string fieldNameOrderBy = QueryList[gridName].FieldNameOrderBy;
+                bool isOrderByDesc = QueryList[gridName].IsOrderByDesc;
+                Type typeRow = TypeRowGet(gridName);
+                LoadDatabase(gridName, fieldNameOrderBy, isOrderByDesc, typeRow);
+            }
+        }
+
+        /// <summary>
         /// Load data from list.
         /// </summary>
         public void LoadRow(string gridName, Type typeRow, List<Row> rowList)
@@ -287,6 +301,11 @@
                 Framework.Util.Assert(row.GetType() == typeRow);
             }
             //
+            Dictionary<string, GridCellServer> cellListHeader = null;
+            if (CellList.ContainsKey(gridName))
+            {
+                CellList[gridName].TryGetValue(Util.IndexEnumToString(IndexEnum.Header), out cellListHeader); // Save header user text.
+            }
             CellList.Remove(gridName); // Clear user modified text and attached errors.
             RowList[gridName] = new Dictionary<string, GridRowServer>(); // Clear data
             TypeRowList[gridName] = typeRow;
@@ -297,6 +316,12 @@
                 RowSet(gridName, index.ToString(), new GridRowServer() { Row = rowList[index], RowNew = null });
             }
             RowNewAdd(gridName);
+            //
+            if (cellListHeader != null)
+            {
+                CellList[gridName] = new Dictionary<string, Dictionary<string, GridCellServer>>();
+                CellList[gridName][Util.IndexEnumToString(IndexEnum.Header)] = cellListHeader; // Load back header user text.
+            }
         }
 
         /// <summary>

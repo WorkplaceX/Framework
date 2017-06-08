@@ -41,6 +41,7 @@
         /// </summary>
         protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
+            List<string> gridNameList = new List<string>();
             foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys)
             {
                 foreach (GridRow gridRow in applicationJson.GridDataJson.RowList[gridName])
@@ -52,11 +53,20 @@
                             GridCell gridCell = applicationJson.GridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                             if (gridCell.IsModify)
                             {
-
+                                gridNameList.Add(gridName);
                             }
                         }
                     }
                 }
+            }
+            //
+            foreach (string gridName in gridNameList)
+            {
+                GridDataServer gridDataServer = new GridDataServer();
+                gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
+                gridDataServer.TextParse(); // Parse text header.
+                gridDataServer.LoadDatabase(gridName);
+                gridDataServer.SaveJson(applicationJson);
             }
         }
     }
