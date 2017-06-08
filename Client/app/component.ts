@@ -259,7 +259,7 @@ export class GridRow {
   template: `
   <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" >
     <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
-      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}
+      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}&nbsp;
       <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
     </div>
     <GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></GridField>
@@ -434,6 +434,20 @@ export class GridField {
       gridCell.O = null;
     }
     gridCell.T = textNew;
+    gridCell.E = null; // Clear cell error
+    this.rowErrorClear(); // Clear row error
+  }
+
+  rowErrorClear() {
+    let gridData: any = this.dataService.json.GridDataJson;
+    if (this.gridName in gridData.RowList) {
+      for (let keyRow in gridData.RowList[this.gridName]) {
+        let index = gridData.RowList[this.gridName][keyRow].Index;
+        if (index == this.index) {
+          gridData.RowList[this.gridName][keyRow].Error = null;
+        }
+      }
+    }
   }
 
   onChange() {

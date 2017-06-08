@@ -239,6 +239,29 @@
         }
 
         /// <summary>
+        /// Returns true, if data row contains text parse error.
+        /// </summary>
+        private bool IsErrorCell(string gridName, string index)
+        {
+            bool result = false;
+            if (CellList.ContainsKey(gridName))
+            {
+                if (CellList[gridName].ContainsKey(index))
+                {
+                    foreach (string fieldName in CellList[gridName][index].Keys)
+                    {
+                        if (CellList[gridName][index][fieldName].Error != null)
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Delete all errors on row.
         /// </summary>
         private void ErrorCellClear(string gridName, string index)
@@ -283,11 +306,20 @@
             RowList[gridName] = new Dictionary<string, GridRowServer>(); // Clear data
             TypeRowList[gridName] = typeRow;
             //
+            RowHeaderAdd(gridName);
             for (int index = 0; index < rowList.Count; index++)
             {
                 RowSet(gridName, index.ToString(), new GridRowServer() { Row = rowList[index], RowNew = null });
             }
             RowNewAdd(gridName);
+        }
+
+        /// <summary>
+        /// Add grid header row.
+        /// </summary>
+        private void RowHeaderAdd(string gridName)
+        {
+            RowSet(gridName, Util.IndexEnumToString(IndexEnum.Header), new GridRowServer() { Row = null, RowNew = null });
         }
 
         /// <summary>
@@ -336,44 +368,44 @@
         /// </summary>
         public void SaveDatabase()
         {
-            foreach (string gridName in RowList.Keys)
-            {
-                foreach (string index in RowList[gridName].Keys)
-                {
-                    ErrorRowSet(gridName, index, null);
-                }
-            }
-            //
             foreach (string gridName in RowList.Keys.ToArray())
             {
                 foreach (string index in RowList[gridName].Keys.ToArray())
                 {
-                    var row = RowList[gridName][index];
-                    if (row.Row != null && row.RowNew != null) // Database Update
+                    if (!IsErrorCell(gridName, index)) // No save if text parse error!
                     {
-                        try
+                        if (ErrorRowGet(gridName, index) == null) // No save if row error. Is set to false by client on text modify.
                         {
-                            DataAccessLayer.Util.Update(row.Row, row.RowNew);
-                            row.Row = row.RowNew;
-                            TextClear(gridName, index);
-                        }
-                        catch (Exception exception)
-                        {
-                            ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
-                        }
-                    }
-                    if (row.Row == null && row.RowNew != null) // Database Insert
-                    {
-                        try
-                        {
-                            DataAccessLayer.Util.Insert(row.RowNew);
-                            row.Row = row.RowNew;
-                            TextClear(gridName, index);
-                            RowNewAdd(gridName); // Make "New" to "Index" and add "New"
-                        }
-                        catch (Exception exception)
-                        {
-                            ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                            var row = RowList[gridName][index];
+                            if (row.Row != null && row.RowNew != null) // Database Update
+                            {
+                                try
+                                {
+                                    DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                                    ErrorRowSet(gridName, index, null);
+                                    row.Row = row.RowNew;
+                                    TextClear(gridName, index);
+                                }
+                                catch (Exception exception)
+                                {
+                                    ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                }
+                            }
+                            if (row.Row == null && row.RowNew != null) // Database Insert
+                            {
+                                try
+                                {
+                                    DataAccessLayer.Util.Insert(row.RowNew);
+                                    ErrorRowSet(gridName, index, null);
+                                    row.Row = row.RowNew;
+                                    TextClear(gridName, index);
+                                    RowNewAdd(gridName); // Make "New" to "Index" and add "New"
+                                }
+                                catch (Exception exception)
+                                {
+                                    ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                }
+                            }
                         }
                     }
                 }
@@ -385,14 +417,6 @@
         /// </summary>
         public void TextParse()
         {
-            foreach (string gridName in RowList.Keys)
-            {
-                foreach (string index in RowList[gridName].Keys)
-                {
-                    ErrorCellClear(gridName, index);
-                }
-            }
-            //
             foreach (string gridName in RowList.Keys)
             {
                 foreach (string index in RowList[gridName].Keys)
@@ -414,6 +438,9 @@
                             case IndexEnum.New:
                                 row.RowNew = DataAccessLayer.Util.RowCreate(typeRow);
                                 break;
+                            case IndexEnum.Header:
+                                row.RowNew = DataAccessLayer.Util.RowCreate(typeRow);
+                                break;
                             default:
                                 throw new Exception("Enum unknown!");
                         }
@@ -426,18 +453,21 @@
                                 {
                                     text = null;
                                 }
-                                object value;
-                                try
+                                if (ErrorCellGet(gridName, index, fieldName) == null) // Do not parse text if it comes from client with error. Client removes error on text modify.
                                 {
-                                    value = DataAccessLayer.Util.ValueFromText(text, row.RowNew.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                    object value;
+                                    try
+                                    {
+                                        value = DataAccessLayer.Util.ValueFromText(text, row.RowNew.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                    }
+                                    catch (Exception exception)
+                                    {
+                                        ErrorCellSet(gridName, index, fieldName, exception.Message);
+                                        row.RowNew = null; // Do not save.
+                                        break;
+                                    }
+                                    row.RowNew.GetType().GetProperty(fieldName).SetValue(row.RowNew, value);
                                 }
-                                catch (Exception exception)
-                                {
-                                    ErrorCellSet(gridName, index, fieldName, exception.Message);
-                                    row.RowNew = null; // Do not save.
-                                    break;
-                                }
-                                row.RowNew.GetType().GetProperty(fieldName).SetValue(row.RowNew, value);
                             }
                         }
                     }
@@ -678,10 +708,6 @@
                             if (gridRowServer.Row != null)
                             {
                                 value = propertyInfo.GetValue(gridRowServer.Row);
-                            }
-                            if (gridRowServer.Row == null)
-                            {
-                                value = "X";
                             }
                             string textJson = DataAccessLayer.Util.ValueToText(value);
                             string text = TextGet(gridName, index, fieldName);
