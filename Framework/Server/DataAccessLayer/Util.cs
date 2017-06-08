@@ -9,6 +9,24 @@
     using System.Linq.Dynamic.Core;
     using System.Reflection;
 
+    public enum FilterOperator
+    {
+        None = 0,
+        Equal = 1,
+        Smaller = 2,
+        Greater = 3,
+        Like = 4
+    }
+
+    public class Filter
+    {
+        public string FieldName;
+
+        public FilterOperator FilterOperator;
+
+        public object Value;
+    }
+
     public static class Util
     {
         public static string TableNameFromTypeRow(Type typeRow)
@@ -144,7 +162,48 @@
             return query.Where("Id = @0", id).ToDynamicArray();
         }
 
-        public static List<Row> Select(Type typeRow, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount)
+        /// <summary>
+        /// Add filter to query.
+        /// </summary>
+        private static void Select(List<Filter> filterList, ref IQueryable query)
+        {
+            if (filterList != null && filterList.Count > 0)
+            {
+                string filterSql = null;
+                List<object> parameterList = new List<object>();
+                int i = 0;
+                foreach (Filter filter in filterList)
+                {
+                    if (filterSql != null)
+                    {
+                        filterSql += " AND ";
+                    }
+                    filterSql += filter.FieldName;
+                    switch (filter.FilterOperator)
+                    {
+                        case FilterOperator.Equal:
+                            filterSql += " = @" + i.ToString();
+                            break;
+                        case FilterOperator.Smaller:
+                            filterSql += " <= @" + i.ToString();
+                            break;
+                        case FilterOperator.Greater:
+                            filterSql += " >= @" + i.ToString();
+                            break;
+                        case FilterOperator.Like:
+                            filterSql += ".Contains(@" + i.ToString() + ")";
+                            break;
+                        default:
+                            throw new Exception("Enum unknowen!");
+                    }
+                    parameterList.Add(filter.Value);
+                    i += 1;
+                }
+                query = query.Where(filterSql, parameterList.ToArray());
+            }
+        }
+
+        public static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount)
         {
             IQueryable query = SelectQuery(typeRow);
             if (fieldNameOrderBy != null)
@@ -156,6 +215,7 @@
                 }
                 query = query.OrderBy(ordering);
             }
+            Select(filterList, ref query);
             query = query.Skip(pageIndex * pageRowCount).Take(pageRowCount);
             object[] resultArray = query.ToDynamicArray().ToArray();
             List<Row> result = new List<Row>();

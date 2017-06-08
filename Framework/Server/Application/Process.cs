@@ -86,7 +86,7 @@
             GridDataServer gridDataServer = new GridDataServer();
             gridDataServer.LoadJson(applicationJson, gridName, ApplicationServer.GetType());
             Type typeRow = gridDataServer.TypeRowGet(gridName);
-            gridDataServer.LoadDatabase(gridName, fieldNameOrderBy, isOrderByDesc, typeRow);
+            gridDataServer.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
             gridDataServer.SaveJson(applicationJson);
         }
 

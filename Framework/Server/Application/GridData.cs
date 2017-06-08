@@ -14,6 +14,11 @@
         public Row RowNew;
 
         /// <summary>
+        /// Header with valid parsed filter parameters.
+        /// </summary>
+        public Row RowHeader; // List<Row> for multiple parameters.
+
+        /// <summary>
         /// Gets or sets error attached to row.
         /// </summary>
         public string Error;
@@ -266,11 +271,46 @@
         /// <summary>
         /// Load data from database.
         /// </summary>
-        public void LoadDatabase(string gridName, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
+        public void LoadDatabase(string gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
         {
             TypeRowList[gridName] = typeRow;
-            List<Row> rowList = DataAccessLayer.Util.Select(typeRow, fieldNameOrderBy, isOrderByDesc, 0, 15);
+            List<Row> rowList = DataAccessLayer.Util.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15);
             LoadRow(gridName, typeRow, rowList);
+        }
+
+        private void LoadDatabase(string gridName, out List<Filter> filterList)
+        {
+            filterList = new List<Filter>();
+            Row row = RowGet(gridName, Util.IndexEnumToString(IndexEnum.Header)).RowHeader; // Data row with parsed header values.
+            foreach (string fieldName in ColumnList[gridName].Keys)
+            {
+                string text = TextGet(gridName, Util.IndexEnumToString(IndexEnum.Header), fieldName);
+                if (text == "")
+                {
+                    text = null;
+                }
+                if (text != null) // Use filter only when text set.
+                {
+                    object value = row.GetType().GetProperty(fieldName).GetValue(row);
+                    FilterOperator filterOperator = FilterOperator.Equal;
+                    if (value is string)
+                    {
+                        filterOperator = FilterOperator.Like;
+                    }
+                    else
+                    {
+                        if (text.Contains(">"))
+                        {
+                            filterOperator = FilterOperator.Greater;
+                        }
+                        if (text.Contains("<"))
+                        {
+                            filterOperator = FilterOperator.Greater;
+                        }
+                    }
+                    filterList.Add(new Filter() { FieldName = fieldName, FilterOperator = filterOperator, Value = value });
+                }
+            }
         }
 
         /// <summary>
@@ -283,7 +323,9 @@
                 string fieldNameOrderBy = QueryList[gridName].FieldNameOrderBy;
                 bool isOrderByDesc = QueryList[gridName].IsOrderByDesc;
                 Type typeRow = TypeRowGet(gridName);
-                LoadDatabase(gridName, fieldNameOrderBy, isOrderByDesc, typeRow);
+                List<Filter> filterList;
+                LoadDatabase(gridName, out filterList);
+                LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
             }
         }
 
@@ -444,16 +486,20 @@
                             Framework.Util.Assert(row.Row.GetType() == typeRow);
                         }
                         IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                        Row rowWrite;
                         switch (indexEnum)
                         {
                             case IndexEnum.Index:
-                                row.RowNew = DataAccessLayer.Util.RowClone(row.Row);
+                                rowWrite = DataAccessLayer.Util.RowClone(row.Row);
+                                row.RowNew = rowWrite;
                                 break;
                             case IndexEnum.New:
-                                row.RowNew = DataAccessLayer.Util.RowCreate(typeRow);
+                                rowWrite = DataAccessLayer.Util.RowCreate(typeRow);
+                                row.RowNew = rowWrite;
                                 break;
                             case IndexEnum.Header:
-                                row.RowNew = DataAccessLayer.Util.RowCreate(typeRow);
+                                rowWrite = DataAccessLayer.Util.RowCreate(typeRow);
+                                row.RowHeader = rowWrite;
                                 break;
                             default:
                                 throw new Exception("Enum unknown!");
@@ -472,7 +518,7 @@
                                     object value;
                                     try
                                     {
-                                        value = DataAccessLayer.Util.ValueFromText(text, row.RowNew.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                        value = DataAccessLayer.Util.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
                                     }
                                     catch (Exception exception)
                                     {
@@ -480,7 +526,7 @@
                                         row.RowNew = null; // Do not save.
                                         break;
                                     }
-                                    row.RowNew.GetType().GetProperty(fieldName).SetValue(row.RowNew, value);
+                                    rowWrite.GetType().GetProperty(fieldName).SetValue(rowWrite, value);
                                 }
                             }
                             ErrorCellSet(gridName, index, fieldName, null); // Clear error.
