@@ -26,18 +26,18 @@
     }
 
     /// <summary>
-    /// Process data grid header filter.
+    /// Process data grid filter.
     /// </summary>
-    public class ProcessGridHeader : ProcessBase
+    public class ProcessGridFilter : ProcessBase
     {
-        public ProcessGridHeader(ApplicationServerBase applicationServer)
+        public ProcessGridFilter(ApplicationServerBase applicationServer)
             : base(applicationServer)
         {
 
         }
 
         /// <summary>
-        /// Detect header text changes from user.
+        /// Detect data grid filter text changes from user.
         /// </summary>
         protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
@@ -46,7 +46,7 @@
             {
                 foreach (GridRow gridRow in applicationJson.GridDataJson.RowList[gridName])
                 {
-                    if (Util.IndexToIndexEnum(gridRow.Index) == IndexEnum.Header)
+                    if (Util.IndexToIndexEnum(gridRow.Index) == IndexEnum.Filter)
                     {
                         foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
                         {
@@ -64,7 +64,7 @@
             {
                 GridDataServer gridDataServer = new GridDataServer();
                 gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
-                gridDataServer.TextParse(); // Parse text header.
+                gridDataServer.TextParse(); // Parse text filter.
                 gridDataServer.LoadDatabase(gridName);
                 gridDataServer.SaveJson(applicationJson);
             }
@@ -370,7 +370,7 @@
                     foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                     {
                         int index;
-                        if (int.TryParse(gridRow.Index, out index)) // Exclude "Header"
+                        if (int.TryParse(gridRow.Index, out index)) // Exclude "Filter"
                         {
                             gridRow.IsClick = true;
                             break;

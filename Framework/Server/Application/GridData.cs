@@ -14,9 +14,9 @@
         public Row RowNew;
 
         /// <summary>
-        /// Header with valid parsed filter parameters.
+        /// Filter with parsed and valid parameters.
         /// </summary>
-        public Row RowHeader; // List<Row> for multiple parameters.
+        public Row RowFilter; // List<Row> for multiple parameters.
 
         /// <summary>
         /// Gets or sets error attached to row.
@@ -281,10 +281,10 @@
         private void LoadDatabase(string gridName, out List<Filter> filterList)
         {
             filterList = new List<Filter>();
-            Row row = RowGet(gridName, Util.IndexEnumToString(IndexEnum.Header)).RowHeader; // Data row with parsed header values.
+            Row row = RowGet(gridName, Util.IndexEnumToString(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
             foreach (string fieldName in ColumnList[gridName].Keys)
             {
-                string text = TextGet(gridName, Util.IndexEnumToString(IndexEnum.Header), fieldName);
+                string text = TextGet(gridName, Util.IndexEnumToString(IndexEnum.Filter), fieldName);
                 if (text == "")
                 {
                     text = null;
@@ -314,11 +314,11 @@
         }
 
         /// <summary>
-        /// Load data from database with current grid header filter and current sorting.
+        /// Load data from database with current grid filter and current sorting.
         /// </summary>
         public void LoadDatabase(string gridName)
         {
-            if (!IsErrorRowCell(gridName, Util.IndexEnumToString(IndexEnum.Header))) // Do not reload data grid if there is text parse error in header.
+            if (!IsErrorRowCell(gridName, Util.IndexEnumToString(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
                 string fieldNameOrderBy = QueryList[gridName].FieldNameOrderBy;
                 bool isOrderByDesc = QueryList[gridName].IsOrderByDesc;
@@ -343,35 +343,35 @@
                 Framework.Util.Assert(row.GetType() == typeRow);
             }
             //
-            Dictionary<string, GridCellServer> cellListHeader = null;
+            Dictionary<string, GridCellServer> cellListFilter = null;
             if (CellList.ContainsKey(gridName))
             {
-                CellList[gridName].TryGetValue(Util.IndexEnumToString(IndexEnum.Header), out cellListHeader); // Save header user text.
+                CellList[gridName].TryGetValue(Util.IndexEnumToString(IndexEnum.Filter), out cellListFilter); // Save filter user text.
             }
             CellList.Remove(gridName); // Clear user modified text and attached errors.
             RowList[gridName] = new Dictionary<string, GridRowServer>(); // Clear data
             TypeRowList[gridName] = typeRow;
             //
-            RowHeaderAdd(gridName);
+            RowFilterAdd(gridName);
             for (int index = 0; index < rowList.Count; index++)
             {
                 RowSet(gridName, index.ToString(), new GridRowServer() { Row = rowList[index], RowNew = null });
             }
             RowNewAdd(gridName);
             //
-            if (cellListHeader != null)
+            if (cellListFilter != null)
             {
                 CellList[gridName] = new Dictionary<string, Dictionary<string, GridCellServer>>();
-                CellList[gridName][Util.IndexEnumToString(IndexEnum.Header)] = cellListHeader; // Load back header user text.
+                CellList[gridName][Util.IndexEnumToString(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
             }
         }
 
         /// <summary>
-        /// Add grid header row.
+        /// Add data grid filter row.
         /// </summary>
-        private void RowHeaderAdd(string gridName)
+        private void RowFilterAdd(string gridName)
         {
-            RowSet(gridName, Util.IndexEnumToString(IndexEnum.Header), new GridRowServer() { Row = null, RowNew = null });
+            RowSet(gridName, Util.IndexEnumToString(IndexEnum.Filter), new GridRowServer() { Row = null, RowNew = null });
         }
 
         /// <summary>
@@ -382,10 +382,10 @@
             // (Index)
             Dictionary<string, GridRowServer> rowListCopy = RowList[gridName];
             RowList[gridName] = new Dictionary<string, GridRowServer>();
-            // Header
+            // Filter
             foreach (string index in rowListCopy.Keys)
             {
-                if (Util.IndexToIndexEnum(index) == IndexEnum.Header)
+                if (Util.IndexToIndexEnum(index) == IndexEnum.Filter)
                 {
                     RowSet(gridName, index, rowListCopy[index]);
                     break;
@@ -425,7 +425,7 @@
                 foreach (string index in RowList[gridName].Keys.ToArray())
                 {
                     IndexEnum indexEnum = Util.IndexToIndexEnum(index);
-                    if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New) // Exclude Header and Total.
+                    if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New) // Exclude Filter and Total.
                     {
                         if (!IsErrorRowCell(gridName, index)) // No save if data row has text parse error!
                         {
@@ -497,9 +497,9 @@
                                 rowWrite = DataAccessLayer.Util.RowCreate(typeRow);
                                 row.RowNew = rowWrite;
                                 break;
-                            case IndexEnum.Header:
+                            case IndexEnum.Filter:
                                 rowWrite = DataAccessLayer.Util.RowCreate(typeRow);
-                                row.RowHeader = rowWrite;
+                                row.RowFilter = rowWrite;
                                 break;
                             default:
                                 throw new Exception("Enum unknown!");
@@ -513,7 +513,7 @@
                                 {
                                     text = null;
                                 }
-                                if (!(text == null && indexEnum == IndexEnum.Header)) // Do not parse text null for header.
+                                if (!(text == null && indexEnum == IndexEnum.Filter)) // Do not parse text null for filter.
                                 {
                                     object value;
                                     try

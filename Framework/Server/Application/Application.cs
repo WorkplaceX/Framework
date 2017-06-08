@@ -41,7 +41,7 @@
         protected virtual void ProcessInit()
         {
             ProcessList.Add(new ProcessApplicationInit(this));
-            ProcessList.Add(new ProcessGridHeader(this));
+            ProcessList.Add(new ProcessGridFilter(this));
             ProcessList.Add(new ProcessGridOrderBy(this));
             ProcessList.Add(new ProcessGridSave(this));
             ProcessList.Add(new ProcessGridRowFirstIsClick(this));

@@ -1,8 +1,8 @@
 ToDo
 -Include build number into version https://docs.travis-ci.com/user/environment-variables/
 -https://github.com/azure/iisnode/wiki/iisnode-releases, https://www.youtube.com/watch?v=JUYCDnqR8p0 (Document install iisnode)
--Rename Cell.V to Cell.T (Text)
--Include SchemaName into TableName
+-Rename Cell.V to Cell.T (Text) [Done]
+-Include SchemaName into TableName [Done]
 -Rename GridCell.IsSelect to IsFocus
 -Focused field based on expression not on GridCell.IsSelect. Same for Row.IsSelect. Be aware of trippel select state with mouse over.
 -https://brockallen.com/2016/09/24/process-start-for-urls-on-net-core/ (Open Browser)

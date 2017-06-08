@@ -8,7 +8,7 @@ namespace Framework.Server.Application
     {
         None = 0,
         Index = 1,
-        Header = 2,
+        Filter = 2,
         New = 3,
         Total = 4
     }
@@ -22,9 +22,9 @@ namespace Framework.Server.Application
 
         public static IndexEnum IndexToIndexEnum(string index)
         {
-            if (IndexEnumToString(IndexEnum.Header) == index)
+            if (IndexEnumToString(IndexEnum.Filter) == index)
             {
-                return IndexEnum.Header;
+                return IndexEnum.Filter;
             }
             if (IndexEnumToString(IndexEnum.New) == index)
             {
