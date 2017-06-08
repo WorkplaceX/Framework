@@ -37,6 +37,8 @@
 
         public bool IsSelect;
 
+        public bool IsModify;
+
         public bool IsClick;
     }
 
@@ -372,38 +374,42 @@
             {
                 foreach (string index in RowList[gridName].Keys.ToArray())
                 {
-                    if (!IsErrorCell(gridName, index)) // No save if text parse error!
+                    IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                    if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New) // Exclude Header and Total.
                     {
-                        if (ErrorRowGet(gridName, index) == null) // No save if row error. Is set to false by client on text modify.
+                        if (!IsErrorCell(gridName, index)) // No save if data row has text parse error!
                         {
-                            var row = RowList[gridName][index];
-                            if (row.Row != null && row.RowNew != null) // Database Update
+                            if (ErrorRowGet(gridName, index) == null) // No save if data row error exists. Is set to false by client on text modify.
                             {
-                                try
+                                var row = RowList[gridName][index];
+                                if (row.Row != null && row.RowNew != null) // Database Update
                                 {
-                                    DataAccessLayer.Util.Update(row.Row, row.RowNew);
-                                    ErrorRowSet(gridName, index, null);
-                                    row.Row = row.RowNew;
-                                    TextClear(gridName, index);
+                                    try
+                                    {
+                                        DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                                        ErrorRowSet(gridName, index, null);
+                                        row.Row = row.RowNew;
+                                        TextClear(gridName, index);
+                                    }
+                                    catch (Exception exception)
+                                    {
+                                        ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                    }
                                 }
-                                catch (Exception exception)
+                                if (row.Row == null && row.RowNew != null) // Database Insert
                                 {
-                                    ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
-                                }
-                            }
-                            if (row.Row == null && row.RowNew != null) // Database Insert
-                            {
-                                try
-                                {
-                                    DataAccessLayer.Util.Insert(row.RowNew);
-                                    ErrorRowSet(gridName, index, null);
-                                    row.Row = row.RowNew;
-                                    TextClear(gridName, index);
-                                    RowNewAdd(gridName); // Make "New" to "Index" and add "New"
-                                }
-                                catch (Exception exception)
-                                {
-                                    ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                    try
+                                    {
+                                        DataAccessLayer.Util.Insert(row.RowNew);
+                                        ErrorRowSet(gridName, index, null);
+                                        row.Row = row.RowNew;
+                                        TextClear(gridName, index);
+                                        RowNewAdd(gridName); // Make "New" to "Index" and add "New"
+                                    }
+                                    catch (Exception exception)
+                                    {
+                                        ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                    }
                                 }
                             }
                         }
@@ -536,6 +542,7 @@
                 {
                     CellGet(gridName, row.Index, column.FieldName).IsSelect = gridDataJson.CellList[gridName][column.FieldName][row.Index].IsSelect;
                     CellGet(gridName, row.Index, column.FieldName).IsClick = gridDataJson.CellList[gridName][column.FieldName][row.Index].IsClick;
+                    CellGet(gridName, row.Index, column.FieldName).IsModify = gridDataJson.CellList[gridName][column.FieldName][row.Index].IsModify;
                     string text;
                     if (gridDataJson.CellList[gridName][column.FieldName][row.Index].IsO)
                     {
@@ -717,7 +724,7 @@
                                 gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCell = new GridCell() { IsSelect = gridCellServer.IsSelect, IsClick = gridCellServer.IsClick, E = errorCell };
+                            GridCell gridCell = new GridCell() { IsSelect = gridCellServer.IsSelect, IsClick = gridCellServer.IsClick, IsModify = gridCellServer.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCell;
                             if (text == null)
                             {

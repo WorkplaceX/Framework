@@ -25,6 +25,42 @@
         }
     }
 
+    /// <summary>
+    /// Process data grid header filter.
+    /// </summary>
+    public class ProcessGridHeader : ProcessBase
+    {
+        public ProcessGridHeader(ApplicationServerBase applicationServer)
+            : base(applicationServer)
+        {
+
+        }
+
+        /// <summary>
+        /// Detect header text changes from user.
+        /// </summary>
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
+        {
+            foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys)
+            {
+                foreach (GridRow gridRow in applicationJson.GridDataJson.RowList[gridName])
+                {
+                    if (Util.IndexToIndexEnum(gridRow.Index) == IndexEnum.Header)
+                    {
+                        foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
+                        {
+                            GridCell gridCell = applicationJson.GridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                            if (gridCell.E == null && gridCell.IsO)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public class ProcessGridOrderBy : ProcessBase
     {
         public ProcessGridOrderBy(ApplicationServerBase applicationServer) 
@@ -46,6 +82,7 @@
 
         protected internal override void ProcessBegin(ApplicationJson applicationJson)
         {
+            // Detect OrderBy click
             foreach (string gridName in applicationJson.GridDataJson.ColumnList.Keys.ToArray())
             {
                 foreach (GridColumn gridColumn in applicationJson.GridDataJson.ColumnList[gridName])
@@ -117,6 +154,34 @@
         }
     }
 
+    /// <summary>
+    /// Set GridCell.IsModify to false.
+    /// </summary>
+    public class ProcessGridCellIsModifyFalse : ProcessBase
+    {
+        public ProcessGridCellIsModifyFalse(ApplicationServerBase applicationServer)
+            : base(applicationServer)
+        {
+
+        }
+
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
+        {
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            //
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        gridCell.IsModify = false;
+                    }
+                }
+            }
+        }
+    }
     public class ProcessGridIsIsClick : ProcessBase
     {
         public ProcessGridIsIsClick(ApplicationServerBase applicationServer)

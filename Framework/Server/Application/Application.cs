@@ -41,12 +41,14 @@
         protected virtual void ProcessInit()
         {
             ProcessList.Add(new ProcessApplicationInit(this));
+            ProcessList.Add(new ProcessGridHeader(this));
             ProcessList.Add(new ProcessGridOrderBy(this));
             ProcessList.Add(new ProcessGridSave(this));
             ProcessList.Add(new ProcessGridRowFirstIsClick(this));
             ProcessList.Add(new ProcessGridIsIsClick(this));
             ProcessList.Add(new ProcessGridLookUp(this));
             ProcessList.Add(new ProcessJson(this));
+            ProcessList.Add(new ProcessGridCellIsModifyFalse(this));
         }
 
         public ApplicationJson Process(ApplicationJson applicationJson, string requestPath)

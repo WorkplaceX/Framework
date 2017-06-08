@@ -217,6 +217,11 @@
         public bool IsSelect;
 
         public bool IsClick;
+
+        /// <summary>
+        /// Gets or sets IsModify. Indicating text has been modified by user since last request.
+        /// </summary>
+        public bool IsModify;
     }
 
     /// <summary>
