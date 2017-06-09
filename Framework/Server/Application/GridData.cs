@@ -251,16 +251,24 @@
         private bool IsModifyRowCell(string gridName, string index)
         {
             bool result = false;
+            Type typeRow = TypeRowGet(gridName);
             if (CellList.ContainsKey(gridName))
             {
                 if (CellList[gridName].ContainsKey(index))
                 {
-                    foreach (string fieldName in CellList[gridName][index].Keys)
+                    foreach (Cell column in DataAccessLayer.Util.ColumnList(typeRow))
                     {
-                        if (CellList[gridName][index][fieldName].IsModify)
+                        if (column.FieldNameSql != null) // Exclude calculated column
                         {
-                            result = true;
-                            break;
+                            string fieldName = column.FieldNameCSharp;
+                            if (CellList[gridName][index].ContainsKey(fieldName))
+                            {
+                                if (CellList[gridName][index][fieldName].IsModify)
+                                {
+                                    result = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -280,10 +288,13 @@
 
         private void LoadDatabase(string gridName, out List<Filter> filterList)
         {
+            Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
             Row row = RowGet(gridName, Util.IndexEnumToString(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
-            foreach (string fieldName in ColumnList[gridName].Keys)
+            
+            foreach (Cell column in DataAccessLayer.Util.ColumnList(typeRow))
             {
+                string fieldName = column.FieldNameCSharp;
                 string text = TextGet(gridName, Util.IndexEnumToString(IndexEnum.Filter), fieldName);
                 if (text == "")
                 {
@@ -291,24 +302,27 @@
                 }
                 if (text != null) // Use filter only when text set.
                 {
-                    object value = row.GetType().GetProperty(fieldName).GetValue(row);
-                    FilterOperator filterOperator = FilterOperator.Equal;
-                    if (value is string)
+                    if (column.FieldNameSql != null) // Do not filter on calculated column.
                     {
-                        filterOperator = FilterOperator.Like;
-                    }
-                    else
-                    {
-                        if (text.Contains(">"))
+                        object value = row.GetType().GetProperty(fieldName).GetValue(row);
+                        FilterOperator filterOperator = FilterOperator.Equal;
+                        if (value is string)
                         {
-                            filterOperator = FilterOperator.Greater;
+                            filterOperator = FilterOperator.Like;
                         }
-                        if (text.Contains("<"))
+                        else
                         {
-                            filterOperator = FilterOperator.Greater;
+                            if (text.Contains(">"))
+                            {
+                                filterOperator = FilterOperator.Greater;
+                            }
+                            if (text.Contains("<"))
+                            {
+                                filterOperator = FilterOperator.Greater;
+                            }
                         }
+                        filterList.Add(new Filter() { FieldName = fieldName, FilterOperator = filterOperator, Value = value });
                     }
-                    filterList.Add(new Filter() { FieldName = fieldName, FilterOperator = filterOperator, Value = value });
                 }
             }
         }
@@ -664,19 +678,23 @@
         {
             var result = new List<GridColumn>();
             //
-            var cellList = Framework.Server.DataAccessLayer.Util.ColumnList(typeRow);
+            var columnList = Framework.Server.DataAccessLayer.Util.ColumnList(typeRow);
             double widthPercentTotal = 0;
             bool isLast = false;
-            for (int i = 0; i < cellList.Count; i++)
+            for (int i = 0; i < columnList.Count; i++)
             {
                 // Text
-                string text = cellList[i].FieldNameSql;
-                cellList[i].ColumnText(ref text);
+                string text = columnList[i].FieldNameSql;
+                if (text == null)
+                {
+                    text = columnList[i].FieldNameCSharp; // Calculated column.
+                }
+                columnList[i].ColumnText(ref text);
                 // WidthPercent
-                isLast = i == cellList.Count;
-                double widthPercentAvg = Math.Round(((double)100 - widthPercentTotal) / ((double)cellList.Count - (double)i), 2);
+                isLast = i == columnList.Count;
+                double widthPercentAvg = Math.Round(((double)100 - widthPercentTotal) / ((double)columnList.Count - (double)i), 2);
                 double widthPercent = widthPercentAvg;
-                cellList[i].ColumnWidthPercent(ref widthPercent);
+                columnList[i].ColumnWidthPercent(ref widthPercent);
                 widthPercent = Math.Round(widthPercent, 2);
                 if (isLast)
                 {
@@ -690,7 +708,7 @@
                     }
                 }
                 widthPercentTotal = widthPercentTotal + widthPercent;
-                result.Add(new GridColumn() { FieldName = cellList[i].FieldNameSql, Text = text, WidthPercent = widthPercent });
+                result.Add(new GridColumn() { FieldName = columnList[i].FieldNameCSharp, Text = text, WidthPercent = widthPercent });
             }
             return result;
         }

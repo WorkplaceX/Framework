@@ -53,7 +53,10 @@
                             GridCell gridCell = applicationJson.GridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                             if (gridCell.IsModify)
                             {
-                                gridNameList.Add(gridName);
+                                if (!gridNameList.Contains(gridName))
+                                {
+                                    gridNameList.Add(gridName);
+                                }
                             }
                         }
                     }
@@ -186,7 +189,10 @@
                     foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
                         GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        gridCell.IsModify = false;
+                        if (gridCell.IsModify)
+                        {
+                            gridCell.IsModify = false;
+                        }
                     }
                 }
             }

@@ -53,7 +53,7 @@
         private string fieldNameSql;
 
         /// <summary>
-        /// Gets sql FieldName.
+        /// Gets sql FieldName. If null, then it's a calculated column.
         /// </summary>
         public string FieldNameSql
         {

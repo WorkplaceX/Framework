@@ -85,8 +85,15 @@
                 {
                     SqlNameAttribute attributePropertySql = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
                     TypeCellAttribute attributePropertyCell = (TypeCellAttribute)propertyInfo.GetCustomAttribute(typeof(TypeCellAttribute));
-                    Cell cell = (Cell)Activator.CreateInstance(attributePropertyCell.TypeCell);
-                    cell.Constructor(attributeRow.SqlName, attributePropertySql.SqlName, propertyInfo.Name);
+                    Type typeCell = typeof(Cell); // Default cell api.
+                    string sqlName = null;
+                    if (attributePropertyCell != null) // Reference from entity property to cell. If no cell api is defined, stick, with default cell api.
+                    {
+                        typeCell = attributePropertyCell.TypeCell;
+                        sqlName = attributePropertySql.SqlName;
+                    }
+                    Cell cell = (Cell)Activator.CreateInstance(typeCell);
+                    cell.Constructor(attributeRow.SqlName, sqlName, propertyInfo.Name);
                     result.Add(cell);
                 }
             }
@@ -126,7 +133,14 @@
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
                     SqlNameAttribute attributeProperty = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
-                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(attributeProperty.SqlName);
+                    if (attributeProperty == null) // Calculated column. Do not include it in sql select.
+                    {
+                        entity.Ignore(propertyInfo.Name);
+                    }
+                    else
+                    {
+                        entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(attributeProperty.SqlName);
+                    }
                 }
             }
             var options = new DbContextOptionsBuilder<DbContext>();

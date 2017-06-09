@@ -1,3 +1,10 @@
+Release b1.0
+-Split SqlName attribute into SqlTableName and SqlColumnName.
+-Tool CLI
+-Class Page.
+-Remove Office
+-Remove Build
+
 ToDo
 -Include build number into version https://docs.travis-ci.com/user/environment-variables/
 -https://github.com/azure/iisnode/wiki/iisnode-releases, https://www.youtube.com/watch?v=JUYCDnqR8p0 (Document install iisnode)
