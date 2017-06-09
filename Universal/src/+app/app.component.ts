@@ -50,15 +50,15 @@ export class AppComponent {
 @Component({
   selector: 'Selector',
   template: `
-  <LayoutContainer *ngIf="json.Type=='LayoutContainer'" [json]=json></LayoutContainer>
-  <LayoutRow *ngIf="json.Type=='LayoutRow'" [json]=json></LayoutRow>
-  <LayoutCell *ngIf="json.Type=='LayoutCell'" [json]=json></LayoutCell>
-  <ButtonX *ngIf="json.Type=='Button'" [json]=json></ButtonX>
-  <Literal *ngIf="json.Type=='Literal'" [json]=json></Literal>
-  <Label *ngIf="json.Type=='Label'" [json]=json></Label>
-  <Grid *ngIf="json.Type=='Grid'" [json]=json></Grid>
-  <GridKeyboard *ngIf="json.Type=='GridKeyboard'" [json]=json></GridKeyboard>
-  <GridField *ngIf="json.Type=='GridField'" [json]=json></GridField>
+  <LayoutContainer *ngIf="json.Type=='LayoutContainer' && !json.IsHide" [json]=json></LayoutContainer>
+  <LayoutRow *ngIf="json.Type=='LayoutRow' && !json.IsHide" [json]=json></LayoutRow>
+  <LayoutCell *ngIf="json.Type=='LayoutCell' && !json.IsHide" [json]=json></LayoutCell>
+  <ButtonX *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></ButtonX>
+  <Literal *ngIf="json.Type=='Literal' && !json.IsHide" [json]=json></Literal>
+  <Label *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></Label>
+  <Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></Grid>
+  <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
+  <GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></GridField>
   <!-- <LayoutDebug [json]=json></LayoutDebug> -->
 `
 })

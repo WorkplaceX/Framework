@@ -330,7 +330,7 @@
         }
 
         /// <summary>
-        /// Load data from list.
+        /// Load data from list into data grid.
         /// </summary>
         public void LoadRow(string gridName, Type typeRow, List<Row> rowList)
         {
@@ -363,6 +363,19 @@
             {
                 CellList[gridName] = new Dictionary<string, Dictionary<string, GridCellServer>>();
                 CellList[gridName][Util.IndexEnumToString(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
+            }
+        }
+
+        /// <summary>
+        /// Load data from single row into data grid.
+        /// </summary>
+        public void LoadRow(string gridName, Row row)
+        {
+            if (row != null)
+            {
+                List<Row> rowList = new List<Row>();
+                rowList.Add(row);
+                LoadRow(gridName, row.GetType(), rowList);
             }
         }
 

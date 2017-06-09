@@ -61,6 +61,8 @@
 
         public string Text;
 
+        public bool IsHide;
+
         /// <summary>
         /// Gets or sets custom html style classes.
         /// </summary>
@@ -169,7 +171,7 @@
         public Dictionary<string, List<GridColumn>> ColumnList;
 
         /// <summary>
-        /// (GridName, FieldName, Index(Filter, 0..99, Total), GridCell)
+        /// (GridName, FieldName, Index(Filter, 0..99, New, Total), GridCell)
         /// </summary>
         public Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>> CellList;
 

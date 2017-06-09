@@ -259,12 +259,6 @@
             dbContext.SaveChanges();
         }
 
-        public static T JsonObjectClone<T>(T data)
-        {
-            string json = JsonConvert.SerializeObject(data, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-            return JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-        }
-
         public static object ValueToJson(object value)
         {
             object result = value;
