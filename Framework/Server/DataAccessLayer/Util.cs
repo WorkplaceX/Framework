@@ -75,8 +75,20 @@
             throw new Exception(string.Format("Type not found! ({0})", tableName));
         }
 
+        [ThreadStatic]
+        private static Dictionary<Type, List<Cell>> cacheColumnList;
+
         public static List<Cell> ColumnList(Type typeRow)
         {
+            if (cacheColumnList == null)
+            {
+                cacheColumnList = new Dictionary<Type, List<Cell>>();
+            }
+            if (cacheColumnList.ContainsKey(typeRow))
+            {
+                return cacheColumnList[typeRow];
+            }
+            //
             List<Cell> result = new List<Cell>();
             if (typeRow != null)
             {
@@ -85,12 +97,15 @@
                 {
                     SqlNameAttribute attributePropertySql = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
                     TypeCellAttribute attributePropertyCell = (TypeCellAttribute)propertyInfo.GetCustomAttribute(typeof(TypeCellAttribute));
-                    Type typeCell = typeof(Cell); // Default cell api.
                     string sqlName = null;
+                    if (attributePropertySql != null)
+                    {
+                        sqlName = attributePropertySql.SqlName;
+                    }
+                    Type typeCell = typeof(Cell); // Default cell api.
                     if (attributePropertyCell != null) // Reference from entity property to cell. If no cell api is defined, stick, with default cell api.
                     {
                         typeCell = attributePropertyCell.TypeCell;
-                        sqlName = attributePropertySql.SqlName;
                     }
                     Cell cell = (Cell)Activator.CreateInstance(typeCell);
                     cell.Constructor(attributeRow.SqlName, sqlName, propertyInfo.Name);

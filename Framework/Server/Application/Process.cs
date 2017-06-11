@@ -1,6 +1,7 @@
 ﻿namespace Framework.Server.Application
 {
     using Framework.Server.Application.Json;
+    using Framework.Server.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -74,6 +75,41 @@
         }
     }
 
+    public class ProcessGridCellButtonIsClick : ProcessBase
+    {
+        public ProcessGridCellButtonIsClick(ApplicationServerBase applicationServer)
+            : base(applicationServer)
+        {
+
+        }
+
+        protected internal override void ProcessBegin(ApplicationJson applicationJson)
+        {
+            GridDataServer gridDataServer = new GridDataServer();
+            gridDataServer.LoadJson(applicationJson, ApplicationServer.GetType());
+            //
+            foreach (string gridName in gridDataServer.GridNameList())
+            {
+                foreach (DataAccessLayer.Cell column in gridDataServer.ColumnList(gridName))
+                {
+                    if (column.ColumnIsButton())
+                    {
+                        foreach (string index in gridDataServer.IndexList(gridName))
+                        {
+                            string text = gridDataServer.CellText(gridName, index, column.FieldNameCSharp);
+                            if (text == "Click")
+                            {
+                                DataAccessLayer.Row row = gridDataServer.Row(gridName, index);
+                                Cell cell = column.Constructor(row);
+                                cell.CellProcessButtonIsClick();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public class ProcessGridOrderBy : ProcessBase
     {
         public ProcessGridOrderBy(ApplicationServerBase applicationServer) 
@@ -88,7 +124,7 @@
             //
             GridDataServer gridDataServer = new GridDataServer();
             gridDataServer.LoadJson(applicationJson, gridName, ApplicationServer.GetType());
-            Type typeRow = gridDataServer.TypeRowGet(gridName);
+            Type typeRow = gridDataServer.TypeRow(gridName);
             gridDataServer.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
             gridDataServer.SaveJson(applicationJson);
         }
@@ -402,9 +438,9 @@
             {
                 GridDataServer gridDataServer = new GridDataServer();
                 gridDataServer.LoadJson(applicationJson, gridDataJson.FocusGridName, ApplicationServer.GetType());
-                Type typeRow = gridDataServer.TypeRowGet(gridDataJson.FocusGridName);
-                var row = gridDataServer.RowGet(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
-                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(typeRow, row.Row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                Type typeRow = gridDataServer.TypeRow(gridDataJson.FocusGridName);
+                var row = gridDataServer.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
+                DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                 List<DataAccessLayer.Row> rowList;
                 cell.LookUp(out typeRow, out rowList);
                 gridDataServer = new GridDataServer();

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
 
     /// <summary>
     /// Base class for every database row.
@@ -32,9 +33,10 @@
         /// <summary>
         /// Constructor for column and cell.
         /// </summary>
-        internal void Constructor(object row)
+        internal Cell Constructor(object row)
         {
             this.row = row;
+            return this;
         }
 
         private string tableNameSql;
@@ -66,7 +68,7 @@
         private string fieldNameCSharp;
 
         /// <summary>
-        /// Gets sql FieldName.
+        /// Gets Csharp FieldName.
         /// </summary>
         public string FieldNameCSharp
         {
@@ -116,6 +118,19 @@
         {
 
         }
+
+        /// <summary>
+        /// Returns true, if data call is to be rendered as button.
+        /// </summary>
+        protected virtual internal bool ColumnIsButton()
+        {
+            return GetType().GetTypeInfo().GetMethod(nameof(CellProcessButtonIsClick), BindingFlags.Instance | BindingFlags.NonPublic).DeclaringType == GetType(); // Method ProcessButtonIsClick(); is overwritten.
+        }
+
+        protected virtual internal void CellProcessButtonIsClick()
+        {
+
+        }
     }
 
     /// <summary>
@@ -149,6 +164,7 @@
     {
         public TypeCellAttribute(Type typeCell)
         {
+            Framework.Util.Assert(typeCell.GetTypeInfo().IsSubclassOf(typeof(Cell)));
             this.TypeCell = typeCell;
         }
 

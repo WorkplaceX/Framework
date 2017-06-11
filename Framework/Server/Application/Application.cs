@@ -47,6 +47,7 @@
             ProcessList.Add(new ProcessGridRowFirstIsClick(this));
             ProcessList.Add(new ProcessGridIsIsClick(this));
             ProcessList.Add(new ProcessGridLookUp(this));
+            ProcessList.Add(new ProcessGridCellButtonIsClick(this));
             ProcessList.Add(new ProcessJson(this));
             ProcessList.Add(new ProcessGridCellIsModifyFalse(this));
         }
