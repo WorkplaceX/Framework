@@ -56,12 +56,12 @@
         /// </summary>
         public PageServer PageServer(Type typePageServer)
         {
-            PageServer result = null;
             if (!pageServerList.ContainsKey(typePageServer))
             {
-                result = (PageServer)Framework.Util.TypeToObject(typePageServer);
-                result.Constructor(this);
-                result = pageServerList[typePageServer];
+                PageServer pageServer = (PageServer)Framework.Util.TypeToObject(typePageServer);
+                pageServer.Constructor(this);
+                pageServer = pageServerList[typePageServer];
+                pageServerList[typePageServer] = pageServer;
             }
             return pageServerList[typePageServer];
         }
@@ -72,6 +72,31 @@
         public T PageServer<T>() where T : PageServer
         {
             return (T)PageServer(typeof(T));
+        }
+
+        public void PageServerRemove(Type typePageServer)
+        {
+            // Remove PageJson
+            string typeName = Framework.Util.TypeToTypeName(typePageServer);
+            if (ApplicationJson.PageJsonList.ContainsKey(typeName))
+            {
+                ApplicationJson.PageJsonList.Remove(typeName);
+            }
+            //
+            if (pageServerList.ContainsKey(typePageServer))
+            {
+                pageServerList.Remove(typePageServer);
+            }
+            if (ApplicationJson.TypeNamePageVisible == typeName)
+            {
+                ApplicationJson.TypeNamePageVisible = null;
+            }
+            ComponentRemove(typePageServer);
+        }
+
+        public void PageServerRemove<T>() where T : PageServer
+        {
+            PageServerRemove(typeof(T));
         }
 
         protected virtual void ProcessInit()
@@ -111,14 +136,26 @@
             return result;
         }
 
-        private void PageJsonVisible()
+        private void ComponentVisible()
         {
             foreach (Component component in ApplicationJson.List)
             {
-                if (component.TypeNamePage != null)
+                if (component.TypeNamePageServer != null)
                 {
-                    PageJson pageJson = Util.PageJson(ApplicationJson, component.TypeNamePage);
-                    component.IsHide = !(component.TypeNamePage == ApplicationJson.TypeNamePageVisible);
+                    PageJson pageJson = Util.PageJson(ApplicationJson, component.TypeNamePageServer);
+                    component.IsHide = !(component.TypeNamePageServer == ApplicationJson.TypeNamePageVisible);
+                }
+            }
+        }
+
+        private void ComponentRemove(Type typePageServer)
+        {
+            string typeNamePage = Framework.Util.TypeToTypeName(typePageServer);
+            foreach (Component component in ApplicationJson.List.ToArray())
+            {
+                if (component.TypeNamePageServer == typeNamePage)
+                {
+                    ApplicationJson.List.Remove(component);
                 }
             }
         }
@@ -145,16 +182,16 @@
             //
             PageServer pageServer = PageServerVisible();
             pageServer.Process(); // Process visible page.
-            PageJsonVisible();
+            ComponentVisible();
             // Process
             {
                 foreach (ProcessBase process in ProcessList)
                 {
-                    process.ProcessBegin(applicationJson);
+                    // process.ProcessBegin(applicationJson);
                 }
                 foreach (ProcessBase process in ProcessList)
                 {
-                    process.ProcessEnd(applicationJson);
+                    // process.ProcessEnd(applicationJson);
                 }
             }
             return ApplicationJson;

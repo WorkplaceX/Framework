@@ -64,9 +64,14 @@
         public bool IsHide;
 
         /// <summary>
-        /// Gets or sets TypeNamePage. Indicating to which page this top level component belongs to.
+        /// Gets or sets Name. Used when it is necessary to differentiate two instances.
         /// </summary>
-        public string TypeNamePage;
+        public string Name;
+
+        /// <summary>
+        /// Gets or sets TypeNamePageServer. Indicating to which page this top level component belongs to.
+        /// </summary>
+        public string TypeNamePageServer;
 
         /// <summary>
         /// Gets or sets custom html style classes.
@@ -95,6 +100,35 @@
         {
             List<Component> result = ListAll();
             return result.OfType<T>().ToList();
+        }
+
+        private void Owner(Component component, ref Component result)
+        {
+            if (List.Contains(component))
+            {
+                result = this;
+            }
+            if (result != null)
+            {
+                foreach (var item in List)
+                {
+                    item.Owner(component, ref result);
+                    if (result != null)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns owner of component.
+        /// </summary>
+        public Component Owner(Component component)
+        {
+            Component result = null;
+            Owner(component, ref result);
+            return result;
         }
 
         protected virtual internal void Process(ApplicationServerBase applicationServer, ApplicationJson applicationJson)

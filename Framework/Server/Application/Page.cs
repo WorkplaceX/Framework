@@ -125,6 +125,9 @@
             }
         }
 
+        /// <summary>
+        /// Initialize page json object.
+        /// </summary>
         protected virtual internal void ProcessApplicationJsonInit()
         {
 
@@ -197,6 +200,17 @@
                 PageJson.StateList = new Dictionary<string, object>();
             }
             PageJson.StateList[name] = value; 
+        }
+    }
+
+    /// <summary>
+    /// Page to process data grid.
+    /// </summary>
+    public class PageServerGridData : PageServer
+    {
+        protected override void ProcessInit()
+        {
+            base.ProcessInit();
         }
     }
 
@@ -279,6 +293,9 @@
         }
     }
 
+    /// <summary>
+    /// Call method PageServer.ProcessPage();
+    /// </summary>
     public class ProcessPageServer : Process2Base
     {
         protected internal override void Process()

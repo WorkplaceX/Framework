@@ -50,7 +50,7 @@ export class AppComponent {
 @Component({
   selector: 'Selector',
   template: `
-  <LayoutContainer *ngIf="json.Type=='LayoutContainer' && !json.IsHide" [json]=json></LayoutContainer>
+  <LayoutContainer *ngIf="json.Type=='LayoutContainer'" [json]=json></LayoutContainer>
   <LayoutRow *ngIf="json.Type=='LayoutRow' && !json.IsHide" [json]=json></LayoutRow>
   <LayoutCell *ngIf="json.Type=='LayoutCell' && !json.IsHide" [json]=json></LayoutCell>
   <ButtonX *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></ButtonX>
@@ -70,7 +70,7 @@ export class Selector {
 @Component({
   selector: 'LayoutContainer',
   template: `
-  <div [ngClass]="json.Class" class='container' removeSelector>
+  <div [ngClass]="json.Class" class='container' removeSelector *ngIf="!json.IsHide">
     Text={{ json.Text }}
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
@@ -355,6 +355,10 @@ export class RemoveSelectorDirective {
     //wait for the component to render completely
     ngOnInit() {
       this.renderer.attachViewAfter(this.el.nativeElement.parentNode.parentNode, [this.el.nativeElement]);
+    }
+
+    ngOnDestroy() {
+      this.el.nativeElement.innerHTML = null;
     }
 }
 

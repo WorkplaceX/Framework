@@ -1,7 +1,8 @@
 Release b1.0
--Split SqlName attribute into SqlTableName and SqlColumnName.
+-Angular Selector IsHide
+-Split SqlName attribute into SqlTableName and SqlColumnName
 -Tool CLI
--Class Page.
+-Class Page
 -Remove Office
 -Remove Build
 
