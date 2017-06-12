@@ -45,12 +45,12 @@
             return result;
         }
 
-        public static Type TypeRowFromName(string typeRowName, Type typeInAssembly)
+        public static Type TypeRowFromName(string typeNameRow, Type typeInAssembly)
         {
             Type result = null;
-            if (typeRowName != null)
+            if (typeNameRow != null)
             {
-                result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeRowName);
+                result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeNameRow);
                 if (result == null)
                 {
                     throw new Exception("Type not found!");

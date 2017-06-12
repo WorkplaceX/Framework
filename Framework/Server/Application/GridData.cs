@@ -686,8 +686,8 @@
             //
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            string typeRowName = gridDataJson.GridQueryList[gridName].TypeRowName;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowName, typeInAssembly);
+            string typeNameRow = gridDataJson.GridQueryList[gridName].TypeNameRow;
+            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeNameRow, typeInAssembly);
             TypeRowSet(gridName, typeRow);
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
@@ -841,7 +841,7 @@
             foreach (string gridName in rowList.Keys)
             {
                 Type typeRow = TypeRowGet(gridName);
-                gridDataJson.GridQueryList[gridName] = new GridQuery() { GridName = gridName, TypeRowName = DataAccessLayer.Util.TypeRowToName(typeRow) };
+                gridDataJson.GridQueryList[gridName] = new GridQuery() { GridName = gridName, TypeNameRow = DataAccessLayer.Util.TypeRowToName(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
                 {

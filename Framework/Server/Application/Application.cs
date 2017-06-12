@@ -38,6 +38,42 @@
             return (T)ProcessList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Returns type of PageServer of applications main page.
+        /// </summary>
+        protected virtual internal Type TypePageServerMain()
+        {
+            return typeof(PageServer);
+        }
+
+        /// <summary>
+        /// (TypePageServer, PageServer).
+        /// </summary>
+        internal Dictionary<Type, PageServer> pageServerList = new Dictionary<Type, PageServer>();
+
+        /// <summary>
+        /// Returns PageServer of type.
+        /// </summary>
+        public PageServer PageServer(Type typePageServer)
+        {
+            PageServer result = null;
+            if (!pageServerList.ContainsKey(typePageServer))
+            {
+                result = (PageServer)Framework.Util.TypeToObject(typePageServer);
+                result.Constructor(this);
+                result = pageServerList[typePageServer];
+            }
+            return pageServerList[typePageServer];
+        }
+
+        /// <summary>
+        /// Returns PageServer of type.
+        /// </summary>
+        public T PageServer<T>() where T : PageServer
+        {
+            return (T)PageServer(typeof(T));
+        }
+
         protected virtual void ProcessInit()
         {
             ProcessList.Add(new ProcessApplicationInit(this));
@@ -52,12 +88,64 @@
             ProcessList.Add(new ProcessGridCellIsModifyFalse(this));
         }
 
+        /// <summary>
+        /// Returns visible PageServer.
+        /// </summary>
+        private PageServer PageServerVisible()
+        {
+            Type typePageServer;
+            if (ApplicationJson.TypeNamePageVisible == null)
+            {
+                typePageServer = TypePageServerMain();
+            }
+            else
+            {
+                typePageServer = Framework.Util.TypeFromTypeName(ApplicationJson.TypeNamePageVisible, GetType());
+            }
+            PageServer result = (PageServer)Framework.Util.TypeToObject(typePageServer);
+            result.Constructor(this);
+            if (result.PageJson.IsInit == false)
+            {
+                result.Show();
+            }
+            return result;
+        }
+
+        private void PageJsonVisible()
+        {
+            foreach (Component component in ApplicationJson.List)
+            {
+                if (component.TypeNamePage != null)
+                {
+                    PageJson pageJson = Util.PageJson(ApplicationJson, component.TypeNamePage);
+                    component.IsHide = !(component.TypeNamePage == ApplicationJson.TypeNamePageVisible);
+                }
+            }
+        }
+
+        private ApplicationJson applicationJson;
+
+        public ApplicationJson ApplicationJson
+        {
+            get
+            {
+                return applicationJson;
+            }
+        }
+
+
         public ApplicationJson Process(ApplicationJson applicationJson, string requestPath)
         {
             if (applicationJson == null) // First request.
             {
                 applicationJson = new ApplicationJson();
+                applicationJson.PageJsonList = new Dictionary<string, PageJson>();
             }
+            this.applicationJson = applicationJson;
+            //
+            PageServer pageServer = PageServerVisible();
+            pageServer.Process(); // Process visible page.
+            PageJsonVisible();
             // Process
             {
                 foreach (ProcessBase process in ProcessList)
@@ -69,7 +157,7 @@
                     process.ProcessEnd(applicationJson);
                 }
             }
-            return applicationJson;
+            return ApplicationJson;
         }
 
         protected virtual internal void ApplicationJsonInit(ApplicationJson applicationJson)

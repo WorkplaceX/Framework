@@ -318,7 +318,7 @@
                             }
                             if (isSetType)
                             {
-                                throw new JsonException("Object has no Type field!");
+                                throw new JsonException("Object has no Type field!"); // Add this code: "public string Type;" // TODO derived object can not be in different assembly.
                             }
                             ValueListSet(value, valueList);
                         }

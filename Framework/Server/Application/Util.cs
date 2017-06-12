@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Framework.Server.Application.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,6 +16,15 @@ namespace Framework.Server.Application
 
     public static class Util
     {
+        internal static PageJson PageJson(ApplicationJson applicationJson, string typeNamePageServer)
+        {
+            if (!applicationJson.PageJsonList.ContainsKey(typeNamePageServer))
+            {
+                applicationJson.PageJsonList[typeNamePageServer] = (PageJson)Framework.Util.TypeToObject(typeof(PageJson));
+            }
+            return (PageJson)applicationJson.PageJsonList[typeNamePageServer];
+        }
+
         public static string IndexEnumToString(IndexEnum indexEnum)
         {
             return indexEnum.ToString();

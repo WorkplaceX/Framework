@@ -64,6 +64,11 @@
         public bool IsHide;
 
         /// <summary>
+        /// Gets or sets TypeNamePage. Indicating to which page this top level component belongs to.
+        /// </summary>
+        public string TypeNamePage;
+
+        /// <summary>
         /// Gets or sets custom html style classes.
         /// </summary>
         public string Class;
@@ -293,7 +298,7 @@
     {
         public string GridName;
 
-        public string TypeRowName;
+        public string TypeNameRow;
 
         public string FieldNameOrderBy;
 
@@ -336,6 +341,26 @@
         /// Gets or sets GridData.
         /// </summary>
         public GridDataJson GridDataJson;
+
+        /// <summary>
+        /// (TypeNamePageServer, Page)
+        /// </summary>
+        public Dictionary<string, PageJson> PageJsonList;
+
+        /// <summary>
+        /// Gets or sets TypeNamePageVisible. Currently visible page. Only one page is visible.
+        /// </summary>
+        public string TypeNamePageVisible;
+    }
+
+    public class PageJson
+    {
+        /// <summary>
+        /// Gets or sets IsInit. Indicating page has been initialized.
+        /// </summary>
+        public bool IsInit;
+
+        public Dictionary<string, object> StateList;
     }
 
     /// <summary>

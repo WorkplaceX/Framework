@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.242 Server";
+                return "v0.243 Server";
             }
         }
 
@@ -157,6 +157,40 @@
                 exception = exception.InnerException;
             }
             return result;
+        }
+
+        public static string TypeToTypeName(Type type)
+        {
+            string result = null;
+            if (type != null)
+            {
+                result = type.FullName;
+            }
+            return result;
+        }
+
+        public static Type TypeFromTypeName(string typeName, Type typeInAssembly)
+        {
+            Type result = null;
+            if (typeName != null)
+            {
+                result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeName);
+                if (result == null)
+                {
+                    throw new Exception("Type not found!");
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns newly created instance of type with parameterless constructor.
+        /// </summary>
+        /// <param name="type">Type with parameterless constructor.</param>
+        /// <returns>Returns instance of type.</returns>
+        public static object TypeToObject(Type type)
+        {
+            return Activator.CreateInstance(type);
         }
     }
 }

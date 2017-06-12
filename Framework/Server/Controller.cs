@@ -27,7 +27,7 @@
 
         public async Task<IActionResult> Web()
         {
-            // Html
+            // Html request
             if (Controller.HttpContext.Request.Path == RoutePath)
             {
                 ApplicationJson applicationJsonOut = ApplicationServer.Process(null, Controller.HttpContext.Request.Path);
@@ -36,7 +36,7 @@
                 htmlUniversal = await HtmlUniversal(html, applicationJsonOut, true); // Angular Universal server side rendering.
                 return Controller.Content(htmlUniversal, "text/html");
             }
-            // Json API
+            // Json API request
             if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
             {
                 string jsonInText = Util.StreamToString(Controller.Request.Body);
@@ -63,7 +63,7 @@
                 }
                 return Controller.Content(jsonOutText, "application/json");
             }
-            // Framework/Server/wwwroot/
+            // Framework/Server/wwwroot/ request
             {
                 string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
                 fileName = Server.Util.FileNameToWwwRoot(fileName);
@@ -72,12 +72,12 @@
                     return Server.Util.FileNameToFileContentResult(Controller, fileName);
                 }
             }
-            // node_modules
+            // node_modules request
             if (Controller.HttpContext.Request.Path.ToString().StartsWith("/node_modules/"))
             {
                 return Util.FileGet(Controller, "", "../Client/", "Universal/");
             }
-            // (*.css; *.js)
+            // (*.css; *.js) request
             if (Controller.HttpContext.Request.Path.ToString().EndsWith(".css") || Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
             {
                 return Util.FileGet(Controller, RoutePath, "Universal/", "Universal/");
