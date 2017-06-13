@@ -7,7 +7,7 @@
     using System.Collections.Generic;
     using System.Reflection;
 
-    internal class GridRowServer
+    internal class GridRow
     {
         public Row Row;
 
@@ -28,7 +28,7 @@
         internal bool IsClick;
     }
 
-    internal class GridCellServer
+    internal class GridCell
     {
         /// <summary>
         /// Gets or sets user modified text.
@@ -47,19 +47,19 @@
         public bool IsClick;
     }
 
-    internal class GridColumnServer
+    internal class GridColumn
     {
         public bool IsClick;
     }
 
-    internal class GridQueryServer
+    internal class GridQuery
     {
         public string FieldNameOrderBy;
 
         public bool IsOrderByDesc;
     }
 
-    public class GridDataServer
+    public class GridData
     {
 
         /// <summary>
@@ -68,7 +68,7 @@
         public string CellText(string gridName, string index, string fieldName)
         {
             string result = null;
-            GridCellServer cell = CellGet(gridName, index, fieldName);
+            GridCell cell = CellGet(gridName, index, fieldName);
             if (cell != null)
             {
                 return cell.Text;
@@ -143,33 +143,33 @@
         }
 
         /// <summary>
-        /// (GridName, GridQueryServer).
+        /// (GridName, GridQuery).
         /// </summary>
-        private Dictionary<string, GridQueryServer> queryList = new Dictionary<string, GridQueryServer>();
+        private Dictionary<string, GridQuery> queryList = new Dictionary<string, GridQuery>();
 
-        private GridQueryServer QueryGet(string gridName)
+        private GridQuery QueryGet(string gridName)
         {
             if (!queryList.ContainsKey(gridName))
             {
-                queryList[gridName] = new GridQueryServer();
+                queryList[gridName] = new GridQuery();
             }
             return queryList[gridName];
         }
 
         /// <summary>
-        /// (GridName, FieldName, GridColumnServer).
+        /// (GridName, FieldName, GridColumn).
         /// </summary>
-        private Dictionary<string, Dictionary<string, GridColumnServer>> columnList = new Dictionary<string, Dictionary<string, GridColumnServer>>();
+        private Dictionary<string, Dictionary<string, GridColumn>> columnList = new Dictionary<string, Dictionary<string, GridColumn>>();
 
-        private GridColumnServer ColumnGet(string gridName, string fieldName)
+        private GridColumn ColumnGet(string gridName, string fieldName)
         {
             if (!columnList.ContainsKey(gridName))
             {
-                columnList[gridName] = new Dictionary<string, GridColumnServer>();
+                columnList[gridName] = new Dictionary<string, GridColumn>();
             }
             if (!columnList[gridName].ContainsKey(fieldName))
             {
-                columnList[gridName][fieldName] = new GridColumnServer();
+                columnList[gridName][fieldName] = new GridColumn();
             }
             //
             return columnList[gridName][fieldName];
@@ -178,11 +178,11 @@
         /// <summary>
         /// (GridName, Index). Original row as loaded from json.
         /// </summary>
-        private Dictionary<string, Dictionary<string, GridRowServer>> rowList = new Dictionary<string, Dictionary<string, GridRowServer>>();
+        private Dictionary<string, Dictionary<string, GridRow>> rowList = new Dictionary<string, Dictionary<string, GridRow>>();
 
-        private GridRowServer RowGet(string gridName, string index)
+        private GridRow RowGet(string gridName, string index)
         {
-            GridRowServer result = null;
+            GridRow result = null;
             if (rowList.ContainsKey(gridName))
             {
                 if (rowList[gridName].ContainsKey(index))
@@ -193,23 +193,23 @@
             return result;
         }
 
-        private void RowSet(string gridName, string index, GridRowServer gridRowServer)
+        private void RowSet(string gridName, string index, GridRow gridRow)
         {
             if (!rowList.ContainsKey(gridName))
             {
-                rowList[gridName] = new Dictionary<string, GridRowServer>();
+                rowList[gridName] = new Dictionary<string, GridRow>();
             }
-            rowList[gridName][index] = gridRowServer;
+            rowList[gridName][index] = gridRow;
         }
 
         /// <summary>
         /// (GridName, Index, FieldName, Text).
         /// </summary>
-        private Dictionary<string, Dictionary<string, Dictionary<string, GridCellServer>>> cellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCellServer>>>();
+        private Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>> cellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>>();
 
-        private GridCellServer CellGet(string gridName, string index, string fieldName)
+        private GridCell CellGet(string gridName, string index, string fieldName)
         {
-            GridCellServer result = null;
+            GridCell result = null;
             if (cellList.ContainsKey(gridName))
             {
                 if (cellList[gridName].ContainsKey(index))
@@ -222,14 +222,14 @@
             }
             if (result == null)
             {
-                result = new GridCellServer();
+                result = new GridCell();
                 if (!cellList.ContainsKey(gridName))
                 {
-                    cellList[gridName] = new Dictionary<string, Dictionary<string, GridCellServer>>();
+                    cellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
                 }
                 if (!cellList[gridName].ContainsKey(index))
                 {
-                    cellList[gridName][index] = new Dictionary<string, GridCellServer>();
+                    cellList[gridName][index] = new Dictionary<string, GridCell>();
                 }
                 cellList[gridName][index][fieldName] = result;
             }
@@ -279,9 +279,9 @@
             {
                 if (cellList[gridName].ContainsKey(index))
                 {
-                    foreach (GridCellServer gridCellServer in cellList[gridName][index].Values)
+                    foreach (GridCell gridCell in cellList[gridName][index].Values)
                     {
-                        gridCellServer.Text = null;
+                        gridCell.Text = null;
                     }
                 }
             }
@@ -436,25 +436,25 @@
                     Framework.Util.Assert(row.GetType() == typeRow);
                 }
                 //
-                Dictionary<string, GridCellServer> cellListFilter = null;
+                Dictionary<string, GridCell> cellListFilter = null;
                 if (cellList.ContainsKey(gridName))
                 {
                     cellList[gridName].TryGetValue(Util.IndexEnumToString(IndexEnum.Filter), out cellListFilter); // Save filter user text.
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
-                this.rowList[gridName] = new Dictionary<string, GridRowServer>(); // Clear data
+                this.rowList[gridName] = new Dictionary<string, GridRow>(); // Clear data
                 TypeRowSet(gridName, typeRow);
                 //
                 RowFilterAdd(gridName);
                 for (int index = 0; index < rowList.Count; index++)
                 {
-                    RowSet(gridName, index.ToString(), new GridRowServer() { Row = rowList[index], RowNew = null });
+                    RowSet(gridName, index.ToString(), new GridRow() { Row = rowList[index], RowNew = null });
                 }
                 RowNewAdd(gridName);
                 //
                 if (cellListFilter != null)
                 {
-                    cellList[gridName] = new Dictionary<string, Dictionary<string, GridCellServer>>();
+                    cellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
                     cellList[gridName][Util.IndexEnumToString(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
                 }
             }
@@ -478,7 +478,7 @@
         /// </summary>
         private void RowFilterAdd(string gridName)
         {
-            RowSet(gridName, Util.IndexEnumToString(IndexEnum.Filter), new GridRowServer() { Row = null, RowNew = null });
+            RowSet(gridName, Util.IndexEnumToString(IndexEnum.Filter), new GridRow() { Row = null, RowNew = null });
         }
 
         /// <summary>
@@ -487,8 +487,8 @@
         private void RowNewAdd(string gridName)
         {
             // (Index)
-            Dictionary<string, GridRowServer> rowListCopy = rowList[gridName];
-            rowList[gridName] = new Dictionary<string, GridRowServer>();
+            Dictionary<string, GridRow> rowListCopy = rowList[gridName];
+            rowList[gridName] = new Dictionary<string, GridRow>();
             // Filter
             foreach (string index in rowListCopy.Keys)
             {
@@ -510,7 +510,7 @@
                 }
             }
             // New
-            RowSet(gridName, Util.IndexEnumToString(IndexEnum.New), new GridRowServer() { Row = null, RowNew = null }); // New row
+            RowSet(gridName, Util.IndexEnumToString(IndexEnum.New), new GridRow() { Row = null, RowNew = null }); // New row
             // Total
             foreach (string index in rowListCopy.Keys)
             {
@@ -652,10 +652,10 @@
             //
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
-                GridQuery gridQuery = gridDataJson.GridQueryList[gridName];
-                GridQueryServer gridQueryServer = QueryGet(gridName);
-                gridQueryServer.FieldNameOrderBy = gridQuery.FieldNameOrderBy;
-                gridQueryServer.IsOrderByDesc = gridQuery.IsOrderByDesc;
+                Json.GridQuery gridQueryJson = gridDataJson.GridQueryList[gridName];
+                GridQuery gridQuery = QueryGet(gridName);
+                gridQuery.FieldNameOrderBy = gridQueryJson.FieldNameOrderBy;
+                gridQuery.IsOrderByDesc = gridQueryJson.IsOrderByDesc;
             }
         }
 
@@ -668,10 +668,10 @@
             //
             foreach (string gridName in gridDataJson.ColumnList.Keys)
             {
-                foreach (GridColumn gridColumn in gridDataJson.ColumnList[gridName])
+                foreach (Json.GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
-                    GridColumnServer gridColumnServer = ColumnGet(gridName, gridColumn.FieldName);
-                    gridColumnServer.IsClick = gridColumn.IsClick;
+                    GridColumn gridColumn = ColumnGet(gridName, gridColumnJson.FieldName);
+                    gridColumn.IsClick = gridColumnJson.IsClick;
                 }
             }
         }
@@ -686,11 +686,11 @@
             //
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            string typeNameRow = gridDataJson.GridQueryList[gridName].TypeNameRow;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeNameRow, typeInAssembly);
+            string typeRowString = gridDataJson.GridQueryList[gridName].TypeRow;
+            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowString, typeInAssembly);
             TypeRowSet(gridName, typeRow);
             //
-            foreach (GridRow row in gridDataJson.RowList[gridName])
+            foreach (Json.GridRow row in gridDataJson.RowList[gridName])
             {
                 IndexEnum indexEnum = Util.IndexToIndexEnum(row.Index);
                 Row resultRow = null;
@@ -698,8 +698,8 @@
                 {
                     resultRow = (Row)Activator.CreateInstance(typeRow);
                 }
-                GridRowServer gridRowServer = new GridRowServer() { Row = resultRow, IsSelect = row.IsSelect, IsClick = row.IsClick };
-                RowSet(gridName, row.Index, gridRowServer);
+                GridRow gridRow = new GridRow() { Row = resultRow, IsSelect = row.IsSelect, IsClick = row.IsClick };
+                RowSet(gridName, row.Index, gridRow);
                 foreach (var column in gridDataJson.ColumnList[gridName])
                 {
                     CellGet(gridName, row.Index, column.FieldName).IsSelect = gridDataJson.CellList[gridName][column.FieldName][row.Index].IsSelect;
@@ -739,7 +739,7 @@
         }
 
         /// <summary>
-        /// Load data from GridDataJson to GridDataServer.
+        /// Load data from GridDataJson to GridData.
         /// </summary>
         public void LoadJson(ApplicationJson applicationJson, Type typeInAssembly)
         {
@@ -754,9 +754,9 @@
         /// <summary>
         /// Returns row's columns.
         /// </summary>
-        private static List<GridColumn> TypeRowToGridColumn(Type typeRow)
+        private static List<Json.GridColumn> TypeRowToGridColumn(Type typeRow)
         {
-            var result = new List<GridColumn>();
+            var result = new List<Json.GridColumn>();
             //
             var columnList = Framework.Server.DataAccessLayer.Util.ColumnList(typeRow);
             double widthPercentTotal = 0;
@@ -788,7 +788,7 @@
                     }
                 }
                 widthPercentTotal = widthPercentTotal + widthPercent;
-                result.Add(new GridColumn() { FieldName = columnList[i].FieldNameCSharp, Text = text, WidthPercent = widthPercent });
+                result.Add(new Json.GridColumn() { FieldName = columnList[i].FieldNameCSharp, Text = text, WidthPercent = widthPercent });
             }
             return result;
         }
@@ -802,10 +802,10 @@
             //
             foreach (string gridName in gridDataJson.ColumnList.Keys)
             {
-                foreach (GridColumn gridColumn in gridDataJson.ColumnList[gridName])
+                foreach (Json.GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
-                    GridColumnServer gridColumnServer = ColumnGet(gridName, gridColumn.FieldName);
-                    gridColumn.IsClick = gridColumnServer.IsClick;
+                    GridColumn gridColumn = ColumnGet(gridName, gridColumnJson.FieldName);
+                    gridColumnJson.IsClick = gridColumn.IsClick;
                 }
             }
         }
@@ -819,15 +819,15 @@
             //
             foreach (string gridName in queryList.Keys)
             {
-                GridQueryServer gridQueryServer = queryList[gridName];
-                GridQuery gridQuery = gridDataJson.GridQueryList[gridName];
-                gridQuery.FieldNameOrderBy = gridQueryServer.FieldNameOrderBy;
-                gridQuery.IsOrderByDesc = gridQueryServer.IsOrderByDesc;
+                GridQuery gridQuery = queryList[gridName];
+                Json.GridQuery gridQueryJson = gridDataJson.GridQueryList[gridName];
+                gridQueryJson.FieldNameOrderBy = gridQuery.FieldNameOrderBy;
+                gridQueryJson.IsOrderByDesc = gridQuery.IsOrderByDesc;
             }
         }
 
         /// <summary>
-        /// Copy data from class GridDataServer to class GridDataJson.
+        /// Copy data from class GridData to class GridDataJson.
         /// </summary>
         public void SaveJson(ApplicationJson applicationJson)
         {
@@ -835,39 +835,39 @@
             //
             if (gridDataJson.GridQueryList == null)
             {
-                gridDataJson.GridQueryList = new Dictionary<string, GridQuery>();
+                gridDataJson.GridQueryList = new Dictionary<string, Json.GridQuery>();
             }
             //
             foreach (string gridName in rowList.Keys)
             {
                 Type typeRow = TypeRowGet(gridName);
-                gridDataJson.GridQueryList[gridName] = new GridQuery() { GridName = gridName, TypeNameRow = DataAccessLayer.Util.TypeRowToName(typeRow) };
+                gridDataJson.GridQueryList[gridName] = new Json.GridQuery() { GridName = gridName, TypeRow = DataAccessLayer.Util.TypeRowToName(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
                 {
-                    gridDataJson.RowList = new Dictionary<string, List<GridRow>>();
+                    gridDataJson.RowList = new Dictionary<string, List<Json.GridRow>>();
                 }
-                gridDataJson.RowList[gridName] = new List<GridRow>();
+                gridDataJson.RowList[gridName] = new List<Json.GridRow>();
                 // Column
                 if (gridDataJson.ColumnList == null)
                 {
-                    gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
+                    gridDataJson.ColumnList = new Dictionary<string, List<Json.GridColumn>>();
                 }
                 gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(typeRow);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {
-                    gridDataJson.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>>();
+                    gridDataJson.CellList = new Dictionary<string, Dictionary<string, Dictionary<string, Json.GridCell>>>();
                 }
-                gridDataJson.CellList[gridName] = new Dictionary<string, Dictionary<string, GridCell>>();
+                gridDataJson.CellList[gridName] = new Dictionary<string, Dictionary<string, Json.GridCell>>();
                 //
                 PropertyInfo[] propertyInfoList = null;
                 foreach (string index in rowList[gridName].Keys)
                 {
-                    GridRowServer gridRowServer = rowList[gridName][index];
+                    GridRow gridRow = rowList[gridName][index];
                     string errorRow = ErrorRowGet(gridName, index);
-                    GridRow gridRow = new GridRow() { Index = index, IsSelect = gridRowServer.IsSelect, IsClick = gridRowServer.IsClick, Error = errorRow };
-                    gridDataJson.RowList[gridName].Add(gridRow);
+                    Json.GridRow gridRowJson = new Json.GridRow() { Index = index, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
+                    gridDataJson.RowList[gridName].Add(gridRowJson);
                     if (propertyInfoList == null && typeRow != null)
                     {
                         propertyInfoList = typeRow.GetTypeInfo().GetProperties();
@@ -878,29 +878,29 @@
                         {
                             string fieldName = propertyInfo.Name;
                             object value = null;
-                            if (gridRowServer.Row != null)
+                            if (gridRow.Row != null)
                             {
-                                value = propertyInfo.GetValue(gridRowServer.Row);
+                                value = propertyInfo.GetValue(gridRow.Row);
                             }
                             string textJson = DataAccessLayer.Util.ValueToText(value);
                             string text = CellTextGet(gridName, index, fieldName);
-                            GridCellServer gridCellServer = CellGet(gridName, index, fieldName);
+                            GridCell gridCell = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))
                             {
-                                gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
+                                gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, Json.GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCell = new GridCell() { IsSelect = gridCellServer.IsSelect, IsClick = gridCellServer.IsClick, IsModify = gridCellServer.IsModify, E = errorCell };
-                            gridDataJson.CellList[gridName][fieldName][index] = gridCell;
+                            Json.GridCell gridCellJson = new Json.GridCell() { IsSelect = gridCell.IsSelect, IsClick = gridCell.IsClick, IsModify = gridCell.IsModify, E = errorCell };
+                            gridDataJson.CellList[gridName][fieldName][index] = gridCellJson;
                             if (text == null)
                             {
-                                gridCell.T = textJson;
+                                gridCellJson.T = textJson;
                             }
                             else
                             {
-                                gridCell.O = textJson;
-                                gridCell.T = text;
-                                gridCell.IsO = true;
+                                gridCellJson.O = textJson;
+                                gridCellJson.T = text;
+                                gridCellJson.IsO = true;
                             }
                         }
                     }

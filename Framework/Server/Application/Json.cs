@@ -69,9 +69,9 @@
         public string Name;
 
         /// <summary>
-        /// Gets or sets TypeNamePageServer. Indicating to which page this top level component belongs to.
+        /// Gets or sets TypePage. Indicating to which page this top level component belongs to.
         /// </summary>
-        public string TypeNamePageServer;
+        public string TypePage;
 
         /// <summary>
         /// Gets or sets custom html style classes.
@@ -131,7 +131,7 @@
             return result;
         }
 
-        protected virtual internal void Process(ApplicationServerBase applicationServer, ApplicationJson applicationJson)
+        protected virtual internal void Process(ApplicationBase application, ApplicationJson applicationJson)
         {
 
         }
@@ -190,7 +190,7 @@
     }
 
     /// <summary>
-    /// Json GridData. There is also a GridDataServer object.
+    /// Json GridData. There is also a GridData object.
     /// </summary>
     public class GridDataJson
     {
@@ -332,7 +332,7 @@
     {
         public string GridName;
 
-        public string TypeNameRow;
+        public string TypeRow;
 
         public string FieldNameOrderBy;
 
@@ -340,7 +340,7 @@
     }
 
     /// <summary>
-    /// Json Application. Root object being transferred between server and client. There is also a ApplicationServer object.
+    /// Json Application. Root object being transferred between server and client. There is also a Application object.
     /// </summary>
     public class ApplicationJson : Component
     {
@@ -354,8 +354,6 @@
         /// GET not POST json when debugging client. See also file json.json.
         /// </summary>
         public bool IsJsonGet;
-
-        public string Name;
 
         public Guid Session;
 
@@ -377,14 +375,14 @@
         public GridDataJson GridDataJson;
 
         /// <summary>
-        /// (TypeNamePageServer, Page)
+        /// (TypePage, Page)
         /// </summary>
         public Dictionary<string, PageJson> PageJsonList;
 
         /// <summary>
-        /// Gets or sets TypeNamePageVisible. Currently visible page. Only one page is visible.
+        /// Gets or sets TypePageVisible. Currently visible page. Only one page is visible.
         /// </summary>
-        public string TypeNamePageVisible;
+        public string TypePageVisible;
     }
 
     public class PageJson
@@ -501,12 +499,12 @@
             TypeSet(typeof(Label)); // Render as Label.
         }
 
-        protected internal override void Process(ApplicationServerBase applicationServer, ApplicationJson applicationJson)
+        protected internal override void Process(ApplicationBase application, ApplicationJson applicationJson)
         {
-            ProcessGridSave processGridSave = applicationServer.ProcessListGet<ProcessGridSave>();
+            ProcessGridSave processGridSave = application.ProcessListGet<ProcessGridSave>();
             string isModify = processGridSave != null ? processGridSave.IsModify.ToString() : false.ToString();
             Text = string.Format("IsModify={0};", isModify);
-            base.Process(applicationServer, applicationJson);
+            base.Process(application, applicationJson);
         }
     }
 }

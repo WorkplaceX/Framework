@@ -8,9 +8,9 @@
     /// <summary>
     /// Server side root object.
     /// </summary>
-    public class ApplicationServerBase
+    public class ApplicationBase
     {
-        public ApplicationServerBase()
+        public ApplicationBase()
         {
             this.ProcessInit();
         }
@@ -39,64 +39,64 @@
         }
 
         /// <summary>
-        /// Returns type of PageServer of applications main page.
+        /// Returns type of Page of applications main page.
         /// </summary>
-        protected virtual internal Type TypePageServerMain()
+        protected virtual internal Type TypePageMain()
         {
-            return typeof(PageServer);
+            return typeof(Page);
         }
 
         /// <summary>
-        /// (TypePageServer, PageServer).
+        /// (TypePage, Page).
         /// </summary>
-        internal Dictionary<Type, PageServer> pageServerList = new Dictionary<Type, PageServer>();
+        internal Dictionary<Type, Page> pageList = new Dictionary<Type, Page>();
 
         /// <summary>
-        /// Returns PageServer of type.
+        /// Returns Page of type.
         /// </summary>
-        public PageServer PageServer(Type typePageServer)
+        public Page Page(Type typePage)
         {
-            if (!pageServerList.ContainsKey(typePageServer))
+            if (!pageList.ContainsKey(typePage))
             {
-                PageServer pageServer = (PageServer)Framework.Util.TypeToObject(typePageServer);
-                pageServer.Constructor(this);
-                pageServer = pageServerList[typePageServer];
-                pageServerList[typePageServer] = pageServer;
+                Page page = (Page)Framework.Util.TypeToObject(typePage);
+                page.Constructor(this);
+                page = pageList[typePage];
+                pageList[typePage] = page;
             }
-            return pageServerList[typePageServer];
+            return pageList[typePage];
         }
 
         /// <summary>
-        /// Returns PageServer of type.
+        /// Returns Page of type.
         /// </summary>
-        public T PageServer<T>() where T : PageServer
+        public T Page<T>() where T : Page
         {
-            return (T)PageServer(typeof(T));
+            return (T)Page(typeof(T));
         }
 
-        public void PageServerRemove(Type typePageServer)
+        public void PageRemove(Type typePage)
         {
             // Remove PageJson
-            string typeName = Framework.Util.TypeToTypeName(typePageServer);
-            if (ApplicationJson.PageJsonList.ContainsKey(typeName))
+            string type = Framework.Util.TypeToString(typePage);
+            if (ApplicationJson.PageJsonList.ContainsKey(type))
             {
-                ApplicationJson.PageJsonList.Remove(typeName);
+                ApplicationJson.PageJsonList.Remove(type);
             }
             //
-            if (pageServerList.ContainsKey(typePageServer))
+            if (pageList.ContainsKey(typePage))
             {
-                pageServerList.Remove(typePageServer);
+                pageList.Remove(typePage);
             }
-            if (ApplicationJson.TypeNamePageVisible == typeName)
+            if (ApplicationJson.TypePageVisible == type)
             {
-                ApplicationJson.TypeNamePageVisible = null;
+                ApplicationJson.TypePageVisible = null;
             }
-            ComponentRemove(typePageServer);
+            ComponentRemove(typePage);
         }
 
-        public void PageServerRemove<T>() where T : PageServer
+        public void PageRemove<T>() where T : Page
         {
-            PageServerRemove(typeof(T));
+            PageRemove(typeof(T));
         }
 
         protected virtual void ProcessInit()
@@ -114,20 +114,20 @@
         }
 
         /// <summary>
-        /// Returns visible PageServer.
+        /// Returns visible Page.
         /// </summary>
-        private PageServer PageServerVisible()
+        private Page PageVisible()
         {
-            Type typePageServer;
-            if (ApplicationJson.TypeNamePageVisible == null)
+            Type typePage;
+            if (ApplicationJson.TypePageVisible == null)
             {
-                typePageServer = TypePageServerMain();
+                typePage = TypePageMain();
             }
             else
             {
-                typePageServer = Framework.Util.TypeFromTypeName(ApplicationJson.TypeNamePageVisible, GetType());
+                typePage = Framework.Util.TypeFromString(ApplicationJson.TypePageVisible, GetType());
             }
-            PageServer result = (PageServer)Framework.Util.TypeToObject(typePageServer);
+            Page result = (Page)Framework.Util.TypeToObject(typePage);
             result.Constructor(this);
             if (result.PageJson.IsInit == false)
             {
@@ -140,20 +140,20 @@
         {
             foreach (Component component in ApplicationJson.List)
             {
-                if (component.TypeNamePageServer != null)
+                if (component.TypePage != null)
                 {
-                    PageJson pageJson = Util.PageJson(ApplicationJson, component.TypeNamePageServer);
-                    component.IsHide = !(component.TypeNamePageServer == ApplicationJson.TypeNamePageVisible);
+                    PageJson pageJson = Util.PageJson(ApplicationJson, component.TypePage);
+                    component.IsHide = !(component.TypePage == ApplicationJson.TypePageVisible);
                 }
             }
         }
 
-        private void ComponentRemove(Type typePageServer)
+        private void ComponentRemove(Type typePage)
         {
-            string typeNamePage = Framework.Util.TypeToTypeName(typePageServer);
+            string typePageString = Framework.Util.TypeToString(typePage);
             foreach (Component component in ApplicationJson.List.ToArray())
             {
-                if (component.TypeNamePageServer == typeNamePage)
+                if (component.TypePage == typePageString)
                 {
                     ApplicationJson.List.Remove(component);
                 }
@@ -180,8 +180,8 @@
             }
             this.applicationJson = applicationJson;
             //
-            PageServer pageServer = PageServerVisible();
-            pageServer.Process(); // Process visible page.
+            Page page = PageVisible();
+            page.Process(); // Process visible page.
             ComponentVisible();
             // Process
             {

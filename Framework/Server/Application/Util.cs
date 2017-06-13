@@ -16,13 +16,13 @@ namespace Framework.Server.Application
 
     public static class Util
     {
-        internal static PageJson PageJson(ApplicationJson applicationJson, string typeNamePageServer)
+        internal static PageJson PageJson(ApplicationJson applicationJson, string typePage)
         {
-            if (!applicationJson.PageJsonList.ContainsKey(typeNamePageServer))
+            if (!applicationJson.PageJsonList.ContainsKey(typePage))
             {
-                applicationJson.PageJsonList[typeNamePageServer] = (PageJson)Framework.Util.TypeToObject(typeof(PageJson));
+                applicationJson.PageJsonList[typePage] = (PageJson)Framework.Util.TypeToObject(typeof(PageJson));
             }
-            return (PageJson)applicationJson.PageJsonList[typeNamePageServer];
+            return (PageJson)applicationJson.PageJsonList[typePage];
         }
 
         public static string IndexEnumToString(IndexEnum indexEnum)

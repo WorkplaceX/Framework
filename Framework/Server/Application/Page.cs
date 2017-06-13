@@ -8,12 +8,12 @@
 
     public class ProcessList : IEnumerable<Process2Base>
     {
-        internal ProcessList(PageServer pageServer)
+        internal ProcessList(Page page)
         {
-            this.PageServer = pageServer;
+            this.Page = page;
         }
 
-        public readonly PageServer PageServer;
+        public readonly Page Page;
 
         private List<Process2Base> processList = new List<Process2Base>();
 
@@ -36,7 +36,7 @@
             }
             // Create process
             Process2Base result = (Process2Base)Framework.Util.TypeToObject(typeProcess);
-            result.Constructor(PageServer);
+            result.Constructor(Page);
             if (typeProcessFind == null)
             {
                 processList.Add(result);
@@ -92,22 +92,22 @@
         }
     }
 
-    public class PageServer
+    public class Page
     {
-        virtual internal void Constructor(ApplicationServerBase applicationServer)
+        virtual internal void Constructor(ApplicationBase application)
         {
-            this.applicationServer = applicationServer;
-            ApplicationServer.pageServerList.Add(GetType(), this);
+            this.application = application;
+            Application.pageList.Add(GetType(), this);
             ProcessInit();
         }
 
-        private ApplicationServerBase applicationServer;
+        private ApplicationBase application;
 
-        public ApplicationServerBase ApplicationServer
+        public ApplicationBase Application
         {
             get
             {
-                return applicationServer;
+                return application;
             }
         }
 
@@ -135,8 +135,8 @@
 
         protected virtual void ProcessInit()
         {
-            ProcessList.Add<ProcessPageServerInit>();
-            ProcessList.Add<ProcessPageServer>();
+            ProcessList.Add<ProcessPageInit>();
+            ProcessList.Add<ProcessPage>();
             ProcessList.Add<ProcessButtonIsClickFalse>();
         }
 
@@ -153,16 +153,16 @@
             }
         }
 
-        public string TypeNamePageServer()
+        public string TypePage()
         {
-            return Framework.Util.TypeToTypeName(GetType());
+            return Framework.Util.TypeToString(GetType());
         }
 
         public ApplicationJson ApplicationJson
         {
             get
             {
-                return ApplicationServer.ApplicationJson;
+                return Application.ApplicationJson;
             }
         }
 
@@ -170,8 +170,8 @@
         {
             get
             {
-                string typeNamePageServer = TypeNamePageServer();
-                return Util.PageJson(ApplicationJson, typeNamePageServer);
+                string typePage = TypePage();
+                return Util.PageJson(ApplicationJson, typePage);
             }
         }
 
@@ -180,7 +180,7 @@
         /// </summary>
         public void Show()
         {
-            ApplicationJson.TypeNamePageVisible = TypeNamePageServer();
+            ApplicationJson.TypePageVisible = TypePage();
         }
 
         protected T StateGet<T>(string name)
@@ -206,7 +206,7 @@
     /// <summary>
     /// Page to process data grid.
     /// </summary>
-    public class PageServerGridData : PageServer
+    public class PageGrid : Page
     {
         protected override void ProcessInit()
         {
@@ -216,26 +216,26 @@
 
     public abstract class Process2Base
     {
-        internal void Constructor(PageServer pageServer)
+        internal void Constructor(Page page)
         {
-            this.pageServer = pageServer;
+            this.page = page;
         }
 
-        private PageServer pageServer;
+        private Page page;
 
-        public PageServer PageServer
+        public Page Page
         {
             get
             {
-                return pageServer;
+                return page;
             }
         }
 
-        public ApplicationServerBase ApplicationServer
+        public ApplicationBase Application
         {
             get
             {
-                return PageServer.ApplicationServer;
+                return Page.Application;
             }
         }
 
@@ -243,7 +243,7 @@
         {
             get
             {
-                return PageServer.ApplicationServer.ApplicationJson;
+                return Page.Application.ApplicationJson;
             }
         }
 
@@ -253,13 +253,13 @@
         }
     }
 
-    public abstract class Process2Base<TPageServer> : Process2Base where TPageServer : PageServer
+    public abstract class Process2Base<TPage> : Process2Base where TPage : Page
     {
-        public new TPageServer PageServer
+        public new TPage Page
         {
             get
             {
-                return (TPageServer)base.PageServer;
+                return (TPage)base.Page;
             }
         }
     }
@@ -267,14 +267,14 @@
     /// <summary>
     /// Initialize a page the first time.
     /// </summary>
-    public class ProcessPageServerInit : Process2Base
+    public class ProcessPageInit : Process2Base
     {
         protected internal override void Process()
         {
-            if (PageServer.PageJson.IsInit == false)
+            if (Page.PageJson.IsInit == false)
             {
-                PageServer.ProcessApplicationJsonInit();
-                PageServer.PageJson.IsInit = true;
+                Page.ProcessApplicationJsonInit();
+                Page.PageJson.IsInit = true;
             }
         }
     }
@@ -294,13 +294,13 @@
     }
 
     /// <summary>
-    /// Call method PageServer.ProcessPage();
+    /// Call method Page.ProcessPage();
     /// </summary>
-    public class ProcessPageServer : Process2Base
+    public class ProcessPage : Process2Base
     {
         protected internal override void Process()
         {
-            PageServer.ProcessPage();
+            Page.ProcessPage();
         }
     }
 }

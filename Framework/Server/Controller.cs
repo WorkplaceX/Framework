@@ -12,25 +12,25 @@
 
     public class WebController
     {
-        public WebController(ControllerBase controller, string routePath, ApplicationServerBase applicationServer)
+        public WebController(ControllerBase controller, string routePath, ApplicationBase application)
         {
             this.Controller = controller;
             this.RoutePath = routePath;
-            this.ApplicationServer = applicationServer;
+            this.Application = application;
         }
 
         public readonly ControllerBase Controller;
 
         public readonly string RoutePath;
 
-        public readonly ApplicationServerBase ApplicationServer;
+        public readonly ApplicationBase Application;
 
         public async Task<IActionResult> Web()
         {
             // Html request
             if (Controller.HttpContext.Request.Path == RoutePath)
             {
-                ApplicationJson applicationJsonOut = ApplicationServer.Process(null, Controller.HttpContext.Request.Path);
+                ApplicationJson applicationJsonOut = Application.Process(null, Controller.HttpContext.Request.Path);
                 string htmlUniversal = null;
                 string html = IndexHtml(true);
                 htmlUniversal = await HtmlUniversal(html, applicationJsonOut, true); // Angular Universal server side rendering.
@@ -44,7 +44,7 @@
                 ApplicationJson applicationJsonOut;
                 try
                 {
-                    applicationJsonOut = ApplicationServer.Process(applicationJsonIn, Controller.HttpContext.Request.Path);
+                    applicationJsonOut = Application.Process(applicationJsonIn, Controller.HttpContext.Request.Path);
                     applicationJsonOut.ErrorProcess = null;
                 }
                 catch (Exception exception)

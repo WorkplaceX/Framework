@@ -159,7 +159,7 @@
             return result;
         }
 
-        public static string TypeToTypeName(Type type)
+        public static string TypeToString(Type type)
         {
             string result = null;
             if (type != null)
@@ -169,12 +169,12 @@
             return result;
         }
 
-        public static Type TypeFromTypeName(string typeName, Type typeInAssembly)
+        public static Type TypeFromString(string type, Type typeInAssembly)
         {
             Type result = null;
-            if (typeName != null)
+            if (type != null)
             {
-                result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeName);
+                result = typeInAssembly.GetTypeInfo().Assembly.GetType(type);
                 if (result == null)
                 {
                     throw new Exception("Type not found!");
