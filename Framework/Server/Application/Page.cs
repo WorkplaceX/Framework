@@ -11,32 +11,24 @@
     {
         virtual internal void Constructor(ApplicationBase application)
         {
-            this.application = application;
+            this.Application = application;
             Application.pageList.Add(GetType(), this);
-            ProcessInit();
+            ProcessInit(processList);
         }
 
-        private ApplicationBase application;
+        public ApplicationBase Application { get; private set; }
 
-        public ApplicationBase Application
+        private ProcessList processListPrivate;
+
+        private ProcessList processList
         {
             get
             {
-                return application;
-            }
-        }
-
-        private ProcessList processList;
-
-        public ProcessList ProcessList
-        {
-            get
-            {
-                if (processList == null)
+                if (processListPrivate == null)
                 {
-                    processList = new ProcessList(this);
+                    processListPrivate = new ProcessList(this);
                 }
-                return processList;
+                return processListPrivate;
             }
         }
 
@@ -48,11 +40,11 @@
 
         }
 
-        protected virtual void ProcessInit()
+        protected virtual void ProcessInit(ProcessList processList)
         {
-            ProcessList.Add<ProcessPage>();
-            ProcessList.Add<ProcessJson>();
-            ProcessList.Add<ProcessButtonIsClickFalse>();
+            processList.Add<ProcessPage>();
+            processList.Add<ProcessJson>();
+            processList.Add<ProcessButtonIsClickFalse>();
         }
 
         protected virtual internal void ProcessPage()
@@ -62,7 +54,7 @@
 
         public void Process()
         {
-            foreach (ProcessBase process in ProcessList)
+            foreach (ProcessBase process in processList)
             {
                 process.Process();
             }
@@ -111,25 +103,6 @@
                 PageJson.StateList = new Dictionary<string, object>();
             }
             PageJson.StateList[name] = value;
-        }
-
-        /// <summary>
-        /// Returns GridData, if a PageData exists which has not been removed.
-        /// </summary>
-        public GridData GridData()
-        {
-            GridData result = null;
-            foreach (string typePageString in Application.ApplicationJson.PageJsonList.Keys)
-            {
-                Type typePage = Framework.Util.TypeFromString(typePageString, Application.GetType());
-                if (Framework.Util.IsSubclassOf(typePage, typeof(PageGrid)))
-                {
-                    PageGrid pageGrid = (PageGrid)Application.PageInstance(typePage);
-                    result = pageGrid.GridData();
-
-                }
-            }
-            return result;
         }
     }
 
@@ -223,18 +196,10 @@
     {
         internal void Constructor(Page page)
         {
-            this.page = page;
+            this.Page = page;
         }
 
-        private Page page;
-
-        public Page Page
-        {
-            get
-            {
-                return page;
-            }
-        }
+        public Page Page { get; private set; }
 
         public ApplicationBase Application
         {

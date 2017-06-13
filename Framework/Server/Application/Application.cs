@@ -161,15 +161,7 @@
             }
         }
 
-        private ApplicationJson applicationJson;
-
-        public ApplicationJson ApplicationJson
-        {
-            get
-            {
-                return applicationJson;
-            }
-        }
+        public ApplicationJson ApplicationJson { get; private set; }
 
         public ApplicationJson Process(ApplicationJson applicationJson, string requestPath)
         {
@@ -178,12 +170,28 @@
                 applicationJson = new ApplicationJson();
                 applicationJson.PageJsonList = new Dictionary<string, PageJson>();
             }
-            this.applicationJson = applicationJson;
+            this.ApplicationJson = applicationJson;
             //
             Page page = PageVisible();
             page.Process(); // Process visible page.
             ComponentVisible();
             return ApplicationJson;
+        }
+
+        private GridData gridData;
+
+        /// <summary>
+        /// Make sure method GridData.LoadJson(); has been called. It's called only once.
+        /// </summary>
+        /// <returns></returns>
+        public GridData GridData()
+        {
+            if (gridData == null)
+            {
+                gridData = new GridData();
+                gridData.LoadJson(ApplicationJson, GetType());
+            }
+            return gridData;
         }
     }
 }

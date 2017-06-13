@@ -26,9 +26,9 @@
         /// </summary>
         internal void Constructor(string tableNameSql, string fieldNameSql, string fieldNameCSharp)
         {
-            this.tableNameSql = tableNameSql;
-            this.fieldNameSql = fieldNameSql;
-            this.fieldNameCSharp = fieldNameCSharp;
+            this.TableNameSql = tableNameSql;
+            this.FieldNameSql = fieldNameSql;
+            this.FieldNameCSharp = fieldNameCSharp;
         }
 
         /// <summary>
@@ -36,58 +36,30 @@
         /// </summary>
         internal Cell Constructor(object row)
         {
-            this.row = row;
+            this.Row = row;
             return this;
         }
-
-        private string tableNameSql;
 
         /// <summary>
         /// Gets sql TableName.
         /// </summary>
-        public string TableName
-        {
-            get
-            {
-                return tableNameSql;
-            }
-        }
+        public string TableNameSql { get; private set; }
 
-        private string fieldNameSql;
 
         /// <summary>
         /// Gets sql FieldName. If null, then it's a calculated column.
         /// </summary>
-        public string FieldNameSql
-        {
-            get
-            {
-                return fieldNameSql;
-            }
-        }
-
-        private string fieldNameCSharp;
+        public string FieldNameSql { get; private set; }
 
         /// <summary>
         /// Gets Csharp FieldName.
         /// </summary>
-        public string FieldNameCSharp
-        {
-            get
-            {
-                return fieldNameCSharp;
-            }
-        }
+        public string FieldNameCSharp { get; private set; }
 
-        private object row;
-
-        public object Row
-        {
-            get
-            {
-                return row;
-            }
-        }
+        /// <summary>
+        /// Gets Row. Null, if column.
+        /// </summary>
+        public object Row { get; private set; }
 
         protected virtual internal void CellIsReadOnly(ref bool isReadOnly)
         {
