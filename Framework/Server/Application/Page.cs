@@ -128,15 +128,15 @@
         /// <summary>
         /// Initialize page json object.
         /// </summary>
-        protected virtual internal void ProcessApplicationJsonInit()
+        protected virtual internal void ApplicationJsonInit()
         {
 
         }
 
         protected virtual void ProcessInit()
         {
-            ProcessList.Add<ProcessPageInit>();
             ProcessList.Add<ProcessPage>();
+            ProcessList.Add<ProcessJson2>();
             ProcessList.Add<ProcessButtonIsClickFalse>();
         }
 
@@ -175,17 +175,13 @@
             }
         }
 
-        /// <summary>
-        /// Make this page visible.
-        /// </summary>
-        public void Show()
-        {
-            ApplicationJson.TypePageVisible = TypePage();
-        }
-
         protected T StateGet<T>(string name)
         {
             T result = default(T);
+            if (PageJson.StateList == null)
+            {
+                PageJson.StateList = new Dictionary<string, object>();
+            }
             if (PageJson.StateList.ContainsKey(name))
             {
                 result = (T)PageJson.StateList[name];
@@ -199,18 +195,7 @@
             {
                 PageJson.StateList = new Dictionary<string, object>();
             }
-            PageJson.StateList[name] = value; 
-        }
-    }
-
-    /// <summary>
-    /// Page to process data grid.
-    /// </summary>
-    public class PageGrid : Page
-    {
-        protected override void ProcessInit()
-        {
-            base.ProcessInit();
+            PageJson.StateList[name] = value;
         }
     }
 
@@ -265,21 +250,6 @@
     }
 
     /// <summary>
-    /// Initialize a page the first time.
-    /// </summary>
-    public class ProcessPageInit : Process2Base
-    {
-        protected internal override void Process()
-        {
-            if (Page.PageJson.IsInit == false)
-            {
-                Page.ProcessApplicationJsonInit();
-                Page.PageJson.IsInit = true;
-            }
-        }
-    }
-
-    /// <summary>
     /// Set Button.IsClick to false.
     /// </summary>
     public class ProcessButtonIsClickFalse : Process2Base
@@ -301,6 +271,20 @@
         protected internal override void Process()
         {
             Page.ProcessPage();
+        }
+    }
+
+    /// <summary>
+    /// Call method Component.Process(); on json class.
+    /// </summary>
+    public class ProcessJson2 : Process2Base
+    {
+        protected internal override void Process()
+        {
+            foreach (Component component in ApplicationJson.ListAll())
+            {
+                component.Process(Application, ApplicationJson);
+            }
         }
     }
 }

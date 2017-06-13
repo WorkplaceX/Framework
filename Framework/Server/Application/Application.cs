@@ -52,9 +52,9 @@
         internal Dictionary<Type, Page> pageList = new Dictionary<Type, Page>();
 
         /// <summary>
-        /// Returns Page of type.
+        /// Returns existing Page instance of type or creates new one, if it doesn't exist.
         /// </summary>
-        public Page Page(Type typePage)
+        public Page PageInstance(Type typePage)
         {
             if (!pageList.ContainsKey(typePage))
             {
@@ -62,18 +62,26 @@
                 page.Constructor(this);
                 page = pageList[typePage];
                 pageList[typePage] = page;
+                if (page.PageJson.IsInit == false)
+                {
+                    page.ApplicationJsonInit();
+                    page.PageJson.IsInit = true;
+                }
             }
             return pageList[typePage];
         }
 
         /// <summary>
-        /// Returns Page of type.
+        /// Returns existing Page instance of type or creates new one, if it doesn't exist.
         /// </summary>
-        public T Page<T>() where T : Page
+        public TPage PageInstance<TPage>() where TPage : Page
         {
-            return (T)Page(typeof(T));
+            return (TPage)PageInstance(typeof(TPage));
         }
 
+        /// <summary>
+        /// Remove top level json Component and PageJson.
+        /// </summary>
         public void PageRemove(Type typePage)
         {
             // Remove PageJson
@@ -94,9 +102,25 @@
             ComponentRemove(typePage);
         }
 
-        public void PageRemove<T>() where T : Page
+        /// <summary>
+        /// Remove top level json Component and PageJson.
+        /// </summary>
+        public void PageRemove<TPage>() where TPage : Page
         {
-            PageRemove(typeof(T));
+            PageRemove(typeof(TPage));
+        }
+
+        public Page PageShow(Type typePage)
+        {
+            string type = Framework.Util.TypeToString(typePage);
+            Page result = PageInstance(typePage); // Make sure page is created.
+            ApplicationJson.TypePageVisible = type;
+            return result;
+        }
+
+        public TPage PageShow<TPage>() where TPage : Page
+        {
+            return (TPage)PageShow(typeof(TPage));
         }
 
         protected virtual void ProcessInit()
@@ -122,17 +146,13 @@
             if (ApplicationJson.TypePageVisible == null)
             {
                 typePage = TypePageMain();
+                ApplicationJson.TypePageVisible = Framework.Util.TypeToString(typePage);
             }
             else
             {
                 typePage = Framework.Util.TypeFromString(ApplicationJson.TypePageVisible, GetType());
             }
-            Page result = (Page)Framework.Util.TypeToObject(typePage);
-            result.Constructor(this);
-            if (result.PageJson.IsInit == false)
-            {
-                result.Show();
-            }
+            Page result = PageInstance(typePage);
             return result;
         }
 
@@ -148,6 +168,9 @@
             }
         }
 
+        /// <summary>
+        /// Remove all top level json components belonging to page.
+        /// </summary>
         private void ComponentRemove(Type typePage)
         {
             string typePageString = Framework.Util.TypeToString(typePage);
@@ -169,7 +192,6 @@
                 return applicationJson;
             }
         }
-
 
         public ApplicationJson Process(ApplicationJson applicationJson, string requestPath)
         {

@@ -234,6 +234,7 @@
             }
         }
     }
+
     public class ProcessGridIsIsClick : ProcessBase
     {
         public ProcessGridIsIsClick(ApplicationBase application)

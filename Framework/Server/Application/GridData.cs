@@ -906,6 +906,14 @@
                     }
                 }
             }
+            // Query removed rows. For example methos LoadRow("Table", null, null);
+            foreach (string gridName in queryList.Keys)
+            {
+                if (!rowList.ContainsKey(gridName))
+                {
+                    gridDataJson.RowList[gridName] = new List<Json.GridRow>();
+                }
+            }
             SaveJsonColumn(applicationJson);
             SaveJsonQuery(applicationJson);
         }

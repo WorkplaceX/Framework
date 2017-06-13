@@ -1,0 +1,384 @@
+﻿namespace Framework.Server.Application
+{
+    using Framework.Server.Application.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    /// <summary>
+    /// Page to process data grid.
+    /// </summary>
+    public class PageGrid : Page
+    {
+        protected override void ProcessInit()
+        {
+            base.ProcessInit();
+            ProcessList.AddBefore<ProcessGridIsClick, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridOrderBy2, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridFilter2, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridLookUp2, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridSave2, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridOrderByText, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridFocusNull, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridCellIsModifyFalse2, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridIsClickFalse, ProcessButtonIsClickFalse>();
+        }
+
+        private GridData gridData;
+
+        /// <summary>
+        /// Make sure method GridData.LoadJson(); has been called. It's called only once.
+        /// </summary>
+        /// <returns></returns>
+        public GridData GridData()
+        {
+            if (gridData == null)
+            {
+                gridData = new GridData();
+                gridData.LoadJson(ApplicationJson, Application.GetType());
+            }
+            return gridData;
+        }
+
+        private bool isGridDataTextParse;
+
+        /// <summary>
+        /// Make sure method GridData.Text(); has been called. It's called only once.
+        /// </summary>
+        public void GridDataTextParse()
+        {
+            if (isGridDataTextParse == false)
+            {
+                isGridDataTextParse = true;
+                GridData().TextParse();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Process OrderBy click.
+    /// </summary>
+    public class ProcessGridOrderBy2 : Process2Base<PageGrid>
+    {
+        private void DatabaseLoad(ApplicationJson applicationJson, string gridName, string fieldNameOrderBy, bool isOrderByDesc)
+        {
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            //
+            GridData gridData = Page.GridData();
+            Type typeRow = gridData.TypeRow(gridName);
+            gridData.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
+            gridData.SaveJson(applicationJson);
+        }
+
+        protected internal override void Process()
+        {
+            // Detect OrderBy click
+            foreach (string gridName in ApplicationJson.GridDataJson.ColumnList.Keys.ToArray())
+            {
+                foreach (Json.GridColumn gridColumn in ApplicationJson.GridDataJson.ColumnList[gridName])
+                {
+                    if (gridColumn.IsClick)
+                    {
+                        Json.GridQuery gridQuery = ApplicationJson.GridDataJson.GridQueryList[gridName];
+                        if (gridQuery.FieldNameOrderBy == gridColumn.FieldName)
+                        {
+                            gridQuery.IsOrderByDesc = !gridQuery.IsOrderByDesc;
+                        }
+                        else
+                        {
+                            gridQuery.FieldNameOrderBy = gridColumn.FieldName;
+                            gridQuery.IsOrderByDesc = true;
+                        }
+                        DatabaseLoad(ApplicationJson, gridName, gridQuery.FieldNameOrderBy, gridQuery.IsOrderByDesc);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Set OrderBy up or down arrow.
+    /// </summary>
+    public class ProcessGridOrderByText : Process2Base
+    {
+        protected internal override void Process()
+        {
+            foreach (string gridName in ApplicationJson.GridDataJson.ColumnList.Keys)
+            {
+                Json.GridQuery gridQuery = ApplicationJson.GridDataJson.GridQueryList[gridName];
+                foreach (Json.GridColumn gridColumn in ApplicationJson.GridDataJson.ColumnList[gridName])
+                {
+                    gridColumn.IsClick = false;
+                    if (gridColumn.FieldName == gridQuery.FieldNameOrderBy)
+                    {
+                        if (gridQuery.IsOrderByDesc)
+                        {
+                            gridColumn.Text = "▼" + " " + gridColumn.FieldName;
+                        }
+                        else
+                        {
+                            gridColumn.Text = "▲" + " " + gridColumn.FieldName;
+                        }
+                    }
+                    else
+                    {
+                        gridColumn.Text = gridColumn.FieldName;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Process data grid filter.
+    /// </summary>
+    public class ProcessGridFilter2 : Process2Base<PageGrid>
+    {
+        protected internal override void Process()
+        {
+            List<string> gridNameList = new List<string>();
+            foreach (string gridName in ApplicationJson.GridDataJson.ColumnList.Keys)
+            {
+                foreach (Json.GridRow gridRow in ApplicationJson.GridDataJson.RowList[gridName])
+                {
+                    if (Util.IndexToIndexEnum(gridRow.Index) == IndexEnum.Filter)
+                    {
+                        foreach (Json.GridColumn gridColumn in ApplicationJson.GridDataJson.ColumnList[gridName])
+                        {
+                            Json.GridCell gridCell = ApplicationJson.GridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                            if (gridCell.IsModify)
+                            {
+                                if (!gridNameList.Contains(gridName))
+                                {
+                                    gridNameList.Add(gridName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //
+            foreach (string gridName in gridNameList)
+            {
+                Page.GridDataTextParse();
+                GridData gridData = Page.GridData();
+                gridData.LoadDatabase(gridName);
+                gridData.SaveJson(ApplicationJson);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Grid row or cell is clicked. Set focus.
+    /// </summary>
+    public class ProcessGridIsClick : Process2Base
+    {
+        private void ProcessGridSelectRowClear(ApplicationJson applicationJson, string gridName)
+        {
+            foreach (Json.GridRow gridRow in applicationJson.GridDataJson.RowList[gridName])
+            {
+                gridRow.IsSelectSet(false);
+            }
+        }
+
+        private void ProcessGridSelectCell(ApplicationJson applicationJson, string gridName, string index, string fieldName)
+        {
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            gridDataJson.FocusGridName = gridName;
+            gridDataJson.FocusIndex = index;
+            gridDataJson.FocusFieldName = fieldName;
+            ProcessGridSelectCellClear(applicationJson);
+            gridDataJson.CellList[gridName][fieldName][index].IsSelect = true;
+        }
+
+        private void ProcessGridSelectCellClear(ApplicationJson applicationJson)
+        {
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        gridCell.IsSelect = false;
+                    }
+                }
+            }
+        }
+
+        protected internal override void Process()
+        {
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            foreach (Json.GridQuery gridQuery in gridDataJson.GridQueryList.Values)
+            {
+                string gridName = gridQuery.GridName;
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    if (gridRow.IsClick)
+                    {
+                        ProcessGridSelectRowClear(ApplicationJson, gridName);
+                        gridRow.IsSelectSet(true);
+                    }
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsClick == true)
+                        {
+                            ProcessGridSelectCell(ApplicationJson, gridName, gridRow.Index, gridColumn.FieldName);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Set row and cell IsClick to false
+    /// </summary>
+    public class ProcessGridIsClickFalse : Process2Base
+    {
+        protected internal override void Process()
+        {
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            foreach (Json.GridQuery gridQuery in gridDataJson.GridQueryList.Values)
+            {
+                string gridName = gridQuery.GridName;
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    gridRow.IsClick = false;
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        gridCell.IsClick = false;
+                    }
+                }
+            }
+        }
+    }
+
+    public class ProcessGridCellIsModifyFalse2 : Process2Base
+    {
+        protected internal override void Process()
+        {
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            //
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsModify)
+                        {
+                            gridCell.IsModify = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class ProcessGridLookUp2 : Process2Base<PageGrid>
+    {
+        protected internal override void Process()
+        {
+            bool isLookUp = false;
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsClick || gridCell.IsModify)
+                        {
+                            isLookUp = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            //
+            if (isLookUp)
+            {
+                if (gridDataJson.FocusFieldName != null)
+                {
+                    GridData gridData = Page.GridData();
+                    Type typeRow = gridData.TypeRow(gridDataJson.FocusGridName);
+                    var row = gridData.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
+                    DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                    List<DataAccessLayer.Row> rowList;
+                    cell.LookUp(out typeRow, out rowList);
+                    gridData.LoadRow("LookUp", typeRow, rowList);
+                    gridData.SaveJson(ApplicationJson);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Set focus to null, if cell does not exist anymore.
+    /// </summary>
+    public class ProcessGridFocusNull : Process2Base
+    {
+        protected internal override void Process()
+        {
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            bool isExist = false; // Focused field exists
+            if (gridDataJson.FocusFieldName != null)
+            {
+                if (gridDataJson.RowList[gridDataJson.FocusGridName].Exists(item => item.Index == gridDataJson.FocusIndex)) // Focused row exists
+                {
+                    if (gridDataJson.ColumnList[gridDataJson.FocusGridName].Exists(item => item.FieldName == gridDataJson.FocusFieldName)) // Focused column exists
+                    {
+                        isExist = true;
+                    }
+                }
+            }
+            if (isExist == false)
+            {
+                if (ApplicationJson.GridDataJson != null)
+                {
+                    ApplicationJson.GridDataJson.FocusFieldName = null;
+                    ApplicationJson.GridDataJson.FocusGridName = null;
+                    ApplicationJson.GridDataJson.FocusIndex = null;
+                }
+            }
+        }
+    }
+
+    public class ProcessGridSave2 : Process2Base<PageGrid>
+    {
+        protected internal override void Process()
+        {
+            bool isSave = false;
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsModify)
+                        {
+                            isSave = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            //
+            if (isSave)
+            {
+                Page.GridData().TextParse();
+                Page.GridData().SaveDatabase();
+                Page.GridData().SaveJson(ApplicationJson);
+            }
+        }
+    }
+}

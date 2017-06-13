@@ -69,7 +69,7 @@
         public string Name;
 
         /// <summary>
-        /// Gets or sets TypePage. Indicating to which page this top level component belongs to.
+        /// Gets or sets TypePage. Indicating to which page this top level json component belongs to.
         /// </summary>
         public string TypePage;
 
@@ -501,10 +501,24 @@
 
         protected internal override void Process(ApplicationBase application, ApplicationJson applicationJson)
         {
-            ProcessGridSave processGridSave = application.ProcessListGet<ProcessGridSave>();
-            string isModify = processGridSave != null ? processGridSave.IsModify.ToString() : false.ToString();
+            bool isModify = false;
+            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            foreach (string gridName in gridDataJson.GridQueryList.Keys)
+            {
+                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (Json.GridColumn gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsO)
+                        {
+                            isModify = true;
+                            break;
+                        }
+                    }
+                }
+            }
             Text = string.Format("IsModify={0};", isModify);
-            base.Process(application, applicationJson);
         }
     }
 }
