@@ -465,7 +465,11 @@
         /// </summary>
         public void LoadRow(string gridName, Row row)
         {
-            if (row != null)
+            if (row == null)
+            {
+                LoadRow(gridName, null, null); // Remove data grid.
+            }
+            else
             {
                 List<Row> rowList = new List<Row>();
                 rowList.Add(row);

@@ -118,14 +118,10 @@
         /// <summary>
         /// Returns cell list. Or column list, if row is null.
         /// </summary>
-        public static List<Cell> CellList(Type typeRow, object row)
+        public static List<Cell> CellList(object row)
         {
-            if (row != null)
-            {
-                Framework.Util.Assert(row.GetType() == typeRow);
-            }
             List<Cell> result = new List<Cell>();
-            result = ColumnList(typeRow);
+            result = ColumnList(row.GetType());
             foreach (Cell cell in result)
             {
                 cell.Constructor(row);

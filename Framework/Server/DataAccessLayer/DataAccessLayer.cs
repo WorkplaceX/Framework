@@ -1,5 +1,6 @@
 ﻿namespace Framework.Server.DataAccessLayer
 {
+    using Framework.Server.Application;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
@@ -127,7 +128,7 @@
             return GetType().GetTypeInfo().GetMethod(nameof(CellProcessButtonIsClick), BindingFlags.Instance | BindingFlags.NonPublic).DeclaringType == GetType(); // Method ProcessButtonIsClick(); is overwritten.
         }
 
-        protected virtual internal void CellProcessButtonIsClick()
+        protected virtual internal void CellProcessButtonIsClick(PageGrid pageGrid, string gridName, string index, string fieldName)
         {
 
         }

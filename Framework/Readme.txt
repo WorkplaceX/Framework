@@ -1,10 +1,11 @@
 Release b1.0
--Angular Selector IsHide
+-Rename Database.lock.cs to Database.g.cs
+-Angular Selector IsHide on all removeSelector
 -Split SqlName attribute into SqlTableName and SqlColumnName
--Tool CLI
 -Class Page
--Remove Office
+-Tool CLI
 -Remove Build
+-Remove Office
 
 ToDo
 -Include build number into version https://docs.travis-ci.com/user/environment-variables/

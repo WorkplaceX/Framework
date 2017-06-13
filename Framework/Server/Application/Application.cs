@@ -52,7 +52,7 @@
         }
 
         /// <summary>
-        /// Remove top level json Component and PageJson.
+        /// Remove top level json Component and PageJson (Page state).
         /// </summary>
         public void PageRemove(Type typePage)
         {
@@ -82,17 +82,37 @@
             PageRemove(typeof(TPage));
         }
 
-        public Page PageShow(Type typePage)
+        /// <summary>
+        /// Show new page.
+        /// </summary>
+        /// <param name="typePage">Type of new page to show.</param>
+        /// <param name="isPageVisibleRemove">Remove currently visible page and its state.</param>
+        /// <returns>Returns instance of new page.</returns>
+        public Page PageShow(Type typePage, bool isPageVisibleRemove = true)
         {
+            if (isPageVisibleRemove)
+            {
+                if (ApplicationJson.TypePageVisible != null)
+                {
+                    Type typePageVisible = Framework.Util.TypeFromString(ApplicationJson.TypePageVisible, GetType());
+                    PageRemove(typePageVisible);
+                }
+            }
             string type = Framework.Util.TypeToString(typePage);
             Page result = PageInstance(typePage); // Make sure page is created.
             ApplicationJson.TypePageVisible = type;
             return result;
         }
 
-        public TPage PageShow<TPage>() where TPage : Page
+        /// <summary>
+        /// Show new page.
+        /// </summary>
+        /// <typeparam name="TPage">Type of new page to show.</typeparam>
+        /// <param name="isPageVisibleRemove">Remove currently visible page and its state.</param>
+        /// <returns>Returns instance of new page.</returns>
+        public TPage PageShow<TPage>(bool isPageVisibleRemove = true) where TPage : Page
         {
-            return (TPage)PageShow(typeof(TPage));
+            return (TPage)PageShow(typeof(TPage), isPageVisibleRemove);
         }
 
         /// <summary>

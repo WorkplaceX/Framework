@@ -192,5 +192,10 @@
         {
             return Activator.CreateInstance(type);
         }
+
+        public static bool IsSubclassOf(Type type, Type typeBase)
+        {
+            return type.GetTypeInfo().IsSubclassOf(typeBase) || type == typeBase;
+        }
     }
 }

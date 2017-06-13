@@ -1,6 +1,7 @@
 ﻿namespace Framework.Server.Application
 {
     using Framework.Server.Application.Json;
+    using Framework.Server.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -18,6 +19,7 @@
             ProcessList.AddBefore<ProcessGridFilter, ProcessButtonIsClickFalse>();
             ProcessList.AddBefore<ProcessGridLookUp, ProcessButtonIsClickFalse>();
             ProcessList.AddBefore<ProcessGridSave, ProcessButtonIsClickFalse>();
+            ProcessList.AddBefore<ProcessGridCellButtonIsClick, ProcessButtonIsClickFalse>();
             ProcessList.AddBefore<ProcessGridOrderByText, ProcessButtonIsClickFalse>();
             ProcessList.AddBefore<ProcessGridFocusNull, ProcessButtonIsClickFalse>();
             ProcessList.AddBefore<ProcessGridCellIsModifyFalse, ProcessButtonIsClickFalse>();
@@ -310,7 +312,7 @@
                     GridData gridData = Page.GridData();
                     Type typeRow = gridData.TypeRow(gridDataJson.FocusGridName);
                     var row = gridData.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
-                    DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                    DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                     List<DataAccessLayer.Row> rowList;
                     cell.LookUp(out typeRow, out rowList);
                     gridData.LoadRow("LookUp", typeRow, rowList);
@@ -378,6 +380,45 @@
                 Page.GridData().TextParse();
                 Page.GridData().SaveDatabase();
                 Page.GridData().SaveJson(ApplicationJson);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Cell rendered as button is clicked.
+    /// </summary>
+    public class ProcessGridCellButtonIsClick : ProcessBase<PageGrid>
+    {
+        protected internal override void Process()
+        {
+            GridDataJson gridDataJson = ApplicationJson.GridDataJson;
+            //
+            string gridNameClick = null;
+            string indexClick = null;
+            string fieldNameClick = null;
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.IsModify && gridCell.T == "Click")
+                        {
+                            gridNameClick = gridName;
+                            indexClick = gridRow.Index;
+                            fieldNameClick = gridColumn.FieldName;
+                            break;
+                        }
+                    }
+                }
+            }
+            //
+            if (gridNameClick != null)
+            {
+                Row row = Page.GridData().Row(gridNameClick, indexClick);
+                Cell cell = DataAccessLayer.Util.CellList(row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
+                cell.CellProcessButtonIsClick(Page, gridNameClick, indexClick, fieldNameClick);
             }
         }
     }

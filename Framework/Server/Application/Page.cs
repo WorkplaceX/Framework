@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Collections;
+    using System.Runtime.CompilerServices;
 
     public class Page
     {
@@ -89,7 +90,7 @@
             }
         }
 
-        protected T StateGet<T>(string name)
+        protected T StateGet<T>([CallerMemberName] string name = null)
         {
             T result = default(T);
             if (PageJson.StateList == null)
@@ -103,13 +104,32 @@
             return result;
         }
 
-        protected void StateSet(string name, object value)
+        protected void StateSet(object value, [CallerMemberName] string name = null)
         {
             if (PageJson.StateList == null)
             {
                 PageJson.StateList = new Dictionary<string, object>();
             }
             PageJson.StateList[name] = value;
+        }
+
+        /// <summary>
+        /// Returns GridData, if a PageData exists which has not been removed.
+        /// </summary>
+        public GridData GridData()
+        {
+            GridData result = null;
+            foreach (string typePageString in Application.ApplicationJson.PageJsonList.Keys)
+            {
+                Type typePage = Framework.Util.TypeFromString(typePageString, Application.GetType());
+                if (Framework.Util.IsSubclassOf(typePage, typeof(PageGrid)))
+                {
+                    PageGrid pageGrid = (PageGrid)Application.PageInstance(typePage);
+                    result = pageGrid.GridData();
+
+                }
+            }
+            return result;
         }
     }
 
