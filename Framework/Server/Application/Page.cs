@@ -6,92 +6,6 @@
     using System.Linq;
     using System.Collections;
 
-    public class ProcessList : IEnumerable<Process2Base>
-    {
-        internal ProcessList(Page page)
-        {
-            this.Page = page;
-        }
-
-        public readonly Page Page;
-
-        private List<Process2Base> processList = new List<Process2Base>();
-
-        public IEnumerator<Process2Base> GetEnumerator()
-        {
-            return processList.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return processList.GetEnumerator();
-        }
-
-        private Process2Base ProcessListInsert(Type typeProcess, Type typeProcessFind, bool isAfter)
-        {
-            // Already exists?
-            foreach (Process2Base process in processList)
-            {
-                Framework.Util.Assert(process.GetType() != typeProcess, "Page already contains process!");
-            }
-            // Create process
-            Process2Base result = (Process2Base)Framework.Util.TypeToObject(typeProcess);
-            result.Constructor(Page);
-            if (typeProcessFind == null)
-            {
-                processList.Add(result);
-            }
-            else
-            {
-                int index = -1;
-                bool isFind = false;
-                // Find process
-                foreach (Process2Base process in processList)
-                {
-                    index += 1;
-                    if (process.GetType() == typeProcessFind)
-                    {
-                        isFind = true;
-                        break;
-                    }
-                }
-                Framework.Util.Assert(isFind, "Process not found!");
-                if (isAfter)
-                {
-                    index += 1;
-                }
-                processList.Insert(index, result);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Create process for this page.
-        /// </summary>
-        public TProcess Add<TProcess>() where TProcess : Process2Base
-        {
-            return (TProcess)ProcessListInsert(typeof(TProcess), null, false);
-        }
-
-        public TProcess AddBefore<TProcess, TProcessFind>() where TProcess : Process2Base where TProcessFind : Process2Base
-        {
-            return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), false);
-        }
-
-        public TProcess AddAfter<TProcess, TProcessFind>() where TProcess : Process2Base where TProcessFind : Process2Base
-        {
-            return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), true);
-        }
-
-        /// <summary>
-        /// Returns process of this page.
-        /// </summary>
-        public T Get<T>() where T : Process2Base
-        {
-            return (T)processList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
-        }
-    }
-
     public class Page
     {
         virtual internal void Constructor(ApplicationBase application)
@@ -136,7 +50,7 @@
         protected virtual void ProcessInit()
         {
             ProcessList.Add<ProcessPage>();
-            ProcessList.Add<ProcessJson2>();
+            ProcessList.Add<ProcessJson>();
             ProcessList.Add<ProcessButtonIsClickFalse>();
         }
 
@@ -147,7 +61,7 @@
 
         public void Process()
         {
-            foreach (Process2Base process in ProcessList)
+            foreach (ProcessBase process in ProcessList)
             {
                 process.Process();
             }
@@ -199,7 +113,93 @@
         }
     }
 
-    public abstract class Process2Base
+    public class ProcessList : IEnumerable<ProcessBase>
+    {
+        internal ProcessList(Page page)
+        {
+            this.Page = page;
+        }
+
+        public readonly Page Page;
+
+        private List<ProcessBase> processList = new List<ProcessBase>();
+
+        public IEnumerator<ProcessBase> GetEnumerator()
+        {
+            return processList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return processList.GetEnumerator();
+        }
+
+        private ProcessBase ProcessListInsert(Type typeProcess, Type typeProcessFind, bool isAfter)
+        {
+            // Already exists?
+            foreach (ProcessBase process in processList)
+            {
+                Framework.Util.Assert(process.GetType() != typeProcess, "Page already contains process!");
+            }
+            // Create process
+            ProcessBase result = (ProcessBase)Framework.Util.TypeToObject(typeProcess);
+            result.Constructor(Page);
+            if (typeProcessFind == null)
+            {
+                processList.Add(result);
+            }
+            else
+            {
+                int index = -1;
+                bool isFind = false;
+                // Find process
+                foreach (ProcessBase process in processList)
+                {
+                    index += 1;
+                    if (process.GetType() == typeProcessFind)
+                    {
+                        isFind = true;
+                        break;
+                    }
+                }
+                Framework.Util.Assert(isFind, "Process not found!");
+                if (isAfter)
+                {
+                    index += 1;
+                }
+                processList.Insert(index, result);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Create process for this page.
+        /// </summary>
+        public TProcess Add<TProcess>() where TProcess : ProcessBase
+        {
+            return (TProcess)ProcessListInsert(typeof(TProcess), null, false);
+        }
+
+        public TProcess AddBefore<TProcess, TProcessFind>() where TProcess : ProcessBase where TProcessFind : ProcessBase
+        {
+            return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), false);
+        }
+
+        public TProcess AddAfter<TProcess, TProcessFind>() where TProcess : ProcessBase where TProcessFind : ProcessBase
+        {
+            return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), true);
+        }
+
+        /// <summary>
+        /// Returns process of this page.
+        /// </summary>
+        public T Get<T>() where T : ProcessBase
+        {
+            return (T)processList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
+        }
+    }
+
+    public abstract class ProcessBase
     {
         internal void Constructor(Page page)
         {
@@ -238,7 +238,7 @@
         }
     }
 
-    public abstract class Process2Base<TPage> : Process2Base where TPage : Page
+    public abstract class ProcessBase<TPage> : ProcessBase where TPage : Page
     {
         public new TPage Page
         {
@@ -252,7 +252,7 @@
     /// <summary>
     /// Set Button.IsClick to false.
     /// </summary>
-    public class ProcessButtonIsClickFalse : Process2Base
+    public class ProcessButtonIsClickFalse : ProcessBase
     {
         protected internal override void Process()
         {
@@ -266,7 +266,7 @@
     /// <summary>
     /// Call method Page.ProcessPage();
     /// </summary>
-    public class ProcessPage : Process2Base
+    public class ProcessPage : ProcessBase
     {
         protected internal override void Process()
         {
@@ -277,7 +277,7 @@
     /// <summary>
     /// Call method Component.Process(); on json class.
     /// </summary>
-    public class ProcessJson2 : Process2Base
+    public class ProcessJson : ProcessBase
     {
         protected internal override void Process()
         {

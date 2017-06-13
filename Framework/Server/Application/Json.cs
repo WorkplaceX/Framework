@@ -505,11 +505,11 @@
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
-                foreach (Json.GridRow gridRow in gridDataJson.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
-                    foreach (Json.GridColumn gridColumn in gridDataJson.ColumnList[gridName])
+                    foreach (GridColumn gridColumn in gridDataJson.ColumnList[gridName])
                     {
-                        Json.GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         if (gridCell.IsO)
                         {
                             isModify = true;
