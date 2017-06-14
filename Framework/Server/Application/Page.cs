@@ -192,7 +192,7 @@
         }
     }
 
-    public abstract class ProcessBase
+    public class ProcessBase
     {
         internal void Constructor(Page page)
         {
@@ -220,17 +220,6 @@
         protected virtual internal void Process()
         {
 
-        }
-    }
-
-    public abstract class ProcessBase<TPage> : ProcessBase where TPage : Page
-    {
-        public new TPage Page
-        {
-            get
-            {
-                return (TPage)base.Page;
-            }
         }
     }
 

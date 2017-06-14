@@ -193,5 +193,19 @@
             }
             return gridData;
         }
+
+        private bool isGridDataTextParse;
+
+        /// <summary>
+        /// Make sure method GridData.Text(); has been called. It's called only once.
+        /// </summary>
+        public void GridDataTextParse()
+        {
+            if (isGridDataTextParse == false)
+            {
+                isGridDataTextParse = true;
+                GridData().TextParse();
+            }
+        }
     }
 }

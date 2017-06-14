@@ -403,7 +403,10 @@
             return Convert.ChangeType(value, type);
         }
 
-        public static Type TypeGet(string objectTypeString, Type rootType)
+        /// <summary>
+        /// Returns type. Searches for type in rootType's assembly and namespace.
+        /// </summary>
+        private static Type TypeGet(string objectTypeString, Type rootType)
         {
             string ns = rootType.Namespace + ".";
             if (rootType.DeclaringType != null)

@@ -25,26 +25,12 @@
             processList.Add<ProcessGridIsClickFalse>();
             base.ProcessInit(processList);
         }
-
-        private bool isGridDataTextParse;
-
-        /// <summary>
-        /// Make sure method GridData.Text(); has been called. It's called only once.
-        /// </summary>
-        public void GridDataTextParse()
-        {
-            if (isGridDataTextParse == false)
-            {
-                isGridDataTextParse = true;
-                Application.GridData().TextParse();
-            }
-        }
     }
 
     /// <summary>
     /// Process OrderBy click.
     /// </summary>
-    public class ProcessGridOrderBy : ProcessBase<PageGrid>
+    public class ProcessGridOrderBy : ProcessBase
     {
         private void DatabaseLoad(ApplicationJson applicationJson, string gridName, string fieldNameOrderBy, bool isOrderByDesc)
         {
@@ -119,7 +105,7 @@
     /// <summary>
     /// Process data grid filter.
     /// </summary>
-    public class ProcessGridFilter : ProcessBase<PageGrid>
+    public class ProcessGridFilter : ProcessBase
     {
         protected internal override void Process()
         {
@@ -147,7 +133,7 @@
             //
             foreach (string gridName in gridNameList)
             {
-                Page.GridDataTextParse();
+                Application.GridDataTextParse();
                 GridData gridData = Application.GridData();
                 gridData.LoadDatabase(gridName);
                 gridData.SaveJson(ApplicationJson);
@@ -267,7 +253,7 @@
         }
     }
 
-    public class ProcessGridLookUp : ProcessBase<PageGrid>
+    public class ProcessGridLookUp : ProcessBase
     {
         protected internal override void Process()
         {
@@ -337,7 +323,7 @@
         }
     }
 
-    public class ProcessGridSave : ProcessBase<PageGrid>
+    public class ProcessGridSave : ProcessBase
     {
         protected internal override void Process()
         {
@@ -371,7 +357,7 @@
     /// <summary>
     /// Cell rendered as button is clicked.
     /// </summary>
-    public class ProcessGridCellButtonIsClick : ProcessBase<PageGrid>
+    public class ProcessGridCellButtonIsClick : ProcessBase
     {
         protected internal override void Process()
         {

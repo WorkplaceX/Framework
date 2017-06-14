@@ -1,3 +1,6 @@
+Release
+-Remove field TypeCSharp, method Component.TypeSet();
+
 Release b1.0
 -Rename Database.lock.cs to Database.g.cs
 -Angular Selector IsHide on all removeSelector
