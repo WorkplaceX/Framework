@@ -61,11 +61,28 @@ export class AppComponent {
   <Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></Grid>
   <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
   <GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></GridField>
+  <Page *ngIf="json.Type=='Page2' && !json.IsHide" [json]=json></Page>
   <!-- <LayoutDebug [json]=json></LayoutDebug> -->
 `
 })
 export class Selector {
   @Input() json: any
+}
+
+/* Page */
+@Component({
+  selector: 'Page',
+  template: `
+  Text={{ json.Text }}
+  <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
+`
+})
+export class Page {
+  @Input() json: any
+
+  trackBy(index: any, item: any) {
+    return item.Key;
+  }
 }
 
 /* LayoutContainer */

@@ -534,6 +534,24 @@ namespace UnitTest.Json
                 }
             }
         }
+
+        public class Data27
+        {
+            public string Field;
+
+            public string Property { get; set; }
+        }
+
+        public void Test27()
+        {
+            var data = new Data27();
+            data.Field = "Field2";
+            data.Property = "Property2";
+            string json = Framework.Server.Json.Util.Serialize(data);
+            var data2 = Framework.Server.Json.Util.Deserialize<Data27>(json);
+            Util.Assert(data2.Field == "Field2");
+            Util.Assert(data2.Property == "Property2");
+        }
     }
 }
 

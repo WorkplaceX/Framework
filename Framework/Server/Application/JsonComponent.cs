@@ -16,7 +16,7 @@
             Constructor(owner, text);
         }
 
-        private void Constructor(Component owner, string text)
+        internal void Constructor(Component owner, string text)
         {
             this.Type = GetType().Name;
             this.Text = text;
@@ -49,7 +49,7 @@
         /// <summary>
         /// Overwrite default type. Used to change Angular Selector.
         /// </summary>
-        public void TypeSet(Type type)
+        internal void TypeSet(Type type)
         {
             Type = type.Name;
         }
@@ -104,9 +104,9 @@
 
         private void Owner(Component component, ref Component result)
         {
-            if (List.Contains(component))
+            if (component.List.Contains(this))
             {
-                result = this;
+                result = component;
             }
             if (result != null)
             {
@@ -122,8 +122,9 @@
         }
 
         /// <summary>
-        /// Returns owner of component.
+        /// Returns owner of this json component.
         /// </summary>
+        /// <param name="component">Component to start search from to down.</param>
         public Component Owner(Component component)
         {
             Component result = null;
@@ -133,6 +134,39 @@
 
         protected virtual internal void Process(ApplicationBase application, ApplicationJson applicationJson)
         {
+
+        }
+    }
+
+    public class Page2 : Component
+    {
+        protected virtual internal void Init(ApplicationBase applicationBase)
+        {
+
+        }
+
+        public Page2 PageVisible(ApplicationBase application)
+        {
+            return application.Page2Visible(Owner(application.ApplicationJson));
+        }
+
+        public Page2 Page2Show(ApplicationBase application, Type typePage, bool isPageVisibleRemove = true)
+        {
+            return application.Page2Show(Owner(application.ApplicationJson), typePage, isPageVisibleRemove);
+        }
+
+        public TPage Page2Show<TPage>(ApplicationBase application, bool isPageVisibleRemove = true) where TPage : Page2, new()
+        {
+            return application.Page2Show<TPage>(Owner(application.ApplicationJson), isPageVisibleRemove);
+        }
+
+        protected virtual internal void ProcessBegin(ApplicationBase application)
+        {
+
+        }
+
+        protected virtual internal void ProcessEnd()
+        { 
 
         }
     }

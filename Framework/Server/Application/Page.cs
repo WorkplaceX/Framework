@@ -7,17 +7,6 @@
     using System.Collections;
     using System.Runtime.CompilerServices;
 
-    public class Page2 : Component
-    {
-        public Page2() { }
-
-        public Page2(Component owner, string text) 
-            : base(owner, text)
-        {
-
-        }
-    }
-
     public class Page
     {
         virtual internal void Constructor(ApplicationBase application)
@@ -117,6 +106,92 @@
         }
     }
 
+    public class ProcessList2 : IEnumerable<ProcessBase2>
+    {
+        internal ProcessList2(ApplicationBase application)
+        {
+            this.Application = application;
+        }
+
+        public readonly ApplicationBase Application;
+
+        private List<ProcessBase2> processList = new List<ProcessBase2>();
+
+        public IEnumerator<ProcessBase2> GetEnumerator()
+        {
+            return processList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return processList.GetEnumerator();
+        }
+
+        private ProcessBase2 ProcessListInsert(Type typeProcess, Type typeProcessFind, bool isAfter)
+        {
+            // Already exists?
+            foreach (ProcessBase2 process in processList)
+            {
+                Framework.Util.Assert(process.GetType() != typeProcess, "Page already contains process!");
+            }
+            // Create process
+            ProcessBase2 result = (ProcessBase2)Framework.Util.TypeToObject(typeProcess);
+            result.Constructor(Application);
+            if (typeProcessFind == null)
+            {
+                processList.Add(result);
+            }
+            else
+            {
+                int index = -1;
+                bool isFind = false;
+                // Find process
+                foreach (ProcessBase2 process in processList)
+                {
+                    index += 1;
+                    if (process.GetType() == typeProcessFind)
+                    {
+                        isFind = true;
+                        break;
+                    }
+                }
+                Framework.Util.Assert(isFind, "Process not found!");
+                if (isAfter)
+                {
+                    index += 1;
+                }
+                processList.Insert(index, result);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Create process for this page.
+        /// </summary>
+        public TProcess Add<TProcess>() where TProcess : ProcessBase2
+        {
+            return (TProcess)ProcessListInsert(typeof(TProcess), null, false);
+        }
+
+        public TProcess AddBefore<TProcess, TProcessFind>() where TProcess : ProcessBase2 where TProcessFind : ProcessBase2
+        {
+            return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), false);
+        }
+
+        public TProcess AddAfter<TProcess, TProcessFind>() where TProcess : ProcessBase2 where TProcessFind : ProcessBase2
+        {
+            return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), true);
+        }
+
+        /// <summary>
+        /// Returns process of this page.
+        /// </summary>
+        public T Get<T>() where T : ProcessBase2
+        {
+            return (T)processList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
+        }
+    }
+
     public class ProcessList : IEnumerable<ProcessBase>
     {
         internal ProcessList(Page page)
@@ -200,6 +275,29 @@
         public T Get<T>() where T : ProcessBase
         {
             return (T)processList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
+        }
+    }
+
+    public class ProcessBase2
+    {
+        internal void Constructor(ApplicationBase application)
+        {
+            this.Application = application;
+        }
+
+        public ApplicationBase Application { get; private set; }
+
+        public ApplicationJson ApplicationJson
+        {
+            get
+            {
+                return Application.ApplicationJson;
+            }
+        }
+
+        protected virtual internal void Process()
+        {
+
         }
     }
 

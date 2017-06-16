@@ -10,6 +10,11 @@
     /// </summary>
     public class ApplicationBase
     {
+        public ApplicationBase()
+        {
+            Process2Init(process2List);
+        }
+
         /// <summary>
         ///  Returns assembly to search for classes when deserializing json. (For example: "Database.dbo.Airport")
         /// </summary>
@@ -24,6 +29,14 @@
         virtual internal Type TypeComponentInNamespace()
         {
             return GetType();
+        }
+
+        /// <summary>
+        /// Create main page on first html request.
+        /// </summary>
+        protected virtual internal Type TypePage2Main()
+        {
+            return typeof(Page2);
         }
 
         /// <summary>
@@ -181,12 +194,19 @@
 
         public ApplicationJson Process(ApplicationJson applicationJson, string requestPath)
         {
-            if (applicationJson == null) // First request.
-            {
-                applicationJson = new ApplicationJson();
-                applicationJson.PageJsonList = new Dictionary<string, PageJson>();
-            }
             this.ApplicationJson = applicationJson;
+            if (ApplicationJson == null) // First request.
+            {
+                ApplicationJson = new ApplicationJson();
+                Type typePage = TypePage2Main();
+                Page2Show(ApplicationJson, typePage);
+                ApplicationJson.PageJsonList = new Dictionary<string, PageJson>();
+            }
+            //
+            foreach (ProcessBase2 process in process2List)
+            {
+                process.Process();
+            }
             //
             Page page = PageVisible();
             page.Process(); // Process visible page.
@@ -222,6 +242,59 @@
                 isGridDataTextParse = true;
                 GridData().TextParse();
             }
+        }
+        private ProcessList2 process2ListPrivate;
+
+        private ProcessList2 process2List
+        {
+            get
+            {
+                if (process2ListPrivate == null)
+                {
+                    process2ListPrivate = new ProcessList2(this);
+                }
+                return process2ListPrivate;
+            }
+        }
+
+        protected virtual void Process2Init(ProcessList2 processList)
+        {
+            processList.Add<ProcessPageBegin>();
+            processList.Add<ProcessPageEnd>();
+        }
+
+        internal Page2 Page2Visible(Component owner)
+        {
+            return owner.List.OfType<Page2>().Where(item => item.IsHide == false).SingleOrDefault();
+        }
+
+        internal Page2 Page2Show(Component owner, Type typePage, bool isPageVisibleRemove = true)
+        {
+            Page2 pageVisible = Page2Visible(owner);
+            if (pageVisible != null)
+            {
+                owner.List.Remove(pageVisible);
+            }
+            var list = owner.List.OfType<Page2>();
+            foreach (Page2 page in list)
+            {
+                page.IsHide = true;
+            }
+            Page2 result = owner.List.OfType<Page2>().Where(item => item.GetType() == typePage).SingleOrDefault(); // Make sure there is only one page of type!
+            if (result == null)
+            {
+                result = (Page2)Activator.CreateInstance(typePage);
+                result.Constructor(owner, null);
+                result.TypeSet(typeof(Page2));
+                result.Init(this);
+            }
+            result.IsHide = false;
+            return result;
+        }
+
+        internal TPage Page2Show<TPage>(Component owner, bool isPageVisibleRemove = true) where TPage : Page2, new()
+        {
+            return (TPage)Page2Show(owner, typeof(TPage), isPageVisibleRemove);
         }
     }
 }

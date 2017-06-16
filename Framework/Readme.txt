@@ -2,6 +2,7 @@ Release
 -Remove field TypeCSharp, method Component.TypeSet();
 
 Release b1.0
+-Json serialize debug remove.
 -Remove Component.Constructor text parameter.
 -Rename Database.lock.cs to Database.g.cs
 -Angular Selector IsHide on all removeSelector

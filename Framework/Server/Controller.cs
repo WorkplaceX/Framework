@@ -30,7 +30,7 @@
         /// </summary>
         /// <param name="typeComponentInNamespace">Additional namespace in which to search for json class when deserializing.</param>
         /// <returns></returns>
-        internal async Task<IActionResult> WebRequest(Type typeComponentInNamespace)
+        internal async Task<IActionResult> WebRequest()
         {
             // Html request
             if (Controller.HttpContext.Request.Path == RoutePath)
@@ -38,14 +38,14 @@
                 ApplicationJson applicationJsonOut = Application.Process(null, Controller.HttpContext.Request.Path);
                 string htmlUniversal = null;
                 string html = IndexHtml(true);
-                htmlUniversal = await HtmlUniversal(html, applicationJsonOut, true); // Angular Universal server side rendering.
+                htmlUniversal = await HtmlUniversal(html, applicationJsonOut, true, Application); // Angular Universal server side rendering.
                 return Controller.Content(htmlUniversal, "text/html");
             }
             // Json API request
             if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
             {
                 string jsonInText = Util.StreamToString(Controller.Request.Body);
-                ApplicationJson applicationJsonIn = Framework.Server.Json.Util.Deserialize<ApplicationJson>(jsonInText, new Type[] { typeComponentInNamespace });
+                ApplicationJson applicationJsonIn = Framework.Server.Json.Util.Deserialize<ApplicationJson>(jsonInText, new Type[] { Application.TypeComponentInNamespace() });
                 ApplicationJson applicationJsonOut;
                 try
                 {
@@ -59,11 +59,11 @@
                     applicationJsonOut.ErrorProcess = Framework.Util.ExceptionToText(exception);
                 }
                 applicationJsonOut.IsJsonGet = false;
-                string jsonOutText = Framework.Server.Json.Util.Serialize(applicationJsonOut);
+                string jsonOutText = Framework.Server.Json.Util.Serialize(applicationJsonOut, new Type[] { Application.TypeComponentInNamespace() });
                 if (Framework.Server.Config.Instance.IsDebugJson)
                 {
                     applicationJsonOut.IsJsonGet = true;
-                    string jsonOutDebug = Framework.Server.Json.Util.Serialize(applicationJsonOut);
+                    string jsonOutDebug = Framework.Server.Json.Util.Serialize(applicationJsonOut, new Type[] { Application.TypeComponentInNamespace() });
                     Framework.Util.FileWrite(Framework.Util.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
                 }
                 return Controller.Content(jsonOutText, "application/json");
@@ -93,7 +93,7 @@
         /// <summary>
         /// Returns server side rendered index.html.
         /// </summary>
-        private async Task<string> HtmlUniversal(string html, ApplicationJson applicationJson, bool isUniversal)
+        private async Task<string> HtmlUniversal(string html, ApplicationJson applicationJson, bool isUniversal, ApplicationBase application)
         {
             if (isUniversal == false)
             {
@@ -104,7 +104,7 @@
                 string htmlUniversal = null;
                 string url = "http://" + Controller.Request.Host.ToUriComponent() + "/Universal/index.js";
                 applicationJson.IsBrowser = false; // Server side rendering mode.
-                string jsonText = Framework.Server.Json.Util.Serialize(applicationJson);
+                string jsonText = Framework.Server.Json.Util.Serialize(applicationJson, application.TypeComponentInNamespace());
                 // Universal rendering
                 {
                     if (Framework.Util.FolderNameIsIss)
@@ -130,7 +130,7 @@
                     result = html.Replace("<app>Loading AppComponent content here ...</app>", htmlUniversalClean);
                 }
                 applicationJson.IsBrowser = true; // Client side rendering mode.
-                string jsonTextBrowser = Framework.Server.Json.Util.Serialize(applicationJson);
+                string jsonTextBrowser = Framework.Server.Json.Util.Serialize(applicationJson, application.TypeComponentInNamespace());
                 string resultAssert = result;
                 // Add json to index.html (Client/index.html)
                 {

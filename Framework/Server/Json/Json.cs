@@ -361,7 +361,7 @@
             SerializePrepare(obj, rootType, false);
             string result = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
             SerializePrepare(obj, rootType, true);
-            // TODO Disable Debug
+            // TODO Remove
             {
                 string debugSource = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
                 object debugObj = Deserialize(result, rootType, typeInNamespaceList);
@@ -374,10 +374,10 @@
         }
 
         /// <summary>
-        /// Returns json text of serialized CSharp object.
+        /// Returns json text of serialized fields and properties of CSharp object.
         /// </summary>
         /// <param name="obj">Object to serialize.</param>
-        /// <param name="typeInNamespaceList">Needed internally for debug, to deserialize and compare.</param>
+        /// <param name="typeInNamespaceList">Needed internally for debug, to deserialize and compare.</param> // TODO Remove
         public static string Serialize(object obj, params Type[] typeInNamespaceList)
         {
             return Serialize(obj, obj.GetType(), typeInNamespaceList);
@@ -511,6 +511,7 @@
                         if (objectType != null)
                         {
                             result = Activator.CreateInstance(objectType);
+                            // Deserialize field
                             foreach (var fieldInfo in result.GetType().GetTypeInfo().GetFields())
                             {
                                 if (jObject != null)
@@ -522,6 +523,21 @@
                                         Type fieldTypeChild = fieldInfo.FieldType;
                                         object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType, typeInNamespaceList);
                                         fieldInfo.SetValue(result, valueChild);
+                                    }
+                                }
+                            }
+                            // Deserialize property
+                            foreach (var propertyInfo in result.GetType().GetTypeInfo().GetProperties())
+                            {
+                                if (jObject != null)
+                                {
+                                    JProperty jProperty = jObject.Property(propertyInfo.Name);
+                                    if (jProperty != null)
+                                    {
+                                        JToken jTokenChild = jProperty.Value;
+                                        Type fieldTypeChild = propertyInfo.PropertyType;
+                                        object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType, typeInNamespaceList);
+                                        propertyInfo.SetValue(result, valueChild);
                                     }
                                 }
                             }
@@ -575,6 +591,12 @@
             return result;
         }
 
+        /// <summary>
+        /// Deserialize fields and properties.
+        /// </summary>
+        /// <typeparam name="T">Type of root object.</typeparam>
+        /// <param name="json">Json text to deserialize.</param>
+        /// <param name="typeInNamespaceList">Additional namespaces to search for classes.</param>
         public static T Deserialize<T>(string json, params Type[] typeInNamespaceList)
         {
             return (T)Deserialize(json, typeof(T), typeInNamespaceList);
