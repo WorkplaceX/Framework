@@ -17,7 +17,9 @@ import  * as util from './util';
   json.ErrorProcess=({{ dataService.json.ErrorProcess }})<br />
   log=({{ dataService.log }})
   </p>
-  <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy:fn"></Selector>
+  <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></Selector>  
+
+
 `,
   providers: [DataService]  
 })
@@ -29,8 +31,8 @@ export class AppComponent {
     this.dataService = dataService;
   } 
 
-  fn() {
-    return "0";
+  trackBy(index: any, item: any) {
+    return item.Key;
   }
 
   clickClient(){
@@ -354,11 +356,18 @@ export class RemoveSelectorDirective {
 
     //wait for the component to render completely
     ngOnInit() {
+      //this.el.nativeElement.childNodes.forEach(element => {
+      //  console.log(element.parentNode);
+      //});
+      // this.el.nativeElement.innerHTML = ".";
+      // this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
+      // See also: https://gist.github.com/bhavik07/4a8f2402475c55835679
       this.renderer.attachViewAfter(this.el.nativeElement.parentNode.parentNode, [this.el.nativeElement]);
     }
 
     ngOnDestroy() {
       this.el.nativeElement.innerHTML = null;
+      // this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
     }
 }
 
