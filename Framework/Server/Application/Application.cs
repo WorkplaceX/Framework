@@ -11,6 +11,22 @@
     public class ApplicationBase
     {
         /// <summary>
+        ///  Returns assembly to search for classes when deserializing json. (For example: "Database.dbo.Airport")
+        /// </summary>
+        virtual internal Type TypeRowInAssembly()
+        {
+            return GetType();
+        }
+
+        /// <summary>
+        /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
+        /// </summary>
+        virtual internal Type TypeComponentInNamespace()
+        {
+            return GetType();
+        }
+
+        /// <summary>
         /// Returns type of Page of applications main page.
         /// </summary>
         protected virtual internal Type TypePageMain()
@@ -189,7 +205,7 @@
             if (gridData == null)
             {
                 gridData = new GridData();
-                gridData.LoadJson(ApplicationJson, GetType());
+                gridData.LoadJson(ApplicationJson, this);
             }
             return gridData;
         }

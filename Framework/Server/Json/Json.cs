@@ -318,7 +318,7 @@
                             }
                             if (isSetType)
                             {
-                                throw new JsonException("Object has no Type field!"); // Add this code: "public string Type;" // TODO derived object can not be in different assembly.
+                                throw new JsonException("Object has no Type field!"); // Add this code: "public string Type;"
                             }
                             ValueListSet(value, valueList);
                         }
@@ -356,7 +356,7 @@
             }
         }
 
-        private static string Serialize(object obj, Type rootType)
+        private static string Serialize(object obj, Type rootType, Type[] typeInNamespaceList)
         {
             SerializePrepare(obj, rootType, false);
             string result = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
@@ -364,7 +364,7 @@
             // TODO Disable Debug
             {
                 string debugSource = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                object debugObj = Deserialize(result, rootType);
+                object debugObj = Deserialize(result, rootType, typeInNamespaceList);
                 SerializePrepare(debugObj, rootType, true);
                 string debugDest = JsonConvert.SerializeObject(debugObj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
                 Util.Assert(debugSource == debugDest);
@@ -373,9 +373,14 @@
             return result;
         }
 
-        public static string Serialize(object obj)
+        /// <summary>
+        /// Returns json text of serialized CSharp object.
+        /// </summary>
+        /// <param name="obj">Object to serialize.</param>
+        /// <param name="typeInNamespaceList">Needed internally for debug, to deserialize and compare.</param>
+        public static string Serialize(object obj, params Type[] typeInNamespaceList)
         {
-            return Serialize(obj, obj.GetType());
+            return Serialize(obj, obj.GetType(), typeInNamespaceList);
         }
 
         private static object DeserializeObjectConvert(object value, Type type)
@@ -404,21 +409,52 @@
         }
 
         /// <summary>
-        /// Returns type. Searches for type in rootType's assembly and namespace.
+        /// Returns type found in namespace.
         /// </summary>
-        private static Type TypeGet(string objectTypeString, Type rootType)
+        /// <param name="objectTypeString">Type as string.</param>
+        /// <param name="typeInNamespace">Any type defined in namespace to search.</param>
+        private static Type TypeGetExact(string objectTypeString, Type typeInNamespace)
         {
-            string ns = rootType.Namespace + ".";
-            if (rootType.DeclaringType != null)
+            string ns = typeInNamespace.Namespace + ".";
+            if (typeInNamespace.DeclaringType != null)
             {
-                ns = rootType.DeclaringType.FullName + "+";
+                ns = typeInNamespace.DeclaringType.FullName + "+";
             }
-            Type result = Type.GetType(ns + objectTypeString + ", " + rootType.GetTypeInfo().Assembly.FullName);
-            Util.Assert(result != null);
+            Type result = Type.GetType(ns + objectTypeString + ", " + typeInNamespace.GetTypeInfo().Assembly.FullName);
             return result;
         }
 
-        private static Type DeserializeTokenObjectType(JObject jObject, Type fieldType, Type rootType)
+        /// <summary>
+        /// Returns type. Searches for type in rootType's assembly and typeInNamespaceList assembly and namespace.
+        /// </summary>
+        private static Type TypeGet(string objectTypeString, Type rootType, Type[] typeInNamespaceList)
+        {
+            List<Type> resultList = new List<Type>();
+            Type result = TypeGetExact(objectTypeString, rootType);
+            if (result != null)
+            {
+                resultList.Add(result);
+            }
+            foreach (Type type in typeInNamespaceList)
+            {
+                result = TypeGetExact(objectTypeString, type);
+                if (result != null)
+                {
+                    resultList.Add(result);
+                }
+            }
+            if (resultList.Count == 0)
+            {
+                Util.Assert(false, "Type not found!");
+            }
+            if (resultList.Count > 1)
+            {
+                Util.Assert(false, "More than one type found!");
+            }
+            return resultList.Single();
+        }
+
+        private static Type DeserializeTokenObjectType(JObject jObject, Type fieldType, Type rootType, Type[] typeInNamespaceList)
         {
             Type result = null;
             if (jObject != null)
@@ -430,7 +466,7 @@
                     string objectTypeString = jValue.Value as string;
                     if (objectTypeString != null)
                     {
-                        result = Util.TypeGet(objectTypeString, rootType);
+                        result = Util.TypeGet(objectTypeString, rootType, typeInNamespaceList);
                     }
                 }
                 //
@@ -440,14 +476,14 @@
                     string objectTypeString = jValue.Value as string;
                     if (objectTypeString != null)
                     {
-                        result = Util.TypeGet(objectTypeString, rootType);
+                        result = Util.TypeGet(objectTypeString, rootType, typeInNamespaceList);
                     }
                 }
             }
             return result;
         }
 
-        private static object DeserializeToken(JToken jToken, Type fieldType, Type rootType)
+        private static object DeserializeToken(JToken jToken, Type fieldType, Type rootType, Type[] typeInNamespaceList)
         {
             object result = null;
             //
@@ -471,7 +507,7 @@
                 case TypeGroup.Object:
                     {
                         JObject jObject = jToken as JObject;
-                        Type objectType = DeserializeTokenObjectType(jObject, fieldType, rootType);
+                        Type objectType = DeserializeTokenObjectType(jObject, fieldType, rootType, typeInNamespaceList);
                         if (objectType != null)
                         {
                             result = Activator.CreateInstance(objectType);
@@ -484,7 +520,7 @@
                                     {
                                         JToken jTokenChild = jProperty.Value;
                                         Type fieldTypeChild = fieldInfo.FieldType;
-                                        object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType);
+                                        object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType, typeInNamespaceList);
                                         fieldInfo.SetValue(result, valueChild);
                                     }
                                 }
@@ -501,7 +537,7 @@
                             foreach (var jTokenChild in jArray)
                             {
                                 Type fieldTypeChild = valueType;
-                                object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType);
+                                object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType, typeInNamespaceList);
                                 list.Add(valueChild);
                             }
                         }
@@ -518,7 +554,7 @@
                             {
                                 Type fieldTypeChild = valueType;
                                 JToken jTokenChild = jKeyValue.Value;
-                                object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType);
+                                object valueChild = DeserializeToken(jTokenChild, fieldTypeChild, rootType, typeInNamespaceList);
                                 list.Add(jKeyValue.Key, valueChild);
                             }
                         }
@@ -531,17 +567,17 @@
             return result;
         }
 
-        private static object Deserialize(string json, Type rootType)
+        private static object Deserialize(string json, Type rootType, Type[] typeInNamespaceList)
         {
             JObject jObject = (JObject)JsonConvert.DeserializeObject(json);
-            object result = DeserializeToken(jObject, rootType, rootType);
+            object result = DeserializeToken(jObject, rootType, rootType, typeInNamespaceList);
             SerializePrepare(result, rootType, true);
             return result;
         }
 
-        public static T Deserialize<T>(string json)
+        public static T Deserialize<T>(string json, params Type[] typeInNamespaceList)
         {
-            return (T)Deserialize(json, typeof(T));
+            return (T)Deserialize(json, typeof(T), typeInNamespaceList);
         }
 
         private static void Assert(bool isAssert, string exceptionText)

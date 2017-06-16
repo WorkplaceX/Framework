@@ -11,7 +11,7 @@
     {
         public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string routePath, ApplicationBase application)
         {
-            return await new WebController(controller, routePath, application).Web();
+            return await new WebController(controller, routePath, application).WebRequest(application.TypeComponentInNamespace());
         }
 
         public static string StreamToString(Stream stream)

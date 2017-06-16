@@ -683,7 +683,7 @@
         /// <summary>
         /// Load data from http json request.
         /// </summary>
-        public void LoadJson(ApplicationJson applicationJson, string gridName, Type typeInAssembly)
+        public void LoadJson(ApplicationJson applicationJson, string gridName, ApplicationBase application)
         {
             LoadJsonQuery(applicationJson);
             LoadJsonColumn(applicationJson);
@@ -691,7 +691,7 @@
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[gridName].TypeRow;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowString, typeInAssembly);
+            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowString, application.TypeRowInAssembly());
             TypeRowSet(gridName, typeRow);
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
@@ -745,13 +745,13 @@
         /// <summary>
         /// Load data from GridDataJson to GridData.
         /// </summary>
-        public void LoadJson(ApplicationJson applicationJson, Type typeInAssembly)
+        public void LoadJson(ApplicationJson applicationJson, ApplicationBase application)
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
-                LoadJson(applicationJson, gridName, typeInAssembly);
+                LoadJson(applicationJson, gridName, application);
             }
         }
 

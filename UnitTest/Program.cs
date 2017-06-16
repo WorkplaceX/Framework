@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +14,10 @@ namespace UnitTest
             new UnitTest.Json.UnitTest().Run();
             Console.WriteLine();
             Console.WriteLine("All test successful!");
-            // Console.ReadLine();
+            if (Debugger.IsAttached)
+            {
+                Console.ReadLine();
+            }
         }
     }
 }

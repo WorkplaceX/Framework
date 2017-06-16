@@ -169,12 +169,12 @@
             return result;
         }
 
-        public static Type TypeFromString(string type, Type typeInAssembly)
+        public static Type TypeFromString(string type, Type typeRowInAssembly) // TODO Remove
         {
             Type result = null;
             if (type != null)
             {
-                result = typeInAssembly.GetTypeInfo().Assembly.GetType(type);
+                result = typeRowInAssembly.GetTypeInfo().Assembly.GetType(type);
                 if (result == null)
                 {
                     throw new Exception("Type not found!");

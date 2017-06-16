@@ -7,6 +7,17 @@
     using System.Collections;
     using System.Runtime.CompilerServices;
 
+    public class Page2 : Component
+    {
+        public Page2() { }
+
+        public Page2(Component owner, string text) 
+            : base(owner, text)
+        {
+
+        }
+    }
+
     public class Page
     {
         virtual internal void Constructor(ApplicationBase application)

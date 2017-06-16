@@ -2,6 +2,7 @@ Release
 -Remove field TypeCSharp, method Component.TypeSet();
 
 Release b1.0
+-Remove Component.Constructor text parameter.
 -Rename Database.lock.cs to Database.g.cs
 -Angular Selector IsHide on all removeSelector
 -Split SqlName attribute into SqlTableName and SqlColumnName

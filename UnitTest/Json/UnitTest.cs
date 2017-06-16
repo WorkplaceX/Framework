@@ -488,5 +488,78 @@ namespace UnitTest.Json
             var data2 = Framework.Server.Json.Util.Deserialize<DataSelector>(json);
             Util.Assert(data2.L is MyLabel2);
         }
+
+        public class Data26Root
+        {
+            public DifferentNamespace.Data26Base Data26;
+        }
+
+        public void Test26()
+        {
+            {
+                var data = new Data26Root();
+                data.Data26 = new DifferentNamespace.Data26();
+                data.Data26.Name = "My26";
+                string json = Framework.Server.Json.Util.Serialize(data, typeof(DifferentNamespace.Data));
+                try
+                {
+                    var data2 = Framework.Server.Json.Util.Deserialize<Data26Root>(json);
+                    Util.Assert(data2.Data26.Name == "My26");
+                }
+                catch (Exception exception)
+                {
+                    Util.Assert(exception.Message == "Type not found!");
+                }
+            }
+            {
+                var data = new Data26Root();
+                data.Data26 = new DifferentNamespace.Data26();
+                data.Data26.Name = "My26";
+                string json = Framework.Server.Json.Util.Serialize(data, typeof(DifferentNamespace.Data));
+                var data2 = Framework.Server.Json.Util.Deserialize<Data26Root>(json, typeof(DifferentNamespace.Data));
+                Util.Assert(data2.Data26.Name == "My26");
+            }
+            {
+                var data = new Data26Root();
+                data.Data26 = new DifferentNamespace.Data26();
+                data.Data26.Name = "My26";
+                ((DifferentNamespace.Data26)data.Data26).Data2 = new DifferentNamespace.Data26Root() { Text = "TypeType" };
+                try
+                {
+                    string json = Framework.Server.Json.Util.Serialize(data, typeof(DifferentNamespace.Data));
+                }
+                catch (Exception exception)
+                {
+                    Util.Assert(exception.Message == "More than one type found!");
+                }
+            }
+        }
+    }
+}
+
+namespace UnitTest.Json.DifferentNamespace
+{
+    public class Data
+    {
+
+    }
+
+    public class Data26Base
+    {
+        public string Name;
+    }
+
+    public class Data26 : Data26Base
+    {
+        public string Type;
+
+        public UnitTest.Data26Root Data2;
+    }
+
+    public class Data26Root : UnitTest.Data26Root
+    {
+        public string Text;
+
+        public string Type;
     }
 }

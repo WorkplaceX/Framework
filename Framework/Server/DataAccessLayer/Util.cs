@@ -45,12 +45,12 @@
             return result;
         }
 
-        public static Type TypeRowFromName(string typeRow, Type typeInAssembly)
+        internal static Type TypeRowFromName(string typeRow, Type typeRowInAssembly)
         {
             Type result = null;
             if (typeRow != null)
             {
-                result = typeInAssembly.GetTypeInfo().Assembly.GetType(typeRow);
+                result = typeRowInAssembly.GetTypeInfo().Assembly.GetType(typeRow);
                 if (result == null)
                 {
                     throw new Exception("Type not found!");
@@ -59,9 +59,9 @@
             return result;
         }
 
-        public static Type TypeRowFromTableName(string tableName, Type typeInAssembly)
+        public static Type TypeRowFromTableName(string tableName, Type typeRowInAssembly) // TODO Remove
         {
-            foreach (Type type in typeInAssembly.GetTypeInfo().Assembly.GetTypes())
+            foreach (Type type in typeRowInAssembly.GetTypeInfo().Assembly.GetTypes())
             {
                 if (type.GetTypeInfo().IsSubclassOf(typeof(Row)))
                 {

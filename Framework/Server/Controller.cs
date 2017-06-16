@@ -25,7 +25,12 @@
 
         public readonly ApplicationBase Application;
 
-        public async Task<IActionResult> Web()
+        /// <summary>
+        /// Web request.
+        /// </summary>
+        /// <param name="typeComponentInNamespace">Additional namespace in which to search for json class when deserializing.</param>
+        /// <returns></returns>
+        internal async Task<IActionResult> WebRequest(Type typeComponentInNamespace)
         {
             // Html request
             if (Controller.HttpContext.Request.Path == RoutePath)
@@ -40,7 +45,7 @@
             if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
             {
                 string jsonInText = Util.StreamToString(Controller.Request.Body);
-                ApplicationJson applicationJsonIn = Framework.Server.Json.Util.Deserialize<ApplicationJson>(jsonInText);
+                ApplicationJson applicationJsonIn = Framework.Server.Json.Util.Deserialize<ApplicationJson>(jsonInText, new Type[] { typeComponentInNamespace });
                 ApplicationJson applicationJsonOut;
                 try
                 {
