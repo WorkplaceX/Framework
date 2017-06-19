@@ -59,6 +59,9 @@
                 process.Run(this);
             }
             //
+            AppJson.ResponseCount += 1;
+            AppJson.VersionServer = Framework.Util.VersionServer;
+            //
             return AppJson;
         }
 

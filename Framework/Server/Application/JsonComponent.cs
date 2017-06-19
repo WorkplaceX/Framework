@@ -342,8 +342,6 @@
         /// </summary>
         public bool IsJsonGet;
 
-        public Guid Session;
-
         public bool IsBrowser;
 
         public string VersionServer;
