@@ -1,6 +1,7 @@
 ﻿namespace Framework.Server.Application
 {
     using Framework.Server.Application.Json;
+    using Microsoft.AspNetCore.Http;
     using System;
     using System.Linq;
 
@@ -43,12 +44,14 @@
 
         public AppJson AppJson { get; private set; }
 
-        internal AppJson Process(AppJson appJson, string requestPath)
+        internal AppJson Run(AppJson appJson, HttpContext httpContext)
         {
             this.AppJson = appJson;
-            if (AppJson == null) // First request.
+            if (AppJson == null || AppJson.Session == null) // First request.
             {
                 AppJson = new AppJson();
+                AppJson.Session = Guid.NewGuid();
+                AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
                 GridData().SaveJson(AppJson); // Initialize AppJson.GridDataJson object.
                 Type typePage = TypePageMain();
                 PageShow(AppJson, typePage);
@@ -128,6 +131,7 @@
             }
             //
             processList.Add<ProcessButtonIsClickFalse>();
+            processList.Add<ProcessLayout>();
             processList.Add<ProcessPageEnd>();
         }
 
@@ -158,8 +162,7 @@
             if (result == null)
             {
                 result = (Page)Activator.CreateInstance(typePage);
-                result.Constructor(owner, null);
-                result.TypeSet(typeof(Page));
+                result.Constructor(owner, null, typeof(Div));
                 result.InitJson(this);
             }
             result.IsHide = false;

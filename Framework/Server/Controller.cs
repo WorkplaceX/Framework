@@ -36,7 +36,7 @@
             // Html request
             if (Controller.HttpContext.Request.Path == RoutePath)
             {
-                AppJson appJsonOut = App.Process(null, Controller.HttpContext.Request.Path);
+                AppJson appJsonOut = App.Run(null, Controller.HttpContext);
                 string htmlUniversal = null;
                 string html = IndexHtml(true);
                 htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
@@ -50,7 +50,7 @@
                 AppJson appJsonOut;
                 try
                 {
-                    appJsonOut = App.Process(appJsonIn, Controller.HttpContext.Request.Path);
+                    appJsonOut = App.Run(appJsonIn, Controller.HttpContext);
                     appJsonOut.ErrorProcess = null;
                 }
                 catch (Exception exception)
@@ -63,7 +63,7 @@
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
                 if (Framework.Server.Config.Instance.IsDebugJson)
                 {
-                    appJsonOut.IsJsonGet = true;
+                    appJsonOut.IsJsonGet = false; // true;
                     string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
                     Framework.Util.FileWrite(Framework.Util.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
                 }

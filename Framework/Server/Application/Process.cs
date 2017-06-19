@@ -139,4 +139,57 @@
             }
         }
     }
+
+    /// <summary>
+    /// Call method Page.ProcessEnd(); at the End of the process chain.
+    /// </summary>
+    public class ProcessLayout : Process
+    {
+        private void ValidateTwelve(LayoutRow layoutRow)
+        {
+            int widthTotal = 0;
+            bool isCell = false;
+            foreach (LayoutCell cell in layoutRow.List.OfType<LayoutCell>())
+            {
+                isCell = true;
+                string find = "col-sm-";
+                int index = cell.CssClass.IndexOf(find);
+                Framework.Util.Assert(index != -1, "Cell width not defined!");
+                string widthString = null;
+                index += find.Length;
+                while (index < cell.CssClass.Length && cell.CssClass[index] >= '0' && cell.CssClass[index] <= '9')
+                {
+                    widthString += cell.CssClass[index].ToString();
+                    index += 1;
+                }
+                int width = int.Parse(widthString);
+                widthTotal += width;
+            }
+            if (isCell) // Not an empty layout row.
+            {
+                Framework.Util.Assert(widthTotal == 12, "Css width total is not 12!");
+            }
+        }
+
+        protected internal override void Run(App app)
+        {
+            foreach (Component component in app.AppJson.ListAll())
+            {
+                LayoutContainer layoutContainer = component as LayoutContainer;
+                if (layoutContainer != null && !layoutContainer.CssClass.Contains("container"))
+                {
+                    layoutContainer.CssClass = "container " + layoutContainer.CssClass;
+                }
+                LayoutRow layoutRow = component as LayoutRow;
+                if (layoutRow != null)
+                {
+                    if (layoutRow.CssClass == null || !layoutRow.CssClass.Contains("row"))
+                    {
+                        layoutRow.CssClass = "row " + layoutRow.CssClass;
+                    }
+                    ValidateTwelve(layoutRow);
+                }
+            }
+        }
+    }
 }

@@ -404,8 +404,12 @@
             if (Nullable.GetUnderlyingType(type) != null)
             {
                 type = Nullable.GetUnderlyingType(type);
+                return DeserializeObjectConvert(value, type);
             }
-            return System.Convert.ChangeType(value, type);
+            else
+            {
+                return System.Convert.ChangeType(value, type);
+            }
         }
 
         /// <summary>

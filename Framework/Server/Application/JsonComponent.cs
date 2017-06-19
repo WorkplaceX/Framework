@@ -12,12 +12,19 @@
 
         public Component(Component owner, string text)
         {
-            Constructor(owner, text);
+            Constructor(owner, text, null);
         }
 
-        internal void Constructor(Component owner, string text)
+        internal void Constructor(Component owner, string text, Type type)
         {
-            this.Type = GetType().Name;
+            if (type != null)
+            {
+                this.Type = type.Name;
+            }
+            else
+            {
+                this.Type = GetType().Name;
+            }
             this.Text = text;
             if (owner != null)
             {
@@ -70,7 +77,7 @@
         /// <summary>
         /// Gets or sets custom html style classes.
         /// </summary>
-        public string Class;
+        public string CssClass;
 
         /// <summary>
         /// Gets json list.
@@ -354,6 +361,10 @@
 
         public string ErrorProcess;
 
+        public Guid? Session;
+
+        public string RequestUrl;
+
         /// <summary>
         /// Gets or sets GridData.
         /// </summary>
@@ -361,13 +372,30 @@
     }
 
     /// <summary>
+    /// Json Div. Rendered as html div element.
+    /// </summary>
+    public class Div : Component
+    {
+        public Div() : this(null, null)
+        {
+            TypeSet(typeof(Div));
+        }
+
+        public Div(Component owner, string text)
+            : base(owner, text)
+        {
+            TypeSet(typeof(Div));
+        }
+    }
+
+    /// <summary>
     /// Json LayoutContainer. Rendered as html div element.
     /// </summary>
-    public class LayoutContainer : Component
+    public class LayoutContainer : Div
     {
         public LayoutContainer() : this(null, null) { }
 
-        public LayoutContainer(Component owner, string text)
+        public LayoutContainer(Div owner, string text)
             : base(owner, text)
         {
 
@@ -377,11 +405,11 @@
     /// <summary>
     /// Json LayoutRow. Rendered as html div element.
     /// </summary>
-    public class LayoutRow : Component
+    public class LayoutRow : Div
     {
         public LayoutRow() : this(null, null) { }
 
-        public LayoutRow(LayoutContainer owner, string text)
+        public LayoutRow(Component owner, string text)
             : base(owner, text)
         {
 
@@ -391,7 +419,7 @@
     /// <summary>
     /// Json LayoutCell. Rendered as html div element.
     /// </summary>
-    public class LayoutCell : Component
+    public class LayoutCell : Div
     {
         public LayoutCell() : this(null, null) { }
 

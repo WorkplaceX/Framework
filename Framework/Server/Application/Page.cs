@@ -2,10 +2,10 @@
 {
     using System;
 
-    public class Page : Component
+    public class Page : Div
     {
         /// <summary>
-        /// Create new page with method Application.PageShow();
+        /// Create new page with method App.PageShow();
         /// </summary>
         public Page()
         {

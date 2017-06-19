@@ -8,7 +8,7 @@ import  * as util from './util';
   selector: 'app',
   template: `
   <p>
-  json.Name=({{ dataService.json.Name }})<br />
+  json.RequestUrl=({{ dataService.json.RequestUrl }})<br />
   json.Session=({{ dataService.json.Session }})<br />
   json.IsBrowser=({{ dataService.json.IsBrowser }})<br />
   RequestCount=({{ dataService.RequestCount }})<br />
@@ -52,13 +52,11 @@ export class AppComponent {
 @Component({
   selector: 'Selector',
   template: `
-  <LayoutContainer *ngIf="json.Type=='LayoutContainer'" [json]=json></LayoutContainer>
-  <LayoutRow *ngIf="json.Type=='LayoutRow' && !json.IsHide" [json]=json></LayoutRow>
-  <LayoutCell *ngIf="json.Type=='LayoutCell' && !json.IsHide" [json]=json></LayoutCell>
-  <ButtonX *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></ButtonX>
+  <span div *ngIf="json.Type=='Div' && !json.IsHide" [json]=json></span>
+  <span button *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></span>
   <Literal *ngIf="json.Type=='Literal' && !json.IsHide" [json]=json></Literal>
   <Label *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></Label>
-  <Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></Grid>
+  <span grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></span>
   <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
   <GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></GridField>
   <Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></Page>
@@ -85,52 +83,16 @@ export class Page {
   }
 }
 
-/* LayoutContainer */
+/* Div */
 @Component({
-  selector: 'LayoutContainer',
+  selector: '[div]',
   template: `
-  <div [ngClass]="json.Class" class='container' removeSelector *ngIf="!json.IsHide">
-    Text={{ json.Text }}
+  <div [ngClass]="json.CssClass" removeSelector>
     <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
   </div>  
 `
 })
-export class LayoutContainer {
-  @Input() json: any
-
-  trackBy(index: any, item: any) {
-    return item.Key;
-  }
-}
-
-/* LayoutRow */
-@Component({
-  selector: 'LayoutRow',
-  template: `
-  <div [ngClass]="json.Class" class='row' removeSelector>
-    <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
-  </div>  
-`
-})
-export class LayoutRow {
-  @Input() json: any
-
-  trackBy(index: any, item: any) {
-    return item.Key;
-  }
-}
-
-/* LayoutCell */
-@Component({
-  selector: 'LayoutCell',
-  template: `
-  <div [ngClass]="json.Class" [class.col-sm-6]='true' removeSelector>
-    Text={{ json.Text }}
-    <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
-  </div>  
-`
-})
-export class LayoutCell {
+export class Div {
   @Input() json: any
 
   trackBy(index: any, item: any) {
@@ -158,8 +120,10 @@ export class LayoutDebug {
 
 /* Button */
 @Component({
-  selector: 'ButtonX',
-  template: `<button type="text" [ngClass]="json.Class" class="btn btn-primary" (click)="click()">{{ json.Text }}</button>`
+  selector: '[button]',
+  template: `
+  <button type="text" [ngClass]="json.CssClass" class="btn btn-primary" (click)="click()" removeSelector>{{ json.Text }}</button>
+  `
 })
 export class Button {
   constructor(dataService: DataService){
@@ -178,7 +142,7 @@ export class Button {
 /* Literal */
 @Component({
   selector: 'Literal',
-  template: `<div [ngClass]="json.Class" [innerHTML]=json.Html></div>`
+  template: `<div [ngClass]="json.CssClass" [innerHTML]=json.Html></div>`
 })
 export class Literal {
   constructor(dataService: DataService){
@@ -200,12 +164,14 @@ export class Label {
 
 /* Grid */
 @Component({
-  selector: 'Grid',
+  selector: '[grid]',
   template: `
-  <div [ngClass]="json.Class" style="white-space: nowrap;">
-  <GridHeader [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName]; trackBy trackBy"></GridHeader>
+  <div removeSelector>
+    <div [ngClass]="json.CssClass" style="white-space: nowrap;">
+      <span gridHeader [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName]; trackBy trackBy"></span>
+    </div>
+    <div gridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
-  <GridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></GridRow>
   `
 })
 export class Grid {
@@ -223,7 +189,7 @@ export class Grid {
 
 /* GridRow */
 @Component({
-  selector: 'GridRow',
+  selector: '[gridRow]',
   template: `
   <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="white-space: nowrap;">
     <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName]; trackBy trackBy"></div>
@@ -323,7 +289,7 @@ export class GridCell {
 
 /* GridHeader */
 @Component({
-  selector: 'GridHeader',
+  selector: '[gridHeader]',
   template: `
   <div (click)="click()" [ngClass]="{'select-class':json.IsSelect}" style="display:inline-block; overflow: hidden;" [style.width.%]=json.WidthPercent><b>{{ json.Text }}</b></div>
   `,
@@ -373,18 +339,24 @@ export class RemoveSelectorDirective {
 
     //wait for the component to render completely
     ngOnInit() {
-      //this.el.nativeElement.childNodes.forEach(element => {
-      //  console.log(element.parentNode);
-      //});
+      // console.log(this.el.nativeElement); // this
+      // console.log(this.el.nativeElement.parentNode); // span
+      // console.log(this.el.nativeElement.parentNode.parentNode); // selector
+      this.el.nativeElement.parentNode.parentNode.parentNode.insertBefore(this.el.nativeElement, this.el.nativeElement.parentNode.parentNode);
+
+      // this.el.nativeElement.childNodes.forEach(element => {
+      //   console.log(element.parentNode);
+      // });
       // this.el.nativeElement.innerHTML = ".";
       // this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
       // See also: https://gist.github.com/bhavik07/4a8f2402475c55835679
-      this.renderer.attachViewAfter(this.el.nativeElement.parentNode.parentNode, [this.el.nativeElement]);
+      // this.renderer.attachViewAfter(this.el.nativeElement.parentNode.parentNode, [this.el.nativeElement]);
     }
 
     ngOnDestroy() {
-      this.el.nativeElement.innerHTML = null;
-      // this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
+      // console.log(this.el.nativeElement.parentNode);
+      // this.el.nativeElement.innerHTML = null;
+      this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
     }
 }
 

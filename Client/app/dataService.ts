@@ -9,6 +9,7 @@ declare var browserJson: any; // Params from browser
 
 export class Json {
     Name: string;
+    RequestUrl: string;
     IsJsonGet: boolean; // GET not POST json when debugging client. See also file Application.json
     VersionClient: string; // Angular client version.
     VersionServer: string; // Angular client version.
@@ -79,7 +80,7 @@ export class DataService {
         } else {
             // POST
             this.log += "Send POST; ";
-            this.http.post('Application.json', JSON.stringify(this.json))
+            this.http.post(this.json.RequestUrl + 'Application.json', JSON.stringify(this.json))
             .map(res => res)
             .subscribe(
                 body => { 
