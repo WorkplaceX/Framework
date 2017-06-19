@@ -9,9 +9,9 @@
 
     public static class Util
     {
-        public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string routePath, ApplicationBase application)
+        public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string routePath, App app)
         {
-            return await new WebController(controller, routePath, application).WebRequest();
+            return await new WebController(controller, routePath, app).WebRequest();
         }
 
         public static string StreamToString(Stream stream)

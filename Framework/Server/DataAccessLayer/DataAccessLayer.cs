@@ -100,7 +100,7 @@
             return GetType().GetTypeInfo().GetMethod(nameof(CellProcessButtonIsClick), BindingFlags.Instance | BindingFlags.NonPublic).DeclaringType == GetType(); // Method ProcessButtonIsClick(); is overwritten.
         }
 
-        protected virtual internal void CellProcessButtonIsClick(ApplicationBase application, string gridName, string index, string fieldName)
+        protected virtual internal void CellProcessButtonIsClick(App app, string gridName, string index, string fieldName)
         {
 
         }

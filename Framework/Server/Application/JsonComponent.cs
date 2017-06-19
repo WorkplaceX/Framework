@@ -327,11 +327,11 @@
     }
 
     /// <summary>
-    /// Json Application. Root object being transferred between server and client. There is also a Application object.
+    /// Json App. Root object being transferred between server and client. There is also a Application object.
     /// </summary>
-    public class ApplicationJson : Component
+    public class AppJson : Component
     {
-        public ApplicationJson()
+        public AppJson()
             : base(null, "Json")
         {
 

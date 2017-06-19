@@ -650,9 +650,9 @@
         /// <summary>
         /// Load Query data from json.
         /// </summary>
-        private void LoadJsonQuery(ApplicationJson applicationJson)
+        private void LoadJsonQuery(AppJson appJson)
         {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
@@ -666,9 +666,9 @@
         /// <summary>
         /// Load GridColumn data from json.
         /// </summary>
-        private void LoadJsonColumn(ApplicationJson applicationJson)
+        private void LoadJsonColumn(AppJson appJson)
         {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             foreach (string gridName in gridDataJson.ColumnList.Keys)
             {
@@ -683,15 +683,15 @@
         /// <summary>
         /// Load data from http json request.
         /// </summary>
-        public void LoadJson(ApplicationJson applicationJson, string gridName, ApplicationBase application)
+        public void LoadJson(AppJson appJson, string gridName, App app)
         {
-            LoadJsonQuery(applicationJson);
-            LoadJsonColumn(applicationJson);
+            LoadJsonQuery(appJson);
+            LoadJsonColumn(appJson);
             //
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[gridName].TypeRow;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowString, application.TypeRowInAssembly());
+            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowString, app.TypeRowInAssembly());
             TypeRowSet(gridName, typeRow);
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
@@ -745,15 +745,15 @@
         /// <summary>
         /// Load data from GridDataJson to GridData.
         /// </summary>
-        public void LoadJson(ApplicationJson applicationJson, ApplicationBase application)
+        public void LoadJson(AppJson appJson, App app)
         {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             if (gridDataJson != null)
             {
                 foreach (string gridName in gridDataJson.GridQueryList.Keys)
                 {
-                    LoadJson(applicationJson, gridName, application);
+                    LoadJson(appJson, gridName, app);
                 }
             }
         }
@@ -803,9 +803,9 @@
         /// <summary>
         /// Save column state to Json.
         /// </summary>
-        private void SaveJsonColumn(ApplicationJson applicationJson)
+        private void SaveJsonColumn(AppJson appJson)
         {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             foreach (string gridName in gridDataJson.ColumnList.Keys)
             {
@@ -820,9 +820,9 @@
         /// <summary>
         /// Save Query back to Json.
         /// </summary>
-        private void SaveJsonQuery(ApplicationJson applicationJson)
+        private void SaveJsonQuery(AppJson appJson)
         {
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             foreach (string gridName in queryList.Keys)
             {
@@ -836,15 +836,15 @@
         /// <summary>
         /// Copy data from class GridData to class GridDataJson.
         /// </summary>
-        public void SaveJson(ApplicationJson applicationJson)
+        public void SaveJson(AppJson appJson)
         {
-            if (applicationJson.GridDataJson == null)
+            if (appJson.GridDataJson == null)
             {
-                applicationJson.GridDataJson = new GridDataJson();
-                applicationJson.GridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
-                applicationJson.GridDataJson.RowList = new Dictionary<string, List<GridRow>>();
+                appJson.GridDataJson = new GridDataJson();
+                appJson.GridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
+                appJson.GridDataJson.RowList = new Dictionary<string, List<GridRow>>();
             }
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
+            GridDataJson gridDataJson = appJson.GridDataJson;
             //
             if (gridDataJson.GridQueryList == null)
             {
@@ -927,8 +927,8 @@
                     gridDataJson.RowList[gridName] = new List<GridRow>();
                 }
             }
-            SaveJsonColumn(applicationJson);
-            SaveJsonQuery(applicationJson);
+            SaveJsonColumn(appJson);
+            SaveJsonQuery(appJson);
         }
     }
 }

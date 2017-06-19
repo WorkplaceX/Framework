@@ -7,12 +7,12 @@
     /// <summary>
     /// Server side root object.
     /// </summary>
-    public class ApplicationBase
+    public class App
     {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public ApplicationBase()
+        public App()
         {
             ProcessInit(processList);
         }
@@ -41,17 +41,17 @@
             return typeof(Page);
         }
 
-        public ApplicationJson ApplicationJson { get; private set; }
+        public AppJson AppJson { get; private set; }
 
-        internal ApplicationJson Process(ApplicationJson applicationJson, string requestPath)
+        internal AppJson Process(AppJson appJson, string requestPath)
         {
-            this.ApplicationJson = applicationJson;
-            if (ApplicationJson == null) // First request.
+            this.AppJson = appJson;
+            if (AppJson == null) // First request.
             {
-                ApplicationJson = new ApplicationJson();
-                GridData().SaveJson(ApplicationJson); // Initialize ApplicationJson.GridDataJson object.
+                AppJson = new AppJson();
+                GridData().SaveJson(AppJson); // Initialize AppJson.GridDataJson object.
                 Type typePage = TypePageMain();
-                PageShow(ApplicationJson, typePage);
+                PageShow(AppJson, typePage);
             }
             //
             foreach (Process process in processList)
@@ -59,7 +59,7 @@
                 process.Run(this);
             }
             //
-            return ApplicationJson;
+            return AppJson;
         }
 
         private GridData gridData;
@@ -72,7 +72,7 @@
             if (gridData == null)
             {
                 gridData = new GridData();
-                gridData.LoadJson(ApplicationJson, this);
+                gridData.LoadJson(AppJson, this);
             }
             return gridData;
         }
