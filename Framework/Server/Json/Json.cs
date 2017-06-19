@@ -1,4 +1,4 @@
-﻿namespace Framework.Server.Json
+﻿namespace Framework.Json
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
