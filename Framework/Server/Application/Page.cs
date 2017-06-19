@@ -35,12 +35,12 @@
             return (TPage)application.PageShow(this.Owner(application.ApplicationJson), typeof(TPage), isPageVisibleRemove);
         }
 
-        protected virtual internal void ProcessBegin(ApplicationBase application)
+        protected virtual internal void RunBegin(ApplicationBase application)
         {
 
         }
 
-        protected virtual internal void ProcessEnd()
+        protected virtual internal void RunEnd()
         {
 
         }
@@ -55,7 +55,7 @@ namespace Framework.Server.Application
     using System.Linq;
     using System.Collections;
 
-    public class ProcessList : IEnumerable<ProcessBase>
+    public class ProcessList : IEnumerable<Process>
     {
         internal ProcessList(ApplicationBase application)
         {
@@ -64,9 +64,9 @@ namespace Framework.Server.Application
 
         public readonly ApplicationBase Application;
 
-        private List<ProcessBase> processList = new List<ProcessBase>();
+        private List<Process> processList = new List<Process>();
 
-        public IEnumerator<ProcessBase> GetEnumerator()
+        public IEnumerator<Process> GetEnumerator()
         {
             return processList.GetEnumerator();
         }
@@ -76,16 +76,15 @@ namespace Framework.Server.Application
             return processList.GetEnumerator();
         }
 
-        private ProcessBase ProcessListInsert(Type typeProcess, Type typeProcessFind, bool isAfter)
+        private Process ProcessListInsert(Type typeProcess, Type typeProcessFind, bool isAfter)
         {
             // Already exists?
-            foreach (ProcessBase process in processList)
+            foreach (Process process in processList)
             {
                 Framework.Util.Assert(process.GetType() != typeProcess, "Page already contains process!");
             }
             // Create process
-            ProcessBase result = (ProcessBase)Framework.Util.TypeToObject(typeProcess);
-            result.Constructor(Application);
+            Process result = (Process)Framework.Util.TypeToObject(typeProcess);
             if (typeProcessFind == null)
             {
                 processList.Add(result);
@@ -95,7 +94,7 @@ namespace Framework.Server.Application
                 int index = -1;
                 bool isFind = false;
                 // Find process
-                foreach (ProcessBase process in processList)
+                foreach (Process process in processList)
                 {
                     index += 1;
                     if (process.GetType() == typeProcessFind)
@@ -117,17 +116,17 @@ namespace Framework.Server.Application
         /// <summary>
         /// Create process for this page.
         /// </summary>
-        public TProcess Add<TProcess>() where TProcess : ProcessBase
+        public TProcess Add<TProcess>() where TProcess : Process
         {
             return (TProcess)ProcessListInsert(typeof(TProcess), null, false);
         }
 
-        public TProcess AddBefore<TProcess, TProcessFind>() where TProcess : ProcessBase where TProcessFind : ProcessBase
+        public TProcess AddBefore<TProcess, TProcessFind>() where TProcess : Process where TProcessFind : Process
         {
             return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), false);
         }
 
-        public TProcess AddAfter<TProcess, TProcessFind>() where TProcess : ProcessBase where TProcessFind : ProcessBase
+        public TProcess AddAfter<TProcess, TProcessFind>() where TProcess : Process where TProcessFind : Process
         {
             return (TProcess)ProcessListInsert(typeof(TProcess), typeof(TProcessFind), true);
         }
@@ -135,30 +134,15 @@ namespace Framework.Server.Application
         /// <summary>
         /// Returns process of this page.
         /// </summary>
-        public T Get<T>() where T : ProcessBase
+        public T Get<T>() where T : Process
         {
             return (T)processList.Where(item => item.GetType() == typeof(T)).FirstOrDefault();
         }
     }
 
-    public class ProcessBase
+    public class Process
     {
-        internal void Constructor(ApplicationBase application)
-        {
-            this.Application = application;
-        }
-
-        public ApplicationBase Application { get; private set; }
-
-        public ApplicationJson ApplicationJson
-        {
-            get
-            {
-                return Application.ApplicationJson;
-            }
-        }
-
-        protected virtual internal void Process()
+        protected virtual internal void Run(ApplicationBase application)
         {
 
         }

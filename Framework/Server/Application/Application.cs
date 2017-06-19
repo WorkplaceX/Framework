@@ -54,9 +54,9 @@
                 PageShow(ApplicationJson, typePage);
             }
             //
-            foreach (ProcessBase process in processList)
+            foreach (Process process in processList)
             {
-                process.Process();
+                process.Run(this);
             }
             //
             return ApplicationJson;
