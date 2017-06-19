@@ -140,6 +140,14 @@
 
     public class Page2 : Component
     {
+        /// <summary>
+        /// Create new page with method Application.PageShow();
+        /// </summary>
+        public Page2()
+        {
+
+        }
+
         protected virtual internal void Init(ApplicationBase applicationBase)
         {
 

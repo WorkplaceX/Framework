@@ -263,12 +263,12 @@
             processList.Add<ProcessPageEnd>();
         }
 
-        internal Page2 Page2Visible(Component owner)
+        public Page2 Page2Visible(Component owner)
         {
             return owner.List.OfType<Page2>().Where(item => item.IsHide == false).SingleOrDefault();
         }
 
-        internal Page2 Page2Show(Component owner, Type typePage, bool isPageVisibleRemove = true)
+        public Page2 Page2Show(Component owner, Type typePage, bool isPageVisibleRemove = true)
         {
             Page2 pageVisible = Page2Visible(owner);
             if (pageVisible != null)
@@ -292,7 +292,7 @@
             return result;
         }
 
-        internal TPage Page2Show<TPage>(Component owner, bool isPageVisibleRemove = true) where TPage : Page2, new()
+        public TPage Page2Show<TPage>(Component owner, bool isPageVisibleRemove = true) where TPage : Page2, new()
         {
             return (TPage)Page2Show(owner, typeof(TPage), isPageVisibleRemove);
         }
