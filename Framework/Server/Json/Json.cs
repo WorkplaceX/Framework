@@ -17,7 +17,7 @@
         }
     }
 
-    public static class Util
+    public static class JsonConvert
     {
         private class UtilValue
         {
@@ -37,7 +37,7 @@
             List<UtilValue> result = new List<UtilValue>();
             TypeGroup typeGroup;
             Type valueType;
-            Util.TypeInfo(obj, obj.GetType(), out typeGroup, out valueType);
+            JsonConvert.TypeInfo(obj, obj.GetType(), out typeGroup, out valueType);
             switch (typeGroup)
             {
                 case TypeGroup.Value:
@@ -81,7 +81,7 @@
         {
             TypeGroup typeGroup;
             Type valueType;
-            Util.TypeInfo(obj, obj.GetType(), out typeGroup, out valueType);
+            JsonConvert.TypeInfo(obj, obj.GetType(), out typeGroup, out valueType);
             switch (typeGroup)
             {
                 case TypeGroup.Object:
@@ -204,7 +204,7 @@
         {
             TypeGroup typeGroup;
             Type valueType;
-            Util.TypeInfo(value.Value, value.FieldType, out typeGroup, out valueType);
+            JsonConvert.TypeInfo(value.Value, value.FieldType, out typeGroup, out valueType);
             switch (typeGroup)
             {
                 case TypeGroup.Value:
@@ -276,7 +276,7 @@
             {
                 TypeGroup typeGroup;
                 Type valueType;
-                Util.TypeInfo(value, fieldType, out typeGroup, out valueType);
+                JsonConvert.TypeInfo(value, fieldType, out typeGroup, out valueType);
                 switch (typeGroup)
                 {
                     case TypeGroup.Value:
@@ -359,15 +359,15 @@
         private static string Serialize(object obj, Type rootType, Type[] typeInNamespaceList)
         {
             SerializePrepare(obj, rootType, false);
-            string result = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
+            string result = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
             SerializePrepare(obj, rootType, true);
             // TODO Remove
             {
-                string debugSource = JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+                string debugSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
                 object debugObj = Deserialize(result, rootType, typeInNamespaceList);
                 SerializePrepare(debugObj, rootType, true);
-                string debugDest = JsonConvert.SerializeObject(debugObj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                Util.Assert(debugSource == debugDest);
+                string debugDest = Newtonsoft.Json.JsonConvert.SerializeObject(debugObj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+                JsonConvert.Assert(debugSource == debugDest);
             }
             //
             return result;
@@ -405,7 +405,7 @@
             {
                 type = Nullable.GetUnderlyingType(type);
             }
-            return Convert.ChangeType(value, type);
+            return System.Convert.ChangeType(value, type);
         }
 
         /// <summary>
@@ -445,11 +445,11 @@
             }
             if (resultList.Count == 0)
             {
-                Util.Assert(false, "Type not found!");
+                JsonConvert.Assert(false, "Type not found!");
             }
             if (resultList.Count > 1)
             {
-                Util.Assert(false, "More than one type found!");
+                JsonConvert.Assert(false, "More than one type found!");
             }
             return resultList.Single();
         }
@@ -466,7 +466,7 @@
                     string objectTypeString = jValue.Value as string;
                     if (objectTypeString != null)
                     {
-                        result = Util.TypeGet(objectTypeString, rootType, typeInNamespaceList);
+                        result = JsonConvert.TypeGet(objectTypeString, rootType, typeInNamespaceList);
                     }
                 }
                 //
@@ -476,7 +476,7 @@
                     string objectTypeString = jValue.Value as string;
                     if (objectTypeString != null)
                     {
-                        result = Util.TypeGet(objectTypeString, rootType, typeInNamespaceList);
+                        result = JsonConvert.TypeGet(objectTypeString, rootType, typeInNamespaceList);
                     }
                 }
             }
@@ -496,7 +496,7 @@
             //
             TypeGroup typeGroup;
             Type valueType;
-            Util.TypeInfo(value, fieldType, out typeGroup, out valueType);
+            JsonConvert.TypeInfo(value, fieldType, out typeGroup, out valueType);
             switch (typeGroup)
             {
                 case TypeGroup.Value:
@@ -585,7 +585,7 @@
 
         private static object Deserialize(string json, Type rootType, Type[] typeInNamespaceList)
         {
-            JObject jObject = (JObject)JsonConvert.DeserializeObject(json);
+            JObject jObject = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(json);
             object result = DeserializeToken(jObject, rootType, rootType, typeInNamespaceList);
             SerializePrepare(result, rootType, true);
             return result;

@@ -1,5 +1,6 @@
 ﻿namespace UnitTest.Json
 {
+    using Framework.Json;
     using System;
     using System.Collections.Generic;
 
@@ -91,8 +92,8 @@
             data.NumberInt = 88;
             data.NumberDouble = 34.223;
             Guid guid = Guid.NewGuid();
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<Data>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<Data>(json);
             Util.Assert(data.Name == data2.Name);
             Util.Assert(data.NumberInt == data2.NumberInt);
             Util.Assert(data.NumberDouble == data2.NumberDouble);
@@ -106,8 +107,8 @@
             data.NumberInt = 88;
             data.NumberDouble = 34.223;
             Guid guid = Guid.NewGuid();
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataNullable>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataNullable>(json);
             Util.Assert(data.Name == data2.Name);
             Util.Assert(data.NumberInt == data2.NumberInt);
             Util.Assert(data.NumberDouble == data2.NumberDouble);
@@ -119,8 +120,8 @@
             DataWithList data = new Json.DataWithList();
             data.Name = "L";
             data.List = null;
-            string json = Framework.Json.Util.Serialize(data);
-            DataWithList data2 = Framework.Json.Util.Deserialize<DataWithList>(json);
+            string json = JsonConvert.Serialize(data);
+            DataWithList data2 = JsonConvert.Deserialize<DataWithList>(json);
         }
 
         public void Test04()
@@ -131,8 +132,8 @@
             data.List.Add(new Json.DataWithListItem() { Name = "X1" });
             data.List.Add(new Json.DataWithListItem2() { Name = "X2" });
             data.List.Add(null);
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithList>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithList>(json);
             Util.Assert(data.List[0].Name == data2.List[0].Name);
             Util.Assert(data.List[1].GetType() == typeof(DataWithListItem2));
         }
@@ -143,8 +144,8 @@
             data.List = new Dictionary<string, int>();
             data.List["F"] = 33;
             data.List["G"] = 44;
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithDictionary>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithDictionary>(json);
             Util.Assert(data.List["F"] == 33);
             Util.Assert(data.List["G"] == 44);
         }
@@ -156,8 +157,8 @@
             data.List["F"] = new DataWithListItem() { Name = "FF" };
             data.List["G"] = new DataWithListItem2() { Name = "GG" };
             data.List["H"] = null;
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithDictionary2>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithDictionary2>(json);
             Util.Assert(data.List["F"].Name == "FF");
             Util.Assert(data.List["G"].Name == "GG");
             Util.Assert(data.List["G"].GetType() == typeof(DataWithListItem2));
@@ -173,16 +174,16 @@
             data.List2 = new List<List<int>>();
             data.List2.Add(new List<int>());
             data.List2[0].Add(88);
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithListNested>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithListNested>(json);
         }
 
         public void Test08()
         {
             var data = new DataWithObject();
             data.Value = "H";
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithObject>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithObject>(json);
             Util.Assert((string)data2.Value == "H");
         }
 
@@ -190,8 +191,8 @@
         {
             var data = new DataWithObject();
             data.Value = 2.23;
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithObject>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithObject>(json);
             Util.Assert((double)data2.Value == 2.23);
         }
 
@@ -199,8 +200,8 @@
         {
             var data = new DataWithObject();
             data.Value = (double)2;
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithObject>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithObject>(json);
             Util.Assert((double)data2.Value == 2);
         }
 
@@ -210,7 +211,7 @@
             data.Value = (int)2;
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -224,7 +225,7 @@
             data.Value = new DataWithListItem();
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -236,8 +237,8 @@
         {
             var data = new DataWithObject();
             data.Value = new DataWithListItem2() { Name = "M" };
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataWithObject>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataWithObject>(json);
             Util.Assert(data2.Value.GetType() == typeof(DataWithListItem2));
             Util.Assert(((DataWithListItem2)data2.Value).Name == "M");
         }
@@ -246,8 +247,8 @@
         {
             var data = new DataListNull();
             data.Name = "H";
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataListNull>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataListNull>(json);
             Util.Assert(!json.Contains("List"));
             Util.Assert(data.List != null);
             Util.Assert(data.List2 != null);
@@ -263,8 +264,8 @@
             data.List = new List<List<object>>();
             data.List.Add(new List<object>());
             data.List.Add(null);
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataListNestedNull>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataListNestedNull>(json);
             Util.Assert(data2.List[1] != null);
         }
 
@@ -274,8 +275,8 @@
             data.List2 = new Dictionary<string, Dictionary<string, int>>();
             data.List2.Add("X", new Dictionary<string, int>());
             data.List2.Add("Y", null);
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataListNestedNull>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataListNestedNull>(json);
             Util.Assert(data2.List2["Y"] != null);
         }
 
@@ -283,8 +284,8 @@
         {
             var data = new DataListNestedNull();
             data.List2 = new Dictionary<string, Dictionary<string, int>>();
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataListNestedNull>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataListNestedNull>(json);
             Util.Assert(data2.List2.Count == 0);
         }
 
@@ -299,8 +300,8 @@
             data.List = new Dictionary<object, object>();
             data.List["A"] = "X";
             data.List["D"] = null;
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataDictionaryKey>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataDictionaryKey>(json);
             Util.Assert((string)data2.List["A"] == "X");
             Util.Assert(data2.List["D"] == null);
         }
@@ -313,7 +314,7 @@
             data.List[8] = null;
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -337,7 +338,7 @@
             data.SelectIndex2 = 44;
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -374,7 +375,7 @@
             data.CellList.Add(row0);
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -407,7 +408,7 @@
             data.List.Add(new Json.UnitTest.MyDictionary<string, int>());
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -424,8 +425,8 @@
         {
             var data = new DataBool();
             data.H = true;
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataBool>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataBool>(json);
             Util.Assert((bool)data2.H == true);
         }
 
@@ -457,7 +458,7 @@
             data.L = new MyLabel();
             try
             {
-                string json = Framework.Json.Util.Serialize(data);
+                string json = JsonConvert.Serialize(data);
             }
             catch (Framework.Json.JsonException exception)
             {
@@ -481,8 +482,8 @@
         {
             var data = new DataSelector();
             data.L = new MyLabel2();
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<DataSelector>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<DataSelector>(json);
             Util.Assert(data2.L is MyLabel2);
         }
 
@@ -497,10 +498,10 @@
                 var data = new Data26Root();
                 data.Data26 = new DifferentNamespace.Data26();
                 data.Data26.Name = "My26";
-                string json = Framework.Json.Util.Serialize(data, typeof(DifferentNamespace.Data));
+                string json = JsonConvert.Serialize(data, typeof(DifferentNamespace.Data));
                 try
                 {
-                    var data2 = Framework.Json.Util.Deserialize<Data26Root>(json);
+                    var data2 = JsonConvert.Deserialize<Data26Root>(json);
                     Util.Assert(data2.Data26.Name == "My26");
                 }
                 catch (Exception exception)
@@ -512,8 +513,8 @@
                 var data = new Data26Root();
                 data.Data26 = new DifferentNamespace.Data26();
                 data.Data26.Name = "My26";
-                string json = Framework.Json.Util.Serialize(data, typeof(DifferentNamespace.Data));
-                var data2 = Framework.Json.Util.Deserialize<Data26Root>(json, typeof(DifferentNamespace.Data));
+                string json = JsonConvert.Serialize(data, typeof(DifferentNamespace.Data));
+                var data2 = JsonConvert.Deserialize<Data26Root>(json, typeof(DifferentNamespace.Data));
                 Util.Assert(data2.Data26.Name == "My26");
             }
             {
@@ -523,7 +524,7 @@
                 ((DifferentNamespace.Data26)data.Data26).Data2 = new DifferentNamespace.Data26Root() { Text = "TypeType" };
                 try
                 {
-                    string json = Framework.Json.Util.Serialize(data, typeof(DifferentNamespace.Data));
+                    string json = JsonConvert.Serialize(data, typeof(DifferentNamespace.Data));
                 }
                 catch (Exception exception)
                 {
@@ -544,8 +545,8 @@
             var data = new Data27();
             data.Field = "Field2";
             data.Property = "Property2";
-            string json = Framework.Json.Util.Serialize(data);
-            var data2 = Framework.Json.Util.Deserialize<Data27>(json);
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<Data27>(json);
             Util.Assert(data2.Field == "Field2");
             Util.Assert(data2.Property == "Property2");
         }
