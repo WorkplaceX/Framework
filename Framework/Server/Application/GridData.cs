@@ -749,9 +749,12 @@
         {
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
-            foreach (string gridName in gridDataJson.GridQueryList.Keys)
+            if (gridDataJson != null)
             {
-                LoadJson(applicationJson, gridName, application);
+                foreach (string gridName in gridDataJson.GridQueryList.Keys)
+                {
+                    LoadJson(applicationJson, gridName, application);
+                }
             }
         }
 
@@ -835,6 +838,12 @@
         /// </summary>
         public void SaveJson(ApplicationJson applicationJson)
         {
+            if (applicationJson.GridDataJson == null)
+            {
+                applicationJson.GridDataJson = new GridDataJson();
+                applicationJson.GridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
+                applicationJson.GridDataJson.RowList = new Dictionary<string, List<GridRow>>();
+            }
             GridDataJson gridDataJson = applicationJson.GridDataJson;
             //
             if (gridDataJson.GridQueryList == null)

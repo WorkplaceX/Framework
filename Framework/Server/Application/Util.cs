@@ -16,15 +16,6 @@ namespace Framework.Server.Application
 
     public static class Util
     {
-        internal static PageJson PageJson(ApplicationJson applicationJson, string typePage)
-        {
-            if (!applicationJson.PageJsonList.ContainsKey(typePage))
-            {
-                applicationJson.PageJsonList[typePage] = (PageJson)Framework.Util.TypeToObject(typeof(PageJson));
-            }
-            return (PageJson)applicationJson.PageJsonList[typePage];
-        }
-
         public static string IndexEnumToString(IndexEnum indexEnum)
         {
             return indexEnum.ToString();

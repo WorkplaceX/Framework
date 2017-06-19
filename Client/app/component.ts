@@ -61,7 +61,7 @@ export class AppComponent {
   <Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></Grid>
   <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
   <GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></GridField>
-  <Page *ngIf="json.Type=='Page2' && !json.IsHide" [json]=json></Page>
+  <Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></Page>
   <!-- <LayoutDebug [json]=json></LayoutDebug> -->
 `
 })

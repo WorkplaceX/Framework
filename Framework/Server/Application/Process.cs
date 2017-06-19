@@ -1,15 +1,30 @@
 ﻿namespace Framework.Server.Application
 {
     using Framework.Server.Application.Json;
+    using System.Linq;
 
     /// <summary>
-    /// Call method Page2.ProcessBegin(); at the begin of the process chain.
+    /// Set Button.IsClick to false.
     /// </summary>
-    public class ProcessPageBegin : ProcessBase2
+    public class ProcessButtonIsClickFalse : ProcessBase
     {
         protected internal override void Process()
         {
-            foreach (var page in ApplicationJson.ListAll<Page2>())
+            foreach (Button button in ApplicationJson.ListAll().OfType<Button>())
+            {
+                button.IsClick = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Call method Page.ProcessBegin(); at the begin of the process chain.
+    /// </summary>
+    public class ProcessPageBegin : ProcessBase
+    {
+        protected internal override void Process()
+        {
+            foreach (var page in ApplicationJson.ListAll().OfType<Page>())
             {
                 page.ProcessBegin(Application);
             }
@@ -17,13 +32,13 @@
     }
 
     /// <summary>
-    /// Call method Page2.ProcessEnd(); at the End of the process chain.
+    /// Call method Page.ProcessEnd(); at the End of the process chain.
     /// </summary>
-    public class ProcessPageEnd : ProcessBase2
+    public class ProcessPageEnd : ProcessBase
     {
         protected internal override void Process()
         {
-            foreach (var page in ApplicationJson.ListAll<Page2>())
+            foreach (var page in ApplicationJson.ListAll().OfType<Page>())
             {
                 page.ProcessEnd();
             }

@@ -7,27 +7,6 @@
     using System.Linq;
 
     /// <summary>
-    /// Page to process data grid.
-    /// </summary>
-    public class PageGrid : Page
-    {
-        protected override void ProcessInit(ProcessList processList)
-        {
-            processList.Add<ProcessGridIsClick>();
-            processList.Add<ProcessGridOrderBy>();
-            processList.Add<ProcessGridFilter>();
-            processList.Add<ProcessGridLookUp>();
-//            processList.Add<ProcessGridSave>();
-            processList.Add<ProcessGridCellButtonIsClick>();
-            processList.Add<ProcessGridOrderByText>();
-            processList.Add<ProcessGridFocusNull>();
-            processList.Add<ProcessGridCellIsModifyFalse>();
-            processList.Add<ProcessGridIsClickFalse>();
-            base.ProcessInit(processList);
-        }
-    }
-
-    /// <summary>
     /// Process OrderBy click.
     /// </summary>
     public class ProcessGridOrderBy : ProcessBase
@@ -388,7 +367,7 @@
             {
                 Row row = Application.GridData().Row(gridNameClick, indexClick);
                 Cell cell = DataAccessLayer.Util.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
-                cell.CellProcessButtonIsClick(Page, gridNameClick, indexClick, fieldNameClick);
+                cell.CellProcessButtonIsClick(Application, gridNameClick, indexClick, fieldNameClick);
             }
         }
     }

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Json Component.
@@ -69,15 +68,13 @@
         public string Name;
 
         /// <summary>
-        /// Gets or sets TypePage. Indicating to which page this top level json component belongs to.
-        /// </summary>
-        public string TypePage;
-
-        /// <summary>
         /// Gets or sets custom html style classes.
         /// </summary>
         public string Class;
 
+        /// <summary>
+        /// Gets json list.
+        /// </summary>
         public List<Component> List = new List<Component>();
 
         private void ListAll(List<Component> result)
@@ -94,12 +91,6 @@
             List<Component> result = new List<Component>();
             ListAll(result);
             return result;
-        }
-
-        public List<T> ListAll<T>() where T : Component
-        {
-            List<Component> result = ListAll();
-            return result.OfType<T>().ToList();
         }
 
         private void Owner(Component component, ref Component result)
@@ -130,52 +121,6 @@
             Component result = null;
             Owner(component, ref result);
             return result;
-        }
-
-        protected virtual internal void Process(ApplicationBase application, ApplicationJson applicationJson)
-        {
-
-        }
-    }
-
-    public class Page2 : Component
-    {
-        /// <summary>
-        /// Create new page with method Application.PageShow();
-        /// </summary>
-        public Page2()
-        {
-
-        }
-
-        protected virtual internal void Init(ApplicationBase applicationBase)
-        {
-
-        }
-
-        public Page2 PageVisible(ApplicationBase application)
-        {
-            return application.Page2Visible(Owner(application.ApplicationJson));
-        }
-
-        public Page2 Page2Show(ApplicationBase application, Type typePage, bool isPageVisibleRemove = true)
-        {
-            return application.Page2Show(Owner(application.ApplicationJson), typePage, isPageVisibleRemove);
-        }
-
-        public TPage Page2Show<TPage>(ApplicationBase application, bool isPageVisibleRemove = true) where TPage : Page2, new()
-        {
-            return application.Page2Show<TPage>(Owner(application.ApplicationJson), isPageVisibleRemove);
-        }
-
-        protected virtual internal void ProcessBegin(ApplicationBase application)
-        {
-
-        }
-
-        protected virtual internal void ProcessEnd()
-        { 
-
         }
     }
 
@@ -415,26 +360,6 @@
         /// Gets or sets GridData.
         /// </summary>
         public GridDataJson GridDataJson;
-
-        /// <summary>
-        /// (TypePage, Page)
-        /// </summary>
-        public Dictionary<string, PageJson> PageJsonList;
-
-        /// <summary>
-        /// Gets or sets TypePageVisible. Currently visible page. Only one page is visible.
-        /// </summary>
-        public string TypePageVisible;
-    }
-
-    public class PageJson
-    {
-        /// <summary>
-        /// Gets or sets IsInit. Indicating page has been initialized.
-        /// </summary>
-        public bool IsInit;
-
-        public Dictionary<string, object> StateList;
     }
 
     /// <summary>
@@ -525,42 +450,6 @@
             : base(owner, text)
         {
 
-        }
-    }
-
-    /// <summary>
-    /// Json LabelGridSaveState.
-    /// </summary>
-    public class LabelGridSaveState : Label
-    {
-        public LabelGridSaveState() : this(null, null) { }
-
-        public LabelGridSaveState(Component owner, string text)
-            : base(owner, text)
-        {
-            TypeSet(typeof(Label)); // Render as Label.
-        }
-
-        protected internal override void Process(ApplicationBase application, ApplicationJson applicationJson)
-        {
-            bool isModify = false;
-            GridDataJson gridDataJson = applicationJson.GridDataJson;
-            foreach (string gridName in gridDataJson.GridQueryList.Keys)
-            {
-                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
-                {
-                    foreach (GridColumn gridColumn in gridDataJson.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        if (gridCell.IsO)
-                        {
-                            isModify = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            Text = string.Format("IsModify={0};", isModify);
         }
     }
 }
