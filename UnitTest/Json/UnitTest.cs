@@ -550,6 +550,25 @@
             Util.Assert(data2.Field == "Field2");
             Util.Assert(data2.Property == "Property2");
         }
+
+        public class Data28
+        {
+            public Guid? GuidNullable;
+
+            public Guid Guid;
+        }
+
+        public void Test28()
+        {
+            var data = new Data28();
+            data.GuidNullable = Guid.NewGuid();
+            data.Guid = Guid.NewGuid();
+            string json = JsonConvert.Serialize(data);
+            var data2 = JsonConvert.Deserialize<Data28>(json);
+            Util.Assert(data.Guid == data2.Guid);
+            Util.Assert(data.GuidNullable == data2.GuidNullable);
+            Util.Assert(data.GuidNullable != data2.Guid);
+        }
     }
 }
 

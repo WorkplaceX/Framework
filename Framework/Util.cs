@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.251 Server";
+                return "v0.252 Server";
             }
         }
 
@@ -34,7 +34,7 @@
             Uri uri = new Uri(typeof(Util).GetTypeInfo().Assembly.CodeBase);
             string result;
             isIss = false;
-            if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll") || uri.AbsolutePath.EndsWith("/Tool/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+            if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll") || uri.AbsolutePath.EndsWith("/BuildTool/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
             {
                 result = new Uri(uri, "../../../../").AbsolutePath;
             }

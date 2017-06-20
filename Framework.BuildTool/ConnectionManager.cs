@@ -3,7 +3,7 @@ using System;
 using System.Data.SqlClient;
 using System.IO;
 
-namespace Framework.Tool
+namespace Framework.BuildTool
 {
     /// <summary>
     /// Build config json.
@@ -22,7 +22,7 @@ namespace Framework.Tool
         {
             get
             {
-                return Framework.Util.FolderName + "Submodule/Framework.Tool/ConnectionManager.json";
+                return Framework.Util.FolderName + "Submodule/Framework.BuildTool/ConnectionManager.json";
             }
         }
 
@@ -152,19 +152,19 @@ namespace Framework.Tool
 
         private static void FileNameCheck()
         {
-            if (!File.Exists(Tool.ConnectionManager.NodeFileName))
+            if (!File.Exists(BuildTool.ConnectionManager.NodeFileName))
             {
-                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NodeFileName, Tool.Config.JsonFileName));
+                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NodeFileName, BuildTool.Config.JsonFileName));
             }
-            if (!File.Exists(Tool.ConnectionManager.NpmFileName))
+            if (!File.Exists(BuildTool.ConnectionManager.NpmFileName))
             {
-                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NpmFileName, Tool.Config.JsonFileName));
+                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NpmFileName, BuildTool.Config.JsonFileName));
             }
-            if (!File.Exists(Tool.ConnectionManager.VisualStudioCodeFileName))
+            if (!File.Exists(BuildTool.ConnectionManager.VisualStudioCodeFileName))
             {
-                Util.Log(string.Format("Warning: File not found! Visual Studio Code. ({0}; {1})", ConnectionManager.VisualStudioCodeFileName, Tool.Config.JsonFileName));
+                Util.Log(string.Format("Warning: File not found! Visual Studio Code. ({0}; {1})", ConnectionManager.VisualStudioCodeFileName, BuildTool.Config.JsonFileName));
             }
-            if (!File.Exists(Tool.ConnectionManager.MSBuildFileName))
+            if (!File.Exists(BuildTool.ConnectionManager.MSBuildFileName))
             {
                 Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.MSBuildFileName, Build.Config.JsonFileName));
             }

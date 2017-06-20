@@ -1,4 +1,4 @@
-﻿namespace Framework.Tool
+﻿namespace Framework.BuildTool
 {
     public class CommandOpen : Command
     {
@@ -24,19 +24,19 @@
         {
             if (Client.IsOn)
             {
-                UtilTool.OpenVisualStudioCode(Util.FolderName + "Submodule/Client/");
+                UtilBuildTool.OpenVisualStudioCode(Util.FolderName + "Submodule/Client/");
             }
             if (Server.IsOn)
             {
-                UtilTool.OpenVisualStudioCode(Util.FolderName + "Server/");
+                UtilBuildTool.OpenVisualStudioCode(Util.FolderName + "Server/");
             }
             if (Solution.IsOn)
             {
-                UtilTool.OpenBrowser(Util.FolderName + "Application.sln");
+                UtilBuildTool.OpenBrowser(Util.FolderName + "Application.sln");
             }
             if (Universal.IsOn)
             {
-                UtilTool.OpenVisualStudioCode(Framework.Util.FolderName + "Submodule/Universal/");
+                UtilBuildTool.OpenVisualStudioCode(Framework.Util.FolderName + "Submodule/Universal/");
             }
         }
     }

@@ -1,10 +1,10 @@
-﻿namespace Framework.Tool
+﻿namespace Framework.BuildTool
 {
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Diagnostics;
 
-    public class ToolBase
+    public class AppBuildTool
     {
         public void Run(string[] args)
         {
@@ -29,6 +29,12 @@
             Command.Register(commandLineApplication, new CommandConnectionString());
             Command.Register(commandLineApplication, new CommandCheck());
             Command.Register(commandLineApplication, new CommandOpen());
+            Command.Register(commandLineApplication, new CommandToggleIsDebugDataJson());
+            Command.Register(commandLineApplication, new CommandServe());
+            Command.Register(commandLineApplication, new CommandUnitTest());
+            Command.Register(commandLineApplication, new CommandRunSql());
+            Command.Register(commandLineApplication, new CommandGenerate());
+            Command.Register(commandLineApplication, new CommandRunGulp());
         }
     }
 }

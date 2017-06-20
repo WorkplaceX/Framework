@@ -1,4 +1,4 @@
-﻿namespace Framework.Tool
+﻿namespace Framework.BuildTool
 {
     using Microsoft.Extensions.CommandLineUtils;
     using System;

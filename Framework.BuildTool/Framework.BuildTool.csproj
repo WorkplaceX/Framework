@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <AssemblyName>Framework.Tool</AssemblyName>
-    <RootNamespace>Framework.Tool</RootNamespace>
+    <AssemblyName>Framework.BuildTool</AssemblyName>
+    <RootNamespace>Framework.BuildTool</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

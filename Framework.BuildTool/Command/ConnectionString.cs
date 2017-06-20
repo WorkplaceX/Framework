@@ -1,4 +1,4 @@
-﻿namespace Framework.Tool
+﻿namespace Framework.BuildTool
 {
     using Newtonsoft.Json;
     using System;

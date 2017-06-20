@@ -1,4 +1,4 @@
-﻿namespace Framework.Tool
+﻿namespace Framework.BuildTool
 {
     public class CommandCheck : Command
     {
