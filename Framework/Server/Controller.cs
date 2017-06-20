@@ -45,7 +45,7 @@
             // Json API request
             if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
             {
-                string jsonInText = Util.StreamToString(Controller.Request.Body);
+                string jsonInText = UtilServer.StreamToString(Controller.Request.Body);
                 AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() });
                 AppJson appJsonOut;
                 try
@@ -72,21 +72,21 @@
             // Framework/Server/wwwroot/ request
             {
                 string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
-                fileName = Server.Util.FileNameToWwwRoot(fileName);
+                fileName = UtilServer.FileNameToWwwRoot(fileName);
                 if (File.Exists(fileName))
                 {
-                    return Server.Util.FileNameToFileContentResult(Controller, fileName);
+                    return UtilServer.FileNameToFileContentResult(Controller, fileName);
                 }
             }
             // node_modules request
             if (Controller.HttpContext.Request.Path.ToString().StartsWith("/node_modules/"))
             {
-                return Util.FileGet(Controller, "", "../Client/", "Universal/");
+                return UtilServer.FileGet(Controller, "", "../Client/", "Universal/");
             }
             // (*.css; *.js) request
             if (Controller.HttpContext.Request.Path.ToString().EndsWith(".css") || Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
             {
-                return Util.FileGet(Controller, RoutePath, "Universal/", "Universal/");
+                return UtilServer.FileGet(Controller, RoutePath, "Universal/", "Universal/");
             }
             return Controller.NotFound();
         }
@@ -187,12 +187,12 @@
         {
             if (isBundle == false)
             {
-                return System.IO.File.ReadAllText("Universal/index.html"); // Original source: Client/index.html
+                return File.ReadAllText("Universal/index.html"); // Original source: Client/index.html
             }
             else
             {
-                string fileName = Server.Util.FileNameToWwwRoot("indexBundle.html"); // Original source: Framework/Server/wwwroot/indexBundle.html
-                return System.IO.File.ReadAllText(fileName);
+                string fileName = UtilServer.FileNameToWwwRoot("indexBundle.html"); // Original source: Framework/Server/wwwroot/indexBundle.html
+                return File.ReadAllText(fileName);
             }
         }
     }

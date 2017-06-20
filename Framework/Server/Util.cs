@@ -7,7 +7,7 @@
     //
     using Framework.Application;
 
-    public static class Util
+    public static class UtilServer
     {
         public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string routePath, App app)
         {

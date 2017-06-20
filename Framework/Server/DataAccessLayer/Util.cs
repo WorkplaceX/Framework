@@ -27,7 +27,7 @@
         public object Value;
     }
 
-    public static class Util
+    public static class UtilDataAccessLayer
     {
         public static string TableNameFromTypeRow(Type typeRow)
         {
@@ -66,7 +66,7 @@
                 if (type.GetTypeInfo().IsSubclassOf(typeof(Row)))
                 {
                     Type typeRow = type;
-                    if (Util.TableNameFromTypeRow(typeRow) == tableName)
+                    if (UtilDataAccessLayer.TableNameFromTypeRow(typeRow) == tableName)
                     {
                         return typeRow;
                     }
@@ -256,7 +256,7 @@
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
-            row = Util.RowClone(row); // Prevent modifications on SetValues(rowNew);
+            row = UtilDataAccessLayer.RowClone(row); // Prevent modifications on SetValues(rowNew);
             Framework.Util.Assert(row.GetType() == rowNew.GetType());
             DbContext dbContext = DbContext(row.GetType());
             var tracking = dbContext.Attach(row);

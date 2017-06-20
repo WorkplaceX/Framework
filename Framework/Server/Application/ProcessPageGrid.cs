@@ -266,7 +266,7 @@
                     GridData gridData = app.GridData();
                     Type typeRow = gridData.TypeRow(gridDataJson.FocusGridName);
                     var row = gridData.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
-                    Cell cell = Util.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                    Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                     List<Row> rowList;
                     cell.LookUp(out typeRow, out rowList);
                     gridData.LoadRow("LookUp", typeRow, rowList);
@@ -371,7 +371,7 @@
             if (gridNameClick != null)
             {
                 Row row = app.GridData().Row(gridNameClick, indexClick);
-                Cell cell = Util.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
+                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
                 cell.CellProcessButtonIsClick(app, gridNameClick, indexClick, fieldNameClick);
             }
         }
