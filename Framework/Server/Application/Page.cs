@@ -1,4 +1,4 @@
-﻿namespace Framework.JsonComponent
+﻿namespace Framework.Component
 {
     using Framework.Application;
     using System;

@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Collections.Generic;
     using System.Reflection;
-    using Framework.JsonComponent;
+    using Framework.Component;
 
     internal class GridRowInternal
     {

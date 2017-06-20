@@ -1,4 +1,4 @@
-﻿namespace Framework.JsonComponent
+﻿namespace Framework.Component
 {
     using System;
     using System.Collections.Generic;

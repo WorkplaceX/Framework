@@ -1,6 +1,6 @@
 ﻿namespace Framework.Application
 {
-    using Framework.JsonComponent;
+    using Framework.Component;
     using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
