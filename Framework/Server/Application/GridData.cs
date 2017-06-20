@@ -1,11 +1,11 @@
-﻿namespace Framework.Server.Application
+﻿namespace Framework.Application
 {
-    using Framework.Server.Application.Json;
-    using Framework.Server.DataAccessLayer;
+    using Framework.DataAccessLayer;
     using System;
     using System.Linq;
     using System.Collections.Generic;
     using System.Reflection;
+    using Framework.JsonComponent;
 
     internal class GridRowInternal
     {
@@ -91,7 +91,7 @@
         public List<Cell> ColumnList(string gridName)
         {
             Type typeRow = TypeRowGet(gridName);
-            return DataAccessLayer.Util.ColumnList(typeRow);
+            return Util.ColumnList(typeRow);
         }
 
         /// <summary>
@@ -331,7 +331,7 @@
             {
                 if (cellList[gridName].ContainsKey(index))
                 {
-                    foreach (Cell column in DataAccessLayer.Util.ColumnList(typeRow))
+                    foreach (Cell column in Util.ColumnList(typeRow))
                     {
                         if (column.FieldNameSql != null) // Exclude calculated column
                         {
@@ -357,7 +357,7 @@
         public void LoadDatabase(string gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
         {
             TypeRowSet(gridName, typeRow);
-            List<Row> rowList = DataAccessLayer.Util.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15);
+            List<Row> rowList = Util.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15);
             LoadRow(gridName, typeRow, rowList);
         }
 
@@ -365,12 +365,12 @@
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
-            Row row = RowGet(gridName, Util.IndexEnumToString(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
+            Row row = RowGet(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
             
-            foreach (Cell column in DataAccessLayer.Util.ColumnList(typeRow))
+            foreach (Cell column in Util.ColumnList(typeRow))
             {
                 string fieldName = column.FieldNameCSharp;
-                string text = CellTextGet(gridName, Util.IndexEnumToString(IndexEnum.Filter), fieldName);
+                string text = CellTextGet(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter), fieldName);
                 if (text == "")
                 {
                     text = null;
@@ -407,7 +407,7 @@
         /// </summary>
         public void LoadDatabase(string gridName)
         {
-            if (!IsErrorRowCell(gridName, Util.IndexEnumToString(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
+            if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
                 string fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
                 bool isOrderByDesc = queryList[gridName].IsOrderByDesc;
@@ -439,7 +439,7 @@
                 Dictionary<string, GridCellInternal> cellListFilter = null;
                 if (cellList.ContainsKey(gridName))
                 {
-                    cellList[gridName].TryGetValue(Util.IndexEnumToString(IndexEnum.Filter), out cellListFilter); // Save filter user text.
+                    cellList[gridName].TryGetValue(UtilApplication.IndexEnumToString(IndexEnum.Filter), out cellListFilter); // Save filter user text.
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
                 this.rowList[gridName] = new Dictionary<string, GridRowInternal>(); // Clear data
@@ -455,7 +455,7 @@
                 if (cellListFilter != null)
                 {
                     cellList[gridName] = new Dictionary<string, Dictionary<string, GridCellInternal>>();
-                    cellList[gridName][Util.IndexEnumToString(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
+                    cellList[gridName][UtilApplication.IndexEnumToString(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
                 }
             }
         }
@@ -482,7 +482,7 @@
         /// </summary>
         private void RowFilterAdd(string gridName)
         {
-            RowSet(gridName, Util.IndexEnumToString(IndexEnum.Filter), new GridRowInternal() { Row = null, RowNew = null });
+            RowSet(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter), new GridRowInternal() { Row = null, RowNew = null });
         }
 
         /// <summary>
@@ -496,7 +496,7 @@
             // Filter
             foreach (string index in rowListCopy.Keys)
             {
-                if (Util.IndexToIndexEnum(index) == IndexEnum.Filter)
+                if (UtilApplication.IndexToIndexEnum(index) == IndexEnum.Filter)
                 {
                     RowSet(gridName, index, rowListCopy[index]);
                     break;
@@ -506,7 +506,7 @@
             int indexInt = 0;
             foreach (string index in rowListCopy.Keys)
             {
-                IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
                 if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
                 {
                     RowSet(gridName, indexInt.ToString(), rowListCopy[index]); // New becomes Index
@@ -514,11 +514,11 @@
                 }
             }
             // New
-            RowSet(gridName, Util.IndexEnumToString(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = null }); // New row
+            RowSet(gridName, UtilApplication.IndexEnumToString(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = null }); // New row
             // Total
             foreach (string index in rowListCopy.Keys)
             {
-                if (Util.IndexToIndexEnum(index) == IndexEnum.Total)
+                if (UtilApplication.IndexToIndexEnum(index) == IndexEnum.Total)
                 {
                     RowSet(gridName, index, rowListCopy[index]);
                     break;
@@ -535,7 +535,7 @@
             {
                 foreach (string index in rowList[gridName].Keys.ToArray())
                 {
-                    IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                    IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
                     if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New) // Exclude Filter and Total.
                     {
                         if (!IsErrorRowCell(gridName, index)) // No save if data row has text parse error!
@@ -547,7 +547,7 @@
                                 {
                                     try
                                     {
-                                        DataAccessLayer.Util.Update(row.Row, row.RowNew);
+                                        Util.Update(row.Row, row.RowNew);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         TextClear(gridName, index);
@@ -561,7 +561,7 @@
                                 {
                                     try
                                     {
-                                        DataAccessLayer.Util.Insert(row.RowNew);
+                                        Util.Insert(row.RowNew);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         TextClear(gridName, index);
@@ -596,20 +596,20 @@
                         {
                             Framework.Util.Assert(row.Row.GetType() == typeRow);
                         }
-                        IndexEnum indexEnum = Util.IndexToIndexEnum(index);
+                        IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
                         Row rowWrite;
                         switch (indexEnum)
                         {
                             case IndexEnum.Index:
-                                rowWrite = DataAccessLayer.Util.RowClone(row.Row);
+                                rowWrite = Util.RowClone(row.Row);
                                 row.RowNew = rowWrite;
                                 break;
                             case IndexEnum.New:
-                                rowWrite = DataAccessLayer.Util.RowCreate(typeRow);
+                                rowWrite = Util.RowCreate(typeRow);
                                 row.RowNew = rowWrite;
                                 break;
                             case IndexEnum.Filter:
-                                rowWrite = DataAccessLayer.Util.RowCreate(typeRow);
+                                rowWrite = Util.RowCreate(typeRow);
                                 row.RowFilter = rowWrite;
                                 break;
                             default:
@@ -629,7 +629,7 @@
                                     object value;
                                     try
                                     {
-                                        value = DataAccessLayer.Util.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                        value = Util.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
                                     }
                                     catch (Exception exception)
                                     {
@@ -691,12 +691,12 @@
             GridDataJson gridDataJson = appJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[gridName].TypeRow;
-            Type typeRow = DataAccessLayer.Util.TypeRowFromName(typeRowString, app.TypeRowInAssembly());
+            Type typeRow = Util.TypeRowFromName(typeRowString, app.TypeRowInAssembly());
             TypeRowSet(gridName, typeRow);
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
             {
-                IndexEnum indexEnum = Util.IndexToIndexEnum(row.Index);
+                IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(row.Index);
                 Row resultRow = null;
                 if (indexEnum == IndexEnum.Index)
                 {
@@ -735,7 +735,7 @@
                     if (indexEnum == IndexEnum.Index)
                     {
                         PropertyInfo propertyInfo = typeRow.GetProperty(column.FieldName);
-                        object value = DataAccessLayer.Util.ValueFromText(text, propertyInfo.PropertyType);
+                        object value = Util.ValueFromText(text, propertyInfo.PropertyType);
                         propertyInfo.SetValue(resultRow, value);
                     }
                 }
@@ -765,7 +765,7 @@
         {
             var result = new List<GridColumn>();
             //
-            var columnList = Framework.Server.DataAccessLayer.Util.ColumnList(typeRow);
+            var columnList = Util.ColumnList(typeRow);
             double widthPercentTotal = 0;
             bool isLast = false;
             for (int i = 0; i < columnList.Count; i++)
@@ -848,13 +848,13 @@
             //
             if (gridDataJson.GridQueryList == null)
             {
-                gridDataJson.GridQueryList = new Dictionary<string, Json.GridQuery>();
+                gridDataJson.GridQueryList = new Dictionary<string, GridQuery>();
             }
             //
             foreach (string gridName in rowList.Keys)
             {
                 Type typeRow = TypeRowGet(gridName);
-                gridDataJson.GridQueryList[gridName] = new Json.GridQuery() { GridName = gridName, TypeRow = DataAccessLayer.Util.TypeRowToName(typeRow) };
+                gridDataJson.GridQueryList[gridName] = new GridQuery() { GridName = gridName, TypeRow = Util.TypeRowToName(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
                 {
@@ -895,7 +895,7 @@
                             {
                                 value = propertyInfo.GetValue(gridRow.Row);
                             }
-                            string textJson = DataAccessLayer.Util.ValueToText(value);
+                            string textJson = Util.ValueToText(value);
                             string text = CellTextGet(gridName, index, fieldName);
                             GridCellInternal gridCell = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))

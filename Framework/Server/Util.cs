@@ -5,7 +5,7 @@
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     //
-    using Framework.Server.Application;
+    using Framework.Application;
 
     public static class Util
     {

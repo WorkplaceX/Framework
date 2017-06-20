@@ -1,6 +1,6 @@
-﻿namespace Framework.Server.Application
+﻿namespace Framework.Application
 {
-    using Framework.Server.Application.Json;
+    using Framework.JsonComponent;
     using System;
     using System.Collections;
     using System.Collections.Generic;

@@ -1,6 +1,6 @@
-﻿namespace Framework.Server.DataAccessLayer
+﻿namespace Framework.DataAccessLayer
 {
-    using Framework.Server.Application;
+    using Framework.Application;
     using System;
     using System.Collections.Generic;
     using System.Reflection;

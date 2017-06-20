@@ -1,4 +1,4 @@
-﻿namespace Framework.Server.DataAccessLayer
+﻿namespace Framework.DataAccessLayer
 {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;

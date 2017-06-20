@@ -1,5 +1,6 @@
-﻿namespace Framework.Server.Application.Json
+﻿namespace Framework.JsonComponent
 {
+    using Framework.Application;
     using System;
 
     public class Page : Div

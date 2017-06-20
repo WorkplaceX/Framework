@@ -1,9 +1,4 @@
-﻿using Framework.Server.Application.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Framework.Server.Application
+﻿namespace Framework.Application
 {
     public enum IndexEnum
     {
@@ -14,7 +9,7 @@ namespace Framework.Server.Application
         Total = 4
     }
 
-    public static class Util
+    public static class UtilApplication
     {
         public static string IndexEnumToString(IndexEnum indexEnum)
         {

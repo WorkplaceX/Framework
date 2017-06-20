@@ -1,7 +1,7 @@
-﻿namespace Framework.Server.Application
+﻿namespace Framework.Application
 {
-    using Framework.Server.Application.Json;
-    using Framework.Server.DataAccessLayer;
+    using Framework.JsonComponent;
+    using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -98,7 +98,7 @@
             {
                 foreach (GridRow gridRow in appJson.GridDataJson.RowList[gridName])
                 {
-                    if (Util.IndexToIndexEnum(gridRow.Index) == IndexEnum.Filter)
+                    if (UtilApplication.IndexToIndexEnum(gridRow.Index) == IndexEnum.Filter)
                     {
                         foreach (GridColumn gridColumn in appJson.GridDataJson.ColumnList[gridName])
                         {
@@ -266,8 +266,8 @@
                     GridData gridData = app.GridData();
                     Type typeRow = gridData.TypeRow(gridDataJson.FocusGridName);
                     var row = gridData.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
-                    DataAccessLayer.Cell cell = DataAccessLayer.Util.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
-                    List<DataAccessLayer.Row> rowList;
+                    Cell cell = Util.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                    List<Row> rowList;
                     cell.LookUp(out typeRow, out rowList);
                     gridData.LoadRow("LookUp", typeRow, rowList);
                     gridData.SaveJson(app.AppJson);
@@ -371,7 +371,7 @@
             if (gridNameClick != null)
             {
                 Row row = app.GridData().Row(gridNameClick, indexClick);
-                Cell cell = DataAccessLayer.Util.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
+                Cell cell = Util.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
                 cell.CellProcessButtonIsClick(app, gridNameClick, indexClick, fieldNameClick);
             }
         }
