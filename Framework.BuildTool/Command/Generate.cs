@@ -10,6 +10,7 @@
 
         public override void Run()
         {
+            Build.DataAccessLayer.Script.Run();
             Util.Log(string.Format("File updated. ({0})", Build.DataAccessLayer.ConnectionManager.DatabaseLockFileName));
         }
     }

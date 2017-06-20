@@ -35,6 +35,7 @@
             Command.Register(commandLineApplication, new CommandRunSql());
             Command.Register(commandLineApplication, new CommandGenerate());
             Command.Register(commandLineApplication, new CommandRunGulp());
+            Command.Register(commandLineApplication, new CommandInstallAll());
         }
     }
 }
