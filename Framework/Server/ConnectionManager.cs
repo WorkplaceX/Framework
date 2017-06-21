@@ -34,6 +34,9 @@ namespace Framework.Server
             }
         }
 
+        /// <summary>
+        /// Gets JsonTxtFileName. Used as template, if file ConnectionManager.json does not exist.
+        /// </summary>
         public static string JsonTxtFileName
         {
             get
