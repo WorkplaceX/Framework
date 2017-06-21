@@ -123,15 +123,20 @@ namespace Framework.BuildTool
 
     public static class ConnectionManagerCheck
     {
-        /// <summary>
-        /// Check dev connection string.
-        /// </summary>
-        public static void ConnectionStringCheck()
+        public static void JsonFileCreateIfNotExists()
         {
             if (!File.Exists(Server.Config.JsonFileName))
             {
                 File.Copy(Server.Config.JsonTxtFileName, Server.Config.JsonFileName);
             }
+        }
+
+        /// <summary>
+        /// Check dev connection string.
+        /// </summary>
+        public static void ConnectionStringCheck()
+        {
+            JsonFileCreateIfNotExists();
             string connectionStringSwitch = Server.Config.Instance.ConnectionStringSwitch;
             string ip = Framework.UtilFramework.Ip();
             UtilFramework.Log(string.Format("SQL Connection check ({0}) from {1}", connectionStringSwitch, ip));

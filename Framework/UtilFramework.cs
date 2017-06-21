@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.254 Server";
+                return "v0.255 Server";
             }
         }
 

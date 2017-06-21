@@ -21,6 +21,8 @@
 
         private void ConnectionStringGet()
         {
+            ConnectionManagerCheck.JsonFileCreateIfNotExists();
+            //
             string connectionStringSwitch = Server.Config.Instance.ConnectionStringSwitch;
             string connectionString = Server.ConnectionManager.ConnectionString;
             UtilFramework.Log(string.Format("{0}={1}", connectionStringSwitch, connectionString));
@@ -28,6 +30,8 @@
 
         private void ConnectionStringSet(string connectionString)
         {
+            ConnectionManagerCheck.JsonFileCreateIfNotExists();
+            //
             Server.Config config = Server.Config.Instance;
             config.ConnectionStringSet(connectionString);
             string json = JsonConvert.SerializeObject(config, Formatting.Indented);
