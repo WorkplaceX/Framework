@@ -33,62 +33,69 @@
         /// <returns></returns>
         internal async Task<IActionResult> WebRequest()
         {
-            // Html request
-            if (Controller.HttpContext.Request.Path == RoutePath)
+            try
             {
-                AppJson appJsonOut = App.Run(null, Controller.HttpContext);
-                string htmlUniversal = null;
-                string html = IndexHtml(true);
-                htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
-                return Controller.Content(htmlUniversal, "text/html");
-            }
-            // Json API request
-            if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
-            {
-                string jsonInText = UtilServer.StreamToString(Controller.Request.Body);
-                AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() });
-                AppJson appJsonOut;
-                try
+                // Html request
+                if (Controller.HttpContext.Request.Path == RoutePath)
                 {
-                    appJsonOut = App.Run(appJsonIn, Controller.HttpContext);
-                    appJsonOut.ErrorProcess = null;
+                    AppJson appJsonOut = App.Run(null, Controller.HttpContext);
+                    string htmlUniversal = null;
+                    string html = IndexHtml(true);
+                    htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
+                    return Controller.Content(htmlUniversal, "text/html");
                 }
-                catch (Exception exception)
+                // Json API request
+                if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
                 {
-                    // Prevent Internal Error 500 on process exception.
-                    appJsonOut = appJsonIn;
-                    appJsonOut.ErrorProcess = Framework.Util.ExceptionToText(exception);
+                    string jsonInText = UtilServer.StreamToString(Controller.Request.Body);
+                    AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() });
+                    AppJson appJsonOut;
+                    try
+                    {
+                        appJsonOut = App.Run(appJsonIn, Controller.HttpContext);
+                        appJsonOut.ErrorProcess = null;
+                    }
+                    catch (Exception exception)
+                    {
+                        // Prevent Internal Error 500 on process exception.
+                        appJsonOut = appJsonIn;
+                        appJsonOut.ErrorProcess = Framework.Util.ExceptionToText(exception);
+                    }
+                    appJsonOut.IsJsonGet = false;
+                    string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
+                    if (Framework.Server.Config.Instance.IsDebugJson)
+                    {
+                        appJsonOut.IsJsonGet = false; // true;
+                        string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
+                        Framework.Util.FileWrite(Framework.Util.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
+                    }
+                    return Controller.Content(jsonOutText, "application/json");
                 }
-                appJsonOut.IsJsonGet = false;
-                string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                if (Framework.Server.Config.Instance.IsDebugJson)
+                // Framework/Server/wwwroot/ request
                 {
-                    appJsonOut.IsJsonGet = false; // true;
-                    string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                    Framework.Util.FileWrite(Framework.Util.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
+                    string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                    fileName = UtilServer.FileNameToWwwRoot(fileName);
+                    if (File.Exists(fileName))
+                    {
+                        return UtilServer.FileNameToFileContentResult(Controller, fileName);
+                    }
                 }
-                return Controller.Content(jsonOutText, "application/json");
-            }
-            // Framework/Server/wwwroot/ request
-            {
-                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
-                fileName = UtilServer.FileNameToWwwRoot(fileName);
-                if (File.Exists(fileName))
+                // node_modules request
+                if (Controller.HttpContext.Request.Path.ToString().StartsWith("/node_modules/"))
                 {
-                    return UtilServer.FileNameToFileContentResult(Controller, fileName);
+                    return UtilServer.FileGet(Controller, "", "../Client/", "Universal/");
                 }
+                // (*.css; *.js) request
+                if (Controller.HttpContext.Request.Path.ToString().EndsWith(".css") || Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
+                {
+                    return UtilServer.FileGet(Controller, RoutePath, "Universal/", "Universal/");
+                }
+                return Controller.NotFound();
             }
-            // node_modules request
-            if (Controller.HttpContext.Request.Path.ToString().StartsWith("/node_modules/"))
+            catch (Exception exception)
             {
-                return UtilServer.FileGet(Controller, "", "../Client/", "Universal/");
+                return Controller.Content(Util.ExceptionToText(exception));
             }
-            // (*.css; *.js) request
-            if (Controller.HttpContext.Request.Path.ToString().EndsWith(".css") || Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
-            {
-                return UtilServer.FileGet(Controller, RoutePath, "Universal/", "Universal/");
-            }
-            return Controller.NotFound();
         }
 
         /// <summary>
