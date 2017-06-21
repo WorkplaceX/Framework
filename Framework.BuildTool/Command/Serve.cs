@@ -3,7 +3,7 @@
     public class CommandServe : Command
     {
         public CommandServe()
-            : base("serve", "Serve web page")
+            : base("serve", "Serve web page. Wait ca. 30 seconds.")
         {
             this.Client = OptionAdd("-c|--client", "Start client server only.");
         }

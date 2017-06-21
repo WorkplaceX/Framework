@@ -3,13 +3,15 @@
     public class CommandInstallAll : Command
     {
         public CommandInstallAll() 
-            : base("installAll", "npm install; dotnet restore; Python error can be ignored")
+            : base("installAll", "npm install; dotnet restore; (Run from CMD, PS won't work. Python error can be ignored)")
         {
 
         }
 
         public override void Run()
         {
+            ConnectionManagerCheck.JsonFileCreateIfNotExists();
+            //
             UtilFramework.Log("Client>npm install");
             UtilBuildTool.NpmInstall(Framework.UtilFramework.FolderName + "Submodule/Client/");
             UtilFramework.Log("Universal>npm install");
