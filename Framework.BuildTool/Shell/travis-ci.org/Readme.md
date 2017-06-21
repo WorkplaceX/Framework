@@ -14,4 +14,4 @@ Deployment to Azure goes with Git Url. It needs to be in quotation marks. Exampl
 Needs to be copied into application root folder.
 
 ## Permission
-For permisson on (*.sh) files see also: http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
+For permisson on (*.sh) files see also: http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied. Example: "git update-index --chmod=+x .travis.yml"
