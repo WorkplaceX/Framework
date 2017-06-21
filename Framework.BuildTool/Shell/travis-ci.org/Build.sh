@@ -4,24 +4,24 @@ set -x # Enable print execute cammands to stdout.
 
 function Main
 {
-    echo \#\#\# Build
+    echo \#\#\# BuildTool
     cd $FolderName
-    cd Build
+    cd BuildTool
     dotnet restore
     dotnet build
     # Set ConnectionString
     set +x # Prevent ConnectionString in log
-    dotnet run 01 "$ConnectionString" 
+    dotnet run -- connection "$ConnectionString" 
     set -x
     # InstallAll
     echo \#\#\# InstallAll
-    dotnet run 02 
+    dotnet run -- installAll
 
-    # Build RunSql
+    # BuildTool RunSql
     echo \#\#\# RunSql
     cd $FolderName
-    cd Build
-    dotnet run 11
+    cd BuildTool
+    dotnet run -- runSql
 
     # Publish Server
     echo \#\#\# Publish Server

@@ -1,4 +1,4 @@
-﻿namespace Framework.Build.DataAccessLayer
+﻿namespace Framework.BuildTool.DataAccessLayer
 {
     public static class ConnectionManager
     {

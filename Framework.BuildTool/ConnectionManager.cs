@@ -166,7 +166,7 @@ namespace Framework.BuildTool
             }
             if (!File.Exists(BuildTool.ConnectionManager.MSBuildFileName))
             {
-                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.MSBuildFileName, Build.Config.JsonFileName));
+                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.MSBuildFileName, BuildTool.Config.JsonFileName));
             }
         }
 

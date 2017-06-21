@@ -10,26 +10,26 @@
     {
         public static void MSBuild(string fileNameCsproj)
         {
-            string fileName = Framework.Build.ConnectionManager.MSBuildFileName;
+            string fileName = BuildTool.ConnectionManager.MSBuildFileName;
             string workingDirectory = Framework.Util.FolderName;
             Start(workingDirectory, fileName, fileNameCsproj);
         }
 
         public static void DotNetBuild(string workingDirectory)
         {
-            string fileName = Framework.Build.ConnectionManager.DotNetFileName;
+            string fileName = BuildTool.ConnectionManager.DotNetFileName;
             Start(workingDirectory, fileName, "build");
         }
 
         public static void DotNetRestore(string workingDirectory)
         {
-            string fileName = Framework.Build.ConnectionManager.DotNetFileName;
+            string fileName = BuildTool.ConnectionManager.DotNetFileName;
             Start(workingDirectory, fileName, "restore");
         }
 
         public static void NpmInstall(string workingDirectory, bool isThrowException = true)
         {
-            string fileName = Framework.Build.ConnectionManager.NpmFileName;
+            string fileName = BuildTool.ConnectionManager.NpmFileName;
             Start(workingDirectory, fileName, "install --loglevel error", isThrowException); // Do not show npm warnings.
         }
 
@@ -72,7 +72,7 @@
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                ProcessStartInfo info = new ProcessStartInfo(Framework.Build.ConnectionManager.VisualStudioCodeFileName, folderName);
+                ProcessStartInfo info = new ProcessStartInfo(BuildTool.ConnectionManager.VisualStudioCodeFileName, folderName);
                 info.CreateNoWindow = true;
                 Process.Start(info);
             }
@@ -88,7 +88,7 @@
 
         public static void DotNetRun(string workingDirectory, bool isWait = true)
         {
-            string fileName = Framework.Build.ConnectionManager.DotNetFileName;
+            string fileName = BuildTool.ConnectionManager.DotNetFileName;
             Start(workingDirectory, fileName, "run", false, isWait);
         }
 
@@ -117,13 +117,13 @@
 
         public static void Node(string workingDirectory, string fileName, bool isWait = true)
         {
-            string nodeFileName = Framework.Build.ConnectionManager.NodeFileName;
+            string nodeFileName = BuildTool.ConnectionManager.NodeFileName;
             Start(workingDirectory, nodeFileName, fileName, false, isWait, new KeyValuePair<string, string>("PORT", "1337"));
         }
 
         public static void NpmRun(string workingDirectory, string script)
         {
-            string fileName = Framework.Build.ConnectionManager.NpmFileName;
+            string fileName = BuildTool.ConnectionManager.NpmFileName;
             Start(workingDirectory, fileName, "run " + script);
         }
     }

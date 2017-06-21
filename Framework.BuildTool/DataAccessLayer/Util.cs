@@ -1,4 +1,4 @@
-﻿namespace Framework.Build.DataAccessLayer
+﻿namespace Framework.BuildTool.DataAccessLayer
 {
     using System;
     using System.Collections.Generic;

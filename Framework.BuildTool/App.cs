@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.CommandLineUtils;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
 
     public class AppBuildTool
@@ -24,18 +25,29 @@
             }
         }
 
-        protected virtual void RegisterCommand(CommandLineApplication commandLineApplication)
+        protected virtual void RegisterCommand(List<Command> commandList)
         {
-            Command.Register(commandLineApplication, new CommandConnectionString());
-            Command.Register(commandLineApplication, new CommandCheck());
-            Command.Register(commandLineApplication, new CommandOpen());
-            Command.Register(commandLineApplication, new CommandToggleIsDebugDataJson());
-            Command.Register(commandLineApplication, new CommandServe());
-            Command.Register(commandLineApplication, new CommandUnitTest());
-            Command.Register(commandLineApplication, new CommandRunSql());
-            Command.Register(commandLineApplication, new CommandGenerate());
-            Command.Register(commandLineApplication, new CommandRunGulp());
-            Command.Register(commandLineApplication, new CommandInstallAll());
+
+        }
+
+        private void RegisterCommand(CommandLineApplication commandLineApplication)
+        {
+            List<Command> commandList = new List<Command>();
+            commandList.Add(new CommandConnectionString());
+            commandList.Add(new CommandCheck());
+            commandList.Add(new CommandOpen());
+            commandList.Add(new CommandToggleIsDebugDataJson());
+            commandList.Add(new CommandServe());
+            commandList.Add(new CommandUnitTest());
+            commandList.Add(new CommandRunSql());
+            commandList.Add(new CommandGenerate());
+            commandList.Add(new CommandRunGulp());
+            commandList.Add(new CommandInstallAll());
+            RegisterCommand(commandList);
+            foreach (Command command in commandList)
+            {
+                Command.Register(commandLineApplication, command);
+            }
         }
     }
 }
