@@ -2,6 +2,6 @@ language: ruby
 dist: trusty
 sudo: required
 
-install: ./Submodule/Framework/Build/Shell/travis-ci.org/Install.sh
+install: ./Submodule/Framework/BuildTool/Shell/travis-ci.org/Install.sh
 
-script: ./Submodule/Framework/Build/Shell/travis-ci.org/Build.sh
+script: ./Submodule/Framework/BuildTool/Shell/travis-ci.org/Build.sh
