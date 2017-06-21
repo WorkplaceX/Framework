@@ -10,24 +10,24 @@
 
         public override void Run()
         {
-            Util.Log("Client>npm install");
-            UtilBuildTool.NpmInstall(Framework.Util.FolderName + "Submodule/Client/");
-            Util.Log("Universal>npm install");
-            UtilBuildTool.NpmInstall(Framework.Util.FolderName + "Submodule/Universal/", false); // Throws always an exception!
+            UtilFramework.Log("Client>npm install");
+            UtilBuildTool.NpmInstall(Framework.UtilFramework.FolderName + "Submodule/Client/");
+            UtilFramework.Log("Universal>npm install");
+            UtilBuildTool.NpmInstall(Framework.UtilFramework.FolderName + "Submodule/Universal/", false); // Throws always an exception!
             // Application
-            Util.Log("Application>dotnet restore");
-            UtilBuildTool.DotNetRestore(Framework.Util.FolderName + "Application/");
-            Util.Log("Application>dotnet build");
-            UtilBuildTool.DotNetBuild(Framework.Util.FolderName + "Application/");
+            UtilFramework.Log("Application>dotnet restore");
+            UtilBuildTool.DotNetRestore(Framework.UtilFramework.FolderName + "Application/");
+            UtilFramework.Log("Application>dotnet build");
+            UtilBuildTool.DotNetBuild(Framework.UtilFramework.FolderName + "Application/");
             // Server
-            Util.Log("Server>dotnet restore");
-            UtilBuildTool.DotNetRestore(Framework.Util.FolderName + "Server/");
-            Util.Log("Server>dotnet build");
-            UtilBuildTool.DotNetBuild(Framework.Util.FolderName + "Server/");
+            UtilFramework.Log("Server>dotnet restore");
+            UtilBuildTool.DotNetRestore(Framework.UtilFramework.FolderName + "Server/");
+            UtilFramework.Log("Server>dotnet build");
+            UtilBuildTool.DotNetBuild(Framework.UtilFramework.FolderName + "Server/");
             // Office
-            if (Framework.Util.IsLinux == false)
+            if (Framework.UtilFramework.IsLinux == false)
             {
-                UtilBuildTool.MSBuild(Framework.Util.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
+                UtilBuildTool.MSBuild(Framework.UtilFramework.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
             }
             new CommandRunGulp().Run();
         }

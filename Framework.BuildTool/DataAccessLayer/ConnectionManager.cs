@@ -6,7 +6,7 @@
         {
             get
             {
-                return Framework.Util.FolderName + "Submodule/Framework/Build/DataAccessLayer/Sql/Schema.sql";
+                return Framework.UtilFramework.FolderName + "Submodule/Framework/Build/DataAccessLayer/Sql/Schema.sql";
             }
         }
 
@@ -14,7 +14,7 @@
         {
             get
             {
-                return Framework.Util.FolderName + "Application/DataAccessLayer/Database.lock.cs";
+                return Framework.UtilFramework.FolderName + "Application/DataAccessLayer/Database.lock.cs";
             }
         }
     }

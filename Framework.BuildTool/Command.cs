@@ -66,16 +66,8 @@
                 }
                 configuration.OnExecute(() =>
                 {
-                    try
-                    {
-                        command.Run();
-                        return 0;
-                    }
-                    catch (Exception exception)
-                    {
-                        Console.WriteLine(Util.ExceptionToText(exception));
-                        return 1;
-                    }
+                    command.Run();
+                    return 0;
                 });
             });
         }
@@ -86,7 +78,7 @@
             result.Name = "Tool";
             result.HelpOption("-h|--help");
             result.OnExecute(() => {
-                Console.WriteLine("For help use -h");
+                UtilFramework.Log("For help use -h");
                 return 0;
             });
             return result;

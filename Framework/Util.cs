@@ -6,7 +6,7 @@
     using System.Net.Http;
     using System.Reflection;
 
-    public static class Util
+    public static class UtilFramework
     {
         public static string VersionServer
         {
@@ -31,7 +31,7 @@
 
         private static void FolderNamePrivate(out string folderName, out bool isIss)
         {
-            Uri uri = new Uri(typeof(Util).GetTypeInfo().Assembly.CodeBase);
+            Uri uri = new Uri(typeof(UtilFramework).GetTypeInfo().Assembly.CodeBase);
             string result;
             isIss = false;
             if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll") || uri.AbsolutePath.EndsWith("/BuildTool/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
@@ -201,6 +201,11 @@
         public static void Log(string text)
         {
             Console.WriteLine(text);
+        }
+
+        public static void LogError(string text)
+        {
+            Console.Error.WriteLine(text);
         }
     }
 }

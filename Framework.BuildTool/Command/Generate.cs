@@ -11,7 +11,7 @@
         public override void Run()
         {
             DataAccessLayer.Script.Run();
-            Util.Log(string.Format("File updated. ({0})", DataAccessLayer.ConnectionManager.DatabaseLockFileName));
+            UtilFramework.Log(string.Format("File updated. ({0})", DataAccessLayer.ConnectionManager.DatabaseLockFileName));
         }
     }
 }

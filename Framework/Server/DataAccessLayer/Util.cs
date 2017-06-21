@@ -257,7 +257,7 @@
         public static void Update(Row row, Row rowNew)
         {
             row = UtilDataAccessLayer.RowClone(row); // Prevent modifications on SetValues(rowNew);
-            Framework.Util.Assert(row.GetType() == rowNew.GetType());
+            Framework.UtilFramework.Assert(row.GetType() == rowNew.GetType());
             DbContext dbContext = DbContext(row.GetType());
             var tracking = dbContext.Attach(row);
             tracking.CurrentValues.SetValues(rowNew);

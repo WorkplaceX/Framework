@@ -39,10 +39,10 @@
             // Already exists?
             foreach (Process process in processList)
             {
-                Framework.Util.Assert(process.GetType() != typeProcess, "Page already contains process!");
+                Framework.UtilFramework.Assert(process.GetType() != typeProcess, "Page already contains process!");
             }
             // Create process
-            Process result = (Process)Framework.Util.TypeToObject(typeProcess);
+            Process result = (Process)Framework.UtilFramework.TypeToObject(typeProcess);
             if (typeProcessFind == null)
             {
                 processList.Add(result);
@@ -61,7 +61,7 @@
                         break;
                     }
                 }
-                Framework.Util.Assert(isFind, "Process not found!");
+                Framework.UtilFramework.Assert(isFind, "Process not found!");
                 if (isAfter)
                 {
                     index += 1;
@@ -154,7 +154,7 @@
                 isCell = true;
                 string find = "col-sm-";
                 int index = cell.CssClass.IndexOf(find);
-                Framework.Util.Assert(index != -1, "Cell width not defined!");
+                Framework.UtilFramework.Assert(index != -1, "Cell width not defined!");
                 string widthString = null;
                 index += find.Length;
                 while (index < cell.CssClass.Length && cell.CssClass[index] >= '0' && cell.CssClass[index] <= '9')
@@ -167,7 +167,7 @@
             }
             if (isCell) // Not an empty layout row.
             {
-                Framework.Util.Assert(widthTotal == 12, "Css width total is not 12!");
+                Framework.UtilFramework.Assert(widthTotal == 12, "Css width total is not 12!");
             }
         }
 

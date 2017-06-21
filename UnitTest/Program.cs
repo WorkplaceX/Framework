@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Framework;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -12,8 +13,8 @@ namespace UnitTest
         {
             new UnitTest.DataAccessLayer.UnitTest().Run();
             new UnitTest.Json.UnitTest().Run();
-            Console.WriteLine();
-            Console.WriteLine("All test successful!");
+            UtilFramework.Log("");
+            UtilFramework.Log("All test successful!");
             if (Debugger.IsAttached)
             {
                 Console.ReadLine();

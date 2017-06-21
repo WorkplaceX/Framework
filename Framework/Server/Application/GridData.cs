@@ -433,7 +433,7 @@
             {
                 foreach (Row row in rowList)
                 {
-                    Framework.Util.Assert(row.GetType() == typeRow);
+                    Framework.UtilFramework.Assert(row.GetType() == typeRow);
                 }
                 //
                 Dictionary<string, GridCellInternal> cellListFilter = null;
@@ -554,7 +554,7 @@
                                     }
                                     catch (Exception exception)
                                     {
-                                        ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                        ErrorRowSet(gridName, index, Framework.UtilFramework.ExceptionToText(exception));
                                     }
                                 }
                                 if (row.Row == null && row.RowNew != null) // Database Insert
@@ -569,7 +569,7 @@
                                     }
                                     catch (Exception exception)
                                     {
-                                        ErrorRowSet(gridName, index, Framework.Util.ExceptionToText(exception));
+                                        ErrorRowSet(gridName, index, Framework.UtilFramework.ExceptionToText(exception));
                                     }
                                 }
                             }
@@ -594,7 +594,7 @@
                         var row = RowGet(gridName, index);
                         if (row.Row != null)
                         {
-                            Framework.Util.Assert(row.Row.GetType() == typeRow);
+                            Framework.UtilFramework.Assert(row.Row.GetType() == typeRow);
                         }
                         IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
                         Row rowWrite;

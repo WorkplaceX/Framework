@@ -24,19 +24,19 @@
         {
             if (Client.IsOn)
             {
-                UtilBuildTool.OpenVisualStudioCode(Util.FolderName + "Submodule/Client/");
+                UtilBuildTool.OpenVisualStudioCode(UtilFramework.FolderName + "Submodule/Client/");
             }
             if (Server.IsOn)
             {
-                UtilBuildTool.OpenVisualStudioCode(Util.FolderName + "Server/");
+                UtilBuildTool.OpenVisualStudioCode(UtilFramework.FolderName + "Server/");
             }
             if (Solution.IsOn)
             {
-                UtilBuildTool.OpenBrowser(Util.FolderName + "Application.sln");
+                UtilBuildTool.OpenBrowser(UtilFramework.FolderName + "Application.sln");
             }
             if (Universal.IsOn)
             {
-                UtilBuildTool.OpenVisualStudioCode(Framework.Util.FolderName + "Submodule/Universal/");
+                UtilBuildTool.OpenVisualStudioCode(Framework.UtilFramework.FolderName + "Submodule/Universal/");
             }
         }
     }

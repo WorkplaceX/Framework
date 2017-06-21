@@ -1,9 +1,10 @@
 ﻿namespace UnitTest
 {
+    using Framework;
     using System;
     using System.Reflection;
 
-    public static class Util
+    public static class UtilUnitTest
     {
         public static void Assert(bool isAssert, string exceptionText)
         {
@@ -37,7 +38,7 @@
                     if (method.DeclaringType == type) // Filter out for example method ToString();
                     {
                         method.Invoke(this, new object[] { }); // Invoke method on static class.
-                        Console.WriteLine($"Method {type.Namespace.Replace("UnitTest.", "")}.{method.Name}(); successful!");
+                        UtilFramework.Log($"Method {type.Namespace.Replace("UnitTest.", "")}.{method.Name}(); successful!");
                     }
                 }
             }

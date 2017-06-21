@@ -59,7 +59,7 @@
                     {
                         // Prevent Internal Error 500 on process exception.
                         appJsonOut = appJsonIn;
-                        appJsonOut.ErrorProcess = Framework.Util.ExceptionToText(exception);
+                        appJsonOut.ErrorProcess = Framework.UtilFramework.ExceptionToText(exception);
                     }
                     appJsonOut.IsJsonGet = false;
                     string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
@@ -67,7 +67,7 @@
                     {
                         appJsonOut.IsJsonGet = false; // true;
                         string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                        Framework.Util.FileWrite(Framework.Util.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
+                        Framework.UtilFramework.FileWrite(Framework.UtilFramework.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
                     }
                     return Controller.Content(jsonOutText, "application/json");
                 }
@@ -94,7 +94,7 @@
             }
             catch (Exception exception)
             {
-                return Controller.Content(Util.ExceptionToText(exception));
+                return Controller.Content(UtilFramework.ExceptionToText(exception));
             }
         }
 
@@ -115,7 +115,7 @@
                 string jsonText = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
                 // Universal rendering
                 {
-                    if (Framework.Util.FolderNameIsIss)
+                    if (Framework.UtilFramework.FolderNameIsIss)
                     {
                         // Running on IIS Server.
                         htmlUniversal = await Post(url, jsonText, false); // Call Angular Universal server side rendering service.
@@ -127,7 +127,7 @@
                         htmlUniversal = await Post(url, jsonText, true);
                     }
                 }
-                Framework.Util.Assert(htmlUniversal != "<app></app>"); // Catch java script errors. See UniversalExpress console for errors!
+                Framework.UtilFramework.Assert(htmlUniversal != "<app></app>"); // Catch java script errors. See UniversalExpress console for errors!
                 //
                 string result = null;
                 // Replace <app> on index.html
@@ -152,7 +152,7 @@
                     string scriptReplace = "var browserJson = " + jsonTextBrowser + ";\r\n" + scriptFind;
                     result = result.Replace(scriptFind, scriptReplace);
                 }
-                Framework.Util.Assert(resultAssert != result, "Adding browserJson failed!");
+                Framework.UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");
                 return result;
             }
         }

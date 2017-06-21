@@ -17,7 +17,8 @@
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception.Message);
+                UtilFramework.LogError(UtilFramework.ExceptionToText(exception));
+                Environment.Exit(1);
             }
             if (Debugger.IsAttached)
             {

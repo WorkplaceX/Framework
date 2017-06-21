@@ -22,7 +22,7 @@ namespace Framework.BuildTool
         {
             get
             {
-                return Framework.Util.FolderName + "Submodule/Framework.BuildTool/ConnectionManager.json";
+                return Framework.UtilFramework.FolderName + "Submodule/Framework.BuildTool/ConnectionManager.json";
             }
         }
 
@@ -30,7 +30,7 @@ namespace Framework.BuildTool
         {
             get
             {
-                string json = Framework.Util.FileRead(JsonFileName);
+                string json = Framework.UtilFramework.FileRead(JsonFileName);
                 var result = JsonConvert.DeserializeObject<Config>(json);
                 return result;
             }
@@ -44,7 +44,7 @@ namespace Framework.BuildTool
             get
             {
                 string result = "npm.cmd";
-                if (Framework.Util.IsLinux)
+                if (Framework.UtilFramework.IsLinux)
                 {
                     result = "npm";
                 }
@@ -64,7 +64,7 @@ namespace Framework.BuildTool
             get
             {
                 string result = "dotnet.exe";
-                if (Framework.Util.IsLinux)
+                if (Framework.UtilFramework.IsLinux)
                 {
                     result = "dotnet";
                 }
@@ -133,8 +133,8 @@ namespace Framework.BuildTool
                 File.Copy(Server.Config.JsonTxtFileName, Server.Config.JsonFileName);
             }
             string connectionStringSwitch = Server.Config.Instance.ConnectionStringSwitch;
-            string ip = Framework.Util.Ip();
-            Util.Log(string.Format("SQL Connection check ({0}) from {1}", connectionStringSwitch, ip));
+            string ip = Framework.UtilFramework.Ip();
+            UtilFramework.Log(string.Format("SQL Connection check ({0}) from {1}", connectionStringSwitch, ip));
             string connectionString = Server.ConnectionManager.ConnectionString;
             try
             {
@@ -142,11 +142,11 @@ namespace Framework.BuildTool
                 {
                     connection.Open();
                 }
-                Util.Log("SQL Connection [ok]");
+                UtilFramework.Log("SQL Connection [ok]");
             }
             catch (Exception exception)
             {
-                Util.Log(string.Format("Error: SQL Connection failed! ({0} - {1})", Server.Config.JsonFileName, exception.Message));
+                UtilFramework.Log(string.Format("Error: SQL Connection failed! ({0} - {1})", Server.Config.JsonFileName, exception.Message));
             }
         }
 
@@ -154,25 +154,25 @@ namespace Framework.BuildTool
         {
             if (!File.Exists(BuildTool.ConnectionManager.NodeFileName))
             {
-                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NodeFileName, BuildTool.Config.JsonFileName));
+                UtilFramework.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NodeFileName, BuildTool.Config.JsonFileName));
             }
             if (!File.Exists(BuildTool.ConnectionManager.NpmFileName))
             {
-                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NpmFileName, BuildTool.Config.JsonFileName));
+                UtilFramework.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.NpmFileName, BuildTool.Config.JsonFileName));
             }
             if (!File.Exists(BuildTool.ConnectionManager.VisualStudioCodeFileName))
             {
-                Util.Log(string.Format("Warning: File not found! Visual Studio Code. ({0}; {1})", ConnectionManager.VisualStudioCodeFileName, BuildTool.Config.JsonFileName));
+                UtilFramework.Log(string.Format("Warning: File not found! Visual Studio Code. ({0}; {1})", ConnectionManager.VisualStudioCodeFileName, BuildTool.Config.JsonFileName));
             }
             if (!File.Exists(BuildTool.ConnectionManager.MSBuildFileName))
             {
-                Util.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.MSBuildFileName, BuildTool.Config.JsonFileName));
+                UtilFramework.Log(string.Format("Error: File not found! ({0}; {1})", ConnectionManager.MSBuildFileName, BuildTool.Config.JsonFileName));
             }
         }
 
         private static void IsDebugDataJson()
         {
-            Util.Log(string.Format("IsDebugDataJson={0}", Server.Config.Instance.IsDebugJson));
+            UtilFramework.Log(string.Format("IsDebugDataJson={0}", Server.Config.Instance.IsDebugJson));
         }
 
         public static void Run()

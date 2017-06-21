@@ -11,7 +11,7 @@
         public static void MSBuild(string fileNameCsproj)
         {
             string fileName = BuildTool.ConnectionManager.MSBuildFileName;
-            string workingDirectory = Framework.Util.FolderName;
+            string workingDirectory = Framework.UtilFramework.FolderName;
             Start(workingDirectory, fileName, fileNameCsproj);
         }
 

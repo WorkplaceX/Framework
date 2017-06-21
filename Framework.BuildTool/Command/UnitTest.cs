@@ -10,7 +10,7 @@
 
         public override void Run()
         {
-            UtilBuildTool.DotNetRun(Framework.Util.FolderName + "Submodule/UnitTest/");
+            UtilBuildTool.DotNetRun(Framework.UtilFramework.FolderName + "Submodule/UnitTest/");
         }
     }
 }

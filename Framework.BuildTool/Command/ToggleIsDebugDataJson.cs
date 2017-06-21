@@ -18,15 +18,15 @@
             if (Get.IsOn)
             {
                 Server.Config config = Server.Config.Instance;
-                Console.WriteLine(string.Format("IsDebugJson={0}", config.IsDebugJson));
+                UtilFramework.Log(string.Format("IsDebugJson={0}", config.IsDebugJson));
             }
             else
             {
                 Server.Config config = Server.Config.Instance;
                 config.IsDebugJson = !config.IsDebugJson;
                 string json = JsonConvert.SerializeObject(config, Formatting.Indented);
-                Util.FileWrite(Server.Config.JsonFileName, json);
-                Util.Log(string.Format("File updated. ({0})", Server.Config.JsonFileName));
+                UtilFramework.FileWrite(Server.Config.JsonFileName, json);
+                UtilFramework.Log(string.Format("File updated. ({0})", Server.Config.JsonFileName));
             }
         }
     }

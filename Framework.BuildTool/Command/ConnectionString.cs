@@ -23,7 +23,7 @@
         {
             string connectionStringSwitch = Server.Config.Instance.ConnectionStringSwitch;
             string connectionString = Server.ConnectionManager.ConnectionString;
-            Console.WriteLine(string.Format("{0}={1}", connectionStringSwitch, connectionString));
+            UtilFramework.Log(string.Format("{0}={1}", connectionStringSwitch, connectionString));
         }
 
         private void ConnectionStringSet(string connectionString)
@@ -31,8 +31,8 @@
             Server.Config config = Server.Config.Instance;
             config.ConnectionStringSet(connectionString);
             string json = JsonConvert.SerializeObject(config, Formatting.Indented);
-            Util.FileWrite(Server.Config.JsonFileName, json);
-            Console.WriteLine(string.Format("File updated. ({0})", Server.Config.JsonFileName));
+            UtilFramework.FileWrite(Server.Config.JsonFileName, json);
+            UtilFramework.Log(string.Format("File updated. ({0})", Server.Config.JsonFileName));
         }
 
         private void ConnectionStringCheck()

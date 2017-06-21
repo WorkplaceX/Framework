@@ -137,7 +137,7 @@
     {
         public TypeCellAttribute(Type typeCell)
         {
-            Framework.Util.Assert(typeCell.GetTypeInfo().IsSubclassOf(typeof(Cell)));
+            Framework.UtilFramework.Assert(typeCell.GetTypeInfo().IsSubclassOf(typeof(Cell)));
             this.TypeCell = typeCell;
         }
 

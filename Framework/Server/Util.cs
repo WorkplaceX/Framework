@@ -149,13 +149,13 @@
         /// <param name="fileName">For example: index.html</param>
         public static string FileNameToWwwRoot(string fileName)
         {
-            if (Framework.Util.FolderNameIsIss == false)
+            if (Framework.UtilFramework.FolderNameIsIss == false)
             {
-                fileName = Framework.Util.FolderName + "Submodule/Framework/Server/wwwroot/" + fileName;
+                fileName = Framework.UtilFramework.FolderName + "Submodule/Framework/Server/wwwroot/" + fileName;
             }
             else
             {
-                fileName = Framework.Util.FolderName + "Server/wwwroot/" + fileName;
+                fileName = Framework.UtilFramework.FolderName + "Server/wwwroot/" + fileName;
             }
             return fileName;
         }

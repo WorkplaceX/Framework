@@ -15,10 +15,10 @@
         {
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
-            var fileNameList = Framework.Util.FileNameList(Framework.Util.FolderName + "BuildTool/Sql/");
+            var fileNameList = Framework.UtilFramework.FileNameList(Framework.UtilFramework.FolderName + "BuildTool/Sql/");
             foreach (string fileName in fileNameList)
             {
-                string text = Framework.Util.FileRead(fileName);
+                string text = Framework.UtilFramework.FileRead(fileName);
                 var sqlList = text.Split(new string[] { "\r\nGO", "\nGO" }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string sql in sqlList)
                 {
