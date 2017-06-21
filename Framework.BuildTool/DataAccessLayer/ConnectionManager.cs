@@ -6,15 +6,15 @@
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Submodule/Framework/Build/DataAccessLayer/Sql/Schema.sql";
+                return Framework.UtilFramework.FolderName + "Submodule/Framework.BuildTool/DataAccessLayer/Sql/Schema.sql";
             }
         }
 
-        public static string DatabaseLockFileName
+        public static string DatabaseGenerateFileName
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Application/DataAccessLayer/Database.lock.cs";
+                return Framework.UtilFramework.FolderName + "Application/DataAccessLayer/Database.Generate.cs";
             }
         }
     }

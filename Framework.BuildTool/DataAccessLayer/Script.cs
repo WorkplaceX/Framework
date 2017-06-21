@@ -17,7 +17,7 @@
             StringBuilder result = new StringBuilder();
             string cSharp;
             new CSharpGenerate(metaCSharp).Run(out cSharp);
-            Util.FileSave(ConnectionManager.DatabaseLockFileName, cSharp);
+            Util.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);
         }
     }
 }

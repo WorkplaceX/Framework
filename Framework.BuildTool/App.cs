@@ -18,7 +18,7 @@
             catch (Exception exception)
             {
                 UtilFramework.LogError(UtilFramework.ExceptionToText(exception));
-                Environment.Exit(1);
+                Environment.Exit(1); // echo Exit Code is %errorlevel%
             }
             if (Debugger.IsAttached)
             {
