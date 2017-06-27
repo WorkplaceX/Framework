@@ -5,7 +5,7 @@
   "scripts": {
     "universalBuild": "npm run prestartUniversal && webpack",
     "universalServe": "node dist/bundle.js",
-    "prestartUniversal": "ng build --prod && ngc",
+    "prestartUniversal": "ng build --prod --progress false && ngc",
     "startUniversal": "ts-node src/server.ts",
     "ng": "ng",
     "start": "ng serve",
