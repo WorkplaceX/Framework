@@ -63,9 +63,12 @@
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
                 if (Framework.Server.Config.Instance.IsDebugJson)
                 {
-                    appJsonOut.IsJsonGet = false; // true;
-                    string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                    Framework.UtilFramework.FileWrite(Framework.UtilFramework.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
+                    if (Framework.UtilFramework.FolderNameIsIss == false) // Do not write Application.json to disk when running in IIS.
+                    {
+                        appJsonOut.IsJsonGet = true;
+                        string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
+                        Framework.UtilFramework.FileWrite(Framework.UtilFramework.FolderName + "Submodule/Client/Application.json", jsonOutDebug);
+                    }
                 }
                 return Controller.Content(jsonOutText, "application/json");
             }
@@ -111,38 +114,24 @@
                     if (Framework.UtilFramework.FolderNameIsIss)
                     {
                         // Running on IIS Server.
-                        htmlUniversal = await Post(url, jsonText, false); // Call Angular Universal server side rendering service.
+                        htmlUniversal = await Post(url, jsonText, true); // Call Angular Universal server side rendering service.
                     }
                     else
                     {
                         // Running in Visual Studio
-                        url = "http://localhost:1337/"; // Call UniversalExpress when running in Visual Studio.
+                        url = "http://localhost:1337/Universal/index.js"; // Call UniversalExpress when running in Visual Studio.
                         htmlUniversal = await Post(url, jsonText, true);
                     }
                 }
-                Framework.UtilFramework.Assert(htmlUniversal != "<app></app>"); // Catch java script errors. See UniversalExpress console for errors!
                 //
-                string result = null;
-                // Replace <app> on index.html
-                {
-                    int indexBegin = htmlUniversal.IndexOf("<app>");
-                    int indexEnd = htmlUniversal.IndexOf("</app>") + "</app>".Length;
-                    string htmlUniversalClean = htmlUniversal.Substring(indexBegin, (indexEnd - indexBegin));
-                    result = html.Replace("<app>Loading AppComponent content here ...</app>", htmlUniversalClean);
-                }
+                string result = htmlUniversal;
                 appJson.IsBrowser = true; // Client side rendering mode.
                 string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
                 string resultAssert = result;
                 // Add json to index.html (Client/index.html)
                 {
-                    string scriptFind = "System.import('app').catch(function(err){ console.error(err); });";
-                    string scriptReplace = "var browserJson = " + jsonTextBrowser + "; " + scriptFind;
-                    result = result.Replace(scriptFind, scriptReplace);
-                }
-                // Add json to index.html (Server/indexBundle.html)
-                {
-                    string scriptFind = "function downloadJSAtOnload() {";
-                    string scriptReplace = "var browserJson = " + jsonTextBrowser + ";\r\n" + scriptFind;
+                    string scriptFind = "var browserJson = '{ \"Name\": \"index.html\", \"IsJsonGet\": true }';";
+                    string scriptReplace = "var browserJson = " + jsonTextBrowser + "; ";
                     result = result.Replace(scriptFind, scriptReplace);
                 }
                 Framework.UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");

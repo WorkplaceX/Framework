@@ -14,8 +14,6 @@
             //
             UtilFramework.Log("Client>npm install");
             UtilBuildTool.NpmInstall(Framework.UtilFramework.FolderName + "Submodule/Client/");
-            UtilFramework.Log("Universal>npm install");
-            UtilBuildTool.NpmInstall(Framework.UtilFramework.FolderName + "Submodule/Universal/", false); // Throws always an exception!
             // Application
             UtilFramework.Log("Application>dotnet restore");
             UtilBuildTool.DotNetRestore(Framework.UtilFramework.FolderName + "Application/");
@@ -31,7 +29,7 @@
             {
                 UtilBuildTool.MSBuild(Framework.UtilFramework.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
             }
-            new CommandRunGulp().Run();
+            new CommandBuildClient().Run();
         }
     }
 }
