@@ -33,9 +33,7 @@
   <ItemGroup>
     <Content Include=".gitignore" />
     <Content Include="Doc\Extension.png" />
-    <Content Include="package.json" />
     <Content Include="README.md" />
-    <Content Include="Universal\index.js.map" />
     <Content Include="Universal\src\index.html" />
   </ItemGroup>
   <ItemGroup>
@@ -45,7 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Universal\index.js" />
-    <Compile Include="Universal\main.bundle.js" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
 
     public static class UtilBuildTool
@@ -60,6 +61,14 @@
 
         public static void FileCopy(string fileNameSource, string fileNameDest)
         {
+            if (fileNameSource.Contains("*"))
+            {
+                string fileNameSourceNoStar = fileNameSource.Replace("*", "");
+                var fileInfo = new FileInfo(fileNameSourceNoStar);
+                string directory = fileInfo.DirectoryName + Path.DirectorySeparatorChar;
+                string fileName = fileNameSource.Substring(directory.Length);
+                fileNameSource = Directory.GetFiles(directory, fileName).Single();
+            }
             string folderNameDest = new FileInfo(fileNameDest).DirectoryName;
             if (!Directory.Exists(folderNameDest))
             {

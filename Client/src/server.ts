@@ -8,13 +8,13 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as bodyParser from 'body-parser';
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 enableProdMode();
 
 const app = express();
 
-let template = readFileSync(join(__dirname, '..', 'dist', 'index.html')).toString();
+let template = readFileSync(join(__dirname, '..', 'src', 'index.html')).toString();
 
 app.use(bodyParser.json());
 
@@ -32,16 +32,16 @@ app.engine('html', (_, options, callback) => {
 app.set('view engine', 'html');
 app.set('views', 'src')
 
-app.get('*.*', express.static(join(__dirname, '..', 'dist')));
+// app.get('*.*', express.static(join(__dirname, '..', 'dist')));
 
-app.get('*', (req, res) => {
+app.get('/Universal/index.js', (req, res) => {
   res.render('index', { req });
 });
 
-app.post('*', (req, res) => {
+app.post('/Universal/index.js', (req, res) => {
   res.render('index', { req });
 });
 
 app.listen(PORT, () => {
-  console.log(`listening on http://localhost:${PORT}!`);
+  console.log(`listening on http://localhost:${PORT}/Universal/index.js!`);
 });

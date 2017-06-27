@@ -1,5 +1,5 @@
 import { Component, Input, ViewChild } from '@angular/core';
-import { Directive, ElementRef, Inject, Renderer } from '@angular/core';
+import { Directive, ElementRef, Inject, Renderer2 } from '@angular/core';
 import { DataService } from './dataService';
 import  * as util from './util';
 
@@ -19,8 +19,6 @@ import  * as util from './util';
   log=({{ dataService.log }})
   </p>
   <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></Selector>  
-
-
 `,
   providers: [DataService]  
 })
@@ -342,7 +340,7 @@ export class FocusDirective {
     selector: '[removeSelector]'
 })
 export class RemoveSelectorDirective {
-    constructor(private el: ElementRef, private renderer: Renderer) {
+    constructor(private el: ElementRef, private renderer: Renderer2) {
     }
 
     //wait for the component to render completely
@@ -350,8 +348,8 @@ export class RemoveSelectorDirective {
       // console.log(this.el.nativeElement); // this
       // console.log(this.el.nativeElement.parentNode); // span
       // console.log(this.el.nativeElement.parentNode.parentNode); // selector
-      this.el.nativeElement.parentNode.parentNode.parentNode.insertBefore(this.el.nativeElement, this.el.nativeElement.parentNode.parentNode);
-
+      //this.el.nativeElement.parentNode.parentNode.parentNode.insertBefore(this.el.nativeElement, this.el.nativeElement.parentNode.parentNode);
+      this.renderer.insertBefore(this.el.nativeElement.parentNode.parentNode.parentNode, this.el.nativeElement, this.el.nativeElement.parentNode.parentNode);
       // this.el.nativeElement.childNodes.forEach(element => {
       //   console.log(element.parentNode);
       // });
@@ -364,7 +362,8 @@ export class RemoveSelectorDirective {
     ngOnDestroy() {
       // console.log(this.el.nativeElement.parentNode);
       // this.el.nativeElement.innerHTML = null;
-      this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
+      // this.el.nativeElement.parentNode.removeChild(this.el.nativeElement);
+      this.renderer.removeChild(this.el.nativeElement.parentNode, this.el.nativeElement);
     }
 }
 

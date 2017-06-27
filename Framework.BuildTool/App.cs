@@ -42,7 +42,7 @@
             commandList.Add(new CommandUnitTest());
             commandList.Add(new CommandRunSql());
             commandList.Add(new CommandGenerate());
-            commandList.Add(new CommandRunGulp());
+            commandList.Add(new CommandBuildClient());
             commandList.Add(new CommandInstallAll());
             RegisterCommand(commandList);
             foreach (Command command in commandList)
