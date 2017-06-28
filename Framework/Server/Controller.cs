@@ -38,7 +38,7 @@
             {
                 AppJson appJsonOut = App.Run(null, Controller.HttpContext);
                 string htmlUniversal = null;
-                string html = IndexHtml();
+                string html = UtilServer.FileNameIndex();
                 htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
                 return Controller.Content(htmlUniversal, "text/html");
             }
@@ -72,24 +72,24 @@
                 }
                 return Controller.Content(jsonOutText, "application/json");
             }
-            // Framework/Server/wwwroot/ request
+            // Framework/Server/wwwroot/*.* request
             {
                 string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
-                fileName = UtilServer.FileNameToWwwRoot(fileName);
+                fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
                 if (File.Exists(fileName))
                 {
                     return UtilServer.FileNameToFileContentResult(Controller, fileName);
                 }
             }
-            // node_modules request
-            if (Controller.HttpContext.Request.Path.ToString().StartsWith("/node_modules/"))
+            // Server/Universal/*.js request
+            if (Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
             {
-                return UtilServer.FileGet(Controller, "", "../Client/", "Universal/");
-            }
-            // (*.css; *.js) request
-            if (Controller.HttpContext.Request.Path.ToString().EndsWith(".css") || Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
-            {
-                return UtilServer.FileGet(Controller, RoutePath, "Universal/", "Universal/");
+                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                fileName = UtilServer.FolderNameServer() + "Universal/" + fileName;
+                if (File.Exists(fileName))
+                {
+                    return UtilServer.FileNameToFileContentResult(Controller, fileName);
+                }
             }
             return Controller.NotFound();
         }
@@ -166,15 +166,6 @@
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Returns index.html.
-        /// </summary>
-        private string IndexHtml()
-        {
-            string fileName = UtilServer.FileNameToWwwRoot("index.html");
-            return File.ReadAllText(fileName);
         }
     }
 }

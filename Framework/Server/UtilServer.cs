@@ -145,20 +145,44 @@
         }
 
         /// <summary>
-        /// Returns FileName in Framework/Server/wwwroot/ folder.
+        /// Returns FolderName Framework/Server/. Different folder if running on IIS.
         /// </summary>
-        /// <param name="fileName">For example: index.html</param>
-        public static string FileNameToWwwRoot(string fileName)
+        public static string FolderNameFrameworkServer()
         {
-            if (Framework.UtilFramework.FolderNameIsIss == false)
+            if (Framework.UtilFramework.FolderNameIsIss)
             {
-                fileName = Framework.UtilFramework.FolderName + "Submodule/Framework/Server/wwwroot/" + fileName;
+                return UtilFramework.FolderName + "Server/";
             }
             else
             {
-                fileName = Framework.UtilFramework.FolderName + "Server/wwwroot/" + fileName;
+                return UtilFramework.FolderName + "Submodule/Framework/Server/";
             }
-            return fileName;
+        }
+
+        /// <summary>
+        /// Returns FolderName Server/.
+        /// </summary>
+        public static string FolderNameServer()
+        {
+            if (Framework.UtilFramework.FolderNameIsIss)
+            {
+                return UtilFramework.FolderName;
+            }
+            else
+            {
+                return UtilFramework.FolderName + "Server/";
+            }
+        }
+
+        public static string FileNameIndex()
+        {
+            string result = FolderNameFrameworkServer() + "wwwroot/" + "index.html";
+            string fileNameOverwrite = FolderNameServer() + "wwwroot/" + "index.html";
+            if (File.Exists(fileNameOverwrite))
+            {
+                return fileNameOverwrite;
+            }
+            return result;
         }
     }
 }
