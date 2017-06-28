@@ -15,7 +15,7 @@
         {
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
-            var fileNameList = Framework.UtilFramework.FileNameList(Framework.UtilFramework.FolderName + "BuildTool/Sql/");
+            var fileNameList = Framework.UtilFramework.FileNameList(Framework.UtilFramework.FolderName + "BuildTool/Sql/", "*.sql");
             foreach (string fileName in fileNameList)
             {
                 string text = Framework.UtilFramework.FileRead(fileName);

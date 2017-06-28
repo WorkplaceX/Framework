@@ -112,10 +112,15 @@
             }
         }
 
+        public static string[] FileNameList(string folderName, string searchPattern)
+        {
+            var result = Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories).OrderBy(item => item).ToArray();
+            return result;
+        }
+
         public static string[] FileNameList(string folderName)
         {
-            var result = Directory.GetFiles(folderName, "*.*", SearchOption.AllDirectories).OrderBy(item => item).ToArray();
-            return result;
+            return FileNameList(folderName, "*.*");
         }
 
         /// <summary>
