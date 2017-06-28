@@ -17,6 +17,7 @@ namespace UnitTest
             UtilFramework.Log("All test successful!");
             if (Debugger.IsAttached)
             {
+                Console.WriteLine("Press Enter...");
                 Console.ReadLine();
             }
         }

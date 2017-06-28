@@ -1,1 +1,0 @@
-﻿SELECT Id, Name FROM TempName

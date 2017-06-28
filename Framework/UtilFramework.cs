@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.258 Server";
+                return "v0.259 Server";
             }
         }
 
@@ -198,11 +198,17 @@
             return type.GetTypeInfo().IsSubclassOf(typeBase) || type == typeBase;
         }
 
+        /// <summary>
+        /// Write to stdout.
+        /// </summary>
         public static void Log(string text)
         {
             Console.WriteLine(text);
         }
-
+        
+        /// <summary>
+        /// Write to stderr.
+        /// </summary>
         public static void LogError(string text)
         {
             Console.Error.WriteLine(text);
