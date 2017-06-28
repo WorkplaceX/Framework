@@ -76,6 +76,11 @@
             {
                 string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
                 fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
+                if (fileName.EndsWith(".css"))
+                {
+                    string d = string.Format("RoutePath={0}; FileName={1}; FolderNameFrameworkServer={2}; FileName2={3};", RoutePath, fileName, UtilServer.FolderNameFrameworkServer(), Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length));
+                    return Controller.Content(d);
+                }
                 if (File.Exists(fileName))
                 {
                     return UtilServer.FileNameToFileContentResult(Controller, fileName);
