@@ -12,10 +12,12 @@ Framework to create applications based on Angular 4 with server side rendering, 
 * **Submodule/UniversalExpress/** (Used for debug in Visual Studio only. Runs Universal in Express server)
 
 ## Install
-* run /build.cmd
-* 01=ConnectionString (Enter ConnectionString of an empty database)
-* 02=InstallAll
-* 07=StartServerAndClient
+* cd BuildTool
+* dotnet run -- -h (To show all CLI commands)
+* dotnet run -- connection [ConnectionString] (Set ConnectionString)
+* dotnet run -- connection --check (Check ConnectionString)
+* dotnet run -- installAll
+* dotnet run -- serve
 
 ## BuildTool CLI
 Command line interface containing all scripts and tools to build and deploy. Also used for CI.
