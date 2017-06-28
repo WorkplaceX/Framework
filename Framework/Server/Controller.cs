@@ -76,23 +76,6 @@
             {
                 string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
                 fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
-                if (fileName.EndsWith(".css"))
-                {
-                    bool exists = File.Exists(fileName);
-                    string fileNameExtension = Path.GetExtension(fileName);
-                    int l = 0;
-                    string ex = "";
-                    try
-                    {
-                        l = File.ReadAllBytes(fileName).Length;
-                    }
-                    catch (Exception exception)
-                    {
-                        ex = UtilFramework.ExceptionToText(exception);
-                    }
-                    string d = string.Format("RoutePath={0}; FileName={1}; FolderNameFrameworkServer={2}; FileName2={3}; IsExist={4}; FileNameExtension={5}; Length={6}; Exception={7};", RoutePath, fileName, UtilServer.FolderNameFrameworkServer(), Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length), exists, fileNameExtension, l, ex);
-                    return Controller.Content(d);
-                }
                 if (File.Exists(fileName))
                 {
                     return UtilServer.FileNameToFileContentResult(Controller, fileName);
