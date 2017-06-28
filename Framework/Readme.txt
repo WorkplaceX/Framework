@@ -17,6 +17,7 @@ Tool
 -"C:\Program Files (x86)\Google\Chrome\Application\chrome" --disable-web-security --user-data-dir
 -https://coursetro.com/posts/code/68/Make-your-Angular-App-SEO-Friendly-(Angular-4-+-Universal)
 -http://www.xiconeditor.com/ (Online ico editor)
+-https://pixabay.com/ (Images)
 
 ToDo
 -Include build number into version https://docs.travis-ci.com/user/environment-variables/
