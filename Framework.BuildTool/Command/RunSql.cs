@@ -19,7 +19,7 @@
             foreach (string fileName in fileNameList)
             {
                 string text = Framework.UtilFramework.FileRead(fileName);
-                var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string sql in sqlList)
                 {
                     using (SqlCommand command = new SqlCommand(sql, connection))
