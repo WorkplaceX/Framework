@@ -134,6 +134,7 @@
                 case ".map": contentType = "text/plain"; break;
                 case ".scss": contentType = "text/plain"; break; // Used only if internet explorer is in debug mode!
                 case ".png": contentType = "image/png"; break;
+                case ".ico": contentType = "image/x-icon"; break;
                 default:
                     throw new Exception("Unknown!");
             }

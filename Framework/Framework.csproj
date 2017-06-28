@@ -32,6 +32,12 @@
     <None Update="Server\wwwroot\bootstrap.min.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Server\wwwroot\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Server\wwwroot\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Server\wwwroot\indexBundle.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -38,7 +38,7 @@
             {
                 AppJson appJsonOut = App.Run(null, Controller.HttpContext);
                 string htmlUniversal = null;
-                string html = IndexHtml(true);
+                string html = IndexHtml();
                 htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
                 return Controller.Content(htmlUniversal, "text/html");
             }
@@ -171,18 +171,10 @@
         /// <summary>
         /// Returns index.html.
         /// </summary>
-        /// <param name="isBundle">If true use Server/index.html else Client/index.html</param>
-        private string IndexHtml(bool isBundle)
+        private string IndexHtml()
         {
-            if (isBundle == false)
-            {
-                return File.ReadAllText("Universal/index.html"); // Original source: Client/index.html
-            }
-            else
-            {
-                string fileName = UtilServer.FileNameToWwwRoot("indexBundle.html"); // Original source: Framework/Server/wwwroot/indexBundle.html
-                return File.ReadAllText(fileName);
-            }
+            string fileName = UtilServer.FileNameToWwwRoot("index.html");
+            return File.ReadAllText(fileName);
         }
     }
 }
