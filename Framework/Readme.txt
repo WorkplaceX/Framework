@@ -1,17 +1,19 @@
 Release
--Remove field TypeCSharp, method Component.TypeSet();
+-Disable file name hashing on client build.
+-Json serialize debug remove.
+-Remove field TypeCSharp, method Component.TypeSet(); --> No, support derive from Component. [Done]
 
 Release b1.0
--Json serialize debug remove.
 -Remove Component.Constructor text parameter.
--Rename Database.lock.cs to Database.g.cs
--Angular Selector IsHide on all removeSelector
--Split SqlName attribute into SqlTableName and SqlColumnName
--Class Page
--Tool CLI
--Remove Build
--Remove Office
--FormatterServices.GetUninitializedObject
+-Split SqlName attribute into SqlTableName and SqlColumnName.
+-New location of Application.json.
+-Rename Database.lock.cs to Database.g.cs [Done]
+-Angular Selector IsHide on all removeSelector [Done]
+-Class Page [Done]
+-Tool CLI [Done]
+-Remove Build [Done]
+-Remove Office [Done]
+-FormatterServices.GetUninitializedObject. See also json package code.
 
 Tool
 -"C:\Program Files (x86)\Google\Chrome\Application\chrome" --disable-web-security --user-data-dir
