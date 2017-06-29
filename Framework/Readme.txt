@@ -1,12 +1,15 @@
 Release
 -Disable file name hashing on client build.
 -Json serialize debug remove.
+-Framework/Server/wwwroot/bootstrap.min.css is not deployed.
+-Overwrite component and create new ones.
 -Remove field TypeCSharp, method Component.TypeSet(); --> No, support derive from Component. [Done]
 
 Release b1.0
 -Remove Component.Constructor text parameter.
 -Split SqlName attribute into SqlTableName and SqlColumnName.
 -New location of Application.json.
+-https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript (File upload)
 -Rename Database.lock.cs to Database.g.cs [Done]
 -Angular Selector IsHide on all removeSelector [Done]
 -Class Page [Done]
