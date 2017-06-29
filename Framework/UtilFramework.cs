@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v0.263 Server";
+                return "v1.001 Server";
             }
         }
 
@@ -114,7 +114,7 @@
 
         public static string[] FileNameList(string folderName, string searchPattern)
         {
-            var result = Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories).OrderBy(item => item).ToArray();
+            var result = Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories);
             return result;
         }
 

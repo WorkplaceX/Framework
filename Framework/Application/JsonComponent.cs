@@ -334,7 +334,7 @@
     }
 
     /// <summary>
-    /// Json App. Root object being transferred between server and client. There is also a Application object.
+    /// Json App. This is the application root json component being transferred between server and client. There is also a Application object.
     /// </summary>
     public class AppJson : Component
     {

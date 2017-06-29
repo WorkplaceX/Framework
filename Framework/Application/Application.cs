@@ -42,6 +42,9 @@
             return typeof(Page);
         }
 
+        /// <summary>
+        /// Gets or sets AppJson. This is the application root json component being transferred between server and client.
+        /// </summary>
         public AppJson AppJson { get; private set; }
 
         internal AppJson Run(AppJson appJson, HttpContext httpContext)
