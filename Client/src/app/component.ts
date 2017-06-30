@@ -374,6 +374,8 @@ export class RemoveSelectorDirective {
   <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
   `
 })
+//  <div *ngIf="gridCell().CellEnum==2" [innerHtml]=Text></div>
+//  <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="click()">{{ Text }}</button>
 export class GridField {
   constructor(dataService: DataService){
     this.dataService = dataService;

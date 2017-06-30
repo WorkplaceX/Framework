@@ -569,6 +569,40 @@
             UtilUnitTest.Assert(data.GuidNullable == data2.GuidNullable);
             UtilUnitTest.Assert(data.GuidNullable != data2.Guid);
         }
+
+        public enum MyEnum
+        {
+            None = 0,
+            One = 1,
+            Two = 2
+        }
+
+        public class Data29
+        {
+            public MyEnum MyEnum;
+
+            public MyEnum? MyEnumNullable;
+        }
+
+        public void Test29()
+        {
+            {
+                var data = new Data29();
+                data.MyEnum = MyEnum.One;
+                data.MyEnumNullable = MyEnum.Two;
+                string json = JsonConvert.Serialize(data);
+                var data2 = JsonConvert.Deserialize<Data29>(json);
+                UtilUnitTest.Assert(data.MyEnum == data2.MyEnum);
+                UtilUnitTest.Assert(data.MyEnumNullable == data2.MyEnumNullable);
+            }
+            {
+                var data = new Data29();
+                data.MyEnumNullable = null;
+                string json = JsonConvert.Serialize(data);
+                var data2 = JsonConvert.Deserialize<Data29>(json);
+                UtilUnitTest.Assert(data.MyEnumNullable == data2.MyEnumNullable);
+            }
+        }
     }
 }
 

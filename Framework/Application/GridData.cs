@@ -842,30 +842,31 @@
             }
         }
 
-        private void SaveJsonIsButtonLiteralUpload(App app, string gridName, string index, Cell cell, ref string text, GridCell gridCell)
+        /// <summary>
+        /// Render cell as Button, Html or FileUpload.
+        /// </summary>
+        private void SaveJsonIsButtonHtmlFileUpload(App app, string gridName, string index, Cell cell, ref string text, GridCell gridCell)
         {
-            gridCell.IsButton = false;
-            gridCell.IsLiteral = false;
-            gridCell.IsUpload = false;
+            gridCell.CellEnum = null;
             //
             bool isButton = false;
             cell.CellIsButton(app, gridName, index, ref isButton, ref text);
             if (isButton)
             {
-                gridCell.IsButton = true;
+                gridCell.CellEnum = GridCellEnum.Button;
             }
             else
             {
-                bool isLiteral = false;
-                cell.CellIsLiteral(app, gridName, index, ref isLiteral);
-                if (isLiteral)
+                bool isHtml = false;
+                cell.CellIsHtml(app, gridName, index, ref isHtml);
+                if (isHtml)
                 {
-                    gridCell.IsLiteral = true;
+                    gridCell.CellEnum = GridCellEnum.Html;
                 }
                 else
                 {
-                    bool isUpload = false;
-                    cell.CellIsUpload(app, gridName, index, ref isUpload, ref text);
+                    bool isFileUpload = false;
+                    cell.CellIsFileUpload(app, gridName, index, ref isFileUpload, ref text);
                 }
             }
         }
@@ -949,7 +950,7 @@
                             GridCell gridCellJson = new GridCell() { IsSelect = gridCell.IsSelect, IsClick = gridCell.IsClick, IsModify = gridCell.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCellJson;
                             //
-                            SaveJsonIsButtonLiteralUpload(app, gridName, index, cell, ref textJson, gridCellJson);
+                            SaveJsonIsButtonHtmlFileUpload(app, gridName, index, cell, ref textJson, gridCellJson);
                             //
                             if (text == null)
                             {

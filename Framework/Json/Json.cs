@@ -401,9 +401,17 @@
             {
                 return value;
             }
+            if (type.GetTypeInfo().IsEnum)
+            {
+                return Enum.ToObject(type, value);
+            }
             if (Nullable.GetUnderlyingType(type) != null)
             {
                 type = Nullable.GetUnderlyingType(type);
+                if (type.GetTypeInfo().IsEnum)
+                {
+                    return Enum.ToObject(type, value);
+                }
                 return DeserializeObjectConvert(value, type);
             }
             else

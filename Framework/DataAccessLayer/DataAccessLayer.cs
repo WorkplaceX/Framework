@@ -117,17 +117,17 @@
             }
         }
 
-        protected virtual internal void CellIsLiteral(App app, string gridName, string index, ref bool isLiteral)
+        protected virtual internal void CellIsHtml(App app, string gridName, string index, ref bool isLiteral)
         {
 
         }
 
-        protected virtual internal void CellIsUpload(App app, string gridName, string index, ref bool isUpload, ref string text)
+        protected virtual internal void CellIsFileUpload(App app, string gridName, string index, ref bool isFileUpload, ref string text)
         {
-            isUpload = UtilFramework.TypeUnderlying(TypeField) == typeof(byte[]);
-            if (isUpload)
+            isFileUpload = UtilFramework.TypeUnderlying(TypeField) == typeof(byte[]);
+            if (isFileUpload)
             {
-                text = "Upload";
+                text = "Upload File...";
             }
         }
 

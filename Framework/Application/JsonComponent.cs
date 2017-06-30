@@ -224,6 +224,26 @@
         public string FocusFieldName;
     }
 
+    public enum GridCellEnum
+    {
+        None = 0,
+        
+        /// <summary>
+        /// Cell is rendered as button.
+        /// </summary>
+        Button = 1,
+
+        /// <summary>
+        /// Cell text is rendered as sanitized html.
+        /// </summary>
+        Html = 2,
+
+        /// <summary>
+        /// Cell is rendered as file upload button.
+        /// </summary>
+        FileUpload = 3
+    }
+
     /// <summary>
     /// Json GridCell. Cell in data grid.
     /// </summary>
@@ -259,19 +279,9 @@
         public bool IsModify;
 
         /// <summary>
-        /// Gets or sets IsButton. If true, cell is rendered as button.
+        /// Gets or sets CellEnum. Render cell as button, html or file upload button.
         /// </summary>
-        public bool IsButton;
-
-        /// <summary>
-        /// Gets or sets IsLiteral. If true, cell text is rendered as literal html.
-        /// </summary>
-        public bool IsLiteral;
-
-        /// <summary>
-        /// Gets or sets IsUpload. If true, cell is rendered as file upload button.
-        /// </summary>
-        public bool IsUpload;
+        public GridCellEnum? CellEnum;
     }
 
     /// <summary>
