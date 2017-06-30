@@ -3,9 +3,9 @@
     public class CommandServe : Command
     {
         public CommandServe()
-            : base("serve", "Serve web page. Wait ca. 30 seconds.")
+            : base("serve", "Serve .NET web page. Wait ca. 30 seconds.")
         {
-            this.Client = OptionAdd("-c|--client", "Start client server only.");
+            this.Client = OptionAdd("-c|--client", "Start npm client server only.");
         }
 
         public readonly Option Client;

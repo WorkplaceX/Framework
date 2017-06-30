@@ -11,7 +11,9 @@
         "assets",
         "favicon.ico",
         "Application.json",
-        "bootstrap.min.css"
+        "bootstrap.min.css",
+        "ArrowDown.png",
+        "Logo.png"
       ],
       "index": "index.html",
       "main": "main.ts",

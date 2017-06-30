@@ -18,7 +18,7 @@
             GridData gridData = app.GridData();
             Type typeRow = gridData.TypeRow(gridName);
             gridData.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
-            gridData.SaveJson(appJson);
+            gridData.SaveJson(app);
         }
 
         protected internal override void Run(App app)
@@ -120,7 +120,7 @@
                 app.GridDataTextParse();
                 GridData gridData = app.GridData();
                 gridData.LoadDatabase(gridName);
-                gridData.SaveJson(appJson);
+                gridData.SaveJson(app);
             }
         }
     }
@@ -270,7 +270,7 @@
                     List<Row> rowList;
                     cell.LookUp(out typeRow, out rowList);
                     gridData.LoadRow("LookUp", typeRow, rowList);
-                    gridData.SaveJson(app.AppJson);
+                    gridData.SaveJson(app);
                 }
             }
         }
@@ -331,9 +331,9 @@
             //
             if (isSave)
             {
-                app.GridData().TextParse();
+                app.GridData().TextParse(app);
                 app.GridData().SaveDatabase();
-                app.GridData().SaveJson(app.AppJson);
+                app.GridData().SaveJson(app);
             }
         }
     }

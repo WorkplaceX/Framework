@@ -257,6 +257,21 @@
         /// Gets or sets IsModify. Indicating text has been modified by user since last request.
         /// </summary>
         public bool IsModify;
+
+        /// <summary>
+        /// Gets or sets IsButton. If true, cell is rendered as button.
+        /// </summary>
+        public bool IsButton;
+
+        /// <summary>
+        /// Gets or sets IsLiteral. If true, cell text is rendered as literal html.
+        /// </summary>
+        public bool IsLiteral;
+
+        /// <summary>
+        /// Gets or sets IsUpload. If true, cell is rendered as file upload button.
+        /// </summary>
+        public bool IsUpload;
     }
 
     /// <summary>

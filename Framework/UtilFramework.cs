@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v1.001 Server";
+                return "v1.002 Server";
             }
         }
 
@@ -217,6 +217,21 @@
         public static void LogError(string text)
         {
             Console.Error.WriteLine(text);
+        }
+
+
+        /// <summary>
+        /// Returns underlying tpye, if any.
+        /// </summary>
+        public static Type TypeUnderlying(Type type)
+        {
+            Type result = type;
+            Type typeUnderlying = Nullable.GetUnderlyingType(type);
+            if (typeUnderlying != null)
+            {
+                result = typeUnderlying;
+            }
+            return result;
         }
     }
 }

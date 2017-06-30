@@ -1,6 +1,7 @@
 ﻿namespace Framework.Application
 {
     using Framework.Component;
+    using Framework.DataAccessLayer;
     using Microsoft.AspNetCore.Http;
     using System;
     using System.Linq;
@@ -47,6 +48,22 @@
         /// </summary>
         public AppJson AppJson { get; private set; }
 
+        /// <summary>
+        /// Called after method UtilDataAccessLayer.ValueToText();
+        /// </summary>
+        protected virtual internal void CellValueToText(string gridName, string index, Cell cell, ref string text)
+        {
+
+        }
+
+        /// <summary>
+        /// Called before method UtilDataAccessLayer.ValueFromText();
+        /// </summary>
+        protected virtual internal void CellValueFromText(string gridName, string index, Cell cell, ref string text)
+        {
+
+        }
+
         internal AppJson Run(AppJson appJson, HttpContext httpContext)
         {
             this.AppJson = appJson;
@@ -55,7 +72,7 @@
                 AppJson = new AppJson();
                 AppJson.Session = Guid.NewGuid();
                 AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
-                GridData().SaveJson(AppJson); // Initialize AppJson.GridDataJson object.
+                GridData().SaveJson(this); // Initialize AppJson.GridDataJson object.
                 Type typePage = TypePageMain();
                 PageShow(AppJson, typePage);
             }
@@ -74,7 +91,7 @@
         private GridData gridData;
 
         /// <summary>
-        /// Make sure method GridData.LoadJson(); has been called. It's called only once.
+        /// Returns GridData. It makes sure method GridData.LoadJson(); has been called. It's called only once.
         /// </summary>
         public GridData GridData()
         {
@@ -96,7 +113,7 @@
             if (isGridDataTextParse == false)
             {
                 isGridDataTextParse = true;
-                GridData().TextParse();
+                GridData().TextParse(this);
             }
         }
         private ProcessList processListPrivate;
@@ -125,7 +142,7 @@
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridFilter>();
                 processList.Add<ProcessGridLookUp>();
-                //            processList.Add<ProcessGridSave>();
+                processList.Add<ProcessGridSave>();
                 processList.Add<ProcessGridCellButtonIsClick>();
                 processList.Add<ProcessGridOrderByText>();
                 processList.Add<ProcessGridFocusNull>();

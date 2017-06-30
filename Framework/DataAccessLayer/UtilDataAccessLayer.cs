@@ -2,12 +2,12 @@
 {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Reflection;
+    using System.Text;
 
     public enum FilterOperator
     {
@@ -86,6 +86,10 @@
             }
             if (cacheColumnList.ContainsKey(typeRow))
             {
+                foreach (Cell column in cacheColumnList[typeRow])
+                {
+                    column.Constructor(null); // Column mode.
+                }
                 return cacheColumnList[typeRow];
             }
             //
@@ -108,7 +112,7 @@
                         typeCell = attributePropertyCell.TypeCell;
                     }
                     Cell cell = (Cell)Activator.CreateInstance(typeCell);
-                    cell.Constructor(attributeRow.SqlName, sqlName, propertyInfo.Name);
+                    cell.Constructor(attributeRow.SqlName, sqlName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
                     result.Add(cell);
                 }
             }
@@ -297,14 +301,19 @@
             return result;
         }
 
-        public static string ValueToText(object value)
+        public static string ValueToText(object value, Type type)
         {
-            string result = null;
+            type = UtilFramework.TypeUnderlying(type);
+            //
+            if (type == typeof(byte[]) && value != null)
+            {
+                return Encoding.Unicode.GetString((byte[])value);
+            }
             if (value != null)
             {
-                result = value.ToString();
+                return value.ToString();
             }
-            return result;
+            return null;
         }
 
         public static object ValueFromText(string text, Type type)
@@ -317,6 +326,11 @@
             if (typeUnderlying != null)
             {
                 type = typeUnderlying;
+            }
+            //
+            if (type == typeof(byte[]) && text != null)
+            {
+                return Encoding.Unicode.GetBytes(text);
             }
             return Convert.ChangeType(text, type);
         }
