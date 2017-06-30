@@ -130,10 +130,10 @@
             Start(workingDirectory, nodeFileName, fileName, false, isWait, new KeyValuePair<string, string>("PORT", "1337"));
         }
 
-        public static void NpmRun(string workingDirectory, string script)
+        public static void NpmRun(string workingDirectory, string script, bool isWait = true)
         {
             string fileName = BuildTool.ConnectionManager.NpmFileName;
-            Start(workingDirectory, fileName, "run " + script);
+            Start(workingDirectory, fileName, "run " + script, isWait: isWait);
         }
     }
 }

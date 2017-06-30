@@ -59,17 +59,7 @@
                     appJsonOut = appJsonIn;
                     appJsonOut.ErrorProcess = Framework.UtilFramework.ExceptionToText(exception);
                 }
-                appJsonOut.IsJsonGet = false;
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                if (Framework.Server.Config.Instance.IsDebugJson)
-                {
-                    if (Framework.UtilFramework.FolderNameIsIss == false) // Do not write Application.json to disk when running in IIS.
-                    {
-                        appJsonOut.IsJsonGet = true;
-                        string jsonOutDebug = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                        Framework.UtilFramework.FileWrite(Framework.UtilFramework.FolderName + "Submodule/Client/src/Application.json", jsonOutDebug);
-                    }
-                }
                 return Controller.Content(jsonOutText, "application/json");
             }
             // Framework/Server/wwwroot/*.* request

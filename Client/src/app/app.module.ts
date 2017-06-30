@@ -23,8 +23,7 @@ import {
     { 
       provide: 'angularJson', useValue: JSON.stringify(
         {
-           Name: "app.module.ts=" + util.currentTime(), 
-/* BuildTool */ IsJsonGet: true 
+          Name: "app.module.ts=" + util.currentTime()
         }) 
     }
   ],

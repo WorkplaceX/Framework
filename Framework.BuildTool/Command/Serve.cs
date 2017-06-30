@@ -5,7 +5,7 @@
         public CommandServe()
             : base("serve", "Serve .NET web page. Wait ca. 30 seconds.")
         {
-            this.Client = OptionAdd("-c|--client", "Start npm client server only.");
+            this.Client = OptionAdd("-c|--client", "Start npm client server only. Opens Chrome in CORS mode.");
         }
 
         public readonly Option Client;
@@ -16,7 +16,9 @@
         {
             if (Client.IsOn)
             {
-                UtilBuildTool.NpmRun(Framework.UtilFramework.FolderName + "Submodule/Client/", "start");
+                UtilBuildTool.NpmRun(Framework.UtilFramework.FolderName + "Submodule/Client/", "start", false);
+                string workingDirectory = Framework.UtilFramework.FolderName;
+                UtilBuildTool.Start(workingDirectory, @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "--disable-web-security --user-data-dir", isWait: false);
             }
             else
             {

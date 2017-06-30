@@ -69,7 +69,9 @@
             this.AppJson = appJson;
             if (AppJson == null || AppJson.Session == null) // First request.
             {
+                int requestCount = AppJson != null ? AppJson.RequestCount : 0;
                 AppJson = new AppJson();
+                AppJson.RequestCount = requestCount;
                 AppJson.Session = Guid.NewGuid();
                 AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
                 GridData().SaveJson(this); // Initialize AppJson.GridDataJson object.

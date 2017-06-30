@@ -369,11 +369,6 @@
 
         }
 
-        /// <summary>
-        /// GET not POST json when debugging client. See also file json.json.
-        /// </summary>
-        public bool IsJsonGet;
-
         public bool IsBrowser;
 
         public string VersionServer;

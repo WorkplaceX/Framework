@@ -10,7 +10,6 @@ declare var browserJson: any; // Params from browser
 export class Json {
     Name: string;
     RequestUrl: string;
-    IsJsonGet: boolean; // GET not POST json when debugging client. See also file Application.json
     VersionClient: string; // Angular client version.
     VersionServer: string; // Angular client version.
     List:any;
@@ -37,74 +36,50 @@ export class DataService {
     constructor( @Inject('angularJson') angularJson: string, @Inject('requestBodyJson') private requestBodyJson: any, http: Http) {
         this.http = http;
 
-        // Request json coming from web post.
+        // Request json coming from web post to universal. // Universal mode.
         if (requestBodyJson != null)
         {
             this.json = requestBodyJson;
         }
         else
         {
-            // Default data
-            this.json = new Json();
-            this.log = "";
-            this.RequestCount = 0;
-            this.json.Name = "dataService.ts=" + util.currentTime();
-
-            // Angular json coming from client app.module.ts
+            // Angular json coming from client app.module.ts // Client debug mode.
             if (angularJson != null) {
                 this.json = JSON.parse(angularJson);
+                this.json.RequestUrl = "http://localhost:49323/"; // Server running in Visual Studio.
+                this.update();
             }
             else
             {
-                // Browser json coming from index.html
-                if (typeof browserJson !== 'undefined') {
-                    if (browserJson instanceof Object){
-                        this.json = browserJson;
-                    } else {
-                        this.json = JSON.parse(browserJson);
-                    }
-                }
+                // Normal mode.
+                this.json = browserJson;
+                this.log = "";
+                this.json.Name = "dataService.ts=" + util.currentTime();
+                this.json.RequestUrl = "";
             }
-        }
-        //
-        this.json.VersionClient = util.versionClient();
-        //
-        if (this.json.IsJsonGet == true) {
-            this.update(); // For debug mode.
-        }
-        if (this.json.IsBrowser == true) {
-            this.update();
         }
     }
 
     update() {
+        if (this.RequestCount == null)
+        {
+            this.RequestCount = 0;
+        }
         this.RequestCount += 1;
         this.json.RequestCount = this.RequestCount;
-        if (this.json.IsJsonGet == true) {
-            // GET for debug
-            this.log += "Send GET; "
-            this.http.get('Application.json')
-            .map(res => res)
-            .subscribe(
-                body => this.json = <Json>(body.json()),
-                err => this.log += err + "; ",
-                () => this.log += "Receive; "
-            );
-        } else {
-            // POST
-            this.log += "Send POST; ";
-            this.http.post(this.json.RequestUrl + 'Application.json', JSON.stringify(this.json))
-            .map(res => res)
-            .subscribe(
-                body => { 
-                    var jsonReceive: Json = <Json>(body.json());
-                    if (this.json.RequestCount == jsonReceive.RequestCount) {
-                        this.json = jsonReceive;
-                    }
-                },
-                err => this.log += err + "; ",
-                () => this.log += "Receive; "
-            );
-        }
+        // POST
+        this.log += "Send POST; ";
+        this.http.post(this.json.RequestUrl + 'Application.json', JSON.stringify(this.json))
+        .map(res => res)
+        .subscribe(
+            body => { 
+                var jsonReceive: Json = <Json>(body.json());
+                if (this.json.RequestCount == jsonReceive.RequestCount) {
+                    this.json = jsonReceive;
+                }
+            },
+            err => this.log += err + "; ",
+            () => this.log += "Receive; "
+        );
     }
 }
