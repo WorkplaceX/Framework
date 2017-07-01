@@ -10,6 +10,7 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Diagnostics;
 
     public class WebController
     {
@@ -60,6 +61,10 @@
                     appJsonOut.ErrorProcess = Framework.UtilFramework.ExceptionToText(exception);
                 }
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
+                if (Debugger.IsAttached)
+                {
+                    Controller.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:4200"); // Avoid "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir
+                }
                 return Controller.Content(jsonOutText, "application/json");
             }
             // Framework/Server/wwwroot/*.* request
@@ -81,7 +86,7 @@
                     return UtilServer.FileNameToFileContentResult(Controller, fileName);
                 }
             }
-            return Controller.NotFound();
+            return Controller.NotFound(); // Not found (404) response.
         }
 
         /// <summary>
@@ -120,7 +125,7 @@
                 string resultAssert = result;
                 // Add json to index.html (Client/index.html)
                 {
-                    string scriptFind = "var browserJson = '{ \"Name\": \"index.html\", \"IsJsonGet\": true }';";
+                    string scriptFind = "var browserJson = '{ }';";
                     string scriptReplace = "var browserJson = " + jsonTextBrowser + "; ";
                     result = result.Replace(scriptFind, scriptReplace);
                 }

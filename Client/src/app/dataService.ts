@@ -35,7 +35,6 @@ export class DataService {
 
     constructor( @Inject('angularJson') angularJson: string, @Inject('requestBodyJson') private requestBodyJson: any, http: Http) {
         this.http = http;
-
         // Request json coming from web post to universal. // Universal mode.
         if (requestBodyJson != null)
         {
@@ -61,10 +60,8 @@ export class DataService {
     }
 
     update() {
-        if (this.RequestCount == null)
-        {
-            this.RequestCount = 0;
-        }
+        if (this.RequestCount == null) { this.RequestCount = 0; };
+        if (this.log == null) { this.log = "" };
         this.RequestCount += 1;
         this.json.RequestCount = this.RequestCount;
         // POST

@@ -36,3 +36,6 @@ h2, h3 {
 .ErrorCell {
   color: red;
 }
+img {
+  width: 100%;
+}
