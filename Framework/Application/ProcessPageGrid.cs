@@ -98,7 +98,7 @@
             {
                 foreach (GridRow gridRow in appJson.GridDataJson.RowList[gridName])
                 {
-                    if (UtilApplication.IndexToIndexEnum(gridRow.Index) == IndexEnum.Filter)
+                    if (UtilApplication.IndexEnumFromText(gridRow.Index) == IndexEnum.Filter)
                     {
                         foreach (GridColumn gridColumn in appJson.GridDataJson.ColumnList[gridName])
                         {
@@ -357,7 +357,7 @@
                     foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
                         GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        if (gridCell.IsModify && gridCell.T == "Click")
+                        if (gridCell.IsModify && gridCell.CellEnum == GridCellEnum.Button)
                         {
                             gridNameClick = gridName;
                             indexClick = gridRow.Index;

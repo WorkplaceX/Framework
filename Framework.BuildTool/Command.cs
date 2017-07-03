@@ -78,7 +78,23 @@
             result.Name = "Tool";
             result.HelpOption("-h|--help");
             result.OnExecute(() => {
-                UtilFramework.Log("For help use -h");
+                // Default function, when no arguments.
+                result.Execute("-h");
+                UtilFramework.Log("");
+                UtilFramework.Log("ShortCut:");
+                UtilFramework.Log("1=buildClient");
+                UtilFramework.Log("2=serve -c");
+                string line = Console.ReadLine();
+                if (line == "1")
+                {
+                    result.Execute("buildClient");
+                }
+                if (line == "2")
+                {
+                    result.Execute("serve", "-c");
+                }
+                Console.WriteLine("Press Enter...");
+                Console.ReadLine();
                 return 0;
             });
             return result;

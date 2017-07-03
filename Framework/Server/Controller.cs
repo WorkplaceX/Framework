@@ -11,6 +11,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using System.Diagnostics;
+    using Framework.DataAccessLayer;
 
     public class WebController
     {
@@ -57,7 +58,7 @@
                 catch (Exception exception)
                 {
                     // Prevent Internal Error 500 on process exception.
-                    appJsonOut = appJsonIn;
+                    appJsonOut = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() }); // Send AppJsonIn back.
                     appJsonOut.ErrorProcess = Framework.UtilFramework.ExceptionToText(exception);
                 }
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
@@ -85,6 +86,10 @@
                 {
                     return UtilServer.FileNameToFileContentResult(Controller, fileName);
                 }
+            }
+            // FileStorage request
+            {
+                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
             }
             return Controller.NotFound(); // Not found (404) response.
         }

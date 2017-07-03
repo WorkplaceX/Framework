@@ -51,7 +51,7 @@
         /// <summary>
         /// Called after method UtilDataAccessLayer.ValueToText();
         /// </summary>
-        protected virtual internal void CellValueToText(string gridName, string index, Cell cell, ref string text)
+        protected virtual internal void CellValueToText(string gridName, string index, Cell cell, ref string result)
         {
 
         }
@@ -59,7 +59,7 @@
         /// <summary>
         /// Called before method UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellValueFromText(string gridName, string index, Cell cell, ref string text)
+        protected virtual internal void CellValueFromText(string gridName, string index, Cell cell, ref string result)
         {
 
         }

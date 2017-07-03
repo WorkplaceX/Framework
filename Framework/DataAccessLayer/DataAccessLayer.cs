@@ -76,12 +76,12 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void CellIsReadOnly(ref bool isReadOnly)
+        protected virtual internal void CellIsReadOnly(ref bool result)
         {
 
         }
 
-        protected virtual internal void ColumnText(ref string text)
+        protected virtual internal void ColumnText(ref string result)
         {
 
         }
@@ -89,7 +89,7 @@
         /// <summary>
         /// Called after method UtilDataAccessLayer.ValueToText();
         /// </summary>
-        protected virtual internal void CellValueToText(App app, string gridName, string index, ref string text)
+        protected virtual internal void CellValueToText(App app, string gridName, string index, ref string result)
         {
 
         }
@@ -97,38 +97,27 @@
         /// <summary>
         /// Called before method UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellValueFromText(App app, string gridName, string index, ref string text)
+        protected virtual internal void CellValueFromText(App app, string gridName, string index, ref string result)
         {
             
         }
 
         /// <summary>
-        /// Returns true, if data call is to be rendered as button.
+        /// Returns true, if data cell is to be rendered as button. Overwrite method CellProcessButtonIsClick(); to process click event.
         /// </summary>
-        protected virtual internal void CellIsButton(App app, string gridName, string index, ref bool isButton, ref string text)
-        {
-            isButton = GetType().GetTypeInfo().GetMethod(nameof(CellProcessButtonIsClick), BindingFlags.Instance | BindingFlags.NonPublic).DeclaringType == GetType(); // Method ProcessButtonIsClick(); is overwritten.
-            if (isButton)
-            {
-                if (text == null)
-                {
-                    text = "Button";
-                }
-            }
-        }
-
-        protected virtual internal void CellIsHtml(App app, string gridName, string index, ref bool isLiteral)
+        protected virtual internal void CellIsButton(App app, string gridName, string index, ref bool result)
         {
 
         }
 
-        protected virtual internal void CellIsFileUpload(App app, string gridName, string index, ref bool isFileUpload, ref string text)
+        protected virtual internal void CellIsHtml(App app, string gridName, string index, ref bool result)
         {
-            isFileUpload = UtilFramework.TypeUnderlying(TypeField) == typeof(byte[]);
-            if (isFileUpload)
-            {
-                text = "Upload File...";
-            }
+
+        }
+
+        protected virtual internal void CellIsFileUpload(App app, string gridName, string index, ref bool result)
+        {
+
         }
 
         protected virtual internal void ColumnWidthPercent(ref double widthPercent)
@@ -147,7 +136,7 @@
 
         }
 
-        protected virtual internal void ColumnIsReadOnly(ref bool isReadOnly)
+        protected virtual internal void ColumnIsReadOnly(ref bool result)
         {
 
         }

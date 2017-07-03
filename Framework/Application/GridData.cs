@@ -365,12 +365,12 @@
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
-            Row row = RowGet(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
+            Row row = RowGet(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
             
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
                 string fieldName = column.FieldNameCSharp;
-                string text = CellTextGet(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter), fieldName);
+                string text = CellTextGet(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter), fieldName);
                 if (text == "")
                 {
                     text = null;
@@ -407,7 +407,7 @@
         /// </summary>
         public void LoadDatabase(string gridName)
         {
-            if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
+            if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
                 string fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
                 bool isOrderByDesc = queryList[gridName].IsOrderByDesc;
@@ -439,7 +439,7 @@
                 Dictionary<string, GridCellInternal> cellListFilter = null;
                 if (cellList.ContainsKey(gridName))
                 {
-                    cellList[gridName].TryGetValue(UtilApplication.IndexEnumToString(IndexEnum.Filter), out cellListFilter); // Save filter user text.
+                    cellList[gridName].TryGetValue(UtilApplication.IndexEnumToText(IndexEnum.Filter), out cellListFilter); // Save filter user text.
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
                 this.rowList[gridName] = new Dictionary<string, GridRowInternal>(); // Clear data
@@ -455,7 +455,7 @@
                 if (cellListFilter != null)
                 {
                     cellList[gridName] = new Dictionary<string, Dictionary<string, GridCellInternal>>();
-                    cellList[gridName][UtilApplication.IndexEnumToString(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
+                    cellList[gridName][UtilApplication.IndexEnumToText(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
                 }
             }
         }
@@ -482,7 +482,7 @@
         /// </summary>
         private void RowFilterAdd(string gridName)
         {
-            RowSet(gridName, UtilApplication.IndexEnumToString(IndexEnum.Filter), new GridRowInternal() { Row = null, RowNew = null });
+            RowSet(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter), new GridRowInternal() { Row = null, RowNew = null });
         }
 
         /// <summary>
@@ -496,7 +496,7 @@
             // Filter
             foreach (string index in rowListCopy.Keys)
             {
-                if (UtilApplication.IndexToIndexEnum(index) == IndexEnum.Filter)
+                if (UtilApplication.IndexEnumFromText(index) == IndexEnum.Filter)
                 {
                     RowSet(gridName, index, rowListCopy[index]);
                     break;
@@ -506,7 +506,7 @@
             int indexInt = 0;
             foreach (string index in rowListCopy.Keys)
             {
-                IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
+                IndexEnum indexEnum = UtilApplication.IndexEnumFromText(index);
                 if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
                 {
                     RowSet(gridName, indexInt.ToString(), rowListCopy[index]); // New becomes Index
@@ -514,11 +514,11 @@
                 }
             }
             // New
-            RowSet(gridName, UtilApplication.IndexEnumToString(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = null }); // New row
+            RowSet(gridName, UtilApplication.IndexEnumToText(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = null }); // New row
             // Total
             foreach (string index in rowListCopy.Keys)
             {
-                if (UtilApplication.IndexToIndexEnum(index) == IndexEnum.Total)
+                if (UtilApplication.IndexEnumFromText(index) == IndexEnum.Total)
                 {
                     RowSet(gridName, index, rowListCopy[index]);
                     break;
@@ -535,7 +535,7 @@
             {
                 foreach (string index in rowList[gridName].Keys.ToArray())
                 {
-                    IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
+                    IndexEnum indexEnum = UtilApplication.IndexEnumFromText(index);
                     if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New) // Exclude Filter and Total.
                     {
                         if (!IsErrorRowCell(gridName, index)) // No save if data row has text parse error!
@@ -596,7 +596,7 @@
                         {
                             Framework.UtilFramework.Assert(row.Row.GetType() == typeRow);
                         }
-                        IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(index);
+                        IndexEnum indexEnum = UtilApplication.IndexEnumFromText(index);
                         Row rowWrite;
                         switch (indexEnum)
                         {
@@ -701,7 +701,7 @@
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
             {
-                IndexEnum indexEnum = UtilApplication.IndexToIndexEnum(row.Index);
+                IndexEnum indexEnum = UtilApplication.IndexEnumFromText(row.Index);
                 Row resultRow = null;
                 if (indexEnum == IndexEnum.Index)
                 {
@@ -845,28 +845,32 @@
         /// <summary>
         /// Render cell as Button, Html or FileUpload.
         /// </summary>
-        private void SaveJsonIsButtonHtmlFileUpload(App app, string gridName, string index, Cell cell, ref string text, GridCell gridCell)
+        private void SaveJsonIsButtonHtmlFileUpload(App app, string gridName, string index, Cell cell, GridCell gridCell)
         {
             gridCell.CellEnum = null;
             //
-            bool isButton = false;
-            cell.CellIsButton(app, gridName, index, ref isButton, ref text);
-            if (isButton)
+            bool result = false;
+            cell.CellIsButton(app, gridName, index, ref result);
+            if (result)
             {
                 gridCell.CellEnum = GridCellEnum.Button;
             }
             else
             {
-                bool isHtml = false;
-                cell.CellIsHtml(app, gridName, index, ref isHtml);
-                if (isHtml)
+                result = false;
+                cell.CellIsHtml(app, gridName, index, ref result);
+                if (result)
                 {
                     gridCell.CellEnum = GridCellEnum.Html;
                 }
                 else
                 {
-                    bool isFileUpload = false;
-                    cell.CellIsFileUpload(app, gridName, index, ref isFileUpload, ref text);
+                    result = false;
+                    cell.CellIsFileUpload(app, gridName, index, ref result);
+                    if (result)
+                    {
+                        gridCell.CellEnum = GridCellEnum.FileUpload;
+                    }
                 }
             }
         }
@@ -950,7 +954,7 @@
                             GridCell gridCellJson = new GridCell() { IsSelect = gridCell.IsSelect, IsClick = gridCell.IsClick, IsModify = gridCell.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCellJson;
                             //
-                            SaveJsonIsButtonHtmlFileUpload(app, gridName, index, cell, ref textJson, gridCellJson);
+                            SaveJsonIsButtonHtmlFileUpload(app, gridName, index, cell, gridCellJson);
                             //
                             if (text == null)
                             {

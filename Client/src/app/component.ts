@@ -5,7 +5,7 @@ import  * as util from './util';
 
 /* AppComponent */
 @Component({
-  selector: 'app',
+  selector: '[app]',
   template: `
   <p>
   json.Name=({{ dataService.json.Name }})<br />
@@ -57,7 +57,7 @@ export class AppComponent {
   <Label *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></Label>
   <span grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></span>
   <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
-  <GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></GridField>
+  <div GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
   <Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></Page>
   <!-- <LayoutDebug [json]=json></LayoutDebug> -->
 `
@@ -248,12 +248,8 @@ export class GridRow {
 @Component({
   selector: '.GridCell',
   template: `
-  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}" >
-    <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
-      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}&nbsp;
-      <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
-    </div>
-    <GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></GridField>
+  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
+    <div GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
     <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell" style="white-space: normal;">
       {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E }}
     </div>
@@ -267,9 +263,14 @@ export class GridRow {
   host: {
     '[style.display]' : "'inline-block'",
     '[style.position]' : "'relative'",
-    '[style.width.%]' : "json.WidthPercent"
+    '[style.width.%]' : "json.WidthPercent",
+    '[style.verticalAlign]' : "'top'"
   }
 })
+//    <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
+//      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}&nbsp;
+//      <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
+//    </div>
 export class GridCell {
   @Input() json: any; // Column // Used for FieldName
   @Input() jsonRow: any; // Used for Index
@@ -369,13 +370,29 @@ export class RemoveSelectorDirective {
 
 /* GridField */
 @Component({
-  selector: 'GridField',
+  selector: '[GridField]',
+  // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
+  <div>
+    <div *ngIf="gridCell().CellEnum==null" style='margin-right:18px'>
+      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
+    </div>
+    <img *ngIf="gridCell().CellEnum==null" src='ArrowDown.png' style="width:12px;height:12px;top:4px;position:absolute;right:4px;"/>
+
+    <div *ngIf="gridCell().CellEnum==2" style='display: inline-block; width:100%;'>
+      <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis;'></div>
+    </div>
+
+    <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="buttonClick()">{{ Text }}</button>
+
+    <div *ngIf="gridCell().CellEnum==3">
+      <button class="btn btn-primary" (click)="clickFileUpload()">{{ Text }}</button>
+      <input #inputElement type="file" class="btn btn-primary" (change)="changeFileUpload($event)" style='display:none'/>
+    </div>
+
+  </div>
   `
 })
-//  <div *ngIf="gridCell().CellEnum==2" [innerHtml]=Text></div>
-//  <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="click()">{{ Text }}</button>
 export class GridField {
   constructor(dataService: DataService){
     this.dataService = dataService;
@@ -386,6 +403,7 @@ export class GridField {
   @Input() fieldName: any;
   @Input() index: any;
   @Input() json: any;
+  @ViewChild('inputElement') el:ElementRef;
 
   point() {
     let gridData: any = this.dataService.json.GridDataJson;
@@ -471,7 +489,32 @@ export class GridField {
       // this.json can be null
       this.json.IsFocus = isFocus;
     }
-  }  
+  }
+
+  buttonClick() {
+    this.gridCell().IsModify = true;
+    this.onChange();
+  }
+
+  changeFileUpload(e) {
+    var file = e.target.files[0];
+    if (!file) {
+      return;
+    }
+    var reader = new FileReader();
+    let This: any = this;
+    reader.onload = function(e2: any) {
+      var data = e2.target.result;
+      console.log(data);
+      This.Text = data;
+      This.onChange();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clickFileUpload() {
+    this.el.nativeElement.click();
+  }
 }
 
 /* GridKeyboard */

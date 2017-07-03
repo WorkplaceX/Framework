@@ -65,7 +65,7 @@ export class DataService {
         this.RequestCount += 1;
         this.json.RequestCount = this.RequestCount;
         // POST
-        this.log += "Send POST; ";
+        this.log += "Send; ";
         this.http.post(this.json.RequestUrl + 'Application.json', JSON.stringify(this.json))
         .map(res => res)
         .subscribe(
@@ -73,6 +73,11 @@ export class DataService {
                 var jsonReceive: Json = <Json>(body.json());
                 if (this.json.RequestCount == jsonReceive.RequestCount) {
                     this.json = jsonReceive;
+                } else {
+                    this.log += "Error RequestCount; "
+                }
+                if (this.json.ErrorProcess != null) {
+                    window.location.replace(this.json.RequestUrl);
                 }
             },
             err => this.log += err + "; ",

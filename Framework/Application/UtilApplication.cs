@@ -11,22 +11,22 @@
 
     public static class UtilApplication
     {
-        public static string IndexEnumToString(IndexEnum indexEnum)
+        public static string IndexEnumToText(IndexEnum indexEnum)
         {
             return indexEnum.ToString();
         }
 
-        public static IndexEnum IndexToIndexEnum(string index)
+        public static IndexEnum IndexEnumFromText(string index)
         {
-            if (IndexEnumToString(IndexEnum.Filter) == index)
+            if (IndexEnumToText(IndexEnum.Filter) == index)
             {
                 return IndexEnum.Filter;
             }
-            if (IndexEnumToString(IndexEnum.New) == index)
+            if (IndexEnumToText(IndexEnum.New) == index)
             {
                 return IndexEnum.New;
             }
-            if (IndexEnumToString(IndexEnum.Total) == index)
+            if (IndexEnumToText(IndexEnum.Total) == index)
             {
                 return IndexEnum.Total;
             }

@@ -4,6 +4,9 @@ import { MyComponent } from './Component/MyComponent'
 import * as util from './util';
 import { HttpModule } from '@angular/http';
 import { FormsModule }   from '@angular/forms';
+import { enableProdMode } from '@angular/core';
+
+enableProdMode();
 
 import { 
 /* BuildTool */ AppComponent, Selector, Page, Div, LayoutDebug, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective 
