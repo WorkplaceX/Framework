@@ -20,11 +20,6 @@
                 UtilFramework.LogError(UtilFramework.ExceptionToText(exception));
                 Environment.Exit(1); // echo Exit Code is %errorlevel%
             }
-            if (Debugger.IsAttached)
-            {
-                Console.WriteLine("Press Enter...");
-                Console.ReadLine();
-            }
         }
 
         protected virtual void RegisterCommand(List<Command> commandList)
@@ -38,7 +33,6 @@
             commandList.Add(new CommandConnectionString());
             commandList.Add(new CommandCheck());
             commandList.Add(new CommandOpen());
-            commandList.Add(new CommandToggleIsDebugDataJson());
             commandList.Add(new CommandServe());
             commandList.Add(new CommandUnitTest());
             commandList.Add(new CommandRunSql());

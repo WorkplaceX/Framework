@@ -14,7 +14,7 @@
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Application/DataAccessLayer/Database.Generate.cs";
+                return Framework.UtilFramework.FolderName + "Application/Database/Database.Generate.cs";
             }
         }
     }

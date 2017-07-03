@@ -84,6 +84,7 @@
                 UtilFramework.Log("ShortCut:");
                 UtilFramework.Log("1=buildClient");
                 UtilFramework.Log("2=serve -c");
+                UtilFramework.Log("3=generate");
                 string line = Console.ReadLine();
                 if (line == "1")
                 {
@@ -92,6 +93,10 @@
                 if (line == "2")
                 {
                     result.Execute("serve", "-c");
+                }
+                if (line == "3")
+                {
+                    result.Execute("generate");
                 }
                 Console.WriteLine("Press Enter...");
                 Console.ReadLine();

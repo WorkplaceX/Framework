@@ -12,6 +12,8 @@
     using System.Threading.Tasks;
     using System.Diagnostics;
     using Framework.DataAccessLayer;
+    using System.Linq;
+    using Database.dbo;
 
     public class WebController
     {
@@ -90,6 +92,18 @@
             // FileStorage request
             {
                 string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                bool isFound = false;
+                byte[] data = null;
+                foreach (FrameworkFileStorage item in UtilDataAccessLayer.Select<FrameworkFileStorage>().Where(item => item.FileName == fileName))
+                {
+                    UtilFramework.Assert(isFound == false, string.Format("Found more than one file! ({0})", fileName));
+                    data = item.Data;
+                    isFound = true;
+                }
+                if (isFound && data != null)
+                {
+                    return UtilServer.FileNameToFileContentResult(Controller, fileName, data);
+                }
             }
             return Controller.NotFound(); // Not found (404) response.
         }

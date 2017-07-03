@@ -15,6 +15,9 @@
             MetaSqlDbContext dbContext = new MetaSqlDbContext();
             string sql = Util.FileLoad(ConnectionManager.SchemaFileName);
             this.List = dbContext.Schema.FromSql(sql).ToArray();
+            //
+            // Filter out "dbo.Framework" tables.
+            this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
         }
 
         public readonly MetaSqlSchema[] List;

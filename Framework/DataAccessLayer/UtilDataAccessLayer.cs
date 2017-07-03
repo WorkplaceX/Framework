@@ -35,8 +35,12 @@
             return attributeRow.SqlName;
         }
 
+        /// <summary>
+        /// Returns row type as string. For example: "Database.dbo.User".
+        /// </summary>
         public static string TypeRowToName(Type typeRow)
         {
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
             string result = null;
             if (typeRow != null)
             {
@@ -45,34 +49,32 @@
             return result;
         }
 
-        internal static Type TypeRowFromName(string typeRow, Type typeRowInAssembly)
+        /// <summary>
+        /// Returns row type. Searches also for Framework tables.
+        /// </summary>
+        /// <param name="typeRow">For example: "Database.dbo.User".</param>
+        public static Type TypeRowFromName(string typeRow, Type typeRowInAssembly)
         {
             Type result = null;
             if (typeRow != null)
             {
+                Type resultFramework = typeof(UtilFramework).GetTypeInfo().Assembly.GetType(typeRow);
                 result = typeRowInAssembly.GetTypeInfo().Assembly.GetType(typeRow);
-                if (result == null)
+                if (result == null && resultFramework == null)
                 {
                     throw new Exception("Type not found!");
                 }
-            }
-            return result;
-        }
-
-        public static Type TypeRowFromTableName(string tableName, Type typeRowInAssembly) // TODO Remove
-        {
-            foreach (Type type in typeRowInAssembly.GetTypeInfo().Assembly.GetTypes())
-            {
-                if (type.GetTypeInfo().IsSubclassOf(typeof(Row)))
+                if (result != null && resultFramework != null)
                 {
-                    Type typeRow = type;
-                    if (UtilDataAccessLayer.TableNameFromTypeRow(typeRow) == tableName)
-                    {
-                        return typeRow;
-                    }
+                    UtilFramework.Assert(false, string.Format("Row type more than once defined! ({0})", typeRow));
+                }
+                if (result == null)
+                {
+                    result = resultFramework;
                 }
             }
-            throw new Exception(string.Format("Type not found! ({0})", tableName));
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(result, typeof(Row)), "Wrong type!");
+            return result;
         }
 
         [ThreadStatic]
@@ -175,14 +177,9 @@
             return query;
         }
 
-        public static object[] Select(Type typeRow)
+        public static IQueryable<TRow> Select<TRow>() where TRow : Row
         {
-            return SelectQuery(typeRow).ToDynamicArray();
-        }
-
-        public static TRow[] Select<TRow>() where TRow : Row
-        {
-            return Select(typeof(TRow)).Cast<TRow>().ToArray();
+            return (IQueryable<TRow>)SelectQuery(typeof(TRow));
         }
 
         public static object[] Select(Type typeRow, int id)
@@ -330,6 +327,12 @@
             //
             if (type == typeof(byte[]) && text != null)
             {
+                string base64 = "base64,";
+                if (text.StartsWith("data:") && text.Contains(base64))
+                {
+                    text = text.Substring(text.IndexOf(base64) + base64.Length);
+                    return Convert.FromBase64String(text);
+                }
                 return Encoding.Unicode.GetBytes(text);
             }
             return Convert.ChangeType(text, type);

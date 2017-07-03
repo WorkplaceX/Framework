@@ -61,59 +61,26 @@
         }
 
         /// <summary>
-        /// Copy file from source to dest and serve it.
+        /// Returns html content type.
         /// </summary>
-        /// <param name="controller">WebApi controller</param>
-        /// <param name="requestFolderName">For example: MyApp/</param>
-        /// <param name="folderNameSourceRelative">For example ../Angular/</param>
-        /// <param name="folderNameDestRelative">For example Application/Nodejs/Client/</param>
-        public static FileContentResult FileGet(ControllerBase controller, string requestFolderName, string folderNameSourceRelative, string folderNameDestRelative)
+        private static string FileNameToFileContentType(string fileName)
         {
-            FileContentResult result = null;
-            string requestFileName = controller.Request.Path.Value;
-            string requestFolderNameMatch = requestFileName;
-            if (!requestFolderNameMatch.EndsWith("/"))
+            // ContentType
+            string fileNameExtension = Path.GetExtension(fileName);
+            string result; // https://www.sitepoint.com/web-foundations/mime-types-complete-list/
+            switch (fileNameExtension)
             {
-                requestFolderNameMatch += "/";
-            }
-            if (requestFolderName.StartsWith("/"))
-            {
-                requestFolderName = requestFolderName.Substring(1);
-            }
-            if (requestFolderNameMatch.StartsWith("/" + requestFolderName))
-            {
-                requestFileName = requestFileName.Substring(requestFolderName.Length + 1);
-                Uri folderName = new Uri(Directory.GetCurrentDirectory() + "/");
-                Uri folderNameSource = new Uri(folderName, folderNameSourceRelative);
-                Uri folderNameDest = new Uri(folderName, folderNameDestRelative);
-                Uri fileNameSource = new Uri(folderNameSource, requestFileName);
-                Uri fileNameDest = new Uri(folderNameDest, requestFileName);
-                // ContentType
-                string fileNameExtension = Path.GetExtension(fileNameSource.LocalPath);
-                string contentType; // https://wiki.selfhtml.org/wiki/Referenz:MIME-Typen
-                switch (fileNameExtension)
-                {
-                    case ".html": contentType = "text/html"; break;
-                    case ".css": contentType = "text/css"; break;
-                    case ".js": contentType = "text/javascript"; break;
-                    case ".map": contentType = "text/plain"; break;
-                    case ".scss": contentType = "text/plain"; break; // Used only if internet explorer is in debug mode!
-                    default:
-                        throw new Exception("Unknown!");
-                }
-                // Copye from source to dest
-                if (File.Exists(fileNameSource.LocalPath) && !File.Exists(fileNameDest.LocalPath))
-                {
-                    string folderNameCopy = Directory.GetParent(fileNameDest.LocalPath).ToString();
-                    if (!Directory.Exists(folderNameCopy))
-                    {
-                        Directory.CreateDirectory(folderNameCopy);
-                    }
-                    File.Copy(fileNameSource.LocalPath, fileNameDest.LocalPath);
-                }
-                // Serve dest
-                var byteList = File.ReadAllBytes(fileNameDest.LocalPath);
-                result = controller.File(byteList, contentType);
+                case ".html": result = "text/html"; break;
+                case ".css": result = "text/css"; break;
+                case ".js": result = "text/javascript"; break;
+                case ".map": result = "text/plain"; break;
+                case ".scss": result = "text/plain"; break; // Used only if internet explorer is in debug mode!
+                case ".png": result = "image/png"; break;
+                case ".ico": result = "image/x-icon"; break;
+                case ".jpg": result = "image/jpeg"; break;
+                case ".pdf": result = "application/pdf"; break;
+                default:
+                    result = "text/plain"; break; // Type not found!
             }
             return result;
         }
@@ -123,25 +90,20 @@
         /// </summary>
         public static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName)
         {
-            // ContentType
-            string fileNameExtension = Path.GetExtension(fileName);
-            string contentType; // https://www.sitepoint.com/web-foundations/mime-types-complete-list/
-            switch (fileNameExtension)
-            {
-                case ".html": contentType = "text/html"; break;
-                case ".css": contentType = "text/css"; break;
-                case ".js": contentType = "text/javascript"; break;
-                case ".map": contentType = "text/plain"; break;
-                case ".scss": contentType = "text/plain"; break; // Used only if internet explorer is in debug mode!
-                case ".png": contentType = "image/png"; break;
-                case ".ico": contentType = "image/x-icon"; break;
-                default:
-                    throw new Exception("Unknown!");
-            }
+            string contentType = FileNameToFileContentType(fileName);
             // Read file
             var byteList = File.ReadAllBytes(fileName);
             var result = controller.File(byteList, contentType);
             return result;
+        }
+
+        /// <summary>
+        /// Returns FileContentResult.
+        /// </summary>
+        public static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName, byte[] data)
+        {
+            string contentType = FileNameToFileContentType(fileName);
+            return controller.File(data, contentType);
         }
 
         /// <summary>

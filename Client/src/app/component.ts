@@ -504,6 +504,7 @@ export class GridField {
     var reader = new FileReader();
     let This: any = this;
     reader.onload = function(e2: any) {
+      // console.log(This.el.nativeElement.value);
       var data = e2.target.result;
       console.log(data);
       This.Text = data;
