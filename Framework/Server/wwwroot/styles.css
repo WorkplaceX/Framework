@@ -1,0 +1,67 @@
+/* Master Styles */
+body {
+    margin: 2em;
+    font-size: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-control {
+    font-size: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.15;
+    border: 0px;
+}
+
+button {
+    font-size: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.15;
+}
+
+img {
+    width: 100%
+}
+
+h1 {
+    color: #369;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 250%;
+}
+
+h2, h3 {
+    color: #444;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: lighter;
+}
+
+.y {
+    background-color: yellow;
+}
+
+.z {
+    font-weight: bold;
+}
+
+.co {
+    background-color: #F2F5A9
+}
+
+.r {
+    background-color: #F6D8CE
+}
+
+.c {
+    background-color: #CEF6CE
+}
+
+.c2 {
+    background-color: #abf7ab
+}
+
+.ErrorRow {
+    color: red;
+}
+
+.ErrorCell {
+    color: red;
+}

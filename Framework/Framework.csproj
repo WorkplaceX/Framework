@@ -29,7 +29,7 @@
     <None Update="Server\wwwroot\ArrowDown.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Server\wwwroot\bootstrap.css">
+    <None Update="Server\wwwroot\bootstrap.min.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Server\wwwroot\favicon.ico">
