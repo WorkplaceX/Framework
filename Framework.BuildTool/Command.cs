@@ -83,8 +83,11 @@
                 UtilFramework.Log("");
                 UtilFramework.Log("ShortCut:");
                 UtilFramework.Log("1=buildClient");
-                UtilFramework.Log("2=serve -c");
+                UtilFramework.Log("2=serve --client");
                 UtilFramework.Log("3=generate");
+                UtilFramework.Log("4=runSql");
+                UtilFramework.Log("5=runSql --drop");
+                UtilFramework.Log("6=runSqlColumn");
                 string line = Console.ReadLine();
                 if (line == "1")
                 {
@@ -92,11 +95,23 @@
                 }
                 if (line == "2")
                 {
-                    result.Execute("serve", "-c");
+                    result.Execute("serve", "--client");
                 }
                 if (line == "3")
                 {
                     result.Execute("generate");
+                }
+                if (line == "4")
+                {
+                    result.Execute("runSql");
+                }
+                if (line == "5")
+                {
+                    result.Execute("runSql", "--drop");
+                }
+                if (line == "6")
+                {
+                    result.Execute("runSqlColumn");
                 }
                 Console.WriteLine("Press Enter...");
                 Console.ReadLine();

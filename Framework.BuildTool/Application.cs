@@ -1,5 +1,6 @@
 ﻿namespace Framework.BuildTool
 {
+    using Framework.Application;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
@@ -7,6 +8,16 @@
 
     public class AppBuildTool
     {
+        public AppBuildTool(App app)
+        {
+            this.App = app;
+        }
+
+        /// <summary>
+        /// Gets App. Used for TypeRowInAssembly.
+        /// </summary>
+        public readonly App App;
+
         public void Run(string[] args)
         {
             CommandLineApplication commandLineApplication = Command.CommandLineApplicationCreate();
@@ -36,6 +47,7 @@
             commandList.Add(new CommandServe());
             commandList.Add(new CommandUnitTest());
             commandList.Add(new CommandRunSql());
+            commandList.Add(new CommandRunSqlColumn(this));
             commandList.Add(new CommandGenerate());
             commandList.Add(new CommandBuildClient());
             commandList.Add(new CommandInstallAll());

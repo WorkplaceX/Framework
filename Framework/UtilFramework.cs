@@ -12,7 +12,7 @@
         {
             get
             {
-                return "v1.006 Server";
+                return "v1.007 Server";
             }
         }
 
@@ -174,20 +174,6 @@
             return result;
         }
 
-        public static Type TypeFromString(string type, Type typeRowInAssembly) // TODO Remove
-        {
-            Type result = null;
-            if (type != null)
-            {
-                result = typeRowInAssembly.GetTypeInfo().Assembly.GetType(type);
-                if (result == null)
-                {
-                    throw new Exception("Type not found!");
-                }
-            }
-            return result;
-        }
-
         /// <summary>
         /// Returns newly created instance of type with parameterless constructor.
         /// </summary>
@@ -200,6 +186,10 @@
 
         public static bool IsSubclassOf(Type type, Type typeBase)
         {
+            if (type == null)
+            {
+                return false;
+            }
             return type.GetTypeInfo().IsSubclassOf(typeBase) || type == typeBase;
         }
 

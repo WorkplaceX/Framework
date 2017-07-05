@@ -50,31 +50,59 @@
         }
 
         /// <summary>
+        /// Returns list of assemblies to look for Row classes.
+        /// </summary>
+        private static Assembly[] AssemblyRowList(Type typeRowInAssembly)
+        {
+            List<Assembly> result = new List<Assembly>();
+            result.Add(typeof(UtilFramework).GetTypeInfo().Assembly);
+            result.Add(typeRowInAssembly.GetTypeInfo().Assembly);
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// Returns TypeRowList of all in code defined Row classes. Returns also framework Row classes.
+        /// </summary>
+        public static Type[] TypeRowList(Type typeRowInAssembly)
+        {
+            List<Type> result = new List<Type>();
+            Assembly[] assemblyList = AssemblyRowList(typeRowInAssembly);
+            foreach (Assembly assembly in assemblyList)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.GetTypeInfo().IsSubclassOf(typeof(Row)))
+                    {
+                        result.Add(type);
+                    }
+                }
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
         /// Returns row type. Searches also for Framework tables.
         /// </summary>
         /// <param name="typeRow">For example: "Database.dbo.User".</param>
         public static Type TypeRowFromName(string typeRow, Type typeRowInAssembly)
         {
-            Type result = null;
+            List<Type> result = new List<Type>();
             if (typeRow != null)
             {
-                Type resultFramework = typeof(UtilFramework).GetTypeInfo().Assembly.GetType(typeRow);
-                result = typeRowInAssembly.GetTypeInfo().Assembly.GetType(typeRow);
-                if (result == null && resultFramework == null)
+                Assembly[] assemblyRowList = AssemblyRowList(typeRowInAssembly);
+                foreach (Assembly assembly in assemblyRowList)
                 {
-                    throw new Exception("Type not found!");
+                    Type type = assembly.GetType(typeRow);
+                    if (type != null)
+                    {
+                        result.Add(type);
+                    }
                 }
-                if (result != null && resultFramework != null)
-                {
-                    UtilFramework.Assert(false, string.Format("Row type more than once defined! ({0})", typeRow));
-                }
-                if (result == null)
-                {
-                    result = resultFramework;
-                }
+                UtilFramework.Assert(result.Count == 0, "Type not found!");
+                UtilFramework.Assert(!(result.Count > 1), string.Format("Row type more than once defined! ({0})", typeRow));
             }
-            UtilFramework.Assert(UtilFramework.IsSubclassOf(result, typeof(Row)), "Wrong type!");
-            return result;
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(result.FirstOrDefault(), typeof(Row)), "Wrong type!");
+            return result.FirstOrDefault();
         }
 
         [ThreadStatic]

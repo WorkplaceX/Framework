@@ -20,14 +20,6 @@
         }
 
         /// <summary>
-        ///  Returns assembly to search for classes when deserializing json. (For example: "Database.dbo.Airport")
-        /// </summary>
-        virtual internal Type TypeRowInAssembly()
-        {
-            return GetType();
-        }
-
-        /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
         /// </summary>
         virtual internal Type TypeComponentInNamespace()

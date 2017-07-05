@@ -61,7 +61,6 @@
 
     public class GridData
     {
-
         /// <summary>
         /// Returns user modified text. If null, user has not changed text.
         /// </summary>
@@ -696,7 +695,7 @@
             GridDataJson gridDataJson = appJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[gridName].TypeRow;
-            Type typeRow = UtilDataAccessLayer.TypeRowFromName(typeRowString, app.TypeRowInAssembly());
+            Type typeRow = UtilDataAccessLayer.TypeRowFromName(typeRowString, UtilApplication.TypeRowInAssembly(app));
             TypeRowSet(gridName, typeRow);
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])

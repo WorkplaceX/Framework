@@ -1,5 +1,7 @@
 ﻿namespace Framework.Application
 {
+    using System;
+
     public enum IndexEnum
     {
         None = 0,
@@ -11,6 +13,14 @@
 
     public static class UtilApplication
     {
+        /// <summary>
+        /// Returns TypeRowInAssembly. This is a type in an assembly. In this assembly search for Row classes when deserializing json. (For example: "Database.dbo.Airport")
+        /// </summary>
+        public static Type TypeRowInAssembly(App app)
+        {
+            return app.GetType();
+        }
+
         public static string IndexEnumToText(IndexEnum indexEnum)
         {
             return indexEnum.ToString();
