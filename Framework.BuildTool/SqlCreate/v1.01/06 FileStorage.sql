@@ -41,7 +41,7 @@ FROM
 			WHERE
 				FileStorage2.Name = FileStorage.Name AND
 				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				FileStorage2.ConfigurationId = ConfigurationPath2.ContainConfigurationId
+				FileStorage2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
 
 			ORDER BY
 				ConfigurationPath2.Level

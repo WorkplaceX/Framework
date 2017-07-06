@@ -14,14 +14,15 @@ DROP TABLE FrameworkColumn
 /* Session */
 DROP TABLE FrameworkSession
 /* Configuration */
+DROP VIEW FrameworkConfigurationTreeHierarchy
 DROP VIEW FrameworkLanguageView
 DROP VIEW FrameworkConfigurationView
+DROP TABLE FrameworkConfigurationPath
+DROP TABLE FrameworkConfigurationTree
 ALTER TABLE FrameworkConfiguration DROP CONSTRAINT FK_FrameworkConfiguration_UserId
 DROP TABLE FrameworkUser
 ALTER TABLE FrameworkConfiguration DROP CONSTRAINT FK_FrameworkConfiguration_LanguageId
 DROP TABLE FrameworkLanguage
-DROP TABLE FrameworkConfigurationPath
-DROP TABLE FrameworkConfigurationTree
 DROP TABLE FrameworkConfiguration
 DROP TABLE FrameworkApplication
 DROP TABLE FrameworkApplicationType

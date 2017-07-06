@@ -36,17 +36,6 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 UNION ALL
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), 'Outline B', 'OutlineB2.docx'
 
-INSERT INTO FrameworkConfigurationPath (ConfigurationId, ContainConfigurationId, Level)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 1
-UNION ALL
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), 1
-UNION ALL
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 2
-UNION ALL
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC D'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 1
-UNION ALL
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 1
-
 INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), NULL, 'Default'
 UNION ALL
@@ -71,13 +60,6 @@ UNION ALL
 SELECT Id AS ConfigurationId, 'Anmelden' FROM FrameworkConfiguration WHERE LanguageId =
 (SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC') AND Name = 'German')
 
-GO
-
-INSERT INTO FrameworkConfigurationPath (ConfigurationId, ContainConfigurationId, Level)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE LanguageName = 'French'), 1
-
-GO
-
 INSERT INTO FrameworkUser (ApplicationId, Name)
 SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'Framework') AS ApplicationId,  'Admin' AS Name
 UNION ALL
@@ -93,5 +75,7 @@ SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), 'Coordy'
 UNION ALL
 SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), 'Spky'
 
-INSERT INTO FrameworkSession (Name, UserId)
-SELECT NEWID(), (SELECT Id FROM FrameworkUser WHERE ApplicationId = (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH') AND Name = 'hnc')
+INSERT INTO FrameworkSession (Name, ApplicationId, ApplicationTypeId)
+SELECT NEWID(), (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT ApplicationTypeId FROM FrameworkApplication WHERE Name = 'PTC CH') /* User not logged in, no language selected */
+INSERT INTO FrameworkSession (Name, ApplicationId, ApplicationTypeId, UserId)
+SELECT NEWID(), (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT ApplicationTypeId FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT Id FROM FrameworkUser WHERE ApplicationId = (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH') AND Name = 'hnc')

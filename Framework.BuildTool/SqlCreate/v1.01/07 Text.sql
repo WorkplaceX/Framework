@@ -36,7 +36,7 @@ FROM
 			WHERE
 				Text2.Name = Text.Name AND
 				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				Text2.ConfigurationId = ConfigurationPath2.ContainConfigurationId
+				Text2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
 
 			ORDER BY
 				ConfigurationPath2.Level

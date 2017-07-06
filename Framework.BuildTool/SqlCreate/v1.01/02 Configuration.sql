@@ -19,24 +19,8 @@ CREATE TABLE FrameworkConfiguration
 (
 	Id INT PRIMARY KEY IDENTITY,
 	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
-	LanguageId INT,
-	UserId INT
-)
-
-CREATE TABLE FrameworkConfigurationTree
-(
-	Id INT PRIMARY KEY IDENTITY,
-	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
-	ParentId INT FOREIGN KEY REFERENCES FrameworkConfigurationTree(Id) NOT NULL,
-)
-
-CREATE TABLE FrameworkConfigurationPath
-(
-	Id INT PRIMARY KEY IDENTITY,
-	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
-	ContainConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
-	Level INT NOT NULL,
-	INDEX IX_FrameworkConfigurationTree UNIQUE (ConfigurationId, ContainConfigurationId)
+	LanguageId INT, /* ADD CONSTRAINT */
+	UserId INT /* ADD CONSTRAINT */ /* Logged in user */ 
 )
 
 CREATE TABLE FrameworkLanguage /* For example English, German */
@@ -47,7 +31,7 @@ CREATE TABLE FrameworkLanguage /* For example English, German */
   	Name NVARCHAR(256) NOT NULL,
 	INDEX IX_FrameworkLanguageName UNIQUE (ConfigurationId, Name)
 )
-ALTER TABLE FrameworkConfiguration ADD	CONSTRAINT FK_FrameworkConfiguration_LanguageId FOREIGN KEY (LanguageId) REFERENCES FrameworkLanguage(Id)
+ALTER TABLE FrameworkConfiguration ADD CONSTRAINT FK_FrameworkConfiguration_LanguageId FOREIGN KEY (LanguageId) REFERENCES FrameworkLanguage(Id)
 
 CREATE TABLE FrameworkUser
 (
@@ -61,7 +45,28 @@ CREATE TABLE FrameworkUser
 	IsActive BIT,
 	INDEX IX_FrameworkUser UNIQUE (ApplicationId, Name)
 )
-ALTER TABLE FrameworkConfiguration ADD	CONSTRAINT FK_FrameworkConfiguration_UserId FOREIGN KEY (UserId) REFERENCES FrameworkUser(Id)
+ALTER TABLE FrameworkConfiguration ADD CONSTRAINT FK_FrameworkConfiguration_UserId FOREIGN KEY (UserId) REFERENCES FrameworkUser(Id)
+
+CREATE TABLE FrameworkConfigurationTree
+(
+	Id INT PRIMARY KEY IDENTITY,
+	ParentId INT FOREIGN KEY REFERENCES FrameworkConfigurationTree(Id),
+	ApplicationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
+	ApplicationParentId INT,
+	LanguageId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id),
+	LanguageParentId INT,
+	UserId INT FOREIGN KEY REFERENCES FrameworkUser(Id),
+	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
+)
+
+CREATE TABLE FrameworkConfigurationPath
+(
+	Id INT PRIMARY KEY IDENTITY,
+	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
+	ConfigurationIdContain INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
+	Level INT NOT NULL,
+	INDEX IX_FrameworkConfigurationTree UNIQUE (ConfigurationId, ConfigurationIdContain)
+)
 
 GO
 
@@ -124,7 +129,7 @@ FROM
 			WHERE
 				Language2.Name = Language.Name AND
 				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				Language2.ConfigurationId = ConfigurationPath2.ContainConfigurationId
+				Language2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
 
 			ORDER BY
 				ConfigurationPath2.Level
@@ -148,3 +153,41 @@ GROUP BY
 	Language2.Level,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
+
+GO
+
+CREATE VIEW FrameworkConfigurationTreeHierarchy
+AS
+
+WITH Hierarchy
+AS
+(
+	SELECT 
+		FirstGeneration.*, 
+		1 AS Level,
+		Id AS LastChildId 
+	FROM 
+		FrameworkConfigurationTree AS FirstGeneration
+	UNION ALL
+	SELECT 
+		NextGeneration.*, 
+		Parent.Level + 1,
+		Parent.LastChildId 
+	FROM 
+		FrameworkConfigurationTree AS NextGeneration,
+		Hierarchy AS Parent 
+	WHERE 
+		NextGeneration.Id = Parent.ParentId
+)
+SELECT 
+  Hierarchy.LastChildId AS Id, 
+  Hierarchy.Id AS ContainId, 
+  Hierarchy.Level, 
+  Hierarchy.ParentId,
+  ConfigurationTree2.ConfigurationId,
+  Hierarchy.ConfigurationId AS ConfigurationIdContain
+  
+FROM Hierarchy Hierarchy
+
+LEFT JOIN
+	FrameworkConfigurationTree ConfigurationTree2 ON (ConfigurationTree2.Id = Hierarchy.LastChildId)
