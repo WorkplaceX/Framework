@@ -14,7 +14,6 @@ DROP TABLE FrameworkColumn
 /* Session */
 DROP TABLE FrameworkSession
 /* Configuration */
-DROP VIEW FrameworkUserView
 DROP VIEW FrameworkLanguageView
 DROP VIEW FrameworkConfigurationView
 ALTER TABLE FrameworkConfiguration DROP CONSTRAINT FK_FrameworkConfiguration_UserId
@@ -25,3 +24,4 @@ DROP TABLE FrameworkConfigurationPath
 DROP TABLE FrameworkConfigurationTree
 DROP TABLE FrameworkConfiguration
 DROP TABLE FrameworkApplication
+DROP TABLE FrameworkApplicationType

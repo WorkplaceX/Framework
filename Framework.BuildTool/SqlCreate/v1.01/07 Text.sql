@@ -15,12 +15,12 @@ CREATE VIEW FrameworkTextView
 AS
 SELECT
 	Configuration.Id AS ConfigurationId,
-	ConfigurationView.ApplicationId AS ConfigurationApplicationId,
-	ConfigurationView.ApplicationName AS ConfigurationApplicationName,
-	ConfigurationView.LanguageId AS ConfigurationLanguageId,
-	ConfigurationView.LanguageName AS ConfigurationLanguageName,
 	Text2.Id AS TextId,
-	Text.Name
+	Text.Name,
+	Text2.ConfigurationId AS ConfigurationIdSource,
+	Text2.Level AS Level,
+	ConfigurationView.Debug AS ConfigurationDebug,
+	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
 
 FROM
 	FrameworkConfiguration Configuration
@@ -28,7 +28,8 @@ FROM
 	OUTER APPLY
 		(
 			SELECT TOP 1 
-				Text2.*
+				Text2.*,
+				ConfigurationPath2.Level
 			FROM
 				FrameworkText Text2,
 				FrameworkConfigurationPath ConfigurationPath2
@@ -45,17 +46,20 @@ FROM
 LEFT JOIN
 	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Configuration.Id)
 
+LEFT JOIN
+	FrameworkConfigurationView ConfigurationViewSource ON (ConfigurationViewSource.ConfigurationId = Text2.ConfigurationId)
+
 WHERE
 	Text2.Id IS NOT NULL
 
 GROUP BY
 	Configuration.Id,
-	ConfigurationView.ApplicationId,
-	ConfigurationView.ApplicationName,
-	ConfigurationView.LanguageId,
-	ConfigurationView.LanguageName,
 	Text2.Id,
-	Text.Name
+	Text.Name,
+	Text2.ConfigurationId,
+	Text2.Level,
+	ConfigurationView.Debug,
+	ConfigurationViewSource.Debug
 
 GO
 

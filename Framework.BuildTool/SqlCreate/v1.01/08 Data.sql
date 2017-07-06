@@ -1,13 +1,22 @@
 ﻿IF (NOT ISNULL((SELECT Version FROM FrameworkVersion), '') = 'v1.01') RETURN  -- Version Check
 
-INSERT INTO FrameworkApplication (Name)
+INSERT INTO FrameworkApplicationType (Name)
+SELECT 'Framework' AS Name
+UNION ALL
 SELECT 'PTC' AS Name
 UNION ALL
-SELECT 'PTC CH' AS Name
-UNION ALL
-SELECT 'PTC D' AS Name
-UNION ALL
 SELECT 'LPN' AS Name
+
+INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
+SELECT 'Framework' AS Name, NULL AS ParentId, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'Framework') AS ApplicationTypeId, 'framework' AS Domain
+INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
+SELECT 'PTC' AS Name, NULL, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptc' AS Domain
+INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
+SELECT 'PTC CH' AS Name, (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptcch'
+INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
+SELECT 'PTC D' AS Name, (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptcd'
+INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
+SELECT 'LPN' AS Name, NULL, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'LPN'), 'lpn'
 
 INSERT INTO FrameworkConfiguration (ApplicationId)
 SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'
@@ -69,5 +78,20 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 
 GO
 
-INSERT INTO FrameworkUser (ConfigurationId, Name)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'John'
+INSERT INTO FrameworkUser (ApplicationId, Name)
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'Framework') AS ApplicationId,  'Admin' AS Name
+UNION ALL
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'LPN') AS ApplicationId,  'John' AS Name
+UNION ALL
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC CH') AS ApplicationId,  'Hnc' AS Name
+
+
+INSERT INTO FrameworkRole (ApplicationTypeId, Name)
+SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'Framework'), 'Admin'
+UNION ALL
+SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), 'Coordy'
+UNION ALL
+SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), 'Spky'
+
+INSERT INTO FrameworkSession (Name, UserId)
+SELECT NEWID(), (SELECT Id FROM FrameworkUser WHERE ApplicationId = (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH') AND Name = 'hnc')

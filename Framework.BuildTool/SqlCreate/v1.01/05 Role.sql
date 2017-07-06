@@ -3,9 +3,9 @@
 CREATE TABLE FrameworkRole /* For example Admin, DataRead */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
+	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id) NOT NULL,
   	Name NVARCHAR(256) NOT NULL,
-	INDEX IX_FrameworkRole UNIQUE (Name, ConfigurationId)
+	INDEX IX_FrameworkRole UNIQUE (ApplicationTypeId, Name)
 )
 
 CREATE TABLE FrameworkUserRole

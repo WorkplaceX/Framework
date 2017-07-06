@@ -1,9 +1,18 @@
 ﻿IF (NOT ISNULL((SELECT Version FROM FrameworkVersion), '') = 'v1.01') RETURN  -- Version Check
 
-CREATE TABLE FrameworkApplication
+CREATE TABLE FrameworkApplicationType
 (
 	Id INT PRIMARY KEY IDENTITY,
   	Name NVARCHAR(256) NOT NULL UNIQUE
+)
+
+CREATE TABLE FrameworkApplication
+(
+	Id INT PRIMARY KEY IDENTITY,
+  	Name NVARCHAR(256) NOT NULL UNIQUE,
+	ParentId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
+	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id),
+	Domain NVARCHAR(256) NOT NULL UNIQUE /* Url */
 )
 
 CREATE TABLE FrameworkConfiguration
@@ -43,14 +52,14 @@ ALTER TABLE FrameworkConfiguration ADD	CONSTRAINT FK_FrameworkConfiguration_Lang
 CREATE TABLE FrameworkUser
 (
 	Id INT PRIMARY KEY IDENTITY,
-	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
+	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL,
   	Name NVARCHAR(256) NOT NULL, /* User name or email */
 	Password NVARCHAR(256),
 	LanguageId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id), /* Default language. See also FrameworkSession.LanguageId */
 	Confirmation UNIQUEIDENTIFIER,
 	IsConfirmation BIT,
 	IsActive BIT,
-	INDEX IX_FrameworkUser UNIQUE (ConfigurationId, Name)
+	INDEX IX_FrameworkUser UNIQUE (ApplicationId, Name)
 )
 ALTER TABLE FrameworkConfiguration ADD	CONSTRAINT FK_FrameworkConfiguration_UserId FOREIGN KEY (UserId) REFERENCES FrameworkUser(Id)
 
@@ -139,55 +148,3 @@ GROUP BY
 	Language2.Level,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
-
-GO
-
-CREATE VIEW FrameworkUserView
-AS
-SELECT
-	Configuration.Id AS ConfigurationId,
-	ConfigurationView.ApplicationId AS ConfigurationApplicationId,
-	ConfigurationView.ApplicationName AS ConfigurationApplicationName,
-	ConfigurationView.LanguageId AS ConfigurationLanguageId,
-	ConfigurationView.LanguageName AS ConfigurationLanguageName,
-	ConfigurationView.UserId AS ConfigurationUserId,
-	ConfigurationView.UserName AS ConfigurationUserName,
-	User2.Id AS UserId,
-	[User].Name
-
-FROM
-	FrameworkConfiguration Configuration
-	CROSS JOIN FrameworkUser [User]
-	OUTER APPLY
-		(
-			SELECT TOP 1 
-				User2.*
-			FROM
-				FrameworkUser User2,
-				FrameworkConfigurationPath ConfigurationPath2
-			WHERE
-				User2.Name = [User].Name AND
-				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				User2.ConfigurationId = ConfigurationPath2.ContainConfigurationId
-
-			ORDER BY
-				ConfigurationPath2.Level
-			-- FOR XML AUTO
-		) AS User2
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Configuration.Id)
-
-WHERE
-	User2.Id IS NOT NULL
-
-GROUP BY
-	Configuration.Id,
-	ConfigurationView.ApplicationId,
-	ConfigurationView.ApplicationName,
-	ConfigurationView.LanguageId,
-	ConfigurationView.LanguageName,
-	ConfigurationView.UserId,
-	ConfigurationView.UserName,
-	User2.Id,
-	[User].Name
