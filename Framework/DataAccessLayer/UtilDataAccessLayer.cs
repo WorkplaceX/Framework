@@ -98,8 +98,14 @@
                         result.Add(type);
                     }
                 }
-                UtilFramework.Assert(result.Count == 0, "Type not found!");
-                UtilFramework.Assert(!(result.Count > 1), string.Format("Row type more than once defined! ({0})", typeRow));
+                if (result.Count == 0)
+                {
+                    UtilFramework.Assert(false, "Type not found!");
+                }
+                if (result.Count > 1)
+                {
+                    UtilFramework.Assert(false, string.Format("Row type more than once defined! ({0})", typeRow));
+                }
             }
             UtilFramework.Assert(UtilFramework.IsSubclassOf(result.FirstOrDefault(), typeof(Row)), "Wrong type!");
             return result.FirstOrDefault();
