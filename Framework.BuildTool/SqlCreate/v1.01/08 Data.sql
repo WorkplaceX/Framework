@@ -18,7 +18,7 @@ SELECT Id FROM FrameworkApplication WHERE Name = 'PTC D'
 UNION ALL
 SELECT Id FROM FrameworkApplication WHERE Name = 'LPN'
 
-INSERT INTO FrameworkFileStorage (ConfigurationId, FileName, FileNameUpload)
+INSERT INTO FrameworkFileStorage (ConfigurationId, Name, FileNameUpload)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 'Outline A', 'OutlineA.docx'
 UNION ALL
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 'Outline B', 'OutlineB.docx'
@@ -53,13 +53,21 @@ SELECT Id FROM FrameworkLanguage
 GO
 
 INSERT INTO FrameworkText (ConfigurationId, Name)
-SELECT (SELECT ConfigurationId FROM FrameworkLanguageView WHERE ConfigurationApplicationName = 'LPN' AND Name='French'), 'Connecter'
+SELECT Id AS ConfigurationId, 'Connecter' FROM FrameworkConfiguration WHERE LanguageId =
+(SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'LPN') AND Name = 'French')
 UNION ALL
-SELECT (SELECT ConfigurationId FROM FrameworkLanguageView WHERE ConfigurationApplicationName = 'PTC' AND Name='Default'), 'Login'
+SELECT Id AS ConfigurationId, 'Login' FROM FrameworkConfiguration WHERE LanguageId =
+(SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC') AND Name = 'Default')
 UNION ALL
-SELECT (SELECT ConfigurationId FROM FrameworkLanguageView WHERE ConfigurationApplicationName = 'PTC' AND Name='German'), 'Anmelden'
+SELECT Id AS ConfigurationId, 'Anmelden' FROM FrameworkConfiguration WHERE LanguageId =
+(SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC') AND Name = 'German')
 
 GO
 
 INSERT INTO FrameworkConfigurationPath (ConfigurationId, ContainConfigurationId, Level)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE LanguageName = 'French'), 1
+
+GO
+
+INSERT INTO FrameworkUser (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'John'

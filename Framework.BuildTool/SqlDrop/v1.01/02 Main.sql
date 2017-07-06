@@ -14,8 +14,10 @@ DROP TABLE FrameworkColumn
 /* Session */
 DROP TABLE FrameworkSession
 /* Configuration */
+DROP VIEW FrameworkUserView
 DROP VIEW FrameworkLanguageView
 DROP VIEW FrameworkConfigurationView
+ALTER TABLE FrameworkConfiguration DROP CONSTRAINT FK_FrameworkConfiguration_UserId
 DROP TABLE FrameworkUser
 ALTER TABLE FrameworkConfiguration DROP CONSTRAINT FK_FrameworkConfiguration_LanguageId
 DROP TABLE FrameworkLanguage
