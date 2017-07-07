@@ -1,5 +1,4 @@
-﻿return
-/* Every Application, Language and User gets it's Configuration layer */
+﻿/* Every Application gets it's Configuration layer */
 INSERT INTO FrameworkConfiguration (ApplicationId, LanguageId, UserId)
 SELECT Id, NULL, NULL FROM FrameworkApplication
 EXCEPT SELECT ApplicationId, LanguageId, UserId FROM FrameworkConfiguration
@@ -8,23 +7,18 @@ INSERT INTO FrameworkConfiguration (ApplicationId, LanguageId, UserId)
 SELECT NULL, Id, NULL FROM FrameworkLanguage
 EXCEPT SELECT ApplicationId, LanguageId, UserId FROM FrameworkConfiguration
 
-INSERT INTO FrameworkConfiguration (ApplicationId, LanguageId, UserId)
-SELECT NULL, NULL, UserId FROM FrameworkSession
-EXCEPT SELECT ApplicationId, LanguageId, UserId FROM FrameworkConfiguration
+/* Path for Application, Language */
+INSERT INTO FrameworkConfigurationPath (ApplicationId, ConfigurationId, ConfigurationIdContain, Level)
+SELECT ApplicationId, ConfigurationId, ConfigurationIdContain, Level FROM FrameworkApplicationHierarchy
 
-/* ConfigurationTree add Application */
-INSERT INTO FrameworkConfigurationTree (ApplicationId, ApplicationParentId)
-SELECT Id, ParentId FROM FrameworkApplication
-EXCEPT
-SELECT ApplicationId, ApplicationParentId FROM FrameworkConfigurationTree
+INSERT INTO FrameworkConfigurationPath (LanguageId, ConfigurationId, ConfigurationIdContain, Level)
+SELECT LanguageId, ConfigurationId, ConfigurationIdContain, Level FROM FrameworkLanguageHierarchy
 
-UPDATE ConfigurationTree SET ConfigurationTree.ParentId = (SELECT Id FROM FrameworkConfigurationTree ConfigurationTree2 WHERE ConfigurationTree2.ApplicationId = ConfigurationTree.ApplicationParentId)
-FROM FrameworkConfigurationTree ConfigurationTree
+/* Add Text */
+INSERT INTO FrameworkText (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkLanguageView WHERE ApplicationName = 'LPN' AND Name = 'French'), 'Connecter' 
+UNION ALL
+SELECT (SELECT ConfigurationId FROM FrameworkLanguageView WHERE ApplicationName = 'PTC' AND Name = 'Default'), 'Login' 
+UNION ALL
+SELECT (SELECT ConfigurationId FROM FrameworkLanguageView WHERE ApplicationName = 'PTC' AND Name = 'German'), 'Anmelden' 
 
-UPDATE ConfigurationTree SET ConfigurationTree.ConfigurationId = (SELECT Id FROM FrameworkConfiguration Configuration2 WHERE Configuration2.ApplicationId = ConfigurationTree.ApplicationId)
-FROM FrameworkConfigurationTree ConfigurationTree
-
-/* Update FrameworkConfigurationPath */
-DELETE FrameworkConfigurationPath
-INSERT INTO FrameworkConfigurationPath (ConfigurationId, ConfigurationIdContain, Level)
-SELECT ConfigurationId, ConfigurationIdContain, Level FROM FrameworkConfigurationTreeHierarchy

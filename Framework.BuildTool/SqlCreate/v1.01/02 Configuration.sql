@@ -51,6 +51,9 @@ ALTER TABLE FrameworkConfiguration ADD CONSTRAINT FK_FrameworkConfiguration_User
 CREATE TABLE FrameworkConfigurationPath
 (
 	Id INT PRIMARY KEY IDENTITY,
+	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
+	LanguageId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id),
+	UserId INT FOREIGN KEY REFERENCES FrameworkUser(Id),
 	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
 	ConfigurationIdContain INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
 	Level INT NOT NULL,
@@ -100,6 +103,8 @@ SELECT
 	Language.Name,
 	Language2.ConfigurationId AS ConfigurationIdSource,
 	Language2.Level AS Level,
+	ConfigurationView.ApplicationId,
+	ConfigurationView.ApplicationName,
 	ConfigurationView.Debug AS ConfigurationDebug,
 	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
 
@@ -138,6 +143,8 @@ GROUP BY
 	Language.Name,
 	Language2.ConfigurationId,
 	Language2.Level,
+	ConfigurationView.ApplicationId,
+	ConfigurationView.ApplicationName,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
 
@@ -167,16 +174,24 @@ AS
 )
 SELECT 
   Hierarchy.LastChildId AS ApplicationId, 
-  Hierarchy.Id AS ContainId, 
+  Hierarchy.Id AS ApplicationIdContain, 
   Hierarchy.Level, 
   Hierarchy.ParentId,
-  Application.Name
+  Application.Name,
+  Configuration.Id ConfigurationId,
+  ConfigurationContain.Id AS ConfigurationIdContain
 
 FROM 
 	Hierarchy Hierarchy
 
 LEFT JOIN
 	FrameworkApplication Application ON Application.Id = Hierarchy.Id
+
+LEFT JOIN
+	FrameworkConfiguration Configuration ON Configuration.ApplicationId = Hierarchy.LastChildId
+
+LEFT JOIN
+	FrameworkConfiguration ConfigurationContain ON ConfigurationContain.ApplicationId = Hierarchy.Id
 
 GO
 
@@ -204,13 +219,21 @@ AS
 )
 SELECT 
   Hierarchy.LastChildId AS LanguageId, 
-  Hierarchy.Id AS ContainId, 
+  Hierarchy.Id AS LanguageIdContain, 
   Hierarchy.Level, 
   Hierarchy.ParentId,
-  Language.Name
+  Language.Name,
+  Configuration.Id ConfigurationId,
+  ConfigurationContain.Id AS ConfigurationIdContain
 
 FROM 
 	Hierarchy Hierarchy
 
 LEFT JOIN
 	FrameworkLanguage Language ON Language.Id = Hierarchy.Id
+
+LEFT JOIN
+	FrameworkConfiguration Configuration ON Configuration.LanguageId = Hierarchy.LastChildId
+
+LEFT JOIN
+	FrameworkConfiguration ConfigurationContain ON ConfigurationContain.LanguageId = Hierarchy.Id

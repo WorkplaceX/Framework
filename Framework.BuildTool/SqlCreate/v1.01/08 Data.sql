@@ -53,18 +53,6 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 INSERT FrameworkLanguage (ConfigurationId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'French'
 
-GO
-
-INSERT INTO FrameworkText (ConfigurationId, Name)
-SELECT Id AS ConfigurationId, 'Connecter' FROM FrameworkConfiguration WHERE LanguageId =
-(SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'LPN') AND Name = 'French')
-UNION ALL
-SELECT Id AS ConfigurationId, 'Login' FROM FrameworkConfiguration WHERE LanguageId =
-(SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC') AND Name = 'Default')
-UNION ALL
-SELECT Id AS ConfigurationId, 'Anmelden' FROM FrameworkConfiguration WHERE LanguageId =
-(SELECT Id AS LanguageId FROM FrameworkLanguage WHERE ConfigurationId = (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC') AND Name = 'German')
-
 INSERT INTO FrameworkUser (ApplicationId, Name)
 SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'Framework') AS ApplicationId,  'Admin' AS Name
 UNION ALL

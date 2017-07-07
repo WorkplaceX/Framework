@@ -19,6 +19,8 @@ SELECT
 	Text.Name,
 	Text2.ConfigurationId AS ConfigurationIdSource,
 	Text2.Level AS Level,
+	ConfigurationView.ApplicationId,
+	ConfigurationView.ApplicationName,
 	ConfigurationView.Debug AS ConfigurationDebug,
 	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
 
@@ -40,7 +42,6 @@ FROM
 
 			ORDER BY
 				ConfigurationPath2.Level
-			-- FOR XML AUTO
 		) AS Text2
 
 LEFT JOIN
@@ -58,8 +59,7 @@ GROUP BY
 	Text.Name,
 	Text2.ConfigurationId,
 	Text2.Level,
+	ConfigurationView.ApplicationId,
+	ConfigurationView.ApplicationName,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
-
-GO
-
