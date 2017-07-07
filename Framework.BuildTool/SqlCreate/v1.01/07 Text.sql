@@ -21,6 +21,8 @@ SELECT
 	Text2.Level AS Level,
 	ConfigurationView.ApplicationId,
 	ConfigurationView.ApplicationName,
+	ConfigurationView.LanguageId,
+	ConfigurationView.LanguageName,
 	ConfigurationView.Debug AS ConfigurationDebug,
 	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
 
@@ -61,5 +63,7 @@ GROUP BY
 	Text2.Level,
 	ConfigurationView.ApplicationId,
 	ConfigurationView.ApplicationName,
+	ConfigurationView.LanguageId,
+	ConfigurationView.LanguageName,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug

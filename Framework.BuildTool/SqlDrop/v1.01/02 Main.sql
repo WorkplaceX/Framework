@@ -12,6 +12,7 @@ DROP TABLE FrameworkRole
 /* Column */
 DROP TABLE FrameworkColumn
 /* Session */
+ALTER TABLE FrameworkConfigurationpATH DROP CONSTRAINT FK_FrameworkConfigurationPath_SessionId
 DROP TABLE FrameworkSession
 /* Configuration */
 DROP VIEW FrameworkLanguageHierarchy

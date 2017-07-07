@@ -50,16 +50,18 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), (SELECT Id FROM FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'English'), 'German'
 --
+INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), (SELECT Id FROM FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'English'), 'Italian'
+--
 INSERT FrameworkLanguage (ConfigurationId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'French'
 
-INSERT INTO FrameworkUser (ApplicationId, Name)
-SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'Framework') AS ApplicationId,  'Admin' AS Name
+INSERT INTO FrameworkUser (ApplicationId, Name, LanguageId)
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'Framework') AS ApplicationId,  'Admin' AS Name, NULL
 UNION ALL
-SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'LPN') AS ApplicationId,  'John' AS Name
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'LPN') AS ApplicationId,  'John' AS Name, NULL
 UNION ALL
-SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC CH') AS ApplicationId,  'Hnc' AS Name
-
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC CH') AS ApplicationId, 'Hnc' AS Name, (SELECT LanguageId FROM FrameworkLanguageView WHERE ApplicationName = 'PTC CH' AND Name = 'Italian')
 
 INSERT INTO FrameworkRole (ApplicationTypeId, Name)
 SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'Framework'), 'Admin'

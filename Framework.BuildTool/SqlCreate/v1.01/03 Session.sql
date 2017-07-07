@@ -10,3 +10,4 @@ CREATE TABLE FrameworkSession
 	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
 	UserId INT FOREIGN KEY REFERENCES FrameworkUser(Id) /* Link to user when logged in. */
 )
+ALTER TABLE FrameworkConfigurationPath ADD CONSTRAINT FK_FrameworkConfigurationPath_SessionId FOREIGN KEY (SessionId) REFERENCES FrameworkSession(Id)

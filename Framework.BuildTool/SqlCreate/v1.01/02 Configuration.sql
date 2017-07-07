@@ -54,10 +54,11 @@ CREATE TABLE FrameworkConfigurationPath
 	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
 	LanguageId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id),
 	UserId INT FOREIGN KEY REFERENCES FrameworkUser(Id),
+	SessionId INT /* ADD CONSTRAINT */,
 	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
 	ConfigurationIdContain INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
 	Level INT NOT NULL,
-	INDEX IX_FrameworkConfigurationTree UNIQUE (ConfigurationId, ConfigurationIdContain)
+	INDEX IX_FrameworkConfigurationTree UNIQUE (ApplicationId, LanguageId, UserId, SessionId, ConfigurationId, ConfigurationIdContain)
 )
 
 GO
@@ -103,6 +104,7 @@ SELECT
 	Language.Name,
 	Language2.ConfigurationId AS ConfigurationIdSource,
 	Language2.Level AS Level,
+	ConfigurationLanguage.ConfigurationId AS ConfigurationIdLanguage,
 	ConfigurationView.ApplicationId,
 	ConfigurationView.ApplicationName,
 	ConfigurationView.Debug AS ConfigurationDebug,
@@ -134,6 +136,9 @@ LEFT JOIN
 LEFT JOIN
 	FrameworkConfigurationView ConfigurationViewSource ON (ConfigurationViewSource.ConfigurationId = Language2.ConfigurationId)
 
+LEFT JOIN
+	FrameworkConfigurationView ConfigurationLanguage ON (ConfigurationLanguage.LanguageId = Language2.Id)
+
 WHERE
 	Language2.Id IS NOT NULL
 
@@ -143,6 +148,7 @@ GROUP BY
 	Language.Name,
 	Language2.ConfigurationId,
 	Language2.Level,
+	ConfigurationLanguage.ConfigurationId,
 	ConfigurationView.ApplicationId,
 	ConfigurationView.ApplicationName,
 	ConfigurationView.Debug,
