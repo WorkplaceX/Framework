@@ -76,3 +76,58 @@ FROM
 	FrameworkSession Session
 WHERE
 	Session.ConfigurationId IS NOT NULL
+
+GO
+
+CREATE PROCEDURE FrameworkConfigurationPathUpdate
+AS
+DELETE FrameworkConfigurationPath
+
+INSERT INTO FrameworkConfiguration (ApplicationId)
+SELECT Id FROM FrameworkApplication
+EXCEPT SELECT ApplicationId FROM FrameworkConfiguration
+
+INSERT INTO FrameworkConfiguration (LanguageId)
+SELECT Id FROM FrameworkLanguage
+EXCEPT SELECT LanguageId FROM FrameworkConfiguration
+
+INSERT INTO FrameworkConfiguration (UserId)
+SELECT UserId FROM FrameworkSession
+EXCEPT SELECT UserId FROM FrameworkConfiguration
+
+INSERT INTO FrameworkConfigurationPath (ApplicationId, LanguageId, UserId, SessionId, ConfigurationId, ConfigurationIdContain, Level)
+SELECT
+	Session.ApplicationId, Session.LanguageId, 
+	Session.UserId,
+	Session.Id AS SessionId,
+	Application.ConfigurationId,
+	Application.ConfigurationIdContain,
+	Application.Level
+FROM
+	FrameworkSession Session
+LEFT JOIN
+	FrameworkApplicationHierarchy Application ON Application.ApplicationId = Session.ApplicationId
+UNION ALL
+SELECT
+	Session.ApplicationId, Session.LanguageId, 
+	Session.UserId,
+	Session.Id,
+	Language.ConfigurationId,
+	Language.ConfigurationIdContain,
+	Language.Level + 1000
+FROM
+	FrameworkSession Session
+JOIN
+	FrameworkLanguageHierarchy Language ON Language.LanguageId = Session.LanguageId
+UNION ALL
+SELECT
+	Session.ApplicationId, Session.LanguageId, 
+	Session.UserId,
+	Session.Id,
+	Session.ConfigurationId,
+	Session.ConfigurationId AS ConfigurationIdContain,
+	2000 AS Level
+FROM
+	FrameworkSession Session
+WHERE
+	Session.ConfigurationId IS NOT NULL

@@ -104,6 +104,10 @@ SELECT
 	Language.Name,
 	Language2.ConfigurationId AS ConfigurationIdSource,
 	Language2.Level AS Level,
+	Language2.ApplicationId2,
+	Language2.LanguageId2,
+	Language2.UserId,
+	Language2.SessionId,
 	ConfigurationLanguage.ConfigurationId AS ConfigurationIdLanguage,
 	ConfigurationView.ApplicationId,
 	ConfigurationView.ApplicationName,
@@ -117,7 +121,11 @@ FROM
 		(
 			SELECT TOP 1 
 				Language2.*,
-				ConfigurationPath2.Level
+				ConfigurationPath2.Level,
+				ConfigurationPath2.ApplicationId AS ApplicationId2,
+				ConfigurationPath2.LanguageId AS LanguageId2,
+				ConfigurationPath2.UserId,
+				ConfigurationPath2.SessionId
 			FROM
 				FrameworkLanguage Language2,
 				FrameworkConfigurationPath ConfigurationPath2
@@ -127,7 +135,7 @@ FROM
 				Language2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
 
 			ORDER BY
-				ConfigurationPath2.Level
+				ConfigurationPath2.Level desc
 		) AS Language2
 
 LEFT JOIN
@@ -148,6 +156,10 @@ GROUP BY
 	Language.Name,
 	Language2.ConfigurationId,
 	Language2.Level,
+	Language2.ApplicationId2,
+	Language2.LanguageId2,
+	Language2.UserId,
+	Language2.SessionId,
 	ConfigurationLanguage.ConfigurationId,
 	ConfigurationView.ApplicationId,
 	ConfigurationView.ApplicationName,
@@ -163,14 +175,14 @@ AS
 (
 	SELECT 
 		FirstGeneration.*, 
-		0 AS Level,
+		100 AS Level,
 		Id AS LastChildId 
 	FROM 
 		FrameworkApplication AS FirstGeneration
 	UNION ALL
 	SELECT 
 		NextGeneration.*, 
-		Parent.Level + 1,
+		Parent.Level - 1,
 		Parent.LastChildId 
 	FROM 
 		FrameworkApplication AS NextGeneration,
@@ -208,14 +220,14 @@ AS
 (
 	SELECT 
 		FirstGeneration.*, 
-		0 AS Level,
+		100 AS Level,
 		Id AS LastChildId 
 	FROM 
 		FrameworkLanguage AS FirstGeneration
 	UNION ALL
 	SELECT 
 		NextGeneration.*, 
-		Parent.Level + 1,
+		Parent.Level - 1,
 		Parent.LastChildId 
 	FROM 
 		FrameworkLanguage AS NextGeneration,
@@ -243,3 +255,41 @@ LEFT JOIN
 
 LEFT JOIN
 	FrameworkConfiguration ConfigurationContain ON ConfigurationContain.LanguageId = Hierarchy.Id
+
+GO
+
+CREATE VIEW FrameworkConfigurationPathView
+AS
+SELECT
+	Path.Id,
+	Path.ApplicationId,
+	Path.LanguageId,
+	Path.UserId,
+	Path.SessionId,
+	Path.ConfigurationId,
+	Path.ConfigurationIdContain,
+	Path.Level,
+	Application.Name AS ApplicationName,
+	Language.Name AS LanguageName,
+	[User].Name AS UserName,
+	Configuration.Debug AS ConfigurationDebug,
+	ConfigurationContain.Debug AS ConfigurationDebugContain
+
+
+FROM
+	FrameworkConfigurationPath Path
+
+LEFT JOIN
+	FrameworkApplication Application ON Application.Id = Path.ApplicationId
+
+LEFT JOIN
+	FrameworkLanguage Language ON Language.Id = Path.LanguageId
+
+LEFT JOIN
+	FrameworkUser [User] ON [User].Id = Path.UserId
+
+LEFT JOIN
+	FrameworkConfigurationView Configuration ON Configuration.ConfigurationId = Path.ConfigurationId
+
+LEFT JOIN
+	FrameworkConfigurationView ConfigurationContain ON ConfigurationContain.ConfigurationId = Path.ConfigurationIdContain

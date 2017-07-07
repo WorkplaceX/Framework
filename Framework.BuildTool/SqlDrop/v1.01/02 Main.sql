@@ -15,6 +15,8 @@ DROP TABLE FrameworkColumn
 ALTER TABLE FrameworkConfigurationpATH DROP CONSTRAINT FK_FrameworkConfigurationPath_SessionId
 DROP TABLE FrameworkSession
 /* Configuration */
+DROP PROCEDURE FrameworkConfigurationPathUpdate
+DROP VIEW FrameworkConfigurationPathView
 DROP VIEW FrameworkLanguageHierarchy
 DROP VIEW FrameworkApplicationHierarchy
 DROP VIEW FrameworkLanguageView

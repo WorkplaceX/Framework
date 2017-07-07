@@ -19,9 +19,10 @@ SELECT
 	Text.Name,
 	Text2.ConfigurationId AS ConfigurationIdSource,
 	Text2.Level AS Level,
-	ConfigurationView.ApplicationId,
-	ConfigurationView.ApplicationName,
-	ConfigurationView.LanguageId,
+	Text2.ApplicationId,
+	Text2.LanguageId,
+	Text2.UserId,
+	Text2.SessionId,
 	ConfigurationView.LanguageName,
 	ConfigurationView.Debug AS ConfigurationDebug,
 	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
@@ -33,7 +34,11 @@ FROM
 		(
 			SELECT TOP 1 
 				Text2.*,
-				ConfigurationPath2.Level
+				ConfigurationPath2.Level,
+				ConfigurationPath2.ApplicationId,
+				ConfigurationPath2.LanguageId,
+				ConfigurationPath2.UserId,
+				ConfigurationPath2.SessionId
 			FROM
 				FrameworkText Text2,
 				FrameworkConfigurationPath ConfigurationPath2
@@ -43,7 +48,7 @@ FROM
 				Text2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
 
 			ORDER BY
-				ConfigurationPath2.Level
+				ConfigurationPath2.Level DESC
 		) AS Text2
 
 LEFT JOIN
@@ -60,10 +65,12 @@ GROUP BY
 	Text2.Id,
 	Text.Name,
 	Text2.ConfigurationId,
+	Text2.ApplicationId,
 	Text2.Level,
-	ConfigurationView.ApplicationId,
-	ConfigurationView.ApplicationName,
-	ConfigurationView.LanguageId,
+	Text2.ApplicationId,
+	Text2.LanguageId,
+	Text2.UserId,
+	Text2.SessionId,
 	ConfigurationView.LanguageName,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug

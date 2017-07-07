@@ -23,7 +23,11 @@ SELECT
 	FileStorage2.Data,
 	FileStorage2.IsDelete,
 	FileStorage2.ConfigurationId AS ConfigurationIdSource,
-	FileStorage2.Level AS Level,
+	FileStorage2.Level,
+	FileStorage2.ApplicationId,
+	FileStorage2.LanguageId,
+	FileStorage2.UserId,
+	FileStorage2.SessionId,
 	ConfigurationView.Debug AS ConfigurationDebug,
 	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
 
@@ -34,7 +38,11 @@ FROM
 		(
 			SELECT TOP 1 
 				FileStorage2.*,
-				ConfigurationPath2.Level
+				ConfigurationPath2.Level,
+				ConfigurationPath2.ApplicationId,
+				ConfigurationPath2.LanguageId,
+				ConfigurationPath2.UserId,
+				ConfigurationPath2.SessionId
 			FROM
 				FrameworkFileStorage FileStorage2,
 				FrameworkConfigurationPath ConfigurationPath2
@@ -44,7 +52,7 @@ FROM
 				FileStorage2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
 
 			ORDER BY
-				ConfigurationPath2.Level
+				ConfigurationPath2.Level DESC
 		) AS FileStorage2
 
 LEFT JOIN
@@ -65,5 +73,9 @@ GROUP BY
 	FileStorage2.IsDelete,
 	FileStorage2.ConfigurationId,
 	FileStorage2.Level,
+	FileStorage2.ApplicationId,
+	FileStorage2.LanguageId,
+	FileStorage2.UserId,
+	FileStorage2.SessionId,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
