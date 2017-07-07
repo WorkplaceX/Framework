@@ -7,28 +7,28 @@ SELECT 'PTC' AS Name
 UNION ALL
 SELECT 'LPN' AS Name
 
-INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
-SELECT 'Framework' AS Name, NULL AS ParentId, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'Framework') AS ApplicationTypeId, 'framework' AS Domain
+INSERT INTO FrameworkApplication (Name, ApplicationTypeId, Domain)
+SELECT 'Framework' AS Name, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'Framework') AS ApplicationTypeId, 'framework' AS Domain
 INSERT INTO FrameworkConfiguration (ApplicationId)
 SELECT (SELECT Id From FrameworkApplication WHERE Name = 'Framework')
 --
-INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
-SELECT 'PTC' AS Name, NULL, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptc' AS Domain
+INSERT INTO FrameworkApplication (Name, ApplicationTypeId, Domain)
+SELECT 'PTC' AS Name, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptc' AS Domain
 INSERT INTO FrameworkConfiguration (ApplicationId)
 SELECT (SELECT Id From FrameworkApplication WHERE Name = 'PTC')
 --
-INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
-SELECT 'PTC CH' AS Name, (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptcch'
+INSERT INTO FrameworkApplication (Name, ApplicationTypeId, Domain)
+SELECT 'PTC CH' AS Name, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptcch'
 INSERT INTO FrameworkConfiguration (ApplicationId, ParentId)
 SELECT (SELECT Id From FrameworkApplication WHERE Name = 'PTC CH'), (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC')
 --
-INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
-SELECT 'PTC D' AS Name, (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptcd'
+INSERT INTO FrameworkApplication (Name, ApplicationTypeId, Domain)
+SELECT 'PTC D' AS Name, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC'), 'ptcd'
 INSERT INTO FrameworkConfiguration (ApplicationId, ParentId)
 SELECT (SELECT Id From FrameworkApplication WHERE Name = 'PTC D'), (SELECT Id FROM FrameworkApplicationType WHERE Name = 'PTC')
 --
-INSERT INTO FrameworkApplication (Name, ParentId, ApplicationTypeId, Domain)
-SELECT 'LPN' AS Name, NULL, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'LPN'), 'lpn'
+INSERT INTO FrameworkApplication (Name, ApplicationTypeId, Domain)
+SELECT 'LPN' AS Name, (SELECT Id FROM FrameworkApplicationType WHERE Name = 'LPN'), 'lpn'
 INSERT INTO FrameworkConfiguration (ApplicationId)
 SELECT (SELECT Id From FrameworkApplication WHERE Name = 'LPN')
 
@@ -41,23 +41,23 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 UNION ALL
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), 'Outline B', 'OutlineB2.docx'
 
-INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), NULL, 'Default'
+INSERT FrameworkLanguage (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 'Default'
 INSERT INTO FrameworkConfiguration (LanguageId, ParentId)
 SELECT (SELECT Id From FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'Default'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC')
 --
-INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), (SELECT Id FROM FrameworkLanguage WHERE Name = 'Default'), 'English'
+INSERT FrameworkLanguage (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 'English'
 INSERT INTO FrameworkConfiguration (LanguageId, ParentId)
 SELECT (SELECT Id From FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'English'), (SELECT Id FROM FrameworkConfiguration WHERE LanguageId = (SELECT Id FROM FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'Default'))
 --
-INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), (SELECT Id FROM FrameworkLanguage WHERE Name = 'English'), 'German'
+INSERT FrameworkLanguage (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), 'German'
 INSERT INTO FrameworkConfiguration (LanguageId, ParentId)
 SELECT (SELECT Id From FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'German'), (SELECT Id FROM FrameworkConfiguration WHERE LanguageId = (SELECT Id FROM FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'English'))
 --
-INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
-SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), NULL, 'French'
+INSERT FrameworkLanguage (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'French'
 INSERT INTO FrameworkConfiguration (LanguageId, ParentId)
 SELECT (SELECT Id From FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN') AND Name = 'French'), (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN')
 

@@ -10,7 +10,6 @@ CREATE TABLE FrameworkApplication
 (
 	Id INT PRIMARY KEY IDENTITY,
   	Name NVARCHAR(256) NOT NULL UNIQUE,
-	ParentId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
 	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id),
 	Domain NVARCHAR(256) NOT NULL UNIQUE /* Url */
 )
@@ -29,7 +28,6 @@ CREATE TABLE FrameworkLanguage /* For example English, German */
 (
 	Id INT PRIMARY KEY IDENTITY,
 	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
-	ParentId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id), -- Fallback if language does not exist.
   	Name NVARCHAR(256) NOT NULL,
 	INDEX IX_FrameworkLanguageName UNIQUE (ConfigurationId, Name)
 )
@@ -111,7 +109,6 @@ AS
 SELECT
 	Configuration.Id AS ConfigurationId,
 	Language2.Id AS LanguageId,
-	Language2.ParentId,
 	Language.Name,
 	Language2.ConfigurationId AS ConfigurationIdSource,
 	Language2.Level AS Level,
@@ -150,7 +147,6 @@ WHERE
 GROUP BY
 	Configuration.Id,
 	Language2.Id,
-	Language2.ParentId,
 	Language.Name,
 	Language2.ConfigurationId,
 	Language2.Level,
@@ -161,7 +157,6 @@ GO
 
 CREATE VIEW FrameworkConfigurationTreeHierarchy
 AS
-
 WITH Hierarchy
 AS
 (
@@ -170,27 +165,33 @@ AS
 		1 AS Level,
 		Id AS LastChildId 
 	FROM 
-		FrameworkConfigurationTree AS FirstGeneration
+		FrameworkConfiguration AS FirstGeneration
 	UNION ALL
 	SELECT 
 		NextGeneration.*, 
 		Parent.Level + 1,
 		Parent.LastChildId 
 	FROM 
-		FrameworkConfigurationTree AS NextGeneration,
+		FrameworkConfiguration AS NextGeneration,
 		Hierarchy AS Parent 
 	WHERE 
 		NextGeneration.Id = Parent.ParentId
 )
 SELECT 
-  Hierarchy.LastChildId AS Id, 
+  Hierarchy.LastChildId AS ConfigurationId, 
   Hierarchy.Id AS ContainId, 
   Hierarchy.Level, 
   Hierarchy.ParentId,
-  ConfigurationTree2.ConfigurationId,
-  Hierarchy.ConfigurationId AS ConfigurationIdContain
+  ConfigurationView.ApplicationId,
+  ConfigurationView.ApplicationName,
+  ConfigurationView.LanguageId,
+  ConfigurationView.LanguageName,
+  ConfigurationView.UserId,
+  ConfigurationView.UserName,
+  ConfigurationView.Debug
+
   
 FROM Hierarchy Hierarchy
 
 LEFT JOIN
-	FrameworkConfigurationTree ConfigurationTree2 ON (ConfigurationTree2.Id = Hierarchy.LastChildId)
+	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Hierarchy.Id)
