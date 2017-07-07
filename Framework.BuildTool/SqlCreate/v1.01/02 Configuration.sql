@@ -98,73 +98,50 @@ GO
 
 CREATE VIEW FrameworkLanguageView
 AS
-SELECT
-	Configuration.Id AS ConfigurationId,
-	Language2.Id AS LanguageId,
-	Language.Name,
-	Language2.ConfigurationId AS ConfigurationIdSource,
-	Language2.Level AS Level,
-	Language2.ApplicationId2,
-	Language2.LanguageId2,
-	Language2.UserId,
-	Language2.SessionId,
-	ConfigurationLanguage.ConfigurationId AS ConfigurationIdLanguage,
-	ConfigurationView.ApplicationId,
-	ConfigurationView.ApplicationName,
-	ConfigurationView.Debug AS ConfigurationDebug,
-	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
+SELECT 
+	Path.ApplicationId,
+	Path.LanguageId,
+	Path.UserId,
+	Path.SessionId,
+	Path.Name,
+	Language.Id AS LanguageLanguageId,
+	Language.ConfigurationId,
+	Configuration.Id AS ConfigurationIdLanguage,
+	Path2.ConfigurationIdContain,
+	(SELECT Name FROM FrameworkApplication Application WHERE Application.Id = Path.ApplicationId) AS ApplicationName
 
 FROM
-	FrameworkConfiguration Configuration
-	CROSS JOIN FrameworkLanguage Language
-	OUTER APPLY
-		(
-			SELECT TOP 1 
-				Language2.*,
-				ConfigurationPath2.Level,
-				ConfigurationPath2.ApplicationId AS ApplicationId2,
-				ConfigurationPath2.LanguageId AS LanguageId2,
-				ConfigurationPath2.UserId,
-				ConfigurationPath2.SessionId
-			FROM
-				FrameworkLanguage Language2,
-				FrameworkConfigurationPath ConfigurationPath2
-			WHERE
-				Language2.Name = Language.Name AND
-				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				Language2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
-
-			ORDER BY
-				ConfigurationPath2.Level desc
-		) AS Language2
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Configuration.Id)
+	FrameworkConfigurationPath Path2,
+	(
+		SELECT
+			Path.ApplicationId,
+			Path.LanguageId,
+			Path.UserId,
+			Path.SessionId,
+			Language.Name,
+			MAX(Path.Level) AS Level
+		FROM
+			FrameworkConfigurationPath Path,
+			FrameworkLanguage Language
+		WHERE
+			Language.ConfigurationId = Path.ConfigurationIdContain 
+		GROUP BY
+			Path.ApplicationId,
+			Path.LanguageId,
+			Path.UserId,
+			Path.SessionId,
+			Language.Name
+	) AS Path,
+	FrameworkLanguage Language
 
 LEFT JOIN
-	FrameworkConfigurationView ConfigurationViewSource ON (ConfigurationViewSource.ConfigurationId = Language2.ConfigurationId)
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationLanguage ON (ConfigurationLanguage.LanguageId = Language2.Id)
+	FrameworkConfiguration Configuration ON Configuration.LanguageId = Language.Id
 
 WHERE
-	Language2.Id IS NOT NULL
-
-GROUP BY
-	Configuration.Id,
-	Language2.Id,
-	Language.Name,
-	Language2.ConfigurationId,
-	Language2.Level,
-	Language2.ApplicationId2,
-	Language2.LanguageId2,
-	Language2.UserId,
-	Language2.SessionId,
-	ConfigurationLanguage.ConfigurationId,
-	ConfigurationView.ApplicationId,
-	ConfigurationView.ApplicationName,
-	ConfigurationView.Debug,
-	ConfigurationViewSource.Debug
+	Path2.SessionId = Path.SessionId AND
+	Path2.Level = Path.Level AND
+	Language.ConfigurationId = Path2.ConfigurationIdContain AND 
+	Language.Name = Path.Name
 
 GO
 

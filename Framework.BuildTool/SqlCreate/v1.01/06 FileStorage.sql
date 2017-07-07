@@ -15,67 +15,43 @@ GO
 
 CREATE VIEW FrameworkFileStorageView
 AS
-SELECT
-	Configuration.Id AS ConfigurationId,
-	FileStorage2.Id AS FileStorageId,
-	FileStorage.Name,
-	FileStorage2.FileNameUpload,
-	FileStorage2.Data,
-	FileStorage2.IsDelete,
-	FileStorage2.ConfigurationId AS ConfigurationIdSource,
-	FileStorage2.Level,
-	FileStorage2.ApplicationId,
-	FileStorage2.LanguageId,
-	FileStorage2.UserId,
-	FileStorage2.SessionId,
-	ConfigurationView.Debug AS ConfigurationDebug,
-	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
+SELECT 
+	Path.ApplicationId,
+	Path.LanguageId,
+	Path.UserId,
+	Path.SessionId,
+	Path.Name,
+	FileStorage.ConfigurationId,
+	FileStorage.FileNameUpload,
+	FileStorage.Data,
+	FileStorage.IsDelete
 
 FROM
-	FrameworkConfiguration Configuration
-	CROSS JOIN FrameworkFileStorage FileStorage
-	OUTER APPLY
-		(
-			SELECT TOP 1 
-				FileStorage2.*,
-				ConfigurationPath2.Level,
-				ConfigurationPath2.ApplicationId,
-				ConfigurationPath2.LanguageId,
-				ConfigurationPath2.UserId,
-				ConfigurationPath2.SessionId
-			FROM
-				FrameworkFileStorage FileStorage2,
-				FrameworkConfigurationPath ConfigurationPath2
-			WHERE
-				FileStorage2.Name = FileStorage.Name AND
-				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				FileStorage2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
-
-			ORDER BY
-				ConfigurationPath2.Level DESC
-		) AS FileStorage2
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Configuration.Id)
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationViewSource ON (ConfigurationViewSource.ConfigurationId = FileStorage2.ConfigurationId)
+	FrameworkConfigurationPath Path2,
+	(
+		SELECT
+			Path.ApplicationId,
+			Path.LanguageId,
+			Path.UserId,
+			Path.SessionId,
+			Storage.Name,
+			MAX(Path.Level) AS Level
+		FROM
+			FrameworkConfigurationPath Path,
+			FrameworkFileStorage Storage
+		WHERE
+			Storage.ConfigurationId = Path.ConfigurationIdContain 
+		GROUP BY
+			Path.ApplicationId,
+			Path.LanguageId,
+			Path.UserId,
+			Path.SessionId,
+			Storage.Name
+	) AS Path,
+	FrameworkFileStorage FileStorage
 
 WHERE
-	FileStorage2.Id IS NOT NULL
-
-GROUP BY
-	Configuration.Id,
-	FileStorage2.Id,
-	FileStorage.Name,
-	FileStorage2.FileNameUpload,
-	FileStorage2.Data,
-	FileStorage2.IsDelete,
-	FileStorage2.ConfigurationId,
-	FileStorage2.Level,
-	FileStorage2.ApplicationId,
-	FileStorage2.LanguageId,
-	FileStorage2.UserId,
-	FileStorage2.SessionId,
-	ConfigurationView.Debug,
-	ConfigurationViewSource.Debug
+	Path2.SessionId = Path.SessionId AND
+	Path2.Level = Path.Level AND
+	FileStorage.ConfigurationId = Path2.ConfigurationIdContain AND 
+	FileStorage.Name = Path.Name

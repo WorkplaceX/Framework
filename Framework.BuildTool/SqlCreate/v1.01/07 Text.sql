@@ -13,64 +13,41 @@ GO
 
 CREATE VIEW FrameworkTextView
 AS
-SELECT
-	Configuration.Id AS ConfigurationId,
-	Text2.Id AS TextId,
-	Text.Name,
-	Text2.ConfigurationId AS ConfigurationIdSource,
-	Text2.Level AS Level,
-	Text2.ApplicationId,
-	Text2.LanguageId,
-	Text2.UserId,
-	Text2.SessionId,
-	ConfigurationView.LanguageName,
-	ConfigurationView.Debug AS ConfigurationDebug,
-	ConfigurationViewSource.Debug AS ConfigurationSourceDebug
+SELECT 
+	Path.ApplicationId,
+	Path.LanguageId,
+	Path.UserId,
+	Path.SessionId,
+	Path.Name,
+	Text.ConfigurationId,
+	Text.Text
 
 FROM
-	FrameworkConfiguration Configuration
-	CROSS JOIN FrameworkText Text
-	OUTER APPLY
-		(
-			SELECT TOP 1 
-				Text2.*,
-				ConfigurationPath2.Level,
-				ConfigurationPath2.ApplicationId,
-				ConfigurationPath2.LanguageId,
-				ConfigurationPath2.UserId,
-				ConfigurationPath2.SessionId
-			FROM
-				FrameworkText Text2,
-				FrameworkConfigurationPath ConfigurationPath2
-			WHERE
-				Text2.Name = Text.Name AND
-				ConfigurationPath2.ConfigurationId = Configuration.Id AND
-				Text2.ConfigurationId = ConfigurationPath2.ConfigurationIdContain
-
-			ORDER BY
-				ConfigurationPath2.Level DESC
-		) AS Text2
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Configuration.Id)
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationViewSource ON (ConfigurationViewSource.ConfigurationId = Text2.ConfigurationId)
+	FrameworkConfigurationPath Path2,
+	(
+		SELECT
+			Path.ApplicationId,
+			Path.LanguageId,
+			Path.UserId,
+			Path.SessionId,
+			Text.Name,
+			MAX(Path.Level) AS Level
+		FROM
+			FrameworkConfigurationPath Path,
+			FrameworkText Text
+		WHERE
+			Text.ConfigurationId = Path.ConfigurationIdContain 
+		GROUP BY
+			Path.ApplicationId,
+			Path.LanguageId,
+			Path.UserId,
+			Path.SessionId,
+			Text.Name
+	) AS Path,
+	FrameworkText Text
 
 WHERE
-	Text2.Id IS NOT NULL
-
-GROUP BY
-	Configuration.Id,
-	Text2.Id,
-	Text.Name,
-	Text2.ConfigurationId,
-	Text2.ApplicationId,
-	Text2.Level,
-	Text2.ApplicationId,
-	Text2.LanguageId,
-	Text2.UserId,
-	Text2.SessionId,
-	ConfigurationView.LanguageName,
-	ConfigurationView.Debug,
-	ConfigurationViewSource.Debug
+	Path2.SessionId = Path.SessionId AND
+	Path2.Level = Path.Level AND
+	Text.ConfigurationId = Path2.ConfigurationIdContain AND 
+	Text.Name = Path.Name

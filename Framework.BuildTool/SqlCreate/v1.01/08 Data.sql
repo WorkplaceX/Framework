@@ -61,7 +61,7 @@ SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'Frame
 UNION ALL
 SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'LPN') AS ApplicationId,  'John' AS Name, NULL
 UNION ALL
-SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC CH') AS ApplicationId, 'Hnc' AS Name, (SELECT LanguageId FROM FrameworkLanguageView WHERE ApplicationName = 'PTC CH' AND Name = 'Italian')
+SELECT (SELECT Id AS ApplicationId FROM FrameworkApplication WHERE Name = 'PTC') AS ApplicationId, 'Hnc' AS Name, NULL
 
 INSERT INTO FrameworkRole (ApplicationTypeId, Name)
 SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'Framework'), 'Admin'
@@ -73,4 +73,4 @@ SELECT (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), 'Spky'
 INSERT INTO FrameworkSession (Name, ApplicationId, ApplicationTypeId)
 SELECT NEWID(), (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT ApplicationTypeId FROM FrameworkApplication WHERE Name = 'PTC CH') /* User not logged in, no language selected */
 INSERT INTO FrameworkSession (Name, ApplicationId, ApplicationTypeId, UserId)
-SELECT NEWID(), (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT ApplicationTypeId FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT Id FROM FrameworkUser WHERE ApplicationId = (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH') AND Name = 'hnc')
+SELECT NEWID(), (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC'), (SELECT ApplicationTypeId FROM FrameworkApplication WHERE Name = 'PTC CH'), (SELECT Id FROM FrameworkUser WHERE ApplicationId = (SELECT Id FROM FrameworkApplication WHERE Name = 'PTC CH') AND Name = 'hnc')
