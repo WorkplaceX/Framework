@@ -9,6 +9,7 @@ CREATE TABLE FrameworkApplicationType
 CREATE TABLE FrameworkApplication
 (
 	Id INT PRIMARY KEY IDENTITY,
+	ParentId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
   	Name NVARCHAR(256) NOT NULL UNIQUE,
 	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id),
 	Domain NVARCHAR(256) NOT NULL UNIQUE /* Url */
@@ -17,7 +18,6 @@ CREATE TABLE FrameworkApplication
 CREATE TABLE FrameworkConfiguration
 (
 	Id INT PRIMARY KEY IDENTITY,
-	ParentId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
 	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
 	LanguageId INT, /* ADD CONSTRAINT */
 	UserId INT /* ADD CONSTRAINT */ /* Logged in user */ 
@@ -28,6 +28,7 @@ CREATE TABLE FrameworkLanguage /* For example English, German */
 (
 	Id INT PRIMARY KEY IDENTITY,
 	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id) NOT NULL,
+	ParentId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id),
   	Name NVARCHAR(256) NOT NULL,
 	INDEX IX_FrameworkLanguageName UNIQUE (ConfigurationId, Name)
 )
@@ -47,18 +48,6 @@ CREATE TABLE FrameworkUser
 )
 ALTER TABLE FrameworkConfiguration ADD CONSTRAINT FK_FrameworkConfiguration_UserId FOREIGN KEY (UserId) REFERENCES FrameworkUser(Id)
 
-CREATE TABLE FrameworkConfigurationTree
-(
-	Id INT PRIMARY KEY IDENTITY,
-	ParentId INT FOREIGN KEY REFERENCES FrameworkConfigurationTree(Id),
-	ApplicationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
-	ApplicationParentId INT,
-	LanguageId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id),
-	LanguageParentId INT,
-	UserId INT FOREIGN KEY REFERENCES FrameworkUser(Id),
-	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
-)
-
 CREATE TABLE FrameworkConfigurationPath
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -74,7 +63,6 @@ CREATE VIEW FrameworkConfigurationView
 AS
 SELECT
 	Configuration.Id AS ConfigurationId,
-	Configuration.ParentId,
 	Application.Id AS ApplicationId,
 	Application.Name AS ApplicationName,
 	Language.Id AS LanguageId,
@@ -152,46 +140,3 @@ GROUP BY
 	Language2.Level,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
-
-GO
-
-CREATE VIEW FrameworkConfigurationTreeHierarchy
-AS
-WITH Hierarchy
-AS
-(
-	SELECT 
-		FirstGeneration.*, 
-		1 AS Level,
-		Id AS LastChildId 
-	FROM 
-		FrameworkConfiguration AS FirstGeneration
-	UNION ALL
-	SELECT 
-		NextGeneration.*, 
-		Parent.Level + 1,
-		Parent.LastChildId 
-	FROM 
-		FrameworkConfiguration AS NextGeneration,
-		Hierarchy AS Parent 
-	WHERE 
-		NextGeneration.Id = Parent.ParentId
-)
-SELECT 
-  Hierarchy.LastChildId AS ConfigurationId, 
-  Hierarchy.Id AS ContainId, 
-  Hierarchy.Level, 
-  Hierarchy.ParentId,
-  ConfigurationView.ApplicationId,
-  ConfigurationView.ApplicationName,
-  ConfigurationView.LanguageId,
-  ConfigurationView.LanguageName,
-  ConfigurationView.UserId,
-  ConfigurationView.UserName,
-  ConfigurationView.Debug
-
-  
-FROM Hierarchy Hierarchy
-
-LEFT JOIN
-	FrameworkConfigurationView ConfigurationView ON (ConfigurationView.ConfigurationId = Hierarchy.Id)
