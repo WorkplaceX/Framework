@@ -1,4 +1,5 @@
-﻿/* Every Application, Language and User gets it's Configuration layer */
+﻿return
+/* Every Application, Language and User gets it's Configuration layer */
 INSERT INTO FrameworkConfiguration (ApplicationId, LanguageId, UserId)
 SELECT Id, NULL, NULL FROM FrameworkApplication
 EXCEPT SELECT ApplicationId, LanguageId, UserId FROM FrameworkConfiguration

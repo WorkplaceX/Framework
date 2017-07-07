@@ -18,9 +18,11 @@ CREATE TABLE FrameworkApplication
 CREATE TABLE FrameworkConfiguration
 (
 	Id INT PRIMARY KEY IDENTITY,
+	ParentId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
 	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
 	LanguageId INT, /* ADD CONSTRAINT */
 	UserId INT /* ADD CONSTRAINT */ /* Logged in user */ 
+	INDEX IX_FrameworkConfiguration UNIQUE (ApplicationId, LanguageId, UserId)
 )
 
 CREATE TABLE FrameworkLanguage /* For example English, German */
@@ -74,6 +76,7 @@ CREATE VIEW FrameworkConfigurationView
 AS
 SELECT
 	Configuration.Id AS ConfigurationId,
+	Configuration.ParentId,
 	Application.Id AS ApplicationId,
 	Application.Name AS ApplicationName,
 	Language.Id AS LanguageId,
