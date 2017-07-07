@@ -14,6 +14,8 @@ DROP TABLE FrameworkColumn
 /* Session */
 DROP TABLE FrameworkSession
 /* Configuration */
+DROP VIEW FrameworkLanguageHierarchy
+DROP VIEW FrameworkApplicationHierarchy
 DROP VIEW FrameworkLanguageView
 DROP VIEW FrameworkConfigurationView
 DROP TABLE FrameworkConfigurationPath

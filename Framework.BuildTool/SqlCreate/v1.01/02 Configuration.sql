@@ -140,3 +140,77 @@ GROUP BY
 	Language2.Level,
 	ConfigurationView.Debug,
 	ConfigurationViewSource.Debug
+
+GO
+
+CREATE VIEW FrameworkApplicationHierarchy
+AS
+WITH Hierarchy
+AS
+(
+	SELECT 
+		FirstGeneration.*, 
+		0 AS Level,
+		Id AS LastChildId 
+	FROM 
+		FrameworkApplication AS FirstGeneration
+	UNION ALL
+	SELECT 
+		NextGeneration.*, 
+		Parent.Level + 1,
+		Parent.LastChildId 
+	FROM 
+		FrameworkApplication AS NextGeneration,
+		Hierarchy AS Parent 
+	WHERE 
+		NextGeneration.Id = Parent.ParentId
+)
+SELECT 
+  Hierarchy.LastChildId AS ApplicationId, 
+  Hierarchy.Id AS ContainId, 
+  Hierarchy.Level, 
+  Hierarchy.ParentId,
+  Application.Name
+
+FROM 
+	Hierarchy Hierarchy
+
+LEFT JOIN
+	FrameworkApplication Application ON Application.Id = Hierarchy.Id
+
+GO
+
+CREATE VIEW FrameworkLanguageHierarchy
+AS
+WITH Hierarchy
+AS
+(
+	SELECT 
+		FirstGeneration.*, 
+		0 AS Level,
+		Id AS LastChildId 
+	FROM 
+		FrameworkLanguage AS FirstGeneration
+	UNION ALL
+	SELECT 
+		NextGeneration.*, 
+		Parent.Level + 1,
+		Parent.LastChildId 
+	FROM 
+		FrameworkLanguage AS NextGeneration,
+		Hierarchy AS Parent 
+	WHERE 
+		NextGeneration.Id = Parent.ParentId
+)
+SELECT 
+  Hierarchy.LastChildId AS LanguageId, 
+  Hierarchy.Id AS ContainId, 
+  Hierarchy.Level, 
+  Hierarchy.ParentId,
+  Language.Name
+
+FROM 
+	Hierarchy Hierarchy
+
+LEFT JOIN
+	FrameworkLanguage Language ON Language.Id = Hierarchy.Id
