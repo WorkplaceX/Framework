@@ -38,11 +38,11 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 
 INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), NULL, 'Default'
-UNION ALL
+INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), (SELECT Id FROM FrameworkLanguage WHERE Name = 'Default'), 'English'
-UNION ALL
+INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC'), (SELECT Id FROM FrameworkLanguage WHERE Name = 'English'), 'German'
-UNION ALL
+INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), NULL, 'French'
 
 INSERT INTO FrameworkConfiguration (LanguageId)
