@@ -101,7 +101,7 @@ CREATE TABLE FrameworkSession
   	Name UNIQUEIDENTIFIER NOT NULL UNIQUE,
 	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
 	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id),
-	LanguageId INT FOREIGN KEY REFERENCES FrameworkApplication(Id), /* User interface language for this session */
+	LanguageId INT FOREIGN KEY REFERENCES FrameworkLanguage(Id), /* User interface language for this session */
 	ConfigurationId INT FOREIGN KEY REFERENCES FrameworkConfiguration(Id),
 	UserId INT FOREIGN KEY REFERENCES FrameworkUser(Id) /* Link to user when logged in. */
 )
@@ -412,21 +412,19 @@ GO
 CREATE VIEW FrameworkTextView
 AS
 SELECT 
-	Path.ApplicationId,
-	Path.LanguageId,
-	Path.UserId,
 	Path.SessionId,
-	Path.Name,
-	Text.ConfigurationId,
-	Text.Text
+	Path.Name AS TextName,
+	Text.Id AS TextId,
+	Text.Text AS Text,
+	Text.ConfigurationId AS SourceConfigurationId, /* Language on which Text is defined */
+	Language.Name AS SourceLanguageName,
+	ApplicationSource.Name AS SourceApplicationName,
+	SessionLanguage.Name AS SessionLanguageName,
+	Application.Name AS SessionApplicationName /* Session ApplicationName */
 
 FROM
-	FrameworkConfigurationPath Path2,
 	(
 		SELECT
-			Path.ApplicationId,
-			Path.LanguageId,
-			Path.UserId,
 			Path.SessionId,
 			Text.Name,
 			MAX(Path.Level) AS Level
@@ -436,19 +434,36 @@ FROM
 		WHERE
 			Text.ConfigurationId = Path.ConfigurationIdContain 
 		GROUP BY
-			Path.ApplicationId,
-			Path.LanguageId,
-			Path.UserId,
 			Path.SessionId,
 			Text.Name
-	) AS Path,
-	FrameworkText Text
+	) AS Path
 
-WHERE
-	Path2.SessionId = Path.SessionId AND
-	Path2.Level = Path.Level AND
-	Text.ConfigurationId = Path2.ConfigurationIdContain AND 
-	Text.Name = Path.Name
+JOIN
+	FrameworkConfigurationPath Path2 ON (Path2.SessionId = Path.SessionId AND Path2.Level = Path.Level)
+
+LEFT JOIN
+	FrameworkText Text ON (Text.ConfigurationId = Path2.ConfigurationIdContain AND Text.Name = Path.Name)
+
+LEFT JOIN
+	FrameworkConfiguration Configuration ON Configuration.Id = Text.ConfigurationId
+
+LEFT JOIN
+	FrameworkLanguage Language ON Language.Id = Configuration.LanguageId
+
+LEFT JOIN
+	FrameworkConfiguration ConfigurationSource ON ConfigurationSource.Id = Language.ConfigurationId
+
+LEFT JOIN
+	FrameworkApplication ApplicationSource ON ApplicationSource.Id = ConfigurationSource.ApplicationId
+
+LEFT JOIN
+	FrameworkSession Session ON (Session.Id = Path.SessionId)
+
+LEFT JOIN
+	FrameworkLanguage SessionLanguage ON (SessionLanguage.Id = Session.LanguageId)
+	
+LEFT JOIN
+	FrameworkApplication Application ON (Application.Id = Session.ApplicationId)
 
 GO
 
@@ -578,6 +593,8 @@ SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE Application
 INSERT FrameworkLanguage (ConfigurationId, ParentId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC CH'), (SELECT Id FROM FrameworkLanguage WHERE ConfigurationId = (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'PTC') AND Name = 'English'), 'Italian'
 INSERT FrameworkLanguage (ConfigurationId, Name)
+SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'Default'
+INSERT FrameworkLanguage (ConfigurationId, Name)
 SELECT (SELECT ConfigurationId FROM FrameworkConfigurationView WHERE ApplicationName = 'LPN'), 'French'
 
 /* User */
@@ -618,12 +635,14 @@ EXEC FrameworkConfigurationPathUpdate
 GO
 
 /* Add Text */
-INSERT INTO FrameworkText (ConfigurationId, Name)
-SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'LPN' AND LanguageName = 'French'), 'Connecter' 
+INSERT INTO FrameworkText (ConfigurationId, Name, Text)
+SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'LPN' AND LanguageName = 'Default'), 'Connecter', 'Connecter'
 UNION ALL
-SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'PTC' AND LanguageName = 'Default'), 'Login' 
+SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'PTC' AND LanguageName = 'Default'), 'Login', 'Login'
 UNION ALL
-SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'PTC' AND LanguageName = 'German'), 'Anmelden' 
+SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'PTC' AND LanguageName = 'Default'), 'Logout', 'Logout'
+UNION ALL
+SELECT (SELECT TOP 1 ConfigurationIdLanguage FROM FrameworkLanguageDisplay WHERE ApplicationName = 'PTC' AND LanguageName = 'German'), 'Login', 'Anmelden' 
 
 GO
 
