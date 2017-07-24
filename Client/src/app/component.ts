@@ -174,7 +174,7 @@ export class Label {
   template: `
   <div removeSelector>
     <div [ngClass]="json.CssClass" style="white-space: nowrap;">
-      <span gridHeader [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName]; trackBy trackBy"></span>
+      <div gridHeader style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName]; trackBy trackBy"></div>
     </div>
     <div gridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
@@ -298,13 +298,16 @@ export class GridCell {
 @Component({
   selector: '[gridHeader]',
   template: `
-  <div (click)="click()" [ngClass]="{'select-class':json.IsSelect}" style="display:inline-block; overflow: hidden;" [style.width.%]=json.WidthPercent><b>{{ json.Text }}</b></div>
+  <div (click)="click()" [ngClass]="{'select-class':json.IsSelect}" style="display:inline-block;"><b>{{ json.Text }}</b></div>
   `,
   styles: [`
   .select-class {
     background-color: rgba(255, 255, 0, 0.7);
   }
-  `]
+  `],
+  host: {
+    '[style.width.%]' : "json.WidthPercent",
+  }
 })
 export class GridHeader {
   @Input() json: any; // GridColumn

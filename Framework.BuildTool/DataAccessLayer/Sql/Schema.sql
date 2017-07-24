@@ -35,7 +35,8 @@
 		FROM sys.foreign_keys Fk JOIN sys.foreign_key_columns FkFieldName ON FkFieldName.constraint_object_id = Fk.object_id
 		WHERE FkFieldName.parent_object_id = ColumnList.object_id AND FkFieldName.parent_column_id = ColumnList.column_id
 		ORDER BY COL_NAME(FkFieldName.referenced_object_id, FkFieldName.referenced_column_id)
-	) AS ForeignFieldName
+	) AS ForeignFieldName,
+	CASE WHEN (SELECT Extended.value FROM sys.extended_properties Extended WHERE Extended.major_id = ColumnList.object_id) = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS bit) END AS IsSystemTable
 
 FROM 
 	sys.columns ColumnList

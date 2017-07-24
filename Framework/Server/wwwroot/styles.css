@@ -1,38 +1,35 @@
 /* Master Styles */
 body {
-    margin: 2em;
-    font-size: 1rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.3rem;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .form-control {
-    font-size: 1rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.15;
     border: 0px;
-    background-color: rgba(0, 0, 0, 0)
+    background-color: rgba(0, 0, 0, 0);
+    width: 100%
 }
 
-button {
-    font-size: 1rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.15;
+.form-control:focus {
+    outline: 0;
+}
+
+.btn {
+    background: #b4e2f6;
+    border: 0px;
+}
+
+.btn:hover {
+    background: #8ccfed;
+    cursor: pointer;
+}
+
+.btn:focus {
+    outline: 0;
 }
 
 img {
     width: 100%
-}
-
-h1 {
-    color: #369;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 250%;
-}
-
-h2, h3 {
-    color: #444;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: lighter;
 }
 
 .y {

@@ -18,6 +18,8 @@
             //
             // Filter out "dbo.Framework" tables.
             this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
+            // Filter out "sysdiagrams" table.
+            this.List = this.List.Where(item => item.IsSystemTable == false).ToArray();
         }
 
         public readonly MetaSqlSchema[] List;
@@ -59,5 +61,7 @@
         public bool IsNullable { get; set; }
 
         public bool IsPrimaryKey { get; set; }
+
+        public bool IsSystemTable { get; set; }
     }
 }
