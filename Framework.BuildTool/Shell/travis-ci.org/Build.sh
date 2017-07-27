@@ -22,6 +22,7 @@ function Main
     cd $FolderName
     cd BuildTool
     dotnet run -- runSql
+	dotnet run -- runSqlColumn
 
     # Publish Server
     echo \#\#\# Publish Server

@@ -704,7 +704,7 @@
                 Row resultRow = null;
                 if (indexEnum == IndexEnum.Index)
                 {
-                    resultRow = (Row)Activator.CreateInstance(typeRow);
+                    resultRow = (Row)UtilFramework.TypeToObject(typeRow);
                 }
                 GridRowInternal gridRow = new GridRowInternal() { Row = resultRow, IsSelect = row.IsSelect, IsClick = row.IsClick };
                 RowSet(gridName, row.Index, gridRow);

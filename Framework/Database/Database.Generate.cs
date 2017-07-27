@@ -1,6 +1,7 @@
 ﻿namespace Database.dbo
 {
     using Framework.DataAccessLayer;
+    using System;
 
     [SqlName("FrameworkApplication")]
     public partial class FrameworkApplication : Row
@@ -13,16 +14,22 @@
         [TypeCell(typeof(FrameworkApplication_Name))]
         public string Name { get; set; }
 
-        [SqlName("Domain")]
-        [TypeCell(typeof(FrameworkApplication_Domain))]
-        public string Domain { get; set; }
+        [SqlName("Path")]
+        [TypeCell(typeof(FrameworkApplication_Path))]
+        public string Path { get; set; }
+
+        [SqlName("Type")]
+        [TypeCell(typeof(FrameworkApplication_Type))]
+        public string Type { get; set; }
     }
 
     public partial class FrameworkApplication_Id : Cell<FrameworkApplication> { }
 
     public partial class FrameworkApplication_Name : Cell<FrameworkApplication> { }
 
-    public partial class FrameworkApplication_Domain : Cell<FrameworkApplication> { }
+    public partial class FrameworkApplication_Path : Cell<FrameworkApplication> { }
+
+    public partial class FrameworkApplication_Type : Cell<FrameworkApplication> { }
 
     [SqlName("FrameworkColumn")]
     public partial class FrameworkColumn : Row
@@ -97,6 +104,28 @@
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage> { }
 
     public partial class FrameworkFileStorage_IsDelete : Cell<FrameworkFileStorage> { }
+
+    [SqlName("FrameworkSession")]
+    public partial class FrameworkSession : Row
+    {
+        [SqlName("Id")]
+        [TypeCell(typeof(FrameworkSession_Id))]
+        public int Id { get; set; }
+
+        [SqlName("Name")]
+        [TypeCell(typeof(FrameworkSession_Name))]
+        public Guid Name { get; set; }
+
+        [SqlName("ApplicationId")]
+        [TypeCell(typeof(FrameworkSession_ApplicationId))]
+        public int ApplicationId { get; set; }
+    }
+
+    public partial class FrameworkSession_Id : Cell<FrameworkSession> { }
+
+    public partial class FrameworkSession_Name : Cell<FrameworkSession> { }
+
+    public partial class FrameworkSession_ApplicationId : Cell<FrameworkSession> { }
 
     [SqlName("FrameworkVersion")]
     public partial class FrameworkVersion : Row

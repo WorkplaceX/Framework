@@ -7,7 +7,6 @@
     using System;
     using System.IO;
     using System.Net.Http;
-    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
     using System.Diagnostics;
@@ -17,16 +16,19 @@
 
     public class WebController
     {
-        public WebController(ControllerBase controller, string routePath, App app)
+        public WebController(ControllerBase controller, string requestPathBase, App app)
         {
             this.Controller = controller;
-            this.RoutePath = routePath;
+            this.RequestPathBase = requestPathBase;
             this.App = app;
         }
 
         public readonly ControllerBase Controller;
 
-        public readonly string RoutePath;
+        /// <summary>
+        /// Gets RequestPathBase. For example "/web/framework/".
+        /// </summary>
+        public readonly string RequestPathBase;
 
         public readonly App App;
 
@@ -37,8 +39,13 @@
         /// <returns></returns>
         internal async Task<IActionResult> WebRequest()
         {
+            string requestPath = Controller.HttpContext.Request.Path.ToString();
+            if (!(App != null && requestPath.StartsWith(RequestPathBase)))
+            {
+                return Controller.NotFound(); // Not found (404) response.
+            }
             // Html request
-            if (Controller.HttpContext.Request.Path == RoutePath)
+            if (requestPath.StartsWith(RequestPathBase) && (requestPath.EndsWith("/") || requestPath.EndsWith(".html")))
             {
                 AppJson appJsonOut = App.Run(null, Controller.HttpContext);
                 string htmlUniversal = null;
@@ -47,7 +54,7 @@
                 return Controller.Content(htmlUniversal, "text/html");
             }
             // Json API request
-            if (Controller.HttpContext.Request.Path == RoutePath + "Application.json")
+            if (requestPath.StartsWith(RequestPathBase) && requestPath.EndsWith("Application.json"))
             {
                 string jsonInText = UtilServer.StreamToString(Controller.Request.Body);
                 AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() });
@@ -71,8 +78,9 @@
                 return Controller.Content(jsonOutText, "application/json");
             }
             // Framework/Server/wwwroot/*.* request
+            if (Path.GetFileName(requestPath).Contains("."))
             {
-                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                string fileName = Path.GetFileName(requestPath);
                 fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
                 if (File.Exists(fileName))
                 {
@@ -80,9 +88,9 @@
                 }
             }
             // Server/Universal/*.js request
-            if (Controller.HttpContext.Request.Path.ToString().EndsWith(".js"))
+            if (requestPath.EndsWith(".js"))
             {
-                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                string fileName = Path.GetFileName(requestPath);
                 fileName = UtilServer.FolderNameServer() + "Universal/" + fileName;
                 if (File.Exists(fileName))
                 {
@@ -91,7 +99,7 @@
             }
             // FileStorage request
             {
-                string fileName = Controller.HttpContext.Request.Path.ToString().Substring(RoutePath.Length);
+                string fileName = requestPath.Substring(RequestPathBase.Length);
                 bool isFound = false;
                 byte[] data = null;
                 foreach (FrameworkFileStorage item in UtilDataAccessLayer.Select<FrameworkFileStorage>().Where(item => item.Name == fileName))
@@ -160,7 +168,7 @@
         {
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json"));
+                HttpResponseMessage response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure UniversalExpress is running.
                 if (isEnsureSuccessStatusCode)
                 {
                     response.EnsureSuccessStatusCode();

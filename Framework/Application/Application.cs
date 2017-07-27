@@ -1,10 +1,53 @@
 ﻿namespace Framework.Application
 {
+    using Database.dbo;
     using Framework.Component;
     using Framework.DataAccessLayer;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+
+    /// <summary>
+    /// Run multiple applications on same ASP.NET Core and same database instance.
+    /// </summary>
+    public class AppSelector
+    {
+        public virtual IEnumerable<FrameworkApplication> ApplicationList()
+        {
+            List<FrameworkApplication> result = new List<FrameworkApplication>();
+            result.Add(new FrameworkApplication() { Name = "App", Path = null, Type = UtilFramework.TypeToName(typeof(App)) });
+            return result;
+        }
+
+        internal App Create(ControllerBase controller, string controllerPath, out string requestPathBase)
+        {
+            App result = null;
+            requestPathBase = controllerPath;
+            string requestUrl = controller.HttpContext.Request.Path.ToString();
+            foreach (FrameworkApplication frameworkApplication in ApplicationList())
+            {
+                string path = frameworkApplication.Path;
+                if (!string.IsNullOrEmpty(path))
+                {
+                    if (!path.EndsWith("/"))
+                    {
+                        path = path + "/";
+                    }
+                }
+                if (requestUrl.StartsWith(controllerPath + path))
+                {
+                    Type type = UtilFramework.TypeFromName(frameworkApplication.Type, GetType(), typeof(UtilFramework));
+                    result = (App)UtilFramework.TypeToObject(type);
+                    result.Constructor(frameworkApplication);
+                    requestPathBase = controllerPath + path;
+                    break;
+                }
+            }
+            return result;
+        }
+    }
 
     /// <summary>
     /// Server side root object.
@@ -18,6 +61,16 @@
         {
             ProcessInit(processList);
         }
+
+        internal void Constructor(FrameworkApplication dbframeworkApplication)
+        {
+            this.DbFrameworkApplication = dbframeworkApplication;
+        }
+
+        /// <summary>
+        /// Gets DbFrameworkApplication. Used in connection with class AppSelector. See also database table FrameworkApplication.
+        /// </summary>
+        public FrameworkApplication DbFrameworkApplication { get; private set; }
 
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
@@ -175,7 +228,7 @@
             Page result = owner.List.OfType<Page>().Where(item => item.GetType() == typePage).SingleOrDefault(); // Make sure there is only one page of type!
             if (result == null)
             {
-                result = (Page)Activator.CreateInstance(typePage);
+                result = (Page)UtilFramework.TypeToObject(typePage);
                 result.Constructor(owner, null, typeof(Div));
                 result.InitJson(this);
             }

@@ -147,7 +147,7 @@
                     {
                         typeCell = attributePropertyCell.TypeCell;
                     }
-                    Cell cell = (Cell)Activator.CreateInstance(typeCell);
+                    Cell cell = (Cell)UtilFramework.TypeToObject(typeCell);
                     cell.Constructor(attributeRow.SqlName, sqlName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
                     result.Add(cell);
                 }
@@ -377,7 +377,7 @@
         /// </summary>
         public static Row RowClone(Row row)
         {
-            Row result = (Row)Activator.CreateInstance(row.GetType());
+            Row result = (Row)UtilFramework.TypeToObject(row.GetType());
             var propertyInfoList = row.GetType().GetProperties();
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
@@ -393,7 +393,7 @@
         /// </summary>
         public static Row RowCreate(Type typeRow)
         {
-            return (Row)Activator.CreateInstance(typeRow);
+            return (Row)UtilFramework.TypeToObject(typeRow);
         }
     }
 }

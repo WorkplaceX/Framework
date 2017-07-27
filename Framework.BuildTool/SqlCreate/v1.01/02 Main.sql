@@ -4,7 +4,15 @@ CREATE TABLE FrameworkApplication
 (
 	Id INT PRIMARY KEY IDENTITY,
   	Name NVARCHAR(256) NOT NULL UNIQUE,
-	Domain NVARCHAR(256) NOT NULL UNIQUE /* Url */
+	Path NVARCHAR(256) NOT NULL UNIQUE, /* Url */
+	Type NVARCHAR(256)
+)
+
+CREATE TABLE FrameworkSession
+(
+	Id INT PRIMARY KEY IDENTITY,
+  	Name UNIQUEIDENTIFIER NOT NULL UNIQUE,
+	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL,
 )
 
 CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source code defined columns. Also calculated fields. */
@@ -27,5 +35,5 @@ CREATE TABLE FrameworkFileStorage
 	INDEX IX_FrameworkFileStorage UNIQUE (ApplicationId, Name)
 )
 
-INSERT INTO FrameworkApplication (Name, Domain)
-SELECT 'Framework', 'Framework'
+INSERT INTO FrameworkApplication (Name, Path)
+SELECT 'Framework', 'framework'

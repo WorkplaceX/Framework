@@ -14,6 +14,13 @@
             return await new WebController(controller, routePath, app).WebRequest();
         }
 
+        public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string controllerPath, AppSelector appSelector)
+        {
+            string requestPathBase;
+            App app = appSelector.Create(controller, controllerPath, out requestPathBase);
+            return await new WebController(controller, requestPathBase, app).WebRequest();
+        }
+
         public static string StreamToString(Stream stream)
         {
             using (var streamReader = new StreamReader(stream))

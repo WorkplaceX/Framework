@@ -1,6 +1,7 @@
 ﻿namespace Framework
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
@@ -164,7 +165,10 @@
             return result;
         }
 
-        public static string TypeToString(Type type)
+        /// <summary>
+        /// Returns for example: "Framework.Application.App"
+        /// </summary>
+        public static string TypeToName(Type type)
         {
             string result = null;
             if (type != null)
@@ -172,6 +176,20 @@
                 result = type.FullName;
             }
             return result;
+        }
+
+        public static Type TypeFromName(string name, params Type[] typeInAssemblyList)
+        {
+            List<Type> result = new List<Type>();
+            foreach (var type in typeInAssemblyList.Distinct())
+            {
+                Type resultType = type.GetTypeInfo().Assembly.GetType(name);
+                if (resultType != null)
+                {
+                    result.Add(resultType);
+                }
+            }
+            return result.Single();
         }
 
         /// <summary>
