@@ -186,7 +186,10 @@
                 Type resultType = type.GetTypeInfo().Assembly.GetType(name);
                 if (resultType != null)
                 {
-                    result.Add(resultType);
+                    if (!result.Contains(resultType))
+                    {
+                        result.Add(resultType);
+                    }
                 }
             }
             return result.Single();

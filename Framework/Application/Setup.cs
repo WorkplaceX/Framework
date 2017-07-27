@@ -17,7 +17,7 @@
         {
             new Button(this, "CLICK");
             new Label(this, "Hello Setup <b>XYZ</b>");
-            new Literal(this, "Literal").Html = "Hello Setup <b>XYZ</b>";
+            new Literal(this, "Literal") { Html = "Hello Setup <b>XYZ</b>", CssClass = "my" };
         }
     }
 }

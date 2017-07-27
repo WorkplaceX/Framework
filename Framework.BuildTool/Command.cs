@@ -85,9 +85,10 @@
                 UtilFramework.Log("1=buildClient");
                 UtilFramework.Log("2=serve --client");
                 UtilFramework.Log("3=generate");
-                UtilFramework.Log("4=runSql");
-                UtilFramework.Log("5=runSql --drop");
-                UtilFramework.Log("6=runSqlColumn");
+                UtilFramework.Log("4=generate --framework");
+                UtilFramework.Log("5=runSql");
+                UtilFramework.Log("6=runSql --drop");
+                UtilFramework.Log("7=runSqlColumn");
                 string line = Console.ReadLine();
                 if (line == "1")
                 {
@@ -103,13 +104,17 @@
                 }
                 if (line == "4")
                 {
-                    result.Execute("runSql");
+                    result.Execute("generate", "--framework");
                 }
                 if (line == "5")
                 {
-                    result.Execute("runSql", "--drop");
+                    result.Execute("runSql");
                 }
                 if (line == "6")
+                {
+                    result.Execute("runSql", "--drop");
+                }
+                if (line == "7")
                 {
                     result.Execute("runSqlColumn");
                 }

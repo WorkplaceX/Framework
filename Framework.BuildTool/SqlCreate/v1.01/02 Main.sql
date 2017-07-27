@@ -27,7 +27,7 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 CREATE TABLE FrameworkFileStorage
 (
 	Id INT PRIMARY KEY IDENTITY,
-	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL,
+	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id),
   	Name NVARCHAR(256) NOT NULL, /* File name with path */
   	FileNameUpload NVARCHAR(256),
 	Data VARBINARY(MAX),

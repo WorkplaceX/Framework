@@ -1,4 +1,4 @@
-﻿namespace Database.dbo
+namespace Database.dbo
 {
     using Framework.DataAccessLayer;
     using System;
@@ -74,7 +74,7 @@
 
         [SqlName("ApplicationId")]
         [TypeCell(typeof(FrameworkFileStorage_ApplicationId))]
-        public int ApplicationId { get; set; }
+        public int? ApplicationId { get; set; }
 
         [SqlName("Name")]
         [TypeCell(typeof(FrameworkFileStorage_Name))]

@@ -17,5 +17,13 @@
                 return Framework.UtilFramework.FolderName + "Application/Database/Database.Generate.cs";
             }
         }
+
+        public static string DatabaseGenerateFrameworkFileName
+        {
+            get
+            {
+                return Framework.UtilFramework.FolderName + "Submodule/Framework/Database/Database.Generate.cs";
+            }
+        }
     }
 }

@@ -10,8 +10,6 @@
 
         public readonly Option Client;
 
-        public readonly Option ClientAndServer;
-
         public override void Run()
         {
             if (Client.IsOn)

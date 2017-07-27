@@ -141,7 +141,7 @@ export class Button {
 /* Literal */
 @Component({
   selector: 'Literal',
-  template: `<div #div [ngClass]="json.CssClass"></div>`
+  template: `<div [innerHtml]="json.Html" #div [ngClass]="json.CssClass"></div>`
 })
 export class Literal {
  
@@ -152,7 +152,7 @@ export class Literal {
   @ViewChild('div') div:ElementRef;
 
   ngAfterViewInit() {
-    this.div.nativeElement.innerHTML = this.json.Html;
+    // this.div.nativeElement.innerHTML = this.json.Html; // Not Universal compatible!
   }  
 
   @Input() json: any
@@ -509,7 +509,7 @@ export class GridField {
     reader.onload = function(e2: any) {
       // console.log(This.el.nativeElement.value);
       var data = e2.target.result;
-      console.log(data);
+      // console.log(data);
       This.Text = data;
       This.onChange();
     };

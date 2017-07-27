@@ -10,14 +10,25 @@
     /// </summary>
     public class MetaSql
     {
-        public MetaSql()
+        /// <summary>
+        /// Run Schema.sql
+        /// </summary>
+        /// <param name="isFramework">For internal use only.</param>
+        public MetaSql(bool isFramework)
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext();
             string sql = Util.FileLoad(ConnectionManager.SchemaFileName);
             this.List = dbContext.Schema.FromSql(sql).ToArray();
             //
             // Filter out "dbo.Framework" tables.
-            this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
+            if (isFramework == false)
+            {
+                this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
+            }
+            else
+            {
+                this.List = this.List.Where(item => (item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
+            }
             // Filter out "sysdiagrams" table.
             this.List = this.List.Where(item => item.IsSystemTable == false).ToArray();
         }

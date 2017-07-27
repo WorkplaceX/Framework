@@ -10,14 +10,22 @@
         /// <summary>
         /// Script to generate CSharp code.
         /// </summary>
-        public static void Run()
+        /// <param name="isFramework">If true, generate CSharp code for framework. For internal use only.</param>
+        public static void Run(bool isFramework)
         {
-            MetaSql metaSql = new MetaSql();
+            MetaSql metaSql = new MetaSql(isFramework);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
             StringBuilder result = new StringBuilder();
             string cSharp;
             new CSharpGenerate(metaCSharp).Run(out cSharp);
-            Util.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);
+            if (isFramework == false)
+            {
+                Util.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);
+            }
+            else
+            {
+                Util.FileSave(ConnectionManager.DatabaseGenerateFrameworkFileName, cSharp);
+            }
         }
     }
 }
