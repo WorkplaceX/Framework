@@ -3,4 +3,6 @@
 DROP TABLE FrameworkFileStorage
 DROP TABLE FrameworkColumn
 DROP TABLE FrameworkSession
+DROP VIEW FrameworkApplicationView
 DROP TABLE FrameworkApplication
+DROP TABLE FrameworkApplicationType

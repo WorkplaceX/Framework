@@ -39,7 +39,7 @@
                         else
                         {
                             gridQuery.FieldNameOrderBy = gridColumn.FieldName;
-                            gridQuery.IsOrderByDesc = true;
+                            gridQuery.IsOrderByDesc = false;
                         }
                         DatabaseLoad(app, appJson, gridName, gridQuery.FieldNameOrderBy, gridQuery.IsOrderByDesc);
                         break;

@@ -1,5 +1,6 @@
 ﻿namespace Framework
 {
+    using Framework.Application;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -13,7 +14,7 @@
         {
             get
             {
-                return "v1.011 Server";
+                return "v1.012 Server";
             }
         }
 
@@ -178,10 +179,43 @@
             return result;
         }
 
+        /// <summary>
+        /// Returns list of assemblies. Including Framework assembly.
+        /// </summary>
+        public static Type[] TypeInAssemblyList(Type typeInAssembly)
+        {
+            List<Type> result = new List<Type>();
+            result.Add(typeof(UtilFramework));
+            if (result.First().GetTypeInfo().Assembly != typeInAssembly.GetTypeInfo().Assembly)
+            {
+                result.Add(typeInAssembly);
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// Returns list of available class App.
+        /// </summary>
+        public static Type[] ApplicationTypeList(Type typeInAssembly)
+        {
+            List<Type> result = new List<Type>();
+            foreach (Type itemTypeInAssembly in TypeInAssemblyList(typeInAssembly))
+            {
+                foreach (var type in itemTypeInAssembly.GetTypeInfo().Assembly.GetTypes())
+                {
+                    if (UtilFramework.IsSubclassOf(type, typeof(App)))
+                    {
+                        result.Add(type);
+                    }
+                }
+            }
+            return result.ToArray();
+        }
+
         public static Type TypeFromName(string name, params Type[] typeInAssemblyList)
         {
             List<Type> result = new List<Type>();
-            foreach (var type in typeInAssemblyList.Distinct())
+            foreach (var type in typeInAssemblyList)
             {
                 Type resultType = type.GetTypeInfo().Assembly.GetType(name);
                 if (resultType != null)

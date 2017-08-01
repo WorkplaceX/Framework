@@ -1,4 +1,6 @@
-﻿using Framework.Application;
+﻿using System;
+using System.Collections.Generic;
+using Framework.Application;
 using Framework.DataAccessLayer;
 
 namespace Database.dbo
@@ -31,6 +33,20 @@ namespace Database.dbo
                     }
                 }
                 result = string.Format("<a href={0} target='blank'>{1}</a>", Row.Name, fileNameOnly);
+            }
+        }
+    }
+
+    public partial class FrameworkFileStorage_ApplicationId : Cell<FrameworkFileStorage>
+    {
+        protected internal override void CellValueFromText(App app, string gridName, string index, ref string result)
+        {
+            if (UtilApplication.IndexEnumFromText(index) == IndexEnum.New)
+            {
+                if (app.DbFrameworkApplication != null)
+                {
+                    result = app.DbFrameworkApplication.Id.ToString();
+                }
             }
         }
     }

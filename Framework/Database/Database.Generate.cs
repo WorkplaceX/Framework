@@ -18,9 +18,13 @@ namespace Database.dbo
         [TypeCell(typeof(FrameworkApplication_Path))]
         public string Path { get; set; }
 
-        [SqlName("Type")]
-        [TypeCell(typeof(FrameworkApplication_Type))]
-        public string Type { get; set; }
+        [SqlName("ApplicationTypeId")]
+        [TypeCell(typeof(FrameworkApplication_ApplicationTypeId))]
+        public int ApplicationTypeId { get; set; }
+
+        [SqlName("IsActive")]
+        [TypeCell(typeof(FrameworkApplication_IsActive))]
+        public bool? IsActive { get; set; }
     }
 
     public partial class FrameworkApplication_Id : Cell<FrameworkApplication> { }
@@ -29,7 +33,71 @@ namespace Database.dbo
 
     public partial class FrameworkApplication_Path : Cell<FrameworkApplication> { }
 
-    public partial class FrameworkApplication_Type : Cell<FrameworkApplication> { }
+    public partial class FrameworkApplication_ApplicationTypeId : Cell<FrameworkApplication> { }
+
+    public partial class FrameworkApplication_IsActive : Cell<FrameworkApplication> { }
+
+    [SqlName("FrameworkApplicationType")]
+    public partial class FrameworkApplicationType : Row
+    {
+        [SqlName("Id")]
+        [TypeCell(typeof(FrameworkApplicationType_Id))]
+        public int Id { get; set; }
+
+        [SqlName("Name")]
+        [TypeCell(typeof(FrameworkApplicationType_Name))]
+        public string Name { get; set; }
+
+        [SqlName("IsExist")]
+        [TypeCell(typeof(FrameworkApplicationType_IsExist))]
+        public bool? IsExist { get; set; }
+    }
+
+    public partial class FrameworkApplicationType_Id : Cell<FrameworkApplicationType> { }
+
+    public partial class FrameworkApplicationType_Name : Cell<FrameworkApplicationType> { }
+
+    public partial class FrameworkApplicationType_IsExist : Cell<FrameworkApplicationType> { }
+
+    [SqlName("FrameworkApplicationView")]
+    public partial class FrameworkApplicationView : Row
+    {
+        [SqlName("Id")]
+        [TypeCell(typeof(FrameworkApplicationView_Id))]
+        public int Id { get; set; }
+
+        [SqlName("Name")]
+        [TypeCell(typeof(FrameworkApplicationView_Name))]
+        public string Name { get; set; }
+
+        [SqlName("Path")]
+        [TypeCell(typeof(FrameworkApplicationView_Path))]
+        public string Path { get; set; }
+
+        [SqlName("Type")]
+        [TypeCell(typeof(FrameworkApplicationView_Type))]
+        public string Type { get; set; }
+
+        [SqlName("IsExist")]
+        [TypeCell(typeof(FrameworkApplicationView_IsExist))]
+        public bool? IsExist { get; set; }
+
+        [SqlName("IsActive")]
+        [TypeCell(typeof(FrameworkApplicationView_IsActive))]
+        public bool? IsActive { get; set; }
+    }
+
+    public partial class FrameworkApplicationView_Id : Cell<FrameworkApplicationView> { }
+
+    public partial class FrameworkApplicationView_Name : Cell<FrameworkApplicationView> { }
+
+    public partial class FrameworkApplicationView_Path : Cell<FrameworkApplicationView> { }
+
+    public partial class FrameworkApplicationView_Type : Cell<FrameworkApplicationView> { }
+
+    public partial class FrameworkApplicationView_IsExist : Cell<FrameworkApplicationView> { }
+
+    public partial class FrameworkApplicationView_IsActive : Cell<FrameworkApplicationView> { }
 
     [SqlName("FrameworkColumn")]
     public partial class FrameworkColumn : Row

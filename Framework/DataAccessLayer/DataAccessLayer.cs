@@ -125,7 +125,7 @@
 
         }
 
-        protected virtual internal void LookUp(out Type typeRow, out List<DataAccessLayer.Row> rowList)
+        protected virtual internal void LookUp(out Type typeRow, out List<Row> rowList)
         {
             typeRow = null;
             rowList = null;

@@ -1,6 +1,8 @@
 ﻿namespace Framework.BuildTool
 {
+    using Database.dbo;
     using Framework.Application;
+    using Framework.Application.Setup;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
@@ -33,26 +35,45 @@
             }
         }
 
-        protected virtual void RegisterCommand(List<Command> commandList)
+        /// <summary>
+        /// Overwrite to register additional application specific commands or clear command list.
+        /// </summary>
+        protected virtual void RegisterCommand(List<Command> result)
         {
 
         }
 
+        /// <summary>
+        /// Overwrite to register application on table FrameworkApplication.
+        /// </summary>
+        protected virtual void DbFrameworkApplicationView(List<FrameworkApplicationView> result)
+        {
+
+        }
+
+        internal List<FrameworkApplicationView> DbFrameworkApplicationView()
+        {
+            List<FrameworkApplicationView> result = new List<FrameworkApplicationView>();
+            result.Add(new FrameworkApplicationView() { Name = "Setup", Path = "setup", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppSetup)) });
+            DbFrameworkApplicationView(result);
+            return result;
+        }
+
         private void RegisterCommand(CommandLineApplication commandLineApplication)
         {
-            List<Command> commandList = new List<Command>();
-            commandList.Add(new CommandConnectionString());
-            commandList.Add(new CommandCheck());
-            commandList.Add(new CommandOpen());
-            commandList.Add(new CommandServe());
-            commandList.Add(new CommandUnitTest());
-            commandList.Add(new CommandRunSql());
-            commandList.Add(new CommandRunSqlColumn(this));
-            commandList.Add(new CommandGenerate());
-            commandList.Add(new CommandBuildClient());
-            commandList.Add(new CommandInstallAll());
-            RegisterCommand(commandList);
-            foreach (Command command in commandList)
+            List<Command> result = new List<Command>();
+            result.Add(new CommandConnectionString());
+            result.Add(new CommandCheck());
+            result.Add(new CommandOpen());
+            result.Add(new CommandServe());
+            result.Add(new CommandUnitTest());
+            result.Add(new CommandRunSql());
+            result.Add(new CommandRunSqlColumn(this));
+            result.Add(new CommandGenerate());
+            result.Add(new CommandBuildClient());
+            result.Add(new CommandInstallAll());
+            RegisterCommand(result);
+            foreach (Command command in result)
             {
                 Command.Register(commandLineApplication, command);
             }

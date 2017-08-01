@@ -620,29 +620,27 @@
                             string fieldName = cell.FieldNameCSharp;
                             //
                             string text = CellTextGet(gridName, index, fieldName);
-                            if (text != null)
+                            if (text == "")
                             {
-                                if (text == "")
+                                text = null;
+                            }
+                            if (!(text == null && indexEnum == IndexEnum.Filter)) // Do not parse text null for filter.
+                            {
+                                object value;
+                                try
                                 {
-                                    text = null;
+                                    cell.CellValueFromText(app, gridName, index, ref text);
+                                    app.CellValueFromText(gridName, index, cell, ref text);
+                                    CellTextSet(gridName, index, fieldName, text);
+                                    value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
                                 }
-                                if (!(text == null && indexEnum == IndexEnum.Filter)) // Do not parse text null for filter.
+                                catch (Exception exception)
                                 {
-                                    object value;
-                                    try
-                                    {
-                                        cell.CellValueFromText(app, gridName, index, ref text);
-                                        app.CellValueFromText(gridName, index, cell, ref text);
-                                        value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
-                                    }
-                                    catch (Exception exception)
-                                    {
-                                        ErrorCellSet(gridName, index, fieldName, exception.Message);
-                                        row.RowNew = null; // Do not save.
-                                        break;
-                                    }
-                                    rowWrite.GetType().GetProperty(fieldName).SetValue(rowWrite, value);
+                                    ErrorCellSet(gridName, index, fieldName, exception.Message);
+                                    row.RowNew = null; // Do not save.
+                                    break;
                                 }
+                                rowWrite.GetType().GetProperty(fieldName).SetValue(rowWrite, value);
                             }
                             ErrorCellSet(gridName, index, fieldName, null); // Clear error.
                         }

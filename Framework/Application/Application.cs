@@ -14,11 +14,9 @@
     /// </summary>
     public class AppSelector
     {
-        public virtual IEnumerable<FrameworkApplication> ApplicationList()
+        public virtual List<FrameworkApplicationView> DbApplicationList()
         {
-            List<FrameworkApplication> result = new List<FrameworkApplication>();
-            result.Add(new FrameworkApplication() { Name = "App", Path = null, Type = UtilFramework.TypeToName(typeof(App)) });
-            return result;
+            return UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.IsActive == true).ToList();
         }
 
         internal App Create(ControllerBase controller, string controllerPath, out string requestPathBase)
@@ -26,7 +24,7 @@
             App result = null;
             requestPathBase = controllerPath;
             string requestUrl = controller.HttpContext.Request.Path.ToString();
-            foreach (FrameworkApplication frameworkApplication in ApplicationList())
+            foreach (FrameworkApplicationView frameworkApplication in DbApplicationList())
             {
                 string path = frameworkApplication.Path;
                 if (!string.IsNullOrEmpty(path))
@@ -38,7 +36,7 @@
                 }
                 if (requestUrl.StartsWith(controllerPath + path))
                 {
-                    Type type = UtilFramework.TypeFromName(frameworkApplication.Type, GetType(), typeof(UtilFramework));
+                    Type type = UtilFramework.TypeFromName(frameworkApplication.Type, UtilFramework.TypeInAssemblyList(GetType()));
                     result = (App)UtilFramework.TypeToObject(type);
                     result.Constructor(frameworkApplication);
                     requestPathBase = controllerPath + path;
@@ -62,15 +60,15 @@
             ProcessInit(processList);
         }
 
-        internal void Constructor(FrameworkApplication dbframeworkApplication)
+        internal void Constructor(FrameworkApplicationView dbFrameworkApplication)
         {
-            this.DbFrameworkApplication = dbframeworkApplication;
+            this.DbFrameworkApplication = dbFrameworkApplication;
         }
 
         /// <summary>
         /// Gets DbFrameworkApplication. Used in connection with class AppSelector. See also database table FrameworkApplication.
         /// </summary>
-        public FrameworkApplication DbFrameworkApplication { get; private set; }
+        public FrameworkApplicationView DbFrameworkApplication { get; private set; }
 
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")

@@ -1,12 +1,36 @@
-﻿IF (NOT ISNULL((SELECT Version FROM FrameworkVersion), '') = 'v1.01') RETURN -- Version Check
+﻿IF (NOT ISNULL((SELECT Version FROM FrameworkVersion), '') = 'v1.01') BEGIN SELECT 'RETURN' RETURN END -- Version Check
+
+CREATE TABLE FrameworkApplicationType
+(
+	Id INT PRIMARY KEY IDENTITY,
+  	Name NVARCHAR(256) NOT NULL UNIQUE,
+	IsExist BIT
+)
 
 CREATE TABLE FrameworkApplication
 (
 	Id INT PRIMARY KEY IDENTITY,
   	Name NVARCHAR(256) NOT NULL UNIQUE,
-	Path NVARCHAR(256) NOT NULL UNIQUE, /* Url */
-	Type NVARCHAR(256)
+	Path NVARCHAR(256) UNIQUE, /* Url */
+	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id) NOT NULL,
+	IsActive BIT
 )
+
+GO
+
+CREATE VIEW FrameworkApplicationView AS
+SELECT
+	Application.Id,
+	Application.Name,
+	Application.Path,
+	(SELECT ApplicationType.Name FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS Type,
+	(SELECT ApplicationType.IsExist FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS IsExist,
+	Application.IsActive
+
+FROM
+	FrameworkApplication Application
+
+GO
 
 CREATE TABLE FrameworkSession
 (
@@ -34,6 +58,3 @@ CREATE TABLE FrameworkFileStorage
 	IsDelete BIT,
 	INDEX IX_FrameworkFileStorage UNIQUE (ApplicationId, Name)
 )
-
-INSERT INTO FrameworkApplication (Name, Path)
-SELECT 'Framework', 'framework'

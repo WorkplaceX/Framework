@@ -17,34 +17,39 @@
 
         private void RunSql(string connectionString)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            IEnumerable<string> fileNameList;
-            if (OptionDrop.IsOn)
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                var fileNameListFramework = UtilFramework.FileNameList(UtilFramework.FolderName + "Submodule/Framework.BuildTool/SqlDrop/", "*.sql").OrderByDescending(item => item);
-                var fileNameListApplication = UtilFramework.FileNameList(UtilFramework.FolderName + "BuildTool/SqlDrop/", "*.sql").OrderByDescending(item => item);
-                fileNameList = fileNameListApplication.Union(fileNameListFramework).ToArray();
-            }
-            else
-            {
-                var fileNameListFramework = UtilFramework.FileNameList(UtilFramework.FolderName + "Submodule/Framework.BuildTool/SqlCreate/", "*.sql").OrderBy(item => item);
-                var fileNameListApplication = UtilFramework.FileNameList(UtilFramework.FolderName + "BuildTool/SqlCreate/", "*.sql").OrderBy(item => item);
-                fileNameList = fileNameListFramework.Union(fileNameListApplication).ToArray();
-            }
-            foreach (string fileName in fileNameList)
-            {
-                UtilFramework.Log(string.Format("### Start RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
-                string text = Framework.UtilFramework.FileRead(fileName);
-                var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string sql in sqlList)
+                connection.Open();
+                IEnumerable<string> fileNameList;
+                if (OptionDrop.IsOn)
                 {
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
+                    var fileNameListFramework = UtilFramework.FileNameList(UtilFramework.FolderName + "Submodule/Framework.BuildTool/SqlDrop/", "*.sql").OrderByDescending(item => item);
+                    var fileNameListApplication = UtilFramework.FileNameList(UtilFramework.FolderName + "BuildTool/SqlDrop/", "*.sql").OrderByDescending(item => item);
+                    fileNameList = fileNameListApplication.Union(fileNameListFramework).ToArray();
                 }
-                UtilFramework.Log(string.Format("### Exit RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
+                else
+                {
+                    var fileNameListFramework = UtilFramework.FileNameList(UtilFramework.FolderName + "Submodule/Framework.BuildTool/SqlCreate/", "*.sql").OrderBy(item => item);
+                    var fileNameListApplication = UtilFramework.FileNameList(UtilFramework.FolderName + "BuildTool/SqlCreate/", "*.sql").OrderBy(item => item);
+                    fileNameList = fileNameListFramework.Union(fileNameListApplication).ToArray();
+                }
+                foreach (string fileName in fileNameList)
+                {
+                    UtilFramework.Log(string.Format("### Start RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
+                    string text = Framework.UtilFramework.FileRead(fileName);
+                    var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string sql in sqlList)
+                    {
+                        using (SqlCommand command = new SqlCommand(sql, connection))
+                        {
+                            if ((command.ExecuteScalar() as string) == "RETURN") // Sql script with GO and RETURN at top would not stop. Therefore use SELECT 'RETURN' if there is GO statements.
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    UtilFramework.Log(string.Format("### Exit RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
+                }
             }
         }
 

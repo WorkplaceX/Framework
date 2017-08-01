@@ -369,6 +369,11 @@
                 }
                 return Encoding.Unicode.GetBytes(text);
             }
+            //
+            if (text == null && type.GetTypeInfo().IsValueType)
+            {
+                return UtilFramework.TypeToObject(type); // For example Int32
+            }
             return Convert.ChangeType(text, type);
         }
 
