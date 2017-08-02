@@ -100,7 +100,7 @@
         }
 
         /// <summary>
-        /// Called before method UtilDataAccessLayer.ValueFromText();
+        /// Called before user entered text is parsed with UtilDataAccessLayer.ValueFromText();
         /// </summary>
         protected virtual internal void CellValueFromText(string gridName, string index, Cell cell, ref string result)
         {

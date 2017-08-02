@@ -360,6 +360,22 @@
             LoadRow(gridName, typeRow, rowList);
         }
 
+        /// <summary>
+        /// Load data from Sql database.
+        /// </summary>
+        public void LoadDatabase(string gridName, Type typeRow)
+        {
+            LoadDatabase(gridName, null, null, false, typeRow);
+        }
+
+        /// <summary>
+        /// Load data from Sql database.
+        /// </summary>
+        public void LoadDatabase<TRow>(string gridName) where TRow : Row
+        {
+            LoadDatabase(gridName, typeof(TRow));
+        }
+
         private void LoadDatabase(string gridName, out List<Filter> filterList)
         {
             Type typeRow = TypeRowGet(gridName);
@@ -402,18 +418,21 @@
         }
 
         /// <summary>
-        /// Load data from database with current grid filter and current sorting.
+        /// Reload data from database with current grid filter and current sorting.
         /// </summary>
         public void LoadDatabase(string gridName)
         {
             if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
-                string fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
-                bool isOrderByDesc = queryList[gridName].IsOrderByDesc;
-                Type typeRow = TypeRowGet(gridName);
-                List<Filter> filterList;
-                LoadDatabase(gridName, out filterList);
-                LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
+                if (queryList.ContainsKey(gridName)) // Reload
+                {
+                    string fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
+                    bool isOrderByDesc = queryList[gridName].IsOrderByDesc;
+                    Type typeRow = TypeRowGet(gridName);
+                    List<Filter> filterList;
+                    LoadDatabase(gridName, out filterList);
+                    LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
+                }
             }
         }
 
@@ -620,27 +639,29 @@
                             string fieldName = cell.FieldNameCSharp;
                             //
                             string text = CellTextGet(gridName, index, fieldName);
-                            if (text == "")
+                            cell.CellValueFromText(app, gridName, index, ref text); // Overwrite for example user entered text also if user entered no text.
+                            app.CellValueFromText(gridName, index, cell, ref text);
+                            if (text != null)
                             {
-                                text = null;
-                            }
-                            if (!(text == null && indexEnum == IndexEnum.Filter)) // Do not parse text null for filter.
-                            {
-                                object value;
-                                try
+                                if (text == "")
                                 {
-                                    cell.CellValueFromText(app, gridName, index, ref text);
-                                    app.CellValueFromText(gridName, index, cell, ref text);
-                                    CellTextSet(gridName, index, fieldName, text);
-                                    value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                    text = null;
                                 }
-                                catch (Exception exception)
+                                if (!(text == null && indexEnum == IndexEnum.Filter)) // Do not parse text null for filter.
                                 {
-                                    ErrorCellSet(gridName, index, fieldName, exception.Message);
-                                    row.RowNew = null; // Do not save.
-                                    break;
+                                    object value;
+                                    try
+                                    {
+                                        value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
+                                    }
+                                    catch (Exception exception)
+                                    {
+                                        ErrorCellSet(gridName, index, fieldName, exception.Message);
+                                        row.RowNew = null; // Do not save.
+                                        break;
+                                    }
+                                    rowWrite.GetType().GetProperty(fieldName).SetValue(rowWrite, value);
                                 }
-                                rowWrite.GetType().GetProperty(fieldName).SetValue(rowWrite, value);
                             }
                             ErrorCellSet(gridName, index, fieldName, null); // Clear error.
                         }

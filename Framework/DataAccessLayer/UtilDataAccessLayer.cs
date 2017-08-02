@@ -50,26 +50,15 @@
         }
 
         /// <summary>
-        /// Returns list of assemblies to look for Row classes.
-        /// </summary>
-        private static Assembly[] AssemblyRowList(Type typeRowInAssembly)
-        {
-            List<Assembly> result = new List<Assembly>();
-            result.Add(typeof(UtilFramework).GetTypeInfo().Assembly);
-            result.Add(typeRowInAssembly.GetTypeInfo().Assembly);
-            return result.ToArray();
-        }
-
-        /// <summary>
         /// Returns TypeRowList of all in code defined Row classes. Returns also framework Row classes.
         /// </summary>
         public static Type[] TypeRowList(Type typeRowInAssembly)
         {
             List<Type> result = new List<Type>();
-            Assembly[] assemblyList = AssemblyRowList(typeRowInAssembly);
-            foreach (Assembly assembly in assemblyList)
+            Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
+            foreach (Type itemTypeInAssembly in typeInAssemblyList)
             {
-                foreach (Type type in assembly.GetTypes())
+                foreach (Type type in itemTypeInAssembly.GetTypeInfo().Assembly.GetTypes())
                 {
                     if (type.GetTypeInfo().IsSubclassOf(typeof(Row)))
                     {
@@ -89,10 +78,10 @@
             List<Type> result = new List<Type>();
             if (typeRow != null)
             {
-                Assembly[] assemblyRowList = AssemblyRowList(typeRowInAssembly);
-                foreach (Assembly assembly in assemblyRowList)
+                Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
+                foreach (Type itemTypeInAssembly in typeInAssemblyList)
                 {
-                    Type type = assembly.GetType(typeRow);
+                    Type type = itemTypeInAssembly.GetTypeInfo().Assembly.GetType(typeRow);
                     if (type != null)
                     {
                         result.Add(type);
@@ -347,6 +336,9 @@
             return null;
         }
 
+        /// <summary>
+        /// Parse user entered text.
+        /// </summary>
         public static object ValueFromText(string text, Type type)
         {
             Type typeUnderlying = Nullable.GetUnderlyingType(type);

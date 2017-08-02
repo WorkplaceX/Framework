@@ -1,5 +1,6 @@
 ﻿namespace Framework.Application.Setup
 {
+    using Database.dbo;
     using Framework.Component;
     using System;
 
@@ -18,6 +19,11 @@
             new Button(this, "CLICK");
             new Label(this, "Hello Setup <b>XYZ</b>");
             new Literal(this, "Literal") { Html = "Hello Setup <b>XYZ</b>", CssClass = "my" };
+            new Literal(this, "L2") { Html = "<h1>Application</h1>" };
+            new Grid(this, "Grid", "Application");
+            app.GridData().LoadDatabase<FrameworkApplicationView>("Application");
+            app.GridData().SaveJson(app);
+
         }
     }
 }
