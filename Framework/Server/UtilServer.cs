@@ -146,10 +146,10 @@
         public static string FileNameIndex()
         {
             string result = FolderNameFrameworkServer() + "wwwroot/" + "index.html";
-            string fileNameOverwrite = FolderNameServer() + "wwwroot/" + "index.html";
-            if (File.Exists(fileNameOverwrite))
+            string fileNameOverride = FolderNameServer() + "wwwroot/" + "index.html";
+            if (File.Exists(fileNameOverride))
             {
-                return fileNameOverwrite;
+                return fileNameOverride;
             }
             return result;
         }

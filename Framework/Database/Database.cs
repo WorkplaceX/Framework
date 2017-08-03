@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Framework.Application;
 using Framework.DataAccessLayer;
+using System.Linq;
 
 namespace Database.dbo
 {
@@ -37,17 +38,15 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkFileStorage_ApplicationId : Cell<FrameworkFileStorage>
+    public partial class FrameworkFileStorage
     {
-        protected internal override void CellValueFromText(App app, string gridName, string index, ref string result)
+        protected internal override void Insert(App app)
         {
-            if (UtilApplication.IndexEnumFromText(index) == IndexEnum.New)
+            if (app.DbFrameworkApplication != null)
             {
-                if (app.DbFrameworkApplication != null)
-                {
-                    result = app.DbFrameworkApplication.Id.ToString();
-                }
+                this.ApplicationId = app.DbFrameworkApplication.Id;
             }
+            base.Insert(app);
         }
     }
 
@@ -61,6 +60,45 @@ namespace Database.dbo
         protected override internal void CellValueToText(App app, string gridName, string index, ref string result)
         {
             result = "File Upload";
+        }
+    }
+
+    public partial class FrameworkApplicationView
+    {
+        protected internal override void Update(App app, Row row)
+        {
+            var application = new FrameworkApplication();
+            UtilDataAccessLayer.RowCopy(row, application);
+            var applicationNew = new FrameworkApplication();
+            UtilDataAccessLayer.RowCopy(this, applicationNew);
+            UtilDataAccessLayer.Update(application, applicationNew);
+        }
+
+        protected internal override void Insert(App app)
+        {
+            var application = new FrameworkApplication();
+            UtilDataAccessLayer.RowCopy(this, application);
+            UtilDataAccessLayer.Insert(application);
+            this.Id = application.Id;
+        }
+
+        protected internal override void Select()
+        {
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == this.Id).First(), this);
+        }
+    }
+
+    public partial class FrameworkApplicationView_Type
+    {
+        protected internal override void CellTextParse(App app, string gridName, string index, ref string result)
+        {
+            string text = result;
+            var applicationType = UtilDataAccessLayer.Select<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
+            if (applicationType == null)
+            {
+                throw new Exception(string.Format("Type unknown! ({0})", result));
+            }
+            Row.ApplicationTypeId = applicationType.Id;
         }
     }
 }

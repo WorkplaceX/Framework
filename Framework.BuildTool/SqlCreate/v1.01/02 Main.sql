@@ -23,6 +23,7 @@ SELECT
 	Application.Id,
 	Application.Name,
 	Application.Path,
+	Application.ApplicationTypeId,
 	(SELECT ApplicationType.Name FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS Type,
 	(SELECT ApplicationType.IsExist FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS IsExist,
 	Application.IsActive

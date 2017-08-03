@@ -547,7 +547,7 @@
         /// <summary>
         /// Save data to sql database.
         /// </summary>
-        public void SaveDatabase()
+        public void SaveDatabase(App app)
         {
             foreach (string gridName in rowList.Keys.ToArray())
             {
@@ -565,7 +565,8 @@
                                 {
                                     try
                                     {
-                                        UtilDataAccessLayer.Update(row.Row, row.RowNew);
+                                        row.RowNew.Update(app, row.Row);
+                                        row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         TextClear(gridName, index);
@@ -579,7 +580,8 @@
                                 {
                                     try
                                     {
-                                        UtilDataAccessLayer.Insert(row.RowNew);
+                                        row.RowNew.Insert(app);
+                                        row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         TextClear(gridName, index);
@@ -639,8 +641,20 @@
                             string fieldName = cell.FieldNameCSharp;
                             //
                             string text = CellTextGet(gridName, index, fieldName);
-                            cell.CellValueFromText(app, gridName, index, ref text); // Overwrite for example user entered text also if user entered no text.
-                            app.CellValueFromText(gridName, index, cell, ref text);
+                            bool isModify = CellGet(gridName, index, fieldName).IsModify;
+                            if (isModify)
+                            {
+                                try
+                                {
+                                    cell.CellTextParse(app, gridName, index, ref text);
+                                }
+                                catch (Exception exception)
+                                {
+                                    ErrorCellSet(gridName, index, fieldName, exception.Message);
+                                    row.RowNew = null; // Do not save.
+                                    break;
+                                }
+                            }
                             if (text != null)
                             {
                                 if (text == "")
@@ -652,6 +666,8 @@
                                     object value;
                                     try
                                     {
+                                        cell.CellValueFromText(app, gridName, index, ref text);
+                                        app.CellValueFromText(gridName, index, cell, ref text);
                                         value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
                                     }
                                     catch (Exception exception)
@@ -745,6 +761,7 @@
                     else
                     {
                         text = gridDataJson.CellList[gridName][fieldName][row.Index].T; // Original text.
+                        CellTextSet(gridName, row.Index, fieldName, text);
                     }
                     // ErrorField
                     string errorFieldText = gridDataJson.CellList[gridName][fieldName][row.Index].E;
@@ -960,8 +977,8 @@
                                 value = cell.PropertyInfo.GetValue(gridRow.Row);
                             }
                             string textJson = UtilDataAccessLayer.ValueToText(value, cell.TypeField);
-                            cell.CellValueToText(app, gridName, index, ref textJson); // Overwrite text.
-                            app.CellValueToText(gridName, index, cell, ref textJson); // Overwrite text generic.
+                            cell.CellValueToText(app, gridName, index, ref textJson); // Override text.
+                            app.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
                             string text = CellTextGet(gridName, index, fieldName);
                             GridCellInternal gridCell = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))

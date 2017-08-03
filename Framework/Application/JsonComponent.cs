@@ -53,7 +53,7 @@
         public string Type;
 
         /// <summary>
-        /// Overwrite default type. Used to change Angular Selector.
+        /// Override default type. Used to change Angular Selector.
         /// </summary>
         internal void TypeSet(Type type)
         {

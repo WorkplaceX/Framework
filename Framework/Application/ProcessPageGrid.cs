@@ -332,7 +332,7 @@
             if (isSave)
             {
                 app.GridData().TextParse(app);
-                app.GridData().SaveDatabase();
+                app.GridData().SaveDatabase(app);
                 app.GridData().SaveJson(app);
             }
         }

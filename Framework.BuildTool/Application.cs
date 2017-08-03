@@ -36,7 +36,7 @@
         }
 
         /// <summary>
-        /// Overwrite to register additional application specific commands or clear command list.
+        /// Override to register additional application specific commands or clear command list.
         /// </summary>
         protected virtual void RegisterCommand(List<Command> result)
         {
@@ -44,7 +44,7 @@
         }
 
         /// <summary>
-        /// Overwrite to register application on table FrameworkApplication.
+        /// Override to register application on table FrameworkApplication.
         /// </summary>
         protected virtual void DbFrameworkApplicationView(List<FrameworkApplicationView> result)
         {

@@ -74,6 +74,10 @@ namespace Database.dbo
         [TypeCell(typeof(FrameworkApplicationView_Path))]
         public string Path { get; set; }
 
+        [SqlName("ApplicationTypeId")]
+        [TypeCell(typeof(FrameworkApplicationView_ApplicationTypeId))]
+        public int ApplicationTypeId { get; set; }
+
         [SqlName("Type")]
         [TypeCell(typeof(FrameworkApplicationView_Type))]
         public string Type { get; set; }
@@ -92,6 +96,8 @@ namespace Database.dbo
     public partial class FrameworkApplicationView_Name : Cell<FrameworkApplicationView> { }
 
     public partial class FrameworkApplicationView_Path : Cell<FrameworkApplicationView> { }
+
+    public partial class FrameworkApplicationView_ApplicationTypeId : Cell<FrameworkApplicationView> { }
 
     public partial class FrameworkApplicationView_Type : Cell<FrameworkApplicationView> { }
 

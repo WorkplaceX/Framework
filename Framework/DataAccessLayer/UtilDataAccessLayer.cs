@@ -375,14 +375,24 @@
         public static Row RowClone(Row row)
         {
             Row result = (Row)UtilFramework.TypeToObject(row.GetType());
-            var propertyInfoList = row.GetType().GetProperties();
-            foreach (PropertyInfo propertyInfo in propertyInfoList)
-            {
-                string fieldName = propertyInfo.Name;
-                object value = propertyInfo.GetValue(row);
-                propertyInfo.SetValue(result, value);
-            }
+            RowCopy(row, result);
             return result;
+        }
+
+        /// <summary>
+        /// Copy data row. Source and dest need not to be of same type. Only fields available on
+        /// both records are copied.
+        /// </summary>
+        public static void RowCopy(Row rowSource, Row rowDest)
+        {
+            var propertyInfoDestList = rowDest.GetType().GetProperties();
+            foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
+            {
+                string fieldName = propertyInfoDest.Name;
+                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldName);
+                object value = propertyInfoSource.GetValue(rowSource);
+                propertyInfoDest.SetValue(rowDest, value);
+            }
         }
 
         /// <summary>

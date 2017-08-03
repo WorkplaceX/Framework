@@ -14,6 +14,27 @@
         {
             return false;
         }
+
+        protected virtual internal void Update(App app, Row row)
+        {
+            UtilDataAccessLayer.Update(row, this);
+        }
+
+        /// <summary>
+        /// Override this method for example to save data to underlying database tables from sql view.
+        /// </summary>
+        protected virtual internal void Insert(App app)
+        {
+            UtilDataAccessLayer.Insert(this);
+        }
+
+        /// <summary>
+        /// Override this method to reload record after update or insert.
+        /// </summary>
+        protected virtual internal void Select()
+        {
+
+        }
     }
 
     /// <summary>
@@ -87,7 +108,15 @@
         }
 
         /// <summary>
-        /// Called after method UtilDataAccessLayer.ValueToText();
+        /// Parse user entered text.
+        /// </summary>
+        protected virtual internal void CellTextParse(App app, string gridName, string index, ref string result)
+        {
+
+        }
+
+        /// <summary>
+        /// Override for custom formatting like adding units of measurement. Called after method UtilDataAccessLayer.ValueToText();
         /// </summary>
         protected virtual internal void CellValueToText(App app, string gridName, string index, ref string result)
         {
@@ -95,7 +124,7 @@
         }
 
         /// <summary>
-        /// Called before user entered text is parsed with method UtilDataAccessLayer.ValueFromText();
+        /// Override to parse custom formating like value with units of measurement. Called before user entered text is parsed with method UtilDataAccessLayer.ValueFromText();
         /// </summary>
         protected virtual internal void CellValueFromText(App app, string gridName, string index, ref string result)
         {
@@ -103,7 +132,7 @@
         }
 
         /// <summary>
-        /// Returns true, if data cell is to be rendered as button. Overwrite method CellProcessButtonIsClick(); to process click event.
+        /// Returns true, if data cell is to be rendered as button. Override method CellProcessButtonIsClick(); to process click event.
         /// </summary>
         protected virtual internal void CellIsButton(App app, string gridName, string index, ref bool result)
         {
