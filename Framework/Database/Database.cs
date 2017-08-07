@@ -67,10 +67,13 @@ namespace Database.dbo
     {
         protected internal override void Update(App app, Row row)
         {
+            // Old row
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(row, application);
+            // New row
             var applicationNew = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, applicationNew);
+            //
             UtilDataAccessLayer.Update(application, applicationNew);
         }
 
@@ -99,6 +102,20 @@ namespace Database.dbo
                 throw new Exception(string.Format("Type unknown! ({0})", result));
             }
             Row.ApplicationTypeId = applicationType.Id;
+        }
+    }
+
+    public partial class FrameworkApplicationView_Type
+    {
+        protected internal override void CellLookUp(out Type typeRow, out List<Row> rowList)
+        {
+            typeRow = typeof(FrameworkApplicationType);
+            rowList = UtilDataAccessLayer.Select(typeRow, null, null, false, 0, 5);
+        }
+
+        protected internal override void CellLookUpIsClick(Row row, ref string result)
+        {
+            result = ((FrameworkApplicationType)row).Name;
         }
     }
 }

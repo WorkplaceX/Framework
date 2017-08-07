@@ -141,6 +141,11 @@
         private void ProcessGridSelectCell(AppJson appJson, string gridName, string index, string fieldName)
         {
             GridDataJson gridDataJson = appJson.GridDataJson;
+            //
+            gridDataJson.FocusGridNamePrevious = gridDataJson.FocusGridName;
+            gridDataJson.FocusIndexPrevious = gridDataJson.FocusIndex;
+            gridDataJson.FocusFieldNamePrevious = gridDataJson.FocusFieldName;
+            //
             gridDataJson.FocusGridName = gridName;
             gridDataJson.FocusIndex = index;
             gridDataJson.FocusFieldName = fieldName;
@@ -211,6 +216,10 @@
                     }
                 }
             }
+            //
+            gridDataJson.FocusGridNamePrevious = null;
+            gridDataJson.FocusIndexPrevious = null;
+            gridDataJson.FocusFieldNamePrevious = null;
         }
     }
 
@@ -237,6 +246,51 @@
         }
     }
 
+    public class ProcessGridLookUpIsClick : Process
+    {
+        protected internal override void Run(App app)
+        {
+            Row rowLookUp = null;
+            GridDataJson gridDataJson = app.AppJson.GridDataJson;
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                if (gridName == "LookUp")
+                {
+                    foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                    {
+                        if (gridRow.IsClick)
+                        {
+                            if (UtilApplication.IndexEnumFromText(gridRow.Index) == IndexEnum.Index)
+                            {
+                                GridData gridData = app.GridData();
+                                rowLookUp = gridData.Row("LookUp", gridRow.Index);
+                            }
+                        }
+                    }
+                }
+            }
+            //
+            if (rowLookUp != null)
+            {
+                GridData gridData = app.GridData();
+                var row = gridData.Row(gridDataJson.FocusGridNamePrevious, gridDataJson.FocusIndexPrevious);
+                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldNamePrevious).First();
+                Cell cellLookUp = UtilDataAccessLayer.CellList(rowLookUp.GetType(), rowLookUp).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                string result = cellLookUp.Value.ToString();
+                cell.CellLookUpIsClick(rowLookUp, ref result);
+                GridCell gridCell = gridDataJson.CellList[gridDataJson.FocusGridNamePrevious][gridDataJson.FocusFieldNamePrevious][gridDataJson.FocusIndexPrevious];
+                gridCell.IsModify = true;
+                gridCell.IsO = true;
+                gridCell.O = gridCell.T;
+                gridCell.T = result;
+                gridData.LoadJson(app.AppJson, app);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Open LookUp grid.
+    /// </summary>
     public class ProcessGridLookUp : Process
     {
         protected internal override void Run(App app)
@@ -268,7 +322,7 @@
                     var row = gridData.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
                     Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                     List<Row> rowList;
-                    cell.LookUp(out typeRow, out rowList);
+                    cell.CellLookUp(out typeRow, out rowList);
                     gridData.LoadRow("LookUp", typeRow, rowList);
                     gridData.SaveJson(app);
                 }

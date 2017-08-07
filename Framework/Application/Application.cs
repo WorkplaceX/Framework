@@ -186,6 +186,7 @@
                 processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridFilter>();
+                processList.Add<ProcessGridLookUpIsClick>();
                 processList.Add<ProcessGridLookUp>();
                 processList.Add<ProcessGridSave>();
                 processList.Add<ProcessGridCellButtonIsClick>();

@@ -222,6 +222,21 @@
         /// Focused grid cell.
         /// </summary>
         public string FocusFieldName;
+
+        /// <summary>
+        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for LookUp. Never sent to client.
+        /// </summary>
+        public string FocusGridNamePrevious;
+
+        /// <summary>
+        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for LookUp. Never sent to client.
+        /// </summary>
+        public string FocusIndexPrevious;
+
+        /// <summary>
+        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for LookUp. Never sent to client.
+        /// </summary>
+        public string FocusFieldNamePrevious;
     }
 
     public enum GridCellEnum

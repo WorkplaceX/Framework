@@ -19,6 +19,8 @@
             new Button(this, "CLICK");
             new Label(this, "Hello Setup <b>XYZ</b>");
             new Literal(this, "Literal") { Html = "Hello Setup <b>XYZ</b>", CssClass = "my" };
+            new Literal(this, "L2") { Html = "<h1>LookUp</h1>" };
+            new Grid(this, "Grid", "LookUp");
             new Literal(this, "L2") { Html = "<h1>Application</h1>" };
             new Grid(this, "Grid", "Application");
             app.GridData().LoadDatabase<FrameworkApplicationView>("Application");

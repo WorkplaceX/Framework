@@ -149,6 +149,10 @@
         /// </summary>
         public static List<Cell> CellList(Type typeRow, object row)
         {
+            if (row != null)
+            {
+                UtilFramework.Assert(row.GetType() == typeRow);
+            }
             List<Cell> result = new List<Cell>();
             result = ColumnList(typeRow); // For column row is null and row.GetType() is not possible.
             foreach (Cell cell in result)
