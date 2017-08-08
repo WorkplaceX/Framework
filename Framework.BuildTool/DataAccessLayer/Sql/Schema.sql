@@ -3,7 +3,7 @@
 	TableList.SchemaName,
 	TableList.TableName,
 	ColumnList.name AS FieldName,
-	ColumnList.column_id AS FieldNameOrderBy,
+	ColumnList.column_id AS FieldNameSort,
 	CAST(CASE WHEN TableList.type = 'V' THEN 1 ELSE 0 END AS BIT) AS IsView,
 	ColumnList.system_type_id AS SqlType,
 	ColumnList.is_nullable AS IsNullable,

@@ -138,14 +138,14 @@
             MERGE INTO FrameworkTable AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT Source.TableName
+                    SELECT Source.Name
                     EXCEPT
-                    SELECT Target.TableName)
+                    SELECT Target.Name)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (TableName, IsExist)
-	            VALUES (Source.TableName, 1);
+	            INSERT (Name, IsExist)
+	            VALUES (Source.Name, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
@@ -161,7 +161,7 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableName)", tableName));
+                    sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", tableName));
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
@@ -186,14 +186,14 @@
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT (SELECT Data.Id AS TableId FROM FrameworkTable Data WHERE Data.TableName = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCsharp
+                    SELECT (SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.Name = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCsharp
                     EXCEPT
                     SELECT Target.TableId, Target.FieldNameSql, Target.FieldNameCsharp)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
 	            INSERT (TableId, FieldNameSql, FieldNameCsharp, IsExist)
-	            VALUES ((SELECT Data.Id AS TableId FROM FrameworkTable Data WHERE Data.TableName = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCsharp, 1);
+	            VALUES ((SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.Name = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCsharp, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;

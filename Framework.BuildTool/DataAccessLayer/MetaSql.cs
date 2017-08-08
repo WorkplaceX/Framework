@@ -63,7 +63,7 @@
 
         public string FieldName { get; set; }
 
-        public int FieldNameOrderBy { get; set; }
+        public int FieldNameSort { get; set; }
 
         public bool IsView { get; set; }
 

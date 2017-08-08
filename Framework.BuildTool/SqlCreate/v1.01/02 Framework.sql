@@ -43,7 +43,7 @@ CREATE TABLE FrameworkSession
 CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	TableName NVARCHAR(256) NOT NULL UNIQUE,
+	Name NVARCHAR(256) NOT NULL UNIQUE,
 	IsExist BIT
 )
 
@@ -56,6 +56,43 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 	IsExist BIT,
 	INDEX IX_FrameworkColumn UNIQUE (TableId, FieldNameSql, FieldNameCsharp)
 )
+
+CREATE TABLE FrameworkConfigColumn
+(
+	Id INT PRIMARY KEY IDENTITY,
+	ColumnId INT FOREIGN KEY REFERENCES FrameworkColumn(Id) NOT NULL,
+	Text NVARCHAR(256),
+	IsVisible BIT,
+	Sort FLOAT,
+	INDEX IX_FrameworkConfigColumn UNIQUE (ColumnId)
+)
+
+GO
+
+CREATE VIEW FrameworkConfigColumnView AS
+SELECT
+	TableX.Id AS TableId,
+	TableX.Name AS TableName,
+	TableX.IsExist AS TableIsExist,
+	ColumnX.Id AS ColumnId,
+	ColumnX.FieldNameSql,
+	ColumnX.FieldNameCsharp,
+	ColumnX.IsExist AS ColumnIsExist,
+	Config.Id AS ConfigId,
+	Config.Text,
+	Config.Sort,
+	Config.IsVisible
+
+FROM
+	FrameworkColumn ColumnX
+	
+LEFT JOIN
+	FrameworkTable TableX ON TableX.Id = ColumnX.TableId
+
+LEFT JOIN
+	FrameworkConfigColumn Config ON Config.ColumnId = ColumnX.Id
+
+GO
 
 CREATE TABLE FrameworkFileStorage
 (

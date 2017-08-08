@@ -112,9 +112,9 @@ namespace Database.dbo
         [TypeCell(typeof(FrameworkColumn_Id))]
         public int Id { get; set; }
 
-        [SqlName("TableNameSql")]
-        [TypeCell(typeof(FrameworkColumn_TableNameSql))]
-        public string TableNameSql { get; set; }
+        [SqlName("TableId")]
+        [TypeCell(typeof(FrameworkColumn_TableId))]
+        public int TableId { get; set; }
 
         [SqlName("FieldNameSql")]
         [TypeCell(typeof(FrameworkColumn_FieldNameSql))]
@@ -131,13 +131,117 @@ namespace Database.dbo
 
     public partial class FrameworkColumn_Id : Cell<FrameworkColumn> { }
 
-    public partial class FrameworkColumn_TableNameSql : Cell<FrameworkColumn> { }
+    public partial class FrameworkColumn_TableId : Cell<FrameworkColumn> { }
 
     public partial class FrameworkColumn_FieldNameSql : Cell<FrameworkColumn> { }
 
     public partial class FrameworkColumn_FieldNameCsharp : Cell<FrameworkColumn> { }
 
     public partial class FrameworkColumn_IsExist : Cell<FrameworkColumn> { }
+
+    [SqlName("FrameworkConfigColumn")]
+    public partial class FrameworkConfigColumn : Row
+    {
+        [SqlName("Id")]
+        [TypeCell(typeof(FrameworkConfigColumn_Id))]
+        public int Id { get; set; }
+
+        [SqlName("ColumnId")]
+        [TypeCell(typeof(FrameworkConfigColumn_ColumnId))]
+        public int ColumnId { get; set; }
+
+        [SqlName("Text")]
+        [TypeCell(typeof(FrameworkConfigColumn_Text))]
+        public string Text { get; set; }
+
+        [SqlName("IsVisible")]
+        [TypeCell(typeof(FrameworkConfigColumn_IsVisible))]
+        public bool? IsVisible { get; set; }
+
+        [SqlName("Sort")]
+        [TypeCell(typeof(FrameworkConfigColumn_Sort))]
+        public double? Sort { get; set; }
+    }
+
+    public partial class FrameworkConfigColumn_Id : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_ColumnId : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_Text : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_IsVisible : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_Sort : Cell<FrameworkConfigColumn> { }
+
+    [SqlName("FrameworkConfigColumnView")]
+    public partial class FrameworkConfigColumnView : Row
+    {
+        [SqlName("TableId")]
+        [TypeCell(typeof(FrameworkConfigColumnView_TableId))]
+        public int? TableId { get; set; }
+
+        [SqlName("TableName")]
+        [TypeCell(typeof(FrameworkConfigColumnView_TableName))]
+        public string TableName { get; set; }
+
+        [SqlName("TableIsExist")]
+        [TypeCell(typeof(FrameworkConfigColumnView_TableIsExist))]
+        public bool? TableIsExist { get; set; }
+
+        [SqlName("ColumnId")]
+        [TypeCell(typeof(FrameworkConfigColumnView_ColumnId))]
+        public int ColumnId { get; set; }
+
+        [SqlName("FieldNameSql")]
+        [TypeCell(typeof(FrameworkConfigColumnView_FieldNameSql))]
+        public string FieldNameSql { get; set; }
+
+        [SqlName("FieldNameCsharp")]
+        [TypeCell(typeof(FrameworkConfigColumnView_FieldNameCsharp))]
+        public string FieldNameCsharp { get; set; }
+
+        [SqlName("ColumnIsExist")]
+        [TypeCell(typeof(FrameworkConfigColumnView_ColumnIsExist))]
+        public bool? ColumnIsExist { get; set; }
+
+        [SqlName("ConfigId")]
+        [TypeCell(typeof(FrameworkConfigColumnView_ConfigId))]
+        public int? ConfigId { get; set; }
+
+        [SqlName("Text")]
+        [TypeCell(typeof(FrameworkConfigColumnView_Text))]
+        public string Text { get; set; }
+
+        [SqlName("Sort")]
+        [TypeCell(typeof(FrameworkConfigColumnView_Sort))]
+        public double? Sort { get; set; }
+
+        [SqlName("IsVisible")]
+        [TypeCell(typeof(FrameworkConfigColumnView_IsVisible))]
+        public bool? IsVisible { get; set; }
+    }
+
+    public partial class FrameworkConfigColumnView_TableId : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_TableName : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_TableIsExist : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_ColumnId : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_FieldNameSql : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_FieldNameCsharp : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_ColumnIsExist : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_ConfigId : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_Text : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_Sort : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_IsVisible : Cell<FrameworkConfigColumnView> { }
 
     [SqlName("FrameworkFileStorage")]
     public partial class FrameworkFileStorage : Row
@@ -201,6 +305,28 @@ namespace Database.dbo
 
     public partial class FrameworkSession_ApplicationId : Cell<FrameworkSession> { }
 
+    [SqlName("FrameworkTable")]
+    public partial class FrameworkTable : Row
+    {
+        [SqlName("Id")]
+        [TypeCell(typeof(FrameworkTable_Id))]
+        public int Id { get; set; }
+
+        [SqlName("Name")]
+        [TypeCell(typeof(FrameworkTable_Name))]
+        public string Name { get; set; }
+
+        [SqlName("IsExist")]
+        [TypeCell(typeof(FrameworkTable_IsExist))]
+        public bool? IsExist { get; set; }
+    }
+
+    public partial class FrameworkTable_Id : Cell<FrameworkTable> { }
+
+    public partial class FrameworkTable_Name : Cell<FrameworkTable> { }
+
+    public partial class FrameworkTable_IsExist : Cell<FrameworkTable> { }
+
     [SqlName("FrameworkVersion")]
     public partial class FrameworkVersion : Row
     {
@@ -208,12 +334,18 @@ namespace Database.dbo
         [TypeCell(typeof(FrameworkVersion_Id))]
         public int Id { get; set; }
 
+        [SqlName("Name")]
+        [TypeCell(typeof(FrameworkVersion_Name))]
+        public string Name { get; set; }
+
         [SqlName("Version")]
         [TypeCell(typeof(FrameworkVersion_Version))]
         public string Version { get; set; }
     }
 
     public partial class FrameworkVersion_Id : Cell<FrameworkVersion> { }
+
+    public partial class FrameworkVersion_Name : Cell<FrameworkVersion> { }
 
     public partial class FrameworkVersion_Version : Cell<FrameworkVersion> { }
 }
