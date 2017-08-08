@@ -40,13 +40,21 @@ CREATE TABLE FrameworkSession
 	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL,
 )
 
+CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
+(
+	Id INT PRIMARY KEY IDENTITY,
+	TableName NVARCHAR(256) NOT NULL UNIQUE,
+	IsExist BIT
+)
+
 CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source code defined columns. Also calculated fields. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	TableNameSql NVARCHAR(256),
+	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
 	FieldNameSql NVARCHAR(256),
 	FieldNameCsharp NVARCHAR(256),
-	IsExist BIT
+	IsExist BIT,
+	INDEX IX_FrameworkColumn UNIQUE (TableId, FieldNameSql, FieldNameCsharp)
 )
 
 CREATE TABLE FrameworkFileStorage

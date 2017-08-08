@@ -124,6 +124,54 @@
             UtilFramework.Log("### Exit RunSqlApplicationType");
         }
 
+        private void RunSqlTable(string connectionString)
+        {
+            UtilFramework.Log("### Start RunSqlTable");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            string sql = "UPDATE FrameworkTable SET IsExist = 0";
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+            string sqlUpsert = @"
+            MERGE INTO FrameworkTable AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT Source.TableName
+                    EXCEPT
+                    SELECT Target.TableName)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (TableName, IsExist)
+	            VALUES (Source.TableName, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            {
+                foreach (string tableName in UtilDataAccessLayer.ColumnList(typeRow).Select(item => item.TableNameSql).Distinct())
+                {
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        sqlSelect.Append(" UNION ALL\r\n");
+                    }
+                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableName)", tableName));
+                }
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+            UtilFramework.Log("### Exit RunSqlTable");
+        }
+
         private void RunSqlColumn(string connectionString)
         {
             UtilFramework.Log("### Start RunSqlColumn");
@@ -138,14 +186,14 @@
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT Source.TableNameSql, Source.FieldNameSql, Source.FieldNameCsharp
+                    SELECT (SELECT Data.Id AS TableId FROM FrameworkTable Data WHERE Data.TableName = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCsharp
                     EXCEPT
-                    SELECT Target.TableNameSql, Target.FieldNameSql, Target.FieldNameCsharp)
+                    SELECT Target.TableId, Target.FieldNameSql, Target.FieldNameCsharp)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (TableNameSql, FieldNameSql, FieldNameCsharp, IsExist)
-	            VALUES (Source.TableNameSql, Source.FieldNameSql, Source.FieldNameCsharp, 1);
+	            INSERT (TableId, FieldNameSql, FieldNameCsharp, IsExist)
+	            VALUES ((SELECT Data.Id AS TableId FROM FrameworkTable Data WHERE Data.TableName = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCsharp, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
@@ -174,6 +222,7 @@
 
         public override void Run()
         {
+            RunSqlTable(Server.ConnectionManager.ConnectionString);
             RunSqlColumn(Server.ConnectionManager.ConnectionString);
             RunSqlApplicationType(Server.ConnectionManager.ConnectionString);
             RunSqlApplication(Server.ConnectionManager.ConnectionString);

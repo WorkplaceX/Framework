@@ -2,6 +2,7 @@
 
 DROP TABLE FrameworkFileStorage
 DROP TABLE FrameworkColumn
+DROP TABLE FrameworkTable
 DROP TABLE FrameworkSession
 DROP VIEW FrameworkApplicationView
 DROP TABLE FrameworkApplication
