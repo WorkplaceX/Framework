@@ -1,4 +1,4 @@
-﻿IF (NOT ISNULL((SELECT Version FROM FrameworkVersion), '') = 'v1.01') BEGIN SELECT 'RETURN' RETURN END -- Version Check
+﻿IF NOT EXISTS(SELECT * FROM FrameworkVersion WHERE Name = 'Framework' AND Version = 'v1.01') BEGIN SELECT 'RETURN' RETURN END -- Version Check
 
 CREATE TABLE FrameworkApplicationType
 (
