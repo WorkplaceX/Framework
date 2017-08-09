@@ -107,6 +107,11 @@
 
         }
 
+        protected virtual internal void ColumnIsVisible(string gridName, Cell cell, ref bool result)
+        {
+            result = UtilApplication.NamingConventionFieldNameSqlIsId(cell.FieldNameSql) == false;
+        }
+
         internal AppJson Run(AppJson appJson, HttpContext httpContext)
         {
             this.AppJson = appJson;

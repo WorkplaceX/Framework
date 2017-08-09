@@ -11,8 +11,9 @@ namespace UnitTest
     {
         public static void Main(string[] args)
         {
-            new UnitTest.DataAccessLayer.UnitTest().Run();
-            new UnitTest.Json.UnitTest().Run();
+            new Application.UnitTest().Run();
+            new DataAccessLayer.UnitTest().Run();
+            new Json.UnitTest().Run();
             UtilFramework.Log("");
             UtilFramework.Log("All test successful!");
             if (Debugger.IsAttached)

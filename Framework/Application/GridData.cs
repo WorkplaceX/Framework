@@ -805,41 +805,64 @@
         /// <summary>
         /// Returns row's columns.
         /// </summary>
-        private static List<GridColumn> TypeRowToGridColumn(Type typeRow)
+        private static List<GridColumn> TypeRowToGridColumn(App app, Type typeRow, string gridName)
         {
             var result = new List<GridColumn>();
             //
             var columnList = UtilDataAccessLayer.ColumnList(typeRow);
             double widthPercentTotal = 0;
             bool isLast = false;
-            for (int i = 0; i < columnList.Count; i++)
+            //
+            List<Cell> columnIsVisibleList = new List<Cell>();
+            foreach (Cell column in columnList)
+            {
+                bool isVisible = true;
+                app.ColumnIsVisible(gridName, column, ref isVisible);
+                column.ColumnIsVisible(ref isVisible);
+                if (isVisible)
+                {
+                    columnIsVisibleList.Add(column);
+                }
+            }
+            //
+            int i = -1;
+            foreach (Cell column in columnList)
             {
                 // Text
-                string text = columnList[i].FieldNameSql;
+                string text = column.FieldNameSql;
                 if (text == null)
                 {
-                    text = columnList[i].FieldNameCSharp; // Calculated column.
+                    text = column.FieldNameCSharp; // Calculated column has no FieldNameSql.
                 }
-                columnList[i].ColumnText(ref text);
-                // WidthPercent
-                isLast = i == columnList.Count;
-                double widthPercentAvg = Math.Round(((double)100 - widthPercentTotal) / ((double)columnList.Count - (double)i), 2);
-                double widthPercent = widthPercentAvg;
-                columnList[i].ColumnWidthPercent(ref widthPercent);
-                widthPercent = Math.Round(widthPercent, 2);
-                if (isLast)
+                column.ColumnText(ref text);
+                //
+                bool isVisible = columnIsVisibleList.Contains(column);
+                if (isVisible)
                 {
-                    widthPercent = 100 - widthPercentTotal;
+                    i = i + 1;
+                    isLast = column == columnIsVisibleList.LastOrDefault();
+                    double widthPercentAvg = Math.Round(((double)100 - widthPercentTotal) / ((double)columnIsVisibleList.Count - (double)i), 2);
+                    double widthPercent = widthPercentAvg;
+                    column.ColumnWidthPercent(ref widthPercent);
+                    widthPercent = Math.Round(widthPercent, 2);
+                    if (isLast)
+                    {
+                        widthPercent = 100 - widthPercentTotal;
+                    }
+                    else
+                    {
+                        if (widthPercentTotal + widthPercent > 100)
+                        {
+                            widthPercent = widthPercentAvg;
+                        }
+                    }
+                    widthPercentTotal = widthPercentTotal + widthPercent;
+                    result.Add(new GridColumn() { FieldName = column.FieldNameCSharp, Text = text, WidthPercent = widthPercent, IsVisible = true });
                 }
                 else
                 {
-                    if (widthPercentTotal + widthPercent > 100)
-                    {
-                        widthPercent = widthPercentAvg;
-                    }
+                    result.Add(new GridColumn() { FieldName = column.FieldNameCSharp, Text = text, IsVisible = false });
                 }
-                widthPercentTotal = widthPercentTotal + widthPercent;
-                result.Add(new GridColumn() { FieldName = columnList[i].FieldNameCSharp, Text = text, WidthPercent = widthPercent });
             }
             return result;
         }
@@ -945,7 +968,7 @@
                 {
                     gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
                 }
-                gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(typeRow);
+                gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(app, typeRow, gridName);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {

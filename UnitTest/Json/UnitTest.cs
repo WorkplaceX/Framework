@@ -1,5 +1,6 @@
 ﻿namespace UnitTest.Json
 {
+    using Framework;
     using Framework.Json;
     using System;
     using System.Collections.Generic;
@@ -94,10 +95,10 @@
             Guid guid = Guid.NewGuid();
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<Data>(json);
-            UtilUnitTest.Assert(data.Name == data2.Name);
-            UtilUnitTest.Assert(data.NumberInt == data2.NumberInt);
-            UtilUnitTest.Assert(data.NumberDouble == data2.NumberDouble);
-            UtilUnitTest.Assert(data.Guid == data2.Guid);
+            UtilFramework.Assert(data.Name == data2.Name);
+            UtilFramework.Assert(data.NumberInt == data2.NumberInt);
+            UtilFramework.Assert(data.NumberDouble == data2.NumberDouble);
+            UtilFramework.Assert(data.Guid == data2.Guid);
         }
 
         public void Test02()
@@ -109,10 +110,10 @@
             Guid guid = Guid.NewGuid();
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataNullable>(json);
-            UtilUnitTest.Assert(data.Name == data2.Name);
-            UtilUnitTest.Assert(data.NumberInt == data2.NumberInt);
-            UtilUnitTest.Assert(data.NumberDouble == data2.NumberDouble);
-            UtilUnitTest.Assert(data.Guid == data2.Guid);
+            UtilFramework.Assert(data.Name == data2.Name);
+            UtilFramework.Assert(data.NumberInt == data2.NumberInt);
+            UtilFramework.Assert(data.NumberDouble == data2.NumberDouble);
+            UtilFramework.Assert(data.Guid == data2.Guid);
         }
 
         public void Test03()
@@ -134,8 +135,8 @@
             data.List.Add(null);
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithList>(json);
-            UtilUnitTest.Assert(data.List[0].Name == data2.List[0].Name);
-            UtilUnitTest.Assert(data.List[1].GetType() == typeof(DataWithListItem2));
+            UtilFramework.Assert(data.List[0].Name == data2.List[0].Name);
+            UtilFramework.Assert(data.List[1].GetType() == typeof(DataWithListItem2));
         }
 
         public void Test05()
@@ -146,8 +147,8 @@
             data.List["G"] = 44;
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithDictionary>(json);
-            UtilUnitTest.Assert(data.List["F"] == 33);
-            UtilUnitTest.Assert(data.List["G"] == 44);
+            UtilFramework.Assert(data.List["F"] == 33);
+            UtilFramework.Assert(data.List["G"] == 44);
         }
 
         public void Test06()
@@ -159,10 +160,10 @@
             data.List["H"] = null;
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithDictionary2>(json);
-            UtilUnitTest.Assert(data.List["F"].Name == "FF");
-            UtilUnitTest.Assert(data.List["G"].Name == "GG");
-            UtilUnitTest.Assert(data.List["G"].GetType() == typeof(DataWithListItem2));
-            UtilUnitTest.Assert(data.List["H"] == null);
+            UtilFramework.Assert(data.List["F"].Name == "FF");
+            UtilFramework.Assert(data.List["G"].Name == "GG");
+            UtilFramework.Assert(data.List["G"].GetType() == typeof(DataWithListItem2));
+            UtilFramework.Assert(data.List["H"] == null);
         }
 
         public void Test07()
@@ -184,7 +185,7 @@
             data.Value = "H";
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithObject>(json);
-            UtilUnitTest.Assert((string)data2.Value == "H");
+            UtilFramework.Assert((string)data2.Value == "H");
         }
 
         public void Test09()
@@ -193,7 +194,7 @@
             data.Value = 2.23;
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithObject>(json);
-            UtilUnitTest.Assert((double)data2.Value == 2.23);
+            UtilFramework.Assert((double)data2.Value == 2.23);
         }
 
         public void Test10()
@@ -202,7 +203,7 @@
             data.Value = (double)2;
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithObject>(json);
-            UtilUnitTest.Assert((double)data2.Value == 2);
+            UtilFramework.Assert((double)data2.Value == 2);
         }
 
         public void Test11()
@@ -215,7 +216,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "Allowed types: string, double or bool!");
+                UtilFramework.Assert(exception.Message == "Allowed types: string, double or bool!");
             }
         }
 
@@ -229,7 +230,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "Object has no Type field!");
+                UtilFramework.Assert(exception.Message == "Object has no Type field!");
             }
         }
 
@@ -239,8 +240,8 @@
             data.Value = new DataWithListItem2() { Name = "M" };
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataWithObject>(json);
-            UtilUnitTest.Assert(data2.Value.GetType() == typeof(DataWithListItem2));
-            UtilUnitTest.Assert(((DataWithListItem2)data2.Value).Name == "M");
+            UtilFramework.Assert(data2.Value.GetType() == typeof(DataWithListItem2));
+            UtilFramework.Assert(((DataWithListItem2)data2.Value).Name == "M");
         }
 
         public void Test14()
@@ -249,13 +250,13 @@
             data.Name = "H";
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataListNull>(json);
-            UtilUnitTest.Assert(!json.Contains("List"));
-            UtilUnitTest.Assert(data.List != null);
-            UtilUnitTest.Assert(data.List2 != null);
-            UtilUnitTest.Assert(data2.List != null);
-            UtilUnitTest.Assert(data2.List2 != null);
-            UtilUnitTest.Assert(data.Name == "H");
-            UtilUnitTest.Assert(data2.Name == "H");
+            UtilFramework.Assert(!json.Contains("List"));
+            UtilFramework.Assert(data.List != null);
+            UtilFramework.Assert(data.List2 != null);
+            UtilFramework.Assert(data2.List != null);
+            UtilFramework.Assert(data2.List2 != null);
+            UtilFramework.Assert(data.Name == "H");
+            UtilFramework.Assert(data2.Name == "H");
         }
 
         public void Test15()
@@ -266,7 +267,7 @@
             data.List.Add(null);
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataListNestedNull>(json);
-            UtilUnitTest.Assert(data2.List[1] != null);
+            UtilFramework.Assert(data2.List[1] != null);
         }
 
         public void Test16()
@@ -277,7 +278,7 @@
             data.List2.Add("Y", null);
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataListNestedNull>(json);
-            UtilUnitTest.Assert(data2.List2["Y"] != null);
+            UtilFramework.Assert(data2.List2["Y"] != null);
         }
 
         public void Test17()
@@ -286,7 +287,7 @@
             data.List2 = new Dictionary<string, Dictionary<string, int>>();
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataListNestedNull>(json);
-            UtilUnitTest.Assert(data2.List2.Count == 0);
+            UtilFramework.Assert(data2.List2.Count == 0);
         }
 
         public class DataDictionaryKey
@@ -302,8 +303,8 @@
             data.List["D"] = null;
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataDictionaryKey>(json);
-            UtilUnitTest.Assert((string)data2.List["A"] == "X");
-            UtilUnitTest.Assert(data2.List["D"] == null);
+            UtilFramework.Assert((string)data2.List["A"] == "X");
+            UtilFramework.Assert(data2.List["D"] == null);
         }
 
         public void Test19()
@@ -318,7 +319,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "Dictionary key needs to be of type string!");
+                UtilFramework.Assert(exception.Message == "Dictionary key needs to be of type string!");
             }
         }
 
@@ -342,7 +343,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "No derived list or dictionary for json!");
+                UtilFramework.Assert(exception.Message == "No derived list or dictionary for json!");
             }
         }
 
@@ -379,7 +380,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "No derived list or dictionary for json!");
+                UtilFramework.Assert(exception.Message == "No derived list or dictionary for json!");
             }
         }
 
@@ -412,7 +413,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "No derived list or dictionary for json!");
+                UtilFramework.Assert(exception.Message == "No derived list or dictionary for json!");
             }
         }
 
@@ -427,7 +428,7 @@
             data.H = true;
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataBool>(json);
-            UtilUnitTest.Assert((bool)data2.H == true);
+            UtilFramework.Assert((bool)data2.H == true);
         }
 
         public class DataSelector
@@ -462,7 +463,7 @@
             }
             catch (Framework.Json.JsonException exception)
             {
-                UtilUnitTest.Assert(exception.Message == "Object has no TypeCSharp field!");
+                UtilFramework.Assert(exception.Message == "Object has no TypeCSharp field!");
             }
         }
 
@@ -484,7 +485,7 @@
             data.L = new MyLabel2();
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<DataSelector>(json);
-            UtilUnitTest.Assert(data2.L is MyLabel2);
+            UtilFramework.Assert(data2.L is MyLabel2);
         }
 
         public class Data26Root
@@ -502,11 +503,11 @@
                 try
                 {
                     var data2 = JsonConvert.Deserialize<Data26Root>(json);
-                    UtilUnitTest.Assert(data2.Data26.Name == "My26");
+                    UtilFramework.Assert(data2.Data26.Name == "My26");
                 }
                 catch (Exception exception)
                 {
-                    UtilUnitTest.Assert(exception.Message == "Type not found!");
+                    UtilFramework.Assert(exception.Message == "Type not found!");
                 }
             }
             {
@@ -515,7 +516,7 @@
                 data.Data26.Name = "My26";
                 string json = JsonConvert.Serialize(data, typeof(DifferentNamespace.Data));
                 var data2 = JsonConvert.Deserialize<Data26Root>(json, typeof(DifferentNamespace.Data));
-                UtilUnitTest.Assert(data2.Data26.Name == "My26");
+                UtilFramework.Assert(data2.Data26.Name == "My26");
             }
             {
                 var data = new Data26Root();
@@ -528,7 +529,7 @@
                 }
                 catch (Exception exception)
                 {
-                    UtilUnitTest.Assert(exception.Message == "More than one type found!");
+                    UtilFramework.Assert(exception.Message == "More than one type found!");
                 }
             }
         }
@@ -547,8 +548,8 @@
             data.Property = "Property2";
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<Data27>(json);
-            UtilUnitTest.Assert(data2.Field == "Field2");
-            UtilUnitTest.Assert(data2.Property == "Property2");
+            UtilFramework.Assert(data2.Field == "Field2");
+            UtilFramework.Assert(data2.Property == "Property2");
         }
 
         public class Data28
@@ -565,9 +566,9 @@
             data.Guid = Guid.NewGuid();
             string json = JsonConvert.Serialize(data);
             var data2 = JsonConvert.Deserialize<Data28>(json);
-            UtilUnitTest.Assert(data.Guid == data2.Guid);
-            UtilUnitTest.Assert(data.GuidNullable == data2.GuidNullable);
-            UtilUnitTest.Assert(data.GuidNullable != data2.Guid);
+            UtilFramework.Assert(data.Guid == data2.Guid);
+            UtilFramework.Assert(data.GuidNullable == data2.GuidNullable);
+            UtilFramework.Assert(data.GuidNullable != data2.Guid);
         }
 
         public enum MyEnum
@@ -592,15 +593,15 @@
                 data.MyEnumNullable = MyEnum.Two;
                 string json = JsonConvert.Serialize(data);
                 var data2 = JsonConvert.Deserialize<Data29>(json);
-                UtilUnitTest.Assert(data.MyEnum == data2.MyEnum);
-                UtilUnitTest.Assert(data.MyEnumNullable == data2.MyEnumNullable);
+                UtilFramework.Assert(data.MyEnum == data2.MyEnum);
+                UtilFramework.Assert(data.MyEnumNullable == data2.MyEnumNullable);
             }
             {
                 var data = new Data29();
                 data.MyEnumNullable = null;
                 string json = JsonConvert.Serialize(data);
                 var data2 = JsonConvert.Deserialize<Data29>(json);
-                UtilUnitTest.Assert(data.MyEnumNullable == data2.MyEnumNullable);
+                UtilFramework.Assert(data.MyEnumNullable == data2.MyEnumNullable);
             }
         }
     }

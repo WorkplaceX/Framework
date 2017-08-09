@@ -1,5 +1,6 @@
 ﻿namespace UnitTest.DataAccessLayer
 {
+    using Framework;
     using System.Collections.Generic;
 
     public class UnitTest : UnitTestBase
@@ -9,7 +10,7 @@
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("Word");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("Word", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "Word2");
+            UtilFramework.Assert(nameCSharp == "Word2");
         }
 
         public void Name02()
@@ -17,7 +18,7 @@
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("WOrd");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("Word", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "Word2");
+            UtilFramework.Assert(nameCSharp == "Word2");
         }
 
         public void Name03()
@@ -25,7 +26,7 @@
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("WO_rd?");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("Word", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "Word2");
+            UtilFramework.Assert(nameCSharp == "Word2");
         }
 
         public void Name04()
@@ -35,7 +36,7 @@
             nameExceptList.Add("Sun");
             nameExceptList.Add("Word2");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("Word", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "Word3");
+            UtilFramework.Assert(nameCSharp == "Word3");
         }
 
         public void Name05()
@@ -44,7 +45,7 @@
             nameExceptList.Add("World2");
             nameExceptList.Add("World3");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("World", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "World");
+            UtilFramework.Assert(nameCSharp == "World");
         }
 
         public void Name06()
@@ -55,7 +56,7 @@
             nameExceptList.Add("World2");
             nameExceptList.Add("World3");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("World", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "World4");
+            UtilFramework.Assert(nameCSharp == "World4");
         }
 
         public void Name07()
@@ -65,7 +66,7 @@
             nameExceptList.Add("World2");
             nameExceptList.Add("World3");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("World", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "World4");
+            UtilFramework.Assert(nameCSharp == "World4");
         }
 
         public void Name08()
@@ -74,7 +75,7 @@
             nameExceptList.Add("World");
             nameExceptList.Add("WorlD");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("WorLD", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "WorLD2");
+            UtilFramework.Assert(nameCSharp == "WorLD2");
         }
 
         public void Name09()
@@ -83,7 +84,7 @@
             nameExceptList.Add("World");
             nameExceptList.Add("WorlD");
             string nameCSharp = Framework.BuildTool.DataAccessLayer.Util.NameCSharp("WorLD", nameExceptList);
-            UtilUnitTest.Assert(nameCSharp == "WorLD2");
+            UtilFramework.Assert(nameCSharp == "WorLD2");
         }
     }
 }

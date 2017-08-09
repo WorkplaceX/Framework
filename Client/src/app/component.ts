@@ -1,5 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { Directive, ElementRef, Inject, Renderer2 } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { DataService } from './dataService';
 import  * as util from './util';
 
@@ -168,13 +169,25 @@ export class Label {
   @Input() json: any
 }
 
+@Pipe({
+    name: 'columnIsVisible'
+})
+export class ColumnIsVisiblePipe implements PipeTransform {
+    transform(items: Array<any>): Array<any> {
+              if (!items) {
+            return items;
+        }
+        return items.filter(item => item.IsVisible == true);
+    }
+}
+
 /* Grid */
 @Component({
   selector: '[grid]',
   template: `
   <div removeSelector>
     <div [ngClass]="json.CssClass" style="white-space: nowrap;">
-      <div gridHeader style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName]; trackBy trackBy"></div>
+      <div gridHeader style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
     <div gridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
@@ -198,7 +211,7 @@ export class Grid {
   selector: '[gridRow]',
   template: `
   <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="white-space: nowrap;">
-    <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName]; trackBy trackBy"></div>
+    <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
     <div *ngIf="json.Error != null" style="white-space: normal;" class="ErrorRow">
       {{ json.Error }}
     </div>
@@ -591,13 +604,13 @@ export class GridKeyboard {
     if (gridData.FocusGridName != null) {
       // Tab
       if (event.keyCode == 9 && event.shiftKey == false) { 
-        gridData.FocusFieldName = this.next(gridData.ColumnList[gridData.FocusGridName], gridData.FocusFieldName, "FieldName").Next;
+        gridData.FocusFieldName = this.next(gridData.ColumnList[gridData.FocusGridName].filter(item => item.IsVisible == true), gridData.FocusFieldName, "FieldName").Next;
         this.select();
         event.preventDefault();
       }
       // Tab back
       if (event.keyCode == 9 && event.shiftKey == true) {
-        gridData.FocusFieldName = this.next(gridData.ColumnList[gridData.FocusGridName], gridData.FocusFieldName, "FieldName").Previous;
+        gridData.FocusFieldName = this.next(gridData.ColumnList[gridData.FocusGridName].filter(item => item.IsVisible == true), gridData.FocusFieldName, "FieldName").Previous;
         this.select();
         event.preventDefault();
       }

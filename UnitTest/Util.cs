@@ -4,22 +4,6 @@
     using System;
     using System.Reflection;
 
-    public static class UtilUnitTest
-    {
-        public static void Assert(bool isAssert, string exceptionText)
-        {
-            if (!isAssert)
-            {
-                throw new Exception(exceptionText);
-            }
-        }
-
-        public static void Assert(bool isAssert)
-        {
-            Assert(isAssert, "Assert!");
-        }
-    }
-
     /// <summary>
     /// Base class for tests.
     /// </summary>

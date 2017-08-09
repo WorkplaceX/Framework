@@ -169,7 +169,7 @@
 
         }
 
-        protected virtual internal void ColumnIsVisible(ref bool isVisible)
+        protected virtual internal void ColumnIsVisible(ref bool result)
         {
 
         }

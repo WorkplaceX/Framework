@@ -320,6 +320,8 @@
         /// (Currently in client handled always as true).
         /// </summary>
         public bool IsUpdate;
+
+        public bool IsVisible;
     }
 
     /// <summary>

@@ -9,12 +9,14 @@ import { enableProdMode } from '@angular/core';
 enableProdMode();
 
 import { 
+  ColumnIsVisiblePipe,
 /* BuildTool */ AppComponent, Selector, Page, Div, LayoutDebug, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective 
 } from './component';
 
 @NgModule({
   declarations: [
     MyComponent,
+    ColumnIsVisiblePipe,
 /* BuildTool */ AppComponent, Selector, Page, Div, LayoutDebug, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective
   ],
   imports: [

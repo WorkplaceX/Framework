@@ -47,5 +47,37 @@
             }
             return IndexEnum.None;
         }
+
+        public static bool NamingConventionFieldNameSqlIsId(string fieldNameSql)
+        {
+            bool result = false;
+            if (fieldNameSql != null)
+            {
+                int index = 0;
+                while (index != -1)
+                {
+                    index = fieldNameSql.IndexOf("Id", index);
+                    if (index != -1)
+                    {
+                        index += "Id".Length;
+                        if (index < fieldNameSql.Length)
+                        {
+                            string text = fieldNameSql.Substring(index, 1);
+                            if (text.ToUpper() == text)
+                            {
+                                result = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
     }
 }
