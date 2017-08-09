@@ -14,7 +14,7 @@
     public static class UtilApplication
     {
         /// <summary>
-        /// Returns TypeRowInAssembly. This is a type in an assembly. In this assembly search for Row classes when deserializing json. (For example: "Database.dbo.Airport")
+        /// Returns TypeRowInAssembly. This is a type in an assembly. Search for row class in this assembly when deserializing json. (For example: "dbo.Airport")
         /// </summary>
         public static Type TypeRowInAssembly(App app)
         {
@@ -48,7 +48,10 @@
             return IndexEnum.None;
         }
 
-        public static bool NamingConventionFieldNameSqlIsId(string fieldNameSql)
+        /// <summary>
+        /// Returns true, if column name contains "Id" according default naming convention.
+        /// </summary>
+        public static bool ConfigFieldNameSqlIsId(string fieldNameSql)
         {
             bool result = false;
             if (fieldNameSql != null)

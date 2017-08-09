@@ -48,7 +48,7 @@
         /// </summary>
         private static void TableName(MetaCSharp metaCSharp, string schemaName, StringBuilder result)
         {
-            var tableNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName).GroupBy(item => new { item.Schema.TableName, item.TableNameCSharp }, (key, group) => key).ToArray();
+            var tableNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName).GroupBy(item => new { item.Schema.SchemaName, item.Schema.TableName, item.TableNameCSharp }, (key, group) => key).ToArray();
             List<string> nameExceptList = new List<string>();
             bool isFirst = true;
             foreach (var item in tableNameList)
@@ -61,7 +61,7 @@
                 {
                     result.AppendLine();
                 }
-                result.AppendLine(string.Format("    [SqlName(\"{0}\")]", item.TableNameCSharp));
+                result.AppendLine(string.Format("    [SqlTable(\"{0}\", \"{1}\")]", item.SchemaName, item.TableName));
                 result.AppendLine(string.Format("    public partial class {0} : Row", item.TableNameCSharp));
                 result.AppendLine("    {");
                 FieldNameProperty(metaCSharp, schemaName, item.TableName, result);

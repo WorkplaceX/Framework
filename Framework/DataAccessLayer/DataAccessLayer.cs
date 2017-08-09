@@ -76,7 +76,7 @@
         public string FieldNameSql { get; private set; }
 
         /// <summary>
-        /// Gets Csharp FieldName.
+        /// Gets CSharp FieldName.
         /// </summary>
         public string FieldNameCSharp { get; private set; }
 
@@ -227,6 +227,22 @@
         }
 
         public readonly string SqlName;
+    }
+
+    /// <summary>
+    /// Sql schema name and table name.
+    /// </summary>
+    public class SqlTableAttribute : Attribute
+    {
+        public SqlTableAttribute(string sqlSchemaName, string sqlTableName)
+        {
+            this.SqlSchemaName = sqlSchemaName;
+            this.SqlTableName = sqlTableName;
+        }
+
+        public readonly string SqlSchemaName;
+
+        public readonly string SqlTableName;
     }
 
     public class TypeCellAttribute : Attribute

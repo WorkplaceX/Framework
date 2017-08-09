@@ -24,6 +24,9 @@
             new Literal(this, "L2") { Html = "<h1>Application</h1>" };
             new Grid(this, "Grid", "Application");
             app.GridData().LoadDatabase<FrameworkApplicationView>("Application");
+            new Literal(this, "L2") { Html = "<h1>Config Column</h1>" };
+            new Grid(this, "Grid", "ConfigColumn");
+            app.GridData().LoadDatabase<FrameworkConfigColumnView>("ConfigColumn");
             app.GridData().SaveJson(app);
 
         }

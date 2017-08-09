@@ -36,16 +36,14 @@
         }
 
         /// <summary>
-        /// Returns row type as string. For example: "Database.dbo.User".
+        /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
         public static string TypeRowToName(Type typeRow)
         {
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
-            string result = null;
-            if (typeRow != null)
-            {
-                result = typeRow.FullName;
-            }
+            string result = UtilFramework.TypeToName(typeRow);
+            UtilFramework.Assert(result.StartsWith("Database."));
+            result = result.Substring("Database.".Length); // Omit "Database" namespace.
             return result;
         }
 
@@ -72,32 +70,14 @@
         /// <summary>
         /// Returns row type. Searches also for Framework tables.
         /// </summary>
-        /// <param name="typeRow">For example: "Database.dbo.User".</param>
-        public static Type TypeRowFromName(string typeRow, Type typeRowInAssembly)
+        /// <param name="name">For example: "Database.dbo.User".</param>
+        public static Type TypeRowFromName(string name, Type typeRowInAssembly)
         {
-            List<Type> result = new List<Type>();
-            if (typeRow != null)
-            {
-                Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
-                foreach (Type itemTypeInAssembly in typeInAssemblyList)
-                {
-                    Type type = itemTypeInAssembly.GetTypeInfo().Assembly.GetType(typeRow);
-                    if (type != null)
-                    {
-                        result.Add(type);
-                    }
-                }
-                if (result.Count == 0)
-                {
-                    UtilFramework.Assert(false, "Type not found!");
-                }
-                if (result.Count > 1)
-                {
-                    UtilFramework.Assert(false, string.Format("Row type more than once defined! ({0})", typeRow));
-                }
-            }
-            UtilFramework.Assert(UtilFramework.IsSubclassOf(result.FirstOrDefault(), typeof(Row)), "Wrong type!");
-            return result.FirstOrDefault();
+            name = "Database." + name;
+            Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
+            Type result = UtilFramework.TypeFromName(name, typeInAssemblyList);
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(result, typeof(Row)), "Wrong type!");
+            return result;
         }
 
         [ThreadStatic]
@@ -121,7 +101,7 @@
             List<Cell> result = new List<Cell>();
             if (typeRow != null)
             {
-                SqlNameAttribute attributeRow = (SqlNameAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlNameAttribute));
+                SqlTableAttribute attributeRow = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
                     SqlNameAttribute attributePropertySql = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
@@ -137,7 +117,7 @@
                         typeCell = attributePropertyCell.TypeCell;
                     }
                     Cell cell = (Cell)UtilFramework.TypeToObject(typeCell);
-                    cell.Constructor(attributeRow.SqlName, sqlName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
+                    cell.Constructor(attributeRow.SqlTableName, sqlName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
                     result.Add(cell);
                 }
             }
@@ -172,8 +152,8 @@
             var builder = new ModelBuilder(conventionSet);
             {
                 var entity = builder.Entity(typeRow);
-                SqlNameAttribute attributeRow = (SqlNameAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlNameAttribute));
-                entity.ToTable(attributeRow.SqlName);
+                SqlTableAttribute attributeRow = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                entity.ToTable(attributeRow.SqlTableName, attributeRow.SqlSchemaName);
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
                     SqlNameAttribute attributeProperty = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
@@ -394,8 +374,11 @@
             {
                 string fieldName = propertyInfoDest.Name;
                 PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldName);
-                object value = propertyInfoSource.GetValue(rowSource);
-                propertyInfoDest.SetValue(rowDest, value);
+                if (propertyInfoSource != null)
+                {
+                    object value = propertyInfoSource.GetValue(rowSource);
+                    propertyInfoDest.SetValue(rowDest, value);
+                }
             }
         }
 

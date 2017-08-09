@@ -118,4 +118,23 @@ namespace Database.dbo
             result = ((FrameworkApplicationType)row).Name;
         }
     }
+
+    public partial class FrameworkConfigColumnView
+    {
+        protected internal override void Update(App app, Row row)
+        {
+            FrameworkConfigColumn configColumn = UtilDataAccessLayer.Select<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            if (configColumn == null)
+            {
+                configColumn = new FrameworkConfigColumn();
+                UtilDataAccessLayer.RowCopy(this, configColumn);
+                UtilDataAccessLayer.Insert(configColumn);
+            }
+            else
+            {
+                UtilDataAccessLayer.RowCopy(this, configColumn);
+                UtilDataAccessLayer.Update(configColumn, configColumn);
+            }
+        }
+    }
 }

@@ -43,7 +43,7 @@ CREATE TABLE FrameworkSession
 CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	Name NVARCHAR(256) NOT NULL UNIQUE,
+	Name NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToName();
 	IsExist BIT
 )
 
@@ -52,9 +52,9 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
 	FieldNameSql NVARCHAR(256),
-	FieldNameCsharp NVARCHAR(256),
+	FieldNameCSharp NVARCHAR(256),
 	IsExist BIT,
-	INDEX IX_FrameworkColumn UNIQUE (TableId, FieldNameSql, FieldNameCsharp)
+	INDEX IX_FrameworkColumn UNIQUE (TableId, FieldNameSql, FieldNameCSharp)
 )
 
 CREATE TABLE FrameworkConfigColumn
@@ -64,6 +64,7 @@ CREATE TABLE FrameworkConfigColumn
 	Text NVARCHAR(256),
 	IsVisible BIT,
 	Sort FLOAT,
+	WidthPercent FLOAT,
 	INDEX IX_FrameworkConfigColumn UNIQUE (ColumnId)
 )
 
@@ -76,12 +77,13 @@ SELECT
 	TableX.IsExist AS TableIsExist,
 	ColumnX.Id AS ColumnId,
 	ColumnX.FieldNameSql,
-	ColumnX.FieldNameCsharp,
+	ColumnX.FieldNameCSharp,
 	ColumnX.IsExist AS ColumnIsExist,
 	Config.Id AS ConfigId,
 	Config.Text,
+	Config.IsVisible,
 	Config.Sort,
-	Config.IsVisible
+	Config.WidthPercent
 
 FROM
 	FrameworkColumn ColumnX

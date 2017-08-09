@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Framework.Component;
+    using Database.dbo;
 
     internal class GridRowInternal
     {
@@ -809,6 +810,8 @@
         {
             var result = new List<GridColumn>();
             //
+            List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(typeRow);
+            //
             var columnList = UtilDataAccessLayer.ColumnList(typeRow);
             double widthPercentTotal = 0;
             bool isLast = false;
@@ -816,7 +819,12 @@
             List<Cell> columnIsVisibleList = new List<Cell>();
             foreach (Cell column in columnList)
             {
-                bool isVisible = true;
+                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(column.FieldNameSql) == false;
+                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.FieldNameSql == column.FieldNameSql && item.FieldNameCSharp == column.FieldNameCSharp).FirstOrDefault();
+                if (configColumn != null && configColumn.IsVisible != null)
+                {
+                    isVisible = configColumn.IsVisible.Value;
+                }
                 app.ColumnIsVisible(gridName, column, ref isVisible);
                 column.ColumnIsVisible(ref isVisible);
                 if (isVisible)

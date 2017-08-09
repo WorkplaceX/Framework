@@ -71,6 +71,30 @@
         public FrameworkApplicationView DbFrameworkApplication { get; private set; }
 
         /// <summary>
+        /// (TypeRowName, Config)
+        /// </summary>
+        private Dictionary<string, List<FrameworkConfigColumnView>> cacheDbConfigColumnList = new Dictionary<string, List<FrameworkConfigColumnView>>();
+
+        /// <summary>
+        /// Returns ConfigColumnList for a table.
+        /// </summary>
+        protected virtual internal List<FrameworkConfigColumnView> DbConfigColumnList(Type typeRow)
+        {
+            List<FrameworkConfigColumnView> result;
+            string typeRowName = UtilDataAccessLayer.TypeRowToName(typeRow);
+            if (cacheDbConfigColumnList.ContainsKey(typeRowName))
+            {
+                result = cacheDbConfigColumnList[typeRowName];
+            }
+            else
+            {
+                result = UtilDataAccessLayer.Select<FrameworkConfigColumnView>().Where(item => item.TableName == typeRowName & item.TableIsExist == true & item.ColumnIsExist == true).ToList();
+                cacheDbConfigColumnList[typeRowName] = result;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
         /// </summary>
         virtual internal Type TypeComponentInNamespace()
@@ -109,7 +133,7 @@
 
         protected virtual internal void ColumnIsVisible(string gridName, Cell cell, ref bool result)
         {
-            result = UtilApplication.NamingConventionFieldNameSqlIsId(cell.FieldNameSql) == false;
+
         }
 
         internal AppJson Run(AppJson appJson, HttpContext httpContext)
