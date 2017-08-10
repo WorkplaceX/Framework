@@ -257,7 +257,7 @@
             if (result == null)
             {
                 result = (Page)UtilFramework.TypeToObject(typePage);
-                result.Constructor(owner, null, typeof(Div));
+                result.Constructor(owner, typeof(Div));
                 result.InitJson(this);
             }
             result.IsHide = false;

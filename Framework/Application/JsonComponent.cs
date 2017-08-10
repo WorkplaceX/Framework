@@ -8,14 +8,14 @@
     /// </summary>
     public class Component
     {
-        public Component() : this(null, null) { }
+        public Component() : this(null) { }
 
-        public Component(Component owner, string text)
+        public Component(Component owner)
         {
-            Constructor(owner, text, null);
+            Constructor(owner, null);
         }
 
-        internal void Constructor(Component owner, string text, Type type)
+        internal void Constructor(Component owner, Type type)
         {
             if (type != null)
             {
@@ -25,7 +25,6 @@
             {
                 this.Type = GetType().Name;
             }
-            this.Text = text;
             if (owner != null)
             {
                 if (owner.List == null)
@@ -64,8 +63,6 @@
         /// Gets or sets TypeCSharp. Used when default property Type has been changed.
         /// </summary>
         public string TypeCSharp;
-
-        public string Text;
 
         public bool IsHide;
 
@@ -138,8 +135,8 @@
     {
         public Grid() { }
 
-        public Grid(Component owner, string text, string gridName)
-            : base(owner, text)
+        public Grid(Component owner, string gridName)
+            : base(owner)
         {
             this.GridName = gridName;
         }
@@ -154,8 +151,8 @@
     {
         public GridKeyboard() { }
 
-        public GridKeyboard(Component owner, string text)
-            : base(owner, text)
+        public GridKeyboard(Component owner)
+            : base(owner)
         {
 
         }
@@ -168,8 +165,8 @@
     {
         public GridField() { }
 
-        public GridField(Component owner, string text, string gridName, string fieldName, string gridIndex)
-            : base(owner, text)
+        public GridField(Component owner, string gridName, string fieldName, string gridIndex)
+            : base(owner)
         {
             this.GridName = gridName;
             this.FieldName = fieldName;
@@ -381,7 +378,7 @@
     public class AppJson : Component
     {
         public AppJson()
-            : base(null, "Json")
+            : base(null)
         {
 
         }
@@ -413,13 +410,13 @@
     /// </summary>
     public class Div : Component
     {
-        public Div() : this(null, null)
+        public Div() : this(null)
         {
             TypeSet(typeof(Div));
         }
 
-        public Div(Component owner, string text)
-            : base(owner, text)
+        public Div(Component owner)
+            : base(owner)
         {
             TypeSet(typeof(Div));
         }
@@ -430,10 +427,10 @@
     /// </summary>
     public class LayoutContainer : Div
     {
-        public LayoutContainer() : this(null, null) { }
+        public LayoutContainer() : this(null) { }
 
-        public LayoutContainer(Div owner, string text)
-            : base(owner, text)
+        public LayoutContainer(Div owner)
+            : base(owner)
         {
 
         }
@@ -444,10 +441,10 @@
     /// </summary>
     public class LayoutRow : Div
     {
-        public LayoutRow() : this(null, null) { }
+        public LayoutRow() : this(null) { }
 
-        public LayoutRow(Component owner, string text)
-            : base(owner, text)
+        public LayoutRow(Component owner)
+            : base(owner)
         {
 
         }
@@ -458,10 +455,10 @@
     /// </summary>
     public class LayoutCell : Div
     {
-        public LayoutCell() : this(null, null) { }
+        public LayoutCell() : this(null) { }
 
-        public LayoutCell(LayoutRow owner, string text)
-            : base(owner, text)
+        public LayoutCell(LayoutRow owner)
+            : base(owner)
         {
 
         }
@@ -472,16 +469,15 @@
     /// </summary>
     public class Button : Component
     {
-        public Button() : this(null, null) { }
+        public Button() : this(null) { }
 
-        public Button(Component owner, string text)
-            : base(owner, text)
+        public Button(Component owner)
+            : base(owner)
         {
-            if (IsClick)
-            {
-                Text += "."; // TODO
-            }
+
         }
+
+        public string Text;
 
         public bool IsClick;
     }
@@ -491,15 +487,15 @@
     /// </summary>
     public class Literal : Component
     {
-        public Literal() : this(null, null) { }
+        public Literal() : this(null) { }
 
-        public Literal(Component owner, string text)
-            : base(owner, text)
+        public Literal(Component owner)
+            : base(owner)
         {
 
         }
 
-        public string Html;
+        public string TextHtml;
     }
 
     /// <summary>
@@ -507,12 +503,14 @@
     /// </summary>
     public class Label : Component
     {
-        public Label() : this(null, null) { }
+        public Label() : this(null) { }
 
-        public Label(Component owner, string text)
-            : base(owner, text)
+        public Label(Component owner)
+            : base(owner)
         {
 
         }
+
+        public string Text;
     }
 }

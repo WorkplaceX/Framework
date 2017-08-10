@@ -16,16 +16,16 @@
     {
         protected internal override void InitJson(App app)
         {
-            new Button(this, "CLICK");
-            new Label(this, "Hello Setup <b>XYZ</b>");
-            new Literal(this, "Literal") { Html = "Hello Setup <b>XYZ</b>", CssClass = "my" };
-            new Literal(this, "L2") { Html = "<h1>LookUp</h1>" };
-            new Grid(this, "Grid", "LookUp");
-            new Literal(this, "L2") { Html = "<h1>Application</h1>" };
-            new Grid(this, "Grid", "Application");
+            new Button(this) { Text = "CLICK" };
+            new Label(this) { Text = "Hello Setup <b>XYZ</b>" };
+            new Literal(this) { TextHtml = "Hello Setup <b>XYZ</b>", CssClass = "my" };
+            new Literal(this) { TextHtml = "<h1>LookUp</h1>" };
+            new Grid(this, "LookUp");
+            new Literal(this) { TextHtml = "<h1>Application</h1>" };
+            new Grid(this, "Application");
             app.GridData().LoadDatabase<FrameworkApplicationView>("Application");
-            new Literal(this, "L2") { Html = "<h1>Config Column</h1>" };
-            new Grid(this, "Grid", "ConfigColumn");
+            new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
+            new Grid(this, "ConfigColumn");
             app.GridData().LoadDatabase<FrameworkConfigColumnView>("ConfigColumn");
             app.GridData().SaveJson(app);
 

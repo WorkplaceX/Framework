@@ -150,7 +150,7 @@
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
-                    if (columnAttribute == null) // Calculated column. Do not include it in sql select.
+                    if (columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
                     {
                         entity.Ignore(propertyInfo.Name);
                     }

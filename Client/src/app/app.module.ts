@@ -10,14 +10,14 @@ enableProdMode();
 
 import { 
   ColumnIsVisiblePipe,
-/* BuildTool */ AppComponent, Selector, Page, Div, LayoutDebug, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective 
+/* BuildTool */ AppComponent, Selector, Page, Div, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective 
 } from './component';
 
 @NgModule({
   declarations: [
     MyComponent,
     ColumnIsVisiblePipe,
-/* BuildTool */ AppComponent, Selector, Page, Div, LayoutDebug, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective
+/* BuildTool */ AppComponent, Selector, Page, Div, Button, Literal, Label, Grid, GridRow, GridCell, GridHeader, GridField, GridKeyboard, FocusDirective, RemoveSelectorDirective
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'client'}),

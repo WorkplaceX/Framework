@@ -6,7 +6,7 @@ Release
 -Remove field TypeCSharp, method Component.TypeSet(); --> No, support derive from Component. [Done]
 
 Release b1.0
--Remove Component.Constructor text parameter.
+-Remove Component.Constructor text parameter. [Done]
 -Split SqlName attribute into SqlTableName and SqlColumnName. [Done]
 -New location of Application.json. File not used anymore [Done]
 -https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript (File upload) [Done]

@@ -60,7 +60,6 @@ export class AppComponent {
   <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
   <div GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
   <Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></Page>
-  <!-- <LayoutDebug [json]=json></LayoutDebug> -->
 `
 })
 export class Selector {
@@ -71,7 +70,6 @@ export class Selector {
 @Component({
   selector: 'Page',
   template: `
-  Text={{ json.Text }}
   <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
 `
 })
@@ -93,24 +91,6 @@ export class Page {
 `
 })
 export class Div {
-  @Input() json: any
-
-  trackBy(index: any, item: any) {
-    return item.Key;
-  }
-}
-
-/* LayoutDebug */
-@Component({
-  selector: 'LayoutDebug',
-  template: `
-  <div style='border:1px solid; padding:2px; margin:2px; background-color:yellow;'>
-    Text={{ json.Text }}
-    <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
-  </div>  
-`
-})
-export class LayoutDebug {
   @Input() json: any
 
   trackBy(index: any, item: any) {
@@ -142,7 +122,7 @@ export class Button {
 /* Literal */
 @Component({
   selector: 'Literal',
-  template: `<div [innerHtml]="json.Html" #div [ngClass]="json.CssClass"></div>`
+  template: `<div [innerHtml]="json.TextHtml" #div [ngClass]="json.CssClass"></div>`
 })
 export class Literal {
  
