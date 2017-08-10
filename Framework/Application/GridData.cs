@@ -566,7 +566,12 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Update(app, row.Row);
+                                        Row rowRefresh = null;
+                                        row.RowNew.Update(app, row.Row, row.RowNew, ref rowRefresh);
+                                        if (rowRefresh != null)
+                                        {
+                                            UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
+                                        }
                                         row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
@@ -581,7 +586,12 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Insert(app);
+                                        Row rowRefresh = null;
+                                        row.RowNew.Insert(app, ref rowRefresh);
+                                        if (rowRefresh != null)
+                                        {
+                                            UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
+                                        }
                                         row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;

@@ -15,15 +15,16 @@
             return false;
         }
 
-        protected virtual internal void Update(App app, Row row)
+        protected virtual internal void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
         {
+            UtilFramework.Assert(this == rowNew);
             UtilDataAccessLayer.Update(row, this);
         }
 
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(App app)
+        protected virtual internal void Insert(App app, ref Row rowRefresh)
         {
             UtilDataAccessLayer.Insert(this);
         }

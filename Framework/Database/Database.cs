@@ -40,13 +40,13 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage
     {
-        protected internal override void Insert(App app)
+        protected internal override void Insert(App app, ref Row rowRefresh)
         {
             if (app.DbFrameworkApplication != null)
             {
                 this.ApplicationId = app.DbFrameworkApplication.Id;
             }
-            base.Insert(app);
+            base.Insert(app, ref rowRefresh);
         }
     }
 
@@ -65,24 +65,25 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView
     {
-        protected internal override void Update(App app, Row row)
+        protected internal override void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
         {
-            // Old row
+            // Row
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(row, application);
-            // New row
+            // RowNew
             var applicationNew = new FrameworkApplication();
-            UtilDataAccessLayer.RowCopy(this, applicationNew);
+            UtilDataAccessLayer.RowCopy(rowNew, applicationNew);
             //
             UtilDataAccessLayer.Update(application, applicationNew);
+            rowRefresh = UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == this.Id).First();
         }
 
-        protected internal override void Insert(App app)
+        protected internal override void Insert(App app, ref Row rowRefresh)
         {
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
             UtilDataAccessLayer.Insert(application);
-            this.Id = application.Id;
+            rowRefresh = UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == application.Id).First();
         }
 
         protected internal override void Select()
@@ -121,20 +122,22 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView
     {
-        protected internal override void Update(App app, Row row)
+        protected internal override void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
         {
-            FrameworkConfigColumn configColumn = UtilDataAccessLayer.Select<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
-            if (configColumn == null)
+            FrameworkConfigColumn config = UtilDataAccessLayer.Select<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            if (config == null)
             {
-                configColumn = new FrameworkConfigColumn();
-                UtilDataAccessLayer.RowCopy(this, configColumn);
-                UtilDataAccessLayer.Insert(configColumn);
+                config = new FrameworkConfigColumn();
+                UtilDataAccessLayer.RowCopy(rowNew, config);
+                UtilDataAccessLayer.Insert(config);
             }
             else
             {
-                UtilDataAccessLayer.RowCopy(this, configColumn);
-                UtilDataAccessLayer.Update(configColumn, configColumn);
+                FrameworkConfigColumn configNew = UtilDataAccessLayer.RowClone(config);
+                UtilDataAccessLayer.RowCopy(rowNew, configNew);
+                UtilDataAccessLayer.Update(config, configNew);
             }
+            rowRefresh = UtilDataAccessLayer.Select<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First();
         }
     }
 }

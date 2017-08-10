@@ -262,7 +262,7 @@
             DbContext dbContext = DbContext(row.GetType());
             var tracking = dbContext.Attach(row);
             tracking.CurrentValues.SetValues(rowNew);
-            dbContext.SaveChanges();
+            UtilFramework.Assert(dbContext.SaveChanges() == 1, "Update failed!");
         }
 
         /// <summary>
@@ -354,6 +354,14 @@
             Row result = (Row)UtilFramework.TypeToObject(row.GetType());
             RowCopy(row, result);
             return result;
+        }
+
+        /// <summary>
+        /// Clone data row.
+        /// </summary>
+        public static TRow RowClone<TRow>(TRow row) where TRow : Row
+        {
+            return (TRow)RowClone((Row)row);
         }
 
         /// <summary>
