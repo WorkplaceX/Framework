@@ -36,7 +36,7 @@
             }
             if (Universal.IsOn)
             {
-                UtilBuildTool.OpenVisualStudioCode(Framework.UtilFramework.FolderName + "Submodule/Universal/");
+                UtilBuildTool.OpenVisualStudioCode(UtilFramework.FolderName + "Submodule/Universal/");
             }
         }
     }

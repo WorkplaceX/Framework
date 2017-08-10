@@ -13,21 +13,21 @@
             ConnectionManagerCheck.JsonFileCreateIfNotExists();
             //
             UtilFramework.Log("Client>npm install");
-            UtilBuildTool.NpmInstall(Framework.UtilFramework.FolderName + "Submodule/Client/");
+            UtilBuildTool.NpmInstall(UtilFramework.FolderName + "Submodule/Client/");
             // Application
             UtilFramework.Log("Application>dotnet restore");
-            UtilBuildTool.DotNetRestore(Framework.UtilFramework.FolderName + "Application/");
+            UtilBuildTool.DotNetRestore(UtilFramework.FolderName + "Application/");
             UtilFramework.Log("Application>dotnet build");
-            UtilBuildTool.DotNetBuild(Framework.UtilFramework.FolderName + "Application/");
+            UtilBuildTool.DotNetBuild(UtilFramework.FolderName + "Application/");
             // Server
             UtilFramework.Log("Server>dotnet restore");
-            UtilBuildTool.DotNetRestore(Framework.UtilFramework.FolderName + "Server/");
+            UtilBuildTool.DotNetRestore(UtilFramework.FolderName + "Server/");
             UtilFramework.Log("Server>dotnet build");
-            UtilBuildTool.DotNetBuild(Framework.UtilFramework.FolderName + "Server/");
+            UtilBuildTool.DotNetBuild(UtilFramework.FolderName + "Server/");
             // Office
-            if (Framework.UtilFramework.IsLinux == false)
+            if (UtilFramework.IsLinux == false)
             {
-                UtilBuildTool.MSBuild(Framework.UtilFramework.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
+                UtilBuildTool.MSBuild(UtilFramework.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
             }
             new CommandBuildClient().Run();
         }

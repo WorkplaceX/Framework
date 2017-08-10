@@ -14,12 +14,12 @@
         {
             if (Client.IsOn)
             {
-                UtilBuildTool.NpmRun(Framework.UtilFramework.FolderName + "Submodule/Client/", "start");
+                UtilBuildTool.NpmRun(UtilFramework.FolderName + "Submodule/Client/", "start");
             }
             else
             {
-                UtilBuildTool.DotNetRun(Framework.UtilFramework.FolderName + "Server/", false);
-                UtilBuildTool.Node(Framework.UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/", "index.js", false);
+                UtilBuildTool.DotNetRun(UtilFramework.FolderName + "Server/", false);
+                UtilBuildTool.Node(UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/", "index.js", false);
                 UtilBuildTool.OpenBrowser("http://localhost:5000");
             }
         }

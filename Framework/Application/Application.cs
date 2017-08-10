@@ -157,7 +157,7 @@
             }
             //
             AppJson.ResponseCount += 1;
-            AppJson.VersionServer = Framework.UtilFramework.VersionServer;
+            AppJson.VersionServer = UtilFramework.VersionServer;
             //
             return AppJson;
         }

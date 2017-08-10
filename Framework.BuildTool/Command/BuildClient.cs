@@ -14,10 +14,10 @@ namespace Framework.BuildTool
         public override void Run()
         {
             UtilFramework.Log("Client>npm run universalBuild");
-            UtilBuildTool.NpmRun(Framework.UtilFramework.FolderName + "Submodule/Client/", "universalBuild");
+            UtilBuildTool.NpmRun(UtilFramework.FolderName + "Submodule/Client/", "universalBuild");
             //
             UtilFramework.Log("Server>Directory Universal/ clean");
-            UtilBuildTool.DirectoryDelete(Framework.UtilFramework.FolderName + "Server/Universal/");
+            UtilBuildTool.DirectoryDelete(UtilFramework.FolderName + "Server/Universal/");
             //
             UtilFramework.Log("UniversalExpress>Directory Universal/ clean");
             UtilBuildTool.DirectoryDelete(UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/");
@@ -32,7 +32,7 @@ namespace Framework.BuildTool
             UtilBuildTool.FileCopy(UtilFramework.FolderName + "Submodule/Client/dist/main.*.bundle.js", UtilFramework.FolderName + "Server/Universal/main.bundle.js");
             //
             UtilFramework.Log("Universal>Copy Client to UniversalExpress");
-            UtilBuildTool.FileCopy(UtilFramework.FolderName + "Submodule/Client/dist/bundle.js", Framework.UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/index.js");
+            UtilBuildTool.FileCopy(UtilFramework.FolderName + "Submodule/Client/dist/bundle.js", UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/index.js");
             UtilBuildTool.FileCopy(fileNameIndex, UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/src/index.html");
         }
     }

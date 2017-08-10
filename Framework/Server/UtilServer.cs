@@ -118,7 +118,7 @@
         /// </summary>
         public static string FolderNameFrameworkServer()
         {
-            if (Framework.UtilFramework.FolderNameIsIss)
+            if (UtilFramework.FolderNameIsIss)
             {
                 return UtilFramework.FolderName + "Server/";
             }
@@ -133,7 +133,7 @@
         /// </summary>
         public static string FolderNameServer()
         {
-            if (Framework.UtilFramework.FolderNameIsIss)
+            if (UtilFramework.FolderNameIsIss)
             {
                 return UtilFramework.FolderName;
             }

@@ -6,7 +6,7 @@
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Submodule/Framework.BuildTool/DataAccessLayer/Sql/Schema.sql";
+                return UtilFramework.FolderName + "Submodule/Framework.BuildTool/DataAccessLayer/Sql/Schema.sql";
             }
         }
 
@@ -14,7 +14,7 @@
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Application/Database/Database.Generate.cs";
+                return UtilFramework.FolderName + "Application/Database/Database.Generate.cs";
             }
         }
 
@@ -22,7 +22,7 @@
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Submodule/Framework/Database/Database.Generate.cs";
+                return UtilFramework.FolderName + "Submodule/Framework/Database/Database.Generate.cs";
             }
         }
     }

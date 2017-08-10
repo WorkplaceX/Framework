@@ -36,7 +36,7 @@
                 foreach (string fileName in fileNameList)
                 {
                     UtilFramework.Log(string.Format("### Start RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
-                    string text = Framework.UtilFramework.FileRead(fileName);
+                    string text = UtilFramework.FileRead(fileName);
                     var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string sql in sqlList)
                     {

@@ -68,7 +68,7 @@
                 {
                     // Prevent Internal Error 500 on process exception.
                     appJsonOut = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() }); // Send AppJsonIn back.
-                    appJsonOut.ErrorProcess = Framework.UtilFramework.ExceptionToText(exception);
+                    appJsonOut.ErrorProcess = UtilFramework.ExceptionToText(exception);
                 }
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
                 if (Debugger.IsAttached)
@@ -133,7 +133,7 @@
                 string jsonText = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
                 // Universal rendering
                 {
-                    if (Framework.UtilFramework.FolderNameIsIss)
+                    if (UtilFramework.FolderNameIsIss)
                     {
                         // Running on IIS Server.
                         htmlUniversal = await Post(url, jsonText, true); // Call Angular Universal server side rendering service.
@@ -156,7 +156,7 @@
                     string scriptReplace = "var browserJson = " + jsonTextBrowser + "; ";
                     result = result.Replace(scriptFind, scriptReplace);
                 }
-                Framework.UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");
+                UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");
                 return result;
             }
         }

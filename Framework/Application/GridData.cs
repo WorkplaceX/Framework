@@ -12,6 +12,9 @@
     {
         public Row Row;
 
+        /// <summary>
+        /// Gets or sets RowNew. This is the row to update or insert on database.
+        /// </summary>
         public Row RowNew;
 
         /// <summary>
@@ -452,7 +455,7 @@
             {
                 foreach (Row row in rowList)
                 {
-                    Framework.UtilFramework.Assert(row.GetType() == typeRow);
+                    UtilFramework.Assert(row.GetType() == typeRow);
                 }
                 //
                 Dictionary<string, GridCellInternal> cellListFilter = null;
@@ -579,7 +582,7 @@
                                     }
                                     catch (Exception exception)
                                     {
-                                        ErrorRowSet(gridName, index, Framework.UtilFramework.ExceptionToText(exception));
+                                        ErrorRowSet(gridName, index, UtilFramework.ExceptionToText(exception));
                                     }
                                 }
                                 if (row.Row == null && row.RowNew != null) // Database Insert
@@ -600,7 +603,7 @@
                                     }
                                     catch (Exception exception)
                                     {
-                                        ErrorRowSet(gridName, index, Framework.UtilFramework.ExceptionToText(exception));
+                                        ErrorRowSet(gridName, index, UtilFramework.ExceptionToText(exception));
                                     }
                                 }
                             }
@@ -625,7 +628,7 @@
                         var row = RowGet(gridName, index);
                         if (row.Row != null)
                         {
-                            Framework.UtilFramework.Assert(row.Row.GetType() == typeRow);
+                            UtilFramework.Assert(row.Row.GetType() == typeRow);
                         }
                         IndexEnum indexEnum = UtilApplication.IndexEnumFromText(index);
                         Row rowWrite;

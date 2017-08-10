@@ -22,7 +22,7 @@ namespace Framework.BuildTool
         {
             get
             {
-                return Framework.UtilFramework.FolderName + "Submodule/Framework.BuildTool/ConnectionManager.json";
+                return UtilFramework.FolderName + "Submodule/Framework.BuildTool/ConnectionManager.json";
             }
         }
 
@@ -30,7 +30,7 @@ namespace Framework.BuildTool
         {
             get
             {
-                string json = Framework.UtilFramework.FileRead(JsonFileName);
+                string json = UtilFramework.FileRead(JsonFileName);
                 var result = JsonConvert.DeserializeObject<Config>(json);
                 return result;
             }
@@ -44,7 +44,7 @@ namespace Framework.BuildTool
             get
             {
                 string result = "npm.cmd";
-                if (Framework.UtilFramework.IsLinux)
+                if (UtilFramework.IsLinux)
                 {
                     result = "npm";
                 }
@@ -64,7 +64,7 @@ namespace Framework.BuildTool
             get
             {
                 string result = "dotnet.exe";
-                if (Framework.UtilFramework.IsLinux)
+                if (UtilFramework.IsLinux)
                 {
                     result = "dotnet";
                 }
@@ -138,7 +138,7 @@ namespace Framework.BuildTool
         {
             JsonFileCreateIfNotExists();
             string connectionStringSwitch = Server.Config.Instance.ConnectionStringSwitch;
-            string ip = Framework.UtilFramework.Ip();
+            string ip = UtilFramework.Ip();
             UtilFramework.Log(string.Format("SQL Connection check ({0}) from {1}", connectionStringSwitch, ip));
             string connectionString = Server.ConnectionManager.ConnectionString;
             try
