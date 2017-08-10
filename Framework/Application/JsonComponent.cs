@@ -286,7 +286,7 @@
         public bool IsClick;
 
         /// <summary>
-        /// Gets or sets IsModify. Indicating text has been modified by user since last request.
+        /// Gets or sets IsModify. Indicating text has been modified by user on last request.
         /// </summary>
         public bool IsModify;
 

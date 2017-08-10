@@ -46,7 +46,20 @@
 
         public bool IsSelect;
 
+        /// <summary>
+        /// Gets or sets IsModify. Text has been modified on last request.
+        /// </summary>
         public bool IsModify;
+
+        /// <summary>
+        /// Gets or sets IsOriginal. Text is modified by user. Original text is stored in TextOriginal.
+        /// </summary>
+        public bool IsOriginal;
+
+        /// <summary>
+        /// Gets or sets TextOriginal. See also field IsOriginal.
+        /// </summary>
+        public string TextOriginal;
 
         public bool IsClick;
     }
@@ -141,6 +154,10 @@
             if (row != null)
             {
                 result = row.Row;
+                if (result == null)
+                {
+                    result = row.RowNew;
+                }
             }
             return result;
         }
@@ -268,23 +285,27 @@
         /// Sets user entered text.
         /// </summary>
         /// <param name="text">If null, user has not changed text.</param>
-        private void CellTextSet(string gridName, string index, string fieldName, string text)
+        private void CellTextSet(string gridName, string index, string fieldName, string text, bool isOriginal, string textOriginal)
         {
-            CellGet(gridName, index, fieldName).Text = text;
+            GridCellInternal cell = CellGet(gridName, index, fieldName);
+            cell.Text = text;
+            cell.IsOriginal = isOriginal;
+            cell.TextOriginal = textOriginal;
         }
 
         /// <summary>
         /// Clear all user modified text for row.
         /// </summary>
-        private void TextClear(string gridName, string index)
+        private void CellTextClear(string gridName, string index)
         {
             if (cellList.ContainsKey(gridName))
             {
                 if (cellList[gridName].ContainsKey(index))
                 {
-                    foreach (GridCellInternal gridCell in cellList[gridName][index].Values)
+                    foreach (GridCellInternal cell in cellList[gridName][index].Values)
                     {
-                        gridCell.Text = null;
+                        cell.Text = null;
+                        cell.IsOriginal = false;
                     }
                 }
             }
@@ -385,7 +406,7 @@
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
             Row row = RowGet(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
-            
+            //
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
                 string fieldName = column.FieldNameCSharp;
@@ -536,7 +557,9 @@
                 }
             }
             // New
-            RowSet(gridName, UtilApplication.IndexEnumToText(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = null }); // New row
+            Type typeRow = this.TypeRowGet(gridName);
+            Row rowNew = UtilDataAccessLayer.RowCreate(typeRow);
+            RowSet(gridName, UtilApplication.IndexEnumToText(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = rowNew }); // New row
             // Total
             foreach (string index in rowListCopy.Keys)
             {
@@ -578,7 +601,7 @@
                                         row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
-                                        TextClear(gridName, index);
+                                        CellTextClear(gridName, index);
                                     }
                                     catch (Exception exception)
                                     {
@@ -598,7 +621,7 @@
                                         row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
-                                        TextClear(gridName, index);
+                                        CellTextClear(gridName, index);
                                         RowNewAdd(gridName); // Make "New" to "Index" and add "New"
                                     }
                                     catch (Exception exception)
@@ -750,12 +773,18 @@
             foreach (GridRow row in gridDataJson.RowList[gridName])
             {
                 IndexEnum indexEnum = UtilApplication.IndexEnumFromText(row.Index);
+                GridRowInternal gridRow = new GridRowInternal() { IsSelect = row.IsSelect, IsClick = row.IsClick };
                 Row resultRow = null;
                 if (indexEnum == IndexEnum.Index)
                 {
                     resultRow = (Row)UtilFramework.TypeToObject(typeRow);
+                    gridRow.Row = resultRow;
                 }
-                GridRowInternal gridRow = new GridRowInternal() { Row = resultRow, IsSelect = row.IsSelect, IsClick = row.IsClick };
+                if (indexEnum == IndexEnum.New)
+                {
+                    resultRow = (Row)UtilFramework.TypeToObject(typeRow);
+                    gridRow.RowNew = resultRow;
+                }
                 RowSet(gridName, row.Index, gridRow);
                 foreach (Cell cell in ColumnList(gridName))
                 {
@@ -770,12 +799,12 @@
                     {
                         text = gridDataJson.CellList[gridName][fieldName][row.Index].O; // Original text.
                         string textModify = gridDataJson.CellList[gridName][fieldName][row.Index].T; // User modified text.
-                        CellTextSet(gridName, row.Index, fieldName, textModify);
+                        CellTextSet(gridName, row.Index, fieldName, textModify, true, text);
                     }
                     else
                     {
                         text = gridDataJson.CellList[gridName][fieldName][row.Index].T; // Original text.
-                        CellTextSet(gridName, row.Index, fieldName, text);
+                        CellTextSet(gridName, row.Index, fieldName, text, false, null);
                     }
                     // ErrorField
                     string errorFieldText = gridDataJson.CellList[gridName][fieldName][row.Index].E;
@@ -789,7 +818,7 @@
                     {
                         ErrorRowSet(gridName, row.Index, errorRowText);
                     }
-                    if (indexEnum == IndexEnum.Index)
+                    if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
                     {
                         cell.CellValueFromText(app, gridName, row.Index, ref text);
                         app.CellValueFromText(gridName, row.Index, cell, ref text);
@@ -1001,6 +1030,11 @@
                 foreach (string index in rowList[gridName].Keys)
                 {
                     GridRowInternal gridRow = rowList[gridName][index];
+                    Row row = gridRow.Row;
+                    if (row == null)
+                    {
+                        row = gridRow.RowNew;
+                    }
                     string errorRow = ErrorRowGet(gridName, index);
                     GridRow gridRowJson = new GridRow() { Index = index, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
                     gridDataJson.RowList[gridName].Add(gridRowJson);
@@ -1012,37 +1046,36 @@
                     {
                         foreach (Cell cell in ColumnList(gridName))
                         {
-                            cell.Constructor(gridRow.Row);
+                            cell.Constructor(row);
                             //
                             string fieldName = cell.FieldNameCSharp;
                             object value = null;
-                            if (gridRow.Row != null)
+                            if (row != null)
                             {
-                                value = cell.PropertyInfo.GetValue(gridRow.Row);
+                                value = cell.PropertyInfo.GetValue(row);
                             }
                             string textJson = UtilDataAccessLayer.ValueToText(value, cell.TypeField);
                             cell.CellValueToText(app, gridName, index, ref textJson); // Override text.
                             app.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
-                            string text = CellTextGet(gridName, index, fieldName);
-                            GridCellInternal gridCell = CellGet(gridName, index, fieldName);
+                            GridCellInternal cellInternal = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))
                             {
                                 gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCellJson = new GridCell() { IsSelect = gridCell.IsSelect, IsClick = gridCell.IsClick, IsModify = gridCell.IsModify, E = errorCell };
+                            GridCell gridCellJson = new GridCell() { IsSelect = cellInternal.IsSelect, IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCellJson;
                             //
                             SaveJsonIsButtonHtmlFileUpload(app, gridName, index, cell, gridCellJson);
                             //
-                            if (text == null)
+                            if (cellInternal.IsOriginal == false)
                             {
                                 gridCellJson.T = textJson;
                             }
                             else
                             {
                                 gridCellJson.O = textJson;
-                                gridCellJson.T = text;
+                                gridCellJson.T = cellInternal.Text; // Never overwrite user entered text.
                                 gridCellJson.IsO = true;
                             }
                         }
