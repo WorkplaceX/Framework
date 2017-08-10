@@ -29,12 +29,6 @@
 
     public static class UtilDataAccessLayer
     {
-        public static string TableNameFromTypeRow(Type typeRow)
-        {
-            SqlNameAttribute attributeRow = (SqlNameAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlNameAttribute));
-            return attributeRow.SqlName;
-        }
-
         /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
@@ -101,23 +95,22 @@
             List<Cell> result = new List<Cell>();
             if (typeRow != null)
             {
-                SqlTableAttribute attributeRow = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
-                    SqlNameAttribute attributePropertySql = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
-                    TypeCellAttribute attributePropertyCell = (TypeCellAttribute)propertyInfo.GetCustomAttribute(typeof(TypeCellAttribute));
-                    string sqlName = null;
-                    if (attributePropertySql != null)
+                    SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
+                    string sqlColumnName = null;
+                    if (columnAttribute != null)
                     {
-                        sqlName = attributePropertySql.SqlName;
+                        sqlColumnName = columnAttribute.SqlColumnName;
                     }
                     Type typeCell = typeof(Cell); // Default cell api.
-                    if (attributePropertyCell != null) // Reference from entity property to cell. If no cell api is defined, stick, with default cell api.
+                    if (columnAttribute != null) // Reference from entity property to cell. If no cell api is defined, stick, with default cell api.
                     {
-                        typeCell = attributePropertyCell.TypeCell;
+                        typeCell = columnAttribute.TypeCell;
                     }
                     Cell cell = (Cell)UtilFramework.TypeToObject(typeCell);
-                    cell.Constructor(attributeRow.SqlTableName, sqlName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
+                    cell.Constructor(tableAttribute.SqlTableName, sqlColumnName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
                     result.Add(cell);
                 }
             }
@@ -152,18 +145,18 @@
             var builder = new ModelBuilder(conventionSet);
             {
                 var entity = builder.Entity(typeRow);
-                SqlTableAttribute attributeRow = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-                entity.ToTable(attributeRow.SqlTableName, attributeRow.SqlSchemaName);
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName);
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
-                    SqlNameAttribute attributeProperty = (SqlNameAttribute)propertyInfo.GetCustomAttribute(typeof(SqlNameAttribute));
-                    if (attributeProperty == null) // Calculated column. Do not include it in sql select.
+                    SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
+                    if (columnAttribute == null) // Calculated column. Do not include it in sql select.
                     {
                         entity.Ignore(propertyInfo.Name);
                     }
                     else
                     {
-                        entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(attributeProperty.SqlName);
+                        entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.SqlColumnName);
                     }
                 }
             }

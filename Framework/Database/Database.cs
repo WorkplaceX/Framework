@@ -8,7 +8,7 @@ namespace Database.dbo
 {
     public partial class FrameworkFileStorage
     {
-        [TypeCell(typeof(FrameworkFileStorage_Download))]
+        [SqlColumn(null, typeof(FrameworkFileStorage_Download))]
         public string Download { get; set; }
     }
 

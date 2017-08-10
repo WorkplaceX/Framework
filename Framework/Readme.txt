@@ -7,9 +7,9 @@ Release
 
 Release b1.0
 -Remove Component.Constructor text parameter.
--Split SqlName attribute into SqlTableName and SqlColumnName.
--New location of Application.json.
--https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript (File upload)
+-Split SqlName attribute into SqlTableName and SqlColumnName. [Done]
+-New location of Application.json. File not used anymore [Done]
+-https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript (File upload) [Done]
 -Rename Database.lock.cs to Database.g.cs [Done]
 -Angular Selector IsHide on all removeSelector [Done]
 -Class Page [Done]

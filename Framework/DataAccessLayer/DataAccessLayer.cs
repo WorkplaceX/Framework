@@ -217,19 +217,6 @@
     }
 
     /// <summary>
-    /// Sql table name and field name.
-    /// </summary>
-    public class SqlNameAttribute : Attribute
-    {
-        public SqlNameAttribute(string sqlName)
-        {
-            this.SqlName = sqlName;
-        }
-
-        public readonly string SqlName;
-    }
-
-    /// <summary>
     /// Sql schema name and table name.
     /// </summary>
     public class SqlTableAttribute : Attribute
@@ -245,13 +232,18 @@
         public readonly string SqlTableName;
     }
 
-    public class TypeCellAttribute : Attribute
+    /// <summary>
+    /// Sql column name.
+    /// </summary>
+    public class SqlColumnAttribute : Attribute
     {
-        public TypeCellAttribute(Type typeCell)
+        public SqlColumnAttribute(string sqlColumnName, Type typeCell)
         {
-            Framework.UtilFramework.Assert(typeCell.GetTypeInfo().IsSubclassOf(typeof(Cell)));
+            this.SqlColumnName = sqlColumnName;
             this.TypeCell = typeCell;
         }
+
+        public readonly string SqlColumnName;
 
         public readonly Type TypeCell;
     }
