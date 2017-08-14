@@ -140,4 +140,25 @@ namespace Database.dbo
             rowRefresh = UtilDataAccessLayer.Select<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First();
         }
     }
+
+    public partial class FrameworkConfigTableView
+    {
+        protected internal override void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
+        {
+            var config = UtilDataAccessLayer.Select<FrameworkConfigTable>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            if (config == null)
+            {
+                config = new FrameworkConfigTable();
+                UtilDataAccessLayer.RowCopy(rowNew, config);
+                UtilDataAccessLayer.Insert(config);
+            }
+            else
+            {
+                FrameworkConfigTable configNew = UtilDataAccessLayer.RowClone(config);
+                UtilDataAccessLayer.RowCopy(rowNew, configNew);
+                UtilDataAccessLayer.Update(config, configNew);
+            }
+            rowRefresh = UtilDataAccessLayer.Select<FrameworkConfigTableView>().Where(item => item.TableId == this.TableId).First();
+        }
+    }
 }

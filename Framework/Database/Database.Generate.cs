@@ -217,6 +217,64 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_WidthPercent : Cell<FrameworkConfigColumnView> { }
 
+    [SqlTable("dbo", "FrameworkConfigTable")]
+    public partial class FrameworkConfigTable : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkConfigTable_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("TableId", typeof(FrameworkConfigTable_TableId))]
+        public int TableId { get; set; }
+
+        [SqlColumn("PageRowCount", typeof(FrameworkConfigTable_PageRowCount))]
+        public int? PageRowCount { get; set; }
+
+        [SqlColumn("IsInsert", typeof(FrameworkConfigTable_IsInsert))]
+        public bool? IsInsert { get; set; }
+    }
+
+    public partial class FrameworkConfigTable_Id : Cell<FrameworkConfigTable> { }
+
+    public partial class FrameworkConfigTable_TableId : Cell<FrameworkConfigTable> { }
+
+    public partial class FrameworkConfigTable_PageRowCount : Cell<FrameworkConfigTable> { }
+
+    public partial class FrameworkConfigTable_IsInsert : Cell<FrameworkConfigTable> { }
+
+    [SqlTable("dbo", "FrameworkConfigTableView")]
+    public partial class FrameworkConfigTableView : Row
+    {
+        [SqlColumn("TableId", typeof(FrameworkConfigTableView_TableId))]
+        public int TableId { get; set; }
+
+        [SqlColumn("TableName", typeof(FrameworkConfigTableView_TableName))]
+        public string TableName { get; set; }
+
+        [SqlColumn("TableIsExist", typeof(FrameworkConfigTableView_TableIsExist))]
+        public bool? TableIsExist { get; set; }
+
+        [SqlColumn("ConfigId", typeof(FrameworkConfigTableView_ConfigId))]
+        public int? ConfigId { get; set; }
+
+        [SqlColumn("PageRowCount", typeof(FrameworkConfigTableView_PageRowCount))]
+        public int? PageRowCount { get; set; }
+
+        [SqlColumn("IsInsert", typeof(FrameworkConfigTableView_IsInsert))]
+        public bool? IsInsert { get; set; }
+    }
+
+    public partial class FrameworkConfigTableView_TableId : Cell<FrameworkConfigTableView> { }
+
+    public partial class FrameworkConfigTableView_TableName : Cell<FrameworkConfigTableView> { }
+
+    public partial class FrameworkConfigTableView_TableIsExist : Cell<FrameworkConfigTableView> { }
+
+    public partial class FrameworkConfigTableView_ConfigId : Cell<FrameworkConfigTableView> { }
+
+    public partial class FrameworkConfigTableView_PageRowCount : Cell<FrameworkConfigTableView> { }
+
+    public partial class FrameworkConfigTableView_IsInsert : Cell<FrameworkConfigTableView> { }
+
     [SqlTable("dbo", "FrameworkFileStorage")]
     public partial class FrameworkFileStorage : Row
     {

@@ -57,6 +57,15 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 	INDEX IX_FrameworkColumn UNIQUE (TableId, FieldNameSql, FieldNameCSharp)
 )
 
+CREATE TABLE FrameworkConfigTable
+(
+	Id INT PRIMARY KEY IDENTITY,
+	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
+	PageRowCount INT, /* Number of records to load on one page */
+	IsInsert BIT, /* Allow insert record */
+	INDEX IX_FrameworkConfigTable UNIQUE (TableId)
+)
+
 CREATE TABLE FrameworkConfigColumn
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -67,6 +76,23 @@ CREATE TABLE FrameworkConfigColumn
 	WidthPercent FLOAT,
 	INDEX IX_FrameworkConfigColumn UNIQUE (ColumnId)
 )
+
+GO
+
+CREATE VIEW FrameworkConfigTableView AS
+SELECT
+	TableX.Id AS TableId,
+	TableX.Name AS TableName,
+	TableX.IsExist AS TableIsExist,
+	Config.Id AS ConfigId,
+	Config.PageRowCount,
+	Config.IsInsert
+
+FROM
+	FrameworkTable TableX
+	
+LEFT JOIN
+	FrameworkConfigTable Config ON Config.TableId = TableX.Id
 
 GO
 

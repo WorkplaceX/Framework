@@ -24,6 +24,11 @@
             new Literal(this) { TextHtml = "<h1>Application</h1>" };
             new Grid(this, "Application");
             app.GridData().LoadDatabase<FrameworkApplicationView>("Application");
+            // ConfigTable
+            new Literal(this) { TextHtml = "<h1>Config Table</h1>" };
+            new Grid(this, "ConfigTable");
+            app.GridData().LoadDatabase<FrameworkConfigTableView>("ConfigTable");
+            // ConfigColumn
             new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
             new Grid(this, "ConfigColumn");
             app.GridData().LoadDatabase<FrameworkConfigColumnView>("ConfigColumn");
