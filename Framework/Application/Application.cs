@@ -182,7 +182,7 @@
         /// <summary>
         /// Make sure method GridData.Text(); has been called. It's called only once.
         /// </summary>
-        public void GridDataTextParse()
+        internal void GridDataTextParse()
         {
             if (isGridDataTextParse == false)
             {
@@ -215,6 +215,7 @@
                 processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridFilter>();
+                processList.Add<ProcessGridIsClickMasterDetail>();
                 processList.Add<ProcessGridLookUpIsClick>();
                 processList.Add<ProcessGridLookUp>();
                 processList.Add<ProcessGridSave>();

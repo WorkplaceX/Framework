@@ -195,6 +195,42 @@
         }
     }
 
+    public class ProcessGridIsClickMasterDetail : Process
+    {
+        private void MasterDetailIsClick(App app, Row row)
+        {
+            GridData gridData = app.GridData();
+            foreach (string gridName in gridData.GridNameList())
+            {
+                Type typeRow = gridData.TypeRow(gridName);
+                Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
+                rowTable.MasterDetail(app, gridName, row);
+            }
+        }
+
+        protected internal override void Run(App app)
+        {
+            GridDataJson gridDataJson = app.AppJson.GridDataJson;
+            foreach (GridQuery gridQuery in gridDataJson.GridQueryList.Values)
+            {
+                string gridName = gridQuery.GridName;
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    if (gridRow.IsClick)
+                    {
+                        if (UtilApplication.IndexEnumFromText(gridRow.Index) == IndexEnum.Index)
+                        {
+                            GridData gridData = app.GridData();
+                            var row = gridData.Row(gridName, gridRow.Index);
+                            MasterDetailIsClick(app, row);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+     }
+
     /// <summary>
     /// Set row and cell IsClick to false
     /// </summary>

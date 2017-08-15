@@ -598,7 +598,6 @@
                                         {
                                             UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
                                         }
-                                        row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -618,7 +617,6 @@
                                         {
                                             UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
                                         }
-                                        row.RowNew.Select();
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);

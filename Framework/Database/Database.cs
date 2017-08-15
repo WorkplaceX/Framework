@@ -85,11 +85,6 @@ namespace Database.dbo
             UtilDataAccessLayer.Insert(application);
             rowRefresh = UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == application.Id).First();
         }
-
-        protected internal override void Select()
-        {
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == this.Id).First(), this);
-        }
     }
 
     public partial class FrameworkApplicationView_Type
@@ -138,6 +133,15 @@ namespace Database.dbo
                 UtilDataAccessLayer.Update(config, configNew);
             }
             rowRefresh = UtilDataAccessLayer.Select<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First();
+        }
+
+        protected internal override void MasterDetail(App app, string gridName, Row row)
+        {
+            FrameworkConfigTableView configTable = row as FrameworkConfigTableView;
+            if (configTable != null)
+            {
+
+            }
         }
     }
 

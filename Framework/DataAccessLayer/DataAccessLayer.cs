@@ -30,9 +30,11 @@
         }
 
         /// <summary>
-        /// Override this method to reload record after update or insert.
+        /// Override this method to filter detail grid when master row has been clicked.
         /// </summary>
-        protected virtual internal void Select()
+        /// <param name="gridName">Master gridName.</param>
+        /// <param name="row">Clicked master grid row.</param>
+        protected virtual internal void MasterDetail(App app, string gridName, Row row)
         {
 
         }
