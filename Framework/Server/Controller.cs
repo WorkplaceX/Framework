@@ -102,7 +102,7 @@
                 string fileName = requestPath.Substring(RequestPathBase.Length);
                 bool isFound = false;
                 byte[] data = null;
-                foreach (FrameworkFileStorage item in UtilDataAccessLayer.Select<FrameworkFileStorage>().Where(item => item.Name == fileName))
+                foreach (FrameworkFileStorage item in UtilDataAccessLayer.Query<FrameworkFileStorage>().Where(item => item.Name == fileName))
                 {
                     UtilFramework.Assert(isFound == false, string.Format("Found more than one file! ({0})", fileName));
                     data = item.Data;

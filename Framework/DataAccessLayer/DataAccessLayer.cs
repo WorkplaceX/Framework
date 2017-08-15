@@ -3,6 +3,7 @@
     using Framework.Application;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
 
     /// <summary>
@@ -34,9 +35,15 @@
         /// </summary>
         /// <param name="gridName">Master gridName.</param>
         /// <param name="row">Clicked master grid row.</param>
-        protected virtual internal void MasterDetail(App app, string gridName, Row row)
+        /// <param name="isReload">If true, this grid (detail) gets reloaded. Override also method Query(); to filter detail grid.</param>
+        protected virtual internal void MasterDetail(App app, string gridName, Row row, ref bool isReload)
         {
 
+        }
+
+        protected virtual internal IQueryable Query(App app, string gridName)
+        {
+            return UtilDataAccessLayer.Query(GetType());
         }
     }
 

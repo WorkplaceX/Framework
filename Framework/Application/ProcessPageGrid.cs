@@ -17,7 +17,7 @@
             //
             GridData gridData = app.GridData();
             Type typeRow = gridData.TypeRow(gridName);
-            gridData.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
+            gridData.LoadDatabase(app, gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
             gridData.SaveJson(app);
         }
 
@@ -119,7 +119,7 @@
             {
                 app.GridDataTextParse();
                 GridData gridData = app.GridData();
-                gridData.LoadDatabase(gridName);
+                gridData.LoadDatabase(app, gridName);
                 gridData.SaveJson(app);
             }
         }
@@ -204,7 +204,12 @@
             {
                 Type typeRow = gridData.TypeRow(gridName);
                 Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
-                rowTable.MasterDetail(app, gridName, row);
+                bool isReload = false;
+                rowTable.MasterDetail(app, gridName, row, ref isReload);
+                if (isReload)
+                {
+                    gridData.LoadDatabase(app, gridName);
+                }
             }
         }
 

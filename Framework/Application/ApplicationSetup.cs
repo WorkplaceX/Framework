@@ -23,15 +23,15 @@
             new Grid(this, "LookUp");
             new Literal(this) { TextHtml = "<h1>Application</h1>" };
             new Grid(this, "Application");
-            app.GridData().LoadDatabase<FrameworkApplicationView>("Application");
+            app.GridData().LoadDatabase<FrameworkApplicationView>(app, "Application");
             // ConfigTable
             new Literal(this) { TextHtml = "<h1>Config Table</h1>" };
             new Grid(this, "ConfigTable");
-            app.GridData().LoadDatabase<FrameworkConfigTableView>("ConfigTable");
+            app.GridData().LoadDatabase<FrameworkConfigTableView>(app, "ConfigTable");
             // ConfigColumn
             new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
             new Grid(this, "ConfigColumn");
-            app.GridData().LoadDatabase<FrameworkConfigColumnView>("ConfigColumn");
+            app.GridData().LoadDatabase<FrameworkConfigColumnView>(app, "ConfigColumn");
             app.GridData().SaveJson(app);
 
         }

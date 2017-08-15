@@ -16,7 +16,7 @@
     {
         public virtual List<FrameworkApplicationView> DbApplicationList()
         {
-            return UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.IsActive == true).ToList();
+            return UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsActive == true).ToList();
         }
 
         internal App Create(ControllerBase controller, string controllerPath, out string requestPathBase)
@@ -88,7 +88,7 @@
             }
             else
             {
-                result = UtilDataAccessLayer.Select<FrameworkConfigColumnView>().Where(item => item.TableName == typeRowName & item.TableIsExist == true & item.ColumnIsExist == true).ToList();
+                result = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableName == typeRowName & item.TableIsExist == true & item.ColumnIsExist == true).ToList();
                 cacheDbConfigColumnList[typeRowName] = result;
             }
             return result;

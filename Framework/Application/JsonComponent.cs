@@ -1,5 +1,6 @@
 ﻿namespace Framework.Component
 {
+    using Framework.Application;
     using System;
     using System.Collections.Generic;
 
@@ -337,19 +338,12 @@
 
         public bool IsSelectGet()
         {
-            return (IsSelect & 1) == 1;
+            return UtilApplication.IsSelectGet(IsSelect);
         }
 
         public void IsSelectSet(bool value)
         {
-            if (value)
-            {
-                IsSelect = IsSelect | 1;
-            }
-            else
-            {
-                IsSelect = IsSelect & 2;
-            }
+            IsSelect = UtilApplication.IsSelectSet(IsSelect, value);
         }
 
         /// <summary>

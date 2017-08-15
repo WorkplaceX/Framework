@@ -75,7 +75,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(rowNew, applicationNew);
             //
             UtilDataAccessLayer.Update(application, applicationNew);
-            rowRefresh = UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == this.Id).First();
+            rowRefresh = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).First();
         }
 
         protected internal override void Insert(App app, ref Row rowRefresh)
@@ -83,7 +83,7 @@ namespace Database.dbo
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
             UtilDataAccessLayer.Insert(application);
-            rowRefresh = UtilDataAccessLayer.Select<FrameworkApplicationView>().Where(item => item.Id == application.Id).First();
+            rowRefresh = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == application.Id).First();
         }
     }
 
@@ -92,7 +92,7 @@ namespace Database.dbo
         protected internal override void CellTextParse(App app, string gridName, string index, ref string result)
         {
             string text = result;
-            var applicationType = UtilDataAccessLayer.Select<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
+            var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
             if (applicationType == null)
             {
                 throw new Exception(string.Format("Type unknown! ({0})", result));
@@ -119,7 +119,7 @@ namespace Database.dbo
     {
         protected internal override void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
         {
-            FrameworkConfigColumn config = UtilDataAccessLayer.Select<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            FrameworkConfigColumn config = UtilDataAccessLayer.Query<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
             if (config == null)
             {
                 config = new FrameworkConfigColumn();
@@ -132,15 +132,28 @@ namespace Database.dbo
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            rowRefresh = UtilDataAccessLayer.Select<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First();
+            rowRefresh = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First();
         }
 
-        protected internal override void MasterDetail(App app, string gridName, Row row)
+        protected internal override void MasterDetail(App app, string gridName, Row row, ref bool isReload)
         {
             FrameworkConfigTableView configTable = row as FrameworkConfigTableView;
             if (configTable != null)
             {
+                isReload = true;
+            }
+        }
 
+        protected internal override IQueryable Query(App app, string gridName)
+        {
+            var configTable = app.GridData().Row("ConfigTable") as FrameworkConfigTableView;
+            if (configTable != null)
+            {
+                return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableName == configTable.TableName);
+            }
+            else
+            {
+                return null;
             }
         }
     }
@@ -149,7 +162,7 @@ namespace Database.dbo
     {
         protected internal override void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
         {
-            var config = UtilDataAccessLayer.Select<FrameworkConfigTable>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            var config = UtilDataAccessLayer.Query<FrameworkConfigTable>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
             if (config == null)
             {
                 config = new FrameworkConfigTable();
@@ -162,7 +175,7 @@ namespace Database.dbo
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            rowRefresh = UtilDataAccessLayer.Select<FrameworkConfigTableView>().Where(item => item.TableId == this.TableId).First();
+            rowRefresh = UtilDataAccessLayer.Query<FrameworkConfigTableView>().Where(item => item.TableId == this.TableId).First();
         }
     }
 }

@@ -169,7 +169,7 @@
             return result;
         }
 
-        private static IQueryable SelectQuery(Type typeRow)
+        public static IQueryable Query(Type typeRow)
         {
             DbContext dbContext = DbContext(typeRow);
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.
@@ -177,15 +177,9 @@
             return query;
         }
 
-        public static IQueryable<TRow> Select<TRow>() where TRow : Row
+        public static IQueryable<TRow> Query<TRow>() where TRow : Row
         {
-            return (IQueryable<TRow>)SelectQuery(typeof(TRow));
-        }
-
-        public static object[] Select(Type typeRow, int id)
-        {
-            IQueryable query = SelectQuery(typeRow);
-            return query.Where("Id = @0", id).ToDynamicArray();
+            return (IQueryable<TRow>)Query(typeof(TRow));
         }
 
         /// <summary>
@@ -229,9 +223,12 @@
             }
         }
 
-        public static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount)
+        public static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
         {
-            IQueryable query = SelectQuery(typeRow);
+            if (query == null)
+            {
+                query = Query(typeRow);
+            }
             if (fieldNameOrderBy != null)
             {
                 string ordering = fieldNameOrderBy;

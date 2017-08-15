@@ -14,6 +14,30 @@
     public static class UtilApplication
     {
         /// <summary>
+        /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
+        /// </summary>
+        public static bool IsSelectGet(int isSelect)
+        {
+            return (isSelect & 1) == 1;
+        }
+
+        /// <summary>
+        /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
+        /// </summary>
+        public static int IsSelectSet(int isSelect, bool value)
+        {
+            if (value)
+            {
+                isSelect = isSelect | 1;
+            }
+            else
+            {
+                isSelect = isSelect & 2;
+            }
+            return isSelect;
+        }
+
+        /// <summary>
         /// Returns TypeRowInAssembly. This is a type in an assembly. Search for row class in this assembly when deserializing json. (For example: "dbo.Airport")
         /// </summary>
         public static Type TypeRowInAssembly(App app)

@@ -27,7 +27,20 @@
         /// </summary>
         public string Error;
 
+        /// <summary>
+        /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
+        /// </summary>
         internal int IsSelect;
+
+        internal bool IsSelectGet()
+        {
+            return UtilApplication.IsSelectGet(IsSelect);
+        }
+
+        internal void IsSelectSet(bool value)
+        {
+            IsSelect = UtilApplication.IsSelectSet(IsSelect, value);
+        }
 
         internal bool IsClick;
     }
@@ -157,6 +170,26 @@
                 if (result == null)
                 {
                     result = row.RowNew;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns selected data row.
+        /// </summary>
+        public Row Row(string gridName)
+        {
+            Row result = null;
+            if (rowList.ContainsKey(gridName))
+            {
+                foreach (var item in rowList[gridName].Values)
+                {
+                    if (item.IsSelectGet())
+                    {
+                        result = item.Row;
+                        break;
+                    }
                 }
             }
             return result;
@@ -378,35 +411,43 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase(string gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
+        internal void LoadDatabase(App app, string gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
         {
             TypeRowSet(gridName, typeRow);
-            List<Row> rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15);
+            Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
+            IQueryable query = rowTable.Query(app, gridName);
+            List<Row> rowList = new List<Row>();
+            if (query != null)
+            {
+                rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
+            }
             LoadRow(gridName, typeRow, rowList);
         }
 
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase(string gridName, Type typeRow)
+        public void LoadDatabase(App app, string gridName, Type typeRow)
         {
-            LoadDatabase(gridName, null, null, false, typeRow);
+            LoadDatabase(app, gridName, null, null, false, typeRow);
         }
 
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase<TRow>(string gridName) where TRow : Row
+        public void LoadDatabase<TRow>(App app, string gridName) where TRow : Row
         {
-            LoadDatabase(gridName, typeof(TRow));
+            LoadDatabase(app, gridName, typeof(TRow));
         }
 
+        /// <summary>
+        /// Parse user entered grid filter row from json.
+        /// </summary>
         private void LoadDatabase(string gridName, out List<Filter> filterList)
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
-            Row row = RowGet(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
-            //
+            Row rowFilter = RowGet(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
                 string fieldName = column.FieldNameCSharp;
@@ -419,7 +460,7 @@
                 {
                     if (column.FieldNameSql != null) // Do not filter on calculated column.
                     {
-                        object value = row.GetType().GetProperty(fieldName).GetValue(row);
+                        object value = rowFilter.GetType().GetProperty(fieldName).GetValue(rowFilter);
                         FilterOperator filterOperator = FilterOperator.Equal;
                         if (value is string)
                         {
@@ -445,7 +486,7 @@
         /// <summary>
         /// Reload data from database with current grid filter and current sorting.
         /// </summary>
-        public void LoadDatabase(string gridName)
+        public void LoadDatabase(App app, string gridName)
         {
             if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
@@ -456,7 +497,7 @@
                     Type typeRow = TypeRowGet(gridName);
                     List<Filter> filterList;
                     LoadDatabase(gridName, out filterList);
-                    LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
+                    LoadDatabase(app, gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
                 }
             }
         }
@@ -675,8 +716,9 @@
                             cell.Constructor(rowWrite);
                             string fieldName = cell.FieldNameCSharp;
                             //
-                            string text = CellTextGet(gridName, index, fieldName);
-                            bool isModify = CellGet(gridName, index, fieldName).IsModify;
+                            GridCellInternal cellInternal = CellGet(gridName, index, fieldName);
+                            string text = cellInternal.Text;
+                            bool isModify = cellInternal.IsModify;
                             if (isModify)
                             {
                                 try
