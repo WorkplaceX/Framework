@@ -1,8 +1,7 @@
-﻿using Framework.Server;
-using System.IO;
-
-namespace Framework.BuildTool
+﻿namespace Framework.BuildTool
 {
+    using Framework.Server;
+
     public class CommandBuildClient : Command
     {
         public CommandBuildClient() 

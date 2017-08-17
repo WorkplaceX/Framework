@@ -75,7 +75,7 @@
         public static CommandLineApplication CommandLineApplicationCreate()
         {
             var result = new CommandLineApplication();
-            result.Name = "Tool";
+            result.Name = "BuildTool";
             result.HelpOption("-h|--help");
             result.OnExecute(() => {
                 // Default function, when no arguments.
@@ -89,6 +89,7 @@
                 UtilFramework.Log("5=runSql");
                 UtilFramework.Log("6=runSql --drop");
                 UtilFramework.Log("7=runSqlColumn");
+                Console.Write(">");
                 string line = Console.ReadLine();
                 if (line == "1")
                 {
@@ -118,7 +119,7 @@
                 {
                     result.Execute("runSqlColumn");
                 }
-                Console.WriteLine("Press Enter...");
+                Console.Write("Press Enter...");
                 Console.ReadLine();
                 return 0;
             });

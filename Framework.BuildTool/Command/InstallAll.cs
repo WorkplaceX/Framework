@@ -24,11 +24,6 @@
             UtilBuildTool.DotNetRestore(UtilFramework.FolderName + "Server/");
             UtilFramework.Log("Server>dotnet build");
             UtilBuildTool.DotNetBuild(UtilFramework.FolderName + "Server/");
-            // Office
-            if (UtilFramework.IsLinux == false)
-            {
-                UtilBuildTool.MSBuild(UtilFramework.FolderName + "Submodule/Office/Office.csproj"); // Office is not (yet) a .NET Core library.
-            }
             new CommandBuildClient().Run();
         }
     }
