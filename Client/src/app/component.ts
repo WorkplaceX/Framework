@@ -8,17 +8,6 @@ import  * as util from './util';
 @Component({
   selector: '[app]',
   template: `
-  <p>
-  json.Name=({{ dataService.json.Name }})<br />
-  json.RequestUrl=({{ dataService.json.RequestUrl }})<br />
-  json.Session=({{ dataService.json.Session }})<br />
-  json.IsBrowser=({{ dataService.json.IsBrowser }})<br />
-  RequestCount=({{ dataService.RequestCount }})<br />
-  json.ResponseCount=({{ dataService.json.ResponseCount }})<br />
-  Version=({{ dataService.json.VersionClient + '; ' + dataService.json.VersionServer }})<br />
-  json.ErrorProcess=({{ dataService.json.ErrorProcess }})<br />
-  log=({{ dataService.log }})
-  </p>
   <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></Selector>  
 `,
   providers: [DataService]  
@@ -47,6 +36,20 @@ export class AppComponent {
     this.jsonText = JSON.stringify(this.dataService.json);
   }
 }
+
+/*
+  <p>
+  json.Name=({{ dataService.json.Name }})<br />
+  json.RequestUrl=({{ dataService.json.RequestUrl }})<br />
+  json.Session=({{ dataService.json.Session }})<br />
+  json.IsBrowser=({{ dataService.json.IsBrowser }})<br />
+  RequestCount=({{ dataService.RequestCount }})<br />
+  json.ResponseCount=({{ dataService.json.ResponseCount }})<br />
+  Version=({{ dataService.json.VersionClient + '; ' + dataService.json.VersionServer }})<br />
+  json.ErrorProcess=({{ dataService.json.ErrorProcess }})<br />
+  log=({{ dataService.log }})
+  </p>
+*/
 
 /* Selector */
 @Component({
