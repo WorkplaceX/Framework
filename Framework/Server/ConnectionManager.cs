@@ -93,6 +93,10 @@ namespace Framework.Server
                 default:
                     throw new Exception("ConnectionStringSwitch unknown!");
             }
+            if (result == "")
+            {
+                result = null;
+            }
             return result;
         }
 
@@ -113,8 +117,6 @@ namespace Framework.Server
         {
             ConnectionStringGetSet(true, value);
         }
-
-        public bool IsDebugJson;
     }
 
     public static class ConnectionManager

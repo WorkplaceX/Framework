@@ -1,7 +1,6 @@
 ﻿{
-  "ConnectionStringDev": "Data Source=localhost; Initial Catalog=Database; Integrated Security=True;",
+  "ConnectionStringDev": "",
   "ConnectionStringTest": "",
   "ConnectionStringProd": "",
-  "ConnectionStringSwitch": "ConnectionStringDev",
-  "IsDebugJson": false
+  "ConnectionStringSwitch": "ConnectionStringDev"
 }

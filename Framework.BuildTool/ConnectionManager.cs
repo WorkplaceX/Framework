@@ -175,16 +175,10 @@ namespace Framework.BuildTool
             }
         }
 
-        private static void IsDebugDataJson()
-        {
-            UtilFramework.Log(string.Format("IsDebugDataJson={0}", Server.Config.Instance.IsDebugJson));
-        }
-
         public static void Run()
         {
             ConnectionStringCheck();
             FileNameCheck();
-            IsDebugDataJson();
         }
     }
 }

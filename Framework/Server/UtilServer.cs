@@ -9,9 +9,11 @@
 
     public static class UtilServer
     {
-        public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string routePath, App app)
+        public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string controllerPath, Type typeAppDefault)
         {
-            return await new WebController(controller, routePath, app).WebRequest();
+            string requestPathBase;
+            App app = new AppSelector(typeAppDefault).Create(controller, controllerPath, out requestPathBase);
+            return await new WebController(controller, controllerPath, app).WebRequest();
         }
 
         public static async Task<IActionResult> ControllerWebRequest(ControllerBase controller, string controllerPath, AppSelector appSelector)

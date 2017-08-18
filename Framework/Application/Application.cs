@@ -14,9 +14,44 @@
     /// </summary>
     public class AppSelector
     {
-        public virtual List<FrameworkApplicationView> DbApplicationList()
+        /// <summary>
+        /// Constructor with default app, if no database connection exists.
+        /// </summary>
+        public AppSelector(Type typeAppDefault)
         {
-            return UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsActive == true).ToList();
+            this.TypeAppDefault = typeAppDefault;
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public AppSelector()
+            : this(null)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets TypeAppDefault. This is the default app, if no database connection exists.
+        /// </summary>
+        public readonly Type TypeAppDefault;
+
+        protected virtual List<FrameworkApplicationView> DbApplicationList()
+        {
+            List<FrameworkApplicationView> result;
+            if (UtilDataAccessLayer.IsConnectionString == false)
+            {
+                result = new List<FrameworkApplicationView>();
+                if (TypeAppDefault != null)
+                {
+                    result.Add(new FrameworkApplicationView() { Path = null, Type = UtilFramework.TypeToName(TypeAppDefault) }); // Register class AppMain programmatically, if no database connection.
+                }
+            }
+            else
+            {
+                result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsActive == true).ToList();
+            }
+            return result;
         }
 
         internal App Create(ControllerBase controller, string controllerPath, out string requestPathBase)
@@ -36,11 +71,19 @@
                 }
                 if (requestUrl.StartsWith(controllerPath + path))
                 {
-                    Type type = UtilFramework.TypeFromName(frameworkApplication.Type, UtilFramework.TypeInAssemblyList(GetType()));
-                    result = (App)UtilFramework.TypeToObject(type);
-                    result.Constructor(frameworkApplication);
-                    requestPathBase = controllerPath + path;
-                    break;
+                    Type typeInAssembly = GetType();
+                    if (TypeAppDefault != null)
+                    {
+                        typeInAssembly = TypeAppDefault;
+                    }
+                    Type type = UtilFramework.TypeFromName(frameworkApplication.Type, UtilFramework.TypeInAssemblyList(typeInAssembly));
+                    if (UtilFramework.IsSubclassOf(type, typeof(App)))
+                    {
+                        result = (App)UtilFramework.TypeToObject(type);
+                        result.Constructor(frameworkApplication);
+                        requestPathBase = controllerPath + path;
+                        break;
+                    }
                 }
             }
             return result;

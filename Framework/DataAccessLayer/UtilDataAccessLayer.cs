@@ -30,6 +30,17 @@
     public static class UtilDataAccessLayer
     {
         /// <summary>
+        /// Gets IsConnectionString. True, if ConnectionString has been set.
+        /// </summary>
+        public static bool IsConnectionString
+        {
+            get
+            {
+                return Server.Config.Instance.ConnectionStringGet() != null;
+            }
+        }
+
+        /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
         public static string TypeRowToName(Type typeRow)
