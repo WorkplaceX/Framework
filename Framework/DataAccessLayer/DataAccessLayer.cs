@@ -11,9 +11,9 @@
     /// </summary>
     public class Row
     {
-        protected virtual bool IsReadOnly()
+        protected virtual void IsReadOnly(ref bool result)
         {
-            return false;
+
         }
 
         protected virtual internal void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
