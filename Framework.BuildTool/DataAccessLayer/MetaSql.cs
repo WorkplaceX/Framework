@@ -1,5 +1,6 @@
 ﻿namespace Framework.BuildTool.DataAccessLayer
 {
+    using Framework.Server;
     using Microsoft.EntityFrameworkCore;
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -43,7 +44,7 @@
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(Framework.Server.ConnectionManager.ConnectionString);
+            optionsBuilder.UseSqlServer(ConnectionManagerServer.ConnectionString);
         }
 
         public DbSet<MetaSqlSchema> Schema { get; set; }

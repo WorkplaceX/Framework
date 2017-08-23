@@ -6,7 +6,7 @@ namespace Framework.Server
     /// <summary>
     /// Server config json.
     /// </summary>
-    public class Config
+    public class ConfigServer
     {
         public string ConnectionStringDev;
 
@@ -25,32 +25,32 @@ namespace Framework.Server
             {
                 if (UtilFramework.FolderNameIsIss == false)
                 {
-                    return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManager.json"; // See also .gitignore
+                    return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManagerServer.json"; // See also .gitignore
                 }
                 else
                 {
-                    return UtilFramework.FolderName + "Server/ConnectionManager.json"; // See also .gitignore
+                    return UtilFramework.FolderName + "Server/ConnectionManagerServer.json"; // See also .gitignore
                 }
             }
         }
 
         /// <summary>
-        /// Gets JsonTxtFileName. Used as template, if file ConnectionManager.json does not exist.
+        /// Gets JsonTxtFileName. Used as template, if file ConnectionManagerServer.json does not exist.
         /// </summary>
         public static string JsonTxtFileName
         {
             get
             {
-                return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManager.json.txt"; // See also .gitignore
+                return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManagerServer.json.txt"; // See also .gitignore
             }
         }
 
-        public static Config Instance
+        public static ConfigServer Instance
         {
             get
             {
                 string json = UtilFramework.FileRead(JsonFileName);
-                var result = JsonConvert.DeserializeObject<Config>(json);
+                var result = JsonConvert.DeserializeObject<ConfigServer>(json);
                 return result;
             }
         }
@@ -119,13 +119,13 @@ namespace Framework.Server
         }
     }
 
-    public static class ConnectionManager
+    public static class ConnectionManagerServer
     {
         public static string ConnectionString
         {
             get
             {
-                return Config.Instance.ConnectionStringGet();
+                return ConfigServer.Instance.ConnectionStringGet();
             }
         }
     }

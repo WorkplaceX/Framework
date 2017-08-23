@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Server\ConnectionManager.json">
+    <None Update="Server\ConnectionManagerServer.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Server\wwwroot\ArrowDown.png">

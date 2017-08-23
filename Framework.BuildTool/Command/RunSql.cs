@@ -1,5 +1,6 @@
 ﻿namespace Framework.BuildTool
 {
+    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
@@ -55,7 +56,7 @@
 
         public override void Run()
         {
-            RunSql(Server.ConnectionManager.ConnectionString);
+            RunSql(ConnectionManagerServer.ConnectionString);
         }
     }
 }

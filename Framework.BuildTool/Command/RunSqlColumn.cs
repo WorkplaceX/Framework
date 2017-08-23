@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.Application;
     using Framework.DataAccessLayer;
+    using Framework.Server;
     using System;
     using System.Data.SqlClient;
     using System.Text;
@@ -216,10 +217,10 @@
 
         public override void Run()
         {
-            RunSqlTable(Server.ConnectionManager.ConnectionString);
-            RunSqlColumn(Server.ConnectionManager.ConnectionString);
-            RunSqlApplicationType(Server.ConnectionManager.ConnectionString);
-            RunSqlApplication(Server.ConnectionManager.ConnectionString);
+            RunSqlTable(ConnectionManagerServer.ConnectionString);
+            RunSqlColumn(ConnectionManagerServer.ConnectionString);
+            RunSqlApplicationType(ConnectionManagerServer.ConnectionString);
+            RunSqlApplication(ConnectionManagerServer.ConnectionString);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace Framework.DataAccessLayer
 {
+    using Framework.Server;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
     using System;
@@ -36,7 +37,7 @@
         {
             get
             {
-                return Server.Config.Instance.ConnectionStringGet() != null;
+                return ConfigServer.Instance.ConnectionStringGet() != null;
             }
         }
 
@@ -172,7 +173,7 @@
                 }
             }
             var options = new DbContextOptionsBuilder<DbContext>();
-            options.UseSqlServer(Framework.Server.ConnectionManager.ConnectionString);
+            options.UseSqlServer(ConnectionManagerServer.ConnectionString);
             options.UseModel(builder.Model);
             DbContext result = new DbContext(options.Options);
             result.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.

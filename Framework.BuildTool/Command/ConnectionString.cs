@@ -1,5 +1,6 @@
 ﻿namespace Framework.BuildTool
 {
+    using Framework.Server;
     using Newtonsoft.Json;
     using System;
 
@@ -23,8 +24,8 @@
         {
             ConnectionManagerCheck.JsonFileCreateIfNotExists();
             //
-            string connectionStringSwitch = Server.Config.Instance.ConnectionStringSwitch;
-            string connectionString = Server.ConnectionManager.ConnectionString;
+            string connectionStringSwitch = ConfigServer.Instance.ConnectionStringSwitch;
+            string connectionString = ConnectionManagerServer.ConnectionString;
             UtilFramework.Log(string.Format("{0}={1}", connectionStringSwitch, connectionString));
         }
 
@@ -32,11 +33,11 @@
         {
             ConnectionManagerCheck.JsonFileCreateIfNotExists();
             //
-            Server.Config config = Server.Config.Instance;
-            config.ConnectionStringSet(connectionString);
-            string json = JsonConvert.SerializeObject(config, Formatting.Indented);
-            UtilFramework.FileWrite(Server.Config.JsonFileName, json);
-            UtilFramework.Log(string.Format("File updated. ({0})", Server.Config.JsonFileName));
+            ConfigServer configServer = ConfigServer.Instance;
+            configServer.ConnectionStringSet(connectionString);
+            string json = JsonConvert.SerializeObject(configServer, Formatting.Indented);
+            UtilFramework.FileWrite(ConfigServer.JsonFileName, json);
+            UtilFramework.Log(string.Format("File updated. ({0})", ConfigServer.JsonFileName));
         }
 
         private void ConnectionStringCheck()
