@@ -1,6 +1,6 @@
 # Framework
 
-Framework to create database application based on Angular 4 with server side rendering, ASP.NET Core and MS-SQL. This repo contains no business logic. Business logic goes into your repo.
+Framework to create database applications based on Angular 4 with server side rendering, ASP.NET Core and MS-SQL. This repo contains no business logic. Company business logic goes for example into your private repo.
 
 ## Getting started
 
