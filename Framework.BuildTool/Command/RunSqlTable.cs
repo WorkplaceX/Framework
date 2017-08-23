@@ -8,10 +8,10 @@
     using System.Data.SqlClient;
     using System.Text;
 
-    public class CommandRunSqlColumn : Command
+    public class CommandRunSqlTable : Command
     {
-        public CommandRunSqlColumn(AppBuildTool appBuildTool) 
-            : base("runSqlColumn", "Run sql table FrameworkColumn update for all in source code defined columns.")
+        public CommandRunSqlTable(AppBuildTool appBuildTool) 
+            : base("runSqlTable", "Copy all in code defined tables and columns to database table FrameworkTable.")
         {
             this.AppBuildTool = appBuildTool;
         }

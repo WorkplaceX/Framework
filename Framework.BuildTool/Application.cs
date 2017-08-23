@@ -68,7 +68,7 @@
             result.Add(new CommandServe());
             result.Add(new CommandUnitTest());
             result.Add(new CommandRunSql());
-            result.Add(new CommandRunSqlColumn(this));
+            result.Add(new CommandRunSqlTable(this));
             result.Add(new CommandGenerate());
             result.Add(new CommandBuildClient());
             result.Add(new CommandInstallAll());

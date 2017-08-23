@@ -88,7 +88,7 @@
                 UtilFramework.Log("4=generate --framework");
                 UtilFramework.Log("5=runSql");
                 UtilFramework.Log("6=runSql --drop");
-                UtilFramework.Log("7=runSqlColumn");
+                UtilFramework.Log("7=runSqlTable");
                 Console.Write(">");
                 string line = Console.ReadLine();
                 if (line == "1")
@@ -117,7 +117,7 @@
                 }
                 if (line == "7")
                 {
-                    result.Execute("runSqlColumn");
+                    result.Execute("runSqlTable");
                 }
                 Console.Write("Press Enter...");
                 Console.ReadLine();
