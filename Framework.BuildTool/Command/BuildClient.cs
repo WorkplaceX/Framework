@@ -19,7 +19,7 @@
             UtilBuildTool.DirectoryDelete(UtilFramework.FolderName + "Server/Universal/");
             //
             UtilFramework.Log("UniversalExpress>Directory Universal/ clean");
-            UtilBuildTool.DirectoryDelete(UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/");
+            UtilBuildTool.DirectoryDelete(UtilFramework.FolderName + "Submodule/Framework.UniversalExpress/Universal/");
             //
             string fileNameIndex = UtilServer.FileNameIndex();
             UtilFramework.Log("Universal>Copy Client to Server");
@@ -31,8 +31,8 @@
             UtilBuildTool.FileCopy(UtilFramework.FolderName + "Submodule/Client/dist/main.*.bundle.js", UtilFramework.FolderName + "Server/Universal/main.bundle.js");
             //
             UtilFramework.Log("Universal>Copy Client to UniversalExpress");
-            UtilBuildTool.FileCopy(UtilFramework.FolderName + "Submodule/Client/dist/bundle.js", UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/index.js");
-            UtilBuildTool.FileCopy(fileNameIndex, UtilFramework.FolderName + "Submodule/UniversalExpress/Universal/src/index.html");
+            UtilBuildTool.FileCopy(UtilFramework.FolderName + "Submodule/Client/dist/bundle.js", UtilFramework.FolderName + "Submodule/Framework.UniversalExpress/Universal/index.js");
+            UtilBuildTool.FileCopy(fileNameIndex, UtilFramework.FolderName + "Submodule/Framework.UniversalExpress/Universal/src/index.html");
         }
     }
 }
