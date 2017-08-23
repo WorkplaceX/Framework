@@ -51,7 +51,7 @@ function Deploy
     git fetch --all 2>&1 # do not write to stderr
     git add .
     git commit -m Deploy
-    git push azure master -f
+    git push azure master -f 2>&1 # do not write to stderr
 }
 
 cd $FolderName
