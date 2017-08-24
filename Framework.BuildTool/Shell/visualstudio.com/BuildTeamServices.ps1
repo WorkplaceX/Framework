@@ -28,7 +28,7 @@ cd $FolderName
 cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 02
 
-# RunSql
+# RunSqlCreate
 cd $FolderName
 cd Build
 cmd.exe /c $FolderNameDotNetZip\dotnet\dotnet.exe run 11

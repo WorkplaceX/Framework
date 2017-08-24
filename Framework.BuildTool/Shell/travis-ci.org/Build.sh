@@ -17,12 +17,11 @@ function Main
     echo \#\#\# InstallAll
     dotnet run -- installAll
 
-    # BuildTool RunSql
-    echo \#\#\# RunSql
+    # BuildTool runSqlCreate
+    echo \#\#\# RunSqlCreate
     cd $FolderName
     cd BuildTool
-    dotnet run -- runSql
-	dotnet run -- runSqlTable
+    dotnet run -- runSqlCreate
 
     # Publish Server
     echo \#\#\# Publish Server

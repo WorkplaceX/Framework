@@ -86,9 +86,8 @@
                 UtilFramework.Log("2=serve --client");
                 UtilFramework.Log("3=generate");
                 UtilFramework.Log("4=generate --framework");
-                UtilFramework.Log("5=runSql");
-                UtilFramework.Log("6=runSql --drop");
-                UtilFramework.Log("7=runSqlTable");
+                UtilFramework.Log("5=runSqlCreate");
+                UtilFramework.Log("6=runSqlCreate --drop");
                 Console.Write(">");
                 string line = Console.ReadLine();
                 if (line == "1")
@@ -109,15 +108,11 @@
                 }
                 if (line == "5")
                 {
-                    result.Execute("runSql");
+                    result.Execute("runSqlCreate");
                 }
                 if (line == "6")
                 {
-                    result.Execute("runSql", "--drop");
-                }
-                if (line == "7")
-                {
-                    result.Execute("runSqlTable");
+                    result.Execute("runSqlCreate", "--drop");
                 }
                 Console.Write("Press Enter...");
                 Console.ReadLine();

@@ -8,10 +8,10 @@
     using System.Data.SqlClient;
     using System.Text;
 
-    public class CommandRunSqlTable : Command
+    public class CommandRunSqlMeta : Command
     {
-        public CommandRunSqlTable(AppBuildTool appBuildTool) 
-            : base("runSqlTable", "Copy all in code defined tables and columns to database table FrameworkTable.")
+        public CommandRunSqlMeta(AppBuildTool appBuildTool) 
+            : base("runSqlMeta", "Copy all in code declared tables and columns to database table FrameworkTable.")
         {
             this.AppBuildTool = appBuildTool;
         }

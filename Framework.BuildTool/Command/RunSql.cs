@@ -6,17 +6,20 @@
     using System.Data.SqlClient;
     using System.Linq;
 
-    public class CommandRunSql : Command
+    public class CommandRunSqlCreate : Command
     {
-        public CommandRunSql() 
-            : base("runSql", "Run sql create scripts")
+        public CommandRunSqlCreate(AppBuildTool appBuildTool) 
+            : base("runSqlCreate", "Run sql create scripts")
         {
+            this.AppBuildTool = appBuildTool;
             this.OptionDrop = OptionAdd("-d|--drop", "Run sql drop scripts");
         }
 
+        public readonly AppBuildTool AppBuildTool;
+
         public readonly Option OptionDrop;
 
-        private void RunSql(string connectionString)
+        private void RunSqlCreate(string connectionString)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -36,7 +39,7 @@
                 }
                 foreach (string fileName in fileNameList)
                 {
-                    UtilFramework.Log(string.Format("### Start RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
+                    UtilFramework.Log(string.Format("### Start RunSqlCreate {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
                     string text = UtilFramework.FileRead(fileName);
                     var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string sql in sqlList)
@@ -49,14 +52,15 @@
                             }
                         }
                     }
-                    UtilFramework.Log(string.Format("### Exit RunSql {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
+                    UtilFramework.Log(string.Format("### Exit RunSqlCreate {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
                 }
             }
         }
 
         public override void Run()
         {
-            RunSql(ConnectionManagerServer.ConnectionString);
+            RunSqlCreate(ConnectionManagerServer.ConnectionString);
+            new CommandRunSqlMeta(AppBuildTool).Run();
         }
     }
 }
