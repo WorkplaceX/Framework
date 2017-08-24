@@ -5,6 +5,8 @@
     using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
     using System;
     using System.Collections.Generic;
+    using System.Data;
+    using System.Data.SqlClient;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Reflection;
@@ -30,6 +32,22 @@
 
     public static class UtilDataAccessLayer
     {
+        public static string Parameter(object value, SqlDbType dbTyle, List<SqlParameter> parameterList)
+        {
+            string result = $"@P{ parameterList.Count }";
+            if (value == null)
+            {
+                value = DBNull.Value;
+            }
+            parameterList.Add(new SqlParameter($"P{ parameterList.Count }", dbTyle) { Value = value });
+            return result;
+        }
+
+        public static void Parameter(SqlCommand command, List<SqlParameter> parameterList)
+        {
+            command.Parameters.AddRange(parameterList.ToArray());
+        }
+
         /// <summary>
         /// Gets IsConnectionString. True, if ConnectionString has been set.
         /// </summary>

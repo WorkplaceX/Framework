@@ -9,8 +9,8 @@ namespace Database.dbo
         [SqlColumn("Id", typeof(FrameworkApplication_Id))]
         public int Id { get; set; }
 
-        [SqlColumn("Name", typeof(FrameworkApplication_Name))]
-        public string Name { get; set; }
+        [SqlColumn("Text", typeof(FrameworkApplication_Text))]
+        public string Text { get; set; }
 
         [SqlColumn("Path", typeof(FrameworkApplication_Path))]
         public string Path { get; set; }
@@ -24,7 +24,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplication_Id : Cell<FrameworkApplication> { }
 
-    public partial class FrameworkApplication_Name : Cell<FrameworkApplication> { }
+    public partial class FrameworkApplication_Text : Cell<FrameworkApplication> { }
 
     public partial class FrameworkApplication_Path : Cell<FrameworkApplication> { }
 
@@ -57,8 +57,8 @@ namespace Database.dbo
         [SqlColumn("Id", typeof(FrameworkApplicationView_Id))]
         public int Id { get; set; }
 
-        [SqlColumn("Name", typeof(FrameworkApplicationView_Name))]
-        public string Name { get; set; }
+        [SqlColumn("Text", typeof(FrameworkApplicationView_Text))]
+        public string Text { get; set; }
 
         [SqlColumn("Path", typeof(FrameworkApplicationView_Path))]
         public string Path { get; set; }
@@ -78,7 +78,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Id : Cell<FrameworkApplicationView> { }
 
-    public partial class FrameworkApplicationView_Name : Cell<FrameworkApplicationView> { }
+    public partial class FrameworkApplicationView_Text : Cell<FrameworkApplicationView> { }
 
     public partial class FrameworkApplicationView_Path : Cell<FrameworkApplicationView> { }
 

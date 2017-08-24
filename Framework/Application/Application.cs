@@ -49,7 +49,7 @@
             }
             else
             {
-                result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsActive == true).ToList();
+                result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // Make sure empty path is last match.
             }
             return result;
         }
@@ -59,10 +59,18 @@
             App result = null;
             requestPathBase = controllerPath;
             string requestUrl = controller.HttpContext.Request.Path.ToString();
+            if (!requestUrl.EndsWith("/"))
+            {
+                requestUrl += "/";
+            }
             foreach (FrameworkApplicationView frameworkApplication in DbApplicationList())
             {
                 string path = frameworkApplication.Path;
-                if (!string.IsNullOrEmpty(path))
+                if (string.IsNullOrEmpty(path))
+                {
+                    path = null;
+                }
+                else
                 {
                     if (!path.EndsWith("/"))
                     {

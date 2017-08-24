@@ -5,6 +5,8 @@
     using Framework.DataAccessLayer;
     using Framework.Server;
     using System;
+    using System.Collections.Generic;
+    using System.Data;
     using System.Data.SqlClient;
     using System.Text;
 
@@ -36,17 +38,18 @@
                 MERGE INTO FrameworkApplication AS Target
                 USING ({0}) AS Source
 	                ON NOT EXISTS(
-                        SELECT Source.Name
+                        SELECT Source.Path
                         EXCEPT
-                        SELECT Target.Name)
+                        SELECT Target.Path)
                 WHEN MATCHED THEN
-	                UPDATE SET Target.Path = Source.Path, Target.IsActive = Source.IsActive
+	                UPDATE SET Target.Text = Source.Text, Target.Path = Source.Path, Target.ApplicationTypeId = Source.ApplicationTypeId, Target.IsActive = Source.IsActive
                 WHEN NOT MATCHED BY TARGET THEN
-	                INSERT (Name, Path, ApplicationTypeId, IsActive)
-	                VALUES (Source.Name, Source.Path, Source.ApplicationTypeId, Source.IsActive);
+	                INSERT (Text, Path, ApplicationTypeId, IsActive)
+	                VALUES (Source.Text, Source.Path, Source.ApplicationTypeId, Source.IsActive);
                 ";
                 StringBuilder sqlSelect = new StringBuilder();
                 bool isFirst = true;
+                List<SqlParameter> parameterList = new List<SqlParameter>();
                 foreach (FrameworkApplicationView frameworkApplication in AppBuildTool.DbFrameworkApplicationView())
                 {
                     if (isFirst)
@@ -58,12 +61,16 @@
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
                     sqlSelect.Append(string.Format(
-                        "(SELECT '{0}' AS Name, '{1}' AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = '{2}') AS ApplicationTypeId, CASE WHEN '{3}' = 'True' THEN 1 ELSE 0 END AS IsActive )",
-                        frameworkApplication.Name, frameworkApplication.Path, frameworkApplication.Type, frameworkApplication.IsActive));
+                        "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = {2}) AS ApplicationTypeId, {3} AS IsActive)",
+                        UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
                 }
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
                 using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
                 {
+                    UtilDataAccessLayer.Parameter(command, parameterList);
                     command.ExecuteNonQuery();
                 }
             }

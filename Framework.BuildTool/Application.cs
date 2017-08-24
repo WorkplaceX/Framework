@@ -54,7 +54,7 @@
         internal List<FrameworkApplicationView> DbFrameworkApplicationView()
         {
             List<FrameworkApplicationView> result = new List<FrameworkApplicationView>();
-            result.Add(new FrameworkApplicationView() { Name = "Setup", Path = "setup", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppSetup)) });
+            result.Add(new FrameworkApplicationView() { Text = "Setup Application", Path = "setup", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppSetup)) });
             DbFrameworkApplicationView(result); // Override to register new applications.
             return result;
         }

@@ -10,7 +10,7 @@ CREATE TABLE FrameworkApplicationType
 CREATE TABLE FrameworkApplication
 (
 	Id INT PRIMARY KEY IDENTITY,
-  	Name NVARCHAR(256) NOT NULL UNIQUE,
+  	Text NVARCHAR(256),
 	Path NVARCHAR(256) UNIQUE, /* Url */
 	ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id) NOT NULL,
 	IsActive BIT
@@ -21,7 +21,7 @@ GO
 CREATE VIEW FrameworkApplicationView AS
 SELECT
 	Application.Id,
-	Application.Name,
+	Application.Text,
 	Application.Path,
 	Application.ApplicationTypeId,
 	(SELECT ApplicationType.Name FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS Type,
