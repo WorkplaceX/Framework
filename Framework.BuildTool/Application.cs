@@ -55,7 +55,7 @@
         {
             List<FrameworkApplicationView> result = new List<FrameworkApplicationView>();
             result.Add(new FrameworkApplicationView() { Name = "Setup", Path = "setup", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppSetup)) });
-            DbFrameworkApplicationView(result);
+            DbFrameworkApplicationView(result); // Override to register new applications.
             return result;
         }
 
