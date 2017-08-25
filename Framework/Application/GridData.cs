@@ -510,7 +510,7 @@
         }
 
         /// <summary>
-        /// Load data from list into data grid.
+        /// Load data directly from list into data grid.
         /// </summary>
         public void LoadRow(string gridName, Type typeRow, List<Row> rowList)
         {
@@ -1033,7 +1033,7 @@
         /// <summary>
         /// Copy data from class GridData to class GridDataJson.
         /// </summary>
-        public void SaveJson()
+        internal void SaveJson()
         {
             AppJson appJson = App.AppJson;
             //

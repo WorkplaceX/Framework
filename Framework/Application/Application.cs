@@ -274,6 +274,7 @@
                 processList.Add<ProcessGridLookUp>();
                 processList.Add<ProcessGridSave>();
                 processList.Add<ProcessGridCellButtonIsClick>();
+                processList.Add<ProcessGridSaveJson>();
                 processList.Add<ProcessGridOrderByText>();
                 processList.Add<ProcessGridFocusNull>();
                 processList.Add<ProcessGridCellIsModifyFalse>();

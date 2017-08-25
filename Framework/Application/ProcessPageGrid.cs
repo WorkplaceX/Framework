@@ -237,6 +237,17 @@
      }
 
     /// <summary>
+    /// Save GridData back to json.
+    /// </summary>
+    public class ProcessGridSaveJson : Process
+    {
+        protected internal override void Run(App app)
+        {
+            app.GridData.SaveJson();
+        }
+    }
+
+    /// <summary>
     /// Set row and cell IsClick to false
     /// </summary>
     public class ProcessGridIsClickFalse : Process
