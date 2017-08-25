@@ -60,7 +60,10 @@
         public override void Run()
         {
             RunSqlCreate(ConnectionManagerServer.ConnectionString);
-            new CommandRunSqlMeta(AppBuildTool).Run();
+            if (OptionDrop.IsOn == false)
+            {
+                new CommandRunSqlMeta(AppBuildTool).Run();
+            }
         }
     }
 }
