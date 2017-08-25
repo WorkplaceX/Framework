@@ -1,0 +1,6 @@
+{
+  "ConnectionStringDev": "Data Source=localhost; Initial Catalog=Database; Integrated Security=True;",
+  "ConnectionStringTest": "",
+  "ConnectionStringProd": "Data Source=framework.database.windows.net;Initial Catalog=Framework;Integrated Security=False;User ID=framework;Password=ksaDkJxmajQ0e8;",
+  "ConnectionStringSwitch": "ConnectionStringDev"
+}

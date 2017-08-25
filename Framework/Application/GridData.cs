@@ -91,7 +91,7 @@
 
     public class GridData
     {
-        public GridData(App app)
+        internal GridData(App app)
         {
             this.App = app;
         }
@@ -101,7 +101,7 @@
         /// <summary>
         /// Returns user modified text. If null, user has not changed text.
         /// </summary>
-        public string CellText(string gridName, string index, string fieldName)
+        internal string CellText(string gridName, string index, string fieldName)
         {
             string result = null;
             GridCellInternal cell = CellGet(gridName, index, fieldName);
@@ -115,7 +115,7 @@
         /// <summary>
         /// Returns list of loaded GridName.
         /// </summary>
-        public List<string> GridNameList()
+        internal List<string> GridNameList()
         {
             List<string> result = new List<string>(queryList.Keys);
             return result;
@@ -124,7 +124,7 @@
         /// <summary>
         /// Returns column definitions.
         /// </summary>
-        public List<Cell> ColumnList(string gridName)
+        internal List<Cell> ColumnList(string gridName)
         {
             Type typeRow = TypeRowGet(gridName);
             return UtilDataAccessLayer.ColumnList(typeRow);
@@ -133,12 +133,12 @@
         /// <summary>
         /// Returns list of loaded row index.
         /// </summary>
-        public List<string> IndexList(string gridName)
+        internal List<string> IndexList(string gridName)
         {
             return new List<string>(rowList[gridName].Keys);
         }
 
-        public Type TypeRow(string gridName)
+        internal Type TypeRow(string gridName)
         {
             return TypeRowGet(gridName);
         }
@@ -685,7 +685,7 @@
         /// <summary>
         /// Parse user modified input text. See also method TextSet(); when parse error occurs method ErrorSet(); is called for the field.
         /// </summary>
-        public void TextParse()
+        internal void TextParse()
         {
             foreach (string gridName in rowList.Keys)
             {
@@ -806,7 +806,7 @@
         /// <summary>
         /// Load data from http json request.
         /// </summary>
-        public void LoadJson(string gridName)
+        internal void LoadJson(string gridName)
         {
             LoadJsonQuery(App.AppJson);
             LoadJsonColumn(App.AppJson);
@@ -879,7 +879,7 @@
         /// <summary>
         /// Load data from GridDataJson to GridData.
         /// </summary>
-        public void LoadJson()
+        internal void LoadJson()
         {
             GridDataJson gridDataJson = App.AppJson.GridDataJson;
             //
