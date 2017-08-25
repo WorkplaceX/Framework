@@ -15,10 +15,10 @@
         {
             GridDataJson gridDataJson = appJson.GridDataJson;
             //
-            GridData gridData = app.GridData();
+            GridData gridData = app.GridData;
             Type typeRow = gridData.TypeRow(gridName);
-            gridData.LoadDatabase(app, gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
-            gridData.SaveJson(app);
+            gridData.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
+            gridData.SaveJson();
         }
 
         protected internal override void Run(App app)
@@ -118,9 +118,9 @@
             foreach (string gridName in gridNameList)
             {
                 app.GridDataTextParse();
-                GridData gridData = app.GridData();
-                gridData.LoadDatabase(app, gridName);
-                gridData.SaveJson(app);
+                GridData gridData = app.GridData;
+                gridData.LoadDatabase(gridName);
+                gridData.SaveJson();
             }
         }
     }
@@ -199,7 +199,7 @@
     {
         private void MasterDetailIsClick(App app, Row row)
         {
-            GridData gridData = app.GridData();
+            GridData gridData = app.GridData;
             foreach (string gridName in gridData.GridNameList())
             {
                 Type typeRow = gridData.TypeRow(gridName);
@@ -208,7 +208,7 @@
                 rowTable.MasterDetail(app, gridName, row, ref isReload);
                 if (isReload)
                 {
-                    gridData.LoadDatabase(app, gridName);
+                    gridData.LoadDatabase(gridName);
                 }
             }
         }
@@ -225,7 +225,7 @@
                     {
                         if (UtilApplication.IndexEnumFromText(gridRow.Index) == IndexEnum.Index)
                         {
-                            GridData gridData = app.GridData();
+                            GridData gridData = app.GridData;
                             var row = gridData.Row(gridName, gridRow.Index);
                             MasterDetailIsClick(app, row);
                             break;
@@ -303,7 +303,7 @@
                         {
                             if (UtilApplication.IndexEnumFromText(gridRow.Index) == IndexEnum.Index)
                             {
-                                GridData gridData = app.GridData();
+                                GridData gridData = app.GridData;
                                 rowLookUp = gridData.Row("LookUp", gridRow.Index);
                             }
                         }
@@ -313,7 +313,7 @@
             //
             if (rowLookUp != null)
             {
-                GridData gridData = app.GridData();
+                GridData gridData = app.GridData;
                 var row = gridData.Row(gridDataJson.FocusGridNamePrevious, gridDataJson.FocusIndexPrevious);
                 Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldNamePrevious).First();
                 Cell cellLookUp = UtilDataAccessLayer.CellList(rowLookUp.GetType(), rowLookUp).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
@@ -324,7 +324,7 @@
                 gridCell.IsO = true;
                 gridCell.O = gridCell.T;
                 gridCell.T = result;
-                gridData.LoadJson(app.AppJson, app);
+                gridData.LoadJson();
             }
         }
     }
@@ -358,14 +358,14 @@
             {
                 if (gridDataJson.FocusFieldName != null)
                 {
-                    GridData gridData = app.GridData();
+                    GridData gridData = app.GridData;
                     Type typeRow = gridData.TypeRow(gridDataJson.FocusGridName);
                     var row = gridData.Row(gridDataJson.FocusGridName, gridDataJson.FocusIndex);
                     Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
                     List<Row> rowList;
                     cell.CellLookUp(out typeRow, out rowList);
                     gridData.LoadRow("LookUp", typeRow, rowList);
-                    gridData.SaveJson(app);
+                    gridData.SaveJson();
                 }
             }
         }
@@ -426,9 +426,9 @@
             //
             if (isSave)
             {
-                app.GridData().TextParse(app);
-                app.GridData().SaveDatabase(app);
-                app.GridData().SaveJson(app);
+                app.GridData.TextParse();
+                app.GridData.SaveDatabase();
+                app.GridData.SaveJson();
             }
         }
     }
@@ -465,7 +465,7 @@
             //
             if (gridNameClick != null)
             {
-                Row row = app.GridData().Row(gridNameClick, indexClick);
+                Row row = app.GridData.Row(gridNameClick, indexClick);
                 Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
                 cell.CellProcessButtonIsClick(app, gridNameClick, indexClick, fieldNameClick);
             }

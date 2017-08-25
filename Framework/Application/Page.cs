@@ -3,6 +3,9 @@
     using Framework.Application;
     using System;
 
+    /// <summary>
+    /// Application page.
+    /// </summary>
     public class Page : Div
     {
         /// <summary>

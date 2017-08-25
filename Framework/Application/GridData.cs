@@ -91,6 +91,13 @@
 
     public class GridData
     {
+        public GridData(App app)
+        {
+            this.App = app;
+        }
+
+        public readonly App App;
+
         /// <summary>
         /// Returns user modified text. If null, user has not changed text.
         /// </summary>
@@ -411,11 +418,11 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        internal void LoadDatabase(App app, string gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
+        internal void LoadDatabase(string gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
         {
             TypeRowSet(gridName, typeRow);
             Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
-            IQueryable query = rowTable.Query(app, gridName);
+            IQueryable query = rowTable.Query(App, gridName);
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
@@ -427,17 +434,17 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase(App app, string gridName, Type typeRow)
+        public void LoadDatabase(string gridName, Type typeRow)
         {
-            LoadDatabase(app, gridName, null, null, false, typeRow);
+            LoadDatabase(gridName, null, null, false, typeRow);
         }
 
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase<TRow>(App app, string gridName) where TRow : Row
+        public void LoadDatabase<TRow>(string gridName) where TRow : Row
         {
-            LoadDatabase(app, gridName, typeof(TRow));
+            LoadDatabase(gridName, typeof(TRow));
         }
 
         /// <summary>
@@ -486,7 +493,7 @@
         /// <summary>
         /// Reload data from database with current grid filter and current sorting.
         /// </summary>
-        public void LoadDatabase(App app, string gridName)
+        public void LoadDatabase(string gridName)
         {
             if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
@@ -497,7 +504,7 @@
                     Type typeRow = TypeRowGet(gridName);
                     List<Filter> filterList;
                     LoadDatabase(gridName, out filterList);
-                    LoadDatabase(app, gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
+                    LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
                 }
             }
         }
@@ -615,7 +622,7 @@
         /// <summary>
         /// Save data to sql database.
         /// </summary>
-        public void SaveDatabase(App app)
+        public void SaveDatabase()
         {
             foreach (string gridName in rowList.Keys.ToArray())
             {
@@ -634,7 +641,7 @@
                                     try
                                     {
                                         Row rowRefresh = null;
-                                        row.RowNew.Update(app, row.Row, row.RowNew, ref rowRefresh);
+                                        row.RowNew.Update(App, row.Row, row.RowNew, ref rowRefresh);
                                         if (rowRefresh != null)
                                         {
                                             UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
@@ -653,7 +660,7 @@
                                     try
                                     {
                                         Row rowRefresh = null;
-                                        row.RowNew.Insert(app, ref rowRefresh);
+                                        row.RowNew.Insert(App, ref rowRefresh);
                                         if (rowRefresh != null)
                                         {
                                             UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
@@ -678,7 +685,7 @@
         /// <summary>
         /// Parse user modified input text. See also method TextSet(); when parse error occurs method ErrorSet(); is called for the field.
         /// </summary>
-        public void TextParse(App app)
+        public void TextParse()
         {
             foreach (string gridName in rowList.Keys)
             {
@@ -723,7 +730,7 @@
                             {
                                 try
                                 {
-                                    cell.CellTextParse(app, gridName, index, ref text);
+                                    cell.CellTextParse(App, gridName, index, ref text);
                                 }
                                 catch (Exception exception)
                                 {
@@ -743,8 +750,8 @@
                                     object value;
                                     try
                                     {
-                                        cell.CellValueFromText(app, gridName, index, ref text);
-                                        app.CellValueFromText(gridName, index, cell, ref text);
+                                        cell.CellValueFromText(App, gridName, index, ref text);
+                                        App.CellValueFromText(gridName, index, cell, ref text);
                                         value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
                                     }
                                     catch (Exception exception)
@@ -799,15 +806,15 @@
         /// <summary>
         /// Load data from http json request.
         /// </summary>
-        public void LoadJson(AppJson appJson, string gridName, App app)
+        public void LoadJson(string gridName)
         {
-            LoadJsonQuery(appJson);
-            LoadJsonColumn(appJson);
+            LoadJsonQuery(App.AppJson);
+            LoadJsonColumn(App.AppJson);
             //
-            GridDataJson gridDataJson = appJson.GridDataJson;
+            GridDataJson gridDataJson = App.AppJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[gridName].TypeRow;
-            Type typeRow = UtilDataAccessLayer.TypeRowFromName(typeRowString, UtilApplication.TypeRowInAssembly(app));
+            Type typeRow = UtilDataAccessLayer.TypeRowFromName(typeRowString, UtilApplication.TypeRowInAssembly(App));
             TypeRowSet(gridName, typeRow);
             //
             foreach (GridRow row in gridDataJson.RowList[gridName])
@@ -860,8 +867,8 @@
                     }
                     if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
                     {
-                        cell.CellValueFromText(app, gridName, row.Index, ref text);
-                        app.CellValueFromText(gridName, row.Index, cell, ref text);
+                        cell.CellValueFromText(App, gridName, row.Index, ref text);
+                        App.CellValueFromText(gridName, row.Index, cell, ref text);
                         object value = UtilDataAccessLayer.ValueFromText(text, cell.PropertyInfo.PropertyType);
                         cell.PropertyInfo.SetValue(resultRow, value);
                     }
@@ -872,15 +879,15 @@
         /// <summary>
         /// Load data from GridDataJson to GridData.
         /// </summary>
-        public void LoadJson(AppJson appJson, App app)
+        public void LoadJson()
         {
-            GridDataJson gridDataJson = appJson.GridDataJson;
+            GridDataJson gridDataJson = App.AppJson.GridDataJson;
             //
             if (gridDataJson != null)
             {
                 foreach (string gridName in gridDataJson.GridQueryList.Keys)
                 {
-                    LoadJson(appJson, gridName, app);
+                    LoadJson(gridName);
                 }
             }
         }
@@ -993,12 +1000,12 @@
         /// <summary>
         /// Render cell as Button, Html or FileUpload.
         /// </summary>
-        private void SaveJsonIsButtonHtmlFileUpload(App app, string gridName, string index, Cell cell, GridCell gridCell)
+        private void SaveJsonIsButtonHtmlFileUpload(string gridName, string index, Cell cell, GridCell gridCell)
         {
             gridCell.CellEnum = null;
             //
             bool result = false;
-            cell.CellIsButton(app, gridName, index, ref result);
+            cell.CellIsButton(App, gridName, index, ref result);
             if (result)
             {
                 gridCell.CellEnum = GridCellEnum.Button;
@@ -1006,7 +1013,7 @@
             else
             {
                 result = false;
-                cell.CellIsHtml(app, gridName, index, ref result);
+                cell.CellIsHtml(App, gridName, index, ref result);
                 if (result)
                 {
                     gridCell.CellEnum = GridCellEnum.Html;
@@ -1014,7 +1021,7 @@
                 else
                 {
                     result = false;
-                    cell.CellIsFileUpload(app, gridName, index, ref result);
+                    cell.CellIsFileUpload(App, gridName, index, ref result);
                     if (result)
                     {
                         gridCell.CellEnum = GridCellEnum.FileUpload;
@@ -1026,9 +1033,9 @@
         /// <summary>
         /// Copy data from class GridData to class GridDataJson.
         /// </summary>
-        public void SaveJson(App app)
+        public void SaveJson()
         {
-            AppJson appJson = app.AppJson;
+            AppJson appJson = App.AppJson;
             //
             if (appJson.GridDataJson == null)
             {
@@ -1058,7 +1065,7 @@
                 {
                     gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
                 }
-                gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(app, typeRow, gridName);
+                gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(App, typeRow, gridName);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {
@@ -1095,8 +1102,8 @@
                                 value = cell.PropertyInfo.GetValue(row);
                             }
                             string textJson = UtilDataAccessLayer.ValueToText(value, cell.TypeField);
-                            cell.CellValueToText(app, gridName, index, ref textJson); // Override text.
-                            app.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
+                            cell.CellValueToText(App, gridName, index, ref textJson); // Override text.
+                            App.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
                             GridCellInternal cellInternal = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName].ContainsKey(fieldName))
                             {
@@ -1106,7 +1113,7 @@
                             GridCell gridCellJson = new GridCell() { IsSelect = cellInternal.IsSelect, IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCellJson;
                             //
-                            SaveJsonIsButtonHtmlFileUpload(app, gridName, index, cell, gridCellJson);
+                            SaveJsonIsButtonHtmlFileUpload(gridName, index, cell, gridCellJson);
                             //
                             if (cellInternal.IsOriginal == false)
                             {

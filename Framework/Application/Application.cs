@@ -197,7 +197,7 @@
                 AppJson.RequestCount = requestCount;
                 AppJson.Session = Guid.NewGuid();
                 AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
-                GridData().SaveJson(this); // Initialize AppJson.GridDataJson object.
+                GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
                 Type typePage = TypePageMain();
                 PageShow(AppJson, typePage);
             }
@@ -216,16 +216,19 @@
         private GridData gridData;
 
         /// <summary>
-        /// Returns GridData. It makes sure method GridData.LoadJson(); has been called. It's called only once.
+        /// Gets GridData. It makes sure method GridData.LoadJson(); has been called. It's called only once.
         /// </summary>
-        public GridData GridData()
+        public GridData GridData
         {
-            if (gridData == null)
+            get
             {
-                gridData = new GridData();
-                gridData.LoadJson(AppJson, this);
+                if (gridData == null)
+                {
+                    gridData = new GridData(this);
+                    gridData.LoadJson();
+                }
+                return gridData;
             }
-            return gridData;
         }
 
         private bool isGridDataTextParse;
@@ -238,7 +241,7 @@
             if (isGridDataTextParse == false)
             {
                 isGridDataTextParse = true;
-                GridData().TextParse(this);
+                GridData.TextParse();
             }
         }
         private ProcessList processListPrivate;
