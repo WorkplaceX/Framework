@@ -149,6 +149,14 @@
 
         }
 
+        /// <summary>
+        /// Override this method for example to display an indicator. See also styles.css
+        /// </summary>
+        protected virtual internal void CellCssClass(App app, string gridName, string index, ref string result)
+        {
+
+        }
+
         protected virtual internal void CellIsHtml(App app, string gridName, string index, ref bool result)
         {
 

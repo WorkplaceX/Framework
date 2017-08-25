@@ -372,23 +372,21 @@ export class RemoveSelectorDirective {
   selector: '[GridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <div>
-    <div *ngIf="gridCell().CellEnum==null" style='margin-right:18px'>
+  <div [ngClass]="gridCell().CssClass">
+    <div *ngIf="gridCell().CellEnum==null">
       <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
-    </div>
-    <img *ngIf="gridCell().CellEnum==null" src='ArrowDown.png' style="width:12px;height:12px;top:4px;position:absolute;right:4px;"/>
-
-    <div *ngIf="gridCell().CellEnum==2" style='display: inline-block; width:100%;'>
-      <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis;'></div>
     </div>
 
     <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="buttonClick()">{{ Text }}</button>
+    
+    <div *ngIf="gridCell().CellEnum==2" style='display: inline-block; width:100%;'>
+      <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis;'></div>
+    </div>
 
     <div *ngIf="gridCell().CellEnum==3">
       <button class="btn btn-primary" (click)="clickFileUpload()">{{ Text }}</button>
       <input #inputElement type="file" class="btn btn-primary" (change)="changeFileUpload($event)" style='display:none'/>
     </div>
-
   </div>
   `
 })

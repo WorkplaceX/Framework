@@ -12,7 +12,9 @@
         "favicon.ico",
         "bootstrap.min.css",
         "styles.css",
-        "ArrowDown.png",
+        "IndicatorUp.png",
+        "IndicatorDown.png",
+        "IndicatorEqual.png",
         "Logo.png"
       ],
       "index": "index.html",

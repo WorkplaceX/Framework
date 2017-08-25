@@ -1028,6 +1028,10 @@
                     }
                 }
             }
+            //
+            string resultCssClass = null;
+            cell.CellCssClass(App, gridName, index, ref resultCssClass);
+            gridCell.CssClass = resultCssClass;
         }
 
         /// <summary>

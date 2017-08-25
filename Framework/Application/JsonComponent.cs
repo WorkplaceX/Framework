@@ -160,7 +160,7 @@
     }
 
     /// <summary>
-    /// Json GridField. Independent from data grid. Displays focused cell.
+    /// Json GridField. Hosts GridCell. Can be used independently from data grid for example to displays focused cell.
     /// </summary>
     public class GridField : Component
     {
@@ -295,6 +295,11 @@
         /// Gets or sets CellEnum. Render cell as button, html or file upload button.
         /// </summary>
         public GridCellEnum? CellEnum;
+
+        /// <summary>
+        /// Gets or sets custom html style classes. Used for example to display an indicator.
+        /// </summary>
+        public string CssClass;
     }
 
     /// <summary>

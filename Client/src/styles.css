@@ -63,3 +63,28 @@ img {
 .ErrorCell {
     color: red;
 }
+
+.indicatorUp {
+	padding-right: 18px;
+	margin-right: 4px;
+	background-image: url('/IndicatorUp.png');
+	background-repeat: no-repeat;
+	background-position: right; 
+}
+
+.indicatorDown {
+	padding-right: 18px;
+	margin-right: 4px;
+	background-image: url('/IndicatorDown.png');
+	background-repeat: no-repeat;
+	background-position: right; 
+}
+
+.indicatorEqual {
+	padding-right: 18px;
+	margin-right: 4px;
+	background-image: url('/IndicatorEqual.png');
+	background-repeat: no-repeat;
+	background-position: right; 
+}
+
