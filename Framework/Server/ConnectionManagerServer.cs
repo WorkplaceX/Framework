@@ -25,11 +25,11 @@ namespace Framework.Server
             {
                 if (UtilFramework.FolderNameIsIss == false)
                 {
-                    return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManagerServer.json"; // See also .gitignore
+                    return UtilFramework.FolderName + "Server/ConnectionManagerServer.json"; // See also .gitignore
                 }
                 else
                 {
-                    return UtilFramework.FolderName + "Server/ConnectionManagerServer.json"; // See also .gitignore
+                    return UtilFramework.FolderName + "ConnectionManagerServer.json"; // See also .gitignore
                 }
             }
         }
@@ -41,7 +41,7 @@ namespace Framework.Server
         {
             get
             {
-                return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManagerServer.json.txt"; // See also .gitignore
+                return UtilFramework.FolderName + "Submodule/Framework/Server/ConnectionManagerServer.json.txt";
             }
         }
 
