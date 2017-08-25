@@ -8,7 +8,7 @@ ConnectionString in Settings Environment Variables need to be in quotation marks
 Deployment to Azure goes with Git Url. It needs to be in quotation marks. Example:
 * AzureGitUrl = "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
 
-![alt tag](Doc/EnvironmentVariable.png)
+![TravisCI](../../Doc/TravisEnvironment.png)
 
 ## .travis.yml
 Needs to be copied into application root folder.
