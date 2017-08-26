@@ -56,6 +56,14 @@ img {
     background-position: right;
 }
 
+.indicatorFilter {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('/IndicatorFilter.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
 .y {
     background-color: yellow;
 }

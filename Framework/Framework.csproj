@@ -38,6 +38,18 @@
     <None Update="Server\wwwroot\indexBundle.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Server\wwwroot\IndicatorDown.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Server\wwwroot\IndicatorEqual.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Server\wwwroot\IndicatorFilter.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Server\wwwroot\IndicatorUp.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Server\wwwroot\styles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
