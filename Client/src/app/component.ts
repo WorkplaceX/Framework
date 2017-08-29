@@ -170,7 +170,7 @@ export class ColumnIsVisiblePipe implements PipeTransform {
   template: `
   <div removeSelector>
     <div [ngClass]="json.CssClass" style="white-space: nowrap;">
-      <div gridHeader style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
+      <div gridColumn style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
     <div gridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
@@ -290,22 +290,17 @@ export class GridCell {
   }
 }
 
-/* GridHeader */
+/* GridColumn (Header) */ 
 @Component({
-  selector: '[gridHeader]',
+  selector: '[gridColumn]',
   template: `
-  <div (click)="click()" [ngClass]="{'select-class':json.IsSelect}" style="display:inline-block;"><b>{{ json.Text }}</b></div>
+  <div (click)="click()" style="display:inline-block;" class="gridColumn"><b>{{ json.Text }}</b></div>
   `,
-  styles: [`
-  .select-class {
-    background-color: rgba(255, 255, 0, 0.7);
-  }
-  `],
   host: {
     '[style.width.%]' : "json.WidthPercent",
   }
 })
-export class GridHeader {
+export class GridColumn {
   @Input() json: any; // GridColumn
   dataService: DataService;
 

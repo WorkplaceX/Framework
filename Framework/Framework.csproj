@@ -38,16 +38,16 @@
     <None Update="Server\wwwroot\indexBundle.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Server\wwwroot\IndicatorDown.png">
+    <None Update="Server\wwwroot\GridDown.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Server\wwwroot\IndicatorEqual.png">
+    <None Update="Server\wwwroot\GridEqual.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Server\wwwroot\IndicatorFilter.png">
+    <None Update="Server\wwwroot\GridFilter.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Server\wwwroot\IndicatorUp.png">
+    <None Update="Server\wwwroot\GridUp.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Server\wwwroot\styles.css">
