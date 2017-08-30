@@ -32,7 +32,8 @@ img {
     width: 100%
 }
 
-.gridCell{
+.gridCell {
+    /* See also: file Submodule/Client/src/app/component.ts */
     border-bottom: 1px solid lightgray;
     margin-right: 2px;
 }
