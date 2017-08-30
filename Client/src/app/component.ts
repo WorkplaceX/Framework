@@ -367,7 +367,7 @@ export class RemoveSelectorDirective {
   selector: '[sGridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <div [ngClass]="gridCell().CssClass">
+  <div [ngClass]="gridCell().CssClass" class="gridCell">
     <div *ngIf="gridCell().CellEnum==null">
       <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
     </div>

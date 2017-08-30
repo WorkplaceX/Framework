@@ -34,7 +34,7 @@ img {
 
 .gridCell{
     border-bottom: 1px solid lightgray;
-    border-right: 1px solid lightgray;
+    margin-right: 2px;
 }
 
 .gridUp {
