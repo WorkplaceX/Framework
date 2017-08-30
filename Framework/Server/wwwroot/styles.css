@@ -32,6 +32,11 @@ img {
     width: 100%
 }
 
+.gridCell{
+    border-bottom: 1px solid lightgray;
+    border-right: 1px solid lightgray;
+}
+
 .gridUp {
     padding-right: 18px;
     margin-right: 4px;
@@ -59,7 +64,8 @@ img {
 .gridFilter {
     padding-right: 18px;
     margin-right: 2px;
-    background-image: url('/GridFilter.png'), linear-gradient(to bottom, #808080, #fff);
+    background-image: url('/GridFilter.png'); /* fallback */
+    background-image: url('/GridFilter.png'), linear-gradient(to bottom, #808080, #fff); /* W3C */
     background-repeat: no-repeat;
     background-position: right;
 }

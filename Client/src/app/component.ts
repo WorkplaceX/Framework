@@ -6,9 +6,9 @@ import  * as util from './util';
 
 /* AppComponent */
 @Component({
-  selector: '[app]',
+  selector: '[sapp]', /* Attribute selector "sApp" (lower char because of express engine) */
   template: `
-  <Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></Selector>  
+  <div sSelector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
 `,
   providers: [DataService]  
 })
@@ -53,16 +53,16 @@ export class AppComponent {
 
 /* Selector */
 @Component({
-  selector: 'Selector',
+  selector: '[sSelector]',
   template: `
-  <span div *ngIf="json.Type=='Div' && !json.IsHide" [json]=json></span>
-  <span button *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></span>
-  <Literal *ngIf="json.Type=='Literal' && !json.IsHide" [json]=json></Literal>
-  <Label *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></Label>
-  <span grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></span>
-  <GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></GridKeyboard>
-  <div GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
-  <Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></Page>
+  <span sDiv *ngIf="json.Type=='Div' && !json.IsHide" [json]=json></span>
+  <span sButton *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></span>
+  <div sLiteral *ngIf="json.Type=='Literal' && !json.IsHide" [json]=json></div>
+  <div sLabel *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></div>
+  <div sGrid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
+  <div sGridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></div>
+  <div sGridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
+  <div sPage *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
 `
 })
 export class Selector {
@@ -71,9 +71,9 @@ export class Selector {
 
 /* Page */
 @Component({
-  selector: 'Page',
+  selector: '[sPage]',
   template: `
-  <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
+  <div sSelector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
 `
 })
 export class Page {
@@ -86,10 +86,10 @@ export class Page {
 
 /* Div */
 @Component({
-  selector: '[div]',
+  selector: '[sDiv]',
   template: `
-  <div [ngClass]="json.CssClass" removeSelector>
-    <Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></Selector>
+  <div [ngClass]="json.CssClass" sRemoveSelector>
+    <div sSelector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
   </div>  
 `
 })
@@ -103,9 +103,9 @@ export class Div {
 
 /* Button */
 @Component({
-  selector: '[button]',
+  selector: '[sButton]',
   template: `
-  <button type="text" [ngClass]="json.CssClass" class="btn btn-primary" (click)="click()" removeSelector>{{ json.Text }}</button>
+  <button type="text" [ngClass]="json.CssClass" class="btn btn-primary" (click)="click()" sRemoveSelector>{{ json.Text }}</button>
   `
 })
 export class Button {
@@ -124,7 +124,7 @@ export class Button {
 
 /* Literal */
 @Component({
-  selector: 'Literal',
+  selector: '[sLiteral]',
   template: `<div [innerHtml]="json.TextHtml" #div [ngClass]="json.CssClass"></div>`
 })
 export class Literal {
@@ -145,7 +145,7 @@ export class Literal {
 
 /* Label */
 @Component({
-  selector: 'Label',
+  selector: '[sLabel]',
   template: `{{ json.Text }}`
 })
 export class Label {
@@ -166,13 +166,13 @@ export class ColumnIsVisiblePipe implements PipeTransform {
 
 /* Grid */
 @Component({
-  selector: '[grid]',
+  selector: '[sGrid]',
   template: `
-  <div removeSelector>
+  <div sRemoveSelector>
     <div [ngClass]="json.CssClass" style="white-space: nowrap;">
-      <div gridColumn style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
+      <div sGridColumn style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
-    <div gridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
+    <div sGridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
   `
 })
@@ -191,10 +191,10 @@ export class Grid {
 
 /* GridRow */
 @Component({
-  selector: '[gridRow]',
+  selector: '[sGridRow]',
   template: `
   <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="white-space: nowrap;">
-    <div class="GridCell" [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
+    <div sGridCell [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
     <div *ngIf="json.Error != null" style="white-space: normal;" class="ErrorRow">
       {{ json.Error }}
     </div>
@@ -242,10 +242,10 @@ export class GridRow {
 
 /* GridCell */
 @Component({
-  selector: '.GridCell',
+  selector: '[sGridCell]',
   template: `
   <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
-    <div GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
+    <div sGridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
     <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell" style="white-space: normal;">
       {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E }}
     </div>
@@ -292,7 +292,7 @@ export class GridCell {
 
 /* GridColumn (Header) */ 
 @Component({
-  selector: '[gridColumn]',
+  selector: '[sGridColumn]',
   template: `
   <div (click)="click()" style="display:inline-block;" class="gridColumn"><b>{{ json.Text }}</b></div>
   `,
@@ -316,7 +316,7 @@ export class GridColumn {
 }
 
 @Directive({
-    selector: '[focus]'
+    selector: '[dFocus]'
 })
 export class FocusDirective {
     @Input()
@@ -332,7 +332,7 @@ export class FocusDirective {
 }
 
 @Directive({
-    selector: '[removeSelector]'
+    selector: '[sRemoveSelector]'
 })
 export class RemoveSelectorDirective {
     constructor(private el: ElementRef, private renderer: Renderer2) {
@@ -364,12 +364,12 @@ export class RemoveSelectorDirective {
 
 /* GridField */
 @Component({
-  selector: '[GridField]',
+  selector: '[sGridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
   <div [ngClass]="gridCell().CssClass">
     <div *ngIf="gridCell().CellEnum==null">
-      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (focus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
+      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
     </div>
 
     <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="buttonClick()">{{ Text }}</button>
@@ -512,7 +512,7 @@ export class GridField {
 
 /* GridKeyboard */
 @Component({
-  selector: 'GridKeyboard',
+  selector: '[sGridKeyboard]',
   template: `
   `,
   host: {

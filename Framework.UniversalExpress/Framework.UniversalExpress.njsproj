@@ -33,12 +33,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
-    <Content Include="Doc\Extension.png" />
     <Content Include="README.md" />
     <Content Include="Universal\src\index.html" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Doc\" />
     <Folder Include="Universal\" />
     <Folder Include="Universal\src\" />
   </ItemGroup>

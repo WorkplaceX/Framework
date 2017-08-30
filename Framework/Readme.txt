@@ -1,4 +1,5 @@
 Release
+-ViewEncapsulation.Native
 -Disable file name hashing on client build.
 -Json serialize debug remove.
 -Framework/Server/wwwroot/bootstrap.min.css is not deployed.

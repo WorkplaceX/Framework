@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
 
     /// <summary>
     /// Base class for every database row.
@@ -45,6 +46,74 @@
         {
             return UtilDataAccessLayer.Query(GetType());
         }
+    }
+
+    public class InfoHtmlCss
+    {
+        private List<string> valueList = new List<string>();
+
+        public void Add(string value)
+        {
+            if (!valueList.Contains(value))
+            {
+                valueList.Add(value);
+            }
+        }
+
+        public void Remove(string value)
+        {
+            if (valueList.Contains(value))
+            {
+                valueList.Remove(value);
+            }
+        }
+
+        public string ToHtml()
+        {
+            if (valueList.Count == 0)
+            {
+                return null;
+            }
+            StringBuilder result = new StringBuilder();
+            bool isFirst = false;
+            foreach (var value in valueList)
+            {
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    result.Append(" ");
+                }
+                result.Append(value);
+            }
+            return result.ToString();
+        }
+    }
+
+    public class InfoCell
+    {
+        public bool IsReadOnly;
+
+        public bool IsButton;
+
+        public InfoHtmlCss HtmlCss;
+
+        public bool IsHtml;
+
+        public bool IsFileUpload;
+    }
+
+    public class InfoColumn
+    {
+        public string Text;
+
+        public double WidthPercent;
+
+        public bool IsVisible;
+
+        public bool IsReadOnly;
     }
 
     /// <summary>
