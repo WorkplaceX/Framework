@@ -103,6 +103,8 @@
         public bool IsHtml;
 
         public bool IsFileUpload;
+
+        public string PlaceHolder;
     }
 
     public class InfoColumn

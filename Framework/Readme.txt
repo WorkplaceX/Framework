@@ -1,5 +1,5 @@
 Release
--ViewEncapsulation.Native
+-ViewEncapsulation.Native (https://stackoverflow.com/questions/39452729/angular2-setting-view-encapsulation-globally)
 -Disable file name hashing on client build.
 -Json serialize debug remove.
 -Framework/Server/wwwroot/bootstrap.min.css is not deployed.
