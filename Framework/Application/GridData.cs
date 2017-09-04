@@ -895,11 +895,9 @@
         /// <summary>
         /// Returns row's columns.
         /// </summary>
-        private static List<GridColumn> TypeRowToGridColumn(App app, Type typeRow, string gridName)
+        private static List<GridColumn> TypeRowToGridColumn(App app, string gridName, Type typeRow, Info info)
         {
             var result = new List<GridColumn>();
-            //
-            List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(typeRow);
             //
             var columnList = UtilDataAccessLayer.ColumnList(typeRow);
             double widthPercentTotal = 0;
@@ -908,14 +906,7 @@
             List<Cell> columnIsVisibleList = new List<Cell>();
             foreach (Cell column in columnList)
             {
-                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(column.FieldNameSql) == false;
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.FieldNameSql == column.FieldNameSql && item.FieldNameCSharp == column.FieldNameCSharp).FirstOrDefault();
-                if (configColumn != null && configColumn.IsVisible != null)
-                {
-                    isVisible = configColumn.IsVisible.Value;
-                }
-                app.ColumnIsVisible(gridName, column, ref isVisible);
-                column.ColumnIsVisible(ref isVisible);
+                bool isVisible = info.ColumnGet(app, gridName, typeRow, column).IsVisible;
                 if (isVisible)
                 {
                     columnIsVisibleList.Add(column);
@@ -926,12 +917,7 @@
             foreach (Cell column in columnList)
             {
                 // Text
-                string text = column.FieldNameSql;
-                if (text == null)
-                {
-                    text = column.FieldNameCSharp; // Calculated column has no FieldNameSql.
-                }
-                column.ColumnText(ref text);
+                string text = info.ColumnGet(app, gridName, typeRow, column).Text;
                 //
                 bool isVisible = columnIsVisibleList.Contains(column);
                 if (isVisible)
@@ -958,7 +944,7 @@
                 }
                 else
                 {
-                    result.Add(new GridColumn() { FieldName = column.FieldNameCSharp, Text = text, IsVisible = false });
+                    result.Add(new GridColumn() { FieldName = column.FieldNameCSharp, Text = null, IsVisible = false });
                 }
             }
             return result;
@@ -1000,7 +986,7 @@
         /// <summary>
         /// Render cell as Button, Html or FileUpload.
         /// </summary>
-        private void SaveJsonIsButtonHtmlFileUpload(string gridName, string index, Cell cell, GridCell gridCell)
+        private void SaveJsonIsButtonHtmlFileUpload(string gridName, Type typeRow, string index, Cell cell, GridCell gridCell, Info info)
         {
             gridCell.CellEnum = null;
             //
@@ -1029,8 +1015,7 @@
                 }
             }
             //
-            string resultCssClass = null;
-            cell.CellCssClass(App, gridName, index, ref resultCssClass);
+            string resultCssClass = info.CellGet(App, gridName, typeRow, cell).Css.ToHtml();
             gridCell.CssClass = resultCssClass;
         }
 
@@ -1057,6 +1042,10 @@
             foreach (string gridName in rowList.Keys)
             {
                 Type typeRow = TypeRowGet(gridName);
+                //
+                Info info = new Info(App);
+                info.ColumnInit(App, gridName, typeRow);
+                //
                 gridDataJson.GridQueryList[gridName] = new GridQuery() { GridName = gridName, TypeRow = UtilDataAccessLayer.TypeRowToName(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
@@ -1069,7 +1058,7 @@
                 {
                     gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
                 }
-                gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(App, typeRow, gridName);
+                gridDataJson.ColumnList[gridName] = TypeRowToGridColumn(App, gridName, typeRow, info);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {
@@ -1086,6 +1075,7 @@
                     {
                         row = gridRow.RowNew;
                     }
+                    info.CellInit(App, gridName, typeRow, row, index);
                     string errorRow = ErrorRowGet(gridName, index);
                     GridRow gridRowJson = new GridRow() { Index = index, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
                     gridDataJson.RowList[gridName].Add(gridRowJson);
@@ -1117,7 +1107,7 @@
                             GridCell gridCellJson = new GridCell() { IsSelect = cellInternal.IsSelect, IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index] = gridCellJson;
                             //
-                            SaveJsonIsButtonHtmlFileUpload(gridName, index, cell, gridCellJson);
+                            SaveJsonIsButtonHtmlFileUpload(gridName, typeRow, index, cell, gridCellJson, info);
                             //
                             if (cellInternal.IsOriginal == false)
                             {

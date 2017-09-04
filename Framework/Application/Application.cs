@@ -167,6 +167,30 @@
         public AppJson AppJson { get; private set; }
 
         /// <summary>
+        /// Define for example grid column header globaly. See also method Cell.InfoColumn();
+        /// </summary>
+        protected virtual internal void InfoColumn(string gridName, Type typeRow, InfoColumn result)
+        {
+
+        }
+
+        /// <summary>
+        /// Define for example grid column header globaly. See also method Cell.InfoCell();
+        /// </summary>
+        protected virtual internal void InfoCell(string gridName, string index, Cell cell, InfoCell result)
+        {
+            switch (UtilApplication.IndexEnumFromText(index))
+            {
+                case IndexEnum.Filter:
+                    result.Css.Add("gridFilter");
+                    break;
+                case IndexEnum.New:
+                    result.Css.Add("gridNew");
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Called after method UtilDataAccessLayer.ValueToText();
         /// </summary>
         protected virtual internal void CellValueToText(string gridName, string index, Cell cell, ref string result)

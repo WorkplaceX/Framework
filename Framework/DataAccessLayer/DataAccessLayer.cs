@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Text;
 
     /// <summary>
     /// Base class for every database row.
@@ -46,76 +45,6 @@
         {
             return UtilDataAccessLayer.Query(GetType());
         }
-    }
-
-    public class InfoHtmlCss
-    {
-        private List<string> valueList = new List<string>();
-
-        public void Add(string value)
-        {
-            if (!valueList.Contains(value))
-            {
-                valueList.Add(value);
-            }
-        }
-
-        public void Remove(string value)
-        {
-            if (valueList.Contains(value))
-            {
-                valueList.Remove(value);
-            }
-        }
-
-        public string ToHtml()
-        {
-            if (valueList.Count == 0)
-            {
-                return null;
-            }
-            StringBuilder result = new StringBuilder();
-            bool isFirst = false;
-            foreach (var value in valueList)
-            {
-                if (isFirst)
-                {
-                    isFirst = false;
-                }
-                else
-                {
-                    result.Append(" ");
-                }
-                result.Append(value);
-            }
-            return result.ToString();
-        }
-    }
-
-    public class InfoCell
-    {
-        public bool IsReadOnly;
-
-        public bool IsButton;
-
-        public InfoHtmlCss HtmlCss;
-
-        public bool IsHtml;
-
-        public bool IsFileUpload;
-
-        public string PlaceHolder;
-    }
-
-    public class InfoColumn
-    {
-        public string Text;
-
-        public double WidthPercent;
-
-        public bool IsVisible;
-
-        public bool IsReadOnly;
     }
 
     /// <summary>
@@ -178,12 +107,12 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void CellIsReadOnly(ref bool result)
+        protected virtual internal void InfoColumn(App app, string gridName, Type typeRow, InfoColumn result)
         {
 
         }
 
-        protected virtual internal void ColumnText(ref string result)
+        protected virtual internal void InfoCell(App app, string gridName, string index, InfoCell result)
         {
 
         }
@@ -220,14 +149,6 @@
 
         }
 
-        /// <summary>
-        /// Override this method for example to display an indicator. See also styles.css
-        /// </summary>
-        protected virtual internal void CellCssClass(App app, string gridName, string index, ref string result)
-        {
-
-        }
-
         protected virtual internal void CellIsHtml(App app, string gridName, string index, ref bool result)
         {
 
@@ -258,16 +179,6 @@
 
         }
 
-        protected virtual internal void ColumnIsVisible(ref bool result)
-        {
-
-        }
-
-        protected virtual internal void ColumnIsReadOnly(ref bool result)
-        {
-
-        }
-
         protected virtual internal void CellProcessButtonIsClick(App app, string gridName, string index, string fieldName)
         {
 
@@ -280,7 +191,10 @@
         {
             get
             {
-                UtilFramework.Assert(Row != null, "Column mode!");
+                if (Row == null) // Column mode!
+                {
+                    return null;
+                }
                 return PropertyInfo.GetValue(Row);
             }
             set

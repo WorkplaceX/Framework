@@ -68,16 +68,12 @@
                     {
                         if (gridQuery.IsOrderByDesc)
                         {
-                            gridColumn.Text = "▼" + " " + gridColumn.FieldName;
+                            gridColumn.Text = "▼" + gridColumn.Text;
                         }
                         else
                         {
-                            gridColumn.Text = "▲" + " " + gridColumn.FieldName;
+                            gridColumn.Text = "▲" + gridColumn.Text;
                         }
-                    }
-                    else
-                    {
-                        gridColumn.Text = gridColumn.FieldName;
                     }
                 }
             }
