@@ -282,6 +282,9 @@
         /// </summary>
         public string E;
 
+        /// <summary>
+        /// Gets or sets IsSelect.
+        /// </summary>
         public bool IsSelect;
 
         public bool IsClick;
@@ -300,6 +303,11 @@
         /// Gets or sets custom html style classes. Used for example to display an indicator.
         /// </summary>
         public string CssClass;
+
+        /// <summary>
+        /// Gets or sets PlaceHolder. Text shown in field, if no entry.
+        /// </summary>
+        public string PlaceHolder;
     }
 
     /// <summary>

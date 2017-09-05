@@ -6,7 +6,6 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Framework.Component;
-    using Database.dbo;
 
     internal class GridRowInternal
     {
@@ -75,6 +74,8 @@
         public string TextOriginal;
 
         public bool IsClick;
+
+        public string PlaceHolder;
     }
 
     internal class GridColumnInternal
@@ -96,21 +97,7 @@
             this.App = app;
         }
 
-        public readonly App App;
-
-        /// <summary>
-        /// Returns user modified text. If null, user has not changed text.
-        /// </summary>
-        internal string CellText(string gridName, string index, string fieldName)
-        {
-            string result = null;
-            GridCellInternal cell = CellGet(gridName, index, fieldName);
-            if (cell != null)
-            {
-                return cell.Text;
-            }
-            return result;
-        }
+        internal readonly App App;
 
         /// <summary>
         /// Returns list of loaded GridName.
@@ -240,6 +227,12 @@
         /// </summary>
         private Dictionary<string, Dictionary<string, GridRowInternal>> rowList = new Dictionary<string, Dictionary<string, GridRowInternal>>();
 
+        private string focusGridName;
+
+        private string focusIndex;
+
+        private string focusFieldName;
+
         private GridRowInternal RowGet(string gridName, string index)
         {
             GridRowInternal result = null;
@@ -267,7 +260,7 @@
         /// </summary>
         private Dictionary<string, Dictionary<string, Dictionary<string, GridCellInternal>>> cellList = new Dictionary<string, Dictionary<string, Dictionary<string, GridCellInternal>>>();
 
-        private GridCellInternal CellGet(string gridName, string index, string fieldName)
+        internal GridCellInternal CellGet(string gridName, string index, string fieldName)
         {
             GridCellInternal result = null;
             if (cellList.ContainsKey(gridName))
@@ -620,9 +613,27 @@
         }
 
         /// <summary>
+        /// Focus last row of data grid.
+        /// </summary>
+        private void SaveDatabaseFocusGridLastIndex(string gridName)
+        {
+            UtilFramework.Assert(focusGridName == gridName);
+            string indexLast = null;
+            foreach (string index in rowList[gridName].Keys)
+            {
+                if (UtilApplication.IndexEnumFromText(index) == IndexEnum.Index)
+                {
+                    indexLast = index;
+                }
+            }
+            UtilFramework.Assert(indexLast != null);
+            focusIndex = indexLast;
+        }
+
+        /// <summary>
         /// Save data to sql database.
         /// </summary>
-        public void SaveDatabase()
+        internal void SaveDatabase()
         {
             foreach (string gridName in rowList.Keys.ToArray())
             {
@@ -669,6 +680,7 @@
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
                                         RowNewAdd(gridName); // Make "New" to "Index" and add "New"
+                                        SaveDatabaseFocusGridLastIndex(gridName);
                                     }
                                     catch (Exception exception)
                                     {
@@ -841,6 +853,7 @@
                     CellGet(gridName, row.Index, fieldName).IsSelect = gridDataJson.CellList[gridName][fieldName][row.Index].IsSelect;
                     CellGet(gridName, row.Index, fieldName).IsClick = gridDataJson.CellList[gridName][fieldName][row.Index].IsClick;
                     CellGet(gridName, row.Index, fieldName).IsModify = gridDataJson.CellList[gridName][fieldName][row.Index].IsModify;
+                    CellGet(gridName, row.Index, fieldName).PlaceHolder = gridDataJson.CellList[gridName][fieldName][row.Index].PlaceHolder;
                     string text;
                     if (gridDataJson.CellList[gridName][cell.FieldNameCSharp][row.Index].IsO)
                     {
@@ -889,6 +902,10 @@
                 {
                     LoadJson(gridName);
                 }
+                //
+                focusGridName = gridDataJson.FocusGridName;
+                focusIndex = gridDataJson.FocusIndex;
+                focusFieldName = gridDataJson.FocusFieldName;
             }
         }
 
@@ -981,6 +998,13 @@
                 gridQueryJson.FieldNameOrderBy = gridQuery.FieldNameOrderBy;
                 gridQueryJson.IsOrderByDesc = gridQuery.IsOrderByDesc;
             }
+        }
+
+        private void SaveJsonFocus(AppJson appJson)
+        {
+            appJson.GridDataJson.FocusGridName = focusGridName;
+            appJson.GridDataJson.FocusIndex = focusIndex;
+            appJson.GridDataJson.FocusFieldName = focusFieldName;
         }
 
         /// <summary>
@@ -1119,6 +1143,7 @@
                                 gridCellJson.T = cellInternal.Text; // Never overwrite user entered text.
                                 gridCellJson.IsO = true;
                             }
+                            gridCellJson.PlaceHolder = info.CellGet(App, gridName, typeRow, cell).PlaceHolder;
                         }
                     }
                 }
@@ -1133,6 +1158,7 @@
             }
             SaveJsonColumn(appJson);
             SaveJsonQuery(appJson);
+            SaveJsonFocus(appJson);
         }
     }
 }

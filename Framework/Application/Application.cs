@@ -171,7 +171,7 @@
         /// </summary>
         protected virtual internal void InfoColumn(string gridName, Type typeRow, InfoColumn result)
         {
-
+            
         }
 
         /// <summary>
@@ -182,9 +182,11 @@
             switch (UtilApplication.IndexEnumFromText(index))
             {
                 case IndexEnum.Filter:
+                    result.PlaceHolder = "Search";
                     result.Css.Add("gridFilter");
                     break;
                 case IndexEnum.New:
+                    result.PlaceHolder = "New";
                     result.Css.Add("gridNew");
                     break;
             }

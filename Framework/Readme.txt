@@ -1,8 +1,8 @@
 Release
 -ViewEncapsulation.Native (https://stackoverflow.com/questions/39452729/angular2-setting-view-encapsulation-globally)
 -Disable file name hashing on client build.
--Json serialize debug remove.
--Framework/Server/wwwroot/bootstrap.min.css is not deployed.
+-Json serialize debug remove. [Done]
+-Framework/Server/wwwroot/bootstrap.min.css is not deployed. [Done]
 -Overwrite component and create new ones.
 -Remove field TypeCSharp, method Component.TypeSet(); --> No, support derive from Component. [Done]
 

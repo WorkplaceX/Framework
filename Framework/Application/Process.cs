@@ -13,6 +13,7 @@
 
         }
     }
+
     public class ProcessList : IEnumerable<Process>
     {
         internal ProcessList(App app)

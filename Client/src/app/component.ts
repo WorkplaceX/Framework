@@ -369,7 +369,7 @@ export class RemoveSelectorDirective {
   template: `
   <div [ngClass]="gridCell().CssClass" class="gridCell">
     <div *ngIf="gridCell().CellEnum==null">
-      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="Empty" />
+      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
 
     <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="buttonClick()">{{ Text }}</button>

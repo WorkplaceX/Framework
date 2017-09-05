@@ -280,16 +280,40 @@
         }
 
         /// <summary>
+        /// Compares values of two rows.
+        /// </summary>
+        /// <returns>Returns true, if rows are equal.</returns>
+        private static bool IsRowEqual(Row rowA, Row rowB)
+        {
+            bool result = true;
+            var columnList = UtilDataAccessLayer.ColumnList(rowA.GetType());
+            foreach (var column in columnList)
+            {
+                object valueA = column.PropertyInfo.GetValue(rowA);
+                object valueB = column.PropertyInfo.GetValue(rowB);
+                if (!object.Equals(valueA, valueB))
+                {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Update data record on database.
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
-            row = UtilDataAccessLayer.RowClone(row); // Prevent modifications on SetValues(rowNew);
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
-            DbContext dbContext = DbContext(row.GetType());
-            var tracking = dbContext.Attach(row);
-            tracking.CurrentValues.SetValues(rowNew);
-            UtilFramework.Assert(dbContext.SaveChanges() == 1, "Update failed!");
+            if (!IsRowEqual(row, rowNew)) // Rows are equal for example after user reverted input after error.
+            {
+                row = UtilDataAccessLayer.RowClone(row); // Prevent modifications on SetValues(rowNew);
+                DbContext dbContext = DbContext(row.GetType());
+                var tracking = dbContext.Attach(row);
+                tracking.CurrentValues.SetValues(rowNew);
+                UtilFramework.Assert(dbContext.SaveChanges() == 1, "Update failed!");
+            }
         }
 
         /// <summary>

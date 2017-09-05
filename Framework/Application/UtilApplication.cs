@@ -123,7 +123,7 @@
         public InfoCss Css;
 
         /// <summary>
-        /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row.
+        /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input field.
         /// </summary>
         public string PlaceHolder;
     }
@@ -142,7 +142,7 @@
         private Type TypeRow;
 
         /// <summary>
-        /// (GridName, TypeRow, FieldNameCSharp, Column).
+        /// (FieldNameCSharp, Column).
         /// </summary>
         Dictionary<string, InfoColumn> infoColumnList = new Dictionary<string, InfoColumn>();
 
@@ -201,15 +201,20 @@
                 infoColumn.InfoCell = new InfoCell();
             }
             //
-            foreach (InfoColumn infoColumn in infoColumnList.Values)
+            foreach (string fieldNameCSharp in infoColumnList.Keys)
             {
+                InfoColumn infoColumn = infoColumnList[fieldNameCSharp];
                 Cell cell = infoColumn.ColumnInternal;
                 UtilFramework.Assert(cell.Row == null);
                 try
                 {
                     cell.Constructor(row); // Column to cell;
-                    app.InfoCell(gridName, index, cell, infoColumn.InfoCell);
-                    cell.InfoCell(app, gridName, index, infoColumn.InfoCell);
+                    infoColumn.InfoCell.PlaceHolder = app.GridData.CellGet(gridName, index, fieldNameCSharp).PlaceHolder; // PlaceHolder loaded back from json request.
+                    if (infoColumn.IsVisible)
+                    {
+                        app.InfoCell(gridName, index, cell, infoColumn.InfoCell);
+                        cell.InfoCell(app, gridName, index, infoColumn.InfoCell);
+                    }
                 }
                 finally
                 {
