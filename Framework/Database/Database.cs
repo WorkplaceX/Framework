@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Framework.Application;
 using Framework.DataAccessLayer;
 using System.Linq;
+using Framework.Component;
 
 namespace Database.dbo
 {
@@ -14,9 +15,9 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Download : Cell<FrameworkFileStorage>
     {
-        protected override internal void CellIsHtml(App app, string gridName, string index, ref bool result)
+        protected internal override void InfoCell(App app, string gridName, string index, InfoCell result)
         {
-            result = true;
+            result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
 
         protected override internal void CellValueToText(App app, string gridName, string index, ref string result)
@@ -52,9 +53,9 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage>
     {
-        protected override internal void CellIsFileUpload(App app, string gridName, string index, ref bool result)
+        protected internal override void InfoCell(App app, string gridName, string index, InfoCell result)
         {
-            result = true;
+            result.CellEnum = GridCellEnum.FileUpload;
         }
 
         protected override internal void CellValueToText(App app, string gridName, string index, ref string result)

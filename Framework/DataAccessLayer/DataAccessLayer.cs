@@ -141,24 +141,6 @@
             
         }
 
-        /// <summary>
-        /// Returns true, if data cell is to be rendered as button. Override method CellProcessButtonIsClick(); to process click event.
-        /// </summary>
-        protected virtual internal void CellIsButton(App app, string gridName, string index, ref bool result)
-        {
-
-        }
-
-        protected virtual internal void CellIsHtml(App app, string gridName, string index, ref bool result)
-        {
-
-        }
-
-        protected virtual internal void CellIsFileUpload(App app, string gridName, string index, ref bool result)
-        {
-
-        }
-
         protected virtual internal void ColumnWidthPercent(ref double widthPercent)
         {
 

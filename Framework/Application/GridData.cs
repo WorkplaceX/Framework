@@ -1012,35 +1012,10 @@
         /// </summary>
         private void SaveJsonIsButtonHtmlFileUpload(string gridName, Type typeRow, string index, Cell cell, GridCell gridCell, Info info)
         {
-            gridCell.CellEnum = null;
+            InfoCell infoCell = info.CellGet(App, gridName, typeRow, cell);
             //
-            bool result = false;
-            cell.CellIsButton(App, gridName, index, ref result);
-            if (result)
-            {
-                gridCell.CellEnum = GridCellEnum.Button;
-            }
-            else
-            {
-                result = false;
-                cell.CellIsHtml(App, gridName, index, ref result);
-                if (result)
-                {
-                    gridCell.CellEnum = GridCellEnum.Html;
-                }
-                else
-                {
-                    result = false;
-                    cell.CellIsFileUpload(App, gridName, index, ref result);
-                    if (result)
-                    {
-                        gridCell.CellEnum = GridCellEnum.FileUpload;
-                    }
-                }
-            }
-            //
-            string resultCssClass = info.CellGet(App, gridName, typeRow, cell).Css.ToHtml();
-            gridCell.CssClass = resultCssClass;
+            gridCell.CellEnum = infoCell.CellEnum;
+            gridCell.CssClass = infoCell.Css.ToHtml();
         }
 
         /// <summary>
@@ -1120,6 +1095,11 @@
                                 value = cell.PropertyInfo.GetValue(row);
                             }
                             string textJson = UtilDataAccessLayer.ValueToText(value, cell.TypeField);
+                            InfoCell infoCell = info.CellGet(App, gridName, typeRow, cell);
+                            if (infoCell.CellEnum == GridCellEnum.Button && textJson == null)
+                            {
+                                textJson = "Button"; // Default text for button.
+                            }
                             cell.CellValueToText(App, gridName, index, ref textJson); // Override text.
                             App.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
                             GridCellInternal cellInternal = CellGet(gridName, index, fieldName);
@@ -1143,7 +1123,7 @@
                                 gridCellJson.T = cellInternal.Text; // Never overwrite user entered text.
                                 gridCellJson.IsO = true;
                             }
-                            gridCellJson.PlaceHolder = info.CellGet(App, gridName, typeRow, cell).PlaceHolder;
+                            gridCellJson.PlaceHolder = infoCell.PlaceHolder;
                         }
                     }
                 }

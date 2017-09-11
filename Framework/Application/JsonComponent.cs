@@ -240,19 +240,19 @@
     public enum GridCellEnum
     {
         None = 0,
-        
+
         /// <summary>
-        /// Cell is rendered as button.
+        /// Cell is rendered as button. To set button text, override method CellValueToText();
         /// </summary>
         Button = 1,
 
         /// <summary>
-        /// Cell text is rendered as sanitized html.
+        /// Cell text is rendered as sanitized html. Override method CellValueToText(); to set html.
         /// </summary>
         Html = 2,
 
         /// <summary>
-        /// Cell is rendered as file upload button.
+        /// Cell is rendered as file upload button. Override method CellValueToText(); to set button text.
         /// </summary>
         FileUpload = 3
     }
