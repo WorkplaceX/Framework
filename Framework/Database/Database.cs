@@ -136,9 +136,9 @@ namespace Database.dbo
             rowRefresh = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First();
         }
 
-        protected internal override void MasterDetail(App app, string gridName, Row row, ref bool isReload)
+        protected internal override void MasterDetail(App app, string gridNameMaster, Row rowMaster, ref bool isReload)
         {
-            FrameworkConfigTableView configTable = row as FrameworkConfigTableView;
+            FrameworkConfigTableView configTable = rowMaster as FrameworkConfigTableView;
             if (configTable != null)
             {
                 isReload = true;

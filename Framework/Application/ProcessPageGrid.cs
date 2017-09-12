@@ -193,7 +193,7 @@
 
     public class ProcessGridIsClickMasterDetail : Process
     {
-        private void MasterDetailIsClick(App app, Row row)
+        private void MasterDetailIsClick(App app, string gridNameMaster, Row rowMaster)
         {
             GridData gridData = app.GridData;
             foreach (string gridName in gridData.GridNameList())
@@ -201,7 +201,7 @@
                 Type typeRow = gridData.TypeRow(gridName);
                 Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
                 bool isReload = false;
-                rowTable.MasterDetail(app, gridName, row, ref isReload);
+                rowTable.MasterDetail(app, gridNameMaster, rowMaster, ref isReload);
                 if (isReload)
                 {
                     gridData.LoadDatabase(gridName);
@@ -223,7 +223,7 @@
                         {
                             GridData gridData = app.GridData;
                             var row = gridData.Row(gridName, gridRow.Index);
-                            MasterDetailIsClick(app, row);
+                            MasterDetailIsClick(app, gridName, row);
                             break;
                         }
                     }

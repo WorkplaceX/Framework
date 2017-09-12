@@ -394,6 +394,11 @@
             {
                 return UtilFramework.TypeToObject(type); // For example Int32
             }
+            //
+            if (type == typeof(Guid) || typeUnderlying == typeof(Guid))
+            {
+                return Guid.Parse(text);
+            }
             return Convert.ChangeType(text, type);
         }
 
