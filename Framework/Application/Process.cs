@@ -6,7 +6,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class Process
+    internal class Process
     {
         protected virtual internal void Run(App app)
         {
@@ -14,7 +14,7 @@
         }
     }
 
-    public class ProcessList : IEnumerable<Process>
+    internal class ProcessList : IEnumerable<Process>
     {
         internal ProcessList(App app)
         {
@@ -102,7 +102,7 @@
     /// <summary>
     /// Set Button.IsClick to false.
     /// </summary>
-    public class ProcessButtonIsClickFalse : Process
+    internal class ProcessButtonIsClickFalse : Process
     {
         protected internal override void Run(App app)
         {
@@ -116,7 +116,7 @@
     /// <summary>
     /// Call method Page.ProcessBegin(); at the begin of the process chain.
     /// </summary>
-    public class ProcessPageBegin : Process
+    internal class ProcessPageBegin : Process
     {
         protected internal override void Run(App app)
         {
@@ -130,7 +130,7 @@
     /// <summary>
     /// Call method Page.ProcessEnd(); at the End of the process chain.
     /// </summary>
-    public class ProcessPageEnd : Process
+    internal class ProcessPageEnd : Process
     {
         protected internal override void Run(App app)
         {
@@ -144,7 +144,7 @@
     /// <summary>
     /// Call method Page.ProcessEnd(); at the End of the process chain.
     /// </summary>
-    public class ProcessLayout : Process
+    internal class ProcessLayout : Process
     {
         private void ValidateTwelve(LayoutRow layoutRow)
         {

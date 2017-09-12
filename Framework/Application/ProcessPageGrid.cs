@@ -9,7 +9,7 @@
     /// <summary>
     /// Process OrderBy click.
     /// </summary>
-    public class ProcessGridOrderBy : Process
+    internal class ProcessGridOrderBy : Process
     {
         private void DatabaseLoad(App app, AppJson appJson, string gridName, string fieldNameOrderBy, bool isOrderByDesc)
         {
@@ -52,7 +52,7 @@
     /// <summary>
     /// Set OrderBy up or down arrow.
     /// </summary>
-    public class ProcessGridOrderByText : Process
+    internal class ProcessGridOrderByText : Process
     {
         protected internal override void Run(App app)
         {
@@ -83,7 +83,7 @@
     /// <summary>
     /// Process data grid filter.
     /// </summary>
-    public class ProcessGridFilter : Process
+    internal class ProcessGridFilter : Process
     {
         protected internal override void Run(App app)
         {
@@ -124,7 +124,7 @@
     /// <summary>
     /// Grid row or cell is clicked. Set focus.
     /// </summary>
-    public class ProcessGridIsClick : Process
+    internal class ProcessGridIsClick : Process
     {
         private void ProcessGridSelectRowClear(AppJson appJson, string gridName)
         {
@@ -191,7 +191,7 @@
         }
     }
 
-    public class ProcessGridIsClickMasterDetail : Process
+    internal class ProcessGridIsClickMasterDetail : Process
     {
         private void MasterDetailIsClick(App app, string gridNameMaster, Row rowMaster)
         {
@@ -235,7 +235,7 @@
     /// <summary>
     /// Save GridData back to json.
     /// </summary>
-    public class ProcessGridSaveJson : Process
+    internal class ProcessGridSaveJson : Process
     {
         protected internal override void Run(App app)
         {
@@ -246,7 +246,7 @@
     /// <summary>
     /// Set row and cell IsClick to false
     /// </summary>
-    public class ProcessGridIsClickFalse : Process
+    internal class ProcessGridIsClickFalse : Process
     {
         protected internal override void Run(App app)
         {
@@ -271,7 +271,7 @@
         }
     }
 
-    public class ProcessGridCellIsModifyFalse : Process
+    internal class ProcessGridCellIsModifyFalse : Process
     {
         protected internal override void Run(App app)
         {
@@ -294,7 +294,7 @@
         }
     }
 
-    public class ProcessGridLookUpIsClick : Process
+    internal class ProcessGridLookUpIsClick : Process
     {
         protected internal override void Run(App app)
         {
@@ -339,7 +339,7 @@
     /// <summary>
     /// Open LookUp grid.
     /// </summary>
-    public class ProcessGridLookUp : Process
+    internal class ProcessGridLookUp : Process
     {
         protected internal override void Run(App app)
         {
@@ -381,7 +381,7 @@
     /// <summary>
     /// Set focus to null, if cell does not exist anymore.
     /// </summary>
-    public class ProcessGridFocusNull : Process
+    internal class ProcessGridFocusNull : Process
     {
         protected internal override void Run(App app)
         {
@@ -409,7 +409,7 @@
         }
     }
 
-    public class ProcessGridSave : Process
+    internal class ProcessGridSave : Process
     {
         protected internal override void Run(App app)
         {
@@ -443,7 +443,7 @@
     /// <summary>
     /// Cell rendered as button is clicked.
     /// </summary>
-    public class ProcessGridCellButtonIsClick : Process
+    internal class ProcessGridCellButtonIsClick : Process
     {
         protected internal override void Run(App app)
         {

@@ -287,7 +287,7 @@
         /// <summary>
         /// Override this method to register new process.
         /// </summary>
-        protected virtual void ProcessInit(ProcessList processList)
+        internal virtual void ProcessInit(ProcessList processList)
         {
             processList.Add<ProcessPageBegin>();
             // Grid
