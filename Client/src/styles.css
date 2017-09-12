@@ -32,6 +32,73 @@ img {
     width: 100%
 }
 
+.gridCell {
+    /* See also: file Submodule/Client/src/app/component.ts */
+    border-bottom: 1px solid lightgray;
+    margin-right: 2px;
+}
+
+.gridUp {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('/GridUp.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridDown {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('/GridDown.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridEqual {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('/GridEqual.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridSave {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('http://localhost:49323/GridSave.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridFilter {
+    padding-right: 18px;
+    margin-right: 2px;
+    background-image: url('/GridFilter.png'); /* fallback */
+    background-image: url('/GridFilter.png'), linear-gradient(to bottom, #808080, #fff); /* W3C */
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridNew {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('/GridNew.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridColumn {
+    right: 10px;
+    background-color: #5858FA;
+    border-right: solid 2px;
+    cursor: pointer;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: white;
+    width: 100%;
+    background: linear-gradient(to bottom, #5858FA, #81BEF7);
+}
+
 .y {
     background-color: yellow;
 }
@@ -63,28 +130,3 @@ img {
 .ErrorCell {
     color: red;
 }
-
-.indicatorUp {
-	padding-right: 18px;
-	margin-right: 4px;
-	background-image: url('/IndicatorUp.png');
-	background-repeat: no-repeat;
-	background-position: right; 
-}
-
-.indicatorDown {
-	padding-right: 18px;
-	margin-right: 4px;
-	background-image: url('/IndicatorDown.png');
-	background-repeat: no-repeat;
-	background-position: right; 
-}
-
-.indicatorEqual {
-	padding-right: 18px;
-	margin-right: 4px;
-	background-image: url('/IndicatorEqual.png');
-	background-repeat: no-repeat;
-	background-position: right; 
-}
-

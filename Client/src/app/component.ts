@@ -456,6 +456,10 @@ export class GridField {
     }
     gridCell.T = textNew;
     gridCell.IsModify = true;
+    // GridSave icon.
+    if (gridCell.CssClass == null || gridCell.CssClass.indexOf('gridSave') == -1) {
+      gridCell.CssClass += " gridSave";
+    }
   }
 
   onChange() {
