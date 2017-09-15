@@ -161,7 +161,10 @@
 
         }
 
-        protected virtual internal void CellProcessButtonIsClick(App app, string gridName, string index, string fieldName)
+        /// <summary>
+        /// Override this method to handle button click event. For example delete button.
+        /// </summary>
+        protected virtual internal void CellButtonIsClick(App app, string gridName, string index, Row row, string fieldName, ref bool isReload)
         {
 
         }

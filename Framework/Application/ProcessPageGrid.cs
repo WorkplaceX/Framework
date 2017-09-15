@@ -474,7 +474,21 @@
             {
                 Row row = app.GridData.Row(gridNameClick, indexClick);
                 Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
-                cell.CellProcessButtonIsClick(app, gridNameClick, indexClick, fieldNameClick);
+                bool isReload = false;
+                bool isException = false;
+                try
+                {
+                    cell.CellButtonIsClick(app, gridNameClick, indexClick, row, fieldNameClick, ref isReload);
+                }
+                catch (Exception exception)
+                {
+                    isException = true;
+                    app.GridData.ErrorRowSet(gridNameClick, indexClick, UtilFramework.ExceptionToText(exception));
+                }
+                if (isReload && isException == false)
+                {
+                    app.GridData.LoadDatabaseReload(gridNameClick);
+                }
             }
         }
     }

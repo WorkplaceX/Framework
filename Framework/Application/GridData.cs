@@ -300,7 +300,7 @@
         /// <summary>
         /// Set error on data row.
         /// </summary>
-        private void ErrorRowSet(string gridName, string index, string text)
+        internal void ErrorRowSet(string gridName, string index, string text)
         {
             RowGet(gridName, index).Error = text;
         }

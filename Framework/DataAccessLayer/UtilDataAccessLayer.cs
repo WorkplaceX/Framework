@@ -327,7 +327,7 @@
         }
 
         /// <summary>
-        /// Delete data record.
+        /// Delete data record from database.
         /// </summary>
         public static void Delete(Row row)
         {
