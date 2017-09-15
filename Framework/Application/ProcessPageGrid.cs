@@ -115,7 +115,7 @@
             {
                 app.GridDataTextParse();
                 GridData gridData = app.GridData;
-                gridData.LoadDatabase(gridName);
+                gridData.LoadDatabaseReload(gridName);
                 gridData.SaveJson();
             }
         }
@@ -204,7 +204,7 @@
                 rowTable.MasterDetail(app, gridNameMaster, rowMaster, ref isReload);
                 if (isReload)
                 {
-                    gridData.LoadDatabase(gridName);
+                    gridData.LoadDatabaseReload(gridName);
                 }
             }
         }

@@ -101,7 +101,7 @@ export class Div {
   }
 }
 
-/* Button */
+/* Button */ // See also GridField for button in grid.
 @Component({
   selector: '[sButton]',
   template: `
@@ -286,7 +286,7 @@ export class GridCell {
     this.jsonGridDataJson.CellList[this.jsonGrid.GridName][this.json.FieldName][this.jsonRow.Index].IsClick = true;
     this.jsonRow.IsClick = true;
     this.dataService.update();
-    event.stopPropagation();
+    event.stopPropagation(); // Prevent underlying GridRow to fire click event.
   }
 }
 
@@ -372,7 +372,7 @@ export class RemoveSelectorDirective {
       <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
 
-    <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="buttonClick()">{{ Text }}</button>
+    <button *ngIf="gridCell().CellEnum==1" type="text" class="btn btn-primary" (click)="buttonClick($event)">{{ Text }}</button>
     
     <div *ngIf="gridCell().CellEnum==2" style='display: inline-block; width:100%;'>
       <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis;'></div>
@@ -487,9 +487,10 @@ export class GridField {
     }
   }
 
-  buttonClick() {
+  buttonClick(event: MouseEvent) {
     this.gridCell().IsModify = true;
     this.onChange();
+    event.stopPropagation(); // Prevent underlying GridCell and GridRow to fire click event.
   }
 
   changeFileUpload(e) {

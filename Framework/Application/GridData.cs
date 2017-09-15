@@ -486,7 +486,7 @@
         /// <summary>
         /// Reload data from database with current grid filter and current sorting.
         /// </summary>
-        public void LoadDatabase(string gridName)
+        public void LoadDatabaseReload(string gridName)
         {
             if (!IsErrorRowCell(gridName, UtilApplication.IndexEnumToText(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
