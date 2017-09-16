@@ -15,15 +15,15 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Download : Cell<FrameworkFileStorage>
     {
-        protected internal override void InfoCell(App app, string gridName, string index, InfoCell result)
+        protected internal override void InfoCell(App app, string gridName, Index index, InfoCell result)
         {
             result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
 
-        protected override internal void CellValueToText(App app, string gridName, string index, ref string result)
+        protected override internal void CellValueToText(App app, string gridName, Index index, ref string result)
         {
             result = null;
-            if (UtilApplication.IndexEnumFromText(index) == IndexEnum.Index && Row.Name != null)
+            if (index.Enum == IndexEnum.Index && Row.Name != null)
             {
                 string fileNameOnly = Row.Name;
                 if (Row.Name.Contains("/"))
@@ -53,12 +53,12 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage>
     {
-        protected internal override void InfoCell(App app, string gridName, string index, InfoCell result)
+        protected internal override void InfoCell(App app, string gridName, Index index, InfoCell result)
         {
             result.CellEnum = GridCellEnum.FileUpload;
         }
 
-        protected override internal void CellValueToText(App app, string gridName, string index, ref string result)
+        protected override internal void CellValueToText(App app, string gridName, Index index, ref string result)
         {
             result = "File Upload";
         }
@@ -90,7 +90,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellTextParse(App app, string gridName, string index, ref string result)
+        protected internal override void CellTextParse(App app, string gridName, Index index, ref string result)
         {
             string text = result;
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();

@@ -18,6 +18,48 @@
     }
 
     /// <summary>
+    /// Data grid row index.
+    /// </summary>
+    public class Index
+    {
+        public Index(string value)
+        {
+            this.Value = value;
+            this.Enum = UtilApplication.IndexEnumFromText(value);
+        }
+
+        public Index(IndexEnum value)
+        {
+            UtilFramework.Assert(value != IndexEnum.Index);
+            this.Value = UtilApplication.IndexEnumToText(value);
+            this.Enum = value;
+        }
+
+        public readonly string Value;
+
+        public readonly IndexEnum Enum;
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+
+            Index index = obj as Index;
+            if (index != null)
+            {
+                return object.Equals(Value, index.Value);
+            }
+            else
+            {
+                return base.Equals(obj);
+            }
+        }
+    }
+
+    /// <summary>
     /// Html cascading style sheets information.
     /// </summary>
     public class InfoCss
@@ -194,7 +236,7 @@
             }
         }
 
-        internal void CellInit(App app, string gridName, Type typeRow, Row row, string index)
+        internal void CellInit(App app, string gridName, Type typeRow, Row row, Index index)
         {
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
@@ -276,12 +318,12 @@
             return app.GetType();
         }
 
-        public static string IndexEnumToText(IndexEnum indexEnum)
+        internal static string IndexEnumToText(IndexEnum indexEnum)
         {
             return indexEnum.ToString();
         }
 
-        public static IndexEnum IndexEnumFromText(string index)
+        internal static IndexEnum IndexEnumFromText(string index)
         {
             if (IndexEnumToText(IndexEnum.Filter) == index)
             {

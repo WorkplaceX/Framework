@@ -112,7 +112,7 @@
 
         }
 
-        protected virtual internal void InfoCell(App app, string gridName, string index, InfoCell result)
+        protected virtual internal void InfoCell(App app, string gridName, Index index, InfoCell result)
         {
 
         }
@@ -120,7 +120,7 @@
         /// <summary>
         /// Parse user entered text.
         /// </summary>
-        protected virtual internal void CellTextParse(App app, string gridName, string index, ref string result)
+        protected virtual internal void CellTextParse(App app, string gridName, Index index, ref string result)
         {
 
         }
@@ -128,7 +128,7 @@
         /// <summary>
         /// Override for custom formatting like adding units of measurement. Called after method UtilDataAccessLayer.ValueToText();  Inverse function is CellValueFromText.
         /// </summary>
-        protected virtual internal void CellValueToText(App app, string gridName, string index, ref string result)
+        protected virtual internal void CellValueToText(App app, string gridName, Index index, ref string result)
         {
 
         }
@@ -136,7 +136,7 @@
         /// <summary>
         /// Override to parse custom formating like value with units of measurement. Called before user entered text is parsed with method UtilDataAccessLayer.ValueFromText(); Inverse function is CellValueToText.
         /// </summary>
-        protected virtual internal void CellValueFromText(App app, string gridName, string index, ref string result)
+        protected virtual internal void CellValueFromText(App app, string gridName, Index index, ref string result)
         {
             
         }
@@ -164,7 +164,7 @@
         /// <summary>
         /// Override this method to handle button click event. For example delete button.
         /// </summary>
-        protected virtual internal void CellButtonIsClick(App app, string gridName, string index, Row row, string fieldName, ref bool isReload)
+        protected virtual internal void CellButtonIsClick(App app, string gridName, Index index, Row row, string fieldName, ref bool isReload)
         {
 
         }

@@ -177,9 +177,9 @@
         /// <summary>
         /// Define for example grid column header globaly. See also method Cell.InfoCell();
         /// </summary>
-        protected virtual internal void InfoCell(string gridName, string index, Cell cell, InfoCell result)
+        protected virtual internal void InfoCell(string gridName, Index index, Cell cell, InfoCell result)
         {
-            switch (UtilApplication.IndexEnumFromText(index))
+            switch (index.Enum)
             {
                 case IndexEnum.Filter:
                     result.PlaceHolder = "Search";
@@ -195,7 +195,7 @@
         /// <summary>
         /// Called after method UtilDataAccessLayer.ValueToText();
         /// </summary>
-        protected virtual internal void CellValueToText(string gridName, string index, Cell cell, ref string result)
+        protected virtual internal void CellValueToText(string gridName, Index index, Cell cell, ref string result)
         {
 
         }
@@ -203,7 +203,7 @@
         /// <summary>
         /// Called before user entered text is parsed with UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellValueFromText(string gridName, string index, Cell cell, ref string result)
+        protected virtual internal void CellValueFromText(string gridName, Index index, Cell cell, ref string result)
         {
 
         }
