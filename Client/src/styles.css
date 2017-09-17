@@ -32,6 +32,22 @@ img {
     width: 100%
 }
 
+.select-class {
+    box-shadow: 0 0 0 1px blue;
+}
+
+.select-class1 {
+    background-color: rgba(255, 255, 0, 0.5);
+}
+
+.select-class2 {
+    background-color: rgba(255, 255, 0, 0.2);
+}
+
+.select-class3 {
+    background-color: rgba(255, 255, 0, 0.7);
+}
+
 .gridCell {
     /* See also: file Submodule/Client/src/app/component.ts */
     border-bottom: 1px solid lightgray;
@@ -41,7 +57,7 @@ img {
 .gridUp {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridUp.png');
+    background-image: url('http://localhost:49323/GridUp.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -49,7 +65,7 @@ img {
 .gridDown {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridDown.png');
+    background-image: url('http://localhost:49323/GridDown.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -57,7 +73,7 @@ img {
 .gridEqual {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridEqual.png');
+    background-image: url('http://localhost:49323/GridEqual.png');
     background-repeat: no-repeat;
     background-position: right;
 }

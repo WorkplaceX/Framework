@@ -169,8 +169,8 @@ export class ColumnIsVisiblePipe implements PipeTransform {
   selector: '[sGrid]',
   template: `
   <div sRemoveSelector>
-    <div [ngClass]="json.CssClass" style="white-space: nowrap;">
-      <div sGridColumn style="display:inline-block; overflow: hidden;" [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
+    <div>
+      <div sGridColumn [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
     <div sGridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
@@ -193,8 +193,8 @@ export class Grid {
 @Component({
   selector: '[sGridRow]',
   template: `
-  <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="white-space: nowrap;">
-    <div sGridCell [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
+  <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}">
+  <div sGridCell [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
     <div *ngIf="json.Error != null" style="white-space: normal;" class="ErrorRow">
       {{ json.Error }}
     </div>
@@ -242,9 +242,7 @@ export class GridRow {
   `,
   host: {
     '[style.display]' : "'inline-block'",
-    '[style.position]' : "'relative'",
     '[style.width.%]' : "json.WidthPercent",
-    '[style.verticalAlign]' : "'top'"
   }
 })
 //    <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
@@ -278,9 +276,10 @@ export class GridCell {
 @Component({
   selector: '[sGridColumn]',
   template: `
-  <div (click)="click()" style="display:inline-block;" class="gridColumn"><b>{{ json.Text }}</b></div>
+  <div (click)="click()" class="gridColumn"><b>{{ json.Text }}</b></div>
   `,
   host: {
+    '[style.display]' : "'inline-block'",
     '[style.width.%]' : "json.WidthPercent",
   }
 })
