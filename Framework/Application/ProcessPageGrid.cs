@@ -475,7 +475,8 @@
             if (gridNameClick != null)
             {
                 Row row = app.GridData.Row(gridNameClick, new Index(indexClick));
-                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
+                Type typeRow = app.GridData.TypeRow(gridNameClick);
+                Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == fieldNameClick).Single();
                 bool isReload = false;
                 bool isException = false;
                 try

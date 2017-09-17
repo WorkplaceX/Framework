@@ -125,6 +125,9 @@
             return new List<Index>(rowList[gridName].Keys);
         }
 
+        /// <summary>
+        /// Returns TypeRow of loaded data. (Works also if load selected no rows).
+        /// </summary>
         internal Type TypeRow(string gridName)
         {
             return TypeRowGet(gridName);
