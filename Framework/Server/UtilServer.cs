@@ -155,5 +155,16 @@
             }
             return result;
         }
+
+        public static string FileNameIndexUniversal()
+        {
+            string result = FolderNameFrameworkServer() + "wwwroot/" + "indexUniversal.html";
+            string fileNameOverride = FolderNameServer() + "wwwroot/" + "indexUniversal.html";
+            if (File.Exists(fileNameOverride))
+            {
+                return fileNameOverride;
+            }
+            return result;
+        }
     }
 }

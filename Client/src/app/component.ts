@@ -199,18 +199,7 @@ export class Grid {
       {{ json.Error }}
     </div>
   </div>
-  `,
-  styles: [`
-  .select-class1 {
-    background-color: rgba(255, 255, 0, 0.5);
-  }
-  .select-class2 {
-    background-color: rgba(255, 255, 0, 0.2);
-  }
-  .select-class3 {
-    background-color: rgba(255, 255, 0, 0.7);
-  }
-  `]
+  `
 })
 export class GridRow {
   @Input() json: any;
@@ -251,11 +240,6 @@ export class GridRow {
     </div>
   </div>
   `,
-  styles: [`
-  .select-class {
-    border:solid 2px blue;
-  }
-  `],
   host: {
     '[style.display]' : "'inline-block'",
     '[style.position]' : "'relative'",

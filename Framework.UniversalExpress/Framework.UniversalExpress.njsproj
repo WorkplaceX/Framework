@@ -34,7 +34,7 @@
   <ItemGroup>
     <Content Include=".gitignore" />
     <Content Include="README.md" />
-    <Content Include="Universal\src\index.html" />
+    <Content Include="Universal\src\indexUniversal.html" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Universal\" />

@@ -49,7 +49,7 @@
             {
                 AppJson appJsonOut = App.Run(null, Controller.HttpContext);
                 string htmlUniversal = null;
-                string html = UtilServer.FileNameIndex();
+                string html = UtilFramework.FileRead(UtilServer.FileNameIndex());
                 htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
                 return Controller.Content(htmlUniversal, "text/html");
             }
@@ -121,16 +121,13 @@
         /// </summary>
         private async Task<string> HtmlUniversal(string html, AppJson appJson, bool isUniversal, App app)
         {
-            if (isUniversal == false)
+            string result = html;
+            if (isUniversal)
             {
-                return html;
-            }
-            else
-            {
-                string htmlUniversal = null;
                 string url = "http://" + Controller.Request.Host.ToUriComponent() + "/Universal/index.js";
                 appJson.IsBrowser = false; // Server side rendering mode.
                 string jsonText = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
+                string htmlUniversal;
                 // Universal rendering
                 {
                     if (UtilFramework.FolderNameIsIss)
@@ -146,19 +143,28 @@
                     }
                 }
                 //
-                string result = htmlUniversal;
-                appJson.IsBrowser = true; // Client side rendering mode.
-                string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
-                string resultAssert = result;
-                // Add json to index.html (Client/index.html)
-                {
-                    string scriptFind = "var browserJson = '{ }';";
-                    string scriptReplace = "var browserJson = " + jsonTextBrowser + "; ";
-                    result = result.Replace(scriptFind, scriptReplace);
-                }
-                UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");
-                return result;
+                string htmlBegin = "<html><head></head><body>";
+                string htmlEnd = "</body></html>";
+                UtilFramework.Assert(htmlUniversal.StartsWith(htmlBegin));
+                UtilFramework.Assert(htmlUniversal.EndsWith(htmlEnd));
+                result = htmlUniversal.Substring(htmlBegin.Length, htmlUniversal.Length - (htmlBegin.Length + htmlEnd.Length));
+                //
+                UtilFramework.Assert((int)result[0] == 65279); // Special character
+                result = result.Substring(1); // Remove specail character
+                //
+                result = html.Replace("<div sapp></div>", result);
             }
+            appJson.IsBrowser = true; // Client side rendering mode.
+            string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
+            string resultAssert = result;
+            // Add json to index.html (Client/index.html)
+            {
+                string scriptFind = "var browserJson = '{ }';";
+                string scriptReplace = "var browserJson = " + jsonTextBrowser + "; ";
+                result = result.Replace(scriptFind, scriptReplace);
+            }
+            UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");
+            return result;
         }
 
         /// <summary>

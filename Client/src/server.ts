@@ -14,7 +14,7 @@ enableProdMode();
 
 const app = express();
 
-let template = readFileSync(join(__dirname, '..', 'src', 'index.html')).toString();
+let template = readFileSync(join(__dirname, '..', 'src', 'indexUniversal.html')).toString();
 
 app.use(bodyParser.json());
 
@@ -35,11 +35,11 @@ app.set('views', 'src')
 // app.get('*.*', express.static(join(__dirname, '..', 'dist')));
 
 app.get('/Universal/index.js', (req, res) => {
-  res.render('index', { req });
+  res.render('indexUniversal', { req });
 });
 
 app.post('/Universal/index.js', (req, res) => {
-  res.render('index', { req });
+  res.render('indexUniversal', { req });
 });
 
 app.listen(PORT, () => {

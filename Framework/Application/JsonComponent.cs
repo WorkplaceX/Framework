@@ -120,7 +120,7 @@
         /// <summary>
         /// Returns owner of this json component.
         /// </summary>
-        /// <param name="component">Component to start search from to down.</param>
+        /// <param name="component">Component to start search from top to down.</param>
         public Component Owner(Component component)
         {
             Component result = null;
