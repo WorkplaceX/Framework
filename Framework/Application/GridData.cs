@@ -175,7 +175,7 @@
         /// <summary>
         /// Returns selected data row.
         /// </summary>
-        public Row Row(string gridName)
+        public Row RowSelected(string gridName)
         {
             Row result = null;
             if (rowList.ContainsKey(gridName))

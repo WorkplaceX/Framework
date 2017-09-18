@@ -147,7 +147,7 @@ namespace Database.dbo
 
         protected internal override IQueryable Query(App app, string gridName)
         {
-            var configTable = app.GridData.Row("ConfigTable") as FrameworkConfigTableView;
+            var configTable = app.GridData.RowSelected("ConfigTable") as FrameworkConfigTableView;
             if (configTable != null)
             {
                 return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableName == configTable.TableName);
