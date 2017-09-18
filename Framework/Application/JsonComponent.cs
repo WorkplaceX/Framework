@@ -68,6 +68,11 @@
         public bool IsHide;
 
         /// <summary>
+        /// Gets or sets Name. Used when it is necessary to differentiate two instances.
+        /// </summary>
+        public string Name;
+
+        /// <summary>
         /// Gets or sets custom html style classes for this component.
         /// </summary>
         public string Css;
