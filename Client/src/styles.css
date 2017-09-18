@@ -38,26 +38,27 @@ img {
     width: 100%
 }
 
-.select-class {
-    box-shadow: 0 0 3px 1px blue;
+.gridCell {
+    /* See also: file Submodule/Client/src/app/component.ts */
+    border-top: 1px solid rgba(255, 255, 255, 0.0);
+    border-bottom: 1px solid lightgray;
+    margin-right: 2px;
 }
 
 .select-class1 {
-    background-color: rgba(255, 255, 0, 0.5);
+    background-color: rgba(255, 255, 64, 0.4);
 }
 
 .select-class2 {
-    background-color: rgba(255, 255, 0, 0.2);
+    background-color: rgba(255, 255, 64, 0.2);
 }
 
 .select-class3 {
-    background-color: rgba(255, 255, 0, 0.7);
+    background-color: rgba(255, 255, 64, 0.6);
 }
 
-.gridCell {
-    /* See also: file Submodule/Client/src/app/component.ts */
-    border-bottom: 1px solid lightgray;
-    margin-right: 2px;
+.select-class {
+    border: 1px solid rgba(0, 64, 255, 0.7);
 }
 
 .gridUp {

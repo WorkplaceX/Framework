@@ -193,13 +193,15 @@ export class Grid {
 @Component({
   selector: '[data-GridRow]',
   template: `
-  <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}">
-  <div data-GridCell [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
+  <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}" style="overflow: hidden">
+    <div data-GridCell [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy">
+    </div>
+
     <div *ngIf="json.Error != null" class="ErrorRow">
       {{ json.Error }}
     </div>
   </div>
-  `
+  ` // style="overflow: hidden" makes background color visible. See also: https://stackoverflow.com/questions/944663/css-background-color-has-no-effect-on-a-div
 })
 export class GridRow {
   @Input() json: any;
@@ -233,7 +235,7 @@ export class GridRow {
 @Component({
   selector: '[data-GridCell]',
   template: `
-  <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
+  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
     <div>
       <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
     </div>
@@ -353,7 +355,7 @@ export class RemoveSelectorDirective {
   selector: '[data-GridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <div [ngClass]="gridCell().Css" class="gridCell" data-RemoveSelector>
+  <div [ngClass]="gridCell().Css" data-RemoveSelector>
     <div *ngIf="gridCell().CellEnum == null">
       <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
