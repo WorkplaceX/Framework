@@ -6,7 +6,7 @@ import  * as util from './util';
 
 /* AppComponent */
 @Component({
-  selector: '[sapp]', /* Attribute selector "sApp" (lower char because of express engine) */
+  selector: '[data-app]', /* Attribute selector "data-App" (lower char because of express engine) */
   template: `
   <div data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
 `,

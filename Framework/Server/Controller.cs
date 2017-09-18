@@ -152,7 +152,13 @@
                 UtilFramework.Assert((int)result[0] == 65279); // Special character
                 result = result.Substring(1); // Remove specail character
                 //
-                result = html.Replace("<div sapp></div>", result);
+                string htmlFind = "<div data-app=\"\" ng-version=\"4.2.4\">";
+                UtilFramework.Assert(result.StartsWith(htmlFind));
+                result = result.Replace(htmlFind, "<div data-app=\"\" data-ng-version=\"4.2.4\">"); // Prefix data for html5.
+                //
+                htmlFind = "<div data-app></div>";
+                UtilFramework.Assert(html.Contains(htmlFind));
+                result = html.Replace(htmlFind, result);
             }
             appJson.IsBrowser = true; // Client side rendering mode.
             string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
