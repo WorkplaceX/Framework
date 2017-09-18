@@ -1,22 +1,28 @@
 /* Master Styles */
 body {
-    font-size: 1.3rem;
     font-family: 'Open Sans', sans-serif;
+    font-size: 1.3rem;
+    line-height: 2rem;
 }
 
-.form-control {
+input {
+    height: 2rem; /* Input box is bigger than normal text. See also body.line-height. */
     border: 0px;
     background-color: rgba(0, 0, 0, 0);
-    width: 100%
-}
-
-.form-control:focus {
+    width: 100%;
     outline: 0;
 }
 
 .btn {
     background: #b4e2f6;
     border: 0px;
+    padding: 0;
+}
+
+.btn {
+    background: #b4e2f6;
+    border: 0px;
+    padding: 0;
 }
 
 .btn:hover {
@@ -33,7 +39,7 @@ img {
 }
 
 .select-class {
-    box-shadow: 0 0 0 1px blue;
+    box-shadow: 0 0 3px 1px blue;
 }
 
 .select-class1 {

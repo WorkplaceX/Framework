@@ -195,7 +195,7 @@ export class Grid {
   template: `
   <div (click)="click()" (mouseover)="mouseOver()" (mouseout)="mouseOut()" [ngClass]="{'select-class1':json.IsSelect==1, 'select-class2':json.IsSelect==2, 'select-class3':json.IsSelect==3}">
   <div data-GridCell [jsonGrid]=jsonGrid [jsonGridDataJson]=jsonGridDataJson [jsonRow]=json [json]=item *ngFor="let item of jsonGridDataJson.ColumnList[jsonGrid.GridName] | columnIsVisible; trackBy trackBy"></div>
-    <div *ngIf="json.Error != null" style="white-space: normal;" class="ErrorRow">
+    <div *ngIf="json.Error != null" class="ErrorRow">
       {{ json.Error }}
     </div>
   </div>
@@ -235,7 +235,7 @@ export class GridRow {
   template: `
   <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
     <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
-    <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell" style="white-space: normal;">
+    <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell">
       {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E }}
     </div>
   </div>
@@ -243,6 +243,7 @@ export class GridRow {
   host: {
     '[style.display]' : "'inline-block'",
     '[style.width.%]' : "json.WidthPercent",
+    '[style.verticalAlign]' : "'top'" // Prevent when error is shown in cell, text in other cells moves down.
   }
 })
 //    <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
@@ -351,14 +352,14 @@ export class RemoveSelectorDirective {
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
   <div [ngClass]="gridCell().CssClass" class="gridCell">
-    <div *ngIf="gridCell().CellEnum==null">
-      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
+  <div *ngIf="gridCell().CellEnum==null">
+  <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
 
     <button *ngIf="gridCell().CellEnum==1" class="btn btn-primary" (click)="buttonClick($event)">{{ Text }}</button>
     
-    <div *ngIf="gridCell().CellEnum==2" style='display: inline-block; width:100%;'>
-      <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis;'></div>
+    <div *ngIf="gridCell().CellEnum==2">
+      <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis; white-space: nowrap; inline-height:100%'></div>
     </div>
 
     <div *ngIf="gridCell().CellEnum==3">

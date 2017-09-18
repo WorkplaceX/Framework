@@ -1,22 +1,28 @@
 /* Master Styles */
 body {
-    font-size: 1.3rem;
     font-family: 'Open Sans', sans-serif;
+    font-size: 1.3rem;
+    line-height: 2rem;
 }
 
-.form-control {
+input {
+    height: 2rem; /* Input box is bigger than normal text. See also body.line-height. */
     border: 0px;
     background-color: rgba(0, 0, 0, 0);
-    width: 100%
-}
-
-.form-control:focus {
+    width: 100%;
     outline: 0;
 }
 
 .btn {
     background: #b4e2f6;
     border: 0px;
+    padding: 0;
+}
+
+.btn {
+    background: #b4e2f6;
+    border: 0px;
+    padding: 0;
 }
 
 .btn:hover {
@@ -33,7 +39,7 @@ img {
 }
 
 .select-class {
-    box-shadow: 0 0 0 1px blue;
+    box-shadow: 0 0 3px 1px blue;
 }
 
 .select-class1 {
@@ -57,7 +63,7 @@ img {
 .gridUp {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridUp.png');
+    background-image: url('http://localhost:49323/GridUp.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -65,7 +71,7 @@ img {
 .gridDown {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridDown.png');
+    background-image: url('http://localhost:49323/GridDown.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -73,7 +79,7 @@ img {
 .gridEqual {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridEqual.png');
+    background-image: url('http://localhost:49323/GridEqual.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -81,7 +87,7 @@ img {
 .gridSave {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridSave.png');
+    background-image: url('http://localhost:49323/GridSave.png');
     background-repeat: no-repeat;
     background-position: right;
 }
