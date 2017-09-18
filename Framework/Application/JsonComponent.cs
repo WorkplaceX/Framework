@@ -68,14 +68,9 @@
         public bool IsHide;
 
         /// <summary>
-        /// Gets or sets Name. Used when it is necessary to differentiate two instances.
+        /// Gets or sets custom html style classes for this component.
         /// </summary>
-        public string Name;
-
-        /// <summary>
-        /// Gets or sets custom html style classes.
-        /// </summary>
-        public string CssClass;
+        public string Css;
 
         /// <summary>
         /// Gets json list.
@@ -302,7 +297,7 @@
         /// <summary>
         /// Gets or sets custom html style classes. Used for example to display an indicator.
         /// </summary>
-        public string CssClass;
+        public string Css;
 
         /// <summary>
         /// Gets or sets PlaceHolder. Text shown in field, if no entry.

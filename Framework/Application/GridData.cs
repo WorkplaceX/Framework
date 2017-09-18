@@ -1019,7 +1019,7 @@
             InfoCell infoCell = info.CellGet(App, gridName, typeRow, cell);
             //
             gridCell.CellEnum = infoCell.CellEnum;
-            gridCell.CssClass = infoCell.Css.ToHtml();
+            gridCell.Css = infoCell.Css.ToHtml();
         }
 
         /// <summary>

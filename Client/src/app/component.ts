@@ -55,15 +55,15 @@ export class AppComponent {
 @Component({
   selector: '[data-Selector]',
   template: `
-  <span data-Div *ngIf="json.Type=='Div' && !json.IsHide" [json]=json></span>
-  <span data-Button *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></span>
+  <div data-Div *ngIf="json.Type=='Div' && !json.IsHide" [json]=json></div>
+  <div data-Button *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></div>
   <div data-Literal *ngIf="json.Type=='Literal' && !json.IsHide" [json]=json></div>
   <div data-Label *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></div>
   <div data-Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></div>
   <div data-GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
   <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
-`
+  `
 })
 export class Selector {
   @Input() json: any
@@ -73,7 +73,7 @@ export class Selector {
 @Component({
   selector: '[data-Page]',
   template: `
-  <div data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
+  <div [ngClass]="json.Css" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy data-RemoveSelector"></div>
 `
 })
 export class Page {
@@ -88,7 +88,7 @@ export class Page {
 @Component({
   selector: '[data-Div]',
   template: `
-  <div [ngClass]="json.CssClass" data-RemoveSelector>
+  <div [ngClass]="json.Css" data-RemoveSelector>
     <div data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
   </div>  
 `
@@ -105,7 +105,7 @@ export class Div {
 @Component({
   selector: '[data-Button]',
   template: `
-  <button [ngClass]="json.CssClass" class="btn btn-primary" (click)="click()" data-RemoveSelector>{{ json.Text }}</button>
+  <button [ngClass]="json.Css" class="btn btn-primary" (click)="click()" data-RemoveSelector>{{ json.Text }}</button>
   `
 })
 export class Button {
@@ -125,7 +125,7 @@ export class Button {
 /* Literal */
 @Component({
   selector: '[data-Literal]',
-  template: `<div [innerHtml]="json.TextHtml" #div [ngClass]="json.CssClass"></div>`
+  template: `<div [ngClass]="json.Css" *ngIf="json.TextHtml" [innerHtml]="json.TextHtml" #div data-RemoveSelector></div>` // See also: https://stackoverflow.com/questions/45459624/angular-4-universal-this-html-charcodeat-is-not-a-function
 })
 export class Literal {
  
@@ -146,7 +146,7 @@ export class Literal {
 /* Label */
 @Component({
   selector: '[data-Label]',
-  template: `{{ json.Text }}`
+  template: `<div [ngClass]="json.Css" data-RemoveSelector>{{ json.Text }}</div>`
 })
 export class Label {
   @Input() json: any
@@ -168,7 +168,7 @@ export class ColumnIsVisiblePipe implements PipeTransform {
 @Component({
   selector: '[data-Grid]',
   template: `
-  <div data-RemoveSelector>
+  <div [ngClass]="json.Css" data-RemoveSelector>
     <div>
       <div data-GridColumn [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
@@ -234,14 +234,16 @@ export class GridRow {
   selector: '[data-GridCell]',
   template: `
   <div (click)="click($event)" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
-    <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
+    <div>
+      <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
+    </div>
     <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell">
       {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E }}
     </div>
   </div>
   `,
   host: {
-    '[style.display]' : "'inline-block'",
+    '[style.float]' : "'left'",
     '[style.width.%]' : "json.WidthPercent",
     '[style.verticalAlign]' : "'top'" // Prevent when error is shown in cell, text in other cells moves down.
   }
@@ -280,7 +282,7 @@ export class GridCell {
   <div (click)="click()" class="gridColumn"><b>{{ json.Text }}</b></div>
   `,
   host: {
-    '[style.display]' : "'inline-block'",
+    '[style.float]' : "'left'",
     '[style.width.%]' : "json.WidthPercent",
   }
 })
@@ -351,23 +353,23 @@ export class RemoveSelectorDirective {
   selector: '[data-GridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <div [ngClass]="gridCell().CssClass" class="gridCell">
-  <div *ngIf="gridCell().CellEnum==null">
-  <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
+  <div [ngClass]="gridCell().Css" class="gridCell" data-RemoveSelector>
+    <div *ngIf="gridCell().CellEnum == null">
+      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
 
-    <button *ngIf="gridCell().CellEnum==1" class="btn btn-primary" (click)="buttonClick($event)">{{ Text }}</button>
-    
-    <div *ngIf="gridCell().CellEnum==2">
-      <div [innerHtml]=Text style='overflow:hidden; text-overflow: ellipsis; white-space: nowrap; inline-height:100%'></div>
+    <button *ngIf="gridCell().CellEnum == 1" class="btn btn-primary" (click)="buttonClick($event)">{{ Text }}</button>
+  
+    <div *ngIf="gridCell().CellEnum == 2">
+      <div [innerHtml]=TextHtml style='overflow:hidden; text-overflow: ellipsis; white-space: nowrap;'></div>
     </div>
 
-    <div *ngIf="gridCell().CellEnum==3">
+    <div *ngIf="gridCell().CellEnum == 3">
       <button class="btn btn-primary" (click)="clickFileUpload()">{{ Text }}</button>
       <input #inputElement type="file" class="btn btn-primary" (change)="changeFileUpload($event)" style='display:none'/>
     </div>
   </div>
-  `
+`
 })
 export class GridField {
   constructor(dataService: DataService){
@@ -426,6 +428,14 @@ export class GridField {
     return this.gridCell().T;
   }
 
+  get TextHtml(): string {
+    let result: string = this.Text;
+    if (result == null) {
+      result = "&nbsp;"; // Avoids cell without height. And Angular4 render error: See also: https://stackoverflow.com/questions/45459624/angular-4-universal-this-html-charcodeat-is-not-a-function
+    }
+    return result;
+  }
+
   set Text(textNew: string) {
     let gridCell = this.gridCell();
     // Backup old text.
@@ -441,8 +451,8 @@ export class GridField {
     gridCell.T = textNew;
     gridCell.IsModify = true;
     // GridSave icon.
-    if (gridCell.CssClass == null || gridCell.CssClass.indexOf('gridSave') == -1) {
-      gridCell.CssClass += " gridSave";
+    if (gridCell.Css == null || gridCell.Css.indexOf('gridSave') == -1) {
+      gridCell.Css += " gridSave";
     }
   }
 

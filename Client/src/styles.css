@@ -95,8 +95,8 @@ img {
 .gridFilter {
     padding-right: 18px;
     margin-right: 2px;
-    background-image: url('/GridFilter.png'); /* fallback */
-    background-image: url('/GridFilter.png'), linear-gradient(to bottom, #808080, #fff); /* W3C */
+    background-image: url('http://localhost:49323/GridFilter.png'); /* fallback */
+    background-image: url('http://localhost:49323/GridFilter.png'), linear-gradient(to bottom, #808080, #fff); /* W3C */
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -104,7 +104,7 @@ img {
 .gridNew {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('/GridNew.png');
+    background-image: url('http://localhost:49323/GridNew.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -119,6 +119,10 @@ img {
     color: white;
     width: 100%;
     background: linear-gradient(to bottom, #5858FA, #81BEF7);
+}
+
+.floatLeft {
+    float: left;
 }
 
 .y {

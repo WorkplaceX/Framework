@@ -154,13 +154,13 @@
             {
                 isCell = true;
                 string find = "col-sm-";
-                int index = cell.CssClass.IndexOf(find);
+                int index = cell.Css.IndexOf(find);
                 UtilFramework.Assert(index != -1, "Cell width not defined!");
                 string widthString = null;
                 index += find.Length;
-                while (index < cell.CssClass.Length && cell.CssClass[index] >= '0' && cell.CssClass[index] <= '9')
+                while (index < cell.Css.Length && cell.Css[index] >= '0' && cell.Css[index] <= '9')
                 {
-                    widthString += cell.CssClass[index].ToString();
+                    widthString += cell.Css[index].ToString();
                     index += 1;
                 }
                 int width = int.Parse(widthString);
@@ -177,16 +177,16 @@
             foreach (Component component in app.AppJson.ListAll())
             {
                 LayoutContainer layoutContainer = component as LayoutContainer;
-                if (layoutContainer != null && !layoutContainer.CssClass.Contains("container"))
+                if (layoutContainer != null && !layoutContainer.Css.Contains("container"))
                 {
-                    layoutContainer.CssClass = "container " + layoutContainer.CssClass;
+                    layoutContainer.Css = "container " + layoutContainer.Css;
                 }
                 LayoutRow layoutRow = component as LayoutRow;
                 if (layoutRow != null)
                 {
-                    if (layoutRow.CssClass == null || !layoutRow.CssClass.Contains("row"))
+                    if (layoutRow.Css == null || !layoutRow.Css.Contains("row"))
                     {
-                        layoutRow.CssClass = "row " + layoutRow.CssClass;
+                        layoutRow.Css = "row " + layoutRow.Css;
                     }
                     ValidateTwelve(layoutRow);
                 }

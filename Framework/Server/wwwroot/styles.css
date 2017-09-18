@@ -63,7 +63,7 @@ img {
 .gridUp {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('http://localhost:49323/GridUp.png');
+    background-image: url('/GridUp.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -71,7 +71,7 @@ img {
 .gridDown {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('http://localhost:49323/GridDown.png');
+    background-image: url('/GridDown.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -79,7 +79,7 @@ img {
 .gridEqual {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('http://localhost:49323/GridEqual.png');
+    background-image: url('/GridEqual.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -87,7 +87,7 @@ img {
 .gridSave {
     padding-right: 18px;
     margin-right: 4px;
-    background-image: url('http://localhost:49323/GridSave.png');
+    background-image: url('/GridSave.png');
     background-repeat: no-repeat;
     background-position: right;
 }
@@ -119,6 +119,10 @@ img {
     color: white;
     width: 100%;
     background: linear-gradient(to bottom, #5858FA, #81BEF7);
+}
+
+.floatLeft {
+    float: left;
 }
 
 .y {
