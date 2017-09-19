@@ -183,11 +183,11 @@
             {
                 case IndexEnum.Filter:
                     result.PlaceHolder = "Search";
-                    result.Css.Add("gridFilter");
+                    result.CssClass.Add("gridFilter");
                     break;
                 case IndexEnum.New:
                     result.PlaceHolder = "New";
-                    result.Css.Add("gridNew");
+                    result.CssClass.Add("gridNew");
                     break;
             }
         }

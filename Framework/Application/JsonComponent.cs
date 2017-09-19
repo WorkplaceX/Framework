@@ -75,7 +75,7 @@
         /// <summary>
         /// Gets or sets custom html style classes for this component.
         /// </summary>
-        public string Css;
+        public string CssClass;
 
         /// <summary>
         /// Gets json list.
@@ -324,7 +324,7 @@
         /// <summary>
         /// Gets or sets custom html style classes. Used for example to display an indicator.
         /// </summary>
-        public string Css;
+        public string CssClass;
 
         /// <summary>
         /// Gets or sets PlaceHolder. Text shown in field, if no entry.

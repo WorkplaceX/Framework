@@ -62,7 +62,7 @@
     /// <summary>
     /// Html cascading style sheets information.
     /// </summary>
-    public class InfoCss
+    public class InfoCssClass
     {
         private List<string> valueList = new List<string>();
 
@@ -146,7 +146,7 @@
     {
         public InfoCell()
         {
-            this.Css = new InfoCss();
+            this.CssClass = new InfoCssClass();
         }
 
         /// <summary>
@@ -162,7 +162,7 @@
         /// <summary>
         /// Gets or sets InfoCss. Html cascading style sheets information for cell.
         /// </summary>
-        public InfoCss Css;
+        public InfoCssClass CssClass;
 
         /// <summary>
         /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input field.

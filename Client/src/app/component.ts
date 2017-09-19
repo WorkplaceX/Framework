@@ -70,11 +70,11 @@ export class Selector {
   @Input() json: any
 }
 
-/* Div */
+/* GridFieldWithLabel */
 @Component({
   selector: '[data-GridFieldWithLabel]',
   template: `
-  <div [ngClass]="json.Css" data-RemoveSelector>
+  <div [ngClass]="json.CssClass" data-RemoveSelector>
     <div style="overflow: hidden">
       <div class="gridFieldWithLabelLeft">{{json.Text}}</div>
       <div class="gridFieldWithLabelRight">
@@ -98,7 +98,7 @@ export class GridFieldWithLabel {
 @Component({
   selector: '[data-Page]',
   template: `
-  <div [ngClass]="json.Css" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy data-RemoveSelector"></div>
+  <div [ngClass]="json.CssClass" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy data-RemoveSelector"></div>
 `
 })
 export class Page {
@@ -113,7 +113,7 @@ export class Page {
 @Component({
   selector: '[data-Div]',
   template: `
-  <div [ngClass]="json.Css" data-RemoveSelector>
+  <div [ngClass]="json.CssClass" data-RemoveSelector>
     <div data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
   </div>  
 `
@@ -130,7 +130,7 @@ export class Div {
 @Component({
   selector: '[data-Button]',
   template: `
-  <button [ngClass]="json.Css" class="btn btn-primary" (click)="click()" data-RemoveSelector>{{ json.Text }}</button>
+  <button [ngClass]="json.CssClass" class="btn btn-primary" (click)="click()" data-RemoveSelector>{{ json.Text }}</button>
   `
 })
 export class Button {
@@ -150,7 +150,7 @@ export class Button {
 /* Literal */
 @Component({
   selector: '[data-Literal]',
-  template: `<div [ngClass]="json.Css" *ngIf="json.TextHtml" [innerHtml]="json.TextHtml" #div data-RemoveSelector></div>` // See also: https://stackoverflow.com/questions/45459624/angular-4-universal-this-html-charcodeat-is-not-a-function
+  template: `<div [ngClass]="json.CssClass" *ngIf="json.TextHtml" [innerHtml]="json.TextHtml" #div data-RemoveSelector></div>` // See also: https://stackoverflow.com/questions/45459624/angular-4-universal-this-html-charcodeat-is-not-a-function
 })
 export class Literal {
  
@@ -171,7 +171,7 @@ export class Literal {
 /* Label */
 @Component({
   selector: '[data-Label]',
-  template: `<div [ngClass]="json.Css" data-RemoveSelector>{{ json.Text }}</div>`
+  template: `<div [ngClass]="json.CssClass" data-RemoveSelector>{{ json.Text }}</div>`
 })
 export class Label {
   @Input() json: any
@@ -193,7 +193,7 @@ export class ColumnIsVisiblePipe implements PipeTransform {
 @Component({
   selector: '[data-Grid]',
   template: `
-  <div [ngClass]="json.Css" data-RemoveSelector>
+  <div [ngClass]="json.CssClass" data-RemoveSelector>
     <div style="overflow: hidden">
       <div data-GridColumn [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
@@ -380,7 +380,7 @@ export class RemoveSelectorDirective {
   selector: '[data-GridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <div [ngClass]="gridCell().Css" data-RemoveSelector>
+  <div [ngClass]="gridCell().CssClass" data-RemoveSelector>
     <div *ngIf="gridCell().CellEnum == null">
       <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusIndex==index && dataService.json.GridDataJson.FocusFieldName == fieldName" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
@@ -478,8 +478,8 @@ export class GridField {
     gridCell.T = textNew;
     gridCell.IsModify = true;
     // GridSave icon.
-    if (gridCell.Css == null || gridCell.Css.indexOf('gridSave') == -1) {
-      gridCell.Css += " gridSave";
+    if (gridCell.CssClass == null || gridCell.CssClass.indexOf('gridSave') == -1) {
+      gridCell.CssClass += " gridSave";
     }
   }
 
