@@ -169,12 +169,12 @@ export class ColumnIsVisiblePipe implements PipeTransform {
   selector: '[data-Grid]',
   template: `
   <div [ngClass]="json.Css" data-RemoveSelector>
-    <div>
+    <div style="overflow: hidden">
       <div data-GridColumn [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
     <div data-GridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
   </div>
-  `
+  ` // Without style="overflow: hidden", filter column disappears.
 })
 export class Grid {
   constructor(dataService: DataService){
@@ -201,7 +201,7 @@ export class Grid {
       {{ json.Error }}
     </div>
   </div>
-  ` // style="overflow: hidden" makes background color visible. See also: https://stackoverflow.com/questions/944663/css-background-color-has-no-effect-on-a-div
+` // style="overflow: hidden" makes background color visible. See also: https://stackoverflow.com/questions/944663/css-background-color-has-no-effect-on-a-div
 })
 export class GridRow {
   @Input() json: any;

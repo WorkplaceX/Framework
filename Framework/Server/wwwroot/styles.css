@@ -95,7 +95,6 @@ img {
 
 .gridFilter {
     padding-right: 18px;
-    margin-right: 2px;
     background-image: url('/GridFilter.png'); /* fallback */
     background-image: url('/GridFilter.png'), linear-gradient(to bottom, #808080, #fff); /* W3C */
     background-repeat: no-repeat;
