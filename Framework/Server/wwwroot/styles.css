@@ -102,14 +102,6 @@ img {
     background-position: right;
 }
 
-.gridSave {
-    padding-right: 18px;
-    margin-right: 4px;
-    background-image: url('/GridSave.png');
-    background-repeat: no-repeat;
-    background-position: right;
-}
-
 .gridFilter {
     padding-right: 18px;
     background-image: url('/GridFilter.png'); /* fallback */
@@ -122,6 +114,14 @@ img {
     padding-right: 18px;
     margin-right: 4px;
     background-image: url('/GridNew.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridSave {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('/GridSave.png');
     background-repeat: no-repeat;
     background-position: right;
 }

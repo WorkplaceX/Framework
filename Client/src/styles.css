@@ -100,14 +100,6 @@ img {
     background-position: right;
 }
 
-.gridSave {
-    padding-right: 18px;
-    margin-right: 4px;
-    background-image: url('http://localhost:49323/GridSave.png');
-    background-repeat: no-repeat;
-    background-position: right;
-}
-
 .gridFilter {
     padding-right: 18px;
     background-image: url('http://localhost:49323/GridFilter.png'); /* fallback */
@@ -120,6 +112,14 @@ img {
     padding-right: 18px;
     margin-right: 4px;
     background-image: url('http://localhost:49323/GridNew.png');
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+.gridSave {
+    padding-right: 18px;
+    margin-right: 4px;
+    background-image: url('http://localhost:49323/GridSave.png');
     background-repeat: no-repeat;
     background-position: right;
 }
