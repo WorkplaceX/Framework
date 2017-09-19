@@ -25,14 +25,14 @@ input {
     padding: 0;
 }
 
-.btn:hover {
-    background: #8ccfed;
-    cursor: pointer;
-}
+    .btn:hover {
+        background: #8ccfed;
+        cursor: pointer;
+    }
 
-.btn:focus {
-    outline: 0;
-}
+    .btn:focus {
+        outline: 0;
+    }
 
 img {
     width: 100%
@@ -43,6 +43,23 @@ img {
     border-top: 1px solid rgba(255, 255, 255, 0.0);
     border-bottom: 1px solid lightgray;
     margin-right: 2px;
+}
+
+.gridFieldWithLabelLeft {
+    width: 33%;
+    float: left;
+}
+
+.gridFieldWithLabelRight {
+    width: 67%;
+    float: left;
+    border-bottom: 1px solid lightgray;
+}
+
+.gridFieldWithLabelGroup {
+    margin-top: 8px;
+    font-weight: bold;
+    border-bottom: 1px solid black;
 }
 
 .select-class1 {

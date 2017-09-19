@@ -63,10 +63,35 @@ export class AppComponent {
   <div data-GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></div>
   <div data-GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
   <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
+  <div data-GridFieldWithLabel *ngIf="json.Type=='GridFieldWithLabel' && !json.IsHide" [json]=json></div>
   `
 })
 export class Selector {
   @Input() json: any
+}
+
+/* Div */
+@Component({
+  selector: '[data-GridFieldWithLabel]',
+  template: `
+  <div [ngClass]="json.Css" data-RemoveSelector>
+    <div style="overflow: hidden">
+      <div class="gridFieldWithLabelLeft">{{json.Text}}</div>
+      <div class="gridFieldWithLabelRight">
+        <div>
+          <div data-GridField [gridName]=json.GridName [fieldName]=json.FieldName></div>
+        </div>
+      </div>
+    </div>
+  </div>  
+`
+})
+export class GridFieldWithLabel {
+  @Input() json: any
+
+  trackBy(index: any, item: any) {
+    return item.Key;
+  }
 }
 
 /* Page */

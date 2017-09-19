@@ -182,6 +182,28 @@
     }
 
     /// <summary>
+    /// Json GridFieldWithLabel. Display Label and GridField horizontally in one component.
+    /// </summary>
+    public class GridFieldWithLabel : Component
+    {
+        public GridFieldWithLabel() { }
+
+        public GridFieldWithLabel(Component owner, string text, string gridName, string fieldName)
+            : base(owner)
+        {
+            this.Text = text;
+            this.GridName = gridName;
+            this.FieldName = fieldName;
+        }
+
+        public string Text;
+
+        public string GridName;
+
+        public string FieldName;
+    }
+
+    /// <summary>
     /// Json GridData. There is also a GridData object.
     /// </summary>
     public class GridDataJson

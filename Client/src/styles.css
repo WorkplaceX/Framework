@@ -45,6 +45,21 @@ img {
     margin-right: 2px;
 }
 
+.gridFieldWithLabelLeft {
+    width: 33%; float: left;
+}
+
+.gridFieldWithLabelRight {
+    width: 67%; float: left;
+    border-bottom: 1px solid lightgray;
+}
+
+.gridFieldWithLabelGroup {
+    margin-top: 8px;
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
 .select-class1 {
     background-color: rgba(255, 255, 64, 0.4);
 }
