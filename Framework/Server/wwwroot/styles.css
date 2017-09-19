@@ -25,14 +25,14 @@ input {
     padding: 0;
 }
 
-    .btn:hover {
-        background: #8ccfed;
-        cursor: pointer;
-    }
+.btn:hover {
+    background: #8ccfed;
+    cursor: pointer;
+}
 
-    .btn:focus {
-        outline: 0;
-    }
+.btn:focus {
+    outline: 0;
+}
 
 img {
     width: 100%
@@ -123,6 +123,14 @@ img {
 
 .floatLeft {
     float: left;
+}
+
+.backgroundColorBlue {
+    background-color: rgba(64, 64, 255, 0.5);
+}
+
+.backgroundColorGreen {
+    background-color: rgba(64, 255, 64, 0.5);
 }
 
 .y {

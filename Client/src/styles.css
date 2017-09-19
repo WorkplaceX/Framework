@@ -125,6 +125,14 @@ img {
     float: left;
 }
 
+.backgroundColorBlue {
+    background-color: rgba(64, 64, 255, 0.5);
+}
+
+.backgroundColorGreen {
+    background-color: rgba(64, 255, 64, 0.5);
+}
+
 .y {
     background-color: yellow;
 }
