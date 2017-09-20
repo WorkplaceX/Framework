@@ -446,7 +446,7 @@
         /// <summary>
         /// Parse user entered grid filter row from json.
         /// </summary>
-        private void LoadDatabase(string gridName, out List<Filter> filterList)
+        private void LoadDatabaseFilterList(string gridName, out List<Filter> filterList)
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
@@ -499,7 +499,7 @@
                     bool isOrderByDesc = queryList[gridName].IsOrderByDesc;
                     Type typeRow = TypeRowGet(gridName);
                     List<Filter> filterList;
-                    LoadDatabase(gridName, out filterList);
+                    LoadDatabaseFilterList(gridName, out filterList);
                     LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
                 }
             }

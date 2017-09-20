@@ -11,16 +11,6 @@
     /// </summary>
     internal class ProcessGridOrderBy : Process
     {
-        private void DatabaseLoad(App app, AppJson appJson, string gridName, string fieldNameOrderBy, bool isOrderByDesc)
-        {
-            GridDataJson gridDataJson = appJson.GridDataJson;
-            //
-            GridData gridData = app.GridData;
-            Type typeRow = gridData.TypeRow(gridName);
-            gridData.LoadDatabase(gridName, null, fieldNameOrderBy, isOrderByDesc, typeRow);
-            gridData.SaveJson();
-        }
-
         protected internal override void Run(App app)
         {
             AppJson appJson = app.AppJson;
@@ -41,7 +31,7 @@
                             gridQuery.FieldNameOrderBy = gridColumn.FieldName;
                             gridQuery.IsOrderByDesc = false;
                         }
-                        DatabaseLoad(app, appJson, gridName, gridQuery.FieldNameOrderBy, gridQuery.IsOrderByDesc);
+                        appJson.GridDataJson.CellList[gridName][gridColumn.FieldName][new Index(IndexEnum.Filter).Value].IsModify = true; // Trigger reload on ProcessGridFilter.
                         break;
                     }
                 }
@@ -89,7 +79,7 @@
         {
             AppJson appJson = app.AppJson;
             //
-            List<string> gridNameList = new List<string>();
+            List<string> gridNameList = new List<string>(); // Grids to reload after filter changed.
             foreach (string gridName in appJson.GridDataJson.ColumnList.Keys)
             {
                 foreach (GridRow gridRow in appJson.GridDataJson.RowList[gridName])
