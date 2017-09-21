@@ -8,6 +8,12 @@ import  * as util from './util';
 @Component({
   selector: '[data-app]', /* Attribute selector "data-App" (lower char because of express engine) */
   template: `
+  <p>
+  json.FocusGridName=({{ dataService.json.GridDataJson?.FocusGridName }})<br />
+  json.FocusFieldName=({{ dataService.json.GridDataJson?.FocusFieldName }})<br />
+  json.FocusIndex=({{ dataService.json.GridDataJson?.FocusIndex }})<br />
+  </p>
+  
   <div data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
 `,
   providers: [DataService]  

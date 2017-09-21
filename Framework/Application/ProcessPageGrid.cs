@@ -31,7 +31,8 @@
                             gridQuery.FieldNameOrderBy = gridColumn.FieldName;
                             gridQuery.IsOrderByDesc = false;
                         }
-                        appJson.GridDataJson.CellList[gridName][gridColumn.FieldName][new Index(IndexEnum.Filter).Value].IsModify = true; // Trigger reload on ProcessGridFilter.
+                        app.GridData.TextParse(isFilterParse: true);
+                        app.GridData.LoadDatabaseReload(gridName);
                         break;
                     }
                 }
@@ -375,6 +376,22 @@
     /// </summary>
     internal class ProcessGridFocusNull : Process
     {
+        private void IsFocus(GridDataJson gridDataJson)
+        {
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        bool isSelect = gridDataJson.FocusGridName == gridName && gridDataJson.FocusFieldName == gridColumn.FieldName && gridDataJson.FocusIndex == gridRow.Index;
+                        gridCell.IsSelect = isSelect;
+                    }
+                }
+            }
+        }
+
         protected internal override void Run(App app)
         {
             GridDataJson gridDataJson = app.AppJson.GridDataJson;
@@ -398,6 +415,8 @@
                     app.AppJson.GridDataJson.FocusIndex = null;
                 }
             }
+            //
+            IsFocus(gridDataJson);
         }
     }
 

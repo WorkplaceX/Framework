@@ -463,24 +463,27 @@
                 {
                     if (column.FieldNameSql != null) // Do not filter on calculated column.
                     {
-                        object value = rowFilter.GetType().GetProperty(fieldName).GetValue(rowFilter);
-                        FilterOperator filterOperator = FilterOperator.Equal;
-                        if (value is string)
+                        if (rowFilter != null) // RowFilter is null, if user made no modifications. See also: GridData.TextParse(isFilterParse: true);
                         {
-                            filterOperator = FilterOperator.Like;
-                        }
-                        else
-                        {
-                            if (text.Contains(">"))
+                            object value = rowFilter.GetType().GetProperty(fieldName).GetValue(rowFilter);
+                            FilterOperator filterOperator = FilterOperator.Equal;
+                            if (value is string)
                             {
-                                filterOperator = FilterOperator.Greater;
+                                filterOperator = FilterOperator.Like;
                             }
-                            if (text.Contains("<"))
+                            else
                             {
-                                filterOperator = FilterOperator.Greater;
+                                if (text.Contains(">"))
+                                {
+                                    filterOperator = FilterOperator.Greater;
+                                }
+                                if (text.Contains("<"))
+                                {
+                                    filterOperator = FilterOperator.Greater;
+                                }
                             }
+                            filterList.Add(new Filter() { FieldName = fieldName, FilterOperator = filterOperator, Value = value });
                         }
-                        filterList.Add(new Filter() { FieldName = fieldName, FilterOperator = filterOperator, Value = value });
                     }
                 }
             }
@@ -700,13 +703,14 @@
         /// <summary>
         /// Parse user modified input text. See also method TextSet(); when parse error occurs method ErrorSet(); is called for the field.
         /// </summary>
-        internal void TextParse()
+        /// <param name="isFilterParse">Parse grid filter also if user made no modifications.</param>
+        internal void TextParse(bool isFilterParse = false)
         {
             foreach (string gridName in rowList.Keys)
             {
                 foreach (Index index in rowList[gridName].Keys)
                 {
-                    if (IsModifyRowCell(gridName, index))
+                    if (IsModifyRowCell(gridName, index) || (index.Enum == IndexEnum.Filter && isFilterParse))
                     {
                         Type typeRow = TypeRowGet(gridName);
                         var row = RowGet(gridName, index);
