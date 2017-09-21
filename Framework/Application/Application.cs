@@ -303,6 +303,7 @@
                 processList.Add<ProcessGridSaveJson>();
                 processList.Add<ProcessGridOrderByText>();
                 processList.Add<ProcessGridFocus>();
+                processList.Add<ProcessGridFieldWithLabelIndex>();
                 processList.Add<ProcessGridCellIsModifyFalse>();
                 processList.Add<ProcessGridIsClickFalse>();
             }

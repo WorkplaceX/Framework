@@ -191,6 +191,26 @@
         }
 
         /// <summary>
+        /// Returns index of selected data row.
+        /// </summary>
+        internal Index RowSelectedIndex(string gridName)
+        {
+            Index result = null;
+            if (rowList.ContainsKey(gridName))
+            {
+                foreach (Index index in rowList[gridName].Keys)
+                {
+                    if (rowList[gridName][index].IsSelectGet())
+                    {
+                        result = index;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// (GridName, GridQuery).
         /// </summary>
         private Dictionary<string, GridQueryInternal> queryList = new Dictionary<string, GridQueryInternal>();

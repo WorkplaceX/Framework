@@ -201,6 +201,8 @@
         public string GridName;
 
         public string FieldName;
+
+        public string Index;
     }
 
     /// <summary>

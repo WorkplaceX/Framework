@@ -8,6 +8,12 @@ import  * as util from './util';
 @Component({
   selector: '[data-app]', /* Attribute selector "data-App" (lower char because of express engine) */
   template: `
+  <p>
+  json.FocusGridName=({{ dataService.json.GridDataJson?.FocusGridName }})<br />
+  json.FocusFieldName=({{ dataService.json.GridDataJson?.FocusFieldName }})<br />
+  json.FocusIndex=({{ dataService.json.GridDataJson?.FocusIndex }})<br />
+  </p>
+  
   <div data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
 `,
   providers: [DataService]  
@@ -85,7 +91,7 @@ export class Selector {
       <div class="gridFieldWithLabelLeft">{{json.Text}}</div>
       <div class="gridFieldWithLabelRight">
         <div>
-          <div data-GridField [gridName]=json.GridName [fieldName]=json.FieldName></div>
+          <div data-GridField [gridName]=json.GridName [fieldName]=json.FieldName [index]=json.Index></div>
         </div>
       </div>
     </div>
@@ -410,37 +416,30 @@ export class GridField {
   }
 
   dataService: DataService;
-  @Input() gridName: any;
-  @Input() fieldName: any;
-  @Input() index: any;
-  @Input() json: any;
+  @Input() json: any; /* Parameter from GridField component */
+  @Input() gridName: any; /* Set parameter directly, instead of using json parameter */
+  @Input() fieldName: any; /* Set parameter directly, instead of using json parameter */
+  @Input() index: any; /* Set parameter directly, instead of using json parameter */
   @ViewChild('inputElement') el:ElementRef;
 
   point() {
     let gridData: any = this.dataService.json.GridDataJson;
-    let gridName: string = gridData.FocusGridName;
-    let fieldName: string = gridData.FocusFieldName;
-    let index: string = gridData.FocusIndex;
+    let gridName: string;
+    let fieldName: string;
+    let index: string;
     if (this.json != null) {
-      if (this.json.GridName != null) {
-        gridName = this.json.GridName;
-      }
-      if (this.json.FieldName != null) {
-        fieldName = this.json.FieldName;
-      }
-      if (this.json.Index != null) {
-        fieldName = this.json.Index;
-      }
+      gridName = this.json.GridName;
+      fieldName = this.json.FieldName;
+      index = this.json.Index;
     } else {
-      if (this.gridName != null){
-        gridName = this.gridName;
-      }
-      if (this.fieldName != null){
-        fieldName = this.fieldName;
-      }
-      if (this.index != null){
-        index = this.index;
-      }
+      gridName = this.gridName;
+      fieldName = this.fieldName;
+      index = this.index;
+    }
+    if (gridName == null) {
+        gridName = gridData.FocusGridName;
+        fieldName = gridData.FocusFieldName;
+        index = gridData.FocusIndex;
     }
     return { gridData: gridData, gridName: gridName, fieldName: fieldName, index: index }; // GridName can be null if no focus is set.
   }

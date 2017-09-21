@@ -402,6 +402,17 @@
         }
     }
 
+    internal class ProcessGridFieldWithLabelIndex : Process
+    {
+        protected internal override void Run(App app)
+        {
+            foreach (GridFieldWithLabel gridFieldWithLabel in app.AppJson.ListAll().OfType<GridFieldWithLabel>())
+            {
+                gridFieldWithLabel.Index = app.GridData.RowSelectedIndex(gridFieldWithLabel.GridName)?.Value; // Set index to selected row.
+            }
+        }
+    }
+
     internal class ProcessGridSave : Process
     {
         protected internal override void Run(App app)
