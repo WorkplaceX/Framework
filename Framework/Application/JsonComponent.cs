@@ -305,9 +305,9 @@
         public string E;
 
         /// <summary>
-        /// Gets or sets IsSelect.
+        /// Gets or sets IsFocus.
         /// </summary>
-        public bool IsSelect;
+        public bool IsFocus;
 
         public bool IsClick;
 

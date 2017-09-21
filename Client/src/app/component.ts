@@ -266,7 +266,7 @@ export class GridRow {
 @Component({
   selector: '[data-GridCell]',
   template: `
-  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
+  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsFocus}">
     <div>
       <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
     </div>

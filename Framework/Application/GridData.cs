@@ -56,7 +56,7 @@
         /// </summary>
         public string Error;
 
-        public bool IsSelect;
+        public bool IsFocus;
 
         /// <summary>
         /// Gets or sets IsModify. Text has been modified on last request.
@@ -858,7 +858,7 @@
                     cell.Constructor(gridRow.Row);
                     string fieldName = cell.FieldNameCSharp;
                     //
-                    CellGet(gridName, rowIndex, fieldName).IsSelect = gridDataJson.CellList[gridName][fieldName][row.Index].IsSelect;
+                    CellGet(gridName, rowIndex, fieldName).IsFocus = gridDataJson.CellList[gridName][fieldName][row.Index].IsFocus;
                     CellGet(gridName, rowIndex, fieldName).IsClick = gridDataJson.CellList[gridName][fieldName][row.Index].IsClick;
                     CellGet(gridName, rowIndex, fieldName).IsModify = gridDataJson.CellList[gridName][fieldName][row.Index].IsModify;
                     CellGet(gridName, rowIndex, fieldName).PlaceHolder = gridDataJson.CellList[gridName][fieldName][row.Index].PlaceHolder;
@@ -1116,7 +1116,7 @@
                                 gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCellJson = new GridCell() { IsSelect = cellInternal.IsSelect, IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
+                            GridCell gridCellJson = new GridCell() { IsFocus = cellInternal.IsFocus, IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index.Value] = gridCellJson;
                             //
                             SaveJsonIsButtonHtmlFileUpload(gridName, typeRow, index, cell, gridCellJson, info);

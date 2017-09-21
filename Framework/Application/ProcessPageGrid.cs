@@ -136,24 +136,6 @@
             gridDataJson.FocusGridName = gridName;
             gridDataJson.FocusIndex = index.Value;
             gridDataJson.FocusFieldName = fieldName;
-            ProcessGridSelectCellClear(appJson);
-            gridDataJson.CellList[gridName][fieldName][index.Value].IsSelect = true;
-        }
-
-        private void ProcessGridSelectCellClear(AppJson appJson)
-        {
-            GridDataJson gridDataJson = appJson.GridDataJson;
-            foreach (string gridName in gridDataJson.RowList.Keys)
-            {
-                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
-                {
-                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        gridCell.IsSelect = false;
-                    }
-                }
-            }
         }
 
         protected internal override void Run(App app)
@@ -372,9 +354,9 @@
     }
 
     /// <summary>
-    /// Set focus to null, if cell does not exist anymore.
+    /// Set focus on focused GridCell, or to null, if cell does not exist anymore.
     /// </summary>
-    internal class ProcessGridFocusNull : Process
+    internal class ProcessGridFocus : Process
     {
         private void IsFocus(GridDataJson gridDataJson)
         {
@@ -386,7 +368,7 @@
                     {
                         GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         bool isSelect = gridDataJson.FocusGridName == gridName && gridDataJson.FocusFieldName == gridColumn.FieldName && gridDataJson.FocusIndex == gridRow.Index;
-                        gridCell.IsSelect = isSelect;
+                        gridCell.IsFocus = isSelect;
                     }
                 }
             }
