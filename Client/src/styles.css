@@ -54,10 +54,12 @@ img {
     border-bottom: 1px solid lightgray;
 }
 
-.gridFieldWithLabelGroup {
+.labelGroup {
     margin-top: 8px;
+    margin-bottom: 2px;
     font-weight: bold;
     border-bottom: 1px solid black;
+    background-color: lightblue;
 }
 
 .select-class1 {

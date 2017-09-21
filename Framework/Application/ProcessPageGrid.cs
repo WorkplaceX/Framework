@@ -174,7 +174,7 @@
                 Type typeRow = gridData.TypeRow(gridName);
                 Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
                 bool isReload = false;
-                rowTable.MasterDetail(app, gridNameMaster, rowMaster, ref isReload);
+                rowTable.MasterIsClick(app, gridNameMaster, rowMaster, ref isReload);
                 if (isReload)
                 {
                     gridData.LoadDatabaseReload(gridName);

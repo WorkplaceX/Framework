@@ -416,7 +416,7 @@
         {
             TypeRowSet(gridName, typeRow);
             Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
-            IQueryable query = rowTable.Query(App, gridName);
+            IQueryable query = rowTable.Where(App, gridName);
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
@@ -655,12 +655,7 @@
                                 {
                                     try
                                     {
-                                        Row rowRefresh = null;
-                                        row.RowNew.Update(App, row.Row, row.RowNew, ref rowRefresh);
-                                        if (rowRefresh != null)
-                                        {
-                                            UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
-                                        }
+                                        row.RowNew.Update(App, row.Row, row.RowNew);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -674,12 +669,7 @@
                                 {
                                     try
                                     {
-                                        Row rowRefresh = null;
-                                        row.RowNew.Insert(App, ref rowRefresh);
-                                        if (rowRefresh != null)
-                                        {
-                                            UtilDataAccessLayer.RowCopy(rowRefresh, row.RowNew);
-                                        }
+                                        row.RowNew.Insert(App);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);

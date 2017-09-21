@@ -16,7 +16,7 @@
 
         }
 
-        protected virtual internal void Update(App app, Row row, Row rowNew, ref Row rowRefresh)
+        protected virtual internal void Update(App app, Row row, Row rowNew)
         {
             UtilFramework.Assert(this == rowNew);
             UtilDataAccessLayer.Update(row, this);
@@ -25,7 +25,7 @@
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(App app, ref Row rowRefresh)
+        protected virtual internal void Insert(App app)
         {
             UtilDataAccessLayer.Insert(this);
         }
@@ -35,13 +35,13 @@
         /// </summary>
         /// <param name="gridNameMaster">Master gridName.</param>
         /// <param name="rowMaster">Clicked master grid row.</param>
-        /// <param name="isReload">If true, this grid (detail) gets reloaded. Override also method Query(); to filter detail grid.</param>
-        protected virtual internal void MasterDetail(App app, string gridNameMaster, Row rowMaster, ref bool isReload)
+        /// <param name="isReload">If true, this grid (detail) gets reloaded. Override also method Row.Where(); to filter detail grid.</param>
+        protected virtual internal void MasterIsClick(App app, string gridNameMaster, Row rowMaster, ref bool isReload)
         {
 
         }
 
-        protected virtual internal IQueryable Query(App app, string gridName)
+        protected virtual internal IQueryable Where(App app, string gridName)
         {
             return UtilDataAccessLayer.Query(GetType());
         }
