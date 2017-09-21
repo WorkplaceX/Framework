@@ -84,9 +84,7 @@ export class Selector {
     <div style="overflow: hidden">
       <div class="gridFieldWithLabelLeft">{{json.Text}}</div>
       <div class="gridFieldWithLabelRight">
-        <div>
-          <div data-GridField [gridName]=json.GridName [fieldName]=json.FieldName [index]=json.Index></div>
-        </div>
+        <div data-GridField [gridName]=json.GridName [fieldName]=json.FieldName [index]=json.Index></div>
       </div>
     </div>
   </div>  
@@ -105,9 +103,7 @@ export class GridFieldWithLabel {
   selector: '[data-GridFieldSingle]',
   template: `
   <div [ngClass]="json.CssClass" data-RemoveSelector>
-    <div>
-      <div data-GridField></div>
-    </div>
+    <div data-GridField></div>
   </div>  
 `
 })
@@ -286,9 +282,8 @@ export class GridRow {
   selector: '[data-GridCell]',
   template: `
   <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsFocus}">
-    <div>
-      <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
-    </div>
+    <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
+
     <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell">
       {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E }}
     </div>
@@ -405,7 +400,7 @@ export class RemoveSelectorDirective {
   selector: '[data-GridField]',
   // See also: http://jsfiddle.net/V79Hn/ for overflow:hidden AND /* GridCell */ [style.verticalAlign]
   template: `
-  <div [ngClass]="gridCell().CssClass" data-RemoveSelector>
+  <div [ngClass]="gridCell().CssClass">
     <div *ngIf="gridCell().CellEnum == null">
       <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
