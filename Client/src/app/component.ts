@@ -8,12 +8,6 @@ import  * as util from './util';
 @Component({
   selector: '[data-app]', /* Attribute selector "data-App" (lower char because of express engine) */
   template: `
-  <p>
-  json.FocusGridName=({{ dataService.json.GridDataJson?.FocusGridName }})<br />
-  json.FocusFieldName=({{ dataService.json.GridDataJson?.FocusFieldName }})<br />
-  json.FocusIndex=({{ dataService.json.GridDataJson?.FocusIndex }})<br />
-  </p>
-  
   <div data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
 `,
   providers: [DataService]  
@@ -73,8 +67,8 @@ export class AppComponent {
   <div data-Label *ngIf="json.Type=='Label' && !json.IsHide" [json]=json></div>
   <div data-Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-GridKeyboard *ngIf="json.Type=='GridKeyboard' && !json.IsHide" [json]=json></div>
-  <div data-GridField *ngIf="json.Type=='GridField' && !json.IsHide" [json]=json></div>
   <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
+  <div data-GridFieldSingle *ngIf="json.Type=='GridFieldSingle' && !json.IsHide" [json]=json></div>
   <div data-GridFieldWithLabel *ngIf="json.Type=='GridFieldWithLabel' && !json.IsHide" [json]=json></div>
   `
 })
@@ -99,6 +93,25 @@ export class Selector {
 `
 })
 export class GridFieldWithLabel {
+  @Input() json: any
+
+  trackBy(index: any, item: any) {
+    return item.Key;
+  }
+}
+
+/* GridFieldSingle */
+@Component({
+  selector: '[data-GridFieldSingle]',
+  template: `
+  <div [ngClass]="json.CssClass" data-RemoveSelector>
+    <div>
+      <div data-GridField></div>
+    </div>
+  </div>  
+`
+})
+export class GridFieldSingle {
   @Input() json: any
 
   trackBy(index: any, item: any) {
@@ -394,7 +407,7 @@ export class RemoveSelectorDirective {
   template: `
   <div [ngClass]="gridCell().CssClass" data-RemoveSelector>
     <div *ngIf="gridCell().CellEnum == null">
-      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusGridName==gridName && dataService.json.GridDataJson.FocusFieldName == fieldName && dataService.json.GridDataJson.FocusIndex==index" placeholder="{{ gridCell().PlaceHolder }}" />
+      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" placeholder="{{ gridCell().PlaceHolder }}" />
     </div>
 
     <button *ngIf="gridCell().CellEnum == 1" class="btn btn-primary" (click)="buttonClick($event)">{{ Text }}</button>
@@ -410,16 +423,16 @@ export class RemoveSelectorDirective {
   </div>
 `
 })
+// <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusGridName==gridName && dataService.json.GridDataJson.FocusFieldName == fieldName && dataService.json.GridDataJson.FocusIndex==index" placeholder="{{ gridCell().PlaceHolder }}" />
 export class GridField {
   constructor(dataService: DataService){
     this.dataService = dataService;
   }
 
   dataService: DataService;
-  @Input() json: any; /* Parameter from GridField component */
-  @Input() gridName: any; /* Set parameter directly, instead of using json parameter */
-  @Input() fieldName: any; /* Set parameter directly, instead of using json parameter */
-  @Input() index: any; /* Set parameter directly, instead of using json parameter */
+  @Input() gridName: any;
+  @Input() fieldName: any;
+  @Input() index: any;
   @ViewChild('inputElement') el:ElementRef;
 
   point() {
@@ -427,15 +440,9 @@ export class GridField {
     let gridName: string;
     let fieldName: string;
     let index: string;
-    if (this.json != null) {
-      gridName = this.json.GridName;
-      fieldName = this.json.FieldName;
-      index = this.json.Index;
-    } else {
-      gridName = this.gridName;
-      fieldName = this.fieldName;
-      index = this.index;
-    }
+    gridName = this.gridName;
+    fieldName = this.fieldName;
+    index = this.index;
     if (gridName == null) {
         gridName = gridData.FocusGridName;
         fieldName = gridData.FocusFieldName;
@@ -503,13 +510,6 @@ export class GridField {
     }
     if (isUpdate == true) {
       this.dataService.update();
-    }
-  }
-
-  focus(isFocus: boolean) {
-    if (this.json !=  null) {
-      // this.json can be null
-      this.json.IsFocus = isFocus;
     }
   }
 

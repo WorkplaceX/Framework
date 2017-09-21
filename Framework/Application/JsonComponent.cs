@@ -160,25 +160,17 @@
     }
 
     /// <summary>
-    /// Json GridField. Hosts GridCell. Can be used independently from data grid for example to displays focused cell.
+    /// Json GridField. Hosts GridCell. Displays currently focused cell.
     /// </summary>
-    public class GridField : Component
+    public class GridFieldSingle : Component
     {
-        public GridField() { }
+        public GridFieldSingle() { }
 
-        public GridField(Component owner, string gridName, string fieldName, string gridIndex)
+        public GridFieldSingle(Component owner)
             : base(owner)
         {
-            this.GridName = gridName;
-            this.FieldName = fieldName;
-            this.GridIndex = gridIndex;
+
         }
-
-        public string GridName;
-
-        public string FieldName;
-
-        public string GridIndex;
     }
 
     /// <summary>
