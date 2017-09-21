@@ -103,9 +103,12 @@ img {
 .gridFilter {
     padding-right: 18px;
     background-image: url('http://localhost:49323/GridFilter.png'); /* fallback */
-    background-image: url('http://localhost:49323/GridFilter.png'), linear-gradient(to bottom, #808080, #fff); /* W3C */
     background-repeat: no-repeat;
     background-position: right;
+}
+
+.gridRowFilter {
+    background-image: linear-gradient(to bottom, #808080, #fff); /* W3C */
 }
 
 .gridNew {

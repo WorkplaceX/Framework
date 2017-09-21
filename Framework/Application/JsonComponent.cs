@@ -371,6 +371,11 @@
         /// </summary>
         public int IsSelect;
 
+        /// <summary>
+        /// Gets or sets IsFilter. Used to display gray background color in filter row.
+        /// </summary>
+        public bool IsFilter;
+
         public bool IsSelectGet()
         {
             return UtilApplication.IsSelectGet(IsSelect);

@@ -56,8 +56,6 @@
         /// </summary>
         public string Error;
 
-        public bool IsFocus;
-
         /// <summary>
         /// Gets or sets IsModify. Text has been modified on last request.
         /// </summary>
@@ -858,7 +856,6 @@
                     cell.Constructor(gridRow.Row);
                     string fieldName = cell.FieldNameCSharp;
                     //
-                    CellGet(gridName, rowIndex, fieldName).IsFocus = gridDataJson.CellList[gridName][fieldName][row.Index].IsFocus;
                     CellGet(gridName, rowIndex, fieldName).IsClick = gridDataJson.CellList[gridName][fieldName][row.Index].IsClick;
                     CellGet(gridName, rowIndex, fieldName).IsModify = gridDataJson.CellList[gridName][fieldName][row.Index].IsModify;
                     CellGet(gridName, rowIndex, fieldName).PlaceHolder = gridDataJson.CellList[gridName][fieldName][row.Index].PlaceHolder;
@@ -1085,6 +1082,7 @@
                     info.CellInit(App, gridName, typeRow, row, index);
                     string errorRow = ErrorRowGet(gridName, index);
                     GridRow gridRowJson = new GridRow() { Index = index.Value, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
+                    gridRowJson.IsFilter = index.Enum == IndexEnum.Filter;
                     gridDataJson.RowList[gridName].Add(gridRowJson);
                     if (propertyInfoList == null && typeRow != null)
                     {
@@ -1116,7 +1114,7 @@
                                 gridDataJson.CellList[gridName][fieldName] = new Dictionary<string, GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCellJson = new GridCell() { IsFocus = cellInternal.IsFocus, IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
+                            GridCell gridCellJson = new GridCell() { IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName][fieldName][index.Value] = gridCellJson;
                             //
                             SaveJsonIsButtonHtmlFileUpload(gridName, typeRow, index, cell, gridCellJson, info);
