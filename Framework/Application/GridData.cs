@@ -102,7 +102,7 @@
         /// </summary>
         internal List<string> GridNameList()
         {
-            List<string> result = new List<string>(queryList.Keys);
+            List<string> result = new List<string>(rowList.Keys);
             return result;
         }
 
@@ -165,6 +165,31 @@
                 if (result == null)
                 {
                     result = row.RowNew;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Select a row of grid and return newly selected row.
+        /// </summary>
+        internal Row RowSelect(string gridName, Index index)
+        {
+            Row result = null;
+            if (rowList.ContainsKey(gridName))
+            {
+                foreach (Index key in rowList[gridName].Keys)
+                {
+                    if (key == index)
+                    {
+                        rowList[gridName][key].IsSelectSet(true);
+                        UtilFramework.Assert(result == null);
+                        result = rowList[gridName][key].Row;
+                    }
+                    else
+                    {
+                        rowList[gridName][key].IsSelectSet(false);
+                    }
                 }
             }
             return result;
@@ -446,6 +471,24 @@
         }
 
         /// <summary>
+        /// Use this method for detail grid. See also method Row.MasterIsClick();
+        /// </summary>
+        public void LoadDatabaseInit(string gridName, Type typeRow)
+        {
+            List<Row> rowList = new List<Row>();
+            LoadRow(gridName, typeRow, rowList);
+        }
+
+        /// <summary>
+        /// Use this method for detail grid. See also method Row.MasterIsClick();
+        /// </summary>
+        public void LoadDatabaseInit<TRow>(string gridName)
+        {
+            List<Row> rowList = new List<Row>();
+            LoadRow(gridName, typeof(TRow), rowList);
+        }
+
+        /// <summary>
         /// Load data from Sql database.
         /// </summary>
         public void LoadDatabase(string gridName, Type typeRow)
@@ -510,19 +553,28 @@
         /// <summary>
         /// Reload data from database with current grid filter and current sorting.
         /// </summary>
-        public void LoadDatabaseReload(string gridName)
+        internal void LoadDatabaseReload(string gridName)
         {
             if (!IsErrorRowCell(gridName, new Index(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
             {
-                if (queryList.ContainsKey(gridName)) // Reload
+                Type typeRow = TypeRowGet(gridName);
+                Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
+                IQueryable query = rowTable.Where(App, gridName);
+                List<Row> rowList = new List<Row>();
+                List<Filter> filterList = null;
+                if (query != null)
                 {
-                    string fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
-                    bool isOrderByDesc = queryList[gridName].IsOrderByDesc;
-                    Type typeRow = TypeRowGet(gridName);
-                    List<Filter> filterList;
-                    LoadDatabaseFilterList(gridName, out filterList);
-                    LoadDatabase(gridName, filterList, fieldNameOrderBy, isOrderByDesc, typeRow);
+                    string fieldNameOrderBy = null;
+                    bool isOrderByDesc = false;
+                    if (queryList.ContainsKey(gridName)) // Reload
+                    {
+                        fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
+                        isOrderByDesc = queryList[gridName].IsOrderByDesc;
+                        LoadDatabaseFilterList(gridName, out filterList);
+                    }
+                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
                 }
+                LoadRow(gridName, typeRow, rowList);
             }
         }
 

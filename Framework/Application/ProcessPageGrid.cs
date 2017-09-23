@@ -164,9 +164,34 @@
         }
     }
 
+    /// <summary>
+    /// Select first row of grid, if no row is yet selected.
+    /// </summary>
+    internal class ProcessGridRowSelectFirst : Process
+    {
+        protected internal override void Run(App app)
+        {
+            GridData gridData = app.GridData;
+            foreach (string gridName in gridData.GridNameList())
+            {
+                Index index = gridData.RowSelectedIndex(gridName);
+                if (index == null)
+                {
+                    Index indexFirst = gridData.IndexList(gridName).Where(item => item.Enum == IndexEnum.Index).FirstOrDefault();
+                    if (indexFirst == null)
+                    {
+                        indexFirst = gridData.IndexList(gridName).Where(item => item.Enum == IndexEnum.New).FirstOrDefault();
+                    }
+                    Row rowSelect = gridData.RowSelect(gridName, indexFirst);
+                    ProcessGridIsClickMasterDetail.MasterDetailIsClick(app, gridName, rowSelect);
+                }
+            }
+        }
+    }
+
     internal class ProcessGridIsClickMasterDetail : Process
     {
-        private void MasterDetailIsClick(App app, string gridNameMaster, Row rowMaster)
+        internal static void MasterDetailIsClick(App app, string gridNameMaster, Row rowMaster)
         {
             GridData gridData = app.GridData;
             foreach (string gridName in gridData.GridNameList())
@@ -193,7 +218,7 @@
                     if (gridRow.IsClick)
                     {
                         Index gridRowIndex = new Index(gridRow.Index);
-                        if (gridRowIndex.Enum == IndexEnum.Index)
+                        if (gridRowIndex.Enum == IndexEnum.Index || gridRowIndex.Enum == IndexEnum.New)
                         {
                             GridData gridData = app.GridData;
                             var row = gridData.Row(gridName, gridRowIndex);
