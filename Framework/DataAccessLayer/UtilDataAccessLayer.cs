@@ -321,9 +321,18 @@
         /// </summary>
         public static void Insert(Row row)
         {
+            Row rowCopy = UtilDataAccessLayer.RowCopy(row);
             DbContext dbContext = DbContext(row.GetType());
             dbContext.Add(row);
-            dbContext.SaveChanges();
+            try
+            {
+                dbContext.SaveChanges();
+            }
+            catch (Exception exception)
+            {
+                UtilDataAccessLayer.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto incremental id to -2147482647. Reverse it back.
+                throw exception;
+            }
         }
 
         /// <summary>
@@ -437,6 +446,16 @@
                     propertyInfoDest.SetValue(rowDest, value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Create copy of data row.
+        /// </summary>
+        public static Row RowCopy(Row row)
+        {
+            Row result = UtilDataAccessLayer.RowCreate(row.GetType());
+            UtilDataAccessLayer.RowCopy(row, result);
+            return result;
         }
 
         /// <summary>
