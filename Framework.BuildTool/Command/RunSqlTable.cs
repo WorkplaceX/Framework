@@ -62,15 +62,15 @@
                     }
                     sqlSelect.Append(string.Format(
                         "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = {2}) AS ApplicationTypeId, {3} AS IsActive)",
-                        UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
                 }
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
                 using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
                 {
-                    UtilDataAccessLayer.Parameter(command, parameterList);
+                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(command, parameterList);
                     command.ExecuteNonQuery();
                 }
             }
@@ -106,7 +106,7 @@
                 ";
                 StringBuilder sqlSelect = new StringBuilder();
                 bool isFirst = true;
-                foreach (Type type in UtilFramework.ApplicationTypeList(AppBuildTool.App.GetType()))
+                foreach (Type type in UtilApplication.ApplicationTypeList(AppBuildTool.App.GetType()))
                 {
                     if (isFirst)
                     {
@@ -152,9 +152,9 @@
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                string tableName = UtilDataAccessLayer.TypeRowToName(typeRow);
+                string tableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToName(typeRow);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -198,9 +198,9 @@
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
+                foreach (Cell column in UtilBuildToolInternal.UtilDataAccessLayer.ColumnList(typeRow))
                 {
                     if (isFirst)
                     {
@@ -210,7 +210,7 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    string tableName = UtilDataAccessLayer.TypeRowToName(typeRow);
+                    string tableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToName(typeRow);
                     sqlSelect.Append(string.Format("(SELECT '{0}' AS TableNameSql, CASE WHEN '{1}' = '' THEN NULL ELSE '{1}' END AS FieldNameSql, '{2}' AS FieldNameCSharp)", tableName, column.FieldNameSql, column.FieldNameCSharp));
                 }
             }

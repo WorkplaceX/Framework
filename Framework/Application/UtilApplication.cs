@@ -6,6 +6,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
 
     public enum IndexEnum
@@ -289,7 +290,7 @@
         /// <summary>
         /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
         /// </summary>
-        public static bool IsSelectGet(int isSelect)
+        internal static bool IsSelectGet(int isSelect)
         {
             return (isSelect & 1) == 1;
         }
@@ -297,7 +298,7 @@
         /// <summary>
         /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
         /// </summary>
-        public static int IsSelectSet(int isSelect, bool value)
+        internal static int IsSelectSet(int isSelect, bool value)
         {
             if (value)
             {
@@ -308,6 +309,25 @@
                 isSelect = isSelect & 2;
             }
             return isSelect;
+        }
+
+        /// <summary>
+        /// Returns list of available class App.
+        /// </summary>
+        public static Type[] ApplicationTypeList(Type typeInAssembly)
+        {
+            List<Type> result = new List<Type>();
+            foreach (Type itemTypeInAssembly in UtilFramework.TypeInAssemblyList(typeInAssembly))
+            {
+                foreach (var type in itemTypeInAssembly.GetTypeInfo().Assembly.GetTypes())
+                {
+                    if (UtilFramework.IsSubclassOf(type, typeof(App)))
+                    {
+                        result.Add(type);
+                    }
+                }
+            }
+            return result.ToArray();
         }
 
         /// <summary>
@@ -348,7 +368,7 @@
         /// <summary>
         /// Returns true, if column name contains "Id" according default naming convention.
         /// </summary>
-        public static bool ConfigFieldNameSqlIsId(string fieldNameSql)
+        internal static bool ConfigFieldNameSqlIsId(string fieldNameSql)
         {
             bool result = false;
             if (fieldNameSql != null)

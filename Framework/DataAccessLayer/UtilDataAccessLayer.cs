@@ -32,18 +32,18 @@
 
     public static class UtilDataAccessLayer
     {
-        public static string Parameter(object value, SqlDbType dbTyle, List<SqlParameter> parameterList)
+        internal static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList)
         {
             string result = $"@P{ parameterList.Count }";
             if (value == null)
             {
                 value = DBNull.Value;
             }
-            parameterList.Add(new SqlParameter($"P{ parameterList.Count }", dbTyle) { Value = value });
+            parameterList.Add(new SqlParameter($"P{ parameterList.Count }", dbType) { Value = value });
             return result;
         }
 
-        public static void Parameter(SqlCommand command, List<SqlParameter> parameterList)
+        internal static void Parameter(SqlCommand command, List<SqlParameter> parameterList)
         {
             command.Parameters.AddRange(parameterList.ToArray());
         }
@@ -51,7 +51,7 @@
         /// <summary>
         /// Gets IsConnectionString. True, if ConnectionString has been set.
         /// </summary>
-        public static bool IsConnectionString
+        internal static bool IsConnectionString
         {
             get
             {
@@ -62,7 +62,7 @@
         /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
-        public static string TypeRowToName(Type typeRow)
+        internal static string TypeRowToName(Type typeRow)
         {
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
             string result = UtilFramework.TypeToName(typeRow);
@@ -74,7 +74,7 @@
         /// <summary>
         /// Returns TypeRowList of all in code defined Row classes. Returns also framework Row classes.
         /// </summary>
-        public static Type[] TypeRowList(Type typeRowInAssembly)
+        internal static Type[] TypeRowList(Type typeRowInAssembly)
         {
             List<Type> result = new List<Type>();
             Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
@@ -95,7 +95,7 @@
         /// Returns row type. Searches also for Framework tables.
         /// </summary>
         /// <param name="name">For example: "Database.dbo.User".</param>
-        public static Type TypeRowFromName(string name, Type typeRowInAssembly)
+        internal static Type TypeRowFromName(string name, Type typeRowInAssembly)
         {
             name = "Database." + name;
             Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
@@ -107,7 +107,7 @@
         [ThreadStatic]
         private static Dictionary<Type, List<Cell>> cacheColumnList;
 
-        public static List<Cell> ColumnList(Type typeRow)
+        internal static List<Cell> ColumnList(Type typeRow)
         {
             if (cacheColumnList == null)
             {
@@ -150,7 +150,7 @@
         /// <summary>
         /// Returns cell list. Or column list, if row is null.
         /// </summary>
-        public static List<Cell> CellList(Type typeRow, object row)
+        internal static List<Cell> CellList(Type typeRow, object row)
         {
             if (row != null)
             {
@@ -253,7 +253,7 @@
             }
         }
 
-        public static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
+        internal static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
         {
             if (query == null)
             {
@@ -321,7 +321,7 @@
         /// </summary>
         public static void Insert(Row row)
         {
-            Row rowCopy = UtilDataAccessLayer.RowCopy(row);
+            Row rowClone = UtilDataAccessLayer.RowClone(row);
             DbContext dbContext = DbContext(row.GetType());
             dbContext.Add(row);
             try
@@ -330,7 +330,7 @@
             }
             catch (Exception exception)
             {
-                UtilDataAccessLayer.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto incremental id to -2147482647. Reverse it back.
+                UtilDataAccessLayer.RowCopy(rowClone, row); // In case of exception, EF might change for example auto incremental id to -2147482647. Reverse it back.
                 throw exception;
             }
         }
@@ -345,7 +345,7 @@
             dbContext.SaveChanges();
         }
 
-        public static object ValueToJson(object value)
+        internal static object ValueToJson(object value)
         {
             object result = value;
             if (value != null)
@@ -358,7 +358,7 @@
             return result;
         }
 
-        public static string ValueToText(object value, Type type)
+        internal static string ValueToText(object value, Type type)
         {
             type = UtilFramework.TypeUnderlying(type);
             //
@@ -376,7 +376,7 @@
         /// <summary>
         /// Parse user entered text.
         /// </summary>
-        public static object ValueFromText(string text, Type type)
+        internal static object ValueFromText(string text, Type type)
         {
             Type typeUnderlying = Nullable.GetUnderlyingType(type);
             if (text == null && typeUnderlying != null) // Type is nullable
@@ -414,7 +414,7 @@
         /// <summary>
         /// Clone data row.
         /// </summary>
-        public static Row RowClone(Row row)
+        internal static Row RowClone(Row row)
         {
             Row result = (Row)UtilFramework.TypeToObject(row.GetType());
             RowCopy(row, result);
@@ -424,16 +424,16 @@
         /// <summary>
         /// Clone data row.
         /// </summary>
-        public static TRow RowClone<TRow>(TRow row) where TRow : Row
+        internal static TRow RowClone<TRow>(TRow row) where TRow : Row
         {
             return (TRow)RowClone((Row)row);
         }
 
         /// <summary>
         /// Copy data row. Source and dest need not to be of same type. Only fields available on
-        /// both records are copied.
+        /// both records are copied. See also RowClone();
         /// </summary>
-        public static void RowCopy(Row rowSource, Row rowDest)
+        internal static void RowCopy(Row rowSource, Row rowDest)
         {
             var propertyInfoDestList = rowDest.GetType().GetProperties();
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
@@ -449,19 +449,9 @@
         }
 
         /// <summary>
-        /// Create copy of data row.
-        /// </summary>
-        public static Row RowCopy(Row row)
-        {
-            Row result = UtilDataAccessLayer.RowCreate(row.GetType());
-            UtilDataAccessLayer.RowCopy(row, result);
-            return result;
-        }
-
-        /// <summary>
         /// Returns new data row.
         /// </summary>
-        public static Row RowCreate(Type typeRow)
+        internal static Row RowCreate(Type typeRow)
         {
             return (Row)UtilFramework.TypeToObject(typeRow);
         }

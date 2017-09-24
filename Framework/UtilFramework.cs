@@ -193,25 +193,6 @@
             return result.ToArray();
         }
 
-        /// <summary>
-        /// Returns list of available class App.
-        /// </summary>
-        public static Type[] ApplicationTypeList(Type typeInAssembly)
-        {
-            List<Type> result = new List<Type>();
-            foreach (Type itemTypeInAssembly in TypeInAssemblyList(typeInAssembly))
-            {
-                foreach (var type in itemTypeInAssembly.GetTypeInfo().Assembly.GetTypes())
-                {
-                    if (UtilFramework.IsSubclassOf(type, typeof(App)))
-                    {
-                        result.Add(type);
-                    }
-                }
-            }
-            return result.ToArray();
-        }
-
         public static Type TypeFromName(string name, params Type[] typeInAssemblyList)
         {
             List<Type> result = new List<Type>();
@@ -234,7 +215,7 @@
         /// </summary>
         /// <param name="type">Type with parameterless constructor.</param>
         /// <returns>Returns instance of type.</returns>
-        public static object TypeToObject(Type type)
+        internal static object TypeToObject(Type type)
         {
             return Activator.CreateInstance(type);
         }
@@ -264,11 +245,10 @@
             Console.Error.WriteLine(text);
         }
 
-
         /// <summary>
         /// Returns underlying tpye, if any.
         /// </summary>
-        public static Type TypeUnderlying(Type type)
+        internal static Type TypeUnderlying(Type type)
         {
             Type result = type;
             Type typeUnderlying = Nullable.GetUnderlyingType(type);
