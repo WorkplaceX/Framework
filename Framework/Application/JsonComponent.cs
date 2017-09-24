@@ -136,10 +136,10 @@
     {
         public Grid() { }
 
-        public Grid(Component owner, string gridName)
+        public Grid(Component owner, GridName gridName)
             : base(owner)
         {
-            this.GridName = gridName;
+            this.GridName = gridName.Value;
         }
 
         public string GridName;

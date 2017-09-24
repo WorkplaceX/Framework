@@ -15,12 +15,12 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Download : Cell<FrameworkFileStorage>
     {
-        protected internal override void InfoCell(App app, string gridName, Index index, InfoCell result)
+        protected internal override void InfoCell(App app, GridName gridName, Index index, InfoCell result)
         {
             result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
 
-        protected override internal void CellValueToText(App app, string gridName, Index index, ref string result)
+        protected override internal void CellValueToText(App app, GridName gridName, Index index, ref string result)
         {
             result = null;
             if (index.Enum == IndexEnum.Index && Row.Name != null)
@@ -53,12 +53,12 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage>
     {
-        protected internal override void InfoCell(App app, string gridName, Index index, InfoCell result)
+        protected internal override void InfoCell(App app, GridName gridName, Index index, InfoCell result)
         {
             result.CellEnum = GridCellEnum.FileUpload;
         }
 
-        protected override internal void CellValueToText(App app, string gridName, Index index, ref string result)
+        protected override internal void CellValueToText(App app, GridName gridName, Index index, ref string result)
         {
             result = "File Upload";
         }
@@ -90,7 +90,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellTextParse(App app, string gridName, Index index, ref string result)
+        protected internal override void CellTextParse(App app, GridName gridName, Index index, ref string result)
         {
             string text = result;
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
@@ -136,7 +136,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First(), this);
         }
 
-        protected internal override void MasterIsClick(App app, string gridNameMaster, Row rowMaster, ref bool isReload)
+        protected internal override void MasterIsClick(App app, GridName gridNameMaster, Row rowMaster, ref bool isReload)
         {
             FrameworkConfigTableView configTable = rowMaster as FrameworkConfigTableView;
             if (configTable != null)
@@ -145,9 +145,9 @@ namespace Database.dbo
             }
         }
 
-        protected internal override IQueryable Where(App app, string gridName)
+        protected internal override IQueryable Where(App app, GridName gridName)
         {
-            var configTable = app.GridData.RowSelected("ConfigTable") as FrameworkConfigTableView;
+            var configTable = app.GridData.RowSelected(new GridName("ConfigTable")) as FrameworkConfigTableView;
             if (configTable != null)
             {
                 return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableName == configTable.TableName);

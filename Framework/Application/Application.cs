@@ -169,7 +169,7 @@
         /// <summary>
         /// Define for example grid column header globaly. See also method Cell.InfoColumn();
         /// </summary>
-        protected virtual internal void InfoColumn(string gridName, Type typeRow, InfoColumn result)
+        protected virtual internal void InfoColumn(GridName gridName, Type typeRow, InfoColumn result)
         {
             
         }
@@ -177,7 +177,7 @@
         /// <summary>
         /// Define for example grid column header globaly. See also method Cell.InfoCell();
         /// </summary>
-        protected virtual internal void InfoCell(string gridName, Index index, Cell cell, InfoCell result)
+        protected virtual internal void InfoCell(GridName gridName, Index index, Cell cell, InfoCell result)
         {
             switch (index.Enum)
             {
@@ -195,7 +195,7 @@
         /// <summary>
         /// Called after method UtilDataAccessLayer.ValueToText();
         /// </summary>
-        protected virtual internal void CellValueToText(string gridName, Index index, Cell cell, ref string result)
+        protected virtual internal void CellValueToText(GridName gridName, Index index, Cell cell, ref string result)
         {
 
         }
@@ -203,12 +203,12 @@
         /// <summary>
         /// Called before user entered text is parsed with UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellValueFromText(string gridName, Index index, Cell cell, ref string result)
+        protected virtual internal void CellValueFromText(GridName gridName, Index index, Cell cell, ref string result)
         {
 
         }
 
-        protected virtual internal void ColumnIsVisible(string gridName, Cell cell, ref bool result)
+        protected virtual internal void ColumnIsVisible(GridName gridName, Cell cell, ref bool result)
         {
 
         }

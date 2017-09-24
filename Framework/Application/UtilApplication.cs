@@ -9,6 +9,84 @@
     using System.Reflection;
     using System.Text;
 
+    public class GridName
+    {
+        public GridName(string name)
+        {
+            this.Name = name;
+            ValueInit();
+        }
+
+        public GridName(Type typeRow)
+        {
+            this.TypeRow = typeRow;
+            this.IsNameCombine = true;
+            ValueInit();
+        }
+
+        public GridName(Type typeRow, string name, bool isNameCombine = true)
+        {
+            this.Name = name;
+            this.TypeRow = typeRow;
+            this.IsNameCombine = isNameCombine;
+            ValueInit();
+        }
+
+        private void ValueInit()
+        {
+            UtilFramework.Assert(Name == null || !Name.Contains("."));
+            if (IsNameCombine)
+            {
+                Value = UtilFramework.TypeToName(TypeRow) + "." + Name;
+            }
+            else
+            {
+                Value = Name;
+            }
+        }
+
+        public readonly string Name;
+
+        public readonly Type TypeRow;
+
+        public readonly bool IsNameCombine;
+
+        internal string Value;
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            GridName gridName = obj as GridName;
+            if (gridName != null)
+            {
+                return object.Equals(Value, gridName.Value);
+            }
+            else
+            {
+                return base.Equals(obj);
+            }
+        }
+    }
+
+    public class GridName<TRow> : GridName where TRow : Row
+    {
+        public GridName() 
+            : base(typeof(TRow))
+        {
+
+        }
+
+        public GridName(string name, bool isNameCombine = true) 
+            : base(typeof(TRow), name, isNameCombine)
+        {
+
+        }
+    }
+
     public enum IndexEnum
     {
         None = 0,
@@ -180,7 +258,7 @@
 
         internal readonly App App;
 
-        private string gridName;
+        private GridName gridName;
 
         private Type TypeRow;
 
@@ -189,7 +267,7 @@
         /// </summary>
         Dictionary<string, InfoColumn> infoColumnList = new Dictionary<string, InfoColumn>();
 
-        internal void ColumnInit(App app, string gridName, Type typeRow)
+        internal void ColumnInit(App app, GridName gridName, Type typeRow)
         {
             UtilFramework.Assert(app == App);
             this.gridName = gridName;
@@ -237,7 +315,7 @@
             }
         }
 
-        internal void CellInit(App app, string gridName, Type typeRow, Row row, Index index)
+        internal void CellInit(App app, GridName gridName, Type typeRow, Row row, Index index)
         {
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
@@ -269,7 +347,7 @@
         /// <summary>
         /// Returns InfoColumn.
         /// </summary>
-        internal InfoColumn ColumnGet(App app, string gridName, Type typeRow, Cell column)
+        internal InfoColumn ColumnGet(App app, GridName gridName, Type typeRow, Cell column)
         {
             UtilFramework.Assert(this.App == app && this.gridName == gridName && this.TypeRow == typeRow);
             return infoColumnList[column.FieldNameCSharp];
@@ -278,7 +356,7 @@
         /// <summary>
         /// Returns InfoCell.
         /// </summary>
-        internal InfoCell CellGet(App app, string gridName, Type typeRow, Cell column)
+        internal InfoCell CellGet(App app, GridName gridName, Type typeRow, Cell column)
         {
             UtilFramework.Assert(this.App == app && this.gridName == gridName && this.TypeRow == typeRow);
             return infoColumnList[column.FieldNameCSharp].InfoCell;
