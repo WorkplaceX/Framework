@@ -13,44 +13,17 @@
     {
         public GridName(string name)
         {
-            this.Name = name;
-            ValueInit();
-        }
-
-        public GridName(Type typeRow)
-        {
-            this.TypeRow = typeRow;
-            this.IsNameCombine = true;
-            ValueInit();
-        }
-
-        public GridName(Type typeRow, string name, bool isNameCombine = true)
-        {
-            this.Name = name;
-            this.TypeRow = typeRow;
-            this.IsNameCombine = isNameCombine;
-            ValueInit();
-        }
-
-        private void ValueInit()
-        {
             UtilFramework.Assert(Name == null || !Name.Contains("."));
-            if (IsNameCombine)
-            {
-                Value = UtilFramework.TypeToName(TypeRow) + "." + Name;
-            }
-            else
-            {
-                Value = Name;
-            }
+            //
+            this.Name = name;
+            this.Value = Name;
         }
 
         public readonly string Name;
 
-        public readonly Type TypeRow;
-
-        public readonly bool IsNameCombine;
-
+        /// <summary>
+        /// Gets GridName or (GridName and TypeRow) combined.
+        /// </summary>
         internal string Value;
 
         public override int GetHashCode()
@@ -70,18 +43,77 @@
                 return base.Equals(obj);
             }
         }
+
+        public static bool operator ==(GridName left, GridName right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(GridName left, GridName right)
+        {
+            return !Equals(left, right);
+        }
     }
 
-    public class GridName<TRow> : GridName where TRow : Row
+    /// <summary>
+    /// Combination of GridName and TypeRow.
+    /// </summary>
+    public class GridNameTypeRow : GridName
     {
-        public GridName() 
+        public GridNameTypeRow(Type typeRow)
+            : base(null)
+        {
+            this.TypeRow = typeRow;
+            this.IsNameExclusive = false;
+            ValueInit();
+        }
+
+        public GridNameTypeRow(Type typeRow, string name, bool isNameExclusive = false)
+            : base(name)
+        {
+            this.TypeRow = typeRow;
+            this.IsNameExclusive = isNameExclusive;
+            ValueInit();
+        }
+
+        public GridNameTypeRow(Type typeRow, GridName gridName)
+            : this(typeRow, gridName.Name)
+        {
+            this.TypeRow = typeRow;
+            this.IsNameExclusive = false;
+        }
+
+        private void ValueInit()
+        {
+            if (IsNameExclusive == false)
+            {
+                Value = UtilFramework.TypeToName(TypeRow) + "." + Name;
+            }
+            else
+            {
+                Value = Name;
+            }
+            UtilFramework.Assert(Value != null);
+        }
+
+        public readonly Type TypeRow;
+
+        /// <summary>
+        /// Gets IsNameExclusive. Do not combine GridName with TypeRow. Use this option if grid can display different tables.
+        /// </summary>
+        public readonly bool IsNameExclusive;
+    }
+
+    public class GridName<TRow> : GridNameTypeRow where TRow : Row
+    {
+        public GridName()
             : base(typeof(TRow))
         {
 
         }
 
-        public GridName(string name, bool isNameCombine = true) 
-            : base(typeof(TRow), name, isNameCombine)
+        public GridName(string name, bool isNameExclusive = false)
+            : base(typeof(TRow), name, isNameExclusive)
         {
 
         }

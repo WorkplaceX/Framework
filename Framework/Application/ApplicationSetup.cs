@@ -20,16 +20,16 @@
             new Literal(this) { TextHtml = "<h1>LookUp</h1>" };
             new Grid(this, new GridName("LookUp"));
             new Literal(this) { TextHtml = "<h1>Application</h1>" };
-            new Grid(this, new GridName("Application"));
-            app.GridData.LoadDatabase<FrameworkApplicationView>(new GridName("Application"));
+            new Grid(this, new GridName<FrameworkApplicationView>());
+            app.GridData.LoadDatabase(new GridName<FrameworkApplicationView>());
             // ConfigTable
             new Literal(this) { TextHtml = "<h1>Config Table</h1>" };
-            new Grid(this, new GridName("ConfigTable"));
-            app.GridData.LoadDatabase<FrameworkConfigTableView>(new GridName("ConfigTable"));
+            new Grid(this, new GridName<FrameworkConfigTableView>());
+            app.GridData.LoadDatabase(new GridName<FrameworkConfigTableView>());
             // ConfigColumn
             new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
-            new Grid(this, new GridName("ConfigColumn"));
-            app.GridData.LoadDatabase<FrameworkConfigColumnView>(new GridName("ConfigColumn"));
+            new Grid(this, new GridName<FrameworkConfigColumnView>());
+            app.GridData.LoadDatabase(new GridName<FrameworkConfigColumnView>());
             app.GridData.SaveJson();
         }
     }

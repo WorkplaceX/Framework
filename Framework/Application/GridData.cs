@@ -216,6 +216,26 @@
         }
 
         /// <summary>
+        /// Returns selected data row.
+        /// </summary>
+        public TRow RowSelected<TRow>(GridName<TRow> gridName) where TRow : Row
+        {
+            Row result = null;
+            if (rowList.ContainsKey(gridName))
+            {
+                foreach (var item in rowList[gridName].Values)
+                {
+                    if (item.IsSelectGet())
+                    {
+                        result = item.Row;
+                        break;
+                    }
+                }
+            }
+            return (TRow)result;
+        }
+
+        /// <summary>
         /// Returns index of selected data row.
         /// </summary>
         internal Index RowSelectedIndex(GridName gridName)
@@ -473,35 +493,18 @@
         /// <summary>
         /// Use this method for detail grid. See also method Row.MasterIsClick();
         /// </summary>
-        public void LoadDatabaseInit(GridName gridName, Type typeRow)
+        public void LoadDatabaseInit(GridNameTypeRow gridName)
         {
             List<Row> rowList = new List<Row>();
-            LoadRow(gridName, typeRow, rowList);
-        }
-
-        /// <summary>
-        /// Use this method for detail grid. See also method Row.MasterIsClick();
-        /// </summary>
-        public void LoadDatabaseInit<TRow>(GridName gridName)
-        {
-            List<Row> rowList = new List<Row>();
-            LoadRow(gridName, typeof(TRow), rowList);
+            LoadRow(gridName, gridName.TypeRow, rowList);
         }
 
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase(GridName gridName, Type typeRow)
+        public void LoadDatabase(GridNameTypeRow gridName)
         {
-            LoadDatabase(gridName, null, null, false, typeRow);
-        }
-
-        /// <summary>
-        /// Load data from Sql database.
-        /// </summary>
-        public void LoadDatabase<TRow>(GridName gridName) where TRow : Row
-        {
-            LoadDatabase(gridName, typeof(TRow));
+            LoadDatabase(gridName, null, null, false, gridName.TypeRow);
         }
 
         /// <summary>
