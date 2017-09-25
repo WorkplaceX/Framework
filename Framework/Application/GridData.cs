@@ -143,10 +143,10 @@
             return result;
         }
 
-        private void TypeRowSet(GridName gridName, Type typeRow)
+        private void TypeRowSet(GridNameTypeRow gridName)
         {
-            typeRowList[gridName] = typeRow;
-            if (typeRow == null)
+            typeRowList[gridName] = gridName.TypeRow;
+            if (gridName.TypeRow == null)
             {
                 typeRowList.Remove(gridName);
             }
@@ -479,7 +479,7 @@
         /// </summary>
         internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc)
         {
-            TypeRowSet(gridName, gridName.TypeRow);
+            TypeRowSet(gridName);
             Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
             IQueryable query = rowTable.Where(App, gridName);
             List<Row> rowList = new List<Row>();
@@ -588,7 +588,7 @@
         {
             if (rowList == null)
             {
-                TypeRowSet(gridName, gridName.TypeRow);
+                TypeRowSet(gridName);
                 cellList.Remove(gridName);
                 this.rowList.Remove(gridName);
             }
@@ -606,7 +606,7 @@
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
                 this.rowList[gridName] = new Dictionary<Index, GridRowInternal>(); // Clear data
-                TypeRowSet(gridName, gridName.TypeRow);
+                TypeRowSet(gridName);
                 //
                 RowFilterAdd(gridName);
                 for (int index = 0; index < rowList.Count; index++)
@@ -897,7 +897,7 @@
             //
             string typeRowString = gridDataJson.GridQueryList[gridName.Value].TypeRow;
             Type typeRow = UtilDataAccessLayer.TypeRowFromName(typeRowString, UtilApplication.TypeRowInAssembly(App));
-            TypeRowSet(gridName, typeRow);
+            TypeRowSet(new GridNameTypeRow(typeRow, gridName));
             //
             foreach (GridRow row in gridDataJson.RowList[gridName.Value])
             {
