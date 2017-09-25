@@ -66,7 +66,7 @@
         {
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
             string result = UtilFramework.TypeToName(typeRow);
-            UtilFramework.Assert(result.StartsWith("Database."));
+            UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "Database.Calculated".
             result = result.Substring("Database.".Length); // Omit "Database" namespace.
             return result;
         }
@@ -140,7 +140,7 @@
                         typeCell = columnAttribute.TypeCell;
                     }
                     Cell cell = (Cell)UtilFramework.TypeToObject(typeCell);
-                    cell.Constructor(tableAttribute.SqlTableName, sqlColumnName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
+                    cell.Constructor(tableAttribute?.SqlTableName, sqlColumnName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
                     result.Add(cell);
                 }
             }

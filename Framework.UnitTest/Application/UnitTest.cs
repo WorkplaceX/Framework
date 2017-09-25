@@ -2,6 +2,7 @@
 {
     using Framework;
     using Framework.Application;
+    using Framework.DataAccessLayer;
 
     public class UnitTest : UnitTestBase
     {
@@ -20,5 +21,36 @@
             //
             UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("Text") == false);
         }
+
+        public void GridName()
+        {
+            {
+                GridName gridName = new GridName("D");
+                UtilFramework.Assert(gridName.IsNameExclusive == true);
+                GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeof(MyRow));
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == false);
+                gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), "Grid1");
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == false);
+                gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), "Grid1", true);
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == true);
+            }
+            {
+                GridName gridName = new GridName("Lookup");
+                UtilFramework.Assert(gridName.IsNameExclusive == true);
+                GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), gridName);
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == true);
+            }
+            {
+                GridName gridName = new GridNameTypeRow(typeof(MyRow), "Lookup");
+                UtilFramework.Assert(gridName.IsNameExclusive == false);
+                GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), gridName);
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == false);
+            }
+        }
+    }
+
+    public class MyRow : Row
+    {
+        public string Text { get; set; }
     }
 }

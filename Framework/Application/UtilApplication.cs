@@ -39,7 +39,7 @@
         /// <summary>
         /// Gets GridName without TypeRow.
         /// </summary>
-        internal string NameExclusive
+        public string NameExclusive
         {
             get
             {
@@ -53,9 +53,25 @@
         }
 
         /// <summary>
+        /// Gets IsNameExclusive. If true, Name is not combined with TypeRow.
+        /// </summary>
+        public bool IsNameExclusive
+        {
+            get
+            {
+                return Value == NameExclusive;
+            }
+        }
+
+        /// <summary>
         /// Gets GridName or (GridName and TypeRow) combined.
         /// </summary>
         internal string Value;
+
+        public override string ToString()
+        {
+            return base.ToString() + $" ({Value})";
+        }
 
         public override int GetHashCode()
         {
@@ -95,28 +111,25 @@
             : base(null)
         {
             this.TypeRow = typeRow;
-            this.IsNameExclusive = false;
-            ValueInit();
+            ValueInit(false);
         }
 
         public GridNameTypeRow(Type typeRow, string name, bool isNameExclusive = false)
             : base(name)
         {
             this.TypeRow = typeRow;
-            this.IsNameExclusive = isNameExclusive;
-            ValueInit();
+            ValueInit(isNameExclusive);
         }
 
         public GridNameTypeRow(Type typeRow, GridName gridName)
-            : this(typeRow, gridName.NameExclusive)
+            : this(typeRow, gridName.NameExclusive, gridName.IsNameExclusive)
         {
-            this.TypeRow = typeRow;
-            this.IsNameExclusive = false;
+
         }
 
-        private void ValueInit()
+        private void ValueInit(bool isNameExclusive)
         {
-            if (IsNameExclusive == false)
+            if (isNameExclusive == false)
             {
                 Value = UtilFramework.TypeToName(TypeRow) + "." + Name;
             }
@@ -125,14 +138,10 @@
                 Value = Name;
             }
             UtilFramework.Assert(Value != null);
+            UtilFramework.Assert(isNameExclusive == IsNameExclusive);
         }
 
         public readonly Type TypeRow;
-
-        /// <summary>
-        /// Gets IsNameExclusive. Do not combine GridName with TypeRow. Use this option if grid can display different tables like lookup.
-        /// </summary>
-        public readonly bool IsNameExclusive;
     }
 
     public class GridName<TRow> : GridNameTypeRow where TRow : Row
@@ -180,6 +189,11 @@
         public readonly string Value;
 
         public readonly IndexEnum Enum;
+
+        public override string ToString()
+        {
+            return base.ToString() + $" ({Value})";
+        }
 
         public override int GetHashCode()
         {
@@ -506,7 +520,7 @@
         /// <summary>
         /// Returns true, if column name contains "Id" according default naming convention.
         /// </summary>
-        internal static bool ConfigFieldNameSqlIsId(string fieldNameSql)
+        public static bool ConfigFieldNameSqlIsId(string fieldNameSql)
         {
             bool result = false;
             if (fieldNameSql != null)

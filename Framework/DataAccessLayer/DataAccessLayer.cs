@@ -146,17 +146,22 @@
 
         }
 
-        protected virtual internal void CellLookUp(out Type typeRow, out List<Row> rowList)
+        /// <summary>
+        /// Set lookup values, the user can select.
+        /// </summary>
+        /// <param name="typeRow">TypeRow needs to be defined, because rowList could be empty.</param>
+        /// <param name="rowList">List of values for lookup window.</param>
+        protected virtual internal void CellLookup(out Type typeRow, out List<Row> rowList)
         {
             typeRow = null;
             rowList = null;
         }
 
         /// <summary>
-        /// Override to handle clicked LookUp row.
+        /// Override to handle clicked Lookup row.
         /// </summary>
         /// <param name="row">LoowUp row which has been clicked.</param>
-        protected virtual internal void CellLookUpIsClick(Row row, ref string result)
+        protected virtual internal void CellLookupIsClick(Row row, ref string result)
         {
 
         }

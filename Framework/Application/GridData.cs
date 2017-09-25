@@ -890,9 +890,6 @@
         /// </summary>
         internal void LoadJson(GridName gridName)
         {
-            LoadJsonQuery(App.AppJson);
-            LoadJsonColumn(App.AppJson);
-            //
             GridDataJson gridDataJson = App.AppJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[gridName.Value].TypeRow;
@@ -968,6 +965,9 @@
             //
             if (gridDataJson != null)
             {
+                LoadJsonQuery(App.AppJson);
+                LoadJsonColumn(App.AppJson);
+                //
                 foreach (string gridName in gridDataJson.GridQueryList.Keys)
                 {
                     LoadJson(new GridName(gridName, true));

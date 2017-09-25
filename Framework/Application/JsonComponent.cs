@@ -142,7 +142,7 @@
             this.GridName = gridName.Value;
         }
 
-        public string GridName;
+        public readonly string GridName;
     }
 
     /// <summary>
@@ -190,7 +190,7 @@
 
         public string Text;
 
-        public string GridName;
+        public readonly string GridName;
 
         public string FieldName;
 
@@ -238,17 +238,17 @@
         public string FocusFieldName;
 
         /// <summary>
-        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for LookUp. Never sent to client.
+        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
         public string FocusGridNamePrevious;
 
         /// <summary>
-        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for LookUp. Never sent to client.
+        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
         public string FocusIndexPrevious;
 
         /// <summary>
-        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for LookUp. Never sent to client.
+        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
         public string FocusFieldNamePrevious;
     }
@@ -527,7 +527,7 @@
     }
 
     /// <summary>
-    /// Json Label.
+    /// Json Label. Text rendered inside html div. See also property CssClass (Use for example CssClass = "floatLeft").
     /// </summary>
     public class Label : Component
     {

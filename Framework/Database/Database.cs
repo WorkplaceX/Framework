@@ -104,13 +104,13 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellLookUp(out Type typeRow, out List<Row> rowList)
+        protected internal override void CellLookup(out Type typeRow, out List<Row> rowList)
         {
             typeRow = typeof(FrameworkApplicationType);
             rowList = UtilDataAccessLayer.Select(typeRow, null, null, false, 0, 5);
         }
 
-        protected internal override void CellLookUpIsClick(Row row, ref string result)
+        protected internal override void CellLookupIsClick(Row row, ref string result)
         {
             result = ((FrameworkApplicationType)row).Name;
         }
