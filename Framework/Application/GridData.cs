@@ -477,17 +477,17 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        internal void LoadDatabase(GridName gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, Type typeRow)
+        internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc)
         {
-            TypeRowSet(gridName, typeRow);
-            Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
+            TypeRowSet(gridName, gridName.TypeRow);
+            Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
             IQueryable query = rowTable.Where(App, gridName);
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
-                rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
+                rowList = UtilDataAccessLayer.Select(gridName.TypeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
             }
-            LoadRow(gridName, typeRow, rowList);
+            LoadRow(gridName, rowList);
         }
 
         /// <summary>
@@ -496,7 +496,7 @@
         public void LoadDatabaseInit(GridNameTypeRow gridName)
         {
             List<Row> rowList = new List<Row>();
-            LoadRow(gridName, gridName.TypeRow, rowList);
+            LoadRow(gridName, rowList);
         }
 
         /// <summary>
@@ -504,7 +504,7 @@
         /// </summary>
         public void LoadDatabase(GridNameTypeRow gridName)
         {
-            LoadDatabase(gridName, null, null, false, gridName.TypeRow);
+            LoadDatabase(gridName, null, null, false);
         }
 
         /// <summary>
@@ -577,18 +577,18 @@
                     }
                     rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
                 }
-                LoadRow(gridName, typeRow, rowList);
+                LoadRow(new GridNameTypeRow(typeRow, gridName), rowList);
             }
         }
 
         /// <summary>
         /// Load data directly from list into data grid.
         /// </summary>
-        public void LoadRow(GridName gridName, Type typeRow, List<Row> rowList)
+        public void LoadRow(GridNameTypeRow gridName, List<Row> rowList)
         {
-            if (typeRow == null || rowList == null)
+            if (rowList == null)
             {
-                TypeRowSet(gridName, typeRow);
+                TypeRowSet(gridName, gridName.TypeRow);
                 cellList.Remove(gridName);
                 this.rowList.Remove(gridName);
             }
@@ -596,7 +596,7 @@
             {
                 foreach (Row row in rowList)
                 {
-                    UtilFramework.Assert(row.GetType() == typeRow);
+                    UtilFramework.Assert(row.GetType() == gridName.TypeRow);
                 }
                 //
                 Dictionary<string, GridCellInternal> cellListFilter = null;
@@ -606,7 +606,7 @@
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
                 this.rowList[gridName] = new Dictionary<Index, GridRowInternal>(); // Clear data
-                TypeRowSet(gridName, typeRow);
+                TypeRowSet(gridName, gridName.TypeRow);
                 //
                 RowFilterAdd(gridName);
                 for (int index = 0; index < rowList.Count; index++)
@@ -626,17 +626,17 @@
         /// <summary>
         /// Load data from single row into data grid.
         /// </summary>
-        public void LoadRow(GridName gridName, Row row)
+        public void LoadRow(GridNameTypeRow gridName, Row row)
         {
             if (row == null)
             {
-                LoadRow(gridName, null, null); // Remove data grid.
+                LoadRow(gridName, (List<Row>)null); // Remove data grid.
             }
             else
             {
                 List<Row> rowList = new List<Row>();
                 rowList.Add(row);
-                LoadRow(gridName, row.GetType(), rowList);
+                LoadRow(gridName, rowList);
             }
         }
 
@@ -862,7 +862,7 @@
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
                 GridQuery gridQueryJson = gridDataJson.GridQueryList[gridName];
-                GridQueryInternal gridQuery = QueryGet(new GridName(gridName));
+                GridQueryInternal gridQuery = QueryGet(new GridName(gridName, true));
                 gridQuery.FieldNameOrderBy = gridQueryJson.FieldNameOrderBy;
                 gridQuery.IsOrderByDesc = gridQueryJson.IsOrderByDesc;
             }
@@ -879,7 +879,7 @@
             {
                 foreach (GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
-                    GridColumnInternal gridColumn = ColumnGet(new GridName(gridName), gridColumnJson.FieldName);
+                    GridColumnInternal gridColumn = ColumnGet(new GridName(gridName, true), gridColumnJson.FieldName);
                     gridColumn.IsClick = gridColumnJson.IsClick;
                 }
             }
@@ -970,7 +970,7 @@
             {
                 foreach (string gridName in gridDataJson.GridQueryList.Keys)
                 {
-                    LoadJson(new GridName(gridName));
+                    LoadJson(new GridName(gridName, true));
                 }
                 //
                 focusGridName = gridDataJson.FocusGridName;
@@ -1048,7 +1048,7 @@
             {
                 foreach (GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
-                    GridColumnInternal gridColumn = ColumnGet(new GridName(gridName), gridColumnJson.FieldName);
+                    GridColumnInternal gridColumn = ColumnGet(new GridName(gridName, true), gridColumnJson.FieldName);
                     gridColumnJson.IsClick = gridColumn.IsClick;
                 }
             }

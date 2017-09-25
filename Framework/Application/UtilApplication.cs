@@ -11,15 +11,46 @@
 
     public class GridName
     {
-        public GridName(string name)
+        internal GridName(string name, bool isJson)
         {
-            UtilFramework.Assert(Name == null || !Name.Contains("."));
+            if (isJson == false)
+            {
+                UtilFramework.Assert(name == null || (name.Contains(".") == false));
+            }
             //
             this.Name = name;
-            this.Value = Name;
+            this.Value = name;
+            this.IsJson = isJson;
         }
 
+        public GridName(string name) 
+            : this(name, false)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets IsJson. Indicating value has been loaded back from json.
+        /// </summary>
+        internal readonly bool IsJson;
+
         public readonly string Name;
+
+        /// <summary>
+        /// Gets GridName without TypeRow.
+        /// </summary>
+        internal string NameExclusive
+        {
+            get
+            {
+                string result = Value.Substring(Value.LastIndexOf(".") + ".".Length);
+                if (result == "")
+                {
+                    result = null;
+                }
+                return result;
+            }
+        }
 
         /// <summary>
         /// Gets GridName or (GridName and TypeRow) combined.
@@ -77,7 +108,7 @@
         }
 
         public GridNameTypeRow(Type typeRow, GridName gridName)
-            : this(typeRow, gridName.Name)
+            : this(typeRow, gridName.NameExclusive)
         {
             this.TypeRow = typeRow;
             this.IsNameExclusive = false;
@@ -99,7 +130,7 @@
         public readonly Type TypeRow;
 
         /// <summary>
-        /// Gets IsNameExclusive. Do not combine GridName with TypeRow. Use this option if grid can display different tables.
+        /// Gets IsNameExclusive. Do not combine GridName with TypeRow. Use this option if grid can display different tables like lookup.
         /// </summary>
         public readonly bool IsNameExclusive;
     }
