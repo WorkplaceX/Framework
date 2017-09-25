@@ -14,25 +14,19 @@ input {
 }
 
 .btn {
-    background: #b4e2f6;
+    background: #AECFFF;
     border: 0px;
     padding: 0;
 }
 
-.btn {
-    background: #b4e2f6;
-    border: 0px;
-    padding: 0;
+.btn:hover {
+    background: #8ccfed;
+    cursor: pointer;
 }
 
-    .btn:hover {
-        background: #8ccfed;
-        cursor: pointer;
-    }
-
-    .btn:focus {
-        outline: 0;
-    }
+.btn:focus {
+    outline: 0;
+}
 
 img {
     width: 100%
@@ -48,6 +42,7 @@ img {
 .gridFieldWithLabelLeft {
     width: 33%;
     float: left;
+    padding-left: 16px;
 }
 
 .gridFieldWithLabelRight {
@@ -57,23 +52,22 @@ img {
 }
 
 .labelGroup {
-    margin-top: 8px;
-    margin-bottom: 2px;
+    margin-top: 16px;
+    margin-bottom: 4px;
     font-weight: bold;
     border-bottom: 1px solid black;
-    background-color: lightblue;
 }
 
 .select-class1 {
-    background-color: rgba(255, 255, 64, 0.4);
+    background-color: rgba(204, 199, 69, 0.4);
 }
 
 .select-class2 {
-    background-color: rgba(255, 255, 64, 0.2);
+    background-color: rgba(204, 199, 69, 0.2);
 }
 
 .select-class3 {
-    background-color: rgba(255, 255, 64, 0.6);
+    background-color: rgba(204, 199, 69, 0.6);
 }
 
 .select-class {
@@ -133,14 +127,14 @@ img {
 
 .gridColumn {
     right: 10px;
-    background-color: #5858FA;
-    border-right: solid 2px;
+    background-color: #7CB1CC;
+    border-right: solid 1px;
     cursor: pointer;
     padding-top: 2px;
     padding-bottom: 2px;
     color: white;
     width: 100%;
-    background: linear-gradient(to bottom, #5858FA, #81BEF7);
+    background: linear-gradient(to bottom, #7CB1CC, #AECFFF);
 }
 
 .floatLeft {

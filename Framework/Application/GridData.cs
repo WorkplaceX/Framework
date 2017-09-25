@@ -1205,6 +1205,7 @@
             {
                 if (!rowList.ContainsKey(gridName))
                 {
+                    gridDataJson.ColumnList[gridName.Value] = new List<GridColumn>(); // Remove GridColumn (header).
                     gridDataJson.RowList[gridName.Value] = new List<GridRow>();
                 }
             }
