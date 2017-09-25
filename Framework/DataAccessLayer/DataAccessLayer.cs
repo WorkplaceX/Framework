@@ -107,7 +107,7 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void InfoColumn(App app, GridName gridName, Type typeRow, InfoColumn result)
+        protected virtual internal void InfoColumn(App app, GridNameTypeRow gridName, InfoColumn result)
         {
 
         }

@@ -321,29 +321,26 @@
 
         internal readonly App App;
 
-        private GridName gridName;
-
-        private Type TypeRow;
+        private GridNameTypeRow gridName;
 
         /// <summary>
         /// (FieldNameCSharp, Column).
         /// </summary>
         Dictionary<string, InfoColumn> infoColumnList = new Dictionary<string, InfoColumn>();
 
-        internal void ColumnInit(App app, GridName gridName, Type typeRow)
+        internal void ColumnInit(App app, GridNameTypeRow gridName)
         {
             UtilFramework.Assert(app == App);
             this.gridName = gridName;
-            this.TypeRow = typeRow;
             //
             infoColumnList = new Dictionary<string, InfoColumn>();
-            var columnList = UtilDataAccessLayer.ColumnList(typeRow);
+            var columnList = UtilDataAccessLayer.ColumnList(gridName.TypeRow);
             foreach (Cell column in columnList)
             {
                 infoColumnList[column.FieldNameCSharp] = new InfoColumn(column);
             }
             // Config from Db
-            List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(typeRow);
+            List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(gridName.TypeRow);
             // Text
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
@@ -369,16 +366,16 @@
             // Override App
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
-                app.InfoColumn(gridName, typeRow, infoColumn);
+                app.InfoColumn(gridName, infoColumn);
             }
             // Override Column
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
-                infoColumn.ColumnInternal.InfoColumn(app, gridName, typeRow, infoColumn);
+                infoColumn.ColumnInternal.InfoColumn(app, gridName, infoColumn);
             }
         }
 
-        internal void CellInit(App app, GridName gridName, Type typeRow, Row row, Index index)
+        internal void CellInit(App app, GridNameTypeRow gridName, Row row, Index index)
         {
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
@@ -410,18 +407,18 @@
         /// <summary>
         /// Returns InfoColumn.
         /// </summary>
-        internal InfoColumn ColumnGet(App app, GridName gridName, Type typeRow, Cell column)
+        internal InfoColumn ColumnGet(App app, GridNameTypeRow gridName, Cell column)
         {
-            UtilFramework.Assert(this.App == app && this.gridName == gridName && this.TypeRow == typeRow);
+            UtilFramework.Assert(this.App == app && this.gridName == gridName);
             return infoColumnList[column.FieldNameCSharp];
         }
 
         /// <summary>
         /// Returns InfoCell.
         /// </summary>
-        internal InfoCell CellGet(App app, GridName gridName, Type typeRow, Cell column)
+        internal InfoCell CellGet(App app, GridNameTypeRow gridName, Cell column)
         {
-            UtilFramework.Assert(this.App == app && this.gridName == gridName && this.TypeRow == typeRow);
+            UtilFramework.Assert(this.App == app && this.gridName == gridName);
             return infoColumnList[column.FieldNameCSharp].InfoCell;
         }
     }

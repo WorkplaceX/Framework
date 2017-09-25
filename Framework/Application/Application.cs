@@ -169,7 +169,7 @@
         /// <summary>
         /// Define for example grid column header globaly. See also method Cell.InfoColumn();
         /// </summary>
-        protected virtual internal void InfoColumn(GridName gridName, Type typeRow, InfoColumn result)
+        protected virtual internal void InfoColumn(GridNameTypeRow gridName, InfoColumn result)
         {
             
         }
