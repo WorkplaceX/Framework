@@ -180,11 +180,11 @@
     {
         public GridFieldWithLabel() { }
 
-        public GridFieldWithLabel(Component owner, string text, string gridName, string fieldName)
+        public GridFieldWithLabel(Component owner, string text, GridName gridName, string fieldName)
             : base(owner)
         {
             this.Text = text;
-            this.GridName = gridName;
+            this.GridName = gridName.Value;
             this.FieldName = fieldName;
         }
 

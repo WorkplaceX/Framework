@@ -449,8 +449,8 @@ export class GridField {
   gridCell() {
     let result : any = null;
     let point = this.point();
-    if (point.gridName != null) { 
-      result = point.gridData.CellList[point.gridName][point.fieldName][point.index]; // GridName can be null if no focus is set.
+    if (point.gridName != null && point.gridData.CellList[point.gridName] != null) { // GridName can be null if no focus is set or GridName might not exist.
+      result = point.gridData.CellList[point.gridName][point.fieldName][point.index];
     }
     if (result == null) {
       result = {};
@@ -493,8 +493,7 @@ export class GridField {
   onChange() {
     let isUpdate = false;
     let point = this.point();
-    if (point.gridName != null) { 
-      // GridName can be null if no focus is set.
+    if (point.gridName != null && point.gridData.ColumnList[point.gridName]) { // GridName can be null if no focus is set. Or GridName might not exist.
       for (let column of point.gridData.ColumnList[point.gridName]) {
         if (column.FieldName == point.fieldName) {
           isUpdate = column.IsUpdate;
