@@ -328,8 +328,11 @@
                 cell.CellLookupIsClick(rowLookup, ref result);
                 GridCell gridCell = gridDataJson.CellList[gridDataJson.FocusGridNamePrevious][gridDataJson.FocusFieldNamePrevious][gridDataJson.FocusIndexPrevious];
                 gridCell.IsModify = true;
-                gridCell.IsO = true;
-                gridCell.O = gridCell.T;
+                if (gridCell.IsO == false)
+                {
+                    gridCell.IsO = true;
+                    gridCell.O = gridCell.T;
+                }
                 gridCell.T = result;
                 gridData.LoadJson();
             }

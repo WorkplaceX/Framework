@@ -17,8 +17,6 @@
         protected internal override void InitJson(App app)
         {
             new Label(this) { Text = $"Version={ UtilFramework.VersionServer }" };
-            new Literal(this) { TextHtml = "<h1>Lookup</h1>" };
-            new Grid(this, new GridName("Lookup"));
             new Literal(this) { TextHtml = "<h1>Application</h1>" };
             new Grid(this, new GridName<FrameworkApplicationView>());
             app.GridData.LoadDatabase(new GridName<FrameworkApplicationView>());
