@@ -213,6 +213,16 @@
                 return base.Equals(obj);
             }
         }
+
+        public static bool operator ==(Index left, Index right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Index left, Index right)
+        {
+            return !Equals(left, right);
+        }
     }
 
     /// <summary>

@@ -415,6 +415,12 @@ export class RemoveSelectorDirective {
       <button class="btn btn-primary" (click)="clickFileUpload()">{{ Text }}</button>
       <input #inputElement type="file" class="btn btn-primary" (change)="changeFileUpload($event)" style='display:none'/>
     </div>
+
+    <div class="gridLookup" *ngIf="gridCell().IsLookup">
+      <div>
+        <div data-Grid [json]="{ GridName: 'Lookup' }"></div>
+      </div>
+    </div>
   </div>
 `
 })

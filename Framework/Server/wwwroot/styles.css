@@ -19,14 +19,14 @@ input {
     padding: 0;
 }
 
-.btn:hover {
-    background: #8ccfed;
-    cursor: pointer;
-}
+    .btn:hover {
+        background: #8ccfed;
+        cursor: pointer;
+    }
 
-.btn:focus {
-    outline: 0;
-}
+    .btn:focus {
+        outline: 0;
+    }
 
 img {
     width: 100%
@@ -135,6 +135,13 @@ img {
     color: white;
     width: 100%;
     background: linear-gradient(to bottom, #7CB1CC, #AECFFF);
+}
+
+.gridLookup {
+    position: absolute;
+    background-color: white;
+    border: 2px solid rgba(0, 64, 255, 0.7);
+    box-shadow: 10px 10px 5px #888888;
 }
 
 .floatLeft {
