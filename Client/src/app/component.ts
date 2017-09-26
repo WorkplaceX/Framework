@@ -283,10 +283,6 @@ export class GridRow {
   template: `
   <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsFocus}">
     <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
-
-    <div *ngIf="jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E != null" class="ErrorCell">
-      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].E }}
-    </div>
   </div>
   `,
   host: {
@@ -414,6 +410,10 @@ export class RemoveSelectorDirective {
     <div *ngIf="gridCell().CellEnum == 3">
       <button class="btn btn-primary" (click)="clickFileUpload()">{{ Text }}</button>
       <input #inputElement type="file" class="btn btn-primary" (change)="changeFileUpload($event)" style='display:none'/>
+    </div>
+
+    <div *ngIf="gridCell().E != null" class="ErrorCell">
+      {{ gridCell().E }}
     </div>
 
     <div class="gridLookup" *ngIf="gridCell().IsLookup">
