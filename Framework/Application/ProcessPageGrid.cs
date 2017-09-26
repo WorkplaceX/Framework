@@ -341,39 +341,71 @@
     /// </summary>
     internal class ProcessGridLookup : Process
     {
-        protected internal override void Run(App app)
+        /// <summary>
+        /// Returns true, if cell has been clicked or text has been entered.
+        /// </summary>
+        private bool IsLookupOpen(App app, out GridName gridName, out Index index, out string fieldName)
         {
-            bool isLookup = false;
+            bool result = false;
+            gridName = null;
+            index = null;
+            fieldName = null;
+            //
             GridDataJson gridDataJson = app.AppJson.GridDataJson;
-            foreach (string gridName in gridDataJson.RowList.Keys)
+            foreach (string gridNameItem in gridDataJson.RowList.Keys)
             {
-                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                foreach (GridRow gridRow in gridDataJson.RowList[gridNameItem])
                 {
-                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridNameItem])
                     {
-                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
+                        GridCell gridCell = gridDataJson.CellList[gridNameItem][gridColumn.FieldName][gridRow.Index];
                         if (gridCell.IsClick || gridCell.IsModify)
                         {
-                            isLookup = true;
+                            result = true;
+                            gridName = new GridName(gridNameItem, true);
+                            index = new Index(gridRow.Index);
+                            fieldName = gridColumn.FieldName;
                             break;
                         }
                     }
                 }
             }
+            return result;
+        }
+
+        protected internal override void Run(App app)
+        {
+            GridName gridName;
+            Index index;
+            string fieldName;
+            bool isLookupOpen = IsLookupOpen(app, out gridName, out index, out fieldName);
             //
-            if (isLookup)
+            GridData gridData = app.GridData;
+            if (isLookupOpen)
             {
-                if (gridDataJson.FocusFieldName != null)
+                Row row = gridData.Row(gridName, index);
+                GridCellInternal gridCellInternal = gridData.CellGet(gridName, index, fieldName);
+                //
+                Type typeRow = gridData.TypeRow(gridName);
+                Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == fieldName).First();
+                List<Row> rowList;
+                cell.CellLookup(out typeRow, out rowList);
+                new GridNameTypeRow(null);
+                bool isLoadRow = gridData.LoadRow(new GridNameTypeRow(typeRow, UtilApplication.GridNameLookup), rowList);
+                //
+                if (isLoadRow)
                 {
-                    GridData gridData = app.GridData;
-                    Type typeRow = gridData.TypeRow(new GridName(gridDataJson.FocusGridName, true));
-                    var row = gridData.Row(new GridName(gridDataJson.FocusGridName, true), new Index(gridDataJson.FocusIndex));
-                    Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
-                    List<Row> rowList;
-                    cell.CellLookup(out typeRow, out rowList);
-                    gridData.LoadRow(new GridNameTypeRow(typeRow, "Lookup", true), rowList);
-                    gridData.SaveJson();
+                    gridData.LookupOpen(gridName, index, fieldName);
                 }
+                else
+                {
+                    gridData.LookupClose();
+                }
+                gridData.SaveJson();
+            }
+            else
+            {
+                gridData.LookupClose();
             }
         }
     }

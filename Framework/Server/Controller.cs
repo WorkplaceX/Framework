@@ -159,6 +159,9 @@
                 htmlFind = "<div data-app></div>";
                 UtilFramework.Assert(html.Contains(htmlFind));
                 result = html.Replace(htmlFind, result);
+                //
+                htmlFind = "innerHTML=\"";
+                result = result.Replace(htmlFind, "data-innerHTML=\""); // Prefix data for html5.
             }
             appJson.IsBrowser = true; // Client side rendering mode.
             string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());

@@ -439,6 +439,21 @@
 
     public static class UtilApplication
     {
+        [ThreadStatic]
+        private static GridName gridNameLookup;
+
+        public static GridName GridNameLookup
+        {
+            get
+            {
+                if (gridNameLookup == null)
+                {
+                    gridNameLookup = new GridName("Lookup");
+                }
+                return gridNameLookup;
+            }
+        }
+
         /// <summary>
         /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
         /// </summary>

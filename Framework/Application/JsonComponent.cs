@@ -303,6 +303,8 @@
         /// </summary>
         public bool IsFocus;
 
+        public bool IsLookup;
+
         public bool IsClick;
 
         /// <summary>

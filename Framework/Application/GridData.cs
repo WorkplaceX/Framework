@@ -61,6 +61,8 @@
         /// </summary>
         public bool IsModify;
 
+        public bool IsLookup;
+
         /// <summary>
         /// Gets or sets IsOriginal. Text is modified by user. Original text is stored in TextOriginal.
         /// </summary>
@@ -322,9 +324,55 @@
         }
 
         /// <summary>
-        /// (GridName, Index, FieldName, Text).
+        /// (GridName, Index, FieldName, GridCellInternal).
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>> cellList = new Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>>();
+
+        /// <summary>
+        /// Set IsLookup flag on cell.
+        /// </summary>
+        internal void LookupOpen(GridName gridName, Index index, string fieldName)
+        {
+            int lookupCount = 0;
+            foreach (GridName gridNameItem in cellList.Keys)
+            {
+                foreach (Index indexItem in cellList[gridNameItem].Keys)
+                {
+                    foreach (string fieldNameItem in cellList[gridNameItem][indexItem].Keys)
+                    {
+                        bool isLookup = gridName == gridNameItem && index == indexItem && fieldName == fieldNameItem;
+                        if (isLookup)
+                        {
+                            lookupCount += 1;
+                        }
+                        if (lookupCount > 1)
+                        {
+                            isLookup = false;
+                        }
+                        cellList[gridNameItem][indexItem][fieldNameItem].IsLookup = isLookup;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set IsLookup flag to false.
+        /// </summary>
+        internal void LookupClose()
+        {
+            foreach (GridName gridNameItem in cellList.Keys)
+            {
+                foreach (Index indexItem in cellList[gridNameItem].Keys)
+                {
+                    foreach (string fieldNameItem in cellList[gridNameItem][indexItem].Keys)
+                    {
+                        cellList[gridNameItem][indexItem][fieldNameItem].IsLookup = false;
+                    }
+                }
+            }
+            //
+            LoadRow(new GridNameTypeRow(null, UtilApplication.GridNameLookup), (List<Row>)null);
+        }
 
         internal GridCellInternal CellGet(GridName gridName, Index index, string fieldName)
         {
@@ -582,11 +630,12 @@
         }
 
         /// <summary>
-        /// Load data directly from list into data grid.
+        /// Load data directly from list into data grid. Returns false, if data grid has been removed.
         /// </summary>
-        public void LoadRow(GridNameTypeRow gridName, List<Row> rowList)
+        public bool LoadRow(GridNameTypeRow gridName, List<Row> rowList)
         {
-            if (rowList == null)
+            bool result = gridName.TypeRow != null && rowList != null;
+            if (result == false)
             {
                 TypeRowSet(gridName);
                 cellList.Remove(gridName);
@@ -621,6 +670,7 @@
                     cellList[gridName][new Index(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
                 }
             }
+            return result;
         }
 
         /// <summary>
@@ -918,9 +968,12 @@
                     cell.Constructor(gridRow.Row);
                     string fieldName = cell.FieldNameCSharp;
                     //
-                    CellGet(gridName, rowIndex, fieldName).IsClick = gridDataJson.CellList[gridName.Value][fieldName][row.Index].IsClick;
-                    CellGet(gridName, rowIndex, fieldName).IsModify = gridDataJson.CellList[gridName.Value][fieldName][row.Index].IsModify;
-                    CellGet(gridName, rowIndex, fieldName).PlaceHolder = gridDataJson.CellList[gridName.Value][fieldName][row.Index].PlaceHolder;
+                    GridCell gridCell = gridDataJson.CellList[gridName.Value][fieldName][row.Index];
+                    GridCellInternal gridCellInternal = CellGet(gridName, rowIndex, fieldName);
+                    gridCellInternal.IsClick = gridCell.IsClick;
+                    gridCellInternal.IsModify = gridCell.IsModify;
+                    gridCellInternal.IsLookup = gridCell.IsLookup;
+                    gridCellInternal.PlaceHolder = gridCell.PlaceHolder;
                     string text;
                     if (gridDataJson.CellList[gridName.Value][cell.FieldNameCSharp][row.Index].IsO)
                     {
@@ -1174,28 +1227,29 @@
                             }
                             cell.CellValueToText(App, gridName, index, ref textJson); // Override text.
                             App.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
-                            GridCellInternal cellInternal = CellGet(gridName, index, fieldName);
+                            GridCellInternal gridCellInternal = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[gridName.Value].ContainsKey(fieldName))
                             {
                                 gridDataJson.CellList[gridName.Value][fieldName] = new Dictionary<string, GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCellJson = new GridCell() { IsClick = cellInternal.IsClick, IsModify = cellInternal.IsModify, E = errorCell };
+                            GridCell gridCellJson = new GridCell() { IsClick = gridCellInternal.IsClick, IsModify = gridCellInternal.IsModify, E = errorCell };
                             gridDataJson.CellList[gridName.Value][fieldName][index.Value] = gridCellJson;
                             //
                             SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson, info);
                             //
-                            if (cellInternal.IsOriginal == false)
+                            if (gridCellInternal.IsOriginal == false)
                             {
                                 gridCellJson.T = textJson;
                             }
                             else
                             {
                                 gridCellJson.O = textJson;
-                                gridCellJson.T = cellInternal.Text; // Never overwrite user entered text.
+                                gridCellJson.T = gridCellInternal.Text; // Never overwrite user entered text.
                                 gridCellJson.IsO = true;
                             }
                             gridCellJson.PlaceHolder = infoCell.PlaceHolder;
+                            gridCellJson.IsLookup = gridCellInternal.IsLookup;
                         }
                     }
                 }
