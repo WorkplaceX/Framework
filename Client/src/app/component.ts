@@ -39,9 +39,9 @@ export class AppComponent {
 
 /*
   <p>
-  json.FocusGridName=({{ dataService.json.GridDataJson?.FocusGridName }})<br />
-  json.FocusFieldName=({{ dataService.json.GridDataJson?.FocusFieldName }})<br />
-  json.FocusIndex=({{ dataService.json.GridDataJson?.FocusIndex }})<br />
+  json.SelectGridName=({{ dataService.json.GridDataJson?.SelectGridName }})<br />
+  json.SelectFieldName=({{ dataService.json.GridDataJson?.SelectFieldName }})<br />
+  json.SelectIndex=({{ dataService.json.GridDataJson?.SelectIndex }})<br />
   </p>
 
   <p>
@@ -281,7 +281,7 @@ export class GridRow {
 @Component({
   selector: '[data-GridCell]',
   template: `
-  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsFocus}">
+  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
     <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
   </div>
   `,
@@ -445,17 +445,17 @@ export class GridField {
     fieldName = this.fieldName;
     index = this.index;
     if (gridName == null) {
-        gridName = gridData.FocusGridName;
-        fieldName = gridData.FocusFieldName;
-        index = gridData.FocusIndex;
+        gridName = gridData.SelectGridName;
+        fieldName = gridData.SelectFieldName;
+        index = gridData.SelectIndex;
     }
-    return { gridData: gridData, gridName: gridName, fieldName: fieldName, index: index }; // GridName can be null if no focus is set.
+    return { gridData: gridData, gridName: gridName, fieldName: fieldName, index: index }; // GridName can be null if none is selected.
   }
 
   gridCell() {
     let result : any = null;
     let point = this.point();
-    if (point.gridName != null && point.gridData.CellList[point.gridName] != null) { // GridName can be null if no focus is set or GridName might not exist.
+    if (point.gridName != null && point.gridData.CellList[point.gridName] != null) { // GridName can be null if none is selected or GridName might not exist.
       result = point.gridData.CellList[point.gridName][point.fieldName][point.index];
     }
     if (result == null) {
@@ -499,7 +499,7 @@ export class GridField {
   onChange() {
     let isUpdate = false;
     let point = this.point();
-    if (point.gridName != null && point.gridData.ColumnList[point.gridName]) { // GridName can be null if no focus is set. Or GridName might not exist.
+    if (point.gridName != null && point.gridData.ColumnList[point.gridName]) { // GridName can be null if none is selected. Or GridName might not exist.
       for (let column of point.gridData.ColumnList[point.gridName]) {
         if (column.FieldName == point.fieldName) {
           isUpdate = column.IsUpdate;
@@ -599,7 +599,7 @@ export class GridKeyboard {
         // Index
         for (let keyRow in gridData.RowList[gridName]) {
           let index = gridData.RowList[gridName][keyRow].Index;
-          gridData.CellList[gridName][fieldName][index].IsSelect = gridData.FocusGridName == gridName && gridData.FocusFieldName == fieldName && gridData.FocusIndex == index;
+          gridData.CellList[gridName][fieldName][index].IsSelect = gridData.SelectGridName == gridName && gridData.SelectFieldName == fieldName && gridData.SelectIndex == index;
         }
       }
     }
@@ -608,28 +608,28 @@ export class GridKeyboard {
 
   public _keydown(event: KeyboardEvent) {
     var gridData: any = this.dataService.json.GridDataJson;
-    if (gridData.FocusGridName != null) {
+    if (gridData.SelectGridName != null) {
       // Tab
       if (event.keyCode == 9 && event.shiftKey == false) { 
-        gridData.FocusFieldName = this.next(gridData.ColumnList[gridData.FocusGridName].filter(item => item.IsVisible == true), gridData.FocusFieldName, "FieldName").Next;
+        gridData.SelectFieldName = this.next(gridData.ColumnList[gridData.SelectGridName].filter(item => item.IsVisible == true), gridData.SelectFieldName, "FieldName").Next;
         this.select();
         event.preventDefault();
       }
       // Tab back
       if (event.keyCode == 9 && event.shiftKey == true) {
-        gridData.FocusFieldName = this.next(gridData.ColumnList[gridData.FocusGridName].filter(item => item.IsVisible == true), gridData.FocusFieldName, "FieldName").Previous;
+        gridData.SelectFieldName = this.next(gridData.ColumnList[gridData.SelectGridName].filter(item => item.IsVisible == true), gridData.SelectFieldName, "FieldName").Previous;
         this.select();
         event.preventDefault();
       }
       // Up
       if (event.keyCode == 38) {
-        gridData.FocusIndex = this.next(gridData.RowList[gridData.FocusGridName], gridData.FocusIndex, "Index").Previous;
+        gridData.SelectIndex = this.next(gridData.RowList[gridData.SelectGridName], gridData.SelectIndex, "Index").Previous;
         this.select();
         event.preventDefault();
       }
       // Down
       if (event.keyCode == 40) {
-        gridData.FocusIndex = this.next(gridData.RowList[gridData.FocusGridName], gridData.FocusIndex, "Index").Next;
+        gridData.SelectIndex = this.next(gridData.RowList[gridData.SelectGridName], gridData.SelectIndex, "Index").Next;
         this.select();
         event.preventDefault();
       }

@@ -160,7 +160,7 @@
     }
 
     /// <summary>
-    /// Json GridField. Hosts GridCell. Displays currently focused cell.
+    /// Json GridField. Hosts GridCell. Displays currently selected cell.
     /// </summary>
     public class GridFieldSingle : Component
     {
@@ -223,34 +223,34 @@
         public Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>> CellList;
 
         /// <summary>
-        /// Focused grid cell.
+        /// Selected grid cell.
         /// </summary>
-        public string FocusGridName;
+        public string SelectGridName;
 
         /// <summary>
-        /// Focused grid cell.
+        /// Selected grid cell.
         /// </summary>
-        public string FocusIndex;
+        public string SelectIndex;
 
         /// <summary>
-        /// Focused grid cell.
+        /// Selected grid cell.
         /// </summary>
-        public string FocusFieldName;
+        public string SelectFieldName;
 
         /// <summary>
-        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
+        /// Selected grid cell. Before select has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
-        public string FocusGridNamePrevious;
+        public string SelectGridNamePrevious;
 
         /// <summary>
-        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
+        /// Selected grid cell. Before select has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
-        public string FocusIndexPrevious;
+        public string SelectIndexPrevious;
 
         /// <summary>
-        /// Focused grid cell. Before focus has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
+        /// Selected grid cell. Before select has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
-        public string FocusFieldNamePrevious;
+        public string SelectFieldNamePrevious;
     }
 
     public enum GridCellEnum
@@ -299,9 +299,9 @@
         public string E;
 
         /// <summary>
-        /// Gets or sets IsFocus.
+        /// Gets or sets IsSelect.
         /// </summary>
-        public bool IsFocus;
+        public bool IsSelect;
 
         public bool IsLookup;
 

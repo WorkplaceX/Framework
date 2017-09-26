@@ -113,7 +113,7 @@
     }
 
     /// <summary>
-    /// Grid row or cell is clicked. Set focus.
+    /// Grid row or cell is clicked. Set IsSelect.
     /// </summary>
     internal class ProcessGridIsClick : Process
     {
@@ -129,13 +129,13 @@
         {
             GridDataJson gridDataJson = appJson.GridDataJson;
             //
-            gridDataJson.FocusGridNamePrevious = gridDataJson.FocusGridName;
-            gridDataJson.FocusIndexPrevious = gridDataJson.FocusIndex;
-            gridDataJson.FocusFieldNamePrevious = gridDataJson.FocusFieldName;
+            gridDataJson.SelectGridNamePrevious = gridDataJson.SelectGridName;
+            gridDataJson.SelectIndexPrevious = gridDataJson.SelectIndex;
+            gridDataJson.SelectFieldNamePrevious = gridDataJson.SelectFieldName;
             //
-            gridDataJson.FocusGridName = gridName;
-            gridDataJson.FocusIndex = index.Value;
-            gridDataJson.FocusFieldName = fieldName;
+            gridDataJson.SelectGridName = gridName;
+            gridDataJson.SelectIndex = index.Value;
+            gridDataJson.SelectFieldName = fieldName;
         }
 
         protected internal override void Run(App app)
@@ -264,9 +264,9 @@
                 }
             }
             //
-            gridDataJson.FocusGridNamePrevious = null;
-            gridDataJson.FocusIndexPrevious = null;
-            gridDataJson.FocusFieldNamePrevious = null;
+            gridDataJson.SelectGridNamePrevious = null;
+            gridDataJson.SelectIndexPrevious = null;
+            gridDataJson.SelectFieldNamePrevious = null;
         }
     }
 
@@ -321,12 +321,12 @@
             if (rowLookup != null)
             {
                 GridData gridData = app.GridData;
-                var row = gridData.Row(new GridName(gridDataJson.FocusGridName, true), new Index(gridDataJson.FocusIndex));
-                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldNamePrevious).First();
-                Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.FieldNameCSharp == gridDataJson.FocusFieldName).First();
+                var row = gridData.Row(new GridName(gridDataJson.SelectGridName, true), new Index(gridDataJson.SelectIndex));
+                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == gridDataJson.SelectFieldNamePrevious).First();
+                Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.FieldNameCSharp == gridDataJson.SelectFieldName).First();
                 string result = cellLookup.Value.ToString();
                 cell.CellLookupIsClick(rowLookup, ref result);
-                GridCell gridCell = gridDataJson.CellList[gridDataJson.FocusGridNamePrevious][gridDataJson.FocusFieldNamePrevious][gridDataJson.FocusIndexPrevious];
+                GridCell gridCell = gridDataJson.CellList[gridDataJson.SelectGridNamePrevious][gridDataJson.SelectFieldNamePrevious][gridDataJson.SelectIndexPrevious];
                 gridCell.IsModify = true;
                 if (gridCell.IsO == false)
                 {
@@ -414,11 +414,11 @@
     }
 
     /// <summary>
-    /// Set focus on focused GridCell, or to null, if cell does not exist anymore.
+    /// Set IsSelect on selected GridCell, or to null, if cell does not exist anymore.
     /// </summary>
-    internal class ProcessGridFocus : Process
+    internal class ProcessGridCellIsSelect : Process
     {
-        private void IsFocus(GridDataJson gridDataJson)
+        private void IsSelect(GridDataJson gridDataJson)
         {
             foreach (string gridName in gridDataJson.RowList.Keys)
             {
@@ -427,8 +427,8 @@
                     foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
                         GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        bool isSelect = gridDataJson.FocusGridName == gridName && gridDataJson.FocusFieldName == gridColumn.FieldName && gridDataJson.FocusIndex == gridRow.Index;
-                        gridCell.IsFocus = isSelect;
+                        bool isSelect = gridDataJson.SelectGridName == gridName && gridDataJson.SelectFieldName == gridColumn.FieldName && gridDataJson.SelectIndex == gridRow.Index;
+                        gridCell.IsSelect = isSelect;
                     }
                 }
             }
@@ -437,12 +437,12 @@
         protected internal override void Run(App app)
         {
             GridDataJson gridDataJson = app.AppJson.GridDataJson;
-            bool isExist = false; // Focused field exists
-            if (gridDataJson.FocusFieldName != null)
+            bool isExist = false; // Selected field exists
+            if (gridDataJson.SelectFieldName != null)
             {
-                if (gridDataJson.RowList[gridDataJson.FocusGridName].Exists(item => item.Index == gridDataJson.FocusIndex)) // Focused row exists
+                if (gridDataJson.RowList[gridDataJson.SelectGridName].Exists(item => item.Index == gridDataJson.SelectIndex)) // Selected row exists
                 {
-                    if (gridDataJson.ColumnList[gridDataJson.FocusGridName].Exists(item => item.FieldName == gridDataJson.FocusFieldName)) // Focused column exists
+                    if (gridDataJson.ColumnList[gridDataJson.SelectGridName].Exists(item => item.FieldName == gridDataJson.SelectFieldName)) // Selected column exists
                     {
                         isExist = true;
                     }
@@ -452,13 +452,13 @@
             {
                 if (app.AppJson.GridDataJson != null)
                 {
-                    app.AppJson.GridDataJson.FocusFieldName = null;
-                    app.AppJson.GridDataJson.FocusGridName = null;
-                    app.AppJson.GridDataJson.FocusIndex = null;
+                    app.AppJson.GridDataJson.SelectFieldName = null;
+                    app.AppJson.GridDataJson.SelectGridName = null;
+                    app.AppJson.GridDataJson.SelectIndex = null;
                 }
             }
             //
-            IsFocus(gridDataJson);
+            IsSelect(gridDataJson);
         }
     }
 

@@ -295,11 +295,11 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, GridRowInternal>> rowList = new Dictionary<GridName, Dictionary<Index, GridRowInternal>>();
 
-        private string focusGridName;
+        private string selectGridName;
 
-        private Index focusIndex;
+        private Index selectIndex;
 
-        private string focusFieldName;
+        private string selectFieldName;
 
         private GridRowInternal RowGet(GridName gridName, Index index)
         {
@@ -742,11 +742,11 @@
         }
 
         /// <summary>
-        /// Focus last row of data grid.
+        /// Select last row of data grid.
         /// </summary>
-        private void SaveDatabaseFocusGridLastIndex(GridName gridName)
+        private void SaveDatabaseSelectGridLastIndex(GridName gridName)
         {
-            UtilFramework.Assert(focusGridName == gridName.Value);
+            UtilFramework.Assert(selectGridName == gridName.Value);
             Index indexLast = null;
             foreach (Index index in rowList[gridName].Keys)
             {
@@ -756,7 +756,7 @@
                 }
             }
             UtilFramework.Assert(indexLast != null);
-            focusIndex = indexLast;
+            selectIndex = indexLast;
         }
 
         /// <summary>
@@ -799,7 +799,7 @@
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
                                         RowNewAdd(gridName); // Make "New" to "Index" and add "New"
-                                        SaveDatabaseFocusGridLastIndex(gridName);
+                                        SaveDatabaseSelectGridLastIndex(gridName);
                                     }
                                     catch (Exception exception)
                                     {
@@ -1026,9 +1026,9 @@
                     LoadJson(new GridName(gridName, true));
                 }
                 //
-                focusGridName = gridDataJson.FocusGridName;
-                focusIndex = new Index(gridDataJson.FocusIndex);
-                focusFieldName = gridDataJson.FocusFieldName;
+                selectGridName = gridDataJson.SelectGridName;
+                selectIndex = new Index(gridDataJson.SelectIndex);
+                selectFieldName = gridDataJson.SelectFieldName;
             }
         }
 
@@ -1123,11 +1123,11 @@
             }
         }
 
-        private void SaveJsonFocus(AppJson appJson)
+        private void SaveJsonSelect(AppJson appJson)
         {
-            appJson.GridDataJson.FocusGridName = focusGridName;
-            appJson.GridDataJson.FocusIndex = focusIndex?.Value;
-            appJson.GridDataJson.FocusFieldName = focusFieldName;
+            appJson.GridDataJson.SelectGridName = selectGridName;
+            appJson.GridDataJson.SelectIndex = selectIndex?.Value;
+            appJson.GridDataJson.SelectFieldName = selectFieldName;
         }
 
         /// <summary>
@@ -1265,7 +1265,7 @@
             }
             SaveJsonColumn(appJson);
             SaveJsonQuery(appJson);
-            SaveJsonFocus(appJson);
+            SaveJsonSelect(appJson);
         }
     }
 }
