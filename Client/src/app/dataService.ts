@@ -31,6 +31,12 @@ export class DataService {
 
     RequestCount: number;
 
+    isSend: boolean;
+
+    isWait: boolean;
+
+    idFocusCount: number = 0; // Every GridField gets its own id.
+
     http: Http;
 
     constructor( @Inject('angularJson') angularJson: string, @Inject('requestBodyJson') private requestBodyJson: any, http: Http) {
@@ -60,28 +66,45 @@ export class DataService {
     }
 
     update() {
+        if (this.isSend == null) { this.isSend = false };
         if (this.RequestCount == null) { this.RequestCount = 0; };
         if (this.log == null) { this.log = "" };
         this.RequestCount += 1;
         this.json.RequestCount = this.RequestCount;
-        // POST
-        this.log += "Send; ";
-        this.http.post(this.json.RequestUrl + 'Application.json', JSON.stringify(this.json))
-        .map(res => res)
-        .subscribe(
-            body => { 
-                var jsonReceive: Json = <Json>(body.json());
-                if (this.json.RequestCount == jsonReceive.RequestCount) {
-                    this.json = jsonReceive;
-                } else {
-                    this.log += "Error RequestCount; "
-                }
-                if (this.json.ErrorProcess != null) {
-                    window.location.replace(this.json.RequestUrl);
-                }
-            },
-            err => this.log += err + "; ",
-            () => this.log += "Receive; "
-        );
+
+        if (this.isSend == false)
+        {
+            this.isSend = true;
+            // POST
+            this.log += "Send; ";
+            this.http.post(this.json.RequestUrl + 'Application.json', JSON.stringify(this.json))
+            .map(res => res)
+            .subscribe(
+                body => { 
+                    var jsonReceive: Json = <Json>(body.json());
+                    if (this.json.RequestCount == jsonReceive.RequestCount) {
+                        if (this.isWait != true) {
+                          this.json = jsonReceive;
+                        }
+                    } else {
+                        this.log += "Error RequestCount; "
+                    }
+                    if (this.json.ErrorProcess != null) {
+                        window.location.replace(this.json.RequestUrl);
+                    }
+                    this.isSend = false;
+                    if (this.isWait == true) {
+                        this.isWait = false;
+                        this.update();
+                    }
+                },
+                err => { this.log += err + "; ", this.isSend = false },
+                () => this.log += "Receive; "
+            );
+        }
+        else
+        {
+            this.isWait = true;
+        }
     }
 }

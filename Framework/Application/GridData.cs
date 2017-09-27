@@ -64,6 +64,16 @@
         public bool IsLookup;
 
         /// <summary>
+        /// Gets or sets FocusId. GridCell can be displayed by multiple GridField. Focus has the one with FocusId. Used to show or hide Lookup.
+        /// </summary>
+        public int? FocusId;
+
+        /// <summary>
+        /// Gets FocusIdRequest. Sent by client if it got focus.
+        /// </summary>
+        public int? FocusIdRequest;
+
+        /// <summary>
         /// Gets or sets IsOriginal. Text is modified by user. Original text is stored in TextOriginal.
         /// </summary>
         public bool IsOriginal;
@@ -327,6 +337,20 @@
         /// (GridName, Index, FieldName, GridCellInternal).
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>> cellList = new Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>>();
+
+        internal void CellAll(Action<GridCellInternal> callback)
+        {
+            foreach (GridName gridName in cellList.Keys)
+            {
+                foreach (Index index in cellList[gridName].Keys)
+                {
+                    foreach (string fieldName in cellList[gridName][index].Keys)
+                    {
+                        callback(cellList[gridName][index][fieldName]);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Set IsLookup flag on cell.
@@ -973,6 +997,8 @@
                     gridCellInternal.IsClick = gridCell.IsClick;
                     gridCellInternal.IsModify = gridCell.IsModify;
                     gridCellInternal.IsLookup = gridCell.IsLookup;
+                    gridCellInternal.FocusId = gridCell.FocusId;
+                    gridCellInternal.FocusIdRequest = gridCell.FocusIdRequest;
                     gridCellInternal.PlaceHolder = gridCell.PlaceHolder;
                     string text;
                     if (gridDataJson.CellList[gridName.Value][cell.FieldNameCSharp][row.Index].IsO)
@@ -1233,7 +1259,7 @@
                                 gridDataJson.CellList[gridName.Value][fieldName] = new Dictionary<string, GridCell>();
                             }
                             string errorCell = ErrorCellGet(gridName, index, fieldName);
-                            GridCell gridCellJson = new GridCell() { IsClick = gridCellInternal.IsClick, IsModify = gridCellInternal.IsModify, E = errorCell };
+                            GridCell gridCellJson = new GridCell();
                             gridDataJson.CellList[gridName.Value][fieldName][index.Value] = gridCellJson;
                             //
                             SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson, info);
@@ -1249,7 +1275,12 @@
                                 gridCellJson.IsO = true;
                             }
                             gridCellJson.PlaceHolder = infoCell.PlaceHolder;
+                            gridCellJson.IsClick = gridCellInternal.IsClick;
+                            gridCellJson.IsModify = gridCellInternal.IsModify;
+                            gridCellJson.E = errorCell;
                             gridCellJson.IsLookup = gridCellInternal.IsLookup;
+                            gridCellJson.FocusId = gridCellInternal.FocusId;
+                            gridCellJson.FocusIdRequest = gridCellInternal.FocusIdRequest;
                         }
                     }
                 }

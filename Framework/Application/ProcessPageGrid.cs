@@ -146,18 +146,21 @@
                 string gridName = gridQuery.GridName;
                 foreach (GridRow gridRow in gridDataJson.RowList[gridName])
                 {
-                    if (gridRow.IsClick)
-                    {
-                        ProcessGridSelectRowClear(app.AppJson, gridName);
-                        gridRow.IsSelectSet(true);
-                    }
+                    bool cellIsClick = false;
                     foreach (var gridColumn in gridDataJson.ColumnList[gridName])
                     {
                         GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
                         if (gridCell.IsClick == true)
                         {
+                            cellIsClick = true;
                             ProcessGridSelectCell(app.AppJson, gridName, new Index(gridRow.Index), gridColumn.FieldName);
                         }
+                    }
+                    if (gridRow.IsClick || cellIsClick)
+                    {
+                        gridRow.IsClick = true; // If cell is clicked, row is also clicked.
+                        ProcessGridSelectRowClear(app.AppJson, gridName);
+                        gridRow.IsSelectSet(true);
                     }
                 }
             }
@@ -412,6 +415,52 @@
             }
         }
     }
+
+    internal class ProcessGridFocus : Process
+    {
+        private void FocusClear(App app)
+        {
+            GridDataJson gridDataJson = app.AppJson.GridDataJson;
+            foreach (string gridNameItem in gridDataJson.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridDataJson.RowList[gridNameItem])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridNameItem])
+                    {
+                        GridCell gridCell = gridDataJson.CellList[gridNameItem][gridColumn.FieldName][gridRow.Index];
+                        gridCell.FocusId = null;
+                        gridCell.FocusIdRequest = null;
+                    }
+                }
+            }
+            //
+            app.GridData.CellAll((GridCellInternal gridCellInternal) => { gridCellInternal.FocusId = null; gridCellInternal.FocusIdRequest = null; });
+        }
+
+        protected internal override void Run(App app)
+        {
+            GridDataJson gridDataJson = app.AppJson.GridDataJson;
+            foreach (string gridNameItem in gridDataJson.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridDataJson.RowList[gridNameItem])
+                {
+                    foreach (GridColumn gridColumn in gridDataJson.ColumnList[gridNameItem])
+                    {
+                        GridCell gridCell = gridDataJson.CellList[gridNameItem][gridColumn.FieldName][gridRow.Index];
+                        if (gridCell.FocusIdRequest != null && gridCell.IsSelect)
+                        {
+                            int? focusIdRequest = gridCell.FocusIdRequest;
+                            FocusClear(app);
+                            gridCell.FocusId = focusIdRequest;
+                            app.GridData.CellGet(new GridName(gridNameItem, true), new Index(gridRow.Index), gridColumn.FieldName).FocusId = focusIdRequest; 
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     /// <summary>
     /// Set IsSelect on selected GridCell, or to null, if cell does not exist anymore.

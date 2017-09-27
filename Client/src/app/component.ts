@@ -311,9 +311,12 @@ export class GridCell {
   }
 
   click(event: MouseEvent){
-    this.jsonGridDataJson.CellList[this.jsonGrid.GridName][this.json.FieldName][this.jsonRow.Index].IsClick = true;
-    this.jsonRow.IsClick = true;
-    this.dataService.update();
+    let gridCell = this.jsonGridDataJson.CellList[this.jsonGrid.GridName][this.json.FieldName][this.jsonRow.Index];
+    if (gridCell.IsClick != true && gridCell.IsSelect != true) { 
+      // IsClick might have been set by GridField focus. If IsSelect is already set, do not post.
+      gridCell.IsClick = true;
+      this.dataService.update();
+    }
     event.stopPropagation(); // Prevent underlying GridRow to fire click event.
   }
 }
@@ -398,7 +401,7 @@ export class RemoveSelectorDirective {
   template: `
   <div [ngClass]="gridCell().CssClass">
     <div *ngIf="gridCell().CellEnum == null">
-      <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" placeholder="{{ gridCell().PlaceHolder }}" />
+      <input type="text" [(ngModel)]="Text" (ngModelChange)="onChange()" placeholder="{{ gridCell().PlaceHolder }}" (focusout)="focus($event, false)" (focusin)="focus($event, true)" />
     </div>
 
     <button *ngIf="gridCell().CellEnum == 1" class="btn btn-primary" (click)="buttonClick($event)">{{ Text }}</button>
@@ -416,18 +419,22 @@ export class RemoveSelectorDirective {
       {{ gridCell().E }}
     </div>
 
-    <div class="gridLookup" *ngIf="gridCell().IsLookup">
+    <div class="gridLookup" *ngIf="gridCell().IsLookup && gridCell().FocusId == focusId">
       <div>
         <div data-Grid [json]="{ GridName: 'Lookup' }"></div>
       </div>
     </div>
   </div>
-`
+  `
 })
+// {{focusId + "; " + gridCell().FocusId + "; " + gridCell().FocusIdRequest }}
 // <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusGridName==gridName && dataService.json.GridDataJson.FocusFieldName == fieldName && dataService.json.GridDataJson.FocusIndex==index" placeholder="{{ gridCell().PlaceHolder }}" />
 export class GridField {
   constructor(dataService: DataService){
     this.dataService = dataService;
+    //
+    this.dataService.idFocusCount += 1;
+    this.focusId = this.dataService.idFocusCount;
   }
 
   dataService: DataService;
@@ -435,6 +442,7 @@ export class GridField {
   @Input() fieldName: any;
   @Input() index: any;
   @ViewChild('inputElement') el:ElementRef;
+  focusId: number;
 
   point() {
     let gridData: any = this.dataService.json.GridDataJson;
@@ -450,6 +458,18 @@ export class GridField {
         index = gridData.SelectIndex;
     }
     return { gridData: gridData, gridName: gridName, fieldName: fieldName, index: index }; // GridName can be null if none is selected.
+  }
+
+  focus(event: FocusEvent, value: boolean) {
+    if (value == true && this.gridCell().IsClick != true) {
+      this.gridCell().FocusIdRequest = this.focusId;
+      this.gridCell().IsClick = true;
+      this.dataService.update();
+    }
+    if (value == false) {
+      this.gridCell().FocusIdRequest = null; // Prevent multiple FocusIdRequest for slow connection.
+      this.gridCell().IsClick = null; // Prevent multiple IsClick for slow connection.
+    }
   }
 
   gridCell() {

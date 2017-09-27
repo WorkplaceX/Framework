@@ -305,6 +305,16 @@
 
         public bool IsLookup;
 
+        /// <summary>
+        /// Gets or sets FocusId. GridCell can be displayed by multiple GridField. Focus has the one with FocusId. Used to show or hide Lookup.
+        /// </summary>
+        public int? FocusId;
+
+        /// <summary>
+        /// Gets FocusIdRequest. Sent by client if it got focus.
+        /// </summary>
+        public int? FocusIdRequest;
+
         public bool IsClick;
 
         /// <summary>
