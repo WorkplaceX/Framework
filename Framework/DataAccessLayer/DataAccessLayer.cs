@@ -16,10 +16,13 @@
 
         }
 
-        protected virtual internal void Update(App app, Row row, Row rowNew)
+        protected virtual internal void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
             UtilFramework.Assert(this == rowNew);
-            UtilDataAccessLayer.Update(row, this);
+            if (app.GridData.IsModifyRowCell(gridName, index, true)) // No update on database if only calculated column has been modified.
+            {
+                UtilDataAccessLayer.Update(row, this);
+            }
         }
 
         /// <summary>

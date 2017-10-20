@@ -13,6 +13,7 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddMemoryCache();
         }
 
         private static bool debugIsException = true; // Enable exception page. // If running on IIS make sure web.config contains: arguments="Server.dll" if you get HTTP Error 502.5 - Process Failure

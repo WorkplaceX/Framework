@@ -66,7 +66,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView
     {
-        protected internal override void Update(App app, Row row, Row rowNew)
+        protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
             // Row
             var application = new FrameworkApplication();
@@ -118,7 +118,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView
     {
-        protected internal override void Update(App app, Row row, Row rowNew)
+        protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
             FrameworkConfigColumn config = UtilDataAccessLayer.Query<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
             if (config == null)
@@ -161,7 +161,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigTableView
     {
-        protected internal override void Update(App app, Row row, Row rowNew)
+        protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
             var config = UtilDataAccessLayer.Query<FrameworkConfigTable>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
             if (config == null)

@@ -3,8 +3,9 @@
     using Database.dbo;
     using Framework.Component;
     using Framework.DataAccessLayer;
+    using Framework.Server;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Caching.Memory;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -54,11 +55,11 @@
             return result;
         }
 
-        internal App Create(ControllerBase controller, string controllerPath, out string requestPathBase)
+        internal App Create(WebControllerBase webController, string controllerPath, out string requestPathBase)
         {
             App result = null;
             requestPathBase = controllerPath;
-            string requestUrl = controller.HttpContext.Request.Path.ToString();
+            string requestUrl = webController.HttpContext.Request.Path.ToString();
             if (!requestUrl.EndsWith("/"))
             {
                 requestUrl += "/";
@@ -88,7 +89,7 @@
                     if (UtilFramework.IsSubclassOf(type, typeof(App)))
                     {
                         result = (App)UtilFramework.TypeToObject(type);
-                        result.Constructor(frameworkApplication);
+                        result.Constructor(webController.MemoryCache, frameworkApplication);
                         requestPathBase = controllerPath + path;
                         break;
                     }
@@ -111,9 +112,23 @@
             ProcessInit(processList);
         }
 
-        internal void Constructor(FrameworkApplicationView dbFrameworkApplication)
+        internal void Constructor(IMemoryCache memoryCache, FrameworkApplicationView dbFrameworkApplication)
         {
+            this.MemoryCache = memoryCache;
             this.DbFrameworkApplication = dbFrameworkApplication;
+        }
+
+        internal IMemoryCache MemoryCache { get; private set; } // TODO Use also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
+
+        /// <summary>
+        /// Returns value from ASP.NET in-memory cache.
+        /// </summary>
+        /// <param name="valueSet">Function to create value, if it doesn't exist.</param>
+        internal TValue MemoryCacheValueGet<TValue>(object key, Func<TValue> valueSet)
+        {
+            TValue result;
+            result = MemoryCache.GetOrCreate<TValue>(key, entry => { return valueSet(); });
+            return result;
         }
 
         /// <summary>

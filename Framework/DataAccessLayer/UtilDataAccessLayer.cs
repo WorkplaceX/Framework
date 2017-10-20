@@ -3,6 +3,7 @@
     using Framework.Server;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
+    using Microsoft.EntityFrameworkCore.Query.Internal;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -210,6 +211,14 @@
         public static IQueryable<TRow> Query<TRow>() where TRow : Row
         {
             return (IQueryable<TRow>)Query(typeof(TRow));
+        }
+
+        /// <summary>
+        /// Returns true, if query is a database query. Otherwise it is a linq to memory query.
+        /// </summary>
+        internal static bool QueryProviderIsDatabase(IQueryable query)
+        {
+            return query.Provider.GetType() == typeof(EntityQueryProvider);
         }
 
         /// <summary>

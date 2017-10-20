@@ -518,7 +518,8 @@
         /// <summary>
         /// Returns true, if text on row has been modified.
         /// </summary>
-        private bool IsModifyRowCell(GridName gridName, Index index)
+        /// <param name="isCalculatedColumnExclude">If true, columns without FieldNameSql are ignored for result. Used for example if query provider is database.</param>
+        internal bool IsModifyRowCell(GridName gridName, Index index, bool isCalculatedColumnExclude)
         {
             bool result = false;
             Type typeRow = TypeRowGet(gridName);
@@ -528,7 +529,7 @@
                 {
                     foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
                     {
-                        if (column.FieldNameSql != null) // Exclude calculated column
+                        if (isCalculatedColumnExclude == false || (column.FieldNameSql != null)) // Exclude calculated column.
                         {
                             string fieldName = column.FieldNameCSharp;
                             if (cellList[gridName][index].ContainsKey(fieldName))
@@ -582,7 +583,8 @@
         /// <summary>
         /// Parse user entered grid filter row from json.
         /// </summary>
-        private void LoadDatabaseFilterList(GridName gridName, out List<Filter> filterList)
+        /// <param name="isExcludeCalculatedColumn">Exclude columns without FieldNameSql from returned filterList.</param>
+        private void LoadDatabaseFilterList(GridName gridName, out List<Filter> filterList, bool isExcludeCalculatedColumn)
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
@@ -597,7 +599,7 @@
                 }
                 if (text != null) // Use filter only when text set.
                 {
-                    if (column.FieldNameSql != null) // Do not filter on calculated column.
+                    if (isExcludeCalculatedColumn == false || (column.FieldNameSql != null)) // Do not filter on calculated column if query provider is database.
                     {
                         if (rowFilter != null) // RowFilter is null, if user made no modifications. See also: GridData.TextParse(isFilterParse: true);
                         {
@@ -645,7 +647,8 @@
                     {
                         fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
                         isOrderByDesc = queryList[gridName].IsOrderByDesc;
-                        LoadDatabaseFilterList(gridName, out filterList);
+                        bool isExcludeCalculatedColumn = UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without FieldNameSql.
+                        LoadDatabaseFilterList(gridName, out filterList, isExcludeCalculatedColumn);
                     }
                     rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
                 }
@@ -797,14 +800,14 @@
                     {
                         if (!IsErrorRowCell(gridName, index)) // No save if data row has text parse error!
                         {
-                            if (IsModifyRowCell(gridName, index)) // Only save row if user modified row on latest request.
+                            if (IsModifyRowCell(gridName, index, false)) // Only save row if user modified row on latest request.
                             {
                                 var row = rowList[gridName][index];
                                 if (row.Row != null && row.RowNew != null) // Database Update
                                 {
                                     try
                                     {
-                                        row.RowNew.Update(App, row.Row, row.RowNew);
+                                        row.RowNew.Update(App, gridName, index, row.Row, row.RowNew);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -847,7 +850,7 @@
             {
                 foreach (Index index in rowList[gridName].Keys)
                 {
-                    if (IsModifyRowCell(gridName, index) || (index.Enum == IndexEnum.Filter && isFilterParse))
+                    if (IsModifyRowCell(gridName, index, false) || (index.Enum == IndexEnum.Filter && isFilterParse))
                     {
                         Type typeRow = TypeRowGet(gridName);
                         var row = RowGet(gridName, index);
