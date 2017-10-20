@@ -19,7 +19,7 @@
         protected virtual internal void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
             UtilFramework.Assert(this == rowNew);
-            if (app.GridData.IsModifyRowCell(gridName, index, true)) // No update on database if only calculated column has been modified.
+            if (app.GridData.IsModifyRowCell(gridName, index, true)) // No update on database, if only calculated column has been modified.
             {
                 UtilDataAccessLayer.Update(row, this);
             }
@@ -28,9 +28,12 @@
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(App app)
+        protected virtual internal void Insert(App app, GridName gridName, Index index)
         {
-            UtilDataAccessLayer.Insert(this);
+            if (app.GridData.IsModifyRowCell(gridName, index, true)) // No insert on database, if only calculated column has been modified.
+            {
+                UtilDataAccessLayer.Insert(this);
+            }
         }
 
         /// <summary>

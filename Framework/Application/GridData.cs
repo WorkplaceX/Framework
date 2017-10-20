@@ -821,7 +821,7 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Insert(App);
+                                        row.RowNew.Insert(App, gridName, index);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);

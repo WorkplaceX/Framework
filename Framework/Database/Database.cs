@@ -41,13 +41,13 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage
     {
-        protected internal override void Insert(App app)
+        protected internal override void Insert(App app, GridName gridName, Index index)
         {
             if (app.DbFrameworkApplication != null)
             {
                 this.ApplicationId = app.DbFrameworkApplication.Id;
             }
-            base.Insert(app);
+            base.Insert(app, gridName, index);
         }
     }
 
@@ -79,7 +79,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).First(), this);
         }
 
-        protected internal override void Insert(App app)
+        protected internal override void Insert(App app, GridName gridName, Index index)
         {
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
