@@ -139,7 +139,7 @@
         public Grid(Component owner, GridName gridName)
             : base(owner)
         {
-            this.GridName = gridName.Value;
+            this.GridName = Framework.Application.GridName.ToJson(gridName);
         }
 
         public readonly string GridName;
@@ -184,7 +184,7 @@
             : base(owner)
         {
             this.Text = text;
-            this.GridName = gridName.Value;
+            this.GridName = Framework.Application.GridName.ToJson(gridName);
             this.FieldName = fieldName;
         }
 

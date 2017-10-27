@@ -12,176 +12,39 @@
     /// <summary>
     /// GridName is a Name or the name of a TypeRow or combined.
     /// </summary>
-    public class GridName2
-    {
-        internal GridName2(string name, Type typeRow, bool isNameNotCombine)
-        {
-            this.Name = name;
-            this.TypeRowInternal = typeRow;
-            this.IsNameNotCombineInternal = isNameNotCombine;
-            //
-            ValueUpdate();
-        }
-
-        public GridName2(string name) 
-            : this(name, null, false)
-        {
-
-        }
-
-        /// <summary>
-        /// Returns object GridName or GridNameTypeRow as json string.
-        /// </summary>
-        internal static string GridNameToJson(GridName2 gridName)
-        {
-            return gridName.Value;
-        }
-
-        /// <summary>
-        /// Returns GridName loaded from json. It is never returns a class GridNameTypeRow.
-        /// </summary>
-        internal static GridName2 GridNameFromJson(string json)
-        {
-            GridName2 result = new GridName2(null);
-            result.Value = json;
-            return result;
-        }
-
-        public readonly string Name;
-
-        internal readonly Type TypeRowInternal;
-
-        internal readonly bool IsNameNotCombineInternal;
-
-        private void ValueUpdate()
-        {
-            UtilFramework.Assert(Name == null || !Name.Contains("."));
-            if (IsNameNotCombineInternal)
-            {
-                this.Value = Name;
-            }
-            else
-            {
-                this.Value = UtilDataAccessLayer.TypeRowToName(TypeRowInternal) + "." + Name;
-            }
-        }
-
-        internal string Value;
-
-        public override string ToString()
-        {
-            return base.ToString() + $" ({Value})";
-        }
-
-        public override int GetHashCode()
-        {
-            return Value.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            GridName2 gridName = obj as GridName2;
-            if (gridName != null)
-            {
-                return object.Equals(Value, gridName.Value);
-            }
-            else
-            {
-                return base.Equals(obj);
-            }
-        }
-
-        public static bool operator ==(GridName2 left, GridName2 right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(GridName2 left, GridName2 right)
-        {
-            return !Equals(left, right);
-        }
-
-        /// <summary>
-        /// Gets or sets Type. Used for json serialization of derived class.
-        /// </summary>
-        public string Type;
-    }
-
-    public class GridNameTypeRow2 : GridName2
-    {
-        public GridNameTypeRow2(Type typeRow) 
-            : base(null, typeRow, false)
-        {
-
-        }
-
-        public GridNameTypeRow2(string name, Type typeRow, bool isNotCombine = false) 
-            : base(name, typeRow, isNotCombine)
-        {
-
-        }
-
-        public Type TypeRow
-        {
-            get
-            {
-                return base.TypeRowInternal;
-            }
-        }
-
-        public bool IsNameNotCombine
-        {
-            get
-            {
-                return base.IsNameNotCombineInternal;
-            }
-        }
-    }
-
-    public class GridName2<TRow> : GridNameTypeRow2 where TRow : Row
-    {
-        public GridName2(string name, bool isNameNotCombine = false) 
-            : base(name, typeof(TRow), isNameNotCombine)
-        {
-
-        }
-    }
-
     public class GridName
     {
-        internal GridName(string name, bool isJson)
+        internal GridName(string name, Type typeRow, bool isNameExclusive)
         {
-            if (isJson == false)
-            {
-                UtilFramework.Assert(name == null || (name.Contains(".") == false));
-            }
+            UtilFramework.Assert(Name == null || !Name.Contains("."));
             //
             this.Name = name;
-            this.Value = name;
-            this.IsJson = isJson;
+            this.TypeRowInternal = typeRow;
+            //
+            if (isNameExclusive == false)
+            {
+                this.Name = UtilDataAccessLayer.TypeRowToName(TypeRowInternal) + "." + Name;
+            }
         }
 
         public GridName(string name) 
-            : this(name, false)
+            : this(name, null, true)
         {
 
         }
 
-        /// <summary>
-        /// Gets IsJson. Indicating value has been loaded back from json.
-        /// </summary>
-        internal readonly bool IsJson;
+        public string Name { get; private set; }
 
-        public readonly string Name;
+        internal readonly Type TypeRowInternal;
 
         /// <summary>
         /// Gets GridName without TypeRow.
         /// </summary>
-        public string NameExclusive
+        internal string NameExclusive
         {
             get
             {
-                string result = Value.Substring(Value.LastIndexOf(".") + ".".Length);
+                string result = Name.Substring(Name.LastIndexOf(".") + ".".Length);
                 if (result == "")
                 {
                     result = null;
@@ -193,27 +56,40 @@
         /// <summary>
         /// Gets IsNameExclusive. If true, Name is not combined with TypeRow.
         /// </summary>
-        public bool IsNameExclusive
+        internal bool IsNameExclusive
         {
             get
             {
-                return Value == NameExclusive;
+                return Name == NameExclusive;
             }
         }
 
         /// <summary>
-        /// Gets GridName or (GridName and TypeRow) combined.
+        /// Returns object GridName or GridNameTypeRow as json string.
         /// </summary>
-        internal string Value;
+        internal static string ToJson(GridName gridName)
+        {
+            return gridName.Name;
+        }
+
+        /// <summary>
+        /// Returns GridName loaded from json. It is never returns a class GridNameTypeRow.
+        /// </summary>
+        internal static GridName FromJson(string json)
+        {
+            GridName result = new GridName(null);
+            result.Name = json;
+            return result;
+        }
 
         public override string ToString()
         {
-            return base.ToString() + $" ({Value})";
+            return base.ToString() + $" ({Name})";
         }
 
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            return Name.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -221,7 +97,7 @@
             GridName gridName = obj as GridName;
             if (gridName != null)
             {
-                return object.Equals(Value, gridName.Value);
+                return object.Equals(Name, gridName.Name);
             }
             else
             {
@@ -240,23 +116,18 @@
         }
     }
 
-    /// <summary>
-    /// Combination of GridName and TypeRow.
-    /// </summary>
     public class GridNameTypeRow : GridName
     {
-        public GridNameTypeRow(Type typeRow)
-            : base(null)
+        public GridNameTypeRow(Type typeRow) 
+            : base(null, typeRow, false)
         {
-            this.TypeRow = typeRow;
-            ValueInit(false);
+
         }
 
-        public GridNameTypeRow(Type typeRow, string name, bool isNameExclusive = false)
-            : base(name)
+        public GridNameTypeRow(Type typeRow, string name, bool isNameExclusive = false) 
+            : base(name, typeRow, isNameExclusive)
         {
-            this.TypeRow = typeRow;
-            ValueInit(isNameExclusive);
+
         }
 
         public GridNameTypeRow(Type typeRow, GridName gridName)
@@ -265,21 +136,13 @@
 
         }
 
-        private void ValueInit(bool isNameExclusive)
+        public Type TypeRow
         {
-            if (isNameExclusive == false)
+            get
             {
-                Value = UtilFramework.TypeToName(TypeRow) + "." + Name;
+                return base.TypeRowInternal;
             }
-            else
-            {
-                Value = Name;
-            }
-            UtilFramework.Assert(Value != null);
-            UtilFramework.Assert(isNameExclusive == IsNameExclusive);
         }
-
-        public readonly Type TypeRow;
     }
 
     public class GridName<TRow> : GridNameTypeRow where TRow : Row
@@ -290,7 +153,7 @@
 
         }
 
-        public GridName(string name, bool isNameExclusive = false)
+        public GridName(string name, bool isNameExclusive = false) 
             : base(typeof(TRow), name, isNameExclusive)
         {
 
