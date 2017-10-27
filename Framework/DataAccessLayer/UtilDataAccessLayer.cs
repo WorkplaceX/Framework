@@ -65,10 +65,14 @@
         /// </summary>
         internal static string TypeRowToName(Type typeRow)
         {
-            UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
-            string result = UtilFramework.TypeToName(typeRow);
-            UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "Database.Calculated".
-            result = result.Substring("Database.".Length); // Omit "Database" namespace.
+            string result = null;
+            if (typeRow != null)
+            {
+                UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
+                result = UtilFramework.TypeToName(typeRow);
+                UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "Database.Calculated".
+                result = result.Substring("Database.".Length); // Remove "Database" namespace.
+            }
             return result;
         }
 

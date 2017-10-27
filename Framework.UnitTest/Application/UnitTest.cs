@@ -1,8 +1,8 @@
 ﻿namespace UnitTest.Application
 {
+    using Database.Calculated;
     using Framework;
     using Framework.Application;
-    using Framework.DataAccessLayer;
 
     public class UnitTest : UnitTestBase
     {
@@ -47,7 +47,27 @@
                 UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == false);
             }
         }
+
+        public void GridName2()
+        {
+            GridName2 gridName = new GridName2("D");
+            UtilFramework.Assert(gridName.Name == "D");
+            //
+            GridNameTypeRow2 gridNameTypeRow = new GridNameTypeRow2("S", typeof(MyRow));
+            UtilFramework.Assert(gridNameTypeRow.Name == "S");
+            UtilFramework.Assert(gridNameTypeRow.TypeRow == typeof(MyRow));
+            UtilFramework.Assert(gridNameTypeRow.IsNameNotCombine == false);
+            //
+            gridNameTypeRow = new GridNameTypeRow2("S", typeof(MyRow), true);
+            UtilFramework.Assert(gridNameTypeRow.Name == "S");
+            UtilFramework.Assert(gridNameTypeRow.IsNameNotCombine == true);
+        }
     }
+}
+
+namespace Database.Calculated
+{
+    using Framework.DataAccessLayer;
 
     public class MyRow : Row
     {

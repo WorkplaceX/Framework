@@ -423,8 +423,8 @@
         /// <summary>
         /// Returns type found in namespace.
         /// </summary>
-        /// <param name="objectTypeString">Type as string.</param>
-        /// <param name="typeInNamespace">Any type defined in namespace to search.</param>
+        /// <param name="objectTypeString">Type as string. For example "MyComponent".</param>
+        /// <param name="typeInNamespace">A type defined in namespace in which to search.</param>
         private static Type TypeGetExact(string objectTypeString, Type typeInNamespace)
         {
             string ns = typeInNamespace.Namespace + ".";
@@ -450,7 +450,7 @@
             foreach (Type type in typeInNamespaceList)
             {
                 result = TypeGetExact(objectTypeString, type);
-                if (result != null)
+                if (result != null && !resultList.Contains(result))
                 {
                     resultList.Add(result);
                 }

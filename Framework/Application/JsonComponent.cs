@@ -5,7 +5,7 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// Json Component.
+    /// Json Component. Public fields and properties are serialized and deserialized.
     /// </summary>
     public class Component
     {
