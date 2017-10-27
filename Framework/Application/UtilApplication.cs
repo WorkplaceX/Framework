@@ -65,7 +65,7 @@
         }
 
         /// <summary>
-        /// Returns object GridName or GridNameTypeRow as json string.
+        /// Returns GridName or GridNameTypeRow as json string.
         /// </summary>
         internal static string ToJson(GridName gridName)
         {
@@ -73,7 +73,7 @@
         }
 
         /// <summary>
-        /// Returns GridName loaded from json. It is never returns a class GridNameTypeRow.
+        /// Returns GridName loaded from json. It never returns a GridNameTypeRow object.
         /// </summary>
         internal static GridName FromJson(string json)
         {
@@ -576,6 +576,22 @@
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Use to serialize GridName or GridNameTypeRow object.
+        /// </summary>
+        public static string GridNameToJson(GridName gridName)
+        {
+            return GridName.ToJson(gridName);
+        }
+
+        /// <summary>
+        /// Use to deserialize GridName. Always returns a GridName object.
+        /// </summary>
+        public static GridName GridNameFromJson(string json)
+        {
+            return GridName.FromJson(json);
         }
     }
 }
