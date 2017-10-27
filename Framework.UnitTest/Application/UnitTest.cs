@@ -46,21 +46,19 @@
                 GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), gridName);
                 UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == false);
             }
-        }
-
-        public void GridName2()
-        {
-            GridName2 gridName = new GridName2("D");
-            UtilFramework.Assert(gridName.Name == "D");
-            //
-            GridNameTypeRow2 gridNameTypeRow = new GridNameTypeRow2("S", typeof(MyRow));
-            UtilFramework.Assert(gridNameTypeRow.Name == "S");
-            UtilFramework.Assert(gridNameTypeRow.TypeRow == typeof(MyRow));
-            UtilFramework.Assert(gridNameTypeRow.IsNameNotCombine == false);
-            //
-            gridNameTypeRow = new GridNameTypeRow2("S", typeof(MyRow), true);
-            UtilFramework.Assert(gridNameTypeRow.Name == "S");
-            UtilFramework.Assert(gridNameTypeRow.IsNameNotCombine == true);
+            {
+                GridName gridName = new GridName("D");
+                UtilFramework.Assert(gridName.Name == "D");
+                //
+                GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), "S");
+                UtilFramework.Assert(gridNameTypeRow.Name == "Calculated.MyRow.S");
+                UtilFramework.Assert(gridNameTypeRow.TypeRow == typeof(MyRow));
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == false);
+                //
+                gridNameTypeRow = new GridNameTypeRow(typeof(MyRow), "S", true);
+                UtilFramework.Assert(gridNameTypeRow.Name == "S");
+                UtilFramework.Assert(gridNameTypeRow.IsNameExclusive == true);
+            }
         }
     }
 }

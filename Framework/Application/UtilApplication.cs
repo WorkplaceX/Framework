@@ -56,7 +56,7 @@
         /// <summary>
         /// Gets IsNameExclusive. If true, Name is not combined with TypeRow.
         /// </summary>
-        internal bool IsNameExclusive
+        public bool IsNameExclusive
         {
             get
             {
