@@ -104,10 +104,9 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellLookup(out Type typeRow, out List<Row> rowList)
+        protected internal override void CellLookup(out IQueryable query)
         {
-            typeRow = typeof(FrameworkApplicationType);
-            rowList = UtilDataAccessLayer.Select(typeRow, null, null, false, 0, 5);
+            query = UtilDataAccessLayer.Query<FrameworkApplicationType>();
         }
 
         protected internal override void CellLookupIsClick(Row row, ref string result)
@@ -145,7 +144,7 @@ namespace Database.dbo
             }
         }
 
-        protected internal override IQueryable Where(App app, GridName gridName)
+        protected internal override IQueryable Query(App app, GridName gridName)
         {
             var configTable = app.GridData.RowSelected(new GridName<FrameworkConfigTableView>());
             if (configTable != null)

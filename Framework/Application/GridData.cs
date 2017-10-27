@@ -554,7 +554,7 @@
         {
             TypeRowSet(gridName);
             Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
-            IQueryable query = rowTable.Where(App, gridName);
+            IQueryable query = rowTable.Query(App, gridName);
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
@@ -636,7 +636,7 @@
             {
                 Type typeRow = TypeRowGet(gridName);
                 Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
-                IQueryable query = rowTable.Where(App, gridName);
+                IQueryable query = rowTable.Query(App, gridName);
                 List<Row> rowList = new List<Row>();
                 List<Filter> filterList = null;
                 if (query != null)

@@ -393,10 +393,15 @@
                 GridCellInternal gridCellInternal = gridData.CellGet(gridName, index, fieldName);
                 //
                 Type typeRow = gridData.TypeRow(gridName);
-                Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == fieldName).First();
-                List<Row> rowList;
-                cell.CellLookup(out typeRow, out rowList);
-                new GridNameTypeRow(null);
+                Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == fieldName).Single();
+                List<Row> rowList = null;
+                IQueryable query;
+                cell.CellLookup(out query);
+                if (query != null)
+                {
+                    typeRow = query.ElementType;
+                    rowList = query.Cast<Row>().ToList();
+                }
                 bool isLoadRow = gridData.LoadRow(new GridNameTypeRow(typeRow, UtilApplication.GridNameLookup), rowList);
                 //
                 if (isLoadRow)

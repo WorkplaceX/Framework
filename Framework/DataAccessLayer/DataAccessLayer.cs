@@ -47,7 +47,7 @@
 
         }
 
-        protected virtual internal IQueryable Where(App app, GridName gridName)
+        protected virtual internal IQueryable Query(App app, GridName gridName)
         {
             return UtilDataAccessLayer.Query(GetType());
         }
@@ -153,14 +153,12 @@
         }
 
         /// <summary>
-        /// Set lookup values, the user can select.
+        /// Values user can select from lookup list.
         /// </summary>
-        /// <param name="typeRow">TypeRow needs to be defined, because rowList could be empty.</param>
-        /// <param name="rowList">List of values for lookup window.</param>
-        protected virtual internal void CellLookup(out Type typeRow, out List<Row> rowList)
+        /// <param name="query">Database query or in-memeory list.</param>
+        protected virtual internal void CellLookup(out IQueryable query)
         {
-            typeRow = null;
-            rowList = null;
+            query = null;
         }
 
         /// <summary>
