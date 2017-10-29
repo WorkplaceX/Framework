@@ -142,6 +142,7 @@ img {
     background-color: white;
     border: 2px solid rgba(0, 64, 255, 0.7);
     box-shadow: 10px 10px 5px #888888;
+    z-index: 1;
 }
 
 .floatLeft {
