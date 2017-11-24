@@ -50,7 +50,7 @@
             }
             else
             {
-                result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // Make sure empty path is last match.
+                result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match.
             }
             return result;
         }

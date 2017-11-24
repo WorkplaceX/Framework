@@ -22,7 +22,7 @@
 
         public void Run(string[] args)
         {
-            CommandLineApplication commandLineApplication = Command.CommandLineApplicationCreate();
+            CommandLineApplication commandLineApplication = UtilBuildTool.CommandLineApplicationCreate();
             RegisterCommand(commandLineApplication);
             try
             {

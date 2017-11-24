@@ -88,7 +88,7 @@
             commandLineApplication.Execute(commandShortCut.Split(' '));
         }
 
-        public static CommandLineApplication CommandLineApplicationCreate()
+        internal static CommandLineApplication CommandLineApplicationCreate(List<string> commandShortCutList)
         {
             var result = new CommandLineApplication();
             result.Name = "BuildTool";
@@ -99,13 +99,6 @@
                 //
                 result.Execute("-h"); // Show list of available commands.
                 UtilFramework.Log("");
-                List<string> commandShortCutList = new List<string>();
-                commandShortCutList.Add("buildClient");
-                commandShortCutList.Add("serve --client");
-                commandShortCutList.Add("generate");
-                commandShortCutList.Add("generate --framework");
-                commandShortCutList.Add("runSqlCreate");
-                commandShortCutList.Add("runSqlCreate --drop");
                 //
                 UtilFramework.Log("ShortCut:");
                 for (int i = 0; i < commandShortCutList.Count; i++)

@@ -1,5 +1,6 @@
 ﻿namespace Framework.BuildTool
 {
+    using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -9,6 +10,19 @@
 
     public static class UtilBuildTool
     {
+        public static CommandLineApplication CommandLineApplicationCreate()
+        {
+            List<string> commandShortCutList = new List<string>();
+            commandShortCutList.Add("buildClient");
+            commandShortCutList.Add("serve --client");
+            commandShortCutList.Add("generate");
+            commandShortCutList.Add("generate --framework");
+            commandShortCutList.Add("runSqlCreate");
+            commandShortCutList.Add("runSqlCreate --drop");
+            //
+            return Command.CommandLineApplicationCreate(commandShortCutList);
+        }
+
         public static void DotNetBuild(string workingDirectory)
         {
             string fileName = ConnectionManagerBuildTool.DotNetFileName;

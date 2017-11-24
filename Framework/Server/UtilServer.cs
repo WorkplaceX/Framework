@@ -201,9 +201,21 @@
         internal async Task<IActionResult> WebRequest()
         {
             string requestPath = Controller.HttpContext.Request.Path.ToString();
+            // Framework/Server/wwwroot/*.* content request
+            if (Path.GetFileName(requestPath).Contains("."))
+            {
+                string fileName = Path.GetFileName(requestPath);
+                fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
+                if (File.Exists(fileName))
+                {
+                    return UtilServer.FileNameToFileContentResult(Controller, fileName);
+                }
+            }
+            // App specific request
             if (!(App != null && requestPath.StartsWith(RequestPathBase)))
             {
-                return Controller.NotFound(); // Not found (404) response.
+                throw new Exception("No App defined for this path!");
+                // return Controller.NotFound(); // Not found (404) response.
             }
             // Html request
             if (requestPath.StartsWith(RequestPathBase) && (requestPath.EndsWith("/") || requestPath.EndsWith(".html")))
@@ -237,16 +249,6 @@
                     Controller.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:4200"); // Avoid "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir
                 }
                 return Controller.Content(jsonOutText, "application/json");
-            }
-            // Framework/Server/wwwroot/*.* request
-            if (Path.GetFileName(requestPath).Contains("."))
-            {
-                string fileName = Path.GetFileName(requestPath);
-                fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
-                if (File.Exists(fileName))
-                {
-                    return UtilServer.FileNameToFileContentResult(Controller, fileName);
-                }
             }
             // Server/Universal/*.js request
             if (requestPath.EndsWith(".js"))

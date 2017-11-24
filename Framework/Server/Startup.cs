@@ -6,6 +6,9 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Derived class Startup has to be declared in Server project.
+    /// </summary>
     public abstract class StartupBase
     {
         // This method gets called by the runtime. Use this method to add services to the container.
