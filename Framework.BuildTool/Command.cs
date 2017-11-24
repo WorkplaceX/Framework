@@ -4,6 +4,9 @@
     using System;
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Command to run from CLI.
+    /// </summary>
     public class Command
     {
         public Command(string name, string description)
@@ -12,20 +15,21 @@
             this.Description = description;
         }
 
+        /// <summary>
+        /// Gets command name.
+        /// </summary>
         public readonly string Name;
 
+        /// <summary>
+        /// Gets command description.
+        /// </summary>
         public readonly string Description;
 
         private List<Argument> argumentList = new List<Argument>();
 
-        public IReadOnlyList<Argument> ArgumentList
-        {
-            get
-            {
-                return argumentList;
-            }
-        }
-
+        /// <summary>
+        /// Add a named argument (parameter) to pass the command.
+        /// </summary>
         public Argument ArgumentAdd(string name, string description)
         {
             name = string.Format("[{0}]", name);
@@ -36,6 +40,10 @@
 
         private List<Option> optionList = new List<Option>();
 
+        /// <summary>
+        /// Add a command option switch.
+        /// </summary>
+        /// <param name="template">For example: "-g|--get"</param>
         public Option OptionAdd(string template, string description)
         {
             Option result = new Option(template, description);
@@ -43,6 +51,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Override this method to implement command execution code.
+        /// </summary>
         public virtual void Run()
         {
 
@@ -72,47 +83,50 @@
             });
         }
 
+        private static void CommandShortCutExecute(CommandLineApplication commandLineApplication, string commandShortCut)
+        {
+            commandLineApplication.Execute(commandShortCut.Split(' '));
+        }
+
         public static CommandLineApplication CommandLineApplicationCreate()
         {
             var result = new CommandLineApplication();
             result.Name = "BuildTool";
-            result.HelpOption("-h|--help");
-            result.OnExecute(() => {
-                // Default function, when no arguments.
-                result.Execute("-h");
+            result.HelpOption("-h|--help"); 
+            result.OnExecute(() => 
+            {
+                // Default function, when no arguments passed from CLI.
+                //
+                result.Execute("-h"); // Show list of available commands.
                 UtilFramework.Log("");
+                List<string> commandShortCutList = new List<string>();
+                commandShortCutList.Add("buildClient");
+                commandShortCutList.Add("serve --client");
+                commandShortCutList.Add("generate");
+                commandShortCutList.Add("generate --framework");
+                commandShortCutList.Add("runSqlCreate");
+                commandShortCutList.Add("runSqlCreate --drop");
+                //
                 UtilFramework.Log("ShortCut:");
-                UtilFramework.Log("1=buildClient");
-                UtilFramework.Log("2=serve --client");
-                UtilFramework.Log("3=generate");
-                UtilFramework.Log("4=generate --framework");
-                UtilFramework.Log("5=runSqlCreate");
-                UtilFramework.Log("6=runSqlCreate --drop");
+                for (int i = 0; i < commandShortCutList.Count; i++)
+                {
+                    UtilFramework.Log(string.Format("{0}={1}", i, commandShortCutList[i]));
+                }
                 Console.Write(">");
-                string line = Console.ReadLine();
-                if (line == "1")
+                string line = Console.ReadLine(); // Read from command line.
+                bool isFind = false;
+                for (int i = 0; i < commandShortCutList.Count; i++)
                 {
-                    result.Execute("buildClient");
+                    if (line == i.ToString())
+                    {
+                        isFind = true;
+                        CommandShortCutExecute(result, commandShortCutList[i]);
+                        break;
+                    }
                 }
-                if (line == "2")
+                if (isFind == false)
                 {
-                    result.Execute("serve", "--client");
-                }
-                if (line == "3")
-                {
-                    result.Execute("generate");
-                }
-                if (line == "4")
-                {
-                    result.Execute("generate", "--framework");
-                }
-                if (line == "5")
-                {
-                    result.Execute("runSqlCreate");
-                }
-                if (line == "6")
-                {
-                    result.Execute("runSqlCreate", "--drop");
+                    CommandShortCutExecute(result, line);
                 }
                 Console.Write("Press Enter...");
                 Console.ReadLine();
@@ -122,6 +136,9 @@
         }
     }
 
+    /// <summary>
+    /// Command named argument (parameter) to pass from CLI.
+    /// </summary>
     public class Argument
     {
         internal Argument(string name, string description)
@@ -150,6 +167,9 @@
         }
     }
 
+    /// <summary>
+    /// Command option switch to pass from CLI. For example: "-g|--get"
+    /// </summary>
     public class Option
     {
         internal Option(string template, string description)
