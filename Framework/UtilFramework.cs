@@ -16,9 +16,9 @@
             {
                 // .NET Standard 1.6 for Libraries
                 // .NET Core 2.0 for CLI's
-                // node v8.9.2 LTS
+                // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.037 Server";
+                return "v1.038 Server";
             }
         }
 
@@ -211,7 +211,7 @@
                     }
                 }
             }
-            return result.Single();
+            return result.Single(); // See also database table FrameworkApplication.
         }
 
         /// <summary>

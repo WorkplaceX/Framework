@@ -6,7 +6,7 @@ set -x # Enable print execute cammands to stdout.
 sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
 sudo apt-get update
-sudo apt-get install dotnet-dev-1.0.1
+sudo apt-get install dotnet-sdk-2.0.0
 
 function Main
 {
@@ -17,7 +17,7 @@ function Main
     node --version
 
     #npm update
-    npm install npm@4.6.1 -g --loglevel error # npm install npm@latest
+    npm install npm@5.5.1 -g --loglevel error # npm install npm@latest
 
     # npm, node version check
     npm --version
