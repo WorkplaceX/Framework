@@ -7,7 +7,7 @@
     public class CommandConnectionString : Command
     {
         public CommandConnectionString()
-            : base("connection", "Database connection string")
+            : base("connection", "Set database connection string (also --get and --check)")
         {
             this.ConnectionString = ArgumentAdd("connectionString", "Set ConnectionString");
             this.OptionGet = OptionAdd("-g|--get", "Get ConnectionString");

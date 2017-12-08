@@ -196,7 +196,7 @@
                 }
             }
             var options = new DbContextOptionsBuilder<DbContext>();
-            options.UseSqlServer(ConnectionManagerServer.ConnectionString);
+            options.UseSqlServer(ConnectionManagerServer.ConnectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
             options.UseModel(builder.Model);
             DbContext result = new DbContext(options.Options);
             result.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.

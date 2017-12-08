@@ -3,7 +3,7 @@
     public class CommandCheck : Command
     {
         public CommandCheck() 
-            : base("check", "Test all ConnectionManager values")
+            : base("check", "Test all ConnectionManager values (Server and BuildTool)")
         {
 
         }

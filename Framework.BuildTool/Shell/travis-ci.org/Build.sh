@@ -39,7 +39,7 @@ function Deploy
 {
     cd $FolderName
     echo \#\#\# Deploy
-    cd ./Server/bin/Debug/netcoreapp1.1/publish/
+    cd ./Server/bin/Debug/netcoreapp2.0/publish/
     echo $(pwd)
     find
 

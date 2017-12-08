@@ -14,7 +14,11 @@
         {
             get
             {
-                return "v1.036 Server";
+                // .NET Standard 1.6 for Libraries
+                // .NET Core 2.0 for CLI's
+                // node v8.9.2 LTS
+                // npm 5.5.1
+                return "v1.037 Server";
             }
         }
 
@@ -36,13 +40,13 @@
             Uri uri = new Uri(typeof(UtilFramework).GetTypeInfo().Assembly.CodeBase);
             string result;
             isIss = false;
-            if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp1.1/Framework.dll") || uri.AbsolutePath.EndsWith("/BuildTool/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+            if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp2.0/Framework.dll") || uri.AbsolutePath.EndsWith("/BuildTool/bin/Debug/netcoreapp2.0/Framework.dll")) // Running in Visual Studio
             {
                 result = new Uri(uri, "../../../../").AbsolutePath;
             }
             else
             {
-                if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp1.1/Framework.dll")) // Running in Visual Studio
+                if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp2.0/Framework.dll")) // Running in Visual Studio
                 {
                     result = new Uri(uri, "../../../../").AbsolutePath;
                 }

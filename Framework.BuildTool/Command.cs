@@ -103,14 +103,14 @@
                 UtilFramework.Log("ShortCut:");
                 for (int i = 0; i < commandShortCutList.Count; i++)
                 {
-                    UtilFramework.Log(string.Format("{0}={1}", i, commandShortCutList[i]));
+                    UtilFramework.Log(string.Format("{0}={1}", i + 1, commandShortCutList[i]));
                 }
                 Console.Write(">");
                 string line = Console.ReadLine(); // Read from command line.
                 bool isFind = false;
                 for (int i = 0; i < commandShortCutList.Count; i++)
                 {
-                    if (line == i.ToString())
+                    if (line == (i + 1).ToString())
                     {
                         isFind = true;
                         CommandShortCutExecute(result, commandShortCutList[i]);
