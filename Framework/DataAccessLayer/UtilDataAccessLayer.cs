@@ -2,7 +2,7 @@
 {
     using Framework.Server;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
+    using Microsoft.EntityFrameworkCore.Metadata.Conventions;
     using Microsoft.EntityFrameworkCore.Query.Internal;
     using System;
     using System.Collections.Generic;
@@ -175,8 +175,7 @@
         /// </summary>
         private static DbContext DbContext(Type typeRow)
         {
-            var conventionBuilder = new CoreConventionSetBuilder();
-            var conventionSet = conventionBuilder.CreateConventionSet();
+            var conventionSet = new ConventionSet();
             var builder = new ModelBuilder(conventionSet);
             {
                 var entity = builder.Entity(typeRow);
@@ -199,7 +198,6 @@
             options.UseSqlServer(ConnectionManagerServer.ConnectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
             options.UseModel(builder.Model);
             DbContext result = new DbContext(options.Options);
-            result.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.
             //
             return result;
         }

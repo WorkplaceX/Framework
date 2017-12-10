@@ -14,11 +14,10 @@
         {
             get
             {
-                // .NET Standard 1.6 for Libraries
-                // .NET Core 2.0 for CLI's
+                // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.038 Server";
+                return "v1.039 Server";
             }
         }
 
