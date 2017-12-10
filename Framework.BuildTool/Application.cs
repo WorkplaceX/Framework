@@ -6,7 +6,6 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
 
     public class AppBuildTool
     {
@@ -62,7 +61,7 @@
         private void RegisterCommand(CommandLineApplication commandLineApplication)
         {
             List<Command> result = new List<Command>();
-            result.Add(new CommandConnectionString());
+            result.Add(new CommandConnectionString()); // CLI shows commands in alphabetical order
             result.Add(new CommandCheck());
             result.Add(new CommandOpen());
             result.Add(new CommandServe());

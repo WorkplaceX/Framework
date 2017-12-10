@@ -181,6 +181,7 @@
                 var entity = builder.Entity(typeRow);
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName);
+                bool isFirst = true;
                 foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
@@ -190,6 +191,12 @@
                     }
                     else
                     {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                            entity.HasKey(propertyInfo.Name); // Assume first property is primary key. Be aware of property order in partial classes!
+                            entity.Property(propertyInfo.Name).ValueGeneratedOnAdd(); // Read back auto increment key value.
+                        }
                         entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.SqlColumnName);
                     }
                 }
