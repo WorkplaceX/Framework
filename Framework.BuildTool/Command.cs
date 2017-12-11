@@ -96,11 +96,13 @@
             result.OnExecute(() => 
             {
                 Console.WindowHeight = 36;
+                UtilFramework.LogColor(ConsoleColor.Blue);
                 UtilFramework.Log(@"  ____            _   _       _   _____                   _      ____   _       ___ ");
                 UtilFramework.Log(@" | __ )   _   _  (_) | |   __| | |_   _|   ___     ___   | |    / ___| | |     |_ _|");
                 UtilFramework.Log(@" |  _ \  | | | | | | | |  / _` |   | |    / _ \   / _ \  | |   | |     | |      | | ");
                 UtilFramework.Log(@" | |_) | | |_| | | | | | | (_| |   | |   | (_) | | (_) | | |   | |___  | |___   | | ");
                 UtilFramework.Log(@" |____/   \__,_| |_| |_|  \__,_|   |_|    \___/   \___/  |_|    \____| |_____| |___|");
+                UtilFramework.LogColorDefault();
                 // Default function, when no arguments passed from CLI.
                 //
                 result.Execute("-h"); // Show list of available commands.

@@ -239,7 +239,33 @@
         {
             Console.WriteLine(text);
         }
-        
+
+        [ThreadStatic]
+        private static ConsoleColor? colorDefault;
+
+        /// <summary>
+        /// Change font color.
+        /// </summary>
+        public static void LogColor(ConsoleColor color)
+        {
+            if (colorDefault == null)
+            {
+                colorDefault = Console.ForegroundColor;
+            }
+            Console.ForegroundColor = color;
+        }
+
+        /// <summary>
+        /// Change font color back to default color.
+        /// </summary>
+        public static void LogColorDefault()
+        {
+            if (colorDefault != null)
+            {
+                Console.ForegroundColor = colorDefault.Value;
+            }
+        }
+
         /// <summary>
         /// Write to stderr.
         /// </summary>
