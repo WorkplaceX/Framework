@@ -9,7 +9,7 @@
     public class CommandRunSqlCreate : Command
     {
         public CommandRunSqlCreate(AppBuildTool appBuildTool) 
-            : base("runSqlCreate", "Run sql create scripts")
+            : base("runSqlCreate", "Run sql create scripts and update FrameworkApplicationType (Meta)")
         {
             this.AppBuildTool = appBuildTool;
             this.OptionDrop = OptionAdd("-d|--drop", "Run sql drop scripts");

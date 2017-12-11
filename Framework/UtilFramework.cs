@@ -17,7 +17,7 @@
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.040 Server";
+                return "v1.041 Server";
             }
         }
 
@@ -198,19 +198,24 @@
 
         public static Type TypeFromName(string name, params Type[] typeInAssemblyList)
         {
-            List<Type> result = new List<Type>();
+            List<Type> resultList = new List<Type>();
             foreach (var type in typeInAssemblyList)
             {
                 Type resultType = type.GetTypeInfo().Assembly.GetType(name);
                 if (resultType != null)
                 {
-                    if (!result.Contains(resultType))
+                    if (!resultList.Contains(resultType))
                     {
-                        result.Add(resultType);
+                        resultList.Add(resultType);
                     }
                 }
             }
-            return result.Single(); // See also database table FrameworkApplication.
+            Type result = resultList.FirstOrDefault();
+            if (result == null)
+            {
+                throw new Exception(string.Format("Url path points to an App class which does not exist. Run BuildTool SqlCreate command to update database table FrameworkApplicationType. ({0})", name));
+            }
+            return resultList.Single(); // See also database table FrameworkApplication.
         }
 
         /// <summary>

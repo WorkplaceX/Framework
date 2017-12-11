@@ -10,10 +10,13 @@
     using System.Data.SqlClient;
     using System.Text;
 
+    /// <summary>
+    /// Executed as part of RunSqlCreate command.
+    /// </summary>
     public class CommandRunSqlMeta : Command
     {
         public CommandRunSqlMeta(AppBuildTool appBuildTool) 
-            : base("runSqlMeta", "Copy all in code declared tables and columns to database table FrameworkTable.")
+            : base("runSqlMeta", "Copy all in code declared Apps, tables and columns to database table FrameworkTable.")
         {
             this.AppBuildTool = appBuildTool;
         }

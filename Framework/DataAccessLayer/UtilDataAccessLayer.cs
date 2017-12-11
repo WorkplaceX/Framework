@@ -202,7 +202,12 @@
                 }
             }
             var options = new DbContextOptionsBuilder<DbContext>();
-            options.UseSqlServer(ConnectionManagerServer.ConnectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
+            string connectionString = ConnectionManagerServer.ConnectionString;
+            if (connectionString == null)
+            {
+                throw new Exception("ConnectionString is null! (See also file: ConnectionManagerServer.json)");
+            }
+            options.UseSqlServer(connectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
             options.UseModel(builder.Model);
             DbContext result = new DbContext(options.Options);
             //
