@@ -22,7 +22,7 @@
             List<string> nameExceptList = new List<string>();
             foreach (string schemaName in schemaNameList)
             {
-                string schemaNameCSharp = Util.NameCSharp(schemaName, nameExceptList);
+                string schemaNameCSharp = UtilDataAccessLayer.NameCSharp(schemaName, nameExceptList);
                 TableName(dataList, schemaName, schemaNameCSharp);
             }
         }
@@ -33,7 +33,7 @@
             List<string> nameExceptList = new List<string>();
             foreach (string tableName in tableNameList)
             {
-                string tableNameCSharp = Util.NameCSharp(tableName, nameExceptList);
+                string tableNameCSharp = UtilDataAccessLayer.NameCSharp(tableName, nameExceptList);
                 FieldName(dataList, schemaName, schemaNameCSharp, tableName, tableNameCSharp);
             }
         }
@@ -45,7 +45,7 @@
             nameExceptList.Add(tableName); // CSharp propery can not have same name like class.
             foreach (MetaSqlSchema field in fieldList)
             {
-                string fieldNameCSharp = Util.NameCSharp(field.FieldName, nameExceptList);
+                string fieldNameCSharp = UtilDataAccessLayer.NameCSharp(field.FieldName, nameExceptList);
                 List.Add(new MetaCSharpSchema()
                 {
                     Schema = field,

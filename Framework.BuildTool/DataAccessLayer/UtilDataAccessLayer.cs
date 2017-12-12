@@ -6,7 +6,7 @@
     using System.Reflection;
     using System.Text;
 
-    public class Util
+    public class UtilDataAccessLayer
     {
         public static string FileLoad(string fileName)
         {
