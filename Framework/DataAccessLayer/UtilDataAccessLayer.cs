@@ -44,11 +44,6 @@
             return result;
         }
 
-        internal static void Parameter(SqlCommand command, List<SqlParameter> parameterList)
-        {
-            command.Parameters.AddRange(parameterList.ToArray());
-        }
-
         /// <summary>
         /// Gets IsConnectionString. True, if ConnectionString has been set.
         /// </summary>

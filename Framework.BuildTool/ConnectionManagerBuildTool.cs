@@ -126,10 +126,7 @@ namespace Framework.BuildTool
             string connectionString = ConnectionManagerServer.ConnectionString;
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                }
+                UtilBuildTool.SqlCommand("SELECT 1");
                 UtilFramework.Log("SQL Connection [ok]");
             }
             catch (Exception exception)

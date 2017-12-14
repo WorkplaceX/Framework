@@ -29,54 +29,43 @@
         private void RunSqlApplication(string connectionString)
         {
             UtilFramework.Log("### Start RunSqlApplication");
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            string sql = "UPDATE FrameworkApplication SET IsActive = 0";
+            UtilBuildTool.SqlCommand(sql);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkApplication AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT Source.Path
+                    EXCEPT
+                    SELECT Target.Path)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.Text = Source.Text, Target.Path = Source.Path, Target.ApplicationTypeId = Source.ApplicationTypeId, Target.IsActive = Source.IsActive
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (Text, Path, ApplicationTypeId, IsActive)
+	            VALUES (Source.Text, Source.Path, Source.ApplicationTypeId, Source.IsActive);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            foreach (FrameworkApplicationView frameworkApplication in AppBuildTool.DbFrameworkApplicationView())
             {
-                connection.Open();
-                string sql = "UPDATE FrameworkApplication SET IsActive = 0";
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                if (isFirst)
                 {
-                    command.ExecuteNonQuery();
+                    isFirst = false;
                 }
-                string sqlUpsert = @"
-                MERGE INTO FrameworkApplication AS Target
-                USING ({0}) AS Source
-	                ON NOT EXISTS(
-                        SELECT Source.Path
-                        EXCEPT
-                        SELECT Target.Path)
-                WHEN MATCHED THEN
-	                UPDATE SET Target.Text = Source.Text, Target.Path = Source.Path, Target.ApplicationTypeId = Source.ApplicationTypeId, Target.IsActive = Source.IsActive
-                WHEN NOT MATCHED BY TARGET THEN
-	                INSERT (Text, Path, ApplicationTypeId, IsActive)
-	                VALUES (Source.Text, Source.Path, Source.ApplicationTypeId, Source.IsActive);
-                ";
-                StringBuilder sqlSelect = new StringBuilder();
-                bool isFirst = true;
-                List<SqlParameter> parameterList = new List<SqlParameter>();
-                foreach (FrameworkApplicationView frameworkApplication in AppBuildTool.DbFrameworkApplicationView())
+                else
                 {
-                    if (isFirst)
-                    {
-                        isFirst = false;
-                    }
-                    else
-                    {
-                        sqlSelect.Append(" UNION ALL\r\n");
-                    }
-                    sqlSelect.Append(string.Format(
-                        "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = {2}) AS ApplicationTypeId, {3} AS IsActive)",
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
+                    sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
-                {
-                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(command, parameterList);
-                    command.ExecuteNonQuery();
-                }
+                sqlSelect.Append(string.Format(
+                    "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = {2}) AS ApplicationTypeId, {3} AS IsActive)",
+                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
+                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
+                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
+                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
             }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, parameterList.ToArray());
             UtilFramework.Log("### Exit RunSqlApplication");
         }
 
@@ -86,60 +75,45 @@
         private void RunSqlApplicationType(string connectionString)
         {
             UtilFramework.Log("### Start RunSqlApplicationType");
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            string sql = "UPDATE FrameworkApplicationType SET IsExist = 0";
+            UtilBuildTool.SqlCommand(sql);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkApplicationType AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT Source.Name
+                    EXCEPT
+                    SELECT Target.Name)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (Name, IsExist)
+	            VALUES (Source.Name, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            foreach (Type type in UtilApplication.ApplicationTypeList(AppBuildTool.App.GetType()))
             {
-                connection.Open();
-                string sql = "UPDATE FrameworkApplicationType SET IsExist = 0";
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                if (isFirst)
                 {
-                    command.ExecuteNonQuery();
+                    isFirst = false;
                 }
-                string sqlUpsert = @"
-                MERGE INTO FrameworkApplicationType AS Target
-                USING ({0}) AS Source
-	                ON NOT EXISTS(
-                        SELECT Source.Name
-                        EXCEPT
-                        SELECT Target.Name)
-                WHEN MATCHED THEN
-	                UPDATE SET Target.IsExist = 1
-                WHEN NOT MATCHED BY TARGET THEN
-	                INSERT (Name, IsExist)
-	                VALUES (Source.Name, 1);
-                ";
-                StringBuilder sqlSelect = new StringBuilder();
-                bool isFirst = true;
-                foreach (Type type in UtilApplication.ApplicationTypeList(AppBuildTool.App.GetType()))
+                else
                 {
-                    if (isFirst)
-                    {
-                        isFirst = false;
-                    }
-                    else
-                    {
-                        sqlSelect.Append(" UNION ALL\r\n");
-                    }
-                    sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", UtilFramework.TypeToName(type)));
+                    sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
+                sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", UtilFramework.TypeToName(type)));
             }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert);
             UtilFramework.Log("### Exit RunSqlApplicationType");
         }
 
         private void RunSqlTable(string connectionString)
         {
             UtilFramework.Log("### Start RunSqlTable");
-            SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
             string sql = "UPDATE FrameworkTable SET IsExist = 0";
-            using (SqlCommand command = new SqlCommand(sql, connection))
-            {
-                command.ExecuteNonQuery();
-            }
+            UtilBuildTool.SqlCommand(sql);
             string sqlUpsert = @"
             MERGE INTO FrameworkTable AS Target
             USING ({0}) AS Source
@@ -169,23 +143,15 @@
                 sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", tableName));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
-            {
-                command.ExecuteNonQuery();
-            }
+            UtilBuildTool.SqlCommand(sqlUpsert);
             UtilFramework.Log("### Exit RunSqlTable");
         }
 
         private void RunSqlColumn(string connectionString)
         {
             UtilFramework.Log("### Start RunSqlColumn");
-            SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
             string sql = "UPDATE FrameworkColumn SET IsExist = 0";
-            using (SqlCommand command = new SqlCommand(sql, connection))
-            {
-                command.ExecuteNonQuery();
-            }
+            UtilBuildTool.SqlCommand(sql);
             string sqlUpsert = @"
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
@@ -218,10 +184,7 @@
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            using (SqlCommand command = new SqlCommand(sqlUpsert, connection))
-            {
-                command.ExecuteNonQuery();
-            }
+            UtilBuildTool.SqlCommand(sqlUpsert);
             UtilFramework.Log("### Exit RunSqlColumn");
         }
 

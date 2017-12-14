@@ -18,11 +18,6 @@
                 return DataAccessLayer.UtilDataAccessLayer.Parameter(value, dbType, parameterList);
             }
 
-            public static void Parameter(SqlCommand command, List<SqlParameter> parameterList)
-            {
-                DataAccessLayer.UtilDataAccessLayer.Parameter(command, parameterList);
-            }
-
             public static string TypeRowToName(Type typeRow)
             {
                 return DataAccessLayer.UtilDataAccessLayer.TypeRowToName(typeRow);

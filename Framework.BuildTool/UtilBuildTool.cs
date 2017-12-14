@@ -18,13 +18,13 @@
         private static void SqlCommand(string sql, Action<SqlCommand> execute, params SqlParameter[] paramList)
         {
             string connectionString = ConnectionManagerServer.ConnectionString;
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                connection.Open();
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection))
                 {
-                    command.Parameters.AddRange(paramList);
-                    execute(command); // Call back
+                    sqlCommand.Parameters.AddRange(paramList);
+                    execute(sqlCommand); // Call back
                 }
             }
         }
