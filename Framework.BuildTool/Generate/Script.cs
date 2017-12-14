@@ -20,11 +20,11 @@
             new CSharpGenerate(metaCSharp).Run(out cSharp);
             if (isFramework == false)
             {
-                UtilDataAccessLayer.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);
+                UtilGenerate.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);
             }
             else
             {
-                UtilDataAccessLayer.FileSave(ConnectionManager.DatabaseGenerateFrameworkFileName, cSharp);
+                UtilGenerate.FileSave(ConnectionManager.DatabaseGenerateFrameworkFileName, cSharp);
             }
         }
     }

@@ -18,7 +18,7 @@
         public MetaSql(bool isFramework)
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext();
-            string sql = UtilDataAccessLayer.FileLoad(ConnectionManager.SchemaFileName);
+            string sql = UtilGenerate.FileLoad(ConnectionManager.SchemaFileName);
             this.List = dbContext.Schema.FromSql(sql).ToArray();
             //
             // Filter out "dbo.Framework" tables.

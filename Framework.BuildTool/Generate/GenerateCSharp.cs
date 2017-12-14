@@ -88,7 +88,7 @@
                 {
                     result.AppendLine();
                 }
-                string typeCSharp = UtilDataAccessLayer.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
+                string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
                 result.AppendLine(string.Format("        [SqlColumn(\"{0}\", typeof({1}))]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp));
                 result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.FieldNameCSharp));
             }
@@ -111,7 +111,7 @@
                 {
                     result.AppendLine();
                 }
-                string typeCSharp = UtilDataAccessLayer.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
+                string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
                 result.AppendLine("    public partial class " + item.TableNameCSharp + "_" + item.FieldNameCSharp + " : Cell<" + item.TableNameCSharp + "> { }");
             }
         }

@@ -9,7 +9,7 @@
         {
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("Word");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("Word", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("Word", nameExceptList);
             UtilFramework.Assert(nameCSharp == "Word2");
         }
 
@@ -17,7 +17,7 @@
         {
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("WOrd");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("Word", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("Word", nameExceptList);
             UtilFramework.Assert(nameCSharp == "Word2");
         }
 
@@ -25,7 +25,7 @@
         {
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("WO_rd?");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("Word", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("Word", nameExceptList);
             UtilFramework.Assert(nameCSharp == "Word2");
         }
 
@@ -35,7 +35,7 @@
             nameExceptList.Add("WO_rd?");
             nameExceptList.Add("Sun");
             nameExceptList.Add("Word2");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("Word", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("Word", nameExceptList);
             UtilFramework.Assert(nameCSharp == "Word3");
         }
 
@@ -44,7 +44,7 @@
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("World2");
             nameExceptList.Add("World3");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("World", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("World", nameExceptList);
             UtilFramework.Assert(nameCSharp == "World");
         }
 
@@ -55,7 +55,7 @@
             nameExceptList.Add("World1");
             nameExceptList.Add("World2");
             nameExceptList.Add("World3");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("World", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("World", nameExceptList);
             UtilFramework.Assert(nameCSharp == "World4");
         }
 
@@ -65,7 +65,7 @@
             nameExceptList.Add("World");
             nameExceptList.Add("World2");
             nameExceptList.Add("World3");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("World", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("World", nameExceptList);
             UtilFramework.Assert(nameCSharp == "World4");
         }
 
@@ -74,7 +74,7 @@
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("World");
             nameExceptList.Add("WorlD");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("WorLD", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("WorLD", nameExceptList);
             UtilFramework.Assert(nameCSharp == "WorLD2");
         }
 
@@ -83,7 +83,7 @@
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add("World");
             nameExceptList.Add("WorlD");
-            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilDataAccessLayer.NameCSharp("WorLD", nameExceptList);
+            string nameCSharp = Framework.BuildTool.DataAccessLayer.UtilGenerate.NameCSharp("WorLD", nameExceptList);
             UtilFramework.Assert(nameCSharp == "WorLD2");
         }
     }

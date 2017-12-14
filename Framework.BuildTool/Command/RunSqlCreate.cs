@@ -172,7 +172,7 @@
         {
             // Create table FrameworkScript
             string fileNameScript = UtilFramework.FolderName + "Submodule/Framework.BuildTool/Sql/Script.sql";
-            string sql = UtilDataAccessLayer.FileLoad(fileNameScript);
+            string sql = UtilGenerate.FileLoad(fileNameScript);
             UtilBuildTool.SqlCommand(sql);
             //
             string[] nameList = new string[] { };

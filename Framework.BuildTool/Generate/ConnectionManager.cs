@@ -6,7 +6,7 @@
         {
             get
             {
-                return UtilFramework.FolderName + "Submodule/Framework.BuildTool/DataAccessLayer/Sql/Schema.sql";
+                return UtilFramework.FolderName + "Submodule/Framework.BuildTool/Generate/Sql/Schema.sql";
             }
         }
 
