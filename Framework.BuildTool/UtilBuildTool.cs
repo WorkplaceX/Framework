@@ -1,8 +1,10 @@
 ﻿namespace Framework.BuildTool
 {
+    using Framework.Server;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
+    using System.Data.SqlClient;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -10,6 +12,19 @@
 
     public static class UtilBuildTool
     {
+        public static void SqlCommand(string sql, Action<SqlCommand> execute)
+        {
+            string connectionString = ConnectionManagerServer.ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    execute(command); // Call back
+                }
+            }
+        }
+
         public static CommandLineApplication CommandLineApplicationCreate()
         {
             List<string> commandShortCutList = new List<string>();

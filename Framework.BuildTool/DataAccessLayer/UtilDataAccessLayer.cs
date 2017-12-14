@@ -6,6 +6,9 @@
     using System.Reflection;
     using System.Text;
 
+    /// <summary>
+    /// Util functions for code generation.
+    /// </summary>
     public class UtilDataAccessLayer
     {
         public static string FileLoad(string fileName)

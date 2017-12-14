@@ -119,7 +119,8 @@
 
         public static string[] FileNameList(string folderName, string searchPattern)
         {
-            var result = Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories);
+            var list = Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories);
+            var result = list.Select(item => item.Replace(@"\", "/")).ToArray();
             return result;
         }
 

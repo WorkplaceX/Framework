@@ -12,4 +12,8 @@
     <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Sql\" />
+  </ItemGroup>
+
 </Project>
