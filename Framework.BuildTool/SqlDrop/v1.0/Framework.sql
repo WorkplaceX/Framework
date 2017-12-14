@@ -1,6 +1,4 @@
-﻿IF NOT EXISTS(SELECT * FROM FrameworkVersion WHERE Name = 'Framework' AND Version = 'v1.0') BEGIN SELECT 'RETURN' RETURN END -- Version Check
-
-DROP TABLE FrameworkFileStorage
+﻿DROP TABLE FrameworkFileStorage
 DROP VIEW FrameworkConfigTableView
 DROP TABLE FrameworkConfigTable
 DROP VIEW FrameworkConfigColumnView

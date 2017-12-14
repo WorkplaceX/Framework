@@ -12,7 +12,10 @@
 
     public static class UtilBuildTool
     {
-        public static void SqlCommand(string sql, Action<SqlCommand> execute)
+        /// <summary>
+        /// Wrap SqlCommand into SqlConnection.
+        /// </summary>
+        private static void SqlCommand(string sql, Action<SqlCommand> execute, params SqlParameter[] paramList)
         {
             string connectionString = ConnectionManagerServer.ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -20,9 +23,45 @@
                 connection.Open();
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.AddRange(paramList);
                     execute(command); // Call back
                 }
             }
+        }
+
+        /// <summary>
+        /// Execute sql command.
+        /// </summary>
+        public static void SqlCommand(string sql, params SqlParameter[] paramList)
+        {
+            SqlCommand(sql, (sqlCommand) => sqlCommand.ExecuteNonQuery(), paramList);
+        }
+
+        /// <summary>
+        /// Read table from database.
+        /// </summary>
+        public static List<Dictionary<string, object>> SqlRead(string sql, params SqlParameter[] paramList)
+        {
+            List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+            SqlCommand(sql, (sqlCommand) =>
+            {
+                sqlCommand.Parameters.AddRange(paramList);
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var row = new Dictionary<string, object>();
+                        result.Add(row);
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            string fieldName = reader.GetName(i);
+                            object value = reader.GetValue(i);
+                            row.Add(fieldName, value);
+                        }
+                    }
+                }
+            });
+            return result;
         }
 
         public static CommandLineApplication CommandLineApplicationCreate()

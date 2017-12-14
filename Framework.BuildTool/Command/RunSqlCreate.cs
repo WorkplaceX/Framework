@@ -22,50 +22,12 @@
 
         public readonly Option OptionDrop;
 
-        private void RunSqlCreate(string connectionString)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                IEnumerable<string> fileNameList;
-                if (OptionDrop.IsOn)
-                {
-                    var fileNameListFramework = UtilFramework.FileNameList(UtilFramework.FolderName + "Submodule/Framework.BuildTool/SqlDrop/", "*.sql").OrderByDescending(item => item);
-                    var fileNameListApplication = UtilFramework.FileNameList(UtilFramework.FolderName + "BuildTool/SqlDrop/", "*.sql").OrderByDescending(item => item);
-                    fileNameList = fileNameListApplication.Union(fileNameListFramework).ToArray();
-                }
-                else
-                {
-                    var fileNameListFramework = UtilFramework.FileNameList(UtilFramework.FolderName + "Submodule/Framework.BuildTool/SqlCreate/", "*.sql").OrderBy(item => item);
-                    var fileNameListApplication = UtilFramework.FileNameList(UtilFramework.FolderName + "BuildTool/SqlCreate/", "*.sql").OrderBy(item => item);
-                    fileNameList = fileNameListFramework.Union(fileNameListApplication).ToArray();
-                }
-                foreach (string fileName in fileNameList)
-                {
-                    UtilFramework.Log(string.Format("### Start RunSqlCreate {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
-                    string text = UtilFramework.FileRead(fileName);
-                    var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string sql in sqlList)
-                    {
-                        using (SqlCommand command = new SqlCommand(sql, connection))
-                        {
-                            if ((command.ExecuteScalar() as string) == "RETURN") // Sql script with GO and RETURN at top would not stop. Therefore use SELECT 'RETURN' if there is GO statements.
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    UtilFramework.Log(string.Format("### Exit RunSqlCreate {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
-                }
-            }
-        }
-
         /// <summary>
-        /// Returns SqlCreate, SqlDrop path.
+        /// Returns SqlCreate, SqlDrop folder name.
         /// </summary>
         /// <param name="isFramework">Framework or Application.</param>
-        /// <param name="isDrop">Add SqlCreate or SqlDrop to path.</param>
-        /// <param name="isName">Return path as name without drive information and SqlCreate folder.</param>
+        /// <param name="isDrop">Add SqlCreate or SqlDrop to folder name.</param>
+        /// <param name="isName">Return folder name as name without drive information and SqlCreate folder.</param>
         private string FolderName(bool isFramework, bool isDrop, bool isName)
         {
             string result = null;
@@ -95,6 +57,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Same file in SqlCreate and SqlDrop folder have the same name.
+        /// </summary>
         private string FileNameToName(string fileName, bool isFramework, bool isDrop)
         {
             string folderNameFind = FolderName(isFramework, isDrop, false);
@@ -115,58 +80,62 @@
             nameList = nameList.Union(result).Distinct().ToArray();
         }
 
-        private bool IsRun(string fileName, bool isFramework, bool isDrop)
+        /// <summary>
+        /// Returns true, if script is marked as IsRun on database.
+        /// </summary>
+        /// <param name="fileName">SqlCreate or SqlDrop script.</param>
+        private bool IsRunGet(string fileName, bool isFramework, bool isDrop)
         {
             string name = FileNameToName(fileName, isFramework, isDrop);
-            UtilBuildTool.SqlCommand("SELECT * FROM FrameworkScript WHERE Name = @Name", (command) =>
-            {
-                command.Parameters.Add("Name", System.Data.SqlDbType.NVarChar).Value = name;
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                    }
-                }
-            });
-            return false;
+            var rowList = UtilBuildTool.SqlRead("SELECT * FROM FrameworkScript WHERE Name = @Name", new SqlParameter("Name", System.Data.SqlDbType.NVarChar) { Value = name });
+            bool result = (bool)rowList.Single()["IsRun"];
+            return result;
         }
 
-        private void Execute(bool isFramework, bool isDrop)
+        /// <summary>
+        /// Set IsRun flag on database table FrameworkScript.
+        /// </summary>
+        private void IsRunSet(string fileName, bool isFramework, bool isDrop, bool value)
+        {
+            string name = FileNameToName(fileName, isFramework, isDrop);
+            UtilBuildTool.SqlCommand(
+                "UPDATE FrameworkScript SET IsRun = @IsRun WHERE Name = @Name", 
+                new SqlParameter("IsRun", System.Data.SqlDbType.Bit) { Value = value }, 
+                new SqlParameter("Name", System.Data.SqlDbType.NVarChar) { Value = name }
+            );
+        }
+
+        /// <summary>
+        /// Execute SqlCreate, SqlDrop scripts.
+        /// </summary>
+        private void ScriptExecute(bool isFramework, bool isDrop)
         {
             string folderName = FolderName(isFramework, isDrop, false);
             var fileNameList = UtilFramework.FileNameList(folderName, "*.sql").OrderBy(item => item);
             foreach (string fileName in fileNameList)
             {
-                UtilFramework.Log(string.Format("### Start RunSqlCreate {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
-
-                string text = UtilFramework.FileRead(fileName);
-                var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string sql in sqlList)
+                bool isRun = IsRunGet(fileName, isFramework, isDrop);
+                UtilFramework.Log(string.Format("### Start RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
+                if (isRun == isDrop)
                 {
-                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    string text = UtilFramework.FileRead(fileName);
+                    var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string sql in sqlList)
                     {
-                        if ((command.ExecuteScalar() as string) == "RETURN") // Sql script with GO and RETURN at top would not stop. Therefore use SELECT 'RETURN' if there is GO statements.
-                        {
-                            break;
-                        }
+                        UtilBuildTool.SqlCommand(sql);
                     }
+                    IsRunSet(fileName, isFramework, isDrop, !isDrop);
                 }
-                UtilFramework.Log(string.Format("### Exit RunSqlCreate {0} OptionDrop={1};", fileName, OptionDrop.IsOn));
+                UtilFramework.Log(string.Format("### Exit RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
             }
         }
 
-        private void RunSqlCreate()
+        /// <summary>
+        /// Insert new scripts and mark missing ones as not exist.
+        /// </summary>
+        private void Upsert(string[] nameList)
         {
-            // Create table FrameworkScript
-            string fileNameScript = UtilFramework.FolderName + "Submodule/Framework.BuildTool/Sql/Script.sql";
-            string sql = UtilDataAccessLayer.FileLoad(fileNameScript);
-            UtilBuildTool.SqlCommand(sql, (sqlCommand) => sqlCommand.ExecuteNonQuery());
-            //
-            string[] nameList = new string[] { };
-            NameList(false, false, ref nameList);
-            NameList(false, true, ref nameList);
-            NameList(true, false, ref nameList);
-            NameList(true, true, ref nameList);
+            UtilBuildTool.SqlCommand("UPDATE FrameworkScript SET IsExist = 0");
             //
             string sqlUpsert = @"
             MERGE INTO FrameworkScript AS Target
@@ -196,13 +165,31 @@
                 sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", name));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, (command) => command.ExecuteNonQuery());
+            UtilBuildTool.SqlCommand(sqlUpsert);
+        }
+
+        private void RunSqlCreate()
+        {
+            // Create table FrameworkScript
+            string fileNameScript = UtilFramework.FolderName + "Submodule/Framework.BuildTool/Sql/Script.sql";
+            string sql = UtilDataAccessLayer.FileLoad(fileNameScript);
+            UtilBuildTool.SqlCommand(sql);
+            //
+            string[] nameList = new string[] { };
+            NameList(false, false, ref nameList);
+            NameList(false, true, ref nameList);
+            NameList(true, false, ref nameList);
+            NameList(true, true, ref nameList);
+            //
+            Upsert(nameList);
+            //
+            ScriptExecute(true, OptionDrop.IsOn);
+            ScriptExecute(false, OptionDrop.IsOn);
         }
 
         public override void Run()
         {
             RunSqlCreate();
-            RunSqlCreate(ConnectionManagerServer.ConnectionString);
             if (OptionDrop.IsOn == false)
             {
                 new CommandRunSqlMeta(AppBuildTool).Run();
