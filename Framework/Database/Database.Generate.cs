@@ -309,6 +309,30 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_IsDelete : Cell<FrameworkFileStorage> { }
 
+    [SqlTable("dbo", "FrameworkScript")]
+    public partial class FrameworkScript : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkScript_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("Name", typeof(FrameworkScript_Name))]
+        public string Name { get; set; }
+
+        [SqlColumn("IsExist", typeof(FrameworkScript_IsExist))]
+        public bool IsExist { get; set; }
+
+        [SqlColumn("IsRun", typeof(FrameworkScript_IsRun))]
+        public bool IsRun { get; set; }
+    }
+
+    public partial class FrameworkScript_Id : Cell<FrameworkScript> { }
+
+    public partial class FrameworkScript_Name : Cell<FrameworkScript> { }
+
+    public partial class FrameworkScript_IsExist : Cell<FrameworkScript> { }
+
+    public partial class FrameworkScript_IsRun : Cell<FrameworkScript> { }
+
     [SqlTable("dbo", "FrameworkSession")]
     public partial class FrameworkSession : Row
     {
@@ -346,23 +370,4 @@ namespace Database.dbo
     public partial class FrameworkTable_Name : Cell<FrameworkTable> { }
 
     public partial class FrameworkTable_IsExist : Cell<FrameworkTable> { }
-
-    [SqlTable("dbo", "FrameworkVersion")]
-    public partial class FrameworkVersion : Row
-    {
-        [SqlColumn("Id", typeof(FrameworkVersion_Id))]
-        public int Id { get; set; }
-
-        [SqlColumn("Name", typeof(FrameworkVersion_Name))]
-        public string Name { get; set; }
-
-        [SqlColumn("Version", typeof(FrameworkVersion_Version))]
-        public string Version { get; set; }
-    }
-
-    public partial class FrameworkVersion_Id : Cell<FrameworkVersion> { }
-
-    public partial class FrameworkVersion_Name : Cell<FrameworkVersion> { }
-
-    public partial class FrameworkVersion_Version : Cell<FrameworkVersion> { }
 }

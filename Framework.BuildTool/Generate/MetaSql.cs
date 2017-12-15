@@ -14,15 +14,15 @@
         /// <summary>
         /// Run Schema.sql
         /// </summary>
-        /// <param name="isFramework">For internal use only.</param>
-        public MetaSql(bool isFramework)
+        /// <param name="isFrameworkDb">For internal use only.</param>
+        public MetaSql(bool isFrameworkDb)
         {
-            MetaSqlDbContext dbContext = new MetaSqlDbContext();
+            MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilGenerate.FileLoad(ConnectionManager.SchemaFileName);
             this.List = dbContext.Schema.FromSql(sql).ToArray();
             //
             // Filter out "dbo.Framework" tables.
-            if (isFramework == false)
+            if (isFrameworkDb == false)
             {
                 this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
             }
@@ -42,9 +42,16 @@
     /// </summary>
     public class MetaSqlDbContext : DbContext
     {
+        public MetaSqlDbContext(bool isFrameworkDb)
+        {
+            this.IsFrameworkDb = isFrameworkDb;
+        }
+
+        public readonly bool IsFrameworkDb;
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(ConnectionManagerServer.ConnectionString(false));
+            optionsBuilder.UseSqlServer(ConnectionManagerServer.ConnectionString(IsFrameworkDb));
         }
 
         public DbSet<MetaSqlSchema> Schema { get; set; }
