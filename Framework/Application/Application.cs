@@ -40,7 +40,7 @@
         protected virtual List<FrameworkApplicationView> DbApplicationList()
         {
             List<FrameworkApplicationView> result;
-            if (UtilDataAccessLayer.IsConnectionString == false)
+            if (UtilDataAccessLayer.IsConnectionStringFramework == false)
             {
                 result = new List<FrameworkApplicationView>();
                 if (TypeAppDefault != null)

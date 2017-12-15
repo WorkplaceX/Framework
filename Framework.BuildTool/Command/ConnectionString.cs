@@ -24,9 +24,10 @@
         {
             ConnectionManagerCheck.JsonFileCreateIfNotExists();
             //
-            string connectionStringSwitch = ConfigServer.Instance.ConnectionStringSwitch;
-            string connectionString = ConnectionManagerServer.ConnectionString;
-            UtilFramework.Log(string.Format("{0}={1}", connectionStringSwitch, connectionString));
+            string connectionStringApplication = ConnectionManagerServer.ConnectionString(false);
+            string connectionStringFramework = ConnectionManagerServer.ConnectionString(true);
+            UtilFramework.Log(string.Format("ConnectionStringApplication={0};", connectionStringApplication));
+            UtilFramework.Log(string.Format("ConnectionStringFramework={0};", connectionStringFramework));
         }
 
         private void ConnectionStringSet(string connectionString)
@@ -34,7 +35,8 @@
             ConnectionManagerCheck.JsonFileCreateIfNotExists();
             //
             ConfigServer configServer = ConfigServer.Instance;
-            configServer.ConnectionStringSet(connectionString);
+            configServer.ConnectionStringSet(connectionString, false);
+            configServer.ConnectionStringSet(connectionString, true);
             string json = JsonConvert.SerializeObject(configServer, Formatting.Indented);
             UtilFramework.FileWrite(ConfigServer.JsonFileName, json);
             UtilFramework.Log(string.Format("File updated. ({0})", ConfigServer.JsonFileName));

@@ -1,6 +1,4 @@
 ﻿{
-  "ConnectionStringDev": "",
-  "ConnectionStringTest": "",
-  "ConnectionStringProd": "",
-  "ConnectionStringSwitch": "ConnectionStringDev"
+  "ConnectionStringApplication": "",
+  "ConnectionStringFramework": ""
 }

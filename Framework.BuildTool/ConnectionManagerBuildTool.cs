@@ -117,16 +117,20 @@ namespace Framework.BuildTool
         /// <summary>
         /// Check dev connection string.
         /// </summary>
-        public static void ConnectionStringCheck()
+        private static void ConnectionStringCheck(bool isFrameworkDb)
         {
             JsonFileCreateIfNotExists();
-            string connectionStringSwitch = ConfigServer.Instance.ConnectionStringSwitch;
             string ip = UtilFramework.Ip();
+            string connectionStringSwitch = "Application";
+            if (isFrameworkDb)
+            {
+                connectionStringSwitch = "Framework";
+            }
             UtilFramework.Log(string.Format("SQL Connection check ({0}) from {1}", connectionStringSwitch, ip));
-            string connectionString = ConnectionManagerServer.ConnectionString;
+            string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
             try
             {
-                UtilBuildTool.SqlCommand("SELECT 1");
+                UtilBuildTool.SqlCommand("SELECT 1", isFrameworkDb);
                 UtilFramework.Log("SQL Connection [ok]");
             }
             catch (Exception exception)
@@ -134,6 +138,16 @@ namespace Framework.BuildTool
                 UtilFramework.Log(string.Format("Error: SQL Connection failed! ({0} - {1})", ConfigServer.JsonFileName, exception.Message));
             }
         }
+
+        /// <summary>
+         /// Check dev connection string.
+         /// </summary>
+         public static void ConnectionStringCheck()
+         {
+             JsonFileCreateIfNotExists();
+             ConnectionStringCheck(false);
+             ConnectionStringCheck(true);
+         }
 
         private static void FileNameCheck()
         {

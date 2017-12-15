@@ -45,13 +45,13 @@
         }
 
         /// <summary>
-        /// Gets IsConnectionString. True, if ConnectionString has been set.
+        /// Gets IsConnectionStringFramework. True, if ConnectionStringFramework has been set.
         /// </summary>
-        internal static bool IsConnectionString
+        internal static bool IsConnectionStringFramework
         {
             get
             {
-                return ConfigServer.Instance.ConnectionStringGet() != null;
+                return ConfigServer.Instance.ConnectionStringGet(false) != null;
             }
         }
 
@@ -197,7 +197,7 @@
                 }
             }
             var options = new DbContextOptionsBuilder<DbContext>();
-            string connectionString = ConnectionManagerServer.ConnectionString;
+            string connectionString = ConnectionManagerServer.ConnectionString(typeRow);
             if (connectionString == null)
             {
                 throw new Exception("ConnectionString is null! (See also file: ConnectionManagerServer.json)");

@@ -15,9 +15,9 @@
         /// <summary>
         /// Wrap SqlCommand into SqlConnection.
         /// </summary>
-        private static void SqlCommand(string sql, Action<SqlCommand> execute, params SqlParameter[] paramList)
+        private static void SqlCommand(string sql, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
         {
-            string connectionString = ConnectionManagerServer.ConnectionString;
+            string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
@@ -32,15 +32,15 @@
         /// <summary>
         /// Execute sql command.
         /// </summary>
-        public static void SqlCommand(string sql, params SqlParameter[] paramList)
+        public static void SqlCommand(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
         {
-            SqlCommand(sql, (sqlCommand) => sqlCommand.ExecuteNonQuery(), paramList);
+            SqlCommand(sql, (sqlCommand) => sqlCommand.ExecuteNonQuery(), isFrameworkDb, paramList);
         }
 
         /// <summary>
         /// Read table from database.
         /// </summary>
-        public static List<Dictionary<string, object>> SqlRead(string sql, params SqlParameter[] paramList)
+        public static List<Dictionary<string, object>> SqlRead(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
         {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
             SqlCommand(sql, (sqlCommand) =>
@@ -60,7 +60,7 @@
                         }
                     }
                 }
-            });
+            }, isFrameworkDb);
             return result;
         }
 
@@ -180,7 +180,8 @@
                 Console.WriteLine("### Exit code={3} (WorkingDirectory={0}; FileName={1}; Arguments={2};)", workingDirectory, fileName, arguments, process.ExitCode);
                 if (isThrowException && process.ExitCode != 0)
                 {
-                    throw new Exception("Script failed!"); // TODO Make sure it's passed to stderr. See also try, catch in method Util.MethodExecute();
+                    // TODO Make sure it's passed to stderr. See also try, catch in method Util.MethodExecute();
+                    throw new Exception("Script failed!"); // Make sure BuildTool intallAll command has been run.
                 }
             }
         }

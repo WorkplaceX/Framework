@@ -1,23 +1,23 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Reflection;
 
 namespace Framework.Server
 {
     /// <summary>
-    /// Server config json.
+    /// Server config json. Read and write values from file "Server\ConnectionManagerServer.json". See also class ConnectionManagerServer.
     /// </summary>
     public class ConfigServer
     {
-        public string ConnectionStringDev;
-
-        public string ConnectionStringTest;
-
-        public string ConnectionStringProd;
+        /// <summary>
+        /// Gets or sets ConnectionString for Application database.
+        /// </summary>
+        public string ConnectionStringApplication;
 
         /// <summary>
-        /// Current ConnectionString (DEV, TEST, PROD).
+        /// Gets or sets ConnectionString for Framework database.
         /// </summary>
-        public string ConnectionStringSwitch;
+        public string ConnectionStringFramework;
 
         public static string JsonFileName
         {
@@ -55,78 +55,70 @@ namespace Framework.Server
             }
         }
 
-        private string ConnectionStringGetSet(bool isSet, string value)
+        private string ConnectionStringGetSet(bool isSet, string value, bool isFrameworkDb)
         {
-            string result = null;
-            switch (ConnectionStringSwitch)
+            // Set
+            if (isSet)
             {
-                case "ConnectionStringDev":
-                    if (isSet == false)
-                    {
-                        result = ConnectionStringDev;
-                    }
-                    else
-                    {
-                        ConnectionStringDev = value;
-                    }
-                    break;
-                case "ConnectionStringTest":
-                    if (isSet == false)
-                    {
-                        result = ConnectionStringTest;
-                    }
-                    else
-                    {
-                        ConnectionStringTest = value;
-                    }
-                    break;
-                case "ConnectionStringProd":
-                    if (isSet == false)
-                    {
-                        result = ConnectionStringProd;
-                    }
-                    else
-                    {
-                        ConnectionStringProd = value;
-                    }
-                    break;
-                default:
-                    throw new Exception("ConnectionStringSwitch unknown!");
+                if (isFrameworkDb == false)
+                {
+                    ConnectionStringApplication = value;
+                }
+                else
+                {
+                    ConnectionStringFramework = value;
+                }
             }
-            if (result == "")
+            // Get
+            if (isFrameworkDb == false)
             {
-                result = null;
+                return ConnectionStringApplication;
             }
-            return result;
+            else
+            {
+                return ConnectionStringFramework;
+            }
         }
 
         /// <summary>
-        /// Returns ConnectionString for DEV, TEST, PROD.
+        /// Returns ConnectionString.
         /// </summary>
-        /// <returns></returns>
-        public string ConnectionStringGet()
+        public string ConnectionStringGet(bool isFrameworkDb)
         {
-            return ConnectionStringGetSet(false, null);
+            return ConnectionStringGetSet(false, null, isFrameworkDb);
         }
 
         /// <summary>
-        /// Sets ConnectionString for DEV, TEST, PROD.
+        /// Sets ConnectionString.
         /// </summary>
-        /// <param name="value"></param>
-        public void ConnectionStringSet(string value)
+        public void ConnectionStringSet(string value, bool isFrameworkDb)
         {
-            ConnectionStringGetSet(true, value);
+            ConnectionStringGetSet(true, value, isFrameworkDb);
         }
     }
 
+    /// <summary>
+    /// Gets values from file "Server/ConnectionManagerServer.json"
+    /// </summary>
     public static class ConnectionManagerServer
     {
-        public static string ConnectionString
+        /// <summary>
+        /// Returns ConnectionString for Application or Framework database.
+        /// </summary>
+        /// <param name="isFrameworkDb">If true, Framework database (ConnectionStringFramework) otherwise Application database (ConnectionString) is returned. </param>
+        public static string ConnectionString(bool isFrameworkDb)
         {
-            get
-            {
-                return ConfigServer.Instance.ConnectionStringGet();
-            }
+            return ConfigServer.Instance.ConnectionStringGet(isFrameworkDb);
+        }
+
+        /// <summary>
+        /// Returns ConnectionString for Application or Framework database.
+        /// </summary>
+        /// <param name="typeRow">Application or Framework data row.</param>
+        public static string ConnectionString(Type typeRow)
+        {
+            bool isFrameworkDb = typeRow.GetTypeInfo().Assembly == typeof(ConnectionManagerServer).Assembly; // Type is declared in Framework assembly.
+            return ConnectionString(isFrameworkDb);
         }
     }
 }

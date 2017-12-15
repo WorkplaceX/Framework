@@ -44,7 +44,7 @@
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(ConnectionManagerServer.ConnectionString);
+            optionsBuilder.UseSqlServer(ConnectionManagerServer.ConnectionString(false));
         }
 
         public DbSet<MetaSqlSchema> Schema { get; set; }

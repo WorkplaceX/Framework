@@ -26,11 +26,11 @@
         /// <summary>
         /// Add AppSetup to table FrameworkApplication.
         /// </summary>
-        private void RunSqlApplication(string connectionString)
+        private void RunSqlApplication()
         {
             UtilFramework.Log("### Start RunSqlApplication");
             string sql = "UPDATE FrameworkApplication SET IsActive = 0";
-            UtilBuildTool.SqlCommand(sql);
+            UtilBuildTool.SqlCommand(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkApplication AS Target
             USING ({0}) AS Source
@@ -65,18 +65,18 @@
                     UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, parameterList.ToArray());
+            UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
             UtilFramework.Log("### Exit RunSqlApplication");
         }
 
         /// <summary>
         /// Add available App types to table FrameworkApplicationType.
         /// </summary>
-        private void RunSqlApplicationType(string connectionString)
+        private void RunSqlApplicationType()
         {
             UtilFramework.Log("### Start RunSqlApplicationType");
             string sql = "UPDATE FrameworkApplicationType SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql);
+            UtilBuildTool.SqlCommand(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkApplicationType AS Target
             USING ({0}) AS Source
@@ -105,15 +105,15 @@
                 sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", UtilFramework.TypeToName(type)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert);
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlApplicationType");
         }
 
-        private void RunSqlTable(string connectionString)
+        private void RunSqlTable()
         {
             UtilFramework.Log("### Start RunSqlTable");
             string sql = "UPDATE FrameworkTable SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql);
+            UtilBuildTool.SqlCommand(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkTable AS Target
             USING ({0}) AS Source
@@ -143,15 +143,15 @@
                 sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", tableName));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert);
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlTable");
         }
 
-        private void RunSqlColumn(string connectionString)
+        private void RunSqlColumn()
         {
             UtilFramework.Log("### Start RunSqlColumn");
             string sql = "UPDATE FrameworkColumn SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql);
+            UtilBuildTool.SqlCommand(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
@@ -184,16 +184,16 @@
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert);
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlColumn");
         }
 
         public override void Run()
         {
-            RunSqlTable(ConnectionManagerServer.ConnectionString);
-            RunSqlColumn(ConnectionManagerServer.ConnectionString);
-            RunSqlApplicationType(ConnectionManagerServer.ConnectionString);
-            RunSqlApplication(ConnectionManagerServer.ConnectionString);
+            RunSqlTable();
+            RunSqlColumn();
+            RunSqlApplicationType();
+            RunSqlApplication();
         }
     }
 }
