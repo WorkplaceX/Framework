@@ -366,27 +366,28 @@
             }
             // Config from Db
             List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(gridName.TypeRow);
-            // Text
+            // IsVisible
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
+                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.FieldNameSql == infoColumn.ColumnInternal.FieldNameSql && item.FieldNameCSharp == infoColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
+                // IsVisible
+                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(infoColumn.ColumnInternal.FieldNameSql) == false;
+                if (configColumn != null && configColumn.IsVisible != null)
+                {
+                    isVisible = configColumn.IsVisible.Value;
+                }
+                infoColumn.IsVisible = isVisible;
                 // Text
                 string text = infoColumn.ColumnInternal.FieldNameSql;
                 if (text == null)
                 {
                     text = infoColumn.ColumnInternal.FieldNameCSharp; // Calculated column has no FieldNameSql.
                 }
-                infoColumn.Text = text;
-            }
-            // IsVisible
-            foreach (InfoColumn infoColumn in infoColumnList.Values)
-            {
-                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(infoColumn.ColumnInternal.FieldNameSql) == false;
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.FieldNameSql == infoColumn.ColumnInternal.FieldNameSql && item.FieldNameCSharp == infoColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
-                if (configColumn != null && configColumn.IsVisible != null)
+                if (configColumn != null && configColumn.Text != null)
                 {
-                    isVisible = configColumn.IsVisible.Value;
+                    text = configColumn.Text;
                 }
-                infoColumn.IsVisible = isVisible;
+                infoColumn.Text = text;
             }
             // Override App
             foreach (InfoColumn infoColumn in infoColumnList.Values)
