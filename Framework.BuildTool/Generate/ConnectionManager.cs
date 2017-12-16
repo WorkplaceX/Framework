@@ -14,7 +14,7 @@
         {
             get
             {
-                return UtilFramework.FolderName + "Application/Database/Database.Generate.cs";
+                return UtilFramework.FolderName + "Application/Database/Generate.cs";
             }
         }
 
@@ -22,7 +22,7 @@
         {
             get
             {
-                return UtilFramework.FolderName + "Submodule/Framework/Database/Database.Generate.cs";
+                return UtilFramework.FolderName + "Submodule/Framework/Database/Generate.cs";
             }
         }
     }

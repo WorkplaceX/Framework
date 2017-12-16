@@ -15,7 +15,6 @@
         {
             MetaSql metaSql = new MetaSql(isFrameworkDb);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
-            StringBuilder result = new StringBuilder();
             string cSharp;
             new CSharpGenerate(metaCSharp).Run(out cSharp);
             if (isFrameworkDb == false)
