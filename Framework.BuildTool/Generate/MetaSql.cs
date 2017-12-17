@@ -25,6 +25,7 @@
             if (isFrameworkDb == false)
             {
                 this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
+                // this.List = this.List.Where(item => item.TableName == "").ToArray(); // Custom table name filtering.
             }
             else
             {
