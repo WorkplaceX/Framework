@@ -147,7 +147,7 @@
         protected virtual internal List<FrameworkConfigColumnView> DbConfigColumnList(Type typeRow)
         {
             List<FrameworkConfigColumnView> result;
-            string typeRowName = UtilDataAccessLayer.TypeRowToName(typeRow);
+            string typeRowName = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
             if (cacheDbConfigColumnList.ContainsKey(typeRowName))
             {
                 result = cacheDbConfigColumnList[typeRowName];

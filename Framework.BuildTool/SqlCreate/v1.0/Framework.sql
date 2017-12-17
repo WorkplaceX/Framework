@@ -41,7 +41,7 @@ CREATE TABLE FrameworkSession
 CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	Name NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToName();
+	Name NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToNameCSharp(); This is TableNameCSharp
 	IsExist BIT
 )
 
@@ -49,10 +49,9 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 (
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
-	FieldNameSql NVARCHAR(256),
-	FieldNameCSharp NVARCHAR(256),
-	IsExist BIT,
-	INDEX IX_FrameworkColumn UNIQUE (TableId, FieldNameSql, FieldNameCSharp)
+	Name NVARCHAR(256) NOT NULL, -- This is FieldNameCSharp
+	IsExist BIT
+	INDEX IX_FrameworkConfigTable UNIQUE (TableId, Name)
 )
 
 CREATE TABLE FrameworkConfigTable
@@ -97,11 +96,10 @@ GO
 CREATE VIEW FrameworkConfigColumnView AS
 SELECT
 	TableX.Id AS TableId,
-	TableX.Name AS TableName,
+	TableX.Name AS TableName, -- TableNameCSharp
 	TableX.IsExist AS TableIsExist,
 	ColumnX.Id AS ColumnId,
-	ColumnX.FieldNameSql,
-	ColumnX.FieldNameCSharp,
+	ColumnX.Name AS ColumnName, -- ColumnNameCSharp
 	ColumnX.IsExist AS ColumnIsExist,
 	Config.Id AS ConfigId,
 	Config.Text,

@@ -23,7 +23,7 @@
             //
             if (isNameExclusive == false)
             {
-                this.Name = UtilDataAccessLayer.TypeRowToName(TypeRowInternal) + "." + Name;
+                this.Name = UtilDataAccessLayer.TypeRowToNameCSharp(TypeRowInternal) + "." + Name;
             }
         }
 
@@ -369,7 +369,7 @@
             // IsVisible
             foreach (InfoColumn infoColumn in infoColumnList.Values)
             {
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.FieldNameSql == infoColumn.ColumnInternal.FieldNameSql && item.FieldNameCSharp == infoColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
+                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnName == infoColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
                 // IsVisible
                 bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(infoColumn.ColumnInternal.FieldNameSql) == false;
                 if (configColumn != null && configColumn.IsVisible != null)

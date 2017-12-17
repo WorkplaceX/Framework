@@ -131,7 +131,7 @@
             bool isFirst = true;
             foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                string tableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToName(typeRow);
+                string tableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -156,14 +156,14 @@
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT (SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.Name = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCSharp
+                    SELECT (SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.Name = Source.TableName), Source.ColumnName
                     EXCEPT
-                    SELECT Target.TableId, Target.FieldNameSql, Target.FieldNameCSharp)
+                    SELECT Target.TableId, Target.Name)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (TableId, FieldNameSql, FieldNameCSharp, IsExist)
-	            VALUES ((SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.Name = Source.TableNameSql), Source.FieldNameSql, Source.FieldNameCSharp, 1);
+	            INSERT (TableId, Name, IsExist)
+	            VALUES ((SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.Name = Source.TableName), Source.ColumnName, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
@@ -179,8 +179,8 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    string tableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToName(typeRow);
-                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableNameSql, CASE WHEN '{1}' = '' THEN NULL ELSE '{1}' END AS FieldNameSql, '{2}' AS FieldNameCSharp)", tableName, column.FieldNameSql, column.FieldNameCSharp));
+                    string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableName, '{1}' AS ColumnName)", tableNameCSharp, column.FieldNameCSharp));
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());

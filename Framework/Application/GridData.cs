@@ -1198,7 +1198,7 @@
                 Info info = new Info(App);
                 info.ColumnInit(App, gridNameTypeRow);
                 //
-                gridDataJson.GridQueryList[GridName.ToJson(gridName)] = new GridQuery() { GridName = GridName.ToJson(gridName), TypeRow = UtilDataAccessLayer.TypeRowToName(typeRow) };
+                gridDataJson.GridQueryList[GridName.ToJson(gridName)] = new GridQuery() { GridName = GridName.ToJson(gridName), TypeRow = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
                 {

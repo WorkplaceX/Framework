@@ -18,9 +18,9 @@
                 return DataAccessLayer.UtilDataAccessLayer.Parameter(value, dbType, parameterList);
             }
 
-            public static string TypeRowToName(Type typeRow)
+            public static string TypeRowToNameCSharp(Type typeRow)
             {
-                return DataAccessLayer.UtilDataAccessLayer.TypeRowToName(typeRow);
+                return DataAccessLayer.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
             }
 
             public static Type[] TypeRowList(Type typeRowInAssembly)

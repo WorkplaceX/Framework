@@ -58,7 +58,7 @@
         /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
-        internal static string TypeRowToName(Type typeRow)
+        internal static string TypeRowToNameCSharp(Type typeRow)
         {
             string result = null;
             if (typeRow != null)
