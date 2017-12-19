@@ -43,5 +43,6 @@ app.post('/Universal/index.js', (req, res) => {
 });
 
 app.listen(PORT, () => {
+  console.log(`Angular Universal Server`);
   console.log(`listening on http://localhost:${PORT}/Universal/index.js!`);
 });
