@@ -82,7 +82,7 @@
                     type = typeof(int);
                     break;
                 case 127: // bigint
-                    type = typeof(int);
+                    type = typeof(Int64);
                     break;
                 case 36:
                     type = typeof(Guid);

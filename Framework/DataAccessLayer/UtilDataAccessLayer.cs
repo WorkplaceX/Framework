@@ -345,6 +345,12 @@
             try
             {
                 dbContext.SaveChanges();
+                //
+                // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
+                // Cause: No autoincrement on Id column or no Id set by application
+                //
+                // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
+                // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
             }
             catch (Exception exception)
             {

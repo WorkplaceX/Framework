@@ -23,5 +23,5 @@ export function currentTime(){
 }
 
 export function versionClient(){
-    return "v0.32 Client";
+    return "v0.33 Client";
 }

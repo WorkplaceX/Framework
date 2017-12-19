@@ -157,6 +157,10 @@ img {
     background-color: rgba(64, 255, 64, 0.5);
 }
 
+.selector {
+    display: none; /* Prevent line break after data-Selector */
+}
+
 .y {
     background-color: yellow;
 }

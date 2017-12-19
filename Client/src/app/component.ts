@@ -8,7 +8,7 @@ import  * as util from './util';
 @Component({
   selector: '[data-app]', /* Attribute selector "data-App" (lower char because of express engine) */
   template: `
-  <div data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
+  <div class="selector" data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>  
 `,
   providers: [DataService]  
 })
@@ -119,7 +119,7 @@ export class GridFieldSingle {
 @Component({
   selector: '[data-Page]',
   template: `
-  <div [ngClass]="json.CssClass" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy data-RemoveSelector"></div>
+  <div [ngClass]="json.CssClass" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy data-RemoveSelector"></div>
 `
 })
 export class Page {
@@ -135,7 +135,7 @@ export class Page {
   selector: '[data-Div]',
   template: `
   <div [ngClass]="json.CssClass" data-RemoveSelector>
-    <div data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
+    <div class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
   </div>  
 `
 })
