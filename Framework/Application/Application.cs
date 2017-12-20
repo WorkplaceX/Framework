@@ -208,9 +208,9 @@
         }
 
         /// <summary>
-        /// Called after method UtilDataAccessLayer.ValueToText();
+        /// Called after method UtilDataAccessLayer.RowValueToText();
         /// </summary>
-        protected virtual internal void CellValueToText(GridName gridName, Index index, Cell cell, ref string result)
+        protected virtual internal void CellRowValueToText(GridName gridName, Index index, Cell cell, ref string result)
         {
 
         }
@@ -218,7 +218,7 @@
         /// <summary>
         /// Called before user entered text is parsed with UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellValueFromText(GridName gridName, Index index, Cell cell, ref string result)
+        protected virtual internal void CellRowValueFromText(GridName gridName, Index index, Cell cell, ref string result)
         {
 
         }

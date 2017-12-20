@@ -5,6 +5,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
 
     /// <summary>
     /// Process OrderBy click.
@@ -324,20 +325,16 @@
             if (rowLookup != null)
             {
                 GridData gridData = app.GridData;
-                var row = gridData.Row(GridName.FromJson(gridDataJson.SelectGridName), new Index(gridDataJson.SelectIndex));
+                // Row and cell, on which lookup is open.
+                GridName gridName = GridName.FromJson(gridDataJson.SelectGridNamePrevious);
+                Index index = new Index(gridDataJson.SelectIndexPrevious);
+                var row = gridData.Row(gridName, index);
                 Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == gridDataJson.SelectFieldNamePrevious).First();
+                // Cell of lookup which user clicked.
                 Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.FieldNameCSharp == gridDataJson.SelectFieldName).First();
                 string result = cellLookup.Value.ToString();
-                cell.CellLookupIsClick(rowLookup, ref result);
-                GridCell gridCell = gridDataJson.CellList[gridDataJson.SelectGridNamePrevious][gridDataJson.SelectFieldNamePrevious][gridDataJson.SelectIndexPrevious];
-                gridCell.IsModify = true;
-                if (gridCell.IsO == false)
-                {
-                    gridCell.IsO = true;
-                    gridCell.O = gridCell.T;
-                }
-                gridCell.T = result;
-                gridData.LoadJson();
+                cell.CellLookupIsClick(app, gridName, index, rowLookup, ref result);
+                app.GridData.CellTextSet(gridName, index, cell.FieldNameCSharp, result);
             }
         }
     }
@@ -400,7 +397,8 @@
                 if (query != null)
                 {
                     typeRow = query.ElementType;
-                    rowList = query.Cast<Row>().ToList();
+                    UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row))); // Query needs to return Row list! Define Row type in memory namespace.
+                    rowList = query.Take(10).Cast<Row>().ToList();
                 }
                 bool isLoadRow = gridData.LoadRow(new GridNameTypeRow(typeRow, UtilApplication.GridNameLookup), rowList);
                 //

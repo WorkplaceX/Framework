@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Framework.Component;
+    using System.Linq.Expressions;
 
     internal class GridRowInternal
     {
@@ -447,7 +448,7 @@
         /// Gets user entered text.
         /// </summary>
         /// <returns>If null, user has not changed text.</returns>
-        private string CellTextGet(GridName gridName, Index index, string fieldName)
+        public string CellTextGet(GridName gridName, Index index, string fieldName)
         {
             return CellGet(gridName, index, fieldName).Text;
         }
@@ -462,6 +463,21 @@
             cell.Text = text;
             cell.IsOriginal = isOriginal;
             cell.TextOriginal = textOriginal;
+        }
+
+        /// <summary>
+        /// Sets user entered text. (Simulate user text input).
+        /// </summary>
+        public void CellTextSet(GridName gridName, Index index, string fieldName, string text)
+        {
+            GridCellInternal gridCell = CellGet(gridName, index, fieldName);
+            gridCell.IsModify = true;
+            if (gridCell.IsOriginal == false)
+            {
+                gridCell.IsOriginal = true;
+                gridCell.TextOriginal = gridCell.Text;
+            }
+            gridCell.Text = text;
         }
 
         /// <summary>
@@ -909,8 +925,8 @@
                                     object value;
                                     try
                                     {
-                                        cell.CellValueFromText(App, gridName, index, ref text);
-                                        App.CellValueFromText(gridName, index, cell, ref text);
+                                        cell.CellRowValueFromText(App, gridName, index, ref text);
+                                        App.CellRowValueFromText(gridName, index, cell, ref text);
                                         value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
                                     }
                                     catch (Exception exception)
@@ -1029,8 +1045,8 @@
                     }
                     if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
                     {
-                        cell.CellValueFromText(App, gridName, rowIndex, ref text);
-                        App.CellValueFromText(gridName, rowIndex, cell, ref text);
+                        cell.CellRowValueFromText(App, gridName, rowIndex, ref text);
+                        App.CellRowValueFromText(gridName, rowIndex, cell, ref text);
                         object value = UtilDataAccessLayer.ValueFromText(text, cell.PropertyInfo.PropertyType);
                         cell.PropertyInfo.SetValue(resultRow, value);
                     }
@@ -1248,14 +1264,14 @@
                             {
                                 value = cell.PropertyInfo.GetValue(row);
                             }
-                            string textJson = UtilDataAccessLayer.ValueToText(value, cell.TypeField);
+                            string textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeField);
                             InfoCell infoCell = info.CellGet(App, gridNameTypeRow, cell);
                             if (infoCell.CellEnum == GridCellEnum.Button && textJson == null)
                             {
                                 textJson = "Button"; // Default text for button.
                             }
-                            cell.CellValueToText(App, gridName, index, ref textJson); // Override text.
-                            App.CellValueToText(gridName, index, cell, ref textJson); // Override text generic.
+                            cell.CellRowValueToText(App, gridName, index, ref textJson); // Override text.
+                            App.CellRowValueToText(gridName, index, cell, ref textJson); // Override text generic.
                             GridCellInternal gridCellInternal = CellGet(gridName, index, fieldName);
                             if (!gridDataJson.CellList[GridName.ToJson(gridName)].ContainsKey(fieldName))
                             {

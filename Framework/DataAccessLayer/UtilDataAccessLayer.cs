@@ -382,7 +382,7 @@
             return result;
         }
 
-        internal static string ValueToText(object value, Type type)
+        internal static string RowValueToText(object value, Type type)
         {
             type = UtilFramework.TypeUnderlying(type);
             //

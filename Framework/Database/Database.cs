@@ -20,7 +20,7 @@ namespace Database.dbo
             result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
 
-        protected override internal void CellValueToText(App app, GridName gridName, Index index, ref string result)
+        protected override internal void CellRowValueToText(App app, GridName gridName, Index index, ref string result)
         {
             result = null;
             if (index.Enum == IndexEnum.Index && Row.Name != null)
@@ -58,7 +58,7 @@ namespace Database.dbo
             result.CellEnum = GridCellEnum.FileUpload;
         }
 
-        protected override internal void CellValueToText(App app, GridName gridName, Index index, ref string result)
+        protected override internal void CellRowValueToText(App app, GridName gridName, Index index, ref string result)
         {
             result = "File Upload";
         }
@@ -109,9 +109,10 @@ namespace Database.dbo
             query = UtilDataAccessLayer.Query<FrameworkApplicationType>();
         }
 
-        protected internal override void CellLookupIsClick(Row row, ref string result)
+
+        protected internal override void CellLookupIsClick(App app, GridName gridName, Index index, Row rowLookup, ref string result)
         {
-            result = ((FrameworkApplicationType)row).Name;
+            result = ((FrameworkApplicationType)rowLookup).Name;
         }
     }
 

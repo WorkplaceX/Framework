@@ -132,9 +132,9 @@
         }
 
         /// <summary>
-        /// Override for custom formatting like adding units of measurement. Called after method UtilDataAccessLayer.ValueToText();  Inverse function is CellValueFromText.
+        /// Override for custom formatting like adding units of measurement. Called after method UtilDataAccessLayer.RowValueToText(); Inverse function is CellValueFromText.
         /// </summary>
-        protected virtual internal void CellValueToText(App app, GridName gridName, Index index, ref string result)
+        protected virtual internal void CellRowValueToText(App app, GridName gridName, Index index, ref string result)
         {
 
         }
@@ -142,7 +142,7 @@
         /// <summary>
         /// Override to parse custom formating like value with units of measurement. Called before user entered text is parsed with method UtilDataAccessLayer.ValueFromText(); Inverse function is CellValueToText.
         /// </summary>
-        protected virtual internal void CellValueFromText(App app, GridName gridName, Index index, ref string result)
+        protected virtual internal void CellRowValueFromText(App app, GridName gridName, Index index, ref string result)
         {
             
         }
@@ -164,8 +164,11 @@
         /// <summary>
         /// Override to handle clicked Lookup row.
         /// </summary>
-        /// <param name="row">LoowUp row which has been clicked.</param>
-        protected virtual internal void CellLookupIsClick(Row row, ref string result)
+        /// <param name="gridName">Grid with open lookup.</param>
+        /// <param name="index">Row with open lookup.</param>
+        /// <param name="rowLookup">LoowUp row which has been clicked.</param>
+        /// <param name="result">Cell text on lookup user clicked.</param>
+        protected virtual internal void CellLookupIsClick(App app, GridName gridName, Index index, Row rowLookup, ref string result)
         {
 
         }
