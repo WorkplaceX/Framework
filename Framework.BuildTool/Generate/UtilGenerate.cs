@@ -72,25 +72,25 @@
             // See also: https://docs.microsoft.com/en-us/sql/t-sql/data-types/data-type-conversion-database-engine
             switch (sqlType)
             {
-                case 56:
-                    type = typeof(int);
+                case 56: // int
+                    type = typeof(Int32);
                     break;
                 case 52: // smallint
-                    type = typeof(int);
+                    type = typeof(Int16);
                     break;
                 case 48: // tinyint
-                    type = typeof(int);
+                    type = typeof(byte);
                     break;
                 case 127: // bigint
                     type = typeof(Int64);
                     break;
-                case 36:
+                case 36: // uniqueidentifier
                     type = typeof(Guid);
                     break;
-                case 61:
+                case 61: // datetime
                     type = typeof(DateTime);
                     break;
-                case 40:
+                case 40: // date
                     type = typeof(DateTime);
                     break;
                 case 175: // char
@@ -108,29 +108,32 @@
                 case 99: // ntext
                     type = typeof(string);
                     break;
-                case 104:
+                case 104: // bit
                     type = typeof(bool);
                     break;
                 case 60: // money
-                    type = typeof(double);
+                    type = typeof(decimal);
                     break;
                 case 106: // decimal
-                    type = typeof(double);
+                    type = typeof(decimal);
                     break;
                 case 59: // real
+                    type = typeof(Single);
+                    break;
+                case 62: // float
                     type = typeof(double);
                     break;
-                case 62:
-                    type = typeof(double);
-                    break;
-                case 165:
+                case 165: // varbinary
                     type = typeof(byte[]);
                     break;
                 case 98: // sql_variant
-                    type = typeof(byte[]);
+                    type = typeof(object);
                     break;
                 case 34: // image
                     type = typeof(byte[]);
+                    break;
+                case 108: // numeric
+                    type = typeof(decimal);
                     break;
                 default:
                     throw new Exception("Type unknown!");
