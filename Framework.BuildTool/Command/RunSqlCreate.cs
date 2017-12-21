@@ -6,6 +6,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using System.IO;
     using System.Linq;
     using System.Text;
 
@@ -70,12 +71,26 @@
         }
 
         /// <summary>
-        /// Populate NameList.
+        /// Same file in SqlCreate and SqlDrop folder have the same name.
+        /// </summary>
+        /// <param name="name">For example: (Submodule/Framework.BuildTool/v1.0/Framework.sql)</param>
+        /// <returns>Returns for example: (C:/Temp/GitHub/ApplicationDemo/Submodule/Framework.BuildTool/SqlCreate/v1.0/Framework.sql)</returns>
+        private string FileNameFromName(string name, bool isFrameworkDb, bool isDrop)
+        {
+            string folderNameFind = FolderName(isFrameworkDb, isDrop, true);
+            string folderNameReplace = FolderName(isFrameworkDb, isDrop, false);
+            UtilFramework.Assert(name.StartsWith(folderNameFind));
+            string result = name.Replace(folderNameFind, folderNameReplace);
+            return result;
+        }
+
+        /// <summary>
+        /// Populate NameList. Returns (*.sql) scripts without "SqlCreate\" or "SqlDrop\" in path.
         /// </summary>
         private void NameList(bool isFrameworkDb, bool isDrop, ref string[] nameList)
         {
             string folderName = FolderName(isFrameworkDb, isDrop, false);
-            var fileNameList = UtilFramework.FileNameList(folderName);
+            var fileNameList = UtilFramework.FileNameList(folderName, "*.sql");
             var result = fileNameList.Select(item => FileNameToName(item, isFrameworkDb, isDrop)).ToArray();
             nameList = nameList.Union(result).Distinct().ToArray();
         }
@@ -111,20 +126,41 @@
         /// </summary>
         private void ScriptExecute(bool isFrameworkDb, bool isDrop)
         {
-            string folderName = FolderName(isFrameworkDb, isDrop, false);
-            var fileNameList = UtilFramework.FileNameList(folderName, "*.sql").OrderBy(item => item);
-            foreach (string fileName in fileNameList)
+            // Run existing scripts.
             {
-                bool isRun = IsRunGet(fileName, isFrameworkDb, isDrop);
-                UtilFramework.Log(string.Format("### Start RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
-                if (isRun == isDrop)
+                string folderName = FolderName(isFrameworkDb, isDrop, false);
+                var fileNameList = UtilFramework.FileNameList(folderName, "*.sql").OrderBy(item => item);
+                if (isDrop)
                 {
-                    string text = UtilFramework.FileRead(fileName);
-                    var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    UtilBuildTool.SqlCommand(sqlList.ToList(), isFrameworkDb);
-                    IsRunSet(fileName, isFrameworkDb, isDrop, !isDrop);
+                    fileNameList = fileNameList.OrderByDescending(item => item);
                 }
-                UtilFramework.Log(string.Format("### Exit RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
+                foreach (string fileName in fileNameList)
+                {
+                    bool isRun = IsRunGet(fileName, isFrameworkDb, isDrop);
+                    UtilFramework.Log(string.Format("### Start RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
+                    if (isRun == isDrop)
+                    {
+                        string text = UtilFramework.FileRead(fileName);
+                        var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        UtilBuildTool.SqlCommand(sqlList.ToList(), isFrameworkDb);
+                        IsRunSet(fileName, isFrameworkDb, isDrop, !isDrop);
+                    }
+                    UtilFramework.Log(string.Format("### Exit RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
+                }
+            }
+            // Set flag for not existing scripts.
+            {
+                string folderName = FolderName(isFrameworkDb, !isDrop, false);
+                var fileNameList = UtilFramework.FileNameList(folderName, "*.sql").OrderBy(item => item);
+                foreach (string fileName in fileNameList)
+                {
+                    string name = FileNameToName(fileName, isFrameworkDb, !isDrop);
+                    string fileNameNotExist = FileNameFromName(name, isFrameworkDb, isDrop);
+                    if (!File.Exists(fileNameNotExist))
+                    {
+                        IsRunSet(fileNameNotExist, isFrameworkDb, isDrop, !isDrop);
+                    }
+                }
             }
         }
 
