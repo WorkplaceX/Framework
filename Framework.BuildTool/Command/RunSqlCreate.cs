@@ -121,10 +121,7 @@
                 {
                     string text = UtilFramework.FileRead(fileName);
                     var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string sql in sqlList)
-                    {
-                        UtilBuildTool.SqlCommand(sql, isFrameworkDb);
-                    }
+                    UtilBuildTool.SqlCommand(sqlList.ToList(), isFrameworkDb);
                     IsRunSet(fileName, isFrameworkDb, isDrop, !isDrop);
                 }
                 UtilFramework.Log(string.Format("### Exit RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));

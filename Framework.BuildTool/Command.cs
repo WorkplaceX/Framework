@@ -3,6 +3,7 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
 
     /// <summary>
     /// Command to run from CLI.
@@ -85,7 +86,20 @@
 
         private static void CommandShortCutExecute(CommandLineApplication commandLineApplication, string commandShortCut)
         {
-            commandLineApplication.Execute(commandShortCut.Split(' '));
+            try
+            {
+                commandLineApplication.Execute(commandShortCut.Split(' '));
+            }
+            catch (Exception exception)
+            {
+                if (Debugger.IsAttached)
+                {
+                    UtilFramework.LogColor(ConsoleColor.Red);
+                    string exceptionText = UtilFramework.ExceptionToText(exception);
+                    UtilFramework.Log(exceptionText);
+                    UtilFramework.LogColorDefault();
+                }
+            }
         }
 
         internal static CommandLineApplication CommandLineApplicationCreate(List<string> commandShortCutList)

@@ -15,16 +15,19 @@
         /// <summary>
         /// Wrap SqlCommand into SqlConnection.
         /// </summary>
-        private static void SqlCommand(string sql, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
+        private static void SqlCommand(List<string> sqlList, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
         {
             string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
-                using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection))
+                foreach (string sql in sqlList)
                 {
-                    sqlCommand.Parameters.AddRange(paramList);
-                    execute(sqlCommand); // Call back
+                    using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection))
+                    {
+                        sqlCommand.Parameters.AddRange(paramList);
+                        execute(sqlCommand); // Call back
+                    }
                 }
             }
         }
@@ -32,9 +35,19 @@
         /// <summary>
         /// Execute sql command.
         /// </summary>
+        public static void SqlCommand(List<string> sqlList, bool isFrameworkDb, params SqlParameter[] paramList)
+        {
+            SqlCommand(sqlList, (sqlCommand) => sqlCommand.ExecuteNonQuery(), isFrameworkDb, paramList);
+        }
+
+        /// <summary>
+        /// Execute sql command.
+        /// </summary>
         public static void SqlCommand(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
         {
-            SqlCommand(sql, (sqlCommand) => sqlCommand.ExecuteNonQuery(), isFrameworkDb, paramList);
+            List<string> sqlList = new List<string>();
+            sqlList.Add(sql);
+            SqlCommand(sqlList, (sqlCommand) => sqlCommand.ExecuteNonQuery(), isFrameworkDb, paramList);
         }
 
         /// <summary>
@@ -43,7 +56,9 @@
         public static List<Dictionary<string, object>> SqlRead(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
         {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
-            SqlCommand(sql, (sqlCommand) =>
+            List<string> sqlList = new List<string>();
+            sqlList.Add(sql);
+            SqlCommand(sqlList, (sqlCommand) =>
             {
                 sqlCommand.Parameters.AddRange(paramList);
                 using (SqlDataReader reader = sqlCommand.ExecuteReader())
