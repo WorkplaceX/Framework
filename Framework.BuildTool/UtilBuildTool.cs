@@ -67,12 +67,14 @@
         public static CommandLineApplication CommandLineApplicationCreate()
         {
             List<string> commandShortCutList = new List<string>();
-            commandShortCutList.Add("buildClient");
-            commandShortCutList.Add("serve --client");
-            commandShortCutList.Add("generate");
-            commandShortCutList.Add("generate --framework");
+            commandShortCutList.Add("check");
+            commandShortCutList.Add("installAll");
             commandShortCutList.Add("runSqlCreate");
             commandShortCutList.Add("runSqlCreate --drop");
+            commandShortCutList.Add("generate");
+            commandShortCutList.Add("generate --framework");
+            commandShortCutList.Add("buildClient");
+            commandShortCutList.Add("serve --client");
             //
             return Command.CommandLineApplicationCreate(commandShortCutList);
         }
