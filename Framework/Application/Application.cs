@@ -89,7 +89,7 @@
                     if (UtilFramework.IsSubclassOf(type, typeof(App)))
                     {
                         result = (App)UtilFramework.TypeToObject(type);
-                        result.Constructor(webController.MemoryCache, frameworkApplication);
+                        result.Constructor(webController, frameworkApplication);
                         requestPathBase = controllerPath + path;
                         break;
                     }
@@ -112,13 +112,13 @@
             ProcessInit(processList);
         }
 
-        internal void Constructor(IMemoryCache memoryCache, FrameworkApplicationView dbFrameworkApplication)
+        internal void Constructor(WebControllerBase webController, FrameworkApplicationView dbFrameworkApplication)
         {
-            this.MemoryCache = memoryCache;
+            this.WebController = webController;
             this.DbFrameworkApplication = dbFrameworkApplication;
         }
 
-        internal IMemoryCache MemoryCache { get; private set; } // TODO Use also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
+        public WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
 
         /// <summary>
         /// Returns value from ASP.NET in-memory cache.
@@ -127,7 +127,7 @@
         internal TValue MemoryCacheValueGet<TValue>(object key, Func<TValue> valueSet)
         {
             TValue result;
-            result = MemoryCache.GetOrCreate<TValue>(key, entry => { return valueSet(); });
+            result = WebController.MemoryCache.GetOrCreate<TValue>(key, entry => { return valueSet(); });
             return result;
         }
 
