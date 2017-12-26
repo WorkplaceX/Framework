@@ -81,6 +81,37 @@
     }
 
     /// <summary>
+    /// Load next or previous page.
+    /// </summary>
+    internal class ProcessGridPageIndex : Process
+    {
+        protected internal override void Run(App app)
+        {
+            AppJson appJson = app.AppJson;
+            var gridQueryList = appJson.GridDataJson.GridQueryList;
+            var gridData = app.GridData;
+            //
+            foreach (string gridName in gridQueryList.Keys)
+            {
+                if (gridQueryList[gridName].IsPageIndexNext)
+                {
+                    gridData.QueryGet(GridName.FromJson(gridName)).PageIndex += 1;
+                    gridData.LoadDatabaseReload(GridName.FromJson(gridName));
+                }
+                if (gridQueryList[gridName].IsPageIndexPrevious)
+                {
+                    gridData.QueryGet(GridName.FromJson(gridName)).PageIndex -= 1;
+                    if (gridData.QueryGet(GridName.FromJson(gridName)).PageIndex < 0)
+                    {
+                        gridData.QueryGet(GridName.FromJson(gridName)).PageIndex = 0;
+                    }
+                    gridData.LoadDatabaseReload(GridName.FromJson(gridName));
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Process data grid filter.
     /// </summary>
     internal class ProcessGridFilter : Process

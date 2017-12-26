@@ -410,6 +410,21 @@
         public string FieldNameOrderBy;
 
         public bool IsOrderByDesc;
+
+        /// <summary>
+        /// Gets or sets current database page index.
+        /// </summary>
+        public int PageIndex;
+
+        /// <summary>
+        /// Gets or sets IsPageIndexNext. If true, next page has been clicked.
+        /// </summary>
+        public bool IsPageIndexNext;
+
+        /// <summary>
+        /// Gets or sets IsPageIndexPrevious. If true, previous page has been clicked.
+        /// </summary>
+        public bool IsPageIndexPrevious;
     }
 
     /// <summary>

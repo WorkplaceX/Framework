@@ -98,6 +98,8 @@
         public string FieldNameOrderBy;
 
         public bool IsOrderByDesc;
+
+        public int PageIndex;
     }
 
     public class GridData
@@ -272,7 +274,7 @@
         /// </summary>
         private Dictionary<GridName, GridQueryInternal> queryList = new Dictionary<GridName, GridQueryInternal>();
 
-        private GridQueryInternal QueryGet(GridName gridName)
+        internal GridQueryInternal QueryGet(GridName gridName)
         {
             if (!queryList.ContainsKey(gridName))
             {
@@ -657,14 +659,22 @@
                 {
                     string fieldNameOrderBy = null;
                     bool isOrderByDesc = false;
+                    int pageIndex = 0;
                     if (queryList.ContainsKey(gridName)) // Reload
                     {
                         fieldNameOrderBy = queryList[gridName].FieldNameOrderBy;
                         isOrderByDesc = queryList[gridName].IsOrderByDesc;
+                        pageIndex = queryList[gridName].PageIndex;
                         bool isExcludeCalculatedColumn = UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without FieldNameSql.
                         LoadDatabaseFilterList(gridName, out filterList, isExcludeCalculatedColumn);
                     }
-                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, 0, 15, query);
+                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, pageIndex, 15, query);
+                    if (pageIndex > 0 && rowList.Count == 0) // Page end reached.
+                    {
+                        queryList[gridName].PageIndex -= 1;
+                        pageIndex = queryList[gridName].PageIndex;
+                        rowList = UtilDataAccessLayer.Select(typeRow, filterList, fieldNameOrderBy, isOrderByDesc, pageIndex, 15, query);
+                    }
                 }
                 LoadRow(new GridNameTypeRow(typeRow, gridName), rowList);
             }
@@ -945,6 +955,7 @@
                 GridQueryInternal gridQuery = QueryGet(GridName.FromJson(gridName));
                 gridQuery.FieldNameOrderBy = gridQueryJson.FieldNameOrderBy;
                 gridQuery.IsOrderByDesc = gridQueryJson.IsOrderByDesc;
+                gridQuery.PageIndex = gridQueryJson.PageIndex;
             }
         }
 
@@ -1154,6 +1165,7 @@
                 GridQuery gridQueryJson = gridDataJson.GridQueryList[GridName.ToJson(gridName)];
                 gridQueryJson.FieldNameOrderBy = gridQuery.FieldNameOrderBy;
                 gridQueryJson.IsOrderByDesc = gridQuery.IsOrderByDesc;
+                gridQueryJson.PageIndex = gridQuery.PageIndex;
             }
         }
 
