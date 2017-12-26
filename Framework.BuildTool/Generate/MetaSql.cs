@@ -15,17 +15,17 @@
         /// Run Schema.sql
         /// </summary>
         /// <param name="isFrameworkDb">For internal use only.</param>
-        public MetaSql(bool isFrameworkDb)
+        public MetaSql(bool isFrameworkDb, AppBuildTool appBuildTool)
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilGenerate.FileLoad(ConnectionManager.SchemaFileName);
             this.List = dbContext.Schema.FromSql(sql).ToArray();
             //
-            // Filter out "dbo.Framework" tables.
+            // For Application filter out "dbo.Framework" tables.
             if (isFrameworkDb == false)
             {
                 this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
-                // this.List = this.List.Where(item => item.TableName == "").ToArray(); // Custom table name filtering.
+                this.List = appBuildTool.GenerateFilter(this.List); // Custom table name filtering for code generation.
             }
             else
             {

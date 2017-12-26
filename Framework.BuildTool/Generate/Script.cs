@@ -11,9 +11,9 @@
         /// Script to generate CSharp code.
         /// </summary>
         /// <param name="isFrameworkDb">If true, generate CSharp code for framework (nternal use only) otherwise generate code for Application.</param>
-        public static void Run(bool isFrameworkDb)
+        public static void Run(bool isFrameworkDb, AppBuildTool appBuildTool)
         {
-            MetaSql metaSql = new MetaSql(isFrameworkDb);
+            MetaSql metaSql = new MetaSql(isFrameworkDb, appBuildTool);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
             string cSharp;
             new CSharpGenerate(metaCSharp).Run(out cSharp);

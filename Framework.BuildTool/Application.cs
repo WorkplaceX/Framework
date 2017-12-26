@@ -3,9 +3,11 @@
     using Database.dbo;
     using Framework.Application;
     using Framework.Application.Setup;
+    using Framework.BuildTool.DataAccessLayer;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class AppBuildTool
     {
@@ -43,6 +45,17 @@
         }
 
         /// <summary>
+        /// Overwrite this method to filter out only specific application tables for which to generate code. For example only tables starting with "Explorer".
+        /// </summary>
+        /// <param name="list">Input list.</param>
+        /// <returns>Returns filtered output list.</returns>
+        protected virtual internal MetaSqlSchema[] GenerateFilter(MetaSqlSchema[] list)
+        {
+            // return list.Where(item => item.SchemaName == "dbo" && item.TableName.StartsWith("Explorer")).ToArray();
+            return list;
+        }
+
+        /// <summary>
         /// Override to register application on table FrameworkApplication.
         /// </summary>
         protected virtual void DbFrameworkApplicationView(List<FrameworkApplicationView> result)
@@ -67,7 +80,7 @@
             result.Add(new CommandServe());
             result.Add(new CommandUnitTest());
             result.Add(new CommandRunSqlCreate(this));
-            result.Add(new CommandGenerate());
+            result.Add(new CommandGenerate(this));
             result.Add(new CommandBuildClient());
             result.Add(new CommandInstallAll());
             RegisterCommand(result);
