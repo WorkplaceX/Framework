@@ -1069,7 +1069,7 @@
         /// <summary>
         /// Returns row's columns.
         /// </summary>
-        private static List<GridColumn> TypeRowToGridColumn(App app, GridNameTypeRow gridName, Info info)
+        private static List<GridColumn> TypeRowToGridColumn(App app, GridNameTypeRow gridName, Design design)
         {
             var result = new List<GridColumn>();
             //
@@ -1080,7 +1080,7 @@
             List<Cell> columnIsVisibleList = new List<Cell>();
             foreach (Cell column in columnList)
             {
-                bool isVisible = info.ColumnGet(app, gridName, column).IsVisible;
+                bool isVisible = design.ColumnGet(app, gridName, column).IsVisible;
                 if (isVisible)
                 {
                     columnIsVisibleList.Add(column);
@@ -1091,7 +1091,7 @@
             foreach (Cell column in columnList)
             {
                 // Text
-                string text = info.ColumnGet(app, gridName, column).Text;
+                string text = design.ColumnGet(app, gridName, column).Text;
                 //
                 bool isVisible = columnIsVisibleList.Contains(column);
                 if (isVisible)
@@ -1167,12 +1167,12 @@
         /// <summary>
         /// Render cell as Button, Html or FileUpload.
         /// </summary>
-        private void SaveJsonIsButtonHtmlFileUpload(GridNameTypeRow gridName, Index index, Cell cell, GridCell gridCell, Info info)
+        private void SaveJsonIsButtonHtmlFileUpload(GridNameTypeRow gridName, Index index, Cell cell, GridCell gridCell, Design design)
         {
-            InfoCell infoCell = info.CellGet(App, gridName, cell);
+            DesignCell designCell = design.CellGet(App, gridName, cell);
             //
-            gridCell.CellEnum = infoCell.CellEnum;
-            gridCell.CssClass = infoCell.CssClass.ToHtml();
+            gridCell.CellEnum = designCell.CellEnum;
+            gridCell.CssClass = designCell.CssClass.ToHtml();
         }
 
         /// <summary>
@@ -1202,8 +1202,8 @@
                 Type typeRow = TypeRowGet(gridName);
                 GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeRow, gridName);
                 //
-                Info info = new Info(App);
-                info.ColumnInit(App, gridNameTypeRow);
+                Design design = new Design(App);
+                design.ColumnInit(App, gridNameTypeRow);
                 //
                 gridDataJson.GridQueryList[GridName.ToJson(gridName)] = new GridQuery() { GridName = GridName.ToJson(gridName), TypeRow = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow) };
                 // Row
@@ -1217,7 +1217,7 @@
                 {
                     gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
                 }
-                gridDataJson.ColumnList[GridName.ToJson(gridName)] = TypeRowToGridColumn(App, gridNameTypeRow, info);
+                gridDataJson.ColumnList[GridName.ToJson(gridName)] = TypeRowToGridColumn(App, gridNameTypeRow, design);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {
@@ -1234,7 +1234,7 @@
                     {
                         row = gridRow.RowNew;
                     }
-                    info.CellInit(App, gridNameTypeRow, row, index);
+                    design.CellInit(App, gridNameTypeRow, row, index);
                     string errorRow = ErrorRowGet(gridName, index);
                     GridRow gridRowJson = new GridRow() { Index = index.Value, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
                     gridRowJson.IsFilter = index.Enum == IndexEnum.Filter;
@@ -1256,8 +1256,8 @@
                                 value = cell.PropertyInfo.GetValue(row);
                             }
                             string textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeField);
-                            InfoCell infoCell = info.CellGet(App, gridNameTypeRow, cell);
-                            if (infoCell.CellEnum == GridCellEnum.Button && textJson == null)
+                            DesignCell designCell = design.CellGet(App, gridNameTypeRow, cell);
+                            if (designCell.CellEnum == GridCellEnum.Button && textJson == null)
                             {
                                 textJson = "Button"; // Default text for button.
                             }
@@ -1272,7 +1272,7 @@
                             GridCell gridCellJson = new GridCell();
                             gridDataJson.CellList[GridName.ToJson(gridName)][fieldName][index.Value] = gridCellJson;
                             //
-                            SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson, info);
+                            SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson, design);
                             //
                             if (gridCellInternal.IsOriginal == false)
                             {
@@ -1284,7 +1284,7 @@
                                 gridCellJson.T = gridCellInternal.Text; // Never overwrite user entered text.
                                 gridCellJson.IsO = true;
                             }
-                            gridCellJson.PlaceHolder = infoCell.PlaceHolder;
+                            gridCellJson.PlaceHolder = designCell.PlaceHolder;
                             gridCellJson.IsClick = gridCellInternal.IsClick;
                             gridCellJson.IsModify = gridCellInternal.IsModify;
                             gridCellJson.E = errorCell;

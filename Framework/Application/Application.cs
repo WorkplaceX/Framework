@@ -182,17 +182,17 @@
         public AppJson AppJson { get; private set; }
 
         /// <summary>
-        /// Define for example grid column header globaly. See also method Cell.InfoColumn();
+        /// Define for example grid column header globaly. See also method Cell.DesignColumn();
         /// </summary>
-        protected virtual internal void InfoColumn(GridNameTypeRow gridName, InfoColumn result)
+        protected virtual internal void DesignColumn(GridNameTypeRow gridName, DesignColumn result)
         {
             
         }
 
         /// <summary>
-        /// Define for example grid column header globaly. See also method Cell.InfoCell();
+        /// Define for example grid column header globaly. See also method Cell.DesignCell();
         /// </summary>
-        protected virtual internal void InfoCell(GridName gridName, Index index, Cell cell, InfoCell result)
+        protected virtual internal void DesignCell(GridName gridName, Index index, Cell cell, DesignCell result)
         {
             switch (index.Enum)
             {

@@ -119,12 +119,12 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void InfoColumn(App app, GridNameTypeRow gridName, InfoColumn result)
+        protected virtual internal void DesignColumn(App app, GridNameTypeRow gridName, DesignColumn result)
         {
 
         }
 
-        protected virtual internal void InfoCell(App app, GridName gridName, Index index, InfoCell result)
+        protected virtual internal void DesignCell(App app, GridName gridName, Index index, DesignCell result)
         {
 
         }

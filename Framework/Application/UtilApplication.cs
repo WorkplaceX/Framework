@@ -229,7 +229,7 @@
     /// <summary>
     /// Html cascading style sheets information.
     /// </summary>
-    public class InfoCssClass
+    public class DesignCssClass
     {
         private List<string> valueList = new List<string>();
 
@@ -278,9 +278,9 @@
         }
     }
 
-    public class InfoColumn
+    public class DesignColumn
     {
-        internal InfoColumn(Cell column)
+        internal DesignColumn(Cell column)
         {
             this.ColumnInternal = column;
         }
@@ -311,14 +311,14 @@
             internal set;
         }
 
-        internal InfoCell InfoCell;
+        internal DesignCell DesignCell;
     }
 
-    public class InfoCell
+    public class DesignCell
     {
-        public InfoCell()
+        public DesignCell()
         {
-            this.CssClass = new InfoCssClass();
+            this.CssClass = new DesignCssClass();
         }
 
         /// <summary>
@@ -332,9 +332,9 @@
         public GridCellEnum? CellEnum;
 
         /// <summary>
-        /// Gets or sets InfoCss. Html cascading style sheets information for cell.
+        /// Gets or sets CssClass. Html cascading style sheets information for cell.
         /// </summary>
-        public InfoCssClass CssClass;
+        public DesignCssClass CssClass;
 
         /// <summary>
         /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input field.
@@ -342,9 +342,9 @@
         public string PlaceHolder;
     }
 
-    public class Info
+    public class Design
     {
-        internal Info(App app)
+        internal Design(App app)
         {
             this.App = app;
         }
@@ -356,76 +356,76 @@
         /// <summary>
         /// (FieldNameCSharp, Column).
         /// </summary>
-        Dictionary<string, InfoColumn> infoColumnList = new Dictionary<string, InfoColumn>();
+        Dictionary<string, DesignColumn> designColumnList = new Dictionary<string, DesignColumn>();
 
         internal void ColumnInit(App app, GridNameTypeRow gridName)
         {
             UtilFramework.Assert(app == App);
             this.gridName = gridName;
             //
-            infoColumnList = new Dictionary<string, InfoColumn>();
+            designColumnList = new Dictionary<string, DesignColumn>();
             var columnList = UtilDataAccessLayer.ColumnList(gridName.TypeRow);
             foreach (Cell column in columnList)
             {
-                infoColumnList[column.FieldNameCSharp] = new InfoColumn(column);
+                designColumnList[column.FieldNameCSharp] = new DesignColumn(column);
             }
             // Config from Db
             List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(gridName.TypeRow);
             // IsVisible
-            foreach (InfoColumn infoColumn in infoColumnList.Values)
+            foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnName == infoColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
+                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnName == designColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
                 // IsVisible
-                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(infoColumn.ColumnInternal.FieldNameSql) == false;
+                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(designColumn.ColumnInternal.FieldNameSql) == false;
                 if (configColumn != null && configColumn.IsVisible != null)
                 {
                     isVisible = configColumn.IsVisible.Value;
                 }
-                infoColumn.IsVisible = isVisible;
+                designColumn.IsVisible = isVisible;
                 // Text
-                string text = infoColumn.ColumnInternal.FieldNameSql;
+                string text = designColumn.ColumnInternal.FieldNameSql;
                 if (text == null)
                 {
-                    text = infoColumn.ColumnInternal.FieldNameCSharp; // Calculated column has no FieldNameSql.
+                    text = designColumn.ColumnInternal.FieldNameCSharp; // Calculated column has no FieldNameSql.
                 }
                 if (configColumn != null && configColumn.Text != null)
                 {
                     text = configColumn.Text;
                 }
-                infoColumn.Text = text;
+                designColumn.Text = text;
             }
             // Override App
-            foreach (InfoColumn infoColumn in infoColumnList.Values)
+            foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                app.InfoColumn(gridName, infoColumn);
+                app.DesignColumn(gridName, designColumn);
             }
             // Override Column
-            foreach (InfoColumn infoColumn in infoColumnList.Values)
+            foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                infoColumn.ColumnInternal.InfoColumn(app, gridName, infoColumn);
+                designColumn.ColumnInternal.DesignColumn(app, gridName, designColumn);
             }
         }
 
         internal void CellInit(App app, GridNameTypeRow gridName, Row row, Index index)
         {
-            foreach (InfoColumn infoColumn in infoColumnList.Values)
+            foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                infoColumn.InfoCell = new InfoCell();
+                designColumn.DesignCell = new DesignCell();
             }
             //
-            foreach (string fieldNameCSharp in infoColumnList.Keys)
+            foreach (string fieldNameCSharp in designColumnList.Keys)
             {
-                InfoColumn infoColumn = infoColumnList[fieldNameCSharp];
-                Cell cell = infoColumn.ColumnInternal;
+                DesignColumn designColumn = designColumnList[fieldNameCSharp];
+                Cell cell = designColumn.ColumnInternal;
                 UtilFramework.Assert(cell.Row == null);
                 try
                 {
                     cell.Constructor(row); // Column to cell;
-                    infoColumn.InfoCell.PlaceHolder = app.GridData.CellGet(gridName, index, fieldNameCSharp).PlaceHolder; // PlaceHolder loaded back from json request.
-                    if (infoColumn.IsVisible)
+                    designColumn.DesignCell.PlaceHolder = app.GridData.CellGet(gridName, index, fieldNameCSharp).PlaceHolder; // PlaceHolder loaded back from json request.
+                    if (designColumn.IsVisible)
                     {
-                        app.InfoCell(gridName, index, cell, infoColumn.InfoCell);
-                        cell.InfoCell(app, gridName, index, infoColumn.InfoCell);
+                        app.DesignCell(gridName, index, cell, designColumn.DesignCell);
+                        cell.DesignCell(app, gridName, index, designColumn.DesignCell);
                     }
                 }
                 finally
@@ -436,21 +436,21 @@
         }
 
         /// <summary>
-        /// Returns InfoColumn.
+        /// Returns DesignColumn.
         /// </summary>
-        internal InfoColumn ColumnGet(App app, GridNameTypeRow gridName, Cell column)
+        internal DesignColumn ColumnGet(App app, GridNameTypeRow gridName, Cell column)
         {
             UtilFramework.Assert(this.App == app && this.gridName == gridName);
-            return infoColumnList[column.FieldNameCSharp];
+            return designColumnList[column.FieldNameCSharp];
         }
 
         /// <summary>
-        /// Returns InfoCell.
+        /// Returns DesignCell.
         /// </summary>
-        internal InfoCell CellGet(App app, GridNameTypeRow gridName, Cell column)
+        internal DesignCell CellGet(App app, GridNameTypeRow gridName, Cell column)
         {
             UtilFramework.Assert(this.App == app && this.gridName == gridName);
-            return infoColumnList[column.FieldNameCSharp].InfoCell;
+            return designColumnList[column.FieldNameCSharp].DesignCell;
         }
     }
 
