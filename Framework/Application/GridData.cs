@@ -6,7 +6,6 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Framework.Component;
-    using System.Linq.Expressions;
 
     internal class GridRowInternal
     {
@@ -175,7 +174,7 @@
             if (row != null)
             {
                 result = row.Row;
-                if (result == null)
+                if (result == null || row.RowNew != null)
                 {
                     result = row.RowNew;
                 }
@@ -306,11 +305,11 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, GridRowInternal>> rowList = new Dictionary<GridName, Dictionary<Index, GridRowInternal>>();
 
-        private string selectGridName;
+        internal string SelectGridName;
 
-        private Index selectIndex;
+        internal Index SelectIndex;
 
-        private string selectFieldName;
+        internal string SelectFieldName;
 
         private GridRowInternal RowGet(GridName gridName, Index index)
         {
@@ -448,7 +447,7 @@
         /// Gets user entered text.
         /// </summary>
         /// <returns>If null, user has not changed text.</returns>
-        public string CellTextGet(GridName gridName, Index index, string fieldName)
+        internal string CellTextGet(GridName gridName, Index index, string fieldName)
         {
             return CellGet(gridName, index, fieldName).Text;
         }
@@ -466,18 +465,17 @@
         }
 
         /// <summary>
-        /// Sets user entered text. (Simulate user text input).
+        /// Set IsModify flag.
         /// </summary>
-        public void CellTextSet(GridName gridName, Index index, string fieldName, string text)
+        internal void CellIsModifySet(GridName gridName, Index index, string fieldName)
         {
+            GridRowInternal gridRow = RowGet(gridName, index);
+            if (gridRow.RowNew == null)
+            {
+                gridRow.RowNew = UtilDataAccessLayer.RowClone(gridRow.Row);
+            }
             GridCellInternal gridCell = CellGet(gridName, index, fieldName);
             gridCell.IsModify = true;
-            if (gridCell.IsOriginal == false)
-            {
-                gridCell.IsOriginal = true;
-                gridCell.TextOriginal = gridCell.Text;
-            }
-            gridCell.Text = text;
         }
 
         /// <summary>
@@ -789,7 +787,7 @@
         /// </summary>
         private void SaveDatabaseSelectGridLastIndex(GridName gridName)
         {
-            UtilFramework.Assert(selectGridName == GridName.ToJson(gridName));
+            UtilFramework.Assert(SelectGridName == GridName.ToJson(gridName));
             Index indexLast = null;
             foreach (Index index in rowList[gridName].Keys)
             {
@@ -799,7 +797,7 @@
                 }
             }
             UtilFramework.Assert(indexLast != null);
-            selectIndex = indexLast;
+            SelectIndex = indexLast;
         }
 
         /// <summary>
@@ -837,7 +835,7 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Insert(App, gridName, index);
+                                        row.RowNew.Insert(App, gridName, index, row.RowNew);
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -862,6 +860,8 @@
         /// <param name="isFilterParse">Parse grid filter also if user made no modifications.</param>
         internal void TextParse(bool isFilterParse = false)
         {
+            UtilFramework.LogDebug(string.Format("TextParse"));
+            //
             foreach (GridName gridName in rowList.Keys)
             {
                 foreach (Index index in rowList[gridName].Keys)
@@ -905,37 +905,24 @@
                             {
                                 try
                                 {
-                                    cell.CellTextParse(App, gridName, index, ref text);
+                                    cell.CellTextParse(App, gridName, index, fieldName, text);
+                                    string textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeField);
+                                    if (text == "")
+                                    {
+                                        text = null;
+                                    }
+                                    if (UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeField) != text) // For example user entered "8.". It would be overwritten on screen with "8".
+                                    {
+                                        ErrorCellSet(gridName, index, fieldName, "Value invalid!");
+                                        row.RowNew = null; // Do not save.
+                                        break;
+                                    }
                                 }
                                 catch (Exception exception)
                                 {
                                     ErrorCellSet(gridName, index, fieldName, exception.Message);
                                     row.RowNew = null; // Do not save.
                                     break;
-                                }
-                            }
-                            if (text != null)
-                            {
-                                if (text == "")
-                                {
-                                    text = null;
-                                }
-                                if (!(text == null && indexEnum == IndexEnum.Filter)) // Do not parse text null for filter.
-                                {
-                                    object value;
-                                    try
-                                    {
-                                        cell.CellRowValueFromText(App, gridName, index, ref text);
-                                        App.CellRowValueFromText(gridName, index, cell, ref text);
-                                        value = UtilDataAccessLayer.ValueFromText(text, rowWrite.GetType().GetProperty(fieldName).PropertyType); // Parse text.
-                                    }
-                                    catch (Exception exception)
-                                    {
-                                        ErrorCellSet(gridName, index, fieldName, exception.Message);
-                                        row.RowNew = null; // Do not save.
-                                        break;
-                                    }
-                                    rowWrite.GetType().GetProperty(fieldName).SetValue(rowWrite, value);
                                 }
                             }
                             ErrorCellSet(gridName, index, fieldName, null); // Clear error.
@@ -983,6 +970,8 @@
         /// </summary>
         internal void LoadJson(GridName gridName)
         {
+            UtilFramework.LogDebug(string.Format("DataFromJson ({0})", GridName.ToJson(gridName)));
+            //
             GridDataJson gridDataJson = App.AppJson.GridDataJson;
             //
             string typeRowString = gridDataJson.GridQueryList[GridName.ToJson(gridName)].TypeRow;
@@ -1047,7 +1036,7 @@
                     {
                         cell.CellRowValueFromText(App, gridName, rowIndex, ref text);
                         App.CellRowValueFromText(gridName, rowIndex, cell, ref text);
-                        object value = UtilDataAccessLayer.ValueFromText(text, cell.PropertyInfo.PropertyType);
+                        object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
                         cell.PropertyInfo.SetValue(resultRow, value);
                     }
                 }
@@ -1071,9 +1060,9 @@
                     LoadJson(GridName.FromJson(gridName));
                 }
                 //
-                selectGridName = gridDataJson.SelectGridName;
-                selectIndex = new Index(gridDataJson.SelectIndex);
-                selectFieldName = gridDataJson.SelectFieldName;
+                SelectGridName = gridDataJson.SelectGridName;
+                SelectIndex = new Index(gridDataJson.SelectIndex);
+                SelectFieldName = gridDataJson.SelectFieldName;
             }
         }
 
@@ -1170,9 +1159,9 @@
 
         private void SaveJsonSelect(AppJson appJson)
         {
-            appJson.GridDataJson.SelectGridName = selectGridName;
-            appJson.GridDataJson.SelectIndex = selectIndex?.Value;
-            appJson.GridDataJson.SelectFieldName = selectFieldName;
+            appJson.GridDataJson.SelectGridName = SelectGridName;
+            appJson.GridDataJson.SelectIndex = SelectIndex?.Value;
+            appJson.GridDataJson.SelectFieldName = SelectFieldName;
         }
 
         /// <summary>
@@ -1208,6 +1197,8 @@
             //
             foreach (GridName gridName in rowList.Keys)
             {
+                UtilFramework.LogDebug(string.Format("DataToJson ({0})", GridName.ToJson(gridName)));
+                //
                 Type typeRow = TypeRowGet(gridName);
                 GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeRow, gridName);
                 //

@@ -201,6 +201,7 @@
         internal async Task<IActionResult> WebRequest()
         {
             string requestPath = Controller.HttpContext.Request.Path.ToString();
+            UtilFramework.LogDebug(string.Format("Request ({0})", requestPath));
             // Framework/Server/wwwroot/*.* content request
             if (Path.GetFileName(requestPath).Contains("."))
             {

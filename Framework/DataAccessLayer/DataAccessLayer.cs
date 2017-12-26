@@ -16,6 +16,11 @@
 
         }
 
+        /// <summary>
+        /// Update data row on database.
+        /// </summary>
+        /// <param name="row">Old data row</param>
+        /// <param name="rowNew">New data row. Set properties for example to read back updated content from db.</param>
         protected virtual internal void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
             UtilFramework.Assert(this == rowNew);
@@ -28,8 +33,9 @@
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(App app, GridName gridName, Index index)
+        protected virtual internal void Insert(App app, GridName gridName, Index index, Row rowNew)
         {
+            UtilFramework.Assert(rowNew == this);
             if (app.GridData.IsModifyRowCell(gridName, index, true)) // No insert on database, if only calculated column has been modified.
             {
                 UtilDataAccessLayer.Insert(this);
@@ -126,9 +132,10 @@
         /// <summary>
         /// Parse user entered text.
         /// </summary>
-        protected virtual internal void CellTextParse(App app, GridName gridName, Index index, ref string result)
+        protected virtual internal void CellTextParse(App app, GridName gridName, Index index, string fieldName, string text)
         {
-
+            object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(fieldName).PropertyType); // Default parse text.
+            Row.GetType().GetProperty(fieldName).SetValue(Row, value);
         }
 
         /// <summary>
@@ -156,7 +163,7 @@
         /// Values user can select from lookup list.
         /// </summary>
         /// <param name="query">Database query or in-memeory list.</param>
-        protected virtual internal void CellLookup(out IQueryable query)
+        protected virtual internal void CellLookup(App app, GridName gridName, Index index, string fieldName, out IQueryable query)
         {
             query = null;
         }
@@ -167,10 +174,10 @@
         /// <param name="gridName">Grid with open lookup.</param>
         /// <param name="index">Row with open lookup.</param>
         /// <param name="rowLookup">LoowUp row which has been clicked.</param>
-        /// <param name="result">Cell text on lookup user clicked.</param>
-        protected virtual internal void CellLookupIsClick(App app, GridName gridName, Index index, Row rowLookup, ref string result)
+        /// <param name="fieldNameLookup">Field which has been clicked.</param>
+        protected virtual internal void CellLookupIsClick(App app, GridName gridName, Index index, string fieldName, Row rowLookup, string fieldNameLookup, string text)
         {
-
+            CellTextParse(app, gridName, index, fieldName, text);
         }
 
         /// <summary>

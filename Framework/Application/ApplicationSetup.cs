@@ -28,7 +28,6 @@
             new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
             new Grid(this, new GridName<FrameworkConfigColumnView>());
             app.GridData.LoadDatabase(new GridName<FrameworkConfigColumnView>());
-            app.GridData.SaveJson();
         }
     }
 }

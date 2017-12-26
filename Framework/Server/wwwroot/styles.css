@@ -98,6 +98,30 @@ img {
     background-position: right;
 }
 
+.gridError {
+    padding-left: 18px;
+    margin-left: 4px;
+    background-image: url('/GridError.png');
+    background-repeat: no-repeat;
+    background-position: left;
+}
+
+.gridWarning {
+    padding-left: 18px;
+    margin-left: 4px;
+    background-image: url('/GridWarning.png');
+    background-repeat: no-repeat;
+    background-position: left;
+}
+
+.gridOk {
+    padding-left: 18px;
+    margin-left: 4px;
+    background-image: url('/GridOk.png');
+    background-repeat: no-repeat;
+    background-position: left;
+}
+
 .gridFilter {
     padding-right: 18px;
     background-image: url('/GridFilter.png'); /* fallback */

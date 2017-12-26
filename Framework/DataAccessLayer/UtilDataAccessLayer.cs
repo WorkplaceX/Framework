@@ -211,6 +211,8 @@
 
         public static IQueryable Query(Type typeRow)
         {
+            UtilFramework.LogDebug(string.Format("QUERY ({0})", UtilDataAccessLayer.TypeRowToNameCSharp(typeRow)));
+            //
             DbContext dbContext = DbContext(typeRow);
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.
             IQueryable query = (IQueryable)(dbContext.GetType().GetTypeInfo().GetMethod("Set").MakeGenericMethod(typeRow).Invoke(dbContext, null));
@@ -273,6 +275,8 @@
 
         internal static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
         {
+            UtilFramework.LogDebug(string.Format("SELECT ({0})",  UtilDataAccessLayer.TypeRowToNameCSharp(typeRow)));
+            //
             if (query == null)
             {
                 query = Query(typeRow);
@@ -323,6 +327,8 @@
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
+            UtilFramework.LogDebug(string.Format("UPDATE ({0})", UtilDataAccessLayer.TypeRowToNameCSharp(row.GetType())));
+            //
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             if (!IsRowEqual(row, rowNew)) // Rows are equal for example after user reverted input after error.
             {
@@ -339,6 +345,8 @@
         /// </summary>
         public static void Insert(Row row)
         {
+            UtilFramework.LogDebug(string.Format("INSERT ({0})", UtilDataAccessLayer.TypeRowToNameCSharp(row.GetType())));
+            //
             Row rowClone = UtilDataAccessLayer.RowClone(row);
             DbContext dbContext = DbContext(row.GetType());
             dbContext.Add(row);
@@ -357,6 +365,62 @@
                 UtilDataAccessLayer.RowCopy(rowClone, row); // In case of exception, EF might change for example auto incremental id to -2147482647. Reverse it back.
                 throw exception;
             }
+        }
+
+        /// <summary>
+        /// Wrap SqlCommand into SqlConnection.
+        /// </summary>
+        private static void SqlCommand(List<string> sqlList, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
+        {
+            string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                sqlConnection.Open();
+                foreach (string sql in sqlList)
+                {
+                    using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection))
+                    {
+                        sqlCommand.Parameters.AddRange(paramList);
+                        execute(sqlCommand); // Call back
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Read data from stored procedure or database table. Returns multiple result sets.
+        /// (ResultSet, Row, FieldName, Value).
+        /// </summary>
+        public static List<List<Dictionary<string, object>>> Execute(string sql, params SqlParameter[] paramList)
+        {
+            List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
+            List<string> sqlList = new List<string>();
+            sqlList.Add(sql);
+            SqlCommand(sqlList, (sqlCommand) =>
+            {
+                sqlCommand.Parameters.AddRange(paramList);
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    while (reader.HasRows)
+                    {
+                        var rowList = new List<Dictionary<string, object>>();
+                        result.Add(rowList);
+                        while (reader.Read())
+                        {
+                            var row = new Dictionary<string, object>();
+                            rowList.Add(row);
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                string fieldName = reader.GetName(i);
+                                object value = reader.GetValue(i);
+                                row.Add(fieldName, value);
+                            }
+                        }
+                        reader.NextResult();
+                    }
+                }
+            }, false);
+            return result;
         }
 
         /// <summary>
@@ -390,6 +454,10 @@
             {
                 return Encoding.Unicode.GetString((byte[])value);
             }
+            if (type == typeof(DateTime) && value != null)
+            {
+                return string.Format("{0:yyyy-MM-dd}", value);
+            }
             if (value != null)
             {
                 return value.ToString();
@@ -400,7 +468,7 @@
         /// <summary>
         /// Parse user entered text.
         /// </summary>
-        internal static object ValueFromText(string text, Type type)
+        internal static object RowValueFromText(string text, Type type)
         {
             Type typeUnderlying = Nullable.GetUnderlyingType(type);
             if (text == null && typeUnderlying != null) // Type is nullable
@@ -431,6 +499,14 @@
             if (type == typeof(Guid) || typeUnderlying == typeof(Guid))
             {
                 return Guid.Parse(text);
+            }
+            if (type == typeof(string) && text == "")
+            {
+                text = null;
+            }
+            if (type.IsValueType && text == "")
+            {
+                return null;
             }
             return Convert.ChangeType(text, type);
         }

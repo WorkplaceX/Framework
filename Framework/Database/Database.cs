@@ -41,13 +41,13 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage
     {
-        protected internal override void Insert(App app, GridName gridName, Index index)
+        protected internal override void Insert(App app, GridName gridName, Index index, Row row)
         {
             if (app.DbFrameworkApplication != null)
             {
                 this.ApplicationId = app.DbFrameworkApplication.Id;
             }
-            base.Insert(app, gridName, index);
+            base.Insert(app, gridName, index, row);
         }
     }
 
@@ -79,7 +79,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).First(), this);
         }
 
-        protected internal override void Insert(App app, GridName gridName, Index index)
+        protected internal override void Insert(App app, GridName gridName, Index index, Row row)
         {
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
@@ -90,29 +90,20 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellTextParse(App app, GridName gridName, Index index, ref string result)
+        protected internal override void CellTextParse(App app, GridName gridName, Index index, string fieldName, string text)
         {
-            string text = result;
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
             if (applicationType == null)
             {
-                throw new Exception(string.Format("Type unknown! ({0})", result));
+                throw new Exception(string.Format("Type unknown! ({0})", text));
             }
+            Row.Type = applicationType.Name;
             Row.ApplicationTypeId = applicationType.Id;
         }
-    }
 
-    public partial class FrameworkApplicationView_Type
-    {
-        protected internal override void CellLookup(out IQueryable query)
+        protected internal override void CellLookup(App app, GridName gridName, Index index, string fieldName, out IQueryable query)
         {
             query = UtilDataAccessLayer.Query<FrameworkApplicationType>();
-        }
-
-
-        protected internal override void CellLookupIsClick(App app, GridName gridName, Index index, Row rowLookup, ref string result)
-        {
-            result = ((FrameworkApplicationType)rowLookup).Name;
         }
     }
 

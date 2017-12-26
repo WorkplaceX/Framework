@@ -249,6 +249,11 @@
             }
         }
 
+        public void Clear()
+        {
+            valueList.Clear();
+        }
+
         public string ToHtml()
         {
             if (valueList.Count == 0)

@@ -72,6 +72,14 @@
         }
     }
 
+    internal class ProcessTextParse : Process
+    {
+        protected internal override void Run(App app)
+        {
+            app.GridData.TextParse();
+        }
+    }
+
     /// <summary>
     /// Process data grid filter.
     /// </summary>
@@ -103,12 +111,10 @@
                 }
             }
             //
-            foreach (string gridName in gridNameList)
+            foreach (string gridName in gridNameList) // Grids with filter changed
             {
-                app.GridDataTextParse();
                 GridData gridData = app.GridData;
                 gridData.LoadDatabaseReload(GridName.FromJson(gridName));
-                gridData.SaveJson();
             }
         }
     }
@@ -328,13 +334,23 @@
                 // Row and cell, on which lookup is open.
                 GridName gridName = GridName.FromJson(gridDataJson.SelectGridNamePrevious);
                 Index index = new Index(gridDataJson.SelectIndexPrevious);
+                string fieldName = gridDataJson.SelectFieldNamePrevious;
+                // Lookup
+                GridName gridNameLookup = GridName.FromJson(gridDataJson.SelectGridName);
+                Index indexLookup = new Index(gridDataJson.SelectIndex);
+                string fieldNameLookup = gridDataJson.SelectFieldName;
+                // Set IsModify
+                gridData.CellIsModifySet(gridName, index, fieldName);
                 var row = gridData.Row(gridName, index);
-                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == gridDataJson.SelectFieldNamePrevious).First();
+                Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.FieldNameCSharp == fieldName).First();
                 // Cell of lookup which user clicked.
-                Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.FieldNameCSharp == gridDataJson.SelectFieldName).First();
-                string result = cellLookup.Value.ToString();
-                cell.CellLookupIsClick(app, gridName, index, rowLookup, ref result);
-                app.GridData.CellTextSet(gridName, index, cell.FieldNameCSharp, result);
+                Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.FieldNameCSharp == fieldNameLookup).First();
+                string text = app.GridData.CellGet(gridNameLookup, indexLookup, fieldNameLookup).Text;
+                cell.CellLookupIsClick(app, gridName, index, cell.FieldNameCSharp, rowLookup, cellLookup.FieldNameCSharp, text);
+                //
+                app.GridData.SelectGridName = GridName.ToJson(gridName);
+                app.GridData.SelectIndex = index;
+                app.GridData.SelectFieldName = fieldName;
             }
         }
     }
@@ -393,7 +409,7 @@
                 Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.FieldNameCSharp == fieldName).Single();
                 List<Row> rowList = null;
                 IQueryable query;
-                cell.CellLookup(out query);
+                cell.CellLookup(app, gridName, index, fieldName, out query);
                 if (query != null)
                 {
                     typeRow = query.ElementType;
@@ -410,7 +426,6 @@
                 {
                     gridData.LookupClose();
                 }
-                gridData.SaveJson();
             }
             else
             {
@@ -525,34 +540,11 @@
         }
     }
 
-    internal class ProcessGridSave : Process
+    internal class ProcessGridSaveDatabase : Process
     {
         protected internal override void Run(App app)
         {
-            bool isSave = false;
-            GridDataJson gridDataJson = app.AppJson.GridDataJson;
-            foreach (string gridName in gridDataJson.RowList.Keys)
-            {
-                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
-                {
-                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.FieldName][gridRow.Index];
-                        if (gridCell.IsModify)
-                        {
-                            isSave = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            //
-            if (isSave)
-            {
-                app.GridData.TextParse();
-                app.GridData.SaveDatabase();
-                app.GridData.SaveJson();
-            }
+            app.GridData.SaveDatabase();
         }
     }
 

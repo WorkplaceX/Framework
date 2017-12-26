@@ -1,12 +1,12 @@
 ﻿namespace Framework
 {
-    using Framework.Application;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Reflection;
+    using System.Threading;
 
     public static class UtilFramework
     {
@@ -244,6 +244,27 @@
         public static void Log(string text)
         {
             Console.WriteLine(text);
+        }
+
+        /// <summary>
+        /// Write Debug.csv file.
+        /// </summary>
+        /// <param name="text"></param>
+        internal static void LogDebug(string text)
+        {
+            string fileName = FolderName + "Submodule/Framework/Debug.csv";
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            text = text.Replace(",", ";");
+            text = text.Replace("\r", "");
+            text = text.Replace("\n", "");
+            text = text.Replace("\"", "");
+            string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            string result = string.Format("=\"{0}\",{1:000},{2}" + "\r\n", time, threadId, text);
+            // if (!File.Exists(fileName))
+            // {
+            //     File.AppendAllText(fileName, "Time,ThreadId,Text" + "\r\n");
+            // }
+            // File.AppendAllText(fileName, result);
         }
 
         [ThreadStatic]

@@ -272,19 +272,6 @@
             }
         }
 
-        private bool isGridDataTextParse;
-
-        /// <summary>
-        /// Make sure method GridData.Text(); has been called. It's called only once.
-        /// </summary>
-        internal void GridDataTextParse()
-        {
-            if (isGridDataTextParse == false)
-            {
-                isGridDataTextParse = true;
-                GridData.TextParse();
-            }
-        }
         private ProcessList processListPrivate;
 
         private ProcessList processList
@@ -309,11 +296,12 @@
             {
                 processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
+                processList.Add<ProcessTextParse>();
                 processList.Add<ProcessGridFilter>();
                 processList.Add<ProcessGridIsClickMasterDetail>();
                 processList.Add<ProcessGridLookupIsClick>();
+                processList.Add<ProcessGridSaveDatabase>();
                 processList.Add<ProcessGridLookup>();
-                processList.Add<ProcessGridSave>();
                 processList.Add<ProcessGridCellButtonIsClick>();
                 processList.Add<ProcessGridRowSelectFirst>();
                 processList.Add<ProcessGridSaveJson>(); // Save
