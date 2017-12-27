@@ -2,7 +2,7 @@
 (
 	Id INT PRIMARY KEY IDENTITY,
   	Name NVARCHAR(256) NOT NULL UNIQUE,
-	IsExist BIT
+	IsExist BIT NOT NULL
 )
 
 CREATE TABLE FrameworkApplication
@@ -42,7 +42,7 @@ CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source co
 (
 	Id INT PRIMARY KEY IDENTITY,
 	Name NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToNameCSharp(); This is TableNameCSharp
-	IsExist BIT
+	IsExist BIT NOT NULL
 )
 
 CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source code defined columns. Also calculated fields. */
@@ -50,8 +50,17 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
 	Name NVARCHAR(256) NOT NULL, -- This is FieldNameCSharp
-	IsExist BIT
+	IsExist BIT NOT NULL
 	INDEX IX_FrameworkConfigTable UNIQUE (TableId, Name)
+)
+
+CREATE TABLE FrameworkGrid /* Used for configuration. Contains all in source code defined grids. (Static GridName) */
+(
+	Id INT PRIMARY KEY IDENTITY,
+	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
+	Name NVARCHAR(256), -- GridName
+	IsExist BIT NOT NULL
+	INDEX IX_FrameworkGrid UNIQUE (TableId, Name) -- For example new GridName<Table>("Master");
 )
 
 CREATE TABLE FrameworkConfigTable

@@ -8,6 +8,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Reflection;
     using System.Text;
 
     /// <summary>
@@ -140,7 +141,62 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", tableName));
+                sqlSelect.Append(string.Format("SELECT '{0}' AS Name", tableName));
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilFramework.Log("### Exit RunSqlTable");
+        }
+
+        private void RunSqlGrid()
+        {
+            UtilFramework.Log("### Start RunSqlGrid");
+            string sql = "UPDATE FrameworkGrid SET IsExist = 0";
+            UtilBuildTool.SqlCommand(sql, true);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkGrid AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT (SELECT FrameworkTable.Id AS TableId FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Name = Source.TableName) AS TableId, Source.GridName AS Name
+                    EXCEPT
+                    SELECT Target.TableId, Target.Name)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (TableId, Name, IsExist)
+	            VALUES ((SELECT FrameworkTable.Id AS TableId FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Name = Source.TableName), Source.GridName, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            {
+                string tableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    sqlSelect.Append(" UNION ALL\r\n");
+                }
+                sqlSelect.Append(string.Format("SELECT '{0}' AS TableName, NULL AS GridName", tableName));
+            }
+            //
+            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            {
+                foreach (PropertyInfo propertyInfo in typeRow.GetProperties(BindingFlags.Static | BindingFlags.Public)) // Static declared property on class Row.
+                {
+                    if (UtilFramework.IsSubclassOf(typeof(GridName), propertyInfo.PropertyType))
+                    {
+                        GridName gridName = (GridName)propertyInfo.GetValue(null);
+                        //
+                        Type gridTypeRow = (Type)gridName.GetType().GetField("TypeRowInternal", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
+                        string gridNameExclusive = (string)gridName.GetType().GetTypeInfo().GetProperty("NameExclusive", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
+                        string gridTableName = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(gridTypeRow);
+                        sqlSelect.Append(" UNION ALL\r\n");
+                        sqlSelect.Append(string.Format("SELECT '{0}' AS TableName, '{1}' AS GridName", gridTableName, gridNameExclusive));
+                    }
+                }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true);
@@ -192,6 +248,7 @@
         {
             RunSqlTable();
             RunSqlColumn();
+            RunSqlGrid();
             RunSqlApplicationType();
             RunSqlApplication();
         }

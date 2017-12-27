@@ -3,6 +3,7 @@ DROP VIEW FrameworkConfigTableView
 DROP TABLE FrameworkConfigTable
 DROP VIEW FrameworkConfigColumnView
 DROP TABLE FrameworkConfigColumn
+DROP TABLE FrameworkGrid
 DROP TABLE FrameworkColumn
 DROP TABLE FrameworkTable
 DROP TABLE FrameworkSession
