@@ -157,13 +157,13 @@
             MERGE INTO FrameworkGrid AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT (SELECT FrameworkTable.Id AS TableId FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Name = Source.TableName) AS TableId, Source.GridName AS Name
+                    SELECT (SELECT FrameworkTable.Id AS TableId FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Name = Source.TableName) AS TableId, Source.GridName
                     EXCEPT
-                    SELECT Target.TableId, Target.Name)
+                    SELECT Target.TableId, Target.GridName)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (TableId, Name, IsExist)
+	            INSERT (TableId, GridName, IsExist)
 	            VALUES ((SELECT FrameworkTable.Id AS TableId FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Name = Source.TableName), Source.GridName, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();

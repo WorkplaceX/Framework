@@ -58,9 +58,9 @@ CREATE TABLE FrameworkGrid /* Used for configuration. Contains all in source cod
 (
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
-	Name NVARCHAR(256), -- GridName
+	GridName NVARCHAR(256),
 	IsExist BIT NOT NULL
-	INDEX IX_FrameworkGrid UNIQUE (TableId, Name) -- For example new GridName<Table>("Master");
+	INDEX IX_FrameworkGrid UNIQUE (TableId, GridName) -- For example new GridName<Table>("Master");
 )
 
 CREATE TABLE FrameworkConfigTable
