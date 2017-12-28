@@ -44,7 +44,7 @@ namespace Database.dbo
         public string Name { get; set; }
 
         [SqlColumn("IsExist", typeof(FrameworkApplicationType_IsExist))]
-        public bool? IsExist { get; set; }
+        public bool IsExist { get; set; }
     }
 
     public partial class FrameworkApplicationType_Id : Cell<FrameworkApplicationType> { }
@@ -105,7 +105,7 @@ namespace Database.dbo
         public string Name { get; set; }
 
         [SqlColumn("IsExist", typeof(FrameworkColumn_IsExist))]
-        public bool? IsExist { get; set; }
+        public bool IsExist { get; set; }
     }
 
     public partial class FrameworkColumn_Id : Cell<FrameworkColumn> { }
@@ -169,7 +169,7 @@ namespace Database.dbo
         public string ColumnName { get; set; }
 
         [SqlColumn("ColumnIsExist", typeof(FrameworkConfigColumnView_ColumnIsExist))]
-        public bool? ColumnIsExist { get; set; }
+        public bool ColumnIsExist { get; set; }
 
         [SqlColumn("ConfigId", typeof(FrameworkConfigColumnView_ConfigId))]
         public int? ConfigId { get; set; }
@@ -243,7 +243,7 @@ namespace Database.dbo
         public string TableName { get; set; }
 
         [SqlColumn("TableIsExist", typeof(FrameworkConfigTableView_TableIsExist))]
-        public bool? TableIsExist { get; set; }
+        public bool TableIsExist { get; set; }
 
         [SqlColumn("ConfigId", typeof(FrameworkConfigTableView_ConfigId))]
         public int? ConfigId { get; set; }
@@ -301,6 +301,30 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_IsDelete : Cell<FrameworkFileStorage> { }
 
+    [SqlTable("dbo", "FrameworkGrid")]
+    public partial class FrameworkGrid : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkGrid_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("TableId", typeof(FrameworkGrid_TableId))]
+        public int TableId { get; set; }
+
+        [SqlColumn("Name", typeof(FrameworkGrid_Name))]
+        public string Name { get; set; }
+
+        [SqlColumn("IsExist", typeof(FrameworkGrid_IsExist))]
+        public bool IsExist { get; set; }
+    }
+
+    public partial class FrameworkGrid_Id : Cell<FrameworkGrid> { }
+
+    public partial class FrameworkGrid_TableId : Cell<FrameworkGrid> { }
+
+    public partial class FrameworkGrid_Name : Cell<FrameworkGrid> { }
+
+    public partial class FrameworkGrid_IsExist : Cell<FrameworkGrid> { }
+
     [SqlTable("dbo", "FrameworkScript")]
     public partial class FrameworkScript : Row
     {
@@ -354,7 +378,7 @@ namespace Database.dbo
         public string Name { get; set; }
 
         [SqlColumn("IsExist", typeof(FrameworkTable_IsExist))]
-        public bool? IsExist { get; set; }
+        public bool IsExist { get; set; }
     }
 
     public partial class FrameworkTable_Id : Cell<FrameworkTable> { }
