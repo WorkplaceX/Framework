@@ -65,10 +65,10 @@ CREATE TABLE FrameworkGrid /* Used for configuration. Contains all in source cod
 	INDEX IX_FrameworkGrid UNIQUE (TableId, GridName) -- For example new GridName<Table>("Master");
 )
 
-CREATE TABLE FrameworkConfigTable
+CREATE TABLE FrameworkConfigGrid
 (
 	Id INT PRIMARY KEY IDENTITY,
-	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL UNIQUE,
+	GridId INT FOREIGN KEY REFERENCES FrameworkGrid(Id) NOT NULL UNIQUE,
 	PageRowCount INT, /* Number of records to load on one page */
 	IsInsert BIT /* Allow insert record */
 )
@@ -86,8 +86,11 @@ CREATE TABLE FrameworkConfigColumn
 
 GO
 
-CREATE VIEW FrameworkConfigTableView AS
+CREATE VIEW FrameworkConfigGridView AS
 SELECT
+	Grid.Id AS GridId,
+	Grid.GridName,
+	Grid.IsExist AS GridIsExist,
 	TableX.Id AS TableId,
 	TableX.TableNameCSharp,
 	TableX.TableNameSql,
@@ -97,10 +100,13 @@ SELECT
 	Config.IsInsert
 
 FROM
-	FrameworkTable TableX
+	FrameworkGrid Grid
+
+LEFT JOIN
+	FrameworkTable TableX ON TableX.Id = Grid.TableId
 	
 LEFT JOIN
-	FrameworkConfigTable Config ON Config.TableId = TableX.Id
+	FrameworkConfigGrid Config ON Config.GridId = Grid.Id
 
 GO
 

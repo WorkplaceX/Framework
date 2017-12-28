@@ -20,10 +20,10 @@
             new Literal(this) { TextHtml = "<h1>Application</h1>" };
             new Grid(this, new GridName<FrameworkApplicationView>());
             app.GridData.LoadDatabase(new GridName<FrameworkApplicationView>());
-            // ConfigTable
-            new Literal(this) { TextHtml = "<h1>Config Table</h1>" };
-            new Grid(this, new GridName<FrameworkConfigTableView>());
-            app.GridData.LoadDatabase(new GridName<FrameworkConfigTableView>());
+            // ConfigGrid
+            new Literal(this) { TextHtml = "<h1>Config Grid</h1>" };
+            new Grid(this, new GridName<FrameworkConfigGridView>());
+            app.GridData.LoadDatabase(new GridName<FrameworkConfigGridView>());
             // ConfigColumn
             new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
             new Grid(this, new GridName<FrameworkConfigColumnView>());

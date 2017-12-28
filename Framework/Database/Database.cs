@@ -129,7 +129,7 @@ namespace Database.dbo
 
         protected internal override void MasterIsClick(App app, GridName gridNameMaster, Row rowMaster, ref bool isReload)
         {
-            FrameworkConfigTableView configTable = rowMaster as FrameworkConfigTableView;
+            FrameworkConfigGridView configTable = rowMaster as FrameworkConfigGridView;
             if (configTable != null)
             {
                 isReload = true;
@@ -138,7 +138,7 @@ namespace Database.dbo
 
         protected internal override IQueryable Query(App app, GridName gridName)
         {
-            var configTable = app.GridData.RowSelected(new GridName<FrameworkConfigTableView>());
+            var configTable = app.GridData.RowSelected(new GridName<FrameworkConfigGridView>());
             if (configTable != null)
             {
                 return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableNameCSharp == configTable.TableNameCSharp);
@@ -150,24 +150,24 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkConfigTableView
+    public partial class FrameworkConfigGridView
     {
         protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
-            var config = UtilDataAccessLayer.Query<FrameworkConfigTable>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            var config = UtilDataAccessLayer.Query<FrameworkConfigGrid>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
             if (config == null)
             {
-                config = new FrameworkConfigTable();
+                config = new FrameworkConfigGrid();
                 UtilDataAccessLayer.RowCopy(rowNew, config);
                 UtilDataAccessLayer.Insert(config);
             }
             else
             {
-                FrameworkConfigTable configNew = UtilDataAccessLayer.RowClone(config);
+                FrameworkConfigGrid configNew = UtilDataAccessLayer.RowClone(config);
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigTableView>().Where(item => item.TableId == this.TableId).First(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.TableId == this.TableId).First(), this);
         }
     }
 }

@@ -224,68 +224,83 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_WidthPercent : Cell<FrameworkConfigColumnView> { }
 
-    [SqlTable("dbo", "FrameworkConfigTable")]
-    public partial class FrameworkConfigTable : Row
+    [SqlTable("dbo", "FrameworkConfigGrid")]
+    public partial class FrameworkConfigGrid : Row
     {
-        [SqlColumn("Id", typeof(FrameworkConfigTable_Id))]
+        [SqlColumn("Id", typeof(FrameworkConfigGrid_Id))]
         public int Id { get; set; }
 
-        [SqlColumn("TableId", typeof(FrameworkConfigTable_TableId))]
-        public int TableId { get; set; }
+        [SqlColumn("GridId", typeof(FrameworkConfigGrid_GridId))]
+        public int GridId { get; set; }
 
-        [SqlColumn("PageRowCount", typeof(FrameworkConfigTable_PageRowCount))]
+        [SqlColumn("PageRowCount", typeof(FrameworkConfigGrid_PageRowCount))]
         public int? PageRowCount { get; set; }
 
-        [SqlColumn("IsInsert", typeof(FrameworkConfigTable_IsInsert))]
+        [SqlColumn("IsInsert", typeof(FrameworkConfigGrid_IsInsert))]
         public bool? IsInsert { get; set; }
     }
 
-    public partial class FrameworkConfigTable_Id : Cell<FrameworkConfigTable> { }
+    public partial class FrameworkConfigGrid_Id : Cell<FrameworkConfigGrid> { }
 
-    public partial class FrameworkConfigTable_TableId : Cell<FrameworkConfigTable> { }
+    public partial class FrameworkConfigGrid_GridId : Cell<FrameworkConfigGrid> { }
 
-    public partial class FrameworkConfigTable_PageRowCount : Cell<FrameworkConfigTable> { }
+    public partial class FrameworkConfigGrid_PageRowCount : Cell<FrameworkConfigGrid> { }
 
-    public partial class FrameworkConfigTable_IsInsert : Cell<FrameworkConfigTable> { }
+    public partial class FrameworkConfigGrid_IsInsert : Cell<FrameworkConfigGrid> { }
 
-    [SqlTable("dbo", "FrameworkConfigTableView")]
-    public partial class FrameworkConfigTableView : Row
+    [SqlTable("dbo", "FrameworkConfigGridView")]
+    public partial class FrameworkConfigGridView : Row
     {
-        [SqlColumn("TableId", typeof(FrameworkConfigTableView_TableId))]
-        public int TableId { get; set; }
+        [SqlColumn("GridId", typeof(FrameworkConfigGridView_GridId))]
+        public int GridId { get; set; }
 
-        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigTableView_TableNameCSharp))]
+        [SqlColumn("GridName", typeof(FrameworkConfigGridView_GridName))]
+        public string GridName { get; set; }
+
+        [SqlColumn("GridIsExist", typeof(FrameworkConfigGridView_GridIsExist))]
+        public bool GridIsExist { get; set; }
+
+        [SqlColumn("TableId", typeof(FrameworkConfigGridView_TableId))]
+        public int? TableId { get; set; }
+
+        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigGridView_TableNameCSharp))]
         public string TableNameCSharp { get; set; }
 
-        [SqlColumn("TableNameSql", typeof(FrameworkConfigTableView_TableNameSql))]
+        [SqlColumn("TableNameSql", typeof(FrameworkConfigGridView_TableNameSql))]
         public string TableNameSql { get; set; }
 
-        [SqlColumn("TableIsExist", typeof(FrameworkConfigTableView_TableIsExist))]
-        public bool TableIsExist { get; set; }
+        [SqlColumn("TableIsExist", typeof(FrameworkConfigGridView_TableIsExist))]
+        public bool? TableIsExist { get; set; }
 
-        [SqlColumn("ConfigId", typeof(FrameworkConfigTableView_ConfigId))]
+        [SqlColumn("ConfigId", typeof(FrameworkConfigGridView_ConfigId))]
         public int? ConfigId { get; set; }
 
-        [SqlColumn("PageRowCount", typeof(FrameworkConfigTableView_PageRowCount))]
+        [SqlColumn("PageRowCount", typeof(FrameworkConfigGridView_PageRowCount))]
         public int? PageRowCount { get; set; }
 
-        [SqlColumn("IsInsert", typeof(FrameworkConfigTableView_IsInsert))]
+        [SqlColumn("IsInsert", typeof(FrameworkConfigGridView_IsInsert))]
         public bool? IsInsert { get; set; }
     }
 
-    public partial class FrameworkConfigTableView_TableId : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_GridId : Cell<FrameworkConfigGridView> { }
 
-    public partial class FrameworkConfigTableView_TableNameCSharp : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_GridName : Cell<FrameworkConfigGridView> { }
 
-    public partial class FrameworkConfigTableView_TableNameSql : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_GridIsExist : Cell<FrameworkConfigGridView> { }
 
-    public partial class FrameworkConfigTableView_TableIsExist : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_TableId : Cell<FrameworkConfigGridView> { }
 
-    public partial class FrameworkConfigTableView_ConfigId : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_TableNameCSharp : Cell<FrameworkConfigGridView> { }
 
-    public partial class FrameworkConfigTableView_PageRowCount : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_TableNameSql : Cell<FrameworkConfigGridView> { }
 
-    public partial class FrameworkConfigTableView_IsInsert : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigGridView_TableIsExist : Cell<FrameworkConfigGridView> { }
+
+    public partial class FrameworkConfigGridView_ConfigId : Cell<FrameworkConfigGridView> { }
+
+    public partial class FrameworkConfigGridView_PageRowCount : Cell<FrameworkConfigGridView> { }
+
+    public partial class FrameworkConfigGridView_IsInsert : Cell<FrameworkConfigGridView> { }
 
     [SqlTable("dbo", "FrameworkFileStorage")]
     public partial class FrameworkFileStorage : Row
