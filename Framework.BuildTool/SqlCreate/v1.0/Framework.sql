@@ -76,12 +76,13 @@ CREATE TABLE FrameworkConfigGrid
 CREATE TABLE FrameworkConfigColumn
 (
 	Id INT PRIMARY KEY IDENTITY,
+	GridId INT FOREIGN KEY REFERENCES FrameworkGrid(Id) NOT NULL,
 	ColumnId INT FOREIGN KEY REFERENCES FrameworkColumn(Id) NOT NULL,
-	Text NVARCHAR(256),
+	Text NVARCHAR(256), -- Column header text.
 	IsVisible BIT,
 	Sort FLOAT,
 	WidthPercent FLOAT,
-	INDEX IX_FrameworkConfigColumn UNIQUE (ColumnId)
+	INDEX IX_FrameworkConfigColumn UNIQUE (GridId, ColumnId)
 )
 
 GO
@@ -112,6 +113,9 @@ GO
 
 CREATE VIEW FrameworkConfigColumnView AS
 SELECT
+	Grid.Id AS GridId,
+	Grid.GridName,
+	Grid.IsExist AS GridIsExist,
 	TableX.Id AS TableId,
 	TableX.TableNameCSharp,
 	TableX.TableNameSql,
@@ -127,13 +131,16 @@ SELECT
 	Config.WidthPercent
 
 FROM
-	FrameworkColumn ColumnX
-	
-LEFT JOIN
-	FrameworkTable TableX ON TableX.Id = ColumnX.TableId
+	FrameworkGrid Grid
 
 LEFT JOIN
-	FrameworkConfigColumn Config ON Config.ColumnId = ColumnX.Id
+	FrameworkTable TableX ON TableX.Id = Grid.TableId
+
+LEFT JOIN
+	FrameworkColumn ColumnX ON ColumnX.TableId = Grid.TableId
+
+LEFT JOIN
+	FrameworkConfigColumn Config ON Config.GridId = Grid.Id AND Config.ColumnId = ColumnX.Id
 
 GO
 

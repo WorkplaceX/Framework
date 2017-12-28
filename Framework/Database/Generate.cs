@@ -127,6 +127,9 @@ namespace Database.dbo
         [SqlColumn("Id", typeof(FrameworkConfigColumn_Id))]
         public int Id { get; set; }
 
+        [SqlColumn("GridId", typeof(FrameworkConfigColumn_GridId))]
+        public int GridId { get; set; }
+
         [SqlColumn("ColumnId", typeof(FrameworkConfigColumn_ColumnId))]
         public int ColumnId { get; set; }
 
@@ -145,6 +148,8 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumn_Id : Cell<FrameworkConfigColumn> { }
 
+    public partial class FrameworkConfigColumn_GridId : Cell<FrameworkConfigColumn> { }
+
     public partial class FrameworkConfigColumn_ColumnId : Cell<FrameworkConfigColumn> { }
 
     public partial class FrameworkConfigColumn_Text : Cell<FrameworkConfigColumn> { }
@@ -158,6 +163,15 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkConfigColumnView")]
     public partial class FrameworkConfigColumnView : Row
     {
+        [SqlColumn("GridId", typeof(FrameworkConfigColumnView_GridId))]
+        public int GridId { get; set; }
+
+        [SqlColumn("GridName", typeof(FrameworkConfigColumnView_GridName))]
+        public string GridName { get; set; }
+
+        [SqlColumn("GridIsExist", typeof(FrameworkConfigColumnView_GridIsExist))]
+        public bool GridIsExist { get; set; }
+
         [SqlColumn("TableId", typeof(FrameworkConfigColumnView_TableId))]
         public int? TableId { get; set; }
 
@@ -171,7 +185,7 @@ namespace Database.dbo
         public bool? TableIsExist { get; set; }
 
         [SqlColumn("ColumnId", typeof(FrameworkConfigColumnView_ColumnId))]
-        public int ColumnId { get; set; }
+        public int? ColumnId { get; set; }
 
         [SqlColumn("ColumnNameCSharp", typeof(FrameworkConfigColumnView_ColumnNameCSharp))]
         public string ColumnNameCSharp { get; set; }
@@ -180,7 +194,7 @@ namespace Database.dbo
         public string ColumnNameSql { get; set; }
 
         [SqlColumn("ColumnIsExist", typeof(FrameworkConfigColumnView_ColumnIsExist))]
-        public bool ColumnIsExist { get; set; }
+        public bool? ColumnIsExist { get; set; }
 
         [SqlColumn("ConfigId", typeof(FrameworkConfigColumnView_ConfigId))]
         public int? ConfigId { get; set; }
@@ -197,6 +211,12 @@ namespace Database.dbo
         [SqlColumn("WidthPercent", typeof(FrameworkConfigColumnView_WidthPercent))]
         public double? WidthPercent { get; set; }
     }
+
+    public partial class FrameworkConfigColumnView_GridId : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_GridName : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_GridIsExist : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_TableId : Cell<FrameworkConfigColumnView> { }
 

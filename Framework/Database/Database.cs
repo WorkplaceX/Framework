@@ -111,7 +111,7 @@ namespace Database.dbo
     {
         protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
-            FrameworkConfigColumn config = UtilDataAccessLayer.Query<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            FrameworkConfigColumn config = UtilDataAccessLayer.Query<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).SingleOrDefault();
             if (config == null)
             {
                 config = new FrameworkConfigColumn();
@@ -124,7 +124,7 @@ namespace Database.dbo
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ColumnId == this.ColumnId).First(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.GridId == this.GridId && item.ColumnId == this.ColumnId).Single(), this); // Read back whole row to update ConfigId, if inserted.
         }
 
         protected internal override void MasterIsClick(App app, GridName gridNameMaster, Row rowMaster, ref bool isReload)
@@ -141,7 +141,7 @@ namespace Database.dbo
             var configTable = app.GridData.RowSelected(new GridName<FrameworkConfigGridView>());
             if (configTable != null)
             {
-                return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableNameCSharp == configTable.TableNameCSharp);
+                return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.GridId == configTable.GridId && item.TableNameCSharp == configTable.TableNameCSharp);
             }
             else
             {
