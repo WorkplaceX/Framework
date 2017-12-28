@@ -49,7 +49,7 @@ CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source c
 (
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
-	Name NVARCHAR(256) NOT NULL, -- This is FieldNameCSharp
+	Name NVARCHAR(256) NOT NULL, -- This is ColumnNameCSharp
 	IsExist BIT NOT NULL
 	INDEX IX_FrameworkConfigTable UNIQUE (TableId, Name)
 )

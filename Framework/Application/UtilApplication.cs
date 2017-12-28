@@ -337,7 +337,7 @@
         public DesignCssClass CssClass;
 
         /// <summary>
-        /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input field.
+        /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input cell.
         /// </summary>
         public string PlaceHolder;
     }
@@ -354,7 +354,7 @@
         private GridNameTypeRow gridName;
 
         /// <summary>
-        /// (FieldNameCSharp, Column).
+        /// (ColumnNameCSharp, Column).
         /// </summary>
         Dictionary<string, DesignColumn> designColumnList = new Dictionary<string, DesignColumn>();
 
@@ -367,26 +367,26 @@
             var columnList = UtilDataAccessLayer.ColumnList(gridName.TypeRow);
             foreach (Cell column in columnList)
             {
-                designColumnList[column.FieldNameCSharp] = new DesignColumn(column);
+                designColumnList[column.ColumnNameCSharp] = new DesignColumn(column);
             }
             // Config from Db
             List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(gridName.TypeRow);
             // IsVisible
             foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnName == designColumn.ColumnInternal.FieldNameCSharp).FirstOrDefault();
+                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnName == designColumn.ColumnInternal.ColumnNameCSharp).FirstOrDefault();
                 // IsVisible
-                bool isVisible = UtilApplication.ConfigFieldNameSqlIsId(designColumn.ColumnInternal.FieldNameSql) == false;
+                bool isVisible = UtilApplication.ConfigColumnNameSqlIsId(designColumn.ColumnInternal.ColumnNameSql) == false;
                 if (configColumn != null && configColumn.IsVisible != null)
                 {
                     isVisible = configColumn.IsVisible.Value;
                 }
                 designColumn.IsVisible = isVisible;
                 // Text
-                string text = designColumn.ColumnInternal.FieldNameSql;
+                string text = designColumn.ColumnInternal.ColumnNameSql;
                 if (text == null)
                 {
-                    text = designColumn.ColumnInternal.FieldNameCSharp; // Calculated column has no FieldNameSql.
+                    text = designColumn.ColumnInternal.ColumnNameCSharp; // Calculated column has no ColumnNameSql.
                 }
                 if (configColumn != null && configColumn.Text != null)
                 {
@@ -413,15 +413,15 @@
                 designColumn.DesignCell = new DesignCell();
             }
             //
-            foreach (string fieldNameCSharp in designColumnList.Keys)
+            foreach (string columnNameCSharp in designColumnList.Keys)
             {
-                DesignColumn designColumn = designColumnList[fieldNameCSharp];
+                DesignColumn designColumn = designColumnList[columnNameCSharp];
                 Cell cell = designColumn.ColumnInternal;
                 UtilFramework.Assert(cell.Row == null);
                 try
                 {
                     cell.Constructor(row); // Column to cell;
-                    designColumn.DesignCell.PlaceHolder = app.GridData.CellGet(gridName, index, fieldNameCSharp).PlaceHolder; // PlaceHolder loaded back from json request.
+                    designColumn.DesignCell.PlaceHolder = app.GridData.CellGet(gridName, index, columnNameCSharp).PlaceHolder; // PlaceHolder loaded back from json request.
                     if (designColumn.IsVisible)
                     {
                         app.DesignCell(gridName, index, cell, designColumn.DesignCell);
@@ -441,7 +441,7 @@
         internal DesignColumn ColumnGet(App app, GridNameTypeRow gridName, Cell column)
         {
             UtilFramework.Assert(this.App == app && this.gridName == gridName);
-            return designColumnList[column.FieldNameCSharp];
+            return designColumnList[column.ColumnNameCSharp];
         }
 
         /// <summary>
@@ -450,7 +450,7 @@
         internal DesignCell CellGet(App app, GridNameTypeRow gridName, Cell column)
         {
             UtilFramework.Assert(this.App == app && this.gridName == gridName);
-            return designColumnList[column.FieldNameCSharp].DesignCell;
+            return designColumnList[column.ColumnNameCSharp].DesignCell;
         }
     }
 
@@ -552,21 +552,21 @@
         /// <summary>
         /// Returns true, if column name contains "Id" according default naming convention.
         /// </summary>
-        public static bool ConfigFieldNameSqlIsId(string fieldNameSql)
+        public static bool ConfigColumnNameSqlIsId(string columnNameSql)
         {
             bool result = false;
-            if (fieldNameSql != null)
+            if (columnNameSql != null)
             {
                 int index = 0;
                 while (index != -1)
                 {
-                    index = fieldNameSql.IndexOf("Id", index);
+                    index = columnNameSql.IndexOf("Id", index);
                     if (index != -1)
                     {
                         index += "Id".Length;
-                        if (index < fieldNameSql.Length)
+                        if (index < columnNameSql.Length)
                         {
-                            string text = fieldNameSql.Substring(index, 1);
+                            string text = columnNameSql.Substring(index, 1);
                             if (text.ToUpper() == text)
                             {
                                 result = true;

@@ -24,7 +24,7 @@
 
     public class Filter
     {
-        public string FieldName;
+        public string ColumnName;
 
         public FilterOperator FilterOperator;
 
@@ -33,6 +33,11 @@
 
     public static class UtilDataAccessLayer
     {
+        internal static PropertyInfo[] TypeRowToPropertyList(Type typeRow)
+        {
+            return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance); // Exclude static GridName declarations.
+        }
+
         internal static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList)
         {
             string result = $"@P{ parameterList.Count }";
@@ -126,7 +131,7 @@
             if (typeRow != null)
             {
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-                foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
+                foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(typeRow))
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
                     string sqlColumnName = null;
@@ -177,7 +182,7 @@
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName);
                 bool isFirst = true;
-                foreach (PropertyInfo propertyInfo in typeRow.GetTypeInfo().GetProperties())
+                foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(typeRow))
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
                     if (columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
@@ -248,7 +253,7 @@
                     {
                         filterSql += " AND ";
                     }
-                    filterSql += filter.FieldName;
+                    filterSql += filter.ColumnName;
                     switch (filter.FilterOperator)
                     {
                         case FilterOperator.Equal:
@@ -273,7 +278,7 @@
             }
         }
 
-        internal static List<Row> Select(Type typeRow, List<Filter> filterList, string fieldNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
+        internal static List<Row> Select(Type typeRow, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
         {
             UtilFramework.LogDebug(string.Format("SELECT ({0})",  UtilDataAccessLayer.TypeRowToNameCSharp(typeRow)));
             //
@@ -281,9 +286,9 @@
             {
                 query = Query(typeRow);
             }
-            if (fieldNameOrderBy != null)
+            if (columnNameOrderBy != null)
             {
-                string ordering = fieldNameOrderBy;
+                string ordering = columnNameOrderBy;
                 if (isOrderByDesc)
                 {
                     ordering = ordering + " DESC";
@@ -389,7 +394,7 @@
 
         /// <summary>
         /// Read data from stored procedure or database table. Returns multiple result sets.
-        /// (ResultSet, Row, FieldName, Value).
+        /// (ResultSet, Row, ColumnName, Value).
         /// </summary>
         public static List<List<Dictionary<string, object>>> Execute(string sql, params SqlParameter[] paramList)
         {
@@ -411,9 +416,9 @@
                             rowList.Add(row);
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                string fieldName = reader.GetName(i);
+                                string columnName = reader.GetName(i);
                                 object value = reader.GetValue(i);
-                                row.Add(fieldName, value);
+                                row.Add(columnName, value);
                             }
                         }
                         reader.NextResult();
@@ -530,16 +535,16 @@
         }
 
         /// <summary>
-        /// Copy data row. Source and dest need not to be of same type. Only fields available on
+        /// Copy data row. Source and dest need not to be of same type. Only cells available on
         /// both records are copied. See also RowClone();
         /// </summary>
         internal static void RowCopy(Row rowSource, Row rowDest)
         {
-            var propertyInfoDestList = rowDest.GetType().GetProperties();
+            var propertyInfoDestList = UtilDataAccessLayer.TypeRowToPropertyList(rowDest.GetType());
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
             {
-                string fieldName = propertyInfoDest.Name;
-                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldName);
+                string columnName = propertyInfoDest.Name;
+                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(columnName);
                 if (propertyInfoSource != null)
                 {
                     object value = propertyInfoSource.GetValue(rowSource);

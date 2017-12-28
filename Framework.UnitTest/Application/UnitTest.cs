@@ -6,20 +6,20 @@
 
     public class UnitTest : UnitTestBase
     {
-        public void FieldNameIsId()
+        public void ColumnNameIsId()
         {
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("") == false);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("Id") == true);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("IdX") == true);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("IdId") == true);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("Iden") == false);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("") == false);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("Id") == true);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("IdX") == true);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("IdId") == true);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("Iden") == false);
             //
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("xId") == true);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("xIdX") == true);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("xIdId") == true);
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("xIden") == false);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("xId") == true);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("xIdX") == true);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("xIdId") == true);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("xIden") == false);
             //
-            UtilFramework.Assert(UtilApplication.ConfigFieldNameSqlIsId("Text") == false);
+            UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("Text") == false);
         }
 
         public void GridName()

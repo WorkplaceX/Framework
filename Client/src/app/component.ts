@@ -40,7 +40,7 @@ export class AppComponent {
 /*
   <p>
   json.SelectGridName=({{ dataService.json.GridDataJson?.SelectGridName }})<br />
-  json.SelectFieldName=({{ dataService.json.GridDataJson?.SelectFieldName }})<br />
+  json.SelectColumnName=({{ dataService.json.GridDataJson?.SelectColumnName }})<br />
   json.SelectIndex=({{ dataService.json.GridDataJson?.SelectIndex }})<br />
   </p>
 
@@ -84,7 +84,7 @@ export class Selector {
     <div style="overflow: hidden">
       <div class="gridFieldWithLabelLeft">{{json.Text}}</div>
       <div class="gridFieldWithLabelRight">
-        <div data-GridField [gridName]=json.GridName [fieldName]=json.FieldName [index]=json.Index></div>
+        <div data-GridField [gridName]=json.GridName [columnName]=json.ColumnName [index]=json.Index></div>
       </div>
     </div>
   </div>  
@@ -292,8 +292,8 @@ export class GridRow {
 @Component({
   selector: '[data-GridCell]',
   template: `
-  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].IsSelect}">
-    <div data-GridField [gridName]=jsonGrid.GridName [fieldName]=json.FieldName [index]=jsonRow.Index></div>
+  <div (click)="click($event)" class="gridCell" [ngClass]="{'select-class':jsonGridDataJson.CellList[jsonGrid.GridName][json.ColumnName][jsonRow.Index].IsSelect}">
+    <div data-GridField [gridName]=jsonGrid.GridName [columnName]=json.ColumnName [index]=jsonRow.Index></div>
   </div>
   `,
   host: {
@@ -303,11 +303,11 @@ export class GridRow {
   }
 })
 //    <div style='margin-right:30px;text-overflow: ellipsis; overflow:hidden;'>
-//      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.FieldName][jsonRow.Index].T }}&nbsp;
+//      {{ jsonGridDataJson.CellList[jsonGrid.GridName][json.ColumnName][jsonRow.Index].T }}&nbsp;
 //      <img src='ArrowDown.png' style="width:12px;height:12px;top:8px;position:absolute;right:7px;"/>
 //    </div>
 export class GridCell {
-  @Input() json: any; // Column // Used for FieldName
+  @Input() json: any; // Column // Used for ColumnName
   @Input() jsonRow: any; // Used for Index
   @Input() jsonGrid: any; // Used for GridName
   @Input() jsonGridDataJson: any; // Used for Value
@@ -322,7 +322,7 @@ export class GridCell {
   }
 
   click(event: MouseEvent){
-    let gridCell = this.jsonGridDataJson.CellList[this.jsonGrid.GridName][this.json.FieldName][this.jsonRow.Index];
+    let gridCell = this.jsonGridDataJson.CellList[this.jsonGrid.GridName][this.json.ColumnName][this.jsonRow.Index];
     if (gridCell.IsClick != true && gridCell.IsSelect != true) { 
       // IsClick might have been set by GridField focus. If IsSelect is already set, do not post.
       gridCell.IsClick = true;
@@ -439,7 +439,7 @@ export class RemoveSelectorDirective {
   `
 })
 // {{focusId + "; " + gridCell().FocusId + "; " + gridCell().FocusIdRequest }}
-// <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusGridName==gridName && dataService.json.GridDataJson.FocusFieldName == fieldName && dataService.json.GridDataJson.FocusIndex==index" placeholder="{{ gridCell().PlaceHolder }}" />
+// <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusGridName==gridName && dataService.json.GridDataJson.FocusColumnName == columnName && dataService.json.GridDataJson.FocusIndex==index" placeholder="{{ gridCell().PlaceHolder }}" />
 export class GridField {
   constructor(dataService: DataService){
     this.dataService = dataService;
@@ -450,7 +450,7 @@ export class GridField {
 
   dataService: DataService;
   @Input() gridName: any;
-  @Input() fieldName: any;
+  @Input() columnName: any;
   @Input() index: any;
   @ViewChild('inputElement') el:ElementRef;
   focusId: number;
@@ -458,17 +458,17 @@ export class GridField {
   point() {
     let gridData: any = this.dataService.json.GridDataJson;
     let gridName: string;
-    let fieldName: string;
+    let columnName: string;
     let index: string;
     gridName = this.gridName;
-    fieldName = this.fieldName;
+    columnName = this.columnName;
     index = this.index;
     if (gridName == null) {
         gridName = gridData.SelectGridName;
-        fieldName = gridData.SelectFieldName;
+        columnName = gridData.SelectColumnName;
         index = gridData.SelectIndex;
     }
-    return { gridData: gridData, gridName: gridName, fieldName: fieldName, index: index }; // GridName can be null if none is selected.
+    return { gridData: gridData, gridName: gridName, columnName: columnName, index: index }; // GridName can be null if none is selected.
   }
 
   focus(event: FocusEvent, value: boolean) {
@@ -487,7 +487,7 @@ export class GridField {
     let result : any = null;
     let point = this.point();
     if (point.gridName != null && point.gridData.CellList[point.gridName] != null) { // GridName can be null if none is selected or GridName might not exist.
-      result = point.gridData.CellList[point.gridName][point.fieldName][point.index];
+      result = point.gridData.CellList[point.gridName][point.columnName][point.index];
     }
     if (result == null) {
       result = {};
@@ -532,7 +532,7 @@ export class GridField {
     let point = this.point();
     if (point.gridName != null && point.gridData.ColumnList[point.gridName]) { // GridName can be null if none is selected. Or GridName might not exist.
       for (let column of point.gridData.ColumnList[point.gridName]) {
-        if (column.FieldName == point.fieldName) {
+        if (column.ColumnName == point.columnName) {
           isUpdate = column.IsUpdate;
           isUpdate = true; // Always post back.
           break;
@@ -624,13 +624,13 @@ export class GridKeyboard {
     // GridName
     for (let keyGridQuery in gridData.GridQueryList) {
       let gridName = gridData.GridQueryList[keyGridQuery].GridName;
-      // FieldName
+      // ColumnName
       for (let keyColumn in gridData.ColumnList[gridName]) {
-        let fieldName = gridData.ColumnList[gridName][keyColumn].FieldName;
+        let columnName = gridData.ColumnList[gridName][keyColumn].ColumnName;
         // Index
         for (let keyRow in gridData.RowList[gridName]) {
           let index = gridData.RowList[gridName][keyRow].Index;
-          gridData.CellList[gridName][fieldName][index].IsSelect = gridData.SelectGridName == gridName && gridData.SelectFieldName == fieldName && gridData.SelectIndex == index;
+          gridData.CellList[gridName][columnName][index].IsSelect = gridData.SelectGridName == gridName && gridData.SelectColumnName == columnName && gridData.SelectIndex == index;
         }
       }
     }
@@ -642,13 +642,13 @@ export class GridKeyboard {
     if (gridData.SelectGridName != null) {
       // Tab
       if (event.keyCode == 9 && event.shiftKey == false) { 
-        gridData.SelectFieldName = this.next(gridData.ColumnList[gridData.SelectGridName].filter(item => item.IsVisible == true), gridData.SelectFieldName, "FieldName").Next;
+        gridData.SelectColumnName = this.next(gridData.ColumnList[gridData.SelectGridName].filter(item => item.IsVisible == true), gridData.SelectColumnName, "ColumnName").Next;
         this.select();
         event.preventDefault();
       }
       // Tab back
       if (event.keyCode == 9 && event.shiftKey == true) {
-        gridData.SelectFieldName = this.next(gridData.ColumnList[gridData.SelectGridName].filter(item => item.IsVisible == true), gridData.SelectFieldName, "FieldName").Previous;
+        gridData.SelectColumnName = this.next(gridData.ColumnList[gridData.SelectGridName].filter(item => item.IsVisible == true), gridData.SelectColumnName, "ColumnName").Previous;
         this.select();
         event.preventDefault();
       }

@@ -34,24 +34,24 @@
             foreach (string tableName in tableNameList)
             {
                 string tableNameCSharp = UtilGenerate.NameCSharp(tableName, nameExceptList);
-                FieldName(dataList, schemaName, schemaNameCSharp, tableName, tableNameCSharp);
+                ColumnName(dataList, schemaName, schemaNameCSharp, tableName, tableNameCSharp);
             }
         }
 
-        private void FieldName(MetaSqlSchema[] dataList, string schemaName, string schemaNameCSharp, string tableName, string tableNameCSharp)
+        private void ColumnName(MetaSqlSchema[] dataList, string schemaName, string schemaNameCSharp, string tableName, string tableNameCSharp)
         {
-            MetaSqlSchema[] fieldList = dataList.Where(item => item.SchemaName == schemaName && item.TableName == tableName).ToArray();
+            MetaSqlSchema[] columnList = dataList.Where(item => item.SchemaName == schemaName && item.TableName == tableName).ToArray();
             List<string> nameExceptList = new List<string>();
             nameExceptList.Add(tableName); // CSharp propery can not have same name like class.
-            foreach (MetaSqlSchema field in fieldList)
+            foreach (MetaSqlSchema column in columnList)
             {
-                string fieldNameCSharp = UtilGenerate.NameCSharp(field.FieldName, nameExceptList);
+                string columnNameCSharp = UtilGenerate.NameCSharp(column.ColumnName, nameExceptList);
                 List.Add(new MetaCSharpSchema()
                 {
-                    Schema = field,
+                    Schema = column,
                     SchemaNameCSharp = schemaNameCSharp,
                     TableNameCSharp = tableNameCSharp,
-                    FieldNameCSharp = fieldNameCSharp,
+                    ColumnNameCSharp = columnNameCSharp,
                 });
             }
         }
@@ -67,6 +67,6 @@
 
         public string TableNameCSharp { get; set; }
 
-        public string FieldNameCSharp { get; set; }
+        public string ColumnNameCSharp { get; set; }
     }
 }

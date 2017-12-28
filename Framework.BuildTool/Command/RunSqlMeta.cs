@@ -184,7 +184,7 @@
             //
             foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                foreach (PropertyInfo propertyInfo in typeRow.GetProperties(BindingFlags.Static | BindingFlags.Public)) // Static declared property on class Row.
+                foreach (PropertyInfo propertyInfo in typeRow.GetProperties(BindingFlags.Static | BindingFlags.Public)) // Static declared GridName property on class Row.
                 {
                     if (UtilFramework.IsSubclassOf(typeof(GridName), propertyInfo.PropertyType))
                     {
@@ -236,7 +236,7 @@
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
                     string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
-                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableName, '{1}' AS ColumnName)", tableNameCSharp, column.FieldNameCSharp));
+                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableName, '{1}' AS ColumnName)", tableNameCSharp, column.ColumnNameCSharp));
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());

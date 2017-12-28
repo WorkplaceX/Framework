@@ -70,9 +70,9 @@
 
         public string TableName { get; set; }
 
-        public string FieldName { get; set; }
+        public string ColumnName { get; set; }
 
-        public int FieldNameSort { get; set; }
+        public int ColumnNameSort { get; set; }
 
         public bool IsView { get; set; }
 

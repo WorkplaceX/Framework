@@ -90,7 +90,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellTextParse(App app, GridName gridName, Index index, string fieldName, string text)
+        protected internal override void CellTextParse(App app, GridName gridName, Index index, string columnName, string text)
         {
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
             if (applicationType == null)
@@ -101,7 +101,7 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override void CellLookup(App app, GridName gridName, Index index, string fieldName, out IQueryable query)
+        protected internal override void CellLookup(App app, GridName gridName, Index index, string columnName, out IQueryable query)
         {
             query = UtilDataAccessLayer.Query<FrameworkApplicationType>();
         }

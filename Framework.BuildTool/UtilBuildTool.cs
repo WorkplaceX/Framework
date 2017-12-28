@@ -69,9 +69,9 @@
                         result.Add(row);
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            string fieldName = reader.GetName(i);
+                            string columnName = reader.GetName(i);
                             object value = reader.GetValue(i);
-                            row.Add(fieldName, value);
+                            row.Add(columnName, value);
                         }
                     }
                 }

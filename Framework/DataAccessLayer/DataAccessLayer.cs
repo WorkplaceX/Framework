@@ -60,20 +60,20 @@
     }
 
     /// <summary>
-    /// Base class for every database field.
+    /// Base class for every database cell.
     /// </summary>
     public class Cell
     {
         /// <summary>
         /// Constructor for column.
         /// </summary>
-        internal void Constructor(string tableNameSql, string fieldNameSql, string fieldNameCSharp, Type typeRow, Type typeField, PropertyInfo propertyInfo)
+        internal void Constructor(string tableNameSql, string columnNameSql, string columnNameCSharp, Type typeRow, Type typeColumn, PropertyInfo propertyInfo)
         {
             this.TableNameSql = tableNameSql;
-            this.FieldNameSql = fieldNameSql;
-            this.FieldNameCSharp = fieldNameCSharp;
+            this.ColumnNameSql = columnNameSql;
+            this.ColumnNameCSharp = columnNameCSharp;
             this.TypeRow = typeRow;
-            this.TypeField = typeField;
+            this.TypeColumn = typeColumn;
             this.PropertyInfo = propertyInfo;
         }
 
@@ -93,14 +93,14 @@
 
 
         /// <summary>
-        /// Gets sql FieldName. If null, then it's a calculated column.
+        /// Gets sql ColumnName. If null, then it's a calculated column.
         /// </summary>
-        public string FieldNameSql { get; private set; }
+        public string ColumnNameSql { get; private set; }
 
         /// <summary>
-        /// Gets CSharp FieldName.
+        /// Gets CSharp ColumnName.
         /// </summary>
-        public string FieldNameCSharp { get; private set; }
+        public string ColumnNameCSharp { get; private set; }
 
         /// <summary>
         /// Gets TypeRow.
@@ -108,9 +108,9 @@
         public Type TypeRow { get; private set; }
 
         /// <summary>
-        /// Gets TypeField.
+        /// Gets TypeColumn.
         /// </summary>
-        public Type TypeField { get; private set; }
+        public Type TypeColumn { get; private set; }
 
         internal PropertyInfo PropertyInfo { get; private set; }
 
@@ -132,10 +132,10 @@
         /// <summary>
         /// Parse user entered text.
         /// </summary>
-        protected virtual internal void CellTextParse(App app, GridName gridName, Index index, string fieldName, string text)
+        protected virtual internal void CellTextParse(App app, GridName gridName, Index index, string columnName, string text)
         {
-            object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(fieldName).PropertyType); // Default parse text.
-            Row.GetType().GetProperty(fieldName).SetValue(Row, value);
+            object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(columnName).PropertyType); // Default parse text.
+            Row.GetType().GetProperty(columnName).SetValue(Row, value);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@
         /// Values user can select from lookup list.
         /// </summary>
         /// <param name="query">Database query or in-memeory list.</param>
-        protected virtual internal void CellLookup(App app, GridName gridName, Index index, string fieldName, out IQueryable query)
+        protected virtual internal void CellLookup(App app, GridName gridName, Index index, string columnName, out IQueryable query)
         {
             query = null;
         }
@@ -174,16 +174,16 @@
         /// <param name="gridName">Grid with open lookup.</param>
         /// <param name="index">Row with open lookup.</param>
         /// <param name="rowLookup">LoowUp row which has been clicked.</param>
-        /// <param name="fieldNameLookup">Field which has been clicked.</param>
-        protected virtual internal void CellLookupIsClick(App app, GridName gridName, Index index, string fieldName, Row rowLookup, string fieldNameLookup, string text)
+        /// <param name="columnNameLookup">Cell which has been clicked.</param>
+        protected virtual internal void CellLookupIsClick(App app, GridName gridName, Index index, string columnName, Row rowLookup, string columnNameLookup, string text)
         {
-            CellTextParse(app, gridName, index, fieldName, text);
+            CellTextParse(app, gridName, index, columnName, text);
         }
 
         /// <summary>
         /// Override this method to handle button click event. For example delete button.
         /// </summary>
-        protected virtual internal void CellButtonIsClick(App app, GridName gridName, Index index, Row row, string fieldName, ref bool isReload)
+        protected virtual internal void CellButtonIsClick(App app, GridName gridName, Index index, Row row, string columnName, ref bool isReload)
         {
 
         }
@@ -210,7 +210,7 @@
     }
 
     /// <summary>
-    /// Base class for every database field.
+    /// Base class for every database cell.
     /// </summary>
     public class Cell<TRow> : Cell
     {

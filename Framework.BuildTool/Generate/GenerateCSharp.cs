@@ -64,21 +64,21 @@
                 result.AppendLine(string.Format("    [SqlTable(\"{0}\", \"{1}\")]", item.SchemaName, item.TableName));
                 result.AppendLine(string.Format("    public partial class {0} : Row", item.TableNameCSharp));
                 result.AppendLine("    {");
-                FieldNameProperty(metaCSharp, schemaName, item.TableName, result);
+                ColumnNameProperty(metaCSharp, schemaName, item.TableName, result);
                 result.AppendLine("    }");
                 result.AppendLine();
-                FieldNameClass(metaCSharp, schemaName, item.TableName, result);
+                ColumnNameClass(metaCSharp, schemaName, item.TableName, result);
             }
         }
 
         /// <summary>
-        /// Generate CSharp property for every database field.
+        /// Generate CSharp property for every database column.
         /// </summary>
-        private static void FieldNameProperty(MetaCSharp metaCSharp, string schemaName, string tableName, StringBuilder result)
+        private static void ColumnNameProperty(MetaCSharp metaCSharp, string schemaName, string tableName, StringBuilder result)
         {
-            var fieldNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName && item.Schema.TableName == tableName).ToArray();
+            var columnNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName && item.Schema.TableName == tableName).ToArray();
             bool isFirst = true;
-            foreach (var item in fieldNameList)
+            foreach (var item in columnNameList)
             {
                 if (isFirst)
                 {
@@ -89,19 +89,19 @@
                     result.AppendLine();
                 }
                 string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
-                result.AppendLine(string.Format("        [SqlColumn(\"{0}\", typeof({1}))]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp));
-                result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.FieldNameCSharp));
+                result.AppendLine(string.Format("        [SqlColumn(\"{0}\", typeof({1}))]", item.Schema.ColumnName, item.TableNameCSharp + "_" + item.ColumnNameCSharp));
+                result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.ColumnNameCSharp));
             }
         }
 
         /// <summary>
-        /// Generate CSharp class for every database field.
+        /// Generate CSharp class for every database column.
         /// </summary>
-        private static void FieldNameClass(MetaCSharp metaCSharp, string schemaName, string tableName, StringBuilder result)
+        private static void ColumnNameClass(MetaCSharp metaCSharp, string schemaName, string tableName, StringBuilder result)
         {
-            var fieldNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName && item.Schema.TableName == tableName).ToArray();
+            var columnNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName && item.Schema.TableName == tableName).ToArray();
             bool isFirst = true;
-            foreach (var item in fieldNameList)
+            foreach (var item in columnNameList)
             {
                 if (isFirst)
                 {
@@ -112,7 +112,7 @@
                     result.AppendLine();
                 }
                 string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
-                result.AppendLine("    public partial class " + item.TableNameCSharp + "_" + item.FieldNameCSharp + " : Cell<" + item.TableNameCSharp + "> { }");
+                result.AppendLine("    public partial class " + item.TableNameCSharp + "_" + item.ColumnNameCSharp + " : Cell<" + item.TableNameCSharp + "> { }");
             }
         }
 

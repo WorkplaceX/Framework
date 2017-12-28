@@ -180,19 +180,19 @@
     {
         public GridFieldWithLabel() { }
 
-        public GridFieldWithLabel(Component owner, string text, GridName gridName, string fieldName)
+        public GridFieldWithLabel(Component owner, string text, GridName gridName, string columnName)
             : base(owner)
         {
             this.Text = text;
             this.GridName = Framework.Application.GridName.ToJson(gridName);
-            this.FieldName = fieldName;
+            this.ColumnName = columnName;
         }
 
         public string Text;
 
         public readonly string GridName;
 
-        public string FieldName;
+        public string ColumnName;
 
         public string Index;
     }
@@ -218,7 +218,7 @@
         public Dictionary<string, List<GridColumn>> ColumnList;
 
         /// <summary>
-        /// (GridName, FieldName, Index(Filter, 0..99, New, Total), GridCell)
+        /// (GridName, ColumnName, Index(Filter, 0..99, New, Total), GridCell)
         /// </summary>
         public Dictionary<string, Dictionary<string, Dictionary<string, GridCell>>> CellList;
 
@@ -235,7 +235,7 @@
         /// <summary>
         /// Selected grid cell.
         /// </summary>
-        public string SelectFieldName;
+        public string SelectColumnName;
 
         /// <summary>
         /// Selected grid cell. Before select has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
@@ -250,7 +250,7 @@
         /// <summary>
         /// Selected grid cell. Before select has been updated based on IsClick. Used internaly for Lookup. Never sent to client.
         /// </summary>
-        public string SelectFieldNamePrevious;
+        public string SelectColumnNamePrevious;
     }
 
     public enum GridCellEnum
@@ -333,7 +333,7 @@
         public string CssClass;
 
         /// <summary>
-        /// Gets or sets PlaceHolder. Text shown in field, if no entry.
+        /// Gets or sets PlaceHolder. Text shown in cell, if no entry.
         /// </summary>
         public string PlaceHolder;
     }
@@ -343,7 +343,7 @@
     /// </summary>
     public class GridColumn
     {
-        public string FieldName;
+        public string ColumnName;
 
         public string Text;
 
@@ -407,7 +407,7 @@
 
         public string TypeRow;
 
-        public string FieldNameOrderBy;
+        public string ColumnNameOrderBy;
 
         public bool IsOrderByDesc;
 
