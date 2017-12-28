@@ -444,7 +444,7 @@
                 if (query != null)
                 {
                     typeRow = query.ElementType;
-                    UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row))); // Query needs to return Row list! Define Row type in memory namespace.
+                    UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row))); // Query needs to return Row list! Define Row type in memory (Database.Memory) namespace.
                     rowList = query.Take(10).Cast<Row>().ToList();
                 }
                 bool isLoadRow = gridData.LoadRow(new GridNameTypeRow(typeRow, UtilApplication.GridNameLookup), rowList);

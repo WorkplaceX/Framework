@@ -141,7 +141,7 @@ namespace Database.dbo
             var configTable = app.GridData.RowSelected(new GridName<FrameworkConfigTableView>());
             if (configTable != null)
             {
-                return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableName == configTable.TableName);
+                return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableNameCSharp == configTable.TableNameCSharp);
             }
             else
             {

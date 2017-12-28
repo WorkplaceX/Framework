@@ -156,8 +156,11 @@ namespace Database.dbo
         [SqlColumn("TableId", typeof(FrameworkConfigColumnView_TableId))]
         public int? TableId { get; set; }
 
-        [SqlColumn("TableName", typeof(FrameworkConfigColumnView_TableName))]
-        public string TableName { get; set; }
+        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigColumnView_TableNameCSharp))]
+        public string TableNameCSharp { get; set; }
+
+        [SqlColumn("TableNameSql", typeof(FrameworkConfigColumnView_TableNameSql))]
+        public string TableNameSql { get; set; }
 
         [SqlColumn("TableIsExist", typeof(FrameworkConfigColumnView_TableIsExist))]
         public bool? TableIsExist { get; set; }
@@ -189,7 +192,9 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_TableId : Cell<FrameworkConfigColumnView> { }
 
-    public partial class FrameworkConfigColumnView_TableName : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnView_TableNameCSharp : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_TableNameSql : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_TableIsExist : Cell<FrameworkConfigColumnView> { }
 
@@ -239,8 +244,11 @@ namespace Database.dbo
         [SqlColumn("TableId", typeof(FrameworkConfigTableView_TableId))]
         public int TableId { get; set; }
 
-        [SqlColumn("TableName", typeof(FrameworkConfigTableView_TableName))]
-        public string TableName { get; set; }
+        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigTableView_TableNameCSharp))]
+        public string TableNameCSharp { get; set; }
+
+        [SqlColumn("TableNameSql", typeof(FrameworkConfigTableView_TableNameSql))]
+        public string TableNameSql { get; set; }
 
         [SqlColumn("TableIsExist", typeof(FrameworkConfigTableView_TableIsExist))]
         public bool TableIsExist { get; set; }
@@ -257,7 +265,9 @@ namespace Database.dbo
 
     public partial class FrameworkConfigTableView_TableId : Cell<FrameworkConfigTableView> { }
 
-    public partial class FrameworkConfigTableView_TableName : Cell<FrameworkConfigTableView> { }
+    public partial class FrameworkConfigTableView_TableNameCSharp : Cell<FrameworkConfigTableView> { }
+
+    public partial class FrameworkConfigTableView_TableNameSql : Cell<FrameworkConfigTableView> { }
 
     public partial class FrameworkConfigTableView_TableIsExist : Cell<FrameworkConfigTableView> { }
 
@@ -310,8 +320,8 @@ namespace Database.dbo
         [SqlColumn("TableId", typeof(FrameworkGrid_TableId))]
         public int TableId { get; set; }
 
-        [SqlColumn("Name", typeof(FrameworkGrid_Name))]
-        public string Name { get; set; }
+        [SqlColumn("GridName", typeof(FrameworkGrid_GridName))]
+        public string GridName { get; set; }
 
         [SqlColumn("IsExist", typeof(FrameworkGrid_IsExist))]
         public bool IsExist { get; set; }
@@ -321,7 +331,7 @@ namespace Database.dbo
 
     public partial class FrameworkGrid_TableId : Cell<FrameworkGrid> { }
 
-    public partial class FrameworkGrid_Name : Cell<FrameworkGrid> { }
+    public partial class FrameworkGrid_GridName : Cell<FrameworkGrid> { }
 
     public partial class FrameworkGrid_IsExist : Cell<FrameworkGrid> { }
 
@@ -374,8 +384,11 @@ namespace Database.dbo
         [SqlColumn("Id", typeof(FrameworkTable_Id))]
         public int Id { get; set; }
 
-        [SqlColumn("Name", typeof(FrameworkTable_Name))]
-        public string Name { get; set; }
+        [SqlColumn("TableNameCSharp", typeof(FrameworkTable_TableNameCSharp))]
+        public string TableNameCSharp { get; set; }
+
+        [SqlColumn("TableNameSql", typeof(FrameworkTable_TableNameSql))]
+        public string TableNameSql { get; set; }
 
         [SqlColumn("IsExist", typeof(FrameworkTable_IsExist))]
         public bool IsExist { get; set; }
@@ -383,7 +396,9 @@ namespace Database.dbo
 
     public partial class FrameworkTable_Id : Cell<FrameworkTable> { }
 
-    public partial class FrameworkTable_Name : Cell<FrameworkTable> { }
+    public partial class FrameworkTable_TableNameCSharp : Cell<FrameworkTable> { }
+
+    public partial class FrameworkTable_TableNameSql : Cell<FrameworkTable> { }
 
     public partial class FrameworkTable_IsExist : Cell<FrameworkTable> { }
 }

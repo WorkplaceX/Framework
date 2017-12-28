@@ -121,7 +121,7 @@
         public WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
 
         /// <summary>
-        /// Returns value from ASP.NET in-memory cache.
+        /// Returns value from ASP.NET memory cache.
         /// </summary>
         /// <param name="valueSet">Function to create value, if it doesn't exist.</param>
         internal TValue MemoryCacheValueGet<TValue>(object key, Func<TValue> valueSet)
@@ -147,15 +147,15 @@
         protected virtual internal List<FrameworkConfigColumnView> DbConfigColumnList(Type typeRow)
         {
             List<FrameworkConfigColumnView> result;
-            string typeRowName = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
-            if (cacheDbConfigColumnList.ContainsKey(typeRowName))
+            string typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+            if (cacheDbConfigColumnList.ContainsKey(typeRowNameCSharp))
             {
-                result = cacheDbConfigColumnList[typeRowName];
+                result = cacheDbConfigColumnList[typeRowNameCSharp];
             }
             else
             {
-                result = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableName == typeRowName & item.TableIsExist == true & item.ColumnIsExist == true).ToList();
-                cacheDbConfigColumnList[typeRowName] = result;
+                result = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableNameCSharp == typeRowNameCSharp & item.TableIsExist == true & item.ColumnIsExist == true).ToList();
+                cacheDbConfigColumnList[typeRowNameCSharp] = result;
             }
             return result;
         }

@@ -41,7 +41,8 @@ CREATE TABLE FrameworkSession
 CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	Name NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToNameCSharp(); This is TableNameCSharp
+	TableNameCSharp NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToNameCSharp();
+	TableNameSql NVARCHAR(256), -- Can be null for memory rows.
 	IsExist BIT NOT NULL
 )
 
@@ -88,7 +89,8 @@ GO
 CREATE VIEW FrameworkConfigTableView AS
 SELECT
 	TableX.Id AS TableId,
-	TableX.Name AS TableName,
+	TableX.TableNameCSharp,
+	TableX.TableNameSql,
 	TableX.IsExist AS TableIsExist,
 	Config.Id AS ConfigId,
 	Config.PageRowCount,
@@ -105,7 +107,8 @@ GO
 CREATE VIEW FrameworkConfigColumnView AS
 SELECT
 	TableX.Id AS TableId,
-	TableX.Name AS TableName, -- TableNameCSharp
+	TableX.TableNameCSharp,
+	TableX.TableNameSql,
 	TableX.IsExist AS TableIsExist,
 	ColumnX.Id AS ColumnId,
 	ColumnX.Name AS ColumnName, -- ColumnNameCSharp
