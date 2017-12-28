@@ -67,9 +67,9 @@
         /// <summary>
         /// Constructor for column.
         /// </summary>
-        internal void Constructor(string tableNameSql, string columnNameSql, string columnNameCSharp, Type typeRow, Type typeColumn, PropertyInfo propertyInfo)
+        internal void Constructor(string tableNameCSharp, string columnNameSql, string columnNameCSharp, Type typeRow, Type typeColumn, PropertyInfo propertyInfo)
         {
-            this.TableNameSql = tableNameSql;
+            this.TableNameCSharp = tableNameCSharp;
             this.ColumnNameSql = columnNameSql;
             this.ColumnNameCSharp = columnNameCSharp;
             this.TypeRow = typeRow;
@@ -89,7 +89,7 @@
         /// <summary>
         /// Gets sql TableName.
         /// </summary>
-        public string TableNameSql { get; private set; }
+        public string TableNameCSharp { get; private set; }
 
 
         /// <summary>

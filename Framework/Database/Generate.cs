@@ -101,8 +101,11 @@ namespace Database.dbo
         [SqlColumn("TableId", typeof(FrameworkColumn_TableId))]
         public int TableId { get; set; }
 
-        [SqlColumn("Name", typeof(FrameworkColumn_Name))]
-        public string Name { get; set; }
+        [SqlColumn("ColumnNameCSharp", typeof(FrameworkColumn_ColumnNameCSharp))]
+        public string ColumnNameCSharp { get; set; }
+
+        [SqlColumn("ColumnNameSql", typeof(FrameworkColumn_ColumnNameSql))]
+        public string ColumnNameSql { get; set; }
 
         [SqlColumn("IsExist", typeof(FrameworkColumn_IsExist))]
         public bool IsExist { get; set; }
@@ -112,7 +115,9 @@ namespace Database.dbo
 
     public partial class FrameworkColumn_TableId : Cell<FrameworkColumn> { }
 
-    public partial class FrameworkColumn_Name : Cell<FrameworkColumn> { }
+    public partial class FrameworkColumn_ColumnNameCSharp : Cell<FrameworkColumn> { }
+
+    public partial class FrameworkColumn_ColumnNameSql : Cell<FrameworkColumn> { }
 
     public partial class FrameworkColumn_IsExist : Cell<FrameworkColumn> { }
 
@@ -168,8 +173,11 @@ namespace Database.dbo
         [SqlColumn("ColumnId", typeof(FrameworkConfigColumnView_ColumnId))]
         public int ColumnId { get; set; }
 
-        [SqlColumn("ColumnName", typeof(FrameworkConfigColumnView_ColumnName))]
-        public string ColumnName { get; set; }
+        [SqlColumn("ColumnNameCSharp", typeof(FrameworkConfigColumnView_ColumnNameCSharp))]
+        public string ColumnNameCSharp { get; set; }
+
+        [SqlColumn("ColumnNameSql", typeof(FrameworkConfigColumnView_ColumnNameSql))]
+        public string ColumnNameSql { get; set; }
 
         [SqlColumn("ColumnIsExist", typeof(FrameworkConfigColumnView_ColumnIsExist))]
         public bool ColumnIsExist { get; set; }
@@ -200,7 +208,9 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_ColumnId : Cell<FrameworkConfigColumnView> { }
 
-    public partial class FrameworkConfigColumnView_ColumnName : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnView_ColumnNameCSharp : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_ColumnNameSql : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_ColumnIsExist : Cell<FrameworkConfigColumnView> { }
 

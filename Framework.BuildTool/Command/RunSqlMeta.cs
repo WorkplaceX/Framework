@@ -132,9 +132,6 @@
             bool isFirst = true;
             foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
-                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-                string tableNameSql = string.Format("[{0}].[{1}]", tableAttribute.SqlSchemaName, tableAttribute.SqlTableName);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -143,7 +140,14 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, '{1}' AS TableNameSql", tableNameCSharp, tableNameSql));
+                string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                string tableNameSql = "NULL";
+                if (tableAttribute != null && (tableAttribute.SqlSchemaName != null || tableAttribute.SqlTableName != null))
+                {
+                    tableNameSql = string.Format("'[{0}].[{1}]'", tableAttribute.SqlSchemaName, tableAttribute.SqlTableName);
+                }
+                sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, {1} AS TableNameSql", tableNameCSharp, tableNameSql));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true);
@@ -214,14 +218,14 @@
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT (SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.TableNameCSharp = Source.TableNameCSharp), Source.ColumnName
+                    SELECT (SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.TableNameCSharp = Source.TableNameCSharp), Source.ColumnNameCSharp
                     EXCEPT
-                    SELECT Target.TableId, Target.Name)
+                    SELECT Target.TableId, Target.ColumnNameCSharp)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (TableId, Name, IsExist)
-	            VALUES ((SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.TableNameCSharp = Source.TableNameCSharp), Source.ColumnName, 1);
+	            INSERT (TableId, ColumnNameCSharp, ColumnNameSql, IsExist)
+	            VALUES ((SELECT TableX.Id AS TableId FROM FrameworkTable TableX WHERE TableX.TableNameCSharp = Source.TableNameCSharp), Source.ColumnNameCSharp, Source.ColumnNameSql, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
@@ -238,7 +242,9 @@
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
                     string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
-                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableNameCSharp, '{1}' AS ColumnName)", tableNameCSharp, column.ColumnNameCSharp));
+                    string columnNameCSharp = column.ColumnNameCSharp;
+                    string columnNameSql = column.ColumnNameSql == null ? "NULL" : string.Format("'[{0}]'", column.ColumnNameSql);
+                    sqlSelect.Append(string.Format("(SELECT '{0}' AS TableNameCSharp, '{1}' AS ColumnNameCSharp, {2} AS ColumnNameSql)", tableNameCSharp, columnNameCSharp, columnNameSql));
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());

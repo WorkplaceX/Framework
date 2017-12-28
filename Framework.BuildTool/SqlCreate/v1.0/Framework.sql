@@ -49,10 +49,11 @@ CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source co
 CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source code defined columns. Also calculated fields. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
-	Name NVARCHAR(256) NOT NULL, -- This is ColumnNameCSharp
+	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL ,
+	ColumnNameCSharp NVARCHAR(256) NOT NULL,
+	ColumnNameSql NVARCHAR(256), -- Can be null for calculated columns.
 	IsExist BIT NOT NULL
-	INDEX IX_FrameworkConfigTable UNIQUE (TableId, Name)
+	INDEX IX_FrameworkColumn UNIQUE (TableId, ColumnNameCSharp)
 )
 
 CREATE TABLE FrameworkGrid /* Used for configuration. Contains all in source code defined grids. (Static GridName) */
@@ -67,10 +68,9 @@ CREATE TABLE FrameworkGrid /* Used for configuration. Contains all in source cod
 CREATE TABLE FrameworkConfigTable
 (
 	Id INT PRIMARY KEY IDENTITY,
-	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL,
+	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL UNIQUE,
 	PageRowCount INT, /* Number of records to load on one page */
-	IsInsert BIT, /* Allow insert record */
-	INDEX IX_FrameworkConfigTable UNIQUE (TableId)
+	IsInsert BIT /* Allow insert record */
 )
 
 CREATE TABLE FrameworkConfigColumn
@@ -111,7 +111,8 @@ SELECT
 	TableX.TableNameSql,
 	TableX.IsExist AS TableIsExist,
 	ColumnX.Id AS ColumnId,
-	ColumnX.Name AS ColumnName, -- ColumnNameCSharp
+	ColumnX.ColumnNameCSharp,
+	ColumnX.ColumnNameSql,
 	ColumnX.IsExist AS ColumnIsExist,
 	Config.Id AS ConfigId,
 	Config.Text,

@@ -130,7 +130,7 @@
             List<Cell> result = new List<Cell>();
             if (typeRow != null)
             {
-                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                 foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(typeRow))
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
@@ -145,7 +145,7 @@
                         typeCell = columnAttribute.TypeCell;
                     }
                     Cell cell = (Cell)UtilFramework.TypeToObject(typeCell);
-                    cell.Constructor(tableAttribute?.SqlTableName, sqlColumnName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
+                    cell.Constructor(tableNameCSharp, sqlColumnName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
                     result.Add(cell);
                 }
             }

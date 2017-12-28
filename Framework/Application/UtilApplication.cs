@@ -374,7 +374,7 @@
             // IsVisible
             foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnName == designColumn.ColumnInternal.ColumnNameCSharp).FirstOrDefault();
+                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnNameCSharp == designColumn.ColumnInternal.ColumnNameCSharp).FirstOrDefault();
                 // IsVisible
                 bool isVisible = UtilApplication.ConfigColumnNameSqlIsId(designColumn.ColumnInternal.ColumnNameSql) == false;
                 if (configColumn != null && configColumn.IsVisible != null)
