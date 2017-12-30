@@ -110,6 +110,9 @@
             UtilFramework.Log("### Exit RunSqlApplicationType");
         }
 
+        /// <summary>
+        /// Populate and update table FrameworkTable.
+        /// </summary>
         private void RunSqlTable()
         {
             UtilFramework.Log("### Start RunSqlTable");
@@ -154,6 +157,9 @@
             UtilFramework.Log("### Exit RunSqlTable");
         }
 
+        /// <summary>
+        /// Populate and update table FrameworkGrid.
+        /// </summary>
         private void RunSqlGrid()
         {
             UtilFramework.Log("### Start RunSqlGrid");
@@ -206,9 +212,12 @@
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true);
-            UtilFramework.Log("### Exit RunSqlTable");
+            UtilFramework.Log("### Exit RunSqlGrid");
         }
 
+        /// <summary>
+        /// Populate and update table FrameworkColumn.
+        /// </summary>
         private void RunSqlColumn()
         {
             UtilFramework.Log("### Start RunSqlColumn");
@@ -252,11 +261,63 @@
             UtilFramework.Log("### Exit RunSqlColumn");
         }
 
+        /// <summary>
+        /// Populate and update table FrameworkConfigGrid.
+        /// </summary>
+        private void RunSqlConfigGrid()
+        {
+            UtilFramework.Log("### Start RunSqlConfigGrid");
+            string sqlUpsert = @"
+            MERGE INTO FrameworkConfigGrid AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT Source.GridId
+                    EXCEPT
+                    SELECT Target.GridId)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.PageRowCountDefault = Source.PageRowCount, Target.IsInsertDefault = Source.IsInsert
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (GridId, PageRowCountDefault, IsInsertDefault)
+	            VALUES (Source.GridId, Source.PageRowCount, IsInsert);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            {
+                foreach (ConfigGridAttribute config in typeRow.GetTypeInfo().GetCustomAttributes(typeof(ConfigGridAttribute)))
+                {
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        sqlSelect.Append(" UNION ALL\r\n");
+                    }
+                    string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                    sqlSelect.Append(string.Format(
+                        "SELECT (SELECT Config.GridId FROM FrameworkConfigGridView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp)) AS GridId, {2} AS PageRowCount, {3} AS IsInsert",
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.PageRowCount, SqlDbType.Int, parameterList),
+                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.IsInsert, SqlDbType.Bit, parameterList)));
+                }
+            }
+            if (isFirst == false)
+            {
+                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            }
+            UtilFramework.Log("### Exit RunSqlConfigGrid");
+        }
+
         public override void Run()
         {
             RunSqlTable();
             RunSqlColumn();
             RunSqlGrid();
+            RunSqlConfigGrid();
             RunSqlApplicationType();
             RunSqlApplication();
         }

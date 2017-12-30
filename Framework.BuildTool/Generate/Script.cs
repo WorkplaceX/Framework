@@ -1,5 +1,8 @@
 ﻿namespace Framework.BuildTool.DataAccessLayer
 {
+    using Database.dbo;
+    using Framework.DataAccessLayer;
+    using System.Linq;
     using System.Text;
 
     /// <summary>
@@ -15,8 +18,10 @@
         {
             MetaSql metaSql = new MetaSql(isFrameworkDb, appBuildTool);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
+            FrameworkConfigGridView[] configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.ConfigId != null).ToArray();
+            FrameworkConfigColumnView[] configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ConfigId != null).ToArray();
             string cSharp;
-            new CSharpGenerate(metaCSharp).Run(out cSharp);
+            new CSharpGenerate(metaCSharp).Run(configGridList, out cSharp);
             if (isFrameworkDb == false)
             {
                 UtilGenerate.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);

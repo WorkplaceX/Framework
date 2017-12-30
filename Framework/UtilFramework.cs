@@ -304,7 +304,7 @@
         /// <summary>
         /// Returns underlying tpye, if any.
         /// </summary>
-        internal static Type TypeUnderlying(Type type)
+        public static Type TypeUnderlying(Type type)
         {
             Type result = type;
             Type typeUnderlying = Nullable.GetUnderlyingType(type);

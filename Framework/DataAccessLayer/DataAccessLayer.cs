@@ -254,4 +254,71 @@
 
         public readonly Type TypeCell;
     }
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class ConfigGridAttribute : Attribute
+    {
+        public ConfigGridAttribute(string gridName, int pageRowCount, bool pageRowCountIsNull, bool isInsert, bool isInsertIsNull)
+        {
+            this.GridName = gridName;
+            this.pageRowCount = pageRowCount;
+            this.pageRowCountIsNull = pageRowCountIsNull;
+            this.isInsert = isInsert;
+            this.isInsertIsNull = isInsertIsNull;
+        }
+
+        public readonly string GridName;
+
+        private int pageRowCount;
+
+        private bool pageRowCountIsNull; // Because of error "Attribute constructor parameter 'pageRowCount' has type 'int?', which is not a valid attribute parameter type": See also: https://stackoverflow.com/questions/3192833/why-decimal-is-not-a-valid-attribute-parameter-type
+
+        public int? PageRowCount
+        {
+            get
+            {
+                if (pageRowCountIsNull)
+                {
+                    return null;
+                }
+                return pageRowCount;
+            }
+        }
+
+        private bool isInsert;
+
+        private bool isInsertIsNull;
+
+        public bool? IsInsert
+        {
+            get
+            {
+                if (isInsertIsNull)
+                {
+                    return null;
+                }
+                return isInsert;
+            }
+        }
+    }
+
+    public class ConfigColumnAttribute : Attribute
+    {
+        public ConfigColumnAttribute(string gridName, string text, string description, bool? isVisible, double? sort, double? widthPercent)
+        {
+            this.Text = text;
+        }
+
+        public readonly string GridName;
+
+        public readonly string Text;
+
+        public readonly string Description;
+
+        public readonly bool? IsVisible;
+
+        public readonly double? Sort;
+
+        public readonly double? WidthPercent;
+    }
 }

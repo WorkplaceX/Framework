@@ -136,6 +136,9 @@ namespace Database.dbo
         [SqlColumn("Text", typeof(FrameworkConfigColumn_Text))]
         public string Text { get; set; }
 
+        [SqlColumn("Description", typeof(FrameworkConfigColumn_Description))]
+        public string Description { get; set; }
+
         [SqlColumn("IsVisible", typeof(FrameworkConfigColumn_IsVisible))]
         public bool? IsVisible { get; set; }
 
@@ -153,6 +156,8 @@ namespace Database.dbo
     public partial class FrameworkConfigColumn_ColumnId : Cell<FrameworkConfigColumn> { }
 
     public partial class FrameworkConfigColumn_Text : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_Description : Cell<FrameworkConfigColumn> { }
 
     public partial class FrameworkConfigColumn_IsVisible : Cell<FrameworkConfigColumn> { }
 
@@ -202,6 +207,9 @@ namespace Database.dbo
         [SqlColumn("Text", typeof(FrameworkConfigColumnView_Text))]
         public string Text { get; set; }
 
+        [SqlColumn("Description", typeof(FrameworkConfigColumnView_Description))]
+        public string Description { get; set; }
+
         [SqlColumn("IsVisible", typeof(FrameworkConfigColumnView_IsVisible))]
         public bool? IsVisible { get; set; }
 
@@ -238,6 +246,8 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_Text : Cell<FrameworkConfigColumnView> { }
 
+    public partial class FrameworkConfigColumnView_Description : Cell<FrameworkConfigColumnView> { }
+
     public partial class FrameworkConfigColumnView_IsVisible : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_Sort : Cell<FrameworkConfigColumnView> { }
@@ -253,8 +263,14 @@ namespace Database.dbo
         [SqlColumn("GridId", typeof(FrameworkConfigGrid_GridId))]
         public int GridId { get; set; }
 
+        [SqlColumn("PageRowCountDefault", typeof(FrameworkConfigGrid_PageRowCountDefault))]
+        public int? PageRowCountDefault { get; set; }
+
         [SqlColumn("PageRowCount", typeof(FrameworkConfigGrid_PageRowCount))]
         public int? PageRowCount { get; set; }
+
+        [SqlColumn("IsInsertDefault", typeof(FrameworkConfigGrid_IsInsertDefault))]
+        public bool? IsInsertDefault { get; set; }
 
         [SqlColumn("IsInsert", typeof(FrameworkConfigGrid_IsInsert))]
         public bool? IsInsert { get; set; }
@@ -264,7 +280,11 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGrid_GridId : Cell<FrameworkConfigGrid> { }
 
+    public partial class FrameworkConfigGrid_PageRowCountDefault : Cell<FrameworkConfigGrid> { }
+
     public partial class FrameworkConfigGrid_PageRowCount : Cell<FrameworkConfigGrid> { }
+
+    public partial class FrameworkConfigGrid_IsInsertDefault : Cell<FrameworkConfigGrid> { }
 
     public partial class FrameworkConfigGrid_IsInsert : Cell<FrameworkConfigGrid> { }
 
@@ -295,8 +315,14 @@ namespace Database.dbo
         [SqlColumn("ConfigId", typeof(FrameworkConfigGridView_ConfigId))]
         public int? ConfigId { get; set; }
 
+        [SqlColumn("PageRowCountDefault", typeof(FrameworkConfigGridView_PageRowCountDefault))]
+        public int? PageRowCountDefault { get; set; }
+
         [SqlColumn("PageRowCount", typeof(FrameworkConfigGridView_PageRowCount))]
         public int? PageRowCount { get; set; }
+
+        [SqlColumn("IsInsertDefault", typeof(FrameworkConfigGridView_IsInsertDefault))]
+        public bool? IsInsertDefault { get; set; }
 
         [SqlColumn("IsInsert", typeof(FrameworkConfigGridView_IsInsert))]
         public bool? IsInsert { get; set; }
@@ -318,7 +344,11 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGridView_ConfigId : Cell<FrameworkConfigGridView> { }
 
+    public partial class FrameworkConfigGridView_PageRowCountDefault : Cell<FrameworkConfigGridView> { }
+
     public partial class FrameworkConfigGridView_PageRowCount : Cell<FrameworkConfigGridView> { }
+
+    public partial class FrameworkConfigGridView_IsInsertDefault : Cell<FrameworkConfigGridView> { }
 
     public partial class FrameworkConfigGridView_IsInsert : Cell<FrameworkConfigGridView> { }
 

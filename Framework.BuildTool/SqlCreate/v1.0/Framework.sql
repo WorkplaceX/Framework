@@ -69,8 +69,10 @@ CREATE TABLE FrameworkConfigGrid
 (
 	Id INT PRIMARY KEY IDENTITY,
 	GridId INT FOREIGN KEY REFERENCES FrameworkGrid(Id) NOT NULL UNIQUE,
+	PageRowCountDefault INT, /* Defined in CSharp code (Attribute). */
 	PageRowCount INT, /* Number of records to load on one page */
-	IsInsert BIT /* Allow insert record */
+	IsInsertDefault BIT, /* Defined in CSharp code (Attribute). */
+	IsInsert BIT, /* Allow insert record */
 )
 
 CREATE TABLE FrameworkConfigColumn
@@ -79,6 +81,7 @@ CREATE TABLE FrameworkConfigColumn
 	GridId INT FOREIGN KEY REFERENCES FrameworkGrid(Id) NOT NULL,
 	ColumnId INT FOREIGN KEY REFERENCES FrameworkColumn(Id) NOT NULL,
 	Text NVARCHAR(256), -- Column header text.
+	Description NVARCHAR(256), -- Column header text.
 	IsVisible BIT,
 	Sort FLOAT,
 	WidthPercent FLOAT,
@@ -97,7 +100,9 @@ SELECT
 	TableX.TableNameSql,
 	TableX.IsExist AS TableIsExist,
 	Config.Id AS ConfigId,
+	Config.PageRowCountDefault,
 	Config.PageRowCount,
+	Config.IsInsertDefault,
 	Config.IsInsert
 
 FROM
@@ -126,6 +131,7 @@ SELECT
 	ColumnX.IsExist AS ColumnIsExist,
 	Config.Id AS ConfigId,
 	Config.Text,
+	Config.Description,
 	Config.IsVisible,
 	Config.Sort,
 	Config.WidthPercent

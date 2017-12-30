@@ -154,7 +154,7 @@ namespace Database.dbo
     {
         protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
         {
-            var config = UtilDataAccessLayer.Query<FrameworkConfigGrid>().Where(item => item.Id == this.ConfigId).FirstOrDefault();
+            var config = UtilDataAccessLayer.Query<FrameworkConfigGrid>().Where(item => item.Id == this.ConfigId).SingleOrDefault();
             if (config == null)
             {
                 config = new FrameworkConfigGrid();
@@ -167,7 +167,7 @@ namespace Database.dbo
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.TableId == this.TableId).First(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.GridId == this.GridId && item.TableId == this.TableId).SingleOrDefault(), this);
         }
     }
 }
