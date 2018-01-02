@@ -75,7 +75,7 @@
             {
                 string valueString = (string)(object)value;
                 valueString = valueString.Replace("\"", @"\""");
-                result = string.Format("\"{0}\"", value);
+                result = string.Format("\"{0}\"", valueString);
             }
             return result;
         }

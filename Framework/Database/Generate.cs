@@ -88,6 +88,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type : Cell<FrameworkApplicationView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkApplicationView_IsExist : Cell<FrameworkApplicationView> { }
 
     public partial class FrameworkApplicationView_IsActive : Cell<FrameworkApplicationView> { }
@@ -280,14 +281,18 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_GridName : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_GridIsExist : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_TableId : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: false, isReadOnlyIsNull: true, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_TableNameCSharp : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: false, isReadOnlyIsNull: true, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_TableNameSql : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_TableIsExist : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_ColumnId : Cell<FrameworkConfigColumnView> { }
@@ -296,30 +301,38 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_ColumnNameSql : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_ColumnIsExist : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_ConfigId : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_TextDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_Text : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_DescriptionDefault : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: false, isReadOnlyIsNull: true, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_Description : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_IsVisibleDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_IsVisible : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_IsReadOnlyDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_IsReadOnly : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_SortDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_Sort : Cell<FrameworkConfigColumnView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigColumnView_WidthPercentDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_WidthPercent : Cell<FrameworkConfigColumnView> { }
@@ -402,6 +415,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGridView_GridName : Cell<FrameworkConfigGridView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigGridView_GridIsExist : Cell<FrameworkConfigGridView> { }
 
     public partial class FrameworkConfigGridView_TableId : Cell<FrameworkConfigGridView> { }
@@ -410,6 +424,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGridView_TableNameSql : Cell<FrameworkConfigGridView> { }
 
+    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
     public partial class FrameworkConfigGridView_TableIsExist : Cell<FrameworkConfigGridView> { }
 
     public partial class FrameworkConfigGridView_ConfigId : Cell<FrameworkConfigGridView> { }
