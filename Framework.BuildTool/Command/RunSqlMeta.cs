@@ -312,12 +312,98 @@
             UtilFramework.Log("### Exit RunSqlConfigGrid");
         }
 
+        /// <summary>
+        /// Populate and update table FrameworkConfigColumn.
+        /// </summary>
+        private void RunSqlConfigColumn()
+        {
+            UtilFramework.Log("### Start RunSqlConfigColumn");
+            string sqlUpsert = @"
+            MERGE INTO FrameworkConfigColumn AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT Source.GridId, Source.ColumnId
+                    EXCEPT
+                    SELECT Target.GridId, Source.ColumnId)
+            WHEN MATCHED THEN
+	            UPDATE SET 
+                    Target.TextDefault = Source.Text, 
+                    Target.DescriptionDefault = Source.Description,
+                    Target.IsVisibleDefault = Source.IsVisible,
+                    Target.IsReadOnlyDefault = Source.IsReadOnly,
+                    Target.SortDefault = Source.Sort,
+                    Target.WidthPercentDefault = Source.WidthPercent
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (GridId, ColumnId, 
+                    TextDefault, 
+                    DescriptionDefault, 
+                    IsVisibleDefault, 
+                    IsReadOnlyDefault, 
+                    SortDefault, 
+                    WidthPercentDefault)
+	            VALUES (Source.GridId, Source.ColumnId, 
+                    Source.Text, 
+                    Source.Description, 
+                    Source.IsVisible, 
+                    Source.IsReadOnly, 
+                    Source.Sort, 
+                    Source.WidthPercent);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App))) // Row
+            {
+                foreach (Cell column in UtilBuildToolInternal.UtilDataAccessLayer.ColumnList(typeRow)) // Column
+                {
+                    foreach (ConfigColumnAttribute config in column.GetType().GetTypeInfo().GetCustomAttributes(typeof(ConfigColumnAttribute))) // Attribute
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                        }
+                        else
+                        {
+                            sqlSelect.Append(" UNION ALL\r\n");
+                        }
+                        string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                        sqlSelect.Append(string.Format(
+                            "SELECT " +
+                            "(SELECT Config.GridId FROM FrameworkConfigColumnView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp, Config.ColumnNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp, {2} AS ColumnNameCSharp)) AS GridId, " +
+                            "(SELECT Config.ColumnId FROM FrameworkConfigColumnView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp, Config.ColumnNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp, {2} AS ColumnNameCSharp)) AS ColumnId, " +
+                            "{3} AS Text, " +
+                            "{4} AS Description, " +
+                            "{5} AS IsVisible, " +
+                            "{6} AS IsReadOnly, " +
+                            "{7} AS Sort, " +
+                            "{8} AS WidthPercent",
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(column.ColumnNameCSharp, SqlDbType.NVarChar, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.Text, SqlDbType.NVarChar, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.Description, SqlDbType.NVarChar, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.IsVisible, SqlDbType.Bit, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.IsReadOnly, SqlDbType.Bit, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.Sort, SqlDbType.Int, parameterList),
+                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.WidthPercent, SqlDbType.Int, parameterList)));
+                    }
+                }
+            }
+            if (isFirst == false)
+            {
+                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            }
+            UtilFramework.Log("### Exit RunSqlConfigColumn");
+        }
+
         public override void Run()
         {
             RunSqlTable();
             RunSqlColumn();
             RunSqlGrid();
             RunSqlConfigGrid();
+            RunSqlConfigColumn();
             RunSqlApplicationType();
             RunSqlApplication();
         }

@@ -307,6 +307,7 @@
     {
         public ConfigColumnAttribute(string gridName, string text, string description, bool isVisible, bool isVisibleIsNull, bool isReadOnly, bool isReadOnlyIsNull, double sort, bool sortIsNull, int widthPercent, bool widthPercentIsNull)
         {
+            this.GridName = gridName;
             this.Text = text;
             this.Description = description;
             this.isVisible = isVisible;

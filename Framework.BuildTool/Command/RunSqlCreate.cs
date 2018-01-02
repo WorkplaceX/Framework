@@ -1,8 +1,6 @@
 ﻿namespace Framework.BuildTool
 {
-    using Framework.Application;
     using Framework.BuildTool.DataAccessLayer;
-    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
