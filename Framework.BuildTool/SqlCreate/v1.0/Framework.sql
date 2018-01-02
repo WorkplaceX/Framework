@@ -80,10 +80,17 @@ CREATE TABLE FrameworkConfigColumn
 	Id INT PRIMARY KEY IDENTITY,
 	GridId INT FOREIGN KEY REFERENCES FrameworkGrid(Id) NOT NULL,
 	ColumnId INT FOREIGN KEY REFERENCES FrameworkColumn(Id) NOT NULL,
+	TextDefault NVARCHAR(256), -- Column header text.
 	Text NVARCHAR(256), -- Column header text.
+	DescriptionDefault NVARCHAR(256), -- Column header text.
 	Description NVARCHAR(256), -- Column header text.
+	IsVisibleDefault BIT,
 	IsVisible BIT,
+	IsReadOnlyDefault BIT,
+	IsReadOnly BIT,
+	SortDefault FLOAT,
 	Sort FLOAT,
+	WidthPercentDefault FLOAT,
 	WidthPercent FLOAT,
 	INDEX IX_FrameworkConfigColumn UNIQUE (GridId, ColumnId)
 )
@@ -130,10 +137,17 @@ SELECT
 	ColumnX.ColumnNameSql,
 	ColumnX.IsExist AS ColumnIsExist,
 	Config.Id AS ConfigId,
+	Config.TextDefault,
 	Config.Text,
+	Config.DescriptionDefault,
 	Config.Description,
+	Config.IsVisibleDefault,
 	Config.IsVisible,
+	Config.IsReadOnlyDefault,
+	Config.IsReadOnly,
+	Config.SortDefault,
 	Config.Sort,
+	Config.WidthPercentDefault,
 	Config.WidthPercent
 
 FROM

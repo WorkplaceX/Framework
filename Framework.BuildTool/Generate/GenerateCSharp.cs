@@ -21,7 +21,7 @@
         /// <summary>
         /// Generate CSharp namespace for every database schema.
         /// </summary>
-        private static void SchemaName(MetaCSharp metaCSharp, FrameworkConfigGridView[] configGridList, StringBuilder result)
+        private static void SchemaName(MetaCSharp metaCSharp, FrameworkConfigGridView[] configGridList, FrameworkConfigColumnView[] configColumnList, StringBuilder result)
         {
             var schemaNameList = metaCSharp.List.GroupBy(item => new { item.Schema.SchemaName, item.SchemaNameCSharp }, (key, group) => key).ToArray();
             bool isFirst = true;
@@ -40,7 +40,7 @@
                 result.AppendLine("    using Framework.DataAccessLayer;");
                 result.AppendLine("    using System;");
                 result.AppendLine();
-                TableName(metaCSharp, configGridList, item.SchemaName, result);
+                TableNameClass(metaCSharp, configGridList, configColumnList, item.SchemaName, result);
                 result.AppendLine("}");
             }
         }
@@ -66,6 +66,8 @@
             }
             if (type == typeof(string))
             {
+                string valueString = (string)(object)value;
+                valueString = valueString.Replace("\"", @"\""");
                 result = string.Format("\"{0}\"", value);
             }
             return result;
@@ -108,7 +110,7 @@
         /// <summary>
         /// Generate CSharp class for every database table.
         /// </summary>
-        private static void TableName(MetaCSharp metaCSharp, FrameworkConfigGridView[] configGridList, string schemaName, StringBuilder result)
+        private static void TableNameClass(MetaCSharp metaCSharp, FrameworkConfigGridView[] configGridList, FrameworkConfigColumnView[] configColumnList, string schemaName, StringBuilder result)
         {
             var tableNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName).GroupBy(item => new { item.Schema.SchemaName, item.Schema.TableName, item.TableNameCSharp }, (key, group) => key).ToArray();
             List<string> nameExceptList = new List<string>();
@@ -130,7 +132,42 @@
                 ColumnNameProperty(metaCSharp, schemaName, item.TableName, result);
                 result.AppendLine("    }");
                 result.AppendLine();
-                ColumnNameClass(metaCSharp, schemaName, item.TableName, result);
+                ColumnNameClass(metaCSharp, configColumnList, schemaName, item.TableName, result);
+            }
+        }
+
+        /// <summary>
+        /// Generate CSharp ColumnName attribute.
+        /// </summary>
+        private static void ColumnNameAttribute(MetaCSharp metaCSharp, FrameworkConfigColumnView[] configColumnList, string schemaName, string tableNameCSharp, StringBuilder result)
+        {
+            foreach (var config in configColumnList.Where(itemConfig => itemConfig.TableNameCSharp == schemaName + "." + tableNameCSharp))
+            {
+                if 
+                    (
+                        config.TextDefault != null ||
+                        config.Text != null ||
+                        config.DescriptionDefault != null ||
+                        config.Description != null ||
+                        config.IsVisibleDefault != null ||
+                        config.IsVisible != null ||
+                        config.IsReadOnlyDefault != null ||
+                        config.IsReadOnly != null ||
+                        config.SortDefault != null ||
+                        config.Sort != null ||
+                        config.WidthPercentDefault != null ||
+                        config.WidthPercent != null
+                    )
+                {
+                    CSharpParam(null, config.GridName, out string gridNameParam, out string gridNameIsNullParam);
+                    CSharpParam(config.TextDefault, config.Text, out string textParam, out string textIsNullParam);
+                    CSharpParam(config.DescriptionDefault, config.Description, out string descriptionParam, out string descriptionIsNullParam);
+                    CSharpParam(config.IsVisibleDefault, config.IsVisible, out string isVisibleParam, out string isVisibleIsNullParam);
+                    CSharpParam(config.IsReadOnlyDefault, config.IsReadOnly, out string isReadOnlyParam, out string isReadOnlyIsNullParam);
+                    CSharpParam(config.SortDefault, config.Sort, out string sortParam, out string sortIsNullParam);
+                    CSharpParam(config.WidthPercentDefault, config.WidthPercent, out string widthPercentParam, out string widthPercentIsNullParam);
+                    result.AppendLine(string.Format("    [ConfigColumn({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})]", gridNameParam, textParam, descriptionParam, isVisibleParam, isVisibleIsNullParam, isReadOnlyParam, isReadOnlyIsNullParam, sortParam, sortIsNullParam, widthPercentParam, widthPercentIsNullParam));
+                }
             }
         }
 
@@ -160,7 +197,7 @@
         /// <summary>
         /// Generate CSharp class for every database column.
         /// </summary>
-        private static void ColumnNameClass(MetaCSharp metaCSharp, string schemaName, string tableName, StringBuilder result)
+        private static void ColumnNameClass(MetaCSharp metaCSharp, FrameworkConfigColumnView[] configColumnList, string schemaName, string tableName, StringBuilder result)
         {
             var columnNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName && item.Schema.TableName == tableName).ToArray();
             bool isFirst = true;
@@ -174,7 +211,7 @@
                 {
                     result.AppendLine();
                 }
-                string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
+                ColumnNameAttribute(metaCSharp, configColumnList, item.SchemaNameCSharp, item.TableNameCSharp, result);
                 result.AppendLine("    public partial class " + item.TableNameCSharp + "_" + item.ColumnNameCSharp + " : Cell<" + item.TableNameCSharp + "> { }");
             }
         }
@@ -182,12 +219,12 @@
         /// <summary>
         /// Generate CSharp code.
         /// </summary>
-        public void Run(FrameworkConfigGridView[] configGridList, out string cSharp)
+        public void Run(FrameworkConfigGridView[] configGridList, FrameworkConfigColumnView[] configColumnList, out string cSharp)
         {
             StringBuilder result = new StringBuilder();
             result.AppendLine("// Do not modify this file. It's generated by BuildTool generate command.");
             result.AppendLine("//");
-            SchemaName(MetaCSharp, configGridList, result);
+            SchemaName(MetaCSharp, configGridList, configColumnList,result);
             cSharp = result.ToString();
         }
     }

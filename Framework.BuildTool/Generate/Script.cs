@@ -21,7 +21,7 @@
             FrameworkConfigGridView[] configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.ConfigId != null).ToArray();
             FrameworkConfigColumnView[] configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ConfigId != null).ToArray();
             string cSharp;
-            new CSharpGenerate(metaCSharp).Run(configGridList, out cSharp);
+            new CSharpGenerate(metaCSharp).Run(configGridList, configColumnList, out cSharp);
             if (isFrameworkDb == false)
             {
                 UtilGenerate.FileSave(ConnectionManager.DatabaseGenerateFileName, cSharp);

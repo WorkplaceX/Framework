@@ -302,11 +302,21 @@
         }
     }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ConfigColumnAttribute : Attribute
     {
-        public ConfigColumnAttribute(string gridName, string text, string description, bool? isVisible, double? sort, double? widthPercent)
+        public ConfigColumnAttribute(string gridName, string text, string description, bool isVisible, bool isVisibleIsNull, bool isReadOnly, bool isReadOnlyIsNull, double sort, bool sortIsNull, int widthPercent, bool widthPercentIsNull)
         {
             this.Text = text;
+            this.Description = description;
+            this.isVisible = isVisible;
+            this.isVisibleIsNull = isVisibleIsNull;
+            this.isReadOnly = isReadOnly;
+            this.isReadOnlyIsNull = isReadOnlyIsNull;
+            this.sort = sort;
+            this.sortIsNull = sortIsNull;
+            this.widthPercent = widthPercent;
+            this.widthPercentIsNull = widthPercentIsNull;
         }
 
         public readonly string GridName;
@@ -315,10 +325,68 @@
 
         public readonly string Description;
 
-        public readonly bool? IsVisible;
+        private bool isVisible;
 
-        public readonly double? Sort;
+        private bool isVisibleIsNull;
 
-        public readonly double? WidthPercent;
+        public bool? IsVisible
+        {
+            get
+            {
+                if (isVisibleIsNull)
+                {
+                    return null;
+                }
+                return isVisible;
+            }
+        }
+
+        private bool isReadOnly;
+
+        private bool isReadOnlyIsNull;
+
+        public bool? IsReadOnly
+        {
+            get
+            {
+                if (isReadOnlyIsNull)
+                {
+                    return null;
+                }
+                return isReadOnly;
+            }
+        }
+
+        private double sort;
+
+        private bool sortIsNull;
+
+        public double? Sort
+        {
+            get
+            {
+                if (sortIsNull)
+                {
+                    return null;
+                }
+                return sort;
+            }
+        }
+
+        private int widthPercent;
+
+        private bool widthPercentIsNull;
+
+        public int? WidthPercent
+        {
+            get
+            {
+                if (widthPercentIsNull)
+                {
+                    return null;
+                }
+                return widthPercent;
+            }
+        }
     }
 }

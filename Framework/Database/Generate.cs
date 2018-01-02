@@ -133,17 +133,38 @@ namespace Database.dbo
         [SqlColumn("ColumnId", typeof(FrameworkConfigColumn_ColumnId))]
         public int ColumnId { get; set; }
 
+        [SqlColumn("TextDefault", typeof(FrameworkConfigColumn_TextDefault))]
+        public string TextDefault { get; set; }
+
         [SqlColumn("Text", typeof(FrameworkConfigColumn_Text))]
         public string Text { get; set; }
+
+        [SqlColumn("DescriptionDefault", typeof(FrameworkConfigColumn_DescriptionDefault))]
+        public string DescriptionDefault { get; set; }
 
         [SqlColumn("Description", typeof(FrameworkConfigColumn_Description))]
         public string Description { get; set; }
 
+        [SqlColumn("IsVisibleDefault", typeof(FrameworkConfigColumn_IsVisibleDefault))]
+        public bool? IsVisibleDefault { get; set; }
+
         [SqlColumn("IsVisible", typeof(FrameworkConfigColumn_IsVisible))]
         public bool? IsVisible { get; set; }
 
+        [SqlColumn("IsReadOnlyDefault", typeof(FrameworkConfigColumn_IsReadOnlyDefault))]
+        public bool? IsReadOnlyDefault { get; set; }
+
+        [SqlColumn("IsReadOnly", typeof(FrameworkConfigColumn_IsReadOnly))]
+        public bool? IsReadOnly { get; set; }
+
+        [SqlColumn("SortDefault", typeof(FrameworkConfigColumn_SortDefault))]
+        public double? SortDefault { get; set; }
+
         [SqlColumn("Sort", typeof(FrameworkConfigColumn_Sort))]
         public double? Sort { get; set; }
+
+        [SqlColumn("WidthPercentDefault", typeof(FrameworkConfigColumn_WidthPercentDefault))]
+        public double? WidthPercentDefault { get; set; }
 
         [SqlColumn("WidthPercent", typeof(FrameworkConfigColumn_WidthPercent))]
         public double? WidthPercent { get; set; }
@@ -155,13 +176,27 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumn_ColumnId : Cell<FrameworkConfigColumn> { }
 
+    public partial class FrameworkConfigColumn_TextDefault : Cell<FrameworkConfigColumn> { }
+
     public partial class FrameworkConfigColumn_Text : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_DescriptionDefault : Cell<FrameworkConfigColumn> { }
 
     public partial class FrameworkConfigColumn_Description : Cell<FrameworkConfigColumn> { }
 
+    public partial class FrameworkConfigColumn_IsVisibleDefault : Cell<FrameworkConfigColumn> { }
+
     public partial class FrameworkConfigColumn_IsVisible : Cell<FrameworkConfigColumn> { }
 
+    public partial class FrameworkConfigColumn_IsReadOnlyDefault : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_IsReadOnly : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_SortDefault : Cell<FrameworkConfigColumn> { }
+
     public partial class FrameworkConfigColumn_Sort : Cell<FrameworkConfigColumn> { }
+
+    public partial class FrameworkConfigColumn_WidthPercentDefault : Cell<FrameworkConfigColumn> { }
 
     public partial class FrameworkConfigColumn_WidthPercent : Cell<FrameworkConfigColumn> { }
 
@@ -204,17 +239,38 @@ namespace Database.dbo
         [SqlColumn("ConfigId", typeof(FrameworkConfigColumnView_ConfigId))]
         public int? ConfigId { get; set; }
 
+        [SqlColumn("TextDefault", typeof(FrameworkConfigColumnView_TextDefault))]
+        public string TextDefault { get; set; }
+
         [SqlColumn("Text", typeof(FrameworkConfigColumnView_Text))]
         public string Text { get; set; }
+
+        [SqlColumn("DescriptionDefault", typeof(FrameworkConfigColumnView_DescriptionDefault))]
+        public string DescriptionDefault { get; set; }
 
         [SqlColumn("Description", typeof(FrameworkConfigColumnView_Description))]
         public string Description { get; set; }
 
+        [SqlColumn("IsVisibleDefault", typeof(FrameworkConfigColumnView_IsVisibleDefault))]
+        public bool? IsVisibleDefault { get; set; }
+
         [SqlColumn("IsVisible", typeof(FrameworkConfigColumnView_IsVisible))]
         public bool? IsVisible { get; set; }
 
+        [SqlColumn("IsReadOnlyDefault", typeof(FrameworkConfigColumnView_IsReadOnlyDefault))]
+        public bool? IsReadOnlyDefault { get; set; }
+
+        [SqlColumn("IsReadOnly", typeof(FrameworkConfigColumnView_IsReadOnly))]
+        public bool? IsReadOnly { get; set; }
+
+        [SqlColumn("SortDefault", typeof(FrameworkConfigColumnView_SortDefault))]
+        public double? SortDefault { get; set; }
+
         [SqlColumn("Sort", typeof(FrameworkConfigColumnView_Sort))]
         public double? Sort { get; set; }
+
+        [SqlColumn("WidthPercentDefault", typeof(FrameworkConfigColumnView_WidthPercentDefault))]
+        public double? WidthPercentDefault { get; set; }
 
         [SqlColumn("WidthPercent", typeof(FrameworkConfigColumnView_WidthPercent))]
         public double? WidthPercent { get; set; }
@@ -244,13 +300,27 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView_ConfigId : Cell<FrameworkConfigColumnView> { }
 
+    public partial class FrameworkConfigColumnView_TextDefault : Cell<FrameworkConfigColumnView> { }
+
     public partial class FrameworkConfigColumnView_Text : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_DescriptionDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_Description : Cell<FrameworkConfigColumnView> { }
 
+    public partial class FrameworkConfigColumnView_IsVisibleDefault : Cell<FrameworkConfigColumnView> { }
+
     public partial class FrameworkConfigColumnView_IsVisible : Cell<FrameworkConfigColumnView> { }
 
+    public partial class FrameworkConfigColumnView_IsReadOnlyDefault : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_IsReadOnly : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_SortDefault : Cell<FrameworkConfigColumnView> { }
+
     public partial class FrameworkConfigColumnView_Sort : Cell<FrameworkConfigColumnView> { }
+
+    public partial class FrameworkConfigColumnView_WidthPercentDefault : Cell<FrameworkConfigColumnView> { }
 
     public partial class FrameworkConfigColumnView_WidthPercent : Cell<FrameworkConfigColumnView> { }
 
