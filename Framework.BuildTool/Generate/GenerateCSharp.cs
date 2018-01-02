@@ -54,7 +54,14 @@
             string result;
             if (value == null)
             {
-                result = Activator.CreateInstance(type).ToString();
+                if (type == typeof(string))
+                {
+                    result = "null";
+                }
+                else
+                {
+                    result = Activator.CreateInstance(type).ToString();
+                }
             }
             else
             {
@@ -64,7 +71,7 @@
             {
                 result = result.ToLower();
             }
-            if (type == typeof(string))
+            if (type == typeof(string) && value != null)
             {
                 string valueString = (string)(object)value;
                 valueString = valueString.Replace("\"", @"\""");
@@ -139,9 +146,9 @@
         /// <summary>
         /// Generate CSharp ColumnName attribute.
         /// </summary>
-        private static void ColumnNameAttribute(MetaCSharp metaCSharp, FrameworkConfigColumnView[] configColumnList, string schemaName, string tableNameCSharp, StringBuilder result)
+        private static void ColumnNameAttribute(MetaCSharp metaCSharp, FrameworkConfigColumnView[] configColumnList, string schemaNameCSharp, string tableNameCSharp, string columnNameCSharp, StringBuilder result)
         {
-            foreach (var config in configColumnList.Where(itemConfig => itemConfig.TableNameCSharp == schemaName + "." + tableNameCSharp))
+            foreach (var config in configColumnList.Where(item => item.TableNameCSharp == schemaNameCSharp + "." + tableNameCSharp && item.ColumnNameCSharp == columnNameCSharp))
             {
                 if 
                     (
@@ -166,7 +173,7 @@
                     CSharpParam(config.IsReadOnlyDefault, config.IsReadOnly, out string isReadOnlyParam, out string isReadOnlyIsNullParam);
                     CSharpParam(config.SortDefault, config.Sort, out string sortParam, out string sortIsNullParam);
                     CSharpParam(config.WidthPercentDefault, config.WidthPercent, out string widthPercentParam, out string widthPercentIsNullParam);
-                    result.AppendLine(string.Format("    [ConfigColumn({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})]", gridNameParam, textParam, descriptionParam, isVisibleParam, isVisibleIsNullParam, isReadOnlyParam, isReadOnlyIsNullParam, sortParam, sortIsNullParam, widthPercentParam, widthPercentIsNullParam));
+                    result.AppendLine(string.Format("    [ConfigColumn(gridName: {0}, text: {1}, description: {2}, isVisible: {3}, isVisibleIsNull: {4}, isReadOnly: {5}, isReadOnlyIsNull: {6}, sort: {7}, sortIsNull: {8}, widthPercent: {9}, widthPercentIsNull: {10})]", gridNameParam, textParam, descriptionParam, isVisibleParam, isVisibleIsNullParam, isReadOnlyParam, isReadOnlyIsNullParam, sortParam, sortIsNullParam, widthPercentParam, widthPercentIsNullParam));
                 }
             }
         }
@@ -211,7 +218,7 @@
                 {
                     result.AppendLine();
                 }
-                ColumnNameAttribute(metaCSharp, configColumnList, item.SchemaNameCSharp, item.TableNameCSharp, result);
+                ColumnNameAttribute(metaCSharp, configColumnList, item.SchemaNameCSharp, item.TableNameCSharp, item.ColumnNameCSharp, result);
                 result.AppendLine("    public partial class " + item.TableNameCSharp + "_" + item.ColumnNameCSharp + " : Cell<" + item.TableNameCSharp + "> { }");
             }
         }
