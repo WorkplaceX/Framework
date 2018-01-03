@@ -142,19 +142,23 @@
         private Dictionary<string, List<FrameworkConfigColumnView>> cacheDbConfigColumnList = new Dictionary<string, List<FrameworkConfigColumnView>>();
 
         /// <summary>
-        /// Returns ConfigColumnList for a table.
+        /// Returns ConfigColumnList for a grid.
         /// </summary>
-        protected virtual internal List<FrameworkConfigColumnView> DbConfigColumnList(Type typeRow)
+        protected virtual internal List<FrameworkConfigColumnView> DbConfigColumnList(GridName gridName)
         {
             List<FrameworkConfigColumnView> result;
-            string typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+            string typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRowInternal);
             if (cacheDbConfigColumnList.ContainsKey(typeRowNameCSharp))
             {
                 result = cacheDbConfigColumnList[typeRowNameCSharp];
             }
             else
             {
-                result = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.TableNameCSharp == typeRowNameCSharp & item.TableIsExist == true & item.ColumnIsExist == true).ToList();
+                result = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => 
+                    item.GridName == gridName.NameExclusive &
+                    item.TableNameCSharp == typeRowNameCSharp & 
+                    item.TableIsExist == true &
+                    item.ColumnIsExist == true).ToList();
                 cacheDbConfigColumnList[typeRowNameCSharp] = result;
             }
             return result;
