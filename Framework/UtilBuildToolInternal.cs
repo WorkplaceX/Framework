@@ -13,9 +13,9 @@
     {
         public static class UtilDataAccessLayer
         {
-            public static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList)
+            public static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList, bool isUseParameter = true)
             {
-                return DataAccessLayer.UtilDataAccessLayer.Parameter(value, dbType, parameterList);
+                return DataAccessLayer.UtilDataAccessLayer.Parameter(value, dbType, parameterList, isUseParameter);
             }
 
             public static string TypeRowToNameCSharp(Type typeRow)

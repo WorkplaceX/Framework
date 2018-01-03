@@ -38,15 +38,48 @@
             return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance); // Exclude static GridName declarations.
         }
 
-        internal static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList)
+        /// <summary>
+        /// Add parameter to sql.
+        /// </summary>
+        /// <param name="isUseParameter">If true, parameter is used, otherwise parameter is passed as literal.</param>
+        internal static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList, bool isUseParameter = true)
         {
-            string result = $"@P{ parameterList.Count }";
-            if (value == null)
+            if (isUseParameter == true)
             {
-                value = DBNull.Value;
+                if (value == null)
+                {
+                    return "NULL";
+                }
+                if (value.GetType() == typeof(string))
+                {
+                    string valueString = (string)value;
+                    valueString = valueString.Replace("'", "''"); // Escape single quote.
+                    return string.Format("'{0}'", value);
+                }
+                if (value.GetType() == typeof(bool))
+                {
+                    bool valueBool = (bool)value;
+                    if (valueBool == false)
+                    {
+                        return "0";
+                    }
+                    else
+                    {
+                        return "1";
+                    }
+                }
+                return value.ToString();
             }
-            parameterList.Add(new SqlParameter($"P{ parameterList.Count }", dbType) { Value = value });
-            return result;
+            else
+            {
+                string result = $"@P{ parameterList.Count }";
+                if (value == null)
+                {
+                    value = DBNull.Value;
+                }
+                parameterList.Add(new SqlParameter($"P{ parameterList.Count }", dbType) { Value = value });
+                return result;
+            }
         }
 
         /// <summary>

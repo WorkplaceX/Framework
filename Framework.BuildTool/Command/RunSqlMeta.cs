@@ -3,7 +3,6 @@
     using Database.dbo;
     using Framework.Application;
     using Framework.DataAccessLayer;
-    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -324,7 +323,7 @@
 	            ON NOT EXISTS(
                     SELECT Source.GridId, Source.ColumnId
                     EXCEPT
-                    SELECT Target.GridId, Source.ColumnId)
+                    SELECT Target.GridId, Target.ColumnId)
             WHEN MATCHED THEN
 	            UPDATE SET 
                     Target.TextDefault = Source.Text, 
