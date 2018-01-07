@@ -71,6 +71,8 @@ CREATE TABLE FrameworkConfigGrid
 	GridId INT FOREIGN KEY REFERENCES FrameworkGrid(Id) NOT NULL UNIQUE,
 	PageRowCountDefault INT, /* Defined in CSharp code (Attribute). */
 	PageRowCount INT, /* Number of records to load on one page */
+	PageColumnCountDefault INT, /* Defined in CSharp code (Attribute). */
+	PageColumnCount INT, /* Number of columns to load (transfer to client) for one page */
 	IsInsertDefault BIT, /* Defined in CSharp code (Attribute). */
 	IsInsert BIT, /* Allow insert record */
 )
@@ -109,6 +111,8 @@ SELECT
 	Config.Id AS ConfigId,
 	Config.PageRowCountDefault,
 	Config.PageRowCount,
+	Config.PageColumnCountDefault,
+	Config.PageColumnCount,
 	Config.IsInsertDefault,
 	Config.IsInsert
 

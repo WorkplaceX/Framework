@@ -417,6 +417,11 @@
         public int PageIndex;
 
         /// <summary>
+        /// Gets or sets current horizontal page index.
+        /// </summary>
+        public int PageHorizontalIndex;
+
+        /// <summary>
         /// Gets or sets IsPageIndexNext. If true, next page has been clicked.
         /// </summary>
         public bool IsPageIndexNext;
@@ -425,6 +430,16 @@
         /// Gets or sets IsPageIndexPrevious. If true, previous page has been clicked.
         /// </summary>
         public bool IsPageIndexPrevious;
+
+        /// <summary>
+        /// Gets or sets IsPageHorizontalIndexNext. If true, next horizontal page has been clicked.
+        /// </summary>
+        public bool IsPageHorizontalIndexNext;
+
+        /// <summary>
+        /// Gets or sets IsPageHorizontalIndexPrevious. If true, previous horizontal page has been clicked.
+        /// </summary>
+        public bool IsPageHorizontalIndexPrevious;
     }
 
     /// <summary>

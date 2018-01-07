@@ -219,7 +219,8 @@ export class ColumnIsVisiblePipe implements PipeTransform {
       <div data-GridColumn [json]=item *ngFor="let item of dataService.json.GridDataJson.ColumnList[json.GridName] | columnIsVisible; trackBy trackBy"></div>
     </div>
     <div data-GridRow [jsonGridDataJson]=dataService.json.GridDataJson [jsonGrid]=json [json]=item *ngFor="let item of dataService.json.GridDataJson.RowList[json.GridName]; trackBy trackBy"></div>
-    <button class="btn btn-primary" (click)="clickPageIndex(false)">&nbsp;◄&nbsp;</button> <button class="btn btn-primary" (click)="clickPageIndex(true)">&nbsp;►&nbsp;</button>
+    <button class="btn btn-primary" (click)="clickPageIndex(false)">&nbsp;▲&nbsp;</button> <button class="btn btn-primary" (click)="clickPageIndex(true)">&nbsp;▼&nbsp;</button>
+    <button class="btn btn-primary" (click)="clickPageHorizontalIndex(false)">&nbsp;◄&nbsp;</button> <button class="btn btn-primary" (click)="clickPageHorizontalIndex(true)">&nbsp;►&nbsp;</button>
   </div>
   ` // Without style="overflow: hidden", filter column disappears.
 })
@@ -236,6 +237,16 @@ export class Grid {
       this.dataService.json.GridDataJson.GridQueryList[this.json.GridName].IsPageIndexNext = true;
     } else {
       this.dataService.json.GridDataJson.GridQueryList[this.json.GridName].IsPageIndexPrevious = true;
+    }
+    //
+    this.dataService.update();
+  }
+
+  clickPageHorizontalIndex(isNext: boolean) {
+    if (isNext == true) {
+      this.dataService.json.GridDataJson.GridQueryList[this.json.GridName].IsPageHorizontalIndexNext = true;
+    } else {
+      this.dataService.json.GridDataJson.GridQueryList[this.json.GridName].IsPageHorizontalIndexPrevious = true;
     }
     //
     this.dataService.update();

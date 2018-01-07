@@ -100,6 +100,8 @@
         public bool IsOrderByDesc;
 
         public int PageIndex;
+
+        public int PageHorizontalIndex;
     }
 
     public class GridData

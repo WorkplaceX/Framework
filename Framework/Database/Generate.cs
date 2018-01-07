@@ -352,6 +352,12 @@ namespace Database.dbo
         [SqlColumn("PageRowCount", typeof(FrameworkConfigGrid_PageRowCount))]
         public int? PageRowCount { get; set; }
 
+        [SqlColumn("PageColumnCountDefault", typeof(FrameworkConfigGrid_PageColumnCountDefault))]
+        public int? PageColumnCountDefault { get; set; }
+
+        [SqlColumn("PageColumnCount", typeof(FrameworkConfigGrid_PageColumnCount))]
+        public int? PageColumnCount { get; set; }
+
         [SqlColumn("IsInsertDefault", typeof(FrameworkConfigGrid_IsInsertDefault))]
         public bool? IsInsertDefault { get; set; }
 
@@ -366,6 +372,10 @@ namespace Database.dbo
     public partial class FrameworkConfigGrid_PageRowCountDefault : Cell<FrameworkConfigGrid> { }
 
     public partial class FrameworkConfigGrid_PageRowCount : Cell<FrameworkConfigGrid> { }
+
+    public partial class FrameworkConfigGrid_PageColumnCountDefault : Cell<FrameworkConfigGrid> { }
+
+    public partial class FrameworkConfigGrid_PageColumnCount : Cell<FrameworkConfigGrid> { }
 
     public partial class FrameworkConfigGrid_IsInsertDefault : Cell<FrameworkConfigGrid> { }
 
@@ -404,6 +414,12 @@ namespace Database.dbo
         [SqlColumn("PageRowCount", typeof(FrameworkConfigGridView_PageRowCount))]
         public int? PageRowCount { get; set; }
 
+        [SqlColumn("PageColumnCountDefault", typeof(FrameworkConfigGridView_PageColumnCountDefault))]
+        public int? PageColumnCountDefault { get; set; }
+
+        [SqlColumn("PageColumnCount", typeof(FrameworkConfigGridView_PageColumnCount))]
+        public int? PageColumnCount { get; set; }
+
         [SqlColumn("IsInsertDefault", typeof(FrameworkConfigGridView_IsInsertDefault))]
         public bool? IsInsertDefault { get; set; }
 
@@ -432,6 +448,10 @@ namespace Database.dbo
     public partial class FrameworkConfigGridView_PageRowCountDefault : Cell<FrameworkConfigGridView> { }
 
     public partial class FrameworkConfigGridView_PageRowCount : Cell<FrameworkConfigGridView> { }
+
+    public partial class FrameworkConfigGridView_PageColumnCountDefault : Cell<FrameworkConfigGridView> { }
+
+    public partial class FrameworkConfigGridView_PageColumnCount : Cell<FrameworkConfigGridView> { }
 
     public partial class FrameworkConfigGridView_IsInsertDefault : Cell<FrameworkConfigGridView> { }
 

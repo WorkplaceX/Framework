@@ -93,6 +93,7 @@
             //
             foreach (string gridName in gridQueryList.Keys)
             {
+                // PageIndex
                 if (gridQueryList[gridName].IsPageIndexNext)
                 {
                     gridData.QueryGet(GridName.FromJson(gridName)).PageIndex += 1;
@@ -104,6 +105,21 @@
                     if (gridData.QueryGet(GridName.FromJson(gridName)).PageIndex < 0)
                     {
                         gridData.QueryGet(GridName.FromJson(gridName)).PageIndex = 0;
+                    }
+                    gridData.LoadDatabaseReload(GridName.FromJson(gridName));
+                }
+                // PageIndex Horizontal
+                if (gridQueryList[gridName].IsPageHorizontalIndexNext)
+                {
+                    gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex += 1;
+                    gridData.LoadDatabaseReload(GridName.FromJson(gridName));
+                }
+                if (gridQueryList[gridName].IsPageIndexPrevious)
+                {
+                    gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex -= 1;
+                    if (gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex < 0)
+                    {
+                        gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex = 0;
                     }
                     gridData.LoadDatabaseReload(GridName.FromJson(gridName));
                 }
