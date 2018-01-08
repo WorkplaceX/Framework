@@ -218,7 +218,7 @@
                 foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(typeRow))
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
-                    if (columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
+                    if (columnAttribute == null || columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
                     {
                         entity.Ignore(propertyInfo.Name);
                     }

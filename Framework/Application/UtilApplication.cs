@@ -377,9 +377,16 @@
                 FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnNameCSharp == designColumn.ColumnInternal.ColumnNameCSharp).SingleOrDefault();
                 // IsVisible
                 bool isVisible = UtilApplication.ConfigColumnNameSqlIsId(designColumn.ColumnInternal.ColumnNameSql) == false;
-                if (configColumn != null && configColumn.IsVisible != null)
+                if (configColumn != null)
                 {
-                    isVisible = configColumn.IsVisible.Value;
+                    if (configColumn.IsVisibleDefault != null)
+                    {
+                        isVisible = configColumn.IsVisibleDefault.Value;
+                    }
+                    if (configColumn.IsVisible != null)
+                    {
+                        isVisible = configColumn.IsVisible.Value;
+                    }
                 }
                 designColumn.IsVisible = isVisible;
                 // Text
@@ -388,9 +395,16 @@
                 {
                     text = designColumn.ColumnInternal.ColumnNameCSharp; // Calculated column has no ColumnNameSql.
                 }
-                if (configColumn != null && configColumn.Text != null)
+                if (configColumn != null)
                 {
-                    text = configColumn.Text;
+                    if (configColumn.TextDefault != null)
+                    {
+                        text = configColumn.TextDefault;
+                    }
+                    if (configColumn.Text != null)
+                    {
+                        text = configColumn.Text;
+                    }
                 }
                 designColumn.Text = text;
             }

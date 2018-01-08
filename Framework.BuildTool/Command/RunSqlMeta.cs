@@ -197,7 +197,7 @@
             {
                 foreach (PropertyInfo propertyInfo in typeRow.GetProperties(BindingFlags.Static | BindingFlags.Public)) // Static declared GridName property on class Row.
                 {
-                    if (UtilFramework.IsSubclassOf(typeof(GridName), propertyInfo.PropertyType))
+                    if (UtilFramework.IsSubclassOf(propertyInfo.PropertyType, typeof(GridName)))
                     {
                         GridName gridName = (GridName)propertyInfo.GetValue(null);
                         //
