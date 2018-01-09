@@ -18,6 +18,10 @@
         private static void SqlCommand(List<string> sqlList, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
         {
             string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new Exception("ConnectionString missing!");
+            }
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
