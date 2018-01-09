@@ -8,3 +8,5 @@ To get started see: [ApplicationStart](https://github.com/WorkplaceX/Application
 
 For documentation see: [Documentation](https://github.com/WorkplaceX/Framework/wiki)
 
+Project page: [WorkplaceX.com](http://workplacex.com)
+
