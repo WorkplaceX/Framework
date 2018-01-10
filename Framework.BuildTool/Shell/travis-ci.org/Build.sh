@@ -17,11 +17,11 @@ function Main
     echo \#\#\# InstallAll
     dotnet run -- installAll
 
-    # BuildTool runSqlCreate
+    # BuildTool runSqlCreate 
     echo \#\#\# RunSqlCreate
     cd $FolderName
     cd BuildTool
-    dotnet run -- runSqlCreate
+    # dotnet run -- runSqlCreate # Run sql update manually from BuildTool CLI because of database firewall.
 
     # Publish Server
     echo \#\#\# Publish Server
