@@ -23,34 +23,20 @@ function Main
     cd BuildTool
     # dotnet run -- runSqlCreate # Run sql update manually from BuildTool CLI because of database firewall.
 
-    # Publish Server
-    echo \#\#\# Publish Server
+    # Build Server
+    echo \#\#\# Build Server
     cd $FolderName
     cd Server
     dotnet restore
     dotnet build
-    dotnet publish
 
-    # Deploy
-    Deploy
-}
-
-function Deploy
-{
+    # Publish and Deploy Server
+    echo \#\#\# Publish and Deploy Server
     cd $FolderName
-    echo \#\#\# Deploy
-    cd ./Server/bin/Debug/netcoreapp2.0/publish/
-    echo $(pwd)
-    find
-
-    git init
+    cd BuildTool
     set +x # Prevent AzureGitUrl password in log
-    git remote add azure "$AzureGitUrl"
+    dotnet run -- deploy "$AzureGitUrl"
     set -x
-    git fetch --all 2>&1 # do not write to stderr
-    git add .
-    git commit -m Deploy
-    git push azure master -f 2>&1 # do not write to stderr
 }
 
 cd $FolderName

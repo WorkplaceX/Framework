@@ -104,6 +104,12 @@
             Start(workingDirectory, fileName, "build");
         }
 
+        public static void DotNetPublish(string workingDirectory)
+        {
+            string fileName = ConnectionManagerBuildTool.DotNetFileName;
+            Start(workingDirectory, fileName, "publish");
+        }
+
         public static void DotNetRestore(string workingDirectory)
         {
             string fileName = ConnectionManagerBuildTool.DotNetFileName;
@@ -137,6 +143,10 @@
         {
             if (Directory.Exists(folderName))
             {
+                foreach (FileInfo fileInfo in new DirectoryInfo(folderName).GetFiles("*.*", SearchOption.AllDirectories))
+                {
+                    fileInfo.Attributes = FileAttributes.Normal; // See also: https://stackoverflow.com/questions/1701457/directory-delete-doesnt-work-access-denied-error-but-under-windows-explorer-it/30673648
+                }
                 Directory.Delete(folderName, true);
             }
         }

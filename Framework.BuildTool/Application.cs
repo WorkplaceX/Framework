@@ -83,6 +83,7 @@
             result.Add(new CommandGenerate(this));
             result.Add(new CommandBuildClient());
             result.Add(new CommandInstallAll());
+            result.Add(new CommandDeploy());
             RegisterCommand(result);
             foreach (Command command in result)
             {
