@@ -25,9 +25,9 @@ namespace Framework.BuildTool
             UtilBuildTool.Start(folderPublish, "git", "init");
             UtilBuildTool.Start(folderPublish, "git", "remote add azure " + azureGitUrl);
             UtilBuildTool.Start(folderPublish, "git", "fetch --all -q"); // -q do not write to stderr.
-            UtilBuildTool.Start(folderPublish, "git", "add .");
+            UtilBuildTool.Start(folderPublish, "git", "add .", isRedirectStdErr: true);
             UtilBuildTool.Start(folderPublish, "git", "commit -m Deploy");
-            UtilBuildTool.Start(folderPublish, "git", "push azure master -f --porcelain"); // Do not write to stderr. See also: https://git-scm.com/docs/git-push/2.10.0
+            UtilBuildTool.Start(folderPublish, "git", "push azure master -f", isRedirectStdErr: true); // Do not write to stderr. Can be tested with "dotnet run -- deploy [AzureGitUrl] 2>Error.txt"
         }
     }
 }

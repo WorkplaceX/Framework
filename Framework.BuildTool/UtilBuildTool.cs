@@ -193,7 +193,7 @@
             Start(workingDirectory, fileName, "run", false, isWait);
         }
 
-        public static void Start(string workingDirectory, string fileName, string arguments, bool isThrowException = true, bool isWait = true, KeyValuePair<string, string>? environment = null)
+        public static void Start(string workingDirectory, string fileName, string arguments, bool isThrowException = true, bool isWait = true, KeyValuePair<string, string>? environment = null, bool isRedirectStdErr = false)
         {
             ProcessStartInfo info = new ProcessStartInfo();
             if (environment != null)
@@ -203,12 +203,24 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
-            Console.WriteLine("### Start (WorkingDirectory={0}; FileName={1}; Arguments={2};)", workingDirectory, fileName, arguments);
+            if (isRedirectStdErr)
+            {
+                info.RedirectStandardError = true; // Do not write to stderr.
+            }
+            Console.WriteLine("### Start (FileName={1}; Arguments={2}; WorkingDirectory={0};)", workingDirectory, fileName, arguments);
             var process = Process.Start(info);
             if (isWait == true)
             {
                 process.WaitForExit();
-                Console.WriteLine("### Exit code={3} (WorkingDirectory={0}; FileName={1}; Arguments={2};)", workingDirectory, fileName, arguments, process.ExitCode);
+                if (isRedirectStdErr)
+                {
+                    string errorText = process.StandardError.ReadToEnd();
+                    if (!string.IsNullOrEmpty(errorText))
+                    {
+                        Console.WriteLine("### STDERR (FileName={1}; Arguments={2}; WorkingDirectory={0}; STDERR={3};)", workingDirectory, fileName, arguments, errorText); // Write stderr into stdout.
+                    }
+                }
+                Console.WriteLine("### Exit code={3} (FileName={1}; Arguments={2}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, process.ExitCode);
                 if (isThrowException && process.ExitCode != 0)
                 {
                     // TODO Make sure it's passed to stderr. See also try, catch in method Util.MethodExecute();
