@@ -8,7 +8,7 @@ ConnectionString in Settings Environment Variables need to be in quotation marks
 Deployment to Azure goes with Git Url. It needs to be in quotation marks. Example:
 * AzureGitUrl = "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
 
-On Azure portal go to "App Service" --> "Deployment options" --> select "Local Git Repository" click select. Now on "App Service" --> "Properties" the "GIT URL" is now shown.
+On Azure portal go to "App Service" --> "Deployment options" --> select "Local Git Repository" click select. On "App Service" --> "Properties" the "GIT URL" is shown. **Add ":MyPassword" to it!**
 
 ![TravisCI](https://github.com/WorkplaceX/Framework/blob/master/Doc/TravisEnvironment.png)
 
