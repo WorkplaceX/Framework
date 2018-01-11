@@ -15,7 +15,7 @@ function Main
     set -x
     # InstallAll
     echo \#\#\# InstallAll
-    # dotnet run -- installAll
+    dotnet run -- installAll
 
     # BuildTool runSqlCreate 
     echo \#\#\# RunSqlCreate
