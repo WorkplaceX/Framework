@@ -26,7 +26,7 @@ namespace Framework.BuildTool
             UtilBuildTool.Start(folderPublish, "git", "fetch --all");
             UtilBuildTool.Start(folderPublish, "git", "add .");
             UtilBuildTool.Start(folderPublish, "git", "commit -m Deploy");
-            UtilBuildTool.Start(folderPublish, "git", "push azure master -f");
+            UtilBuildTool.Start(folderPublish, "git", "push azure master -f --porcelain"); // Do not write to stderr. See also: https://git-scm.com/docs/git-push/2.10.0
         }
     }
 }
