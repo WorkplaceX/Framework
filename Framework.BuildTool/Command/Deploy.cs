@@ -26,7 +26,7 @@ namespace Framework.BuildTool
             UtilBuildTool.Start(folderPublish, "git", "fetch --all");
             UtilBuildTool.Start(folderPublish, "git", "add .");
             UtilBuildTool.Start(folderPublish, "git", "commit -m Deploy");
-            UtilBuildTool.Start(folderPublish, "git", "push azure master -f 2>&1 # do not write to stderr");
+            UtilBuildTool.Start(folderPublish, "git", "push azure master -f");
         }
     }
 }
