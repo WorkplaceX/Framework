@@ -203,7 +203,6 @@
             info.WorkingDirectory = workingDirectory;
             info.FileName = fileName;
             info.Arguments = arguments;
-            info.RedirectStandardError = false;
             Console.WriteLine("### Start (WorkingDirectory={0}; FileName={1}; Arguments={2};)", workingDirectory, fileName, arguments);
             var process = Process.Start(info);
             if (isWait == true)

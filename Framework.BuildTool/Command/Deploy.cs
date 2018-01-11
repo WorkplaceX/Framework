@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Framework.BuildTool
 {
@@ -23,10 +24,10 @@ namespace Framework.BuildTool
             UtilFramework.Assert(Directory.Exists(folderPublish), "Publish failed!");
             UtilBuildTool.Start(folderPublish, "git", "init");
             UtilBuildTool.Start(folderPublish, "git", "remote add azure " + azureGitUrl);
-            UtilBuildTool.Start(folderPublish, "git", "fetch --all --progress");
-            UtilBuildTool.Start(folderPublish, "git", "add .");
-            UtilBuildTool.Start(folderPublish, "git", "commit -m Deploy");
-            UtilBuildTool.Start(folderPublish, "git", "push azure master -f --porcelain"); // Do not write to stderr. See also: https://git-scm.com/docs/git-push/2.10.0
+            // UtilBuildTool.Start(folderPublish, "git", "fetch --all --progress");
+            // UtilBuildTool.Start(folderPublish, "git", "add .");
+            // UtilBuildTool.Start(folderPublish, "git", "commit -m Deploy");
+            // UtilBuildTool.Start(folderPublish, "git", "push azure master -f --porcelain"); // Do not write to stderr. See also: https://git-scm.com/docs/git-push/2.10.0
         }
     }
 }
