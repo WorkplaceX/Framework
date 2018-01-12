@@ -59,10 +59,10 @@
                 }
                 sqlSelect.Append(string.Format(
                     "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = {2}) AS ApplicationTypeId, {3} AS IsActive)",
-                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
-                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
-                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
-                    UtilBuildToolInternal.UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
+                    UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
@@ -132,7 +132,7 @@
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
                 if (isFirst)
                 {
@@ -142,7 +142,7 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 string tableNameSql = "NULL";
                 if (tableAttribute != null && (tableAttribute.SqlSchemaName != null || tableAttribute.SqlTableName != null))
@@ -179,9 +179,9 @@
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -193,7 +193,7 @@
                 sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, NULL AS GridName", tableNameCSharp));
             }
             //
-            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
                 foreach (PropertyInfo propertyInfo in typeRow.GetProperties(BindingFlags.Static | BindingFlags.Public)) // Static declared GridName property on class Row.
                 {
@@ -203,7 +203,7 @@
                         //
                         Type gridTypeRow = (Type)gridName.GetType().GetField("TypeRowInternal", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
                         string gridNameExclusive = (string)gridName.GetType().GetTypeInfo().GetProperty("NameExclusive", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
-                        string gridTableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(gridTypeRow);
+                        string gridTableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridTypeRow);
                         sqlSelect.Append(" UNION ALL\r\n");
                         sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, '{1}' AS GridName", gridTableNameCSharp, gridNameExclusive));
                     }
@@ -237,9 +237,9 @@
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                foreach (Cell column in UtilBuildToolInternal.UtilDataAccessLayer.ColumnList(typeRow))
+                foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
                 {
                     if (isFirst)
                     {
@@ -249,7 +249,7 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                    string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                     string columnNameCSharp = column.ColumnNameCSharp;
                     string columnNameSql = column.ColumnNameSql == null ? "NULL" : string.Format("'[{0}]'", column.ColumnNameSql);
                     sqlSelect.Append(string.Format("(SELECT '{0}' AS TableNameCSharp, '{1}' AS ColumnNameCSharp, {2} AS ColumnNameSql)", tableNameCSharp, columnNameCSharp, columnNameSql));
@@ -282,7 +282,7 @@
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
             List<SqlParameter> parameterList = new List<SqlParameter>();
-            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
                 foreach (ConfigGridAttribute config in typeRow.GetTypeInfo().GetCustomAttributes(typeof(ConfigGridAttribute)))
                 {
@@ -294,13 +294,13 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                    string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                     sqlSelect.Append(string.Format(
                         "SELECT (SELECT Config.GridId FROM FrameworkConfigGridView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp)) AS GridId, {2} AS PageRowCount, {3} AS IsInsert",
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.PageRowCount, SqlDbType.Int, parameterList),
-                        UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.IsInsert, SqlDbType.Bit, parameterList)));
+                        UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(config.PageRowCount, SqlDbType.Int, parameterList),
+                        UtilDataAccessLayer.Parameter(config.IsInsert, SqlDbType.Bit, parameterList)));
                 }
             }
             if (isFirst == false)
@@ -351,9 +351,9 @@
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
             List<SqlParameter> parameterList = new List<SqlParameter>();
-            foreach (Type typeRow in UtilBuildToolInternal.UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App))) // Row
+            foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App))) // Row
             {
-                foreach (Cell column in UtilBuildToolInternal.UtilDataAccessLayer.ColumnList(typeRow)) // Column
+                foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow)) // Column
                 {
                     foreach (ConfigColumnAttribute config in column.GetType().GetTypeInfo().GetCustomAttributes(typeof(ConfigColumnAttribute))) // Attribute
                     {
@@ -365,7 +365,7 @@
                         {
                             sqlSelect.Append(" UNION ALL\r\n");
                         }
-                        string tableNameCSharp = UtilBuildToolInternal.UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                        string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
                         sqlSelect.Append(string.Format(
                             "SELECT " +
                             "(SELECT Config.GridId FROM FrameworkConfigColumnView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp, Config.ColumnNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp, {2} AS ColumnNameCSharp)) AS GridId, " +
@@ -376,15 +376,15 @@
                             "{6} AS IsReadOnly, " +
                             "{7} AS Sort, " +
                             "{8} AS WidthPercent",
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(column.ColumnNameCSharp, SqlDbType.NVarChar, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.Text, SqlDbType.NVarChar, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.Description, SqlDbType.NVarChar, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.IsVisible, SqlDbType.Bit, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.IsReadOnly, SqlDbType.Bit, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.Sort, SqlDbType.Int, parameterList),
-                            UtilBuildToolInternal.UtilDataAccessLayer.Parameter(config.WidthPercent, SqlDbType.Int, parameterList)));
+                            UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(column.ColumnNameCSharp, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(config.Text, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(config.Description, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(config.IsVisible, SqlDbType.Bit, parameterList),
+                            UtilDataAccessLayer.Parameter(config.IsReadOnly, SqlDbType.Bit, parameterList),
+                            UtilDataAccessLayer.Parameter(config.Sort, SqlDbType.Int, parameterList),
+                            UtilDataAccessLayer.Parameter(config.WidthPercent, SqlDbType.Int, parameterList)));
                     }
                 }
             }

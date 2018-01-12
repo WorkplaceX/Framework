@@ -1,4 +1,9 @@
-﻿namespace Framework
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Framework.BuildTool")] // Not public but used by other Framework assembly.
+[assembly: InternalsVisibleTo("Framework.UnitTest")] // Access internal methods by UnitTest.
+
+namespace Framework
 {
     using System;
     using System.Collections.Generic;
@@ -17,7 +22,7 @@
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.044 Server";
+                return "v1.045 Server";
             }
         }
 
