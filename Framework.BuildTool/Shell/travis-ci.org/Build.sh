@@ -4,36 +4,33 @@ set -x # Enable print execute cammands to stdout.
 
 function Main
 {
-    echo \#\#\# BuildTool
+	# BuildTool InstallAll
+    echo \#\#\# BuildTool InstallAll
     cd $FolderName
     cd BuildTool
-    # Set ConnectionString
     set +x # Prevent ConnectionString in log
-    dotnet run -- connection "$ConnectionString" 
+    dotnet run -- connection "$ConnectionString" # Set ConnectionString
     set -x
-    # InstallAll
-    echo \#\#\# InstallAll
-    dotnet run -- installAll
+    dotnet run --no-build -- installAll
 
-    # BuildTool runSqlCreate 
-    echo \#\#\# RunSqlCreate
+    # BuildTool UnitTest
+    echo \#\#\# BuildTool UnitTest
     cd $FolderName
     cd BuildTool
-    # dotnet run -- runSqlCreate # Run sql update manually from BuildTool CLI because of database firewall.
+	dotnet run --no-build -- unitTest
 
-    # Build Server
-    echo \#\#\# Build Server
+    # BuildTool RunSqlCreate 
+    echo \#\#\# BuildTool RunSqlCreate 
     cd $FolderName
-    cd Server
-    dotnet restore
-    dotnet build
+    cd BuildTool
+    # dotnet run --no-build -- runSqlCreate # Run sql update manually from BuildTool CLI because of database firewall.
 
-    # Publish and Deploy Server
-    echo \#\#\# Publish and Deploy Server
+    # BuildTool Deploy
+    echo \#\#\# BuildTool Deploy
     cd $FolderName
     cd BuildTool
     set +x # Prevent AzureGitUrl password in log
-    dotnet run -- deploy "$AzureGitUrl"
+    dotnet run --no-build -- deploy "$AzureGitUrl" # publish
     set -x
 }
 
