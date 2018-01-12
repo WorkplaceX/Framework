@@ -7,8 +7,6 @@ function Main
     echo \#\#\# BuildTool
     cd $FolderName
     cd BuildTool
-    dotnet restore
-    dotnet build
     # Set ConnectionString
     set +x # Prevent ConnectionString in log
     dotnet run -- connection "$ConnectionString" 
@@ -41,6 +39,7 @@ function Main
 
 cd $FolderName
 Main 2> >(tee Error.txt) # stderr to stdout and Error.txt.
+
 cd $FolderName
 if [ -s Error.txt ] # If Error.txt not empty
 then
