@@ -61,6 +61,11 @@
         /// </summary>
         public bool IsModify;
 
+        /// <summary>
+        /// Gets or sets IsParseSuccess. For internal use only. Never sent to client. Indicates user modified text could be parsed successfully.
+        /// </summary>
+        public bool IsParseSuccess;
+
         public bool IsLookup;
 
         /// <summary>
@@ -74,7 +79,7 @@
         public int? FocusIdRequest;
 
         /// <summary>
-        /// Gets or sets IsOriginal. Text is modified by user. Original text is stored in TextOriginal.
+        /// Gets or sets IsOriginal. If true, Text has been modified by user. Original text is stored in TextOriginal.
         /// </summary>
         public bool IsOriginal;
 
@@ -173,17 +178,18 @@
         /// </summary>
         public Row Row(GridName gridName, Index index)
         {
-            Row result = null;
             var row = RowGet(gridName, index);
-            if (row != null)
+            switch (index.Enum)
             {
-                result = row.Row;
-                if (result == null || row.RowNew != null)
-                {
-                    result = row.RowNew;
-                }
+                case IndexEnum.Index:
+                    return row.Row;
+                case IndexEnum.Filter:
+                    return row.RowFilter;
+                case IndexEnum.New:
+                    return row.RowNew;
+                default:
+                    throw new Exception("Enum unknown!");
             }
-            return result;
         }
 
         /// <summary>
@@ -607,39 +613,34 @@
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
             Row rowFilter = RowGet(gridName, new Index(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
+            Row rowFilterDefault = UtilDataAccessLayer.RowCreate(typeRow);
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
                 string columnName = column.ColumnNameCSharp;
-                string text = CellTextGet(gridName, new Index(IndexEnum.Filter), columnName);
-                if (text == "")
-                {
-                    text = null;
-                }
-                if (text != null) // Use filter only when text set.
+                object value = column.Constructor(rowFilter).Value;
+                object valueDefault = column.Constructor(rowFilterDefault).Value;
+                if (!object.Equals(value, valueDefault)) // Use filter only when value set.
                 {
                     if (isExcludeCalculatedColumn == false || (column.ColumnNameSql != null)) // Do not filter on calculated column if query provider is database.
                     {
-                        if (rowFilter != null) // RowFilter is null, if user made no modifications. See also: GridData.TextParse(isFilterParse: true);
+                        FilterOperator filterOperator = FilterOperator.Equal;
+                        if (value is string)
                         {
-                            object value = rowFilter.GetType().GetProperty(columnName).GetValue(rowFilter);
-                            FilterOperator filterOperator = FilterOperator.Equal;
-                            if (value is string)
-                            {
-                                filterOperator = FilterOperator.Like;
-                            }
-                            else
-                            {
-                                if (text.Contains(">"))
-                                {
-                                    filterOperator = FilterOperator.Greater;
-                                }
-                                if (text.Contains("<"))
-                                {
-                                    filterOperator = FilterOperator.Greater;
-                                }
-                            }
-                            filterList.Add(new Filter() { ColumnName = columnName, FilterOperator = filterOperator, Value = value });
+                            filterOperator = FilterOperator.Like;
                         }
+                        else
+                        {
+                            string text = CellTextGet(gridName, new Index(IndexEnum.Filter), columnName);
+                            if (text.Contains(">"))
+                            {
+                                filterOperator = FilterOperator.Greater;
+                            }
+                            if (text.Contains("<"))
+                            {
+                                filterOperator = FilterOperator.Greater;
+                            }
+                        }
+                        filterList.Add(new Filter() { ColumnName = columnName, FilterOperator = filterOperator, Value = value });
                     }
                 }
             }
@@ -702,9 +703,11 @@
                 }
                 //
                 Dictionary<string, GridCellInternal> cellListFilter = null;
+                GridRowInternal rowFilter = null;
                 if (cellList.ContainsKey(gridName))
                 {
                     cellList[gridName].TryGetValue(new Index(IndexEnum.Filter), out cellListFilter); // Save filter user text.
+                    this.rowList[gridName].TryGetValue(new Index(IndexEnum.Filter), out rowFilter); // Save parsed row.
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
                 this.rowList[gridName] = new Dictionary<Index, GridRowInternal>(); // Clear data
@@ -721,6 +724,7 @@
                 {
                     cellList[gridName] = new Dictionary<Index, Dictionary<string, GridCellInternal>>();
                     cellList[gridName][new Index(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
+                    this.rowList[gridName][new Index(IndexEnum.Filter)] = rowFilter;
                 }
             }
             return result;
@@ -748,7 +752,9 @@
         /// </summary>
         private void RowFilterAdd(GridName gridName)
         {
-            RowSet(gridName, new Index(IndexEnum.Filter), new GridRowInternal() { Row = null, RowNew = null });
+            Type typeRow = this.TypeRowGet(gridName);
+            Row rowFilter = UtilDataAccessLayer.RowCreate(typeRow);
+            RowSet(gridName, new Index(IndexEnum.Filter), new GridRowInternal() { RowFilter = rowFilter });
         }
 
         /// <summary>
@@ -829,7 +835,7 @@
                             if (IsModifyRowCell(gridName, index, false)) // Only save row if user modified row on latest request.
                             {
                                 var row = rowList[gridName][index];
-                                if (row.Row != null && row.RowNew != null) // Database Update
+                                if (indexEnum == IndexEnum.Index) // Database Update
                                 {
                                     try
                                     {
@@ -843,7 +849,7 @@
                                         ErrorRowSet(gridName, index, UtilFramework.ExceptionToText(exception));
                                     }
                                 }
-                                if (row.Row == null && row.RowNew != null) // Database Insert
+                                if (indexEnum == IndexEnum.New) // Database Insert
                                 {
                                     try
                                     {
@@ -892,15 +898,13 @@
                         {
                             case IndexEnum.Index:
                                 rowWrite = UtilDataAccessLayer.RowClone(row.Row);
-                                row.RowNew = rowWrite;
+                                row.RowNew = rowWrite; // Row = Original; RowNew = Modified.
                                 break;
                             case IndexEnum.New:
-                                rowWrite = UtilDataAccessLayer.RowCreate(typeRow);
-                                row.RowNew = rowWrite;
+                                rowWrite = row.RowNew;
                                 break;
                             case IndexEnum.Filter:
-                                rowWrite = UtilDataAccessLayer.RowCreate(typeRow);
-                                row.RowFilter = rowWrite;
+                                rowWrite = row.RowFilter;
                                 break;
                             default:
                                 throw new Exception("Enum unknown!");
@@ -928,6 +932,10 @@
                                         ErrorCellSet(gridName, index, columnName, "Value invalid!");
                                         row.RowNew = null; // Do not save.
                                         break;
+                                    }
+                                    else
+                                    {
+                                        cellInternal.IsParseSuccess = true;
                                     }
                                 }
                                 catch (Exception exception)
@@ -996,16 +1004,20 @@
                 Index rowIndex = new Index(row.Index);
                 IndexEnum indexEnum = rowIndex.Enum;
                 GridRowInternal gridRow = new GridRowInternal() { IsSelect = row.IsSelect, IsClick = row.IsClick };
-                Row resultRow = null;
-                if (indexEnum == IndexEnum.Index)
+                Row resultRow = (Row)UtilFramework.TypeToObject(typeRow);
+                switch (indexEnum)
                 {
-                    resultRow = (Row)UtilFramework.TypeToObject(typeRow);
-                    gridRow.Row = resultRow;
-                }
-                if (indexEnum == IndexEnum.New)
-                {
-                    resultRow = (Row)UtilFramework.TypeToObject(typeRow);
-                    gridRow.RowNew = resultRow;
+                    case IndexEnum.Index:
+                        gridRow.Row = resultRow;
+                        break;
+                    case IndexEnum.Filter:
+                        gridRow.RowFilter = resultRow;
+                        break;
+                    case IndexEnum.New:
+                        gridRow.RowNew = resultRow;
+                        break;
+                    default:
+                        throw new Exception("Enum unknown!");
                 }
                 RowSet(gridName, rowIndex, gridRow);
                 foreach (Cell cell in ColumnList(gridName))
@@ -1045,13 +1057,10 @@
                     {
                         ErrorRowSet(gridName, rowIndex, errorRowText);
                     }
-                    if (indexEnum == IndexEnum.Index || indexEnum == IndexEnum.New)
-                    {
-                        cell.CellRowValueFromText(App, gridName, rowIndex, ref text);
-                        App.CellRowValueFromText(gridName, rowIndex, cell, ref text);
-                        object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
-                        cell.PropertyInfo.SetValue(resultRow, value);
-                    }
+                    cell.CellRowValueFromText(App, gridName, rowIndex, ref text);
+                    App.CellRowValueFromText(gridName, rowIndex, cell, ref text);
+                    object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
+                    cell.PropertyInfo.SetValue(resultRow, value);
                 }
             }
         }
@@ -1243,10 +1252,20 @@
                 foreach (Index index in rowList[gridName].Keys)
                 {
                     GridRowInternal gridRow = rowList[gridName][index];
-                    Row row = gridRow.Row;
-                    if (row == null)
+                    Row row;
+                    switch (index.Enum)
                     {
-                        row = gridRow.RowNew;
+                        case IndexEnum.Index:
+                            row = gridRow.Row;
+                            break;
+                        case IndexEnum.Filter:
+                            row = gridRow.RowFilter;
+                            break;
+                        case IndexEnum.New:
+                            row = gridRow.RowNew;
+                            break;
+                        default:
+                            throw new Exception("Enum unknown!");
                     }
                     design.CellInit(App, gridNameTypeRow, row, index);
                     string errorRow = ErrorRowGet(gridName, index);
@@ -1288,7 +1307,7 @@
                             //
                             SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson, design);
                             //
-                            if (gridCellInternal.IsOriginal == false)
+                            if (gridCellInternal.IsOriginal == false || gridCellInternal.IsParseSuccess)
                             {
                                 gridCellJson.T = textJson;
                             }
