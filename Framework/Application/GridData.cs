@@ -612,7 +612,7 @@
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
-            Row rowFilter = RowGet(gridName, new Index(IndexEnum.Filter)).RowFilter; // Data row with parsed filter values.
+            Row rowFilter = RowGet(gridName, Index.Filter).RowFilter; // Data row with parsed filter values.
             Row rowFilterDefault = UtilDataAccessLayer.RowCreate(typeRow);
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
@@ -630,7 +630,7 @@
                         }
                         else
                         {
-                            string text = CellTextGet(gridName, new Index(IndexEnum.Filter), columnName);
+                            string text = CellTextGet(gridName, Index.Filter, columnName);
                             if (text.Contains(">"))
                             {
                                 filterOperator = FilterOperator.Greater;
@@ -651,7 +651,7 @@
         /// </summary>
         internal void LoadDatabaseReload(GridName gridName)
         {
-            if (!IsErrorRowCell(gridName, new Index(IndexEnum.Filter))) // Do not reload data grid if there is text parse error in filter.
+            if (!IsErrorRowCell(gridName, Index.Filter)) // Do not reload data grid if there is text parse error in filter.
             {
                 Type typeRow = TypeRowGet(gridName);
                 Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
@@ -706,8 +706,8 @@
                 GridRowInternal rowFilter = null;
                 if (cellList.ContainsKey(gridName))
                 {
-                    cellList[gridName].TryGetValue(new Index(IndexEnum.Filter), out cellListFilter); // Save filter user text.
-                    this.rowList[gridName].TryGetValue(new Index(IndexEnum.Filter), out rowFilter); // Save parsed row.
+                    cellList[gridName].TryGetValue(Index.Filter, out cellListFilter); // Save filter user text.
+                    this.rowList[gridName].TryGetValue(Index.Filter, out rowFilter); // Save parsed row.
                 }
                 cellList.Remove(gridName); // Clear user modified text and attached errors.
                 this.rowList[gridName] = new Dictionary<Index, GridRowInternal>(); // Clear data
@@ -723,8 +723,8 @@
                 if (cellListFilter != null)
                 {
                     cellList[gridName] = new Dictionary<Index, Dictionary<string, GridCellInternal>>();
-                    cellList[gridName][new Index(IndexEnum.Filter)] = cellListFilter; // Load back filter user text.
-                    this.rowList[gridName][new Index(IndexEnum.Filter)] = rowFilter;
+                    cellList[gridName][Index.Filter] = cellListFilter; // Load back filter user text.
+                    this.rowList[gridName][Index.Filter] = rowFilter;
                 }
             }
             return result;
@@ -754,7 +754,7 @@
         {
             Type typeRow = this.TypeRowGet(gridName);
             Row rowFilter = UtilDataAccessLayer.RowCreate(typeRow);
-            RowSet(gridName, new Index(IndexEnum.Filter), new GridRowInternal() { RowFilter = rowFilter });
+            RowSet(gridName, Index.Filter, new GridRowInternal() { RowFilter = rowFilter });
         }
 
         /// <summary>
@@ -788,7 +788,7 @@
             // New
             Type typeRow = this.TypeRowGet(gridName);
             Row rowNew = UtilDataAccessLayer.RowCreate(typeRow);
-            RowSet(gridName, new Index(IndexEnum.New), new GridRowInternal() { Row = null, RowNew = rowNew }); // New row
+            RowSet(gridName, Index.Filter, new GridRowInternal() { Row = null, RowNew = rowNew }); // New row
             // Total
             foreach (Index index in rowListCopy.Keys)
             {

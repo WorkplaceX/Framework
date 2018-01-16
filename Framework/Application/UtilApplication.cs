@@ -180,11 +180,65 @@
             this.Enum = UtilApplication.IndexEnumFromText(value);
         }
 
-        public Index(IndexEnum value)
+        private Index(IndexEnum value)
         {
             UtilFramework.Assert(value != IndexEnum.Index);
             this.Value = UtilApplication.IndexEnumToText(value);
             this.Enum = value;
+        }
+
+        [ThreadStatic]
+        private static Index filter;
+
+        /// <summary>
+        /// Gets Filter. Index for Filter row.
+        /// </summary>
+        public static Index Filter
+        {
+            get
+            {
+                if (filter == null)
+                {
+                    filter = new Index(IndexEnum.Filter);
+                }
+                return filter;
+            }
+        }
+
+        [ThreadStatic]
+        private static Index _new;
+
+        /// <summary>
+        /// Gets New. Index for New row.
+        /// </summary>
+        public static Index New
+        {
+            get
+            {
+                if (_new == null)
+                {
+                    _new = new Index(IndexEnum.New);
+                }
+                return _new;
+            }
+        }
+
+        [ThreadStatic]
+        private static Index indexTotal;
+
+        /// <summary>
+        /// Gets Total. Index for Total row.
+        /// </summary>
+        public static Index IndexTotal
+        {
+            get
+            {
+                if (indexTotal == null)
+                {
+                    indexTotal = new Index(IndexEnum.Total);
+                }
+                return indexTotal;
+            }
         }
 
         public readonly string Value;
