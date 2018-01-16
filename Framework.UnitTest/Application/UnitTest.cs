@@ -9,7 +9,6 @@
     {
         public void ColumnNameIsId()
         {
-            throw new Exception();
             UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("") == false);
             UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("Id") == true);
             UtilFramework.Assert(UtilApplication.ConfigColumnNameSqlIsId("IdX") == true);
