@@ -24,7 +24,7 @@ namespace Framework.BuildTool
             UtilFramework.Assert(Directory.Exists(folderPublish), "Publish failed!");
             UtilBuildTool.Start(folderPublish, "git", "init");
             UtilBuildTool.Start(folderPublish, "git", "config user.email \"deploy@deploy.deploy\""); // Prevent: Error "Please tell me who you are". See also: http://www.thecreativedev.com/solution-github-please-tell-me-who-you-are-error/
-            UtilBuildTool.Start(folderPublish, "git", "config user.name \"Bhumi Shah\"");
+            UtilBuildTool.Start(folderPublish, "git", "config user.name \"Deploy\"");
             UtilBuildTool.Start(folderPublish, "git", "remote add azure " + azureGitUrl);
             UtilBuildTool.Start(folderPublish, "git", "fetch --all -q"); // -q do not write to stderr.
             UtilBuildTool.Start(folderPublish, "git", "add .", isRedirectStdErr: true);

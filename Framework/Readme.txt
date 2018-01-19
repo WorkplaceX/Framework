@@ -45,6 +45,8 @@ ToDo
 
 Tools
 -https://developer.microsoft.com/en-us/microsoft-edge/tools/screenshots/
+-http://www.responsimulator.com/
+-http://iphone5simulator.com/
 
 ### client.aot.ts
 require('core-js/shim');

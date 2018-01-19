@@ -24,7 +24,7 @@
         public readonly AppBuildTool AppBuildTool;
 
         /// <summary>
-        /// Add AppSetup to table FrameworkApplication.
+        /// Add AppSetting to table FrameworkApplication.
         /// </summary>
         private void RunSqlApplication()
         {
