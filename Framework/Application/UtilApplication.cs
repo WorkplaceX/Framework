@@ -9,6 +9,25 @@
     using System.Reflection;
     using System.Text;
 
+    public class ApplicationEventArgument
+    {
+        internal ApplicationEventArgument(App app, GridName gridName, Index index, string columnName)
+        {
+            this.App = app;
+            this.GridName = gridName;
+            this.Index = index;
+            this.ColumnName = columnName;
+        }
+
+        public readonly App App;
+
+        public readonly GridName GridName;
+
+        public readonly Index Index;
+
+        public readonly string ColumnName;
+    }
+
     /// <summary>
     /// GridName is a Name or the name of a TypeRow or combined.
     /// </summary>

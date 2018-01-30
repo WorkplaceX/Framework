@@ -57,6 +57,11 @@
         {
             return UtilDataAccessLayer.Query(GetType());
         }
+
+        protected virtual internal IQueryable QueryLookup(Row rowLookup, ApplicationEventArgument e)
+        {
+            return UtilDataAccessLayer.Query(GetType());
+        }
     }
 
     /// <summary>
@@ -160,24 +165,20 @@
         }
 
         /// <summary>
-        /// Values user can select from lookup list.
+        /// Returns GridName for lookup grid window. See also method Row.QueryLookup(); to filter rows.
         /// </summary>
-        /// <param name="query">Database query or in-memeory list.</param>
-        protected virtual internal void CellLookup(App app, GridName gridName, Index index, string columnName, out IQueryable query)
+        protected virtual internal GridNameTypeRow CellLookup(ApplicationEventArgument e)
         {
-            query = null;
+            return null;
         }
 
         /// <summary>
         /// Override to handle clicked Lookup row.
         /// </summary>
-        /// <param name="gridName">Grid with open lookup.</param>
-        /// <param name="index">Row with open lookup.</param>
         /// <param name="rowLookup">LoowUp row which has been clicked.</param>
-        /// <param name="columnNameLookup">Cell which has been clicked.</param>
-        protected virtual internal void CellLookupIsClick(App app, GridName gridName, Index index, string columnName, Row rowLookup, string columnNameLookup, string text)
+        protected virtual internal void CellLookupIsClick(Row rowLookup, ApplicationEventArgument e)
         {
-            CellTextParse(app, gridName, index, columnName, text);
+        
         }
 
         /// <summary>

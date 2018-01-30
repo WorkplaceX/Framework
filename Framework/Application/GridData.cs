@@ -68,6 +68,8 @@
 
         public bool IsLookup;
 
+        public string GridNameLookup;
+
         /// <summary>
         /// Gets or sets FocusId. GridCell can be displayed by multiple GridField. Focus has the one with FocusId. Used to show or hide Lookup.
         /// </summary>
@@ -182,6 +184,10 @@
             switch (index.Enum)
             {
                 case IndexEnum.Index:
+                    if (row.RowNew != null)
+                    {
+                        return row.RowNew;
+                    }
                     return row.Row;
                 case IndexEnum.Filter:
                     return row.RowFilter;
@@ -315,6 +321,11 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, GridRowInternal>> rowList = new Dictionary<GridName, Dictionary<Index, GridRowInternal>>();
 
+        internal Dictionary<Index, GridRowInternal> RowList(GridName gridName)
+        {
+            return rowList[gridName];
+        }
+
         internal string SelectGridName;
 
         internal Index SelectIndex;
@@ -348,7 +359,7 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>> cellList = new Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>>();
 
-        internal void CellAll(Action<GridCellInternal> callback)
+        internal void CellAll(Action<GridCellInternal, ApplicationEventArgument> callback)
         {
             foreach (GridName gridName in cellList.Keys)
             {
@@ -356,7 +367,7 @@
                 {
                     foreach (string columnName in cellList[gridName][index].Keys)
                     {
-                        callback(cellList[gridName][index][columnName]);
+                        callback(cellList[gridName][index][columnName], new ApplicationEventArgument(App, gridName, index, columnName));
                     }
                 }
             }
@@ -365,28 +376,22 @@
         /// <summary>
         /// Set IsLookup flag on cell.
         /// </summary>
-        internal void LookupOpen(GridName gridName, Index index, string columnName)
+        internal void LookupOpen(GridName gridName, Index index, string columnName, GridName gridNameLookup)
         {
-            int lookupCount = 0;
-            foreach (GridName gridNameItem in cellList.Keys)
+            CellAll((GridCellInternal gridCell, ApplicationEventArgument e) =>
             {
-                foreach (Index indexItem in cellList[gridNameItem].Keys)
+                gridCell.IsLookup = false;
+                gridCell.GridNameLookup = null;
+            });
+            CellAll((GridCellInternal gridCell, ApplicationEventArgument e) =>
+            {
+                bool isLookup = gridName == e.GridName && index == e.Index && columnName == e.ColumnName;
+                if (isLookup)
                 {
-                    foreach (string columnNameItem in cellList[gridNameItem][indexItem].Keys)
-                    {
-                        bool isLookup = gridName == gridNameItem && index == indexItem && columnName == columnNameItem;
-                        if (isLookup)
-                        {
-                            lookupCount += 1;
-                        }
-                        if (lookupCount > 1)
-                        {
-                            isLookup = false;
-                        }
-                        cellList[gridNameItem][indexItem][columnNameItem].IsLookup = isLookup;
-                    }
+                    gridCell.IsLookup = true;
+                    gridCell.GridNameLookup = gridNameLookup.Name;
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -401,6 +406,7 @@
                     foreach (string columnNameItem in cellList[gridNameItem][indexItem].Keys)
                     {
                         cellList[gridNameItem][indexItem][columnNameItem].IsLookup = false;
+                        cellList[gridNameItem][indexItem][columnNameItem].GridNameLookup = null;
                     }
                 }
             }
@@ -480,7 +486,7 @@
         internal void CellIsModifySet(GridName gridName, Index index, string columnName)
         {
             GridRowInternal gridRow = RowGet(gridName, index);
-            if (gridRow.RowNew == null)
+            if (index.Enum == IndexEnum.Index && gridRow.RowNew == null)
             {
                 gridRow.RowNew = UtilDataAccessLayer.RowClone(gridRow.Row);
             }
@@ -574,11 +580,19 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc)
+        internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, bool isLookup, Row rowLookup, Index indexLookup)
         {
             TypeRowSet(gridName);
             Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
-            IQueryable query = rowTable.Query(App, gridName);
+            IQueryable query;
+            if (isLookup == false)
+            {
+                query = rowTable.Query(App, gridName);
+            }
+            else
+            {
+                query = rowTable.QueryLookup(rowLookup, new ApplicationEventArgument(App, gridName, indexLookup, null));
+            }
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
@@ -601,7 +615,7 @@
         /// </summary>
         public void LoadDatabase(GridNameTypeRow gridName)
         {
-            LoadDatabase(gridName, null, null, false);
+            LoadDatabase(gridName, null, null, false, false, null, null);
         }
 
         /// <summary>
@@ -788,7 +802,7 @@
             // New
             Type typeRow = this.TypeRowGet(gridName);
             Row rowNew = UtilDataAccessLayer.RowCreate(typeRow);
-            RowSet(gridName, Index.Filter, new GridRowInternal() { Row = null, RowNew = rowNew }); // New row
+            RowSet(gridName, Index.New, new GridRowInternal() { Row = null, RowNew = rowNew }); // New row
             // Total
             foreach (Index index in rowListCopy.Keys)
             {
@@ -1030,6 +1044,7 @@
                     gridCellInternal.IsClick = gridCell.IsClick;
                     gridCellInternal.IsModify = gridCell.IsModify;
                     gridCellInternal.IsLookup = gridCell.IsLookup;
+                    gridCellInternal.GridNameLookup = gridCell.GridNameLookup;
                     gridCellInternal.FocusId = gridCell.FocusId;
                     gridCellInternal.FocusIdRequest = gridCell.FocusIdRequest;
                     gridCellInternal.PlaceHolder = gridCell.PlaceHolder;
@@ -1322,6 +1337,7 @@
                             gridCellJson.IsModify = gridCellInternal.IsModify;
                             gridCellJson.E = errorCell;
                             gridCellJson.IsLookup = gridCellInternal.IsLookup;
+                            gridCellJson.GridNameLookup = gridCellInternal.GridNameLookup;
                             gridCellJson.FocusId = gridCellInternal.FocusId;
                             gridCellJson.FocusIdRequest = gridCellInternal.FocusIdRequest;
                         }

@@ -306,6 +306,11 @@
         public bool IsLookup;
 
         /// <summary>
+        /// Gets or sets GridNameLookup. This is the grid to display as lookup window.
+        /// </summary>
+        public string GridNameLookup;
+
+        /// <summary>
         /// Gets or sets FocusId. GridCell can be displayed by multiple GridField. Focus has the one with FocusId. Used to show or hide Lookup.
         /// </summary>
         public int? FocusId;

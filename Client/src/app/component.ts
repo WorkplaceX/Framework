@@ -443,12 +443,13 @@ export class RemoveSelectorDirective {
 
     <div class="gridLookup" *ngIf="gridCell().IsLookup && gridCell().FocusId == focusId">
       <div>
-        <div data-Grid [json]="{ GridName: 'Lookup' }"></div>
+        <div data-Grid [json]="{ GridName: gridCell().GridNameLookup }"></div>
       </div>
     </div>
   </div>
   `
 })
+// IsLookup={{ gridCell().IsLookup }}; Focus={{ gridCell().FocusId }}-{{ focusId }}; GridNameLookup={{ gridCell().GridNameLookup }};
 // {{focusId + "; " + gridCell().FocusId + "; " + gridCell().FocusIdRequest }}
 // <input type="text" class="form-control" [(ngModel)]="Text" (ngModelChange)="onChange()" (dFocus)="focus(true)" (focusout)="focus(false)" [focus]="dataService.json.GridDataJson.FocusGridName==gridName && dataService.json.GridDataJson.FocusColumnName == columnName && dataService.json.GridDataJson.FocusIndex==index" placeholder="{{ gridCell().PlaceHolder }}" />
 export class GridField {

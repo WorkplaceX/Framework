@@ -302,9 +302,9 @@
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridPageIndex>();
                 processList.Add<ProcessTextParse>();
+                processList.Add<ProcessGridLookupIsClick>();
                 processList.Add<ProcessGridFilter>();
                 processList.Add<ProcessGridIsClickMasterDetail>();
-                processList.Add<ProcessGridLookupIsClick>();
                 processList.Add<ProcessGridSaveDatabase>();
                 processList.Add<ProcessGridLookup>();
                 processList.Add<ProcessGridCellButtonIsClick>();

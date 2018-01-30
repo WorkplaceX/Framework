@@ -76,7 +76,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(rowNew, applicationNew);
             //
             UtilDataAccessLayer.Update(application, applicationNew);
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).First(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).Single(), this);
         }
 
         protected internal override void Insert(App app, GridName gridName, Index index, Row row)
@@ -84,8 +84,13 @@ namespace Database.dbo
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
             UtilDataAccessLayer.Insert(application);
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == application.Id).First(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == application.Id).Single(), this);
         }
+    }
+
+    public partial class FrameworkApplicationType : Row
+    {
+        public static GridNameTypeRow Lookup { get { return new GridName<FrameworkApplicationType>("Lookup"); } }
     }
 
     public partial class FrameworkApplicationView_Type
@@ -101,9 +106,14 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override void CellLookup(App app, GridName gridName, Index index, string columnName, out IQueryable query)
+        protected internal override GridNameTypeRow CellLookup(ApplicationEventArgument e)
         {
-            query = UtilDataAccessLayer.Query<FrameworkApplicationType>();
+            return FrameworkApplicationType.Lookup;
+        }
+
+        protected internal override void CellLookupIsClick(Row rowLookup, ApplicationEventArgument e)
+        {
+            Row.ApplicationTypeId = ((FrameworkApplicationType)rowLookup).Id;
         }
     }
 
