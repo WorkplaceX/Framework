@@ -15,15 +15,15 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Download : Cell<FrameworkFileStorage>
     {
-        protected internal override void DesignCell(App app, GridName gridName, Index index, DesignCell result)
+        protected internal override void DesignCell(DesignCell result, ApplicationEventArgument e)
         {
             result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
 
-        protected override internal void CellRowValueToText(App app, GridName gridName, Index index, ref string result)
+        protected internal override void RowValueToText(ref string result, ApplicationEventArgument e)
         {
             result = null;
-            if (index.Enum == IndexEnum.Index && Row.Name != null)
+            if (e.Index.Enum == IndexEnum.Index && Row.Name != null)
             {
                 string fileNameOnly = Row.Name;
                 if (Row.Name.Contains("/"))
@@ -41,24 +41,24 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage
     {
-        protected internal override void Insert(App app, GridName gridName, Index index, Row row)
+        protected internal override void Insert(Row rowNew, ApplicationEventArgument e)
         {
-            if (app.DbFrameworkApplication != null)
+            if (e.App.DbFrameworkApplication != null)
             {
-                this.ApplicationId = app.DbFrameworkApplication.Id;
+                this.ApplicationId = e.App.DbFrameworkApplication.Id;
             }
-            base.Insert(app, gridName, index, row);
+            base.Insert(rowNew, e);
         }
     }
 
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage>
     {
-        protected internal override void DesignCell(App app, GridName gridName, Index index, DesignCell result)
+        protected internal override void DesignCell(DesignCell result, ApplicationEventArgument e)
         {
             result.CellEnum = GridCellEnum.FileUpload;
         }
 
-        protected override internal void CellRowValueToText(App app, GridName gridName, Index index, ref string result)
+        protected internal override void RowValueToText(ref string result, ApplicationEventArgument e)
         {
             result = "File Upload";
         }
@@ -66,7 +66,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView
     {
-        protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
+        protected internal override void Update(Row row, Row rowNew, ApplicationEventArgument e)
         {
             // Row
             var application = new FrameworkApplication();
@@ -79,7 +79,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).Single(), this);
         }
 
-        protected internal override void Insert(App app, GridName gridName, Index index, Row row)
+        protected internal override void Insert(Row rowNew, ApplicationEventArgument e)
         {
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
@@ -95,7 +95,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void CellTextParse(App app, GridName gridName, Index index, string columnName, string text)
+        protected internal override void TextParse(string text, ApplicationEventArgument e)
         {
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
             if (applicationType == null)
@@ -106,12 +106,12 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override GridNameTypeRow CellLookup(ApplicationEventArgument e)
+        protected internal override GridNameTypeRow Lookup(ApplicationEventArgument e)
         {
             return FrameworkApplicationType.Lookup;
         }
 
-        protected internal override void CellLookupIsClick(Row rowLookup, ApplicationEventArgument e)
+        protected internal override void LookupIsClick(Row rowLookup, ApplicationEventArgument e)
         {
             Row.ApplicationTypeId = ((FrameworkApplicationType)rowLookup).Id;
         }
@@ -119,7 +119,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView
     {
-        protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
+        protected internal override void Update(Row row, Row rowNew, ApplicationEventArgument e)
         {
             FrameworkConfigColumn config = UtilDataAccessLayer.Query<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).SingleOrDefault();
             if (config == null)
@@ -162,7 +162,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGridView
     {
-        protected internal override void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
+        protected internal override void Update(Row row, Row rowNew, ApplicationEventArgument e)
         {
             var config = UtilDataAccessLayer.Query<FrameworkConfigGrid>().Where(item => item.Id == this.ConfigId).SingleOrDefault();
             if (config == null)

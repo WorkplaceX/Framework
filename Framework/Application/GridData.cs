@@ -853,7 +853,7 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Update(App, gridName, index, row.Row, row.RowNew);
+                                        row.RowNew.Update(row.Row, row.RowNew, new ApplicationEventArgument(App, gridName, index, null));
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -867,7 +867,7 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Insert(App, gridName, index, row.RowNew);
+                                        row.RowNew.Insert(row.RowNew, new ApplicationEventArgument(App, gridName, index, null));
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -935,7 +935,7 @@
                             {
                                 try
                                 {
-                                    cell.CellTextParse(App, gridName, index, columnName, text);
+                                    cell.TextParse(text, new ApplicationEventArgument(App, gridName, index, columnName));
                                     string textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
                                     if (text == "")
                                     {
@@ -1072,7 +1072,7 @@
                     {
                         ErrorRowSet(gridName, rowIndex, errorRowText);
                     }
-                    cell.CellRowValueFromText(App, gridName, rowIndex, ref text);
+                    cell.RowValueFromText(ref text, new ApplicationEventArgument(App, gridName, rowIndex, null));
                     App.CellRowValueFromText(gridName, rowIndex, cell, ref text);
                     object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
                     cell.PropertyInfo.SetValue(resultRow, value);
@@ -1137,7 +1137,7 @@
                     isLast = column == columnIsVisibleList.LastOrDefault();
                     double widthPercentAvg = Math.Round(((double)100 - widthPercentTotal) / ((double)columnIsVisibleList.Count - (double)i), 2);
                     double widthPercent = widthPercentAvg;
-                    column.ColumnWidthPercent(ref widthPercent);
+                    column.WidthPercent(ref widthPercent);
                     widthPercent = Math.Round(widthPercent, 2);
                     if (isLast)
                     {
@@ -1309,7 +1309,7 @@
                             {
                                 textJson = "Button"; // Default text for button.
                             }
-                            cell.CellRowValueToText(App, gridName, index, ref textJson); // Override text.
+                            cell.RowValueToText(ref textJson, new ApplicationEventArgument(App, gridName, index, null)); // Override text.
                             App.CellRowValueToText(gridName, index, cell, ref textJson); // Override text generic.
                             GridCellInternal gridCellInternal = CellGet(gridName, index, columnName);
                             if (!gridDataJson.CellList[GridName.ToJson(gridName)].ContainsKey(columnName))

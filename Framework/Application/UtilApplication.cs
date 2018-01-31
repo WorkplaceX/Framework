@@ -489,7 +489,7 @@
             // Override Column
             foreach (DesignColumn designColumn in designColumnList.Values)
             {
-                designColumn.ColumnInternal.DesignColumn(app, gridName, designColumn);
+                designColumn.ColumnInternal.DesignColumn(designColumn, new ApplicationEventArgument(app, gridName, null, null));
             }
         }
 
@@ -512,7 +512,7 @@
                     if (designColumn.IsVisible)
                     {
                         app.DesignCell(gridName, index, cell, designColumn.DesignCell);
-                        cell.DesignCell(app, gridName, index, designColumn.DesignCell);
+                        cell.DesignCell(designColumn.DesignCell, new ApplicationEventArgument(app, gridName, index, null));
                     }
                 }
                 finally

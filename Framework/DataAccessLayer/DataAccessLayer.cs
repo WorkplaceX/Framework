@@ -11,20 +11,15 @@
     /// </summary>
     public class Row
     {
-        protected virtual void IsReadOnly(ref bool result)
-        {
-
-        }
-
         /// <summary>
         /// Update data row on database.
         /// </summary>
-        /// <param name="row">Old data row</param>
-        /// <param name="rowNew">New data row. Set properties for example to read back updated content from db.</param>
-        protected virtual internal void Update(App app, GridName gridName, Index index, Row row, Row rowNew)
+        /// <param name="row">Old data row.</param>
+        /// <param name="rowNew">New data row. Set properties on this rowNew, for example to read back updated content from db.</param>
+        protected virtual internal void Update(Row row, Row rowNew, ApplicationEventArgument e)
         {
             UtilFramework.Assert(this == rowNew);
-            if (app.GridData.IsModifyRowCell(gridName, index, true)) // No update on database, if only calculated column has been modified.
+            if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No update on database, if only calculated column has been modified.
             {
                 UtilDataAccessLayer.Update(row, this);
             }
@@ -33,10 +28,10 @@
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(App app, GridName gridName, Index index, Row rowNew)
+        protected virtual internal void Insert(Row rowNew, ApplicationEventArgument e)
         {
             UtilFramework.Assert(rowNew == this);
-            if (app.GridData.IsModifyRowCell(gridName, index, true)) // No insert on database, if only calculated column has been modified.
+            if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No insert on database, if only calculated column has been modified.
             {
                 UtilDataAccessLayer.Insert(this);
             }
@@ -47,7 +42,7 @@
         /// </summary>
         /// <param name="gridNameMaster">Master gridName.</param>
         /// <param name="rowMaster">Clicked master grid row.</param>
-        /// <param name="isReload">If true, this grid (detail) gets reloaded. Override also method Row.Where(); to filter detail grid.</param>
+        /// <param name="isReload">If true, this grid (detail) gets reloaded. Override also method Row.Query(); to filter detail grid.</param>
         protected virtual internal void MasterIsClick(App app, GridName gridNameMaster, Row rowMaster, ref bool isReload)
         {
 
@@ -124,12 +119,12 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void DesignColumn(App app, GridNameTypeRow gridName, DesignColumn result)
+        protected virtual internal void DesignColumn(DesignColumn result, ApplicationEventArgument e)
         {
 
         }
 
-        protected virtual internal void DesignCell(App app, GridName gridName, Index index, DesignCell result)
+        protected virtual internal void DesignCell(DesignCell result, ApplicationEventArgument e)
         {
 
         }
@@ -137,16 +132,16 @@
         /// <summary>
         /// Parse user entered text.
         /// </summary>
-        protected virtual internal void CellTextParse(App app, GridName gridName, Index index, string columnName, string text)
+        protected virtual internal void TextParse(string text, ApplicationEventArgument e)
         {
-            object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(columnName).PropertyType); // Default parse text.
-            Row.GetType().GetProperty(columnName).SetValue(Row, value);
+            object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(e.ColumnName).PropertyType); // Default parse text.
+            Row.GetType().GetProperty(e.ColumnName).SetValue(Row, value);
         }
 
         /// <summary>
         /// Override for custom formatting like adding units of measurement. Called after method UtilDataAccessLayer.RowValueToText(); Inverse function is CellValueFromText.
         /// </summary>
-        protected virtual internal void CellRowValueToText(App app, GridName gridName, Index index, ref string result)
+        protected virtual internal void RowValueToText(ref string result, ApplicationEventArgument e)
         {
 
         }
@@ -154,12 +149,12 @@
         /// <summary>
         /// Override to parse custom formating like value with units of measurement. Called before user entered text is parsed with method UtilDataAccessLayer.ValueFromText(); Inverse function is CellValueToText.
         /// </summary>
-        protected virtual internal void CellRowValueFromText(App app, GridName gridName, Index index, ref string result)
+        protected virtual internal void RowValueFromText(ref string result, ApplicationEventArgument e)
         {
             
         }
 
-        protected virtual internal void ColumnWidthPercent(ref double widthPercent)
+        protected virtual internal void WidthPercent(ref double widthPercent)
         {
 
         }
@@ -167,7 +162,7 @@
         /// <summary>
         /// Returns GridName for lookup grid window. See also method Row.QueryLookup(); to filter rows.
         /// </summary>
-        protected virtual internal GridNameTypeRow CellLookup(ApplicationEventArgument e)
+        protected virtual internal GridNameTypeRow Lookup(ApplicationEventArgument e)
         {
             return null;
         }
@@ -176,7 +171,7 @@
         /// Override to handle clicked Lookup row.
         /// </summary>
         /// <param name="rowLookup">LoowUp row which has been clicked.</param>
-        protected virtual internal void CellLookupIsClick(Row rowLookup, ApplicationEventArgument e)
+        protected virtual internal void LookupIsClick(Row rowLookup, ApplicationEventArgument e)
         {
         
         }
@@ -184,7 +179,7 @@
         /// <summary>
         /// Override this method to handle button click event. For example delete button.
         /// </summary>
-        protected virtual internal void CellButtonIsClick(App app, GridName gridName, Index index, Row row, string columnName, ref bool isReload)
+        protected virtual internal void ButtonIsClick(App app, GridName gridName, Index index, Row row, string columnName, ref bool isReload)
         {
 
         }

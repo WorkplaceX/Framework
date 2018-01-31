@@ -389,7 +389,7 @@
                 // Cell of lookup which user clicked.
                 Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.ColumnNameCSharp == columnNameLookup).First();
                 string text = app.GridData.CellGet(gridNameLookup, indexLookup, columnNameLookup).Text;
-                cell.CellLookupIsClick(rowLookup, new ApplicationEventArgument(app, gridName, index, cell.ColumnNameCSharp)); // (cellLookup.ColumnNameCSharp, text);
+                cell.LookupIsClick(rowLookup, new ApplicationEventArgument(app, gridName, index, cell.ColumnNameCSharp)); // (cellLookup.ColumnNameCSharp, text);
                 //
                 app.GridData.SelectGridName = GridName.ToJson(gridName);
                 app.GridData.SelectIndex = index;
@@ -452,7 +452,7 @@
                 Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == columnName).Single();
                 if (index.Enum != IndexEnum.Filter) // No Lookup for filter column for now. It would work though for example for distinct.
                 {
-                    GridNameTypeRow gridNameLookup = cell.CellLookup(new ApplicationEventArgument(app, gridName, index, columnName));
+                    GridNameTypeRow gridNameLookup = cell.Lookup(new ApplicationEventArgument(app, gridName, index, columnName));
                     if (gridNameLookup != null)
                     {
                         gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, index);
@@ -620,7 +620,7 @@
                 bool isException = false;
                 try
                 {
-                    cell.CellButtonIsClick(app, GridName.FromJson(gridNameClick), new Index(indexClick), row, columnNameClick, ref isReload);
+                    cell.ButtonIsClick(app, GridName.FromJson(gridNameClick), new Index(indexClick), row, columnNameClick, ref isReload);
                 }
                 catch (Exception exception)
                 {
