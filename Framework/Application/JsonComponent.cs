@@ -139,8 +139,14 @@
         public Grid(Component owner, GridName gridName)
             : base(owner)
         {
+            this.GridNameInternal = gridName;
             this.GridName = Framework.Application.GridName.ToJson(gridName);
         }
+
+        /// <summary>
+        /// Gets GridNameInternal. See also class ProcessGridLoad.
+        /// </summary>
+        internal readonly GridName GridNameInternal;
 
         public readonly string GridName;
     }

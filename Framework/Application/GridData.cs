@@ -178,7 +178,7 @@
         /// <summary>
         /// Returns data row.
         /// </summary>
-        public Row Row(GridName gridName, Index index)
+        internal Row Row(GridName gridName, Index index)
         {
             var row = RowGet(gridName, index);
             switch (index.Enum)
@@ -399,19 +399,11 @@
         /// </summary>
         internal void LookupClose()
         {
-            foreach (GridName gridNameItem in cellList.Keys)
+            CellAll((GridCellInternal gridCell, ApplicationEventArgument e) =>
             {
-                foreach (Index indexItem in cellList[gridNameItem].Keys)
-                {
-                    foreach (string columnNameItem in cellList[gridNameItem][indexItem].Keys)
-                    {
-                        cellList[gridNameItem][indexItem][columnNameItem].IsLookup = false;
-                        cellList[gridNameItem][indexItem][columnNameItem].GridNameLookup = null;
-                    }
-                }
-            }
-            //
-            LoadRow(new GridNameTypeRow(null, UtilApplication.GridNameLookup), (List<Row>)null);
+                gridCell.IsLookup = false;
+                gridCell.GridNameLookup = null;
+            });
         }
 
         internal GridCellInternal CellGet(GridName gridName, Index index, string columnName)
@@ -613,7 +605,7 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        public void LoadDatabase(GridNameTypeRow gridName)
+        internal void LoadDatabase(GridNameTypeRow gridName)
         {
             LoadDatabase(gridName, null, null, false, false, null, null);
         }
@@ -700,7 +692,7 @@
         /// <summary>
         /// Load data directly from list into data grid. Returns false, if data grid has been removed.
         /// </summary>
-        public bool LoadRow(GridNameTypeRow gridName, List<Row> rowList)
+        internal bool LoadRow(GridNameTypeRow gridName, List<Row> rowList)
         {
             bool result = gridName.TypeRow != null && rowList != null;
             if (result == false)
@@ -747,7 +739,7 @@
         /// <summary>
         /// Load data from single row into data grid.
         /// </summary>
-        public void LoadRow(GridNameTypeRow gridName, Row row)
+        internal void LoadRow(GridNameTypeRow gridName, Row row)
         {
             if (row == null)
             {

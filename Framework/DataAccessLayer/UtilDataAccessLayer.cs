@@ -304,6 +304,7 @@
         {
             UtilFramework.LogDebug(string.Format("SELECT ({0})",  UtilDataAccessLayer.TypeRowToNameCSharp(typeRow)));
             //
+            UtilFramework.Assert(query.ElementType == typeRow);
             if (query == null)
             {
                 query = Query(typeRow);

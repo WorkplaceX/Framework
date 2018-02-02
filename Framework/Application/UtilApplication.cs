@@ -44,6 +44,11 @@
             {
                 this.Name = UtilDataAccessLayer.TypeRowToNameCSharp(TypeRowInternal) + "." + Name;
             }
+            //
+            if (UtilFramework.IsSubclassOf(this.GetType(), typeof(GridNameTypeRow)))
+            {
+                UtilFramework.Assert(this.TypeRowInternal != null);
+            }
         }
 
         public GridName(string name) 
@@ -54,6 +59,9 @@
 
         public string Name { get; private set; }
 
+        /// <summary>
+        /// Gets or sets TypeRowInternal. Not null only in derived class GridNameTypeRow.
+        /// </summary>
         internal readonly Type TypeRowInternal;
 
         /// <summary>
@@ -84,7 +92,7 @@
         }
 
         /// <summary>
-        /// Returns GridName or GridNameTypeRow as json string.
+        /// Returns GridName or GridNameTypeRow as json string. In case of GridNameTypeRow type information gets lost!
         /// </summary>
         internal static string ToJson(GridName gridName)
         {
@@ -543,21 +551,6 @@
 
     public static class UtilApplication
     {
-        [ThreadStatic]
-        private static GridName gridNameLookup;
-
-        public static GridName GridNameLookup
-        {
-            get
-            {
-                if (gridNameLookup == null)
-                {
-                    gridNameLookup = new GridName("Lookup");
-                }
-                return gridNameLookup;
-            }
-        }
-
         /// <summary>
         /// Bitwise (01=Select; 10=MouseOver; 11=Select and MouseOver).
         /// </summary>

@@ -287,6 +287,7 @@
             processList.Add<ProcessPageBegin>();
             // Grid
             {
+                processList.Add<ProcessGridLoad>();
                 processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridPageIndex>();

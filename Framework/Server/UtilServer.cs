@@ -20,14 +20,18 @@
         {
             string requestPathBase;
             App app = new AppSelector(typeAppDefault).Create(webController, controllerPath, out requestPathBase);
-            return await new UtilWebController(webController, controllerPath, app).WebRequest();
+            string url = webController.Request.Path; // For debug.
+            var result = await new UtilWebController(webController, controllerPath, app).WebRequest();
+            return result;
         }
 
         public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, AppSelector appSelector)
         {
             string requestPathBase;
             App app = appSelector.Create(webController, controllerPath, out requestPathBase);
-            return await new UtilWebController(webController, requestPathBase, app).WebRequest();
+            string url = webController.Request.Path; // For debug.
+            var result = await new UtilWebController(webController, requestPathBase, app).WebRequest();
+            return result;
         }
 
         public static string StreamToString(Stream stream)

@@ -157,6 +157,32 @@
     }
 
     /// <summary>
+    /// Initial load of grid.
+    /// </summary>
+    internal class ProcessGridLoad : Process
+    {
+        protected internal override void Run(App app)
+        {
+            List<GridNameTypeRow> gridNameList = new List<GridNameTypeRow>(); // GridName to load.
+            foreach (Grid grid in app.AppJson.ListAll().OfType<Grid>())
+            {
+                if (grid.GridNameInternal is GridNameTypeRow && !gridNameList.Contains(grid.GridNameInternal))
+                {
+                    gridNameList.Add((GridNameTypeRow)grid.GridNameInternal);
+                }
+            }
+            //
+            foreach (GridNameTypeRow gridName in gridNameList)
+            {
+                if (app.GridData.TypeRow(gridName) == null)
+                {
+                    app.GridData.LoadDatabase(gridName); // Keeps method LoadDatabase(); internal.
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Grid row or cell is clicked. Set IsSelect.
     /// </summary>
     internal class ProcessGridIsClick : Process
@@ -241,15 +267,18 @@
         internal static void MasterDetailIsClick(App app, GridName gridNameMaster, Row rowMaster)
         {
             GridData gridData = app.GridData;
-            foreach (GridName gridName in gridData.GridNameList())
+            foreach (GridName gridNameDetail in gridData.GridNameList())
             {
-                Type typeRow = gridData.TypeRow(gridName);
-                Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
-                bool isReload = false;
-                rowTable.MasterIsClick(app, gridNameMaster, rowMaster, ref isReload);
-                if (isReload)
+                if (gridNameMaster != gridNameDetail)
                 {
-                    gridData.LoadDatabaseReload(gridName);
+                    Type typeRow = gridData.TypeRow(gridNameDetail);
+                    Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
+                    bool isReload = false;
+                    rowTable.MasterIsClick(app, gridNameMaster, rowMaster, ref isReload);
+                    if (isReload)
+                    {
+                        gridData.LoadDatabaseReload(gridNameDetail);
+                    }
                 }
             }
         }
