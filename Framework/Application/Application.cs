@@ -40,18 +40,7 @@
         protected virtual List<FrameworkApplicationView> DbApplicationList()
         {
             List<FrameworkApplicationView> result;
-            if (UtilDataAccessLayer.IsConnectionStringFramework == false)
-            {
-                result = new List<FrameworkApplicationView>();
-                if (TypeAppDefault != null)
-                {
-                    result.Add(new FrameworkApplicationView() { Path = null, Type = UtilFramework.TypeToName(TypeAppDefault) }); // Register class AppMain programmatically, if no database connection.
-                }
-            }
-            else
-            {
-                result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match. And sql view FrameworkApplicationView exists (Execute BuildTool runSqlCreate command). 
-            }
+            result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match. And sql view FrameworkApplicationView exists (Execute BuildTool runSqlCreate command). 
             return result;
         }
 

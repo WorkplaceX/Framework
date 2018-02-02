@@ -83,17 +83,6 @@
         }
 
         /// <summary>
-        /// Gets IsConnectionStringFramework. True, if ConnectionStringFramework has been set.
-        /// </summary>
-        internal static bool IsConnectionStringFramework
-        {
-            get
-            {
-                return ConfigServer.Instance.ConnectionStringGet(false) != null;
-            }
-        }
-
-        /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
         internal static string TypeRowToNameCSharp(Type typeRow)
