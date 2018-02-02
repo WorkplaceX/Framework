@@ -2,7 +2,7 @@
 {
     using Database.dbo;
     using Framework.Application;
-    using Framework.Application.Setting;
+    using Framework.Application.Config;
     using Framework.BuildTool.DataAccessLayer;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
@@ -66,7 +66,7 @@
         internal List<FrameworkApplicationView> DbFrameworkApplicationView()
         {
             List<FrameworkApplicationView> result = new List<FrameworkApplicationView>();
-            result.Add(new FrameworkApplicationView() { Text = "Application Setting", Path = "setting", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppSetting)) });
+            result.Add(new FrameworkApplicationView() { Text = "Application Config", Path = "config", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppConfig)) });
             DbFrameworkApplicationView(result); // Override to register new applications.
             return result;
         }

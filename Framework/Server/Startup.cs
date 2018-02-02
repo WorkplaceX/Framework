@@ -39,7 +39,7 @@
 
             app.Run(async (context) => // Fallback if no URL matches.
             {
-                await context.Response.WriteAsync("<html><head><title></title></head><body><h1>Debug</h1><a href='web/setting/'>Setting</a><br /><a href='web/demo/'>Demo</a></body></html>"); 
+                await context.Response.WriteAsync("<html><head><title></title></head><body><h1>Debug</h1><a href='web/config/'>Config</a><br /><a href='web/demo/'>Demo</a></body></html>"); 
             });
         }
     }

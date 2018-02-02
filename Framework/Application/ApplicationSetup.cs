@@ -1,18 +1,18 @@
-﻿namespace Framework.Application.Setting
+﻿namespace Framework.Application.Config
 {
     using Database.dbo;
     using Framework.Component;
     using System;
 
-    public class AppSetting : App
+    public class AppConfig : App
     {
         protected internal override Type TypePageMain()
         {
-            return typeof(PageSetting);
+            return typeof(PageConfig);
         }
     }
 
-    public class PageSetting : Page
+    public class PageConfig : Page
     {
         protected internal override void InitJson(App app)
         {
