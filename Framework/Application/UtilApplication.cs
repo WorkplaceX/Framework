@@ -490,9 +490,9 @@
                     var configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
                     this.dbConfigColumnList.AddRange(configColumnList);
                 });
-                // taskLoadGrid.Start();
-                // taskLoadColumn.Start();
-                // Task.WhenAll(taskLoadGrid, taskLoadColumn).Wait();
+                taskLoadGrid.Start();
+                taskLoadColumn.Start();
+                Task.WhenAll(taskLoadGrid, taskLoadColumn).Wait();
             }
         }
 
