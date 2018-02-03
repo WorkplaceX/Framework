@@ -360,7 +360,7 @@
         }
     }
 
-    public class DesignGrid
+    public class ConfigGrid
     {
         /// <summary>
         /// Gets or sets PageRowCount. Number of rows loaded for grid.
@@ -437,15 +437,15 @@
         public string PlaceHolder;
     }
 
-    internal class Design2
+    internal class ConfigInternal
     {
-        public Design2(App app)
+        public ConfigInternal(App app)
         {
             this.App = app;
             this.typeRowNameCSharpList = new List<string>();
             this.dbConfigGridList = new List<FrameworkConfigGridView>();
             this.dbConfigColumnList = new List<FrameworkConfigColumnView>();
-            this.designGridList = new Dictionary<GridNameTypeRow, DesignGrid>();
+            this.configGridList = new Dictionary<GridNameTypeRow, ConfigGrid>();
         }
 
         public readonly App App;
@@ -518,13 +518,13 @@
 
         private readonly List<FrameworkConfigColumnView> dbConfigColumnList;
 
-        private readonly Dictionary<GridNameTypeRow, DesignGrid> designGridList;
+        private readonly Dictionary<GridNameTypeRow, ConfigGrid> configGridList;
 
-        public DesignGrid DesignGridGet(GridNameTypeRow gridName)
+        public ConfigGrid ConfigGridGet(GridNameTypeRow gridName)
         {
-            if (!this.designGridList.ContainsKey(gridName))
+            if (!this.configGridList.ContainsKey(gridName))
             {
-                DesignGrid designGrid = new DesignGrid() { PageRowCount = 15, IsInsert = true };
+                ConfigGrid configGrid = new ConfigGrid() { PageRowCount = 15, IsInsert = true };
                 string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
                 string gridNameString = gridName.NameExclusive;
                 var dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
@@ -532,26 +532,26 @@
                 {
                     if (dbConfigGrid.PageRowCountDefault != null)
                     {
-                        designGrid.PageRowCount = dbConfigGrid.PageRowCountDefault.Value;
+                        configGrid.PageRowCount = dbConfigGrid.PageRowCountDefault.Value;
                     }
                     if (dbConfigGrid.PageRowCount != null)
                     {
-                        designGrid.PageRowCount = dbConfigGrid.PageRowCount.Value;
+                        configGrid.PageRowCount = dbConfigGrid.PageRowCount.Value;
                     }
                     if (dbConfigGrid.IsInsertDefault != null)
                     {
-                        designGrid.IsInsert = dbConfigGrid.IsInsertDefault.Value;
+                        configGrid.IsInsert = dbConfigGrid.IsInsertDefault.Value;
                     }
                     if (dbConfigGrid.IsInsert != null)
                     {
-                        designGrid.IsInsert = dbConfigGrid.IsInsert.Value;
+                        configGrid.IsInsert = dbConfigGrid.IsInsert.Value;
                     }
                 }
                 Row row = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
-                row.DesignGrid(designGrid, new ApplicationEventArgument(App, gridName, null, null));
-                this.designGridList[gridName] = designGrid;
+                row.ConfigGrid(configGrid, new ApplicationEventArgument(App, gridName, null, null));
+                this.configGridList[gridName] = configGrid;
             }
-            return this.designGridList[gridName];
+            return this.configGridList[gridName];
         }
     }
 

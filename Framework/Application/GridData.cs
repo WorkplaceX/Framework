@@ -116,12 +116,12 @@
         internal GridData(App app)
         {
             this.App = app;
-            this.Design = new Design2(App);
+            this.Config = new ConfigInternal(App);
         }
 
         internal readonly App App;
 
-        internal readonly Design2 Design;
+        internal readonly ConfigInternal Config;
 
         /// <summary>
         /// Returns list of loaded GridName.
@@ -616,8 +616,8 @@
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
-                Design.LoadDatabaseConfig(gridName);
-                int pageRowCount = Design.DesignGridGet(gridName).PageRowCount;
+                Config.LoadDatabaseConfig(gridName);
+                int pageRowCount = Config.ConfigGridGet(gridName).PageRowCount;
                 rowList = UtilDataAccessLayer.Select(gridName.TypeRow, filterList, columnNameOrderBy, isOrderByDesc, 0, pageRowCount, query);
             }
             LoadRow(gridName, rowList);
@@ -707,8 +707,8 @@
                         bool isExcludeCalculatedColumn = UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without ColumnNameSql.
                         LoadDatabaseFilterList(gridName, out filterList, isExcludeCalculatedColumn);
                     }
-                    Design.LoadDatabaseConfig(gridName);
-                    int pageRowCount = Design.DesignGridGet(GridNameTypeRow(gridName)).PageRowCount;
+                    Config.LoadDatabaseConfig(gridName);
+                    int pageRowCount = Config.ConfigGridGet(GridNameTypeRow(gridName)).PageRowCount;
                     rowList = UtilDataAccessLayer.Select(typeRow, filterList, ColumnNameOrderBy, isOrderByDesc, pageIndex, pageRowCount, query);
                     if (pageIndex > 0 && rowList.Count == 0) // Page end reached.
                     {
