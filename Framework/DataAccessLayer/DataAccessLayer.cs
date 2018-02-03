@@ -134,6 +134,16 @@
 
         }
 
+        protected virtual internal void ConfigColumn(ConfigColumn result, ApplicationEventArgument e)
+        {
+
+        }
+
+        protected virtual internal void ConfigCell(ConfigCell result, ApplicationEventArgument e)
+        {
+
+        }
+
         /// <summary>
         /// Parse user entered text.
         /// </summary>

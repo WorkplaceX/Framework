@@ -373,6 +373,56 @@
         public bool IsInsert;
     }
 
+    public class ConfigColumn
+    {
+        /// <summary>
+        /// Gets or sets Text. This is the grid column header.
+        /// </summary>
+        public string Text;
+
+        /// <summary>
+        /// Gets or sets IsReadOnly. Column read only flag.
+        /// </summary>
+        public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets IsVisible. If false, data is not shown but still transfered to client.
+        /// </summary>
+        public bool IsVisible;
+
+        /// <summary>
+        /// Gets WidthPercent. This is the column width.
+        /// </summary>
+        public double WidthPercent
+        {
+            get;
+            internal set;
+        }
+    }
+
+    public class ConfigCell
+    {
+        /// <summary>
+        /// Gets or sets IsReadOnly.
+        /// </summary>
+        public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets CellEnum. If not rendered as default (null), cell can be rendered as Button, Html or FileUpload.
+        /// </summary>
+        public GridCellEnum? CellEnum;
+
+        /// <summary>
+        /// Gets or sets CssClass. Html cascading style sheets information for cell.
+        /// </summary>
+        public DesignCssClass CssClass;
+
+        /// <summary>
+        /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input cell.
+        /// </summary>
+        public string PlaceHolder;
+    }
+
     public class DesignColumn
     {
         internal DesignColumn(Cell column)
@@ -446,6 +496,7 @@
             this.dbConfigGridList = new List<FrameworkConfigGridView>();
             this.dbConfigColumnList = new List<FrameworkConfigColumnView>();
             this.configGridList = new Dictionary<GridNameTypeRow, ConfigGrid>();
+            this.configColumnList = new Dictionary<GridNameTypeRow, Dictionary<string, ConfigColumn>>();
         }
 
         public readonly App App;
@@ -512,46 +563,150 @@
         /// <summary>
         /// (TableNameCSharp). Ignores GridName and IsExist on database load.
         /// </summary>
-        private readonly List<string> typeRowNameCSharpList;
+        private List<string> typeRowNameCSharpList;
 
-        private readonly List<FrameworkConfigGridView> dbConfigGridList;
+        private List<FrameworkConfigGridView> dbConfigGridList;
 
-        private readonly List<FrameworkConfigColumnView> dbConfigColumnList;
+        private List<FrameworkConfigColumnView> dbConfigColumnList;
 
-        private readonly Dictionary<GridNameTypeRow, ConfigGrid> configGridList;
+        private Dictionary<GridNameTypeRow, ConfigGrid> configGridList;
+
+        /// <summary>
+        /// (GridName, ColumnNameCSharp, ConfigColumn).
+        /// </summary>
+        private Dictionary<GridNameTypeRow, Dictionary<string, ConfigColumn>> configColumnList;
+
+        private void AssertLoadConfig(GridNameTypeRow gridName)
+        {
+            string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
+            if (!typeRowNameCSharpList.Contains(tableNameCSharp))
+            {
+                LoadDatabaseConfig(null); // Happens, if request did not cause any grid to load.
+            }
+            UtilFramework.Assert(typeRowNameCSharpList.Contains(tableNameCSharp));
+        }
 
         public ConfigGrid ConfigGridGet(GridNameTypeRow gridName)
         {
+            AssertLoadConfig(gridName);
+            //
             if (!this.configGridList.ContainsKey(gridName))
             {
-                ConfigGrid configGrid = new ConfigGrid() { PageRowCount = 15, IsInsert = true };
+                ConfigGrid result = new ConfigGrid() // Default
+                {
+                    PageRowCount = 15,
+                    IsInsert = true
+                };
+                //
                 string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
                 string gridNameString = gridName.NameExclusive;
-                var dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
+                FrameworkConfigGridView dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
                 if (dbConfigGrid != null)
                 {
                     if (dbConfigGrid.PageRowCountDefault != null)
                     {
-                        configGrid.PageRowCount = dbConfigGrid.PageRowCountDefault.Value;
+                        result.PageRowCount = dbConfigGrid.PageRowCountDefault.Value;
                     }
                     if (dbConfigGrid.PageRowCount != null)
                     {
-                        configGrid.PageRowCount = dbConfigGrid.PageRowCount.Value;
+                        result.PageRowCount = dbConfigGrid.PageRowCount.Value;
                     }
                     if (dbConfigGrid.IsInsertDefault != null)
                     {
-                        configGrid.IsInsert = dbConfigGrid.IsInsertDefault.Value;
+                        result.IsInsert = dbConfigGrid.IsInsertDefault.Value;
                     }
                     if (dbConfigGrid.IsInsert != null)
                     {
-                        configGrid.IsInsert = dbConfigGrid.IsInsert.Value;
+                        if (dbConfigGrid.IsInsertDefault == false) // If factory setting is no insert, it cannot be overridden.
+                        {
+                            result.IsInsert = dbConfigGrid.IsInsert.Value;
+                        }
                     }
                 }
                 Row row = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
-                row.ConfigGrid(configGrid, new ApplicationEventArgument(App, gridName, null, null));
-                this.configGridList[gridName] = configGrid;
+                // Override programmatically
+                row.ConfigGrid(result, new ApplicationEventArgument(App, gridName, null, null));
+                //
+                this.configGridList[gridName] = result;
             }
             return this.configGridList[gridName];
+        }
+
+        public ConfigColumn ConfigColumnGet(GridNameTypeRow gridName, Cell column)
+        {
+            AssertLoadConfig(gridName);
+            //
+            if (!this.configColumnList.ContainsKey(gridName))
+            {
+                this.configColumnList[gridName] = new Dictionary<string, ConfigColumn>();
+            }
+            if (!this.configColumnList[gridName].ContainsKey(column.ColumnNameCSharp))
+            {
+                ConfigColumn result = new ConfigColumn() // Default
+                {
+                    Text = column.ColumnNameCSharp,
+                    IsVisible = UtilApplication.ConfigColumnNameSqlIsId(column.ColumnNameSql) == false
+                };
+                //
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
+                string gridNameString = gridName.NameExclusive;
+                var dbList = dbConfigColumnList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString);
+                FrameworkConfigColumnView dbConfigColumn = dbList.Where(item => item.ColumnNameCSharp == column.ColumnNameCSharp && item.TableIsExist == true && item.GridIsExist == true && item.ColumnIsExist == true).SingleOrDefault();
+                if (dbConfigColumn != null)
+                {
+                    if (dbConfigColumn.TextDefault != null)
+                    {
+                        result.Text = dbConfigColumn.TextDefault;
+                    }
+                    if (dbConfigColumn.Text != null)
+                    {
+                        result.Text = dbConfigColumn.Text;
+                    }
+                    if (dbConfigColumn.IsVisibleDefault != null)
+                    {
+                        result.IsVisible = dbConfigColumn.IsVisibleDefault.Value;
+                    }
+                    if (dbConfigColumn.IsVisible != null)
+                    {
+                        if (dbConfigColumn.IsVisibleDefault == false) // // If factory setting is hide, it cannot be overridden.
+                        {
+                            result.IsVisible = dbConfigColumn.IsVisible.Value;
+                        }
+                    }
+                }
+                // Override programmatically
+                column.ConfigColumn(result, new ApplicationEventArgument(App, gridName, null, null));
+                //
+                this.configColumnList[gridName][column.ColumnNameCSharp] = result;
+            }
+            return this.configColumnList[gridName][column.ColumnNameCSharp];
+        }
+
+        internal ConfigCell ConfigCellGet(GridNameTypeRow gridName, Index index, Cell cell)
+        {
+            AssertLoadConfig(gridName);
+            //
+            ConfigCell result = new ConfigCell() // Default
+            {
+                IsReadOnly = false,
+                CellEnum = null, // GridCellEnum.None,
+                CssClass = new DesignCssClass(),
+                PlaceHolder = null
+            };
+            switch (index.Enum)
+            {
+                case IndexEnum.Filter:
+                    result.PlaceHolder = "Search";
+                    result.CssClass.Add("gridFilter");
+                    break;
+                case IndexEnum.New:
+                    result.PlaceHolder = "New";
+                    result.CssClass.Add("gridNew");
+                    break;
+            }
+            // Override programmatically
+            cell.ConfigCell(result, new ApplicationEventArgument(App, gridName, index, cell.ColumnNameCSharp));
+            return result;
         }
     }
 

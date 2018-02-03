@@ -178,8 +178,11 @@
 
         private Type TypeRowGet(GridName gridName)
         {
-            Type result;
-            typeRowList.TryGetValue(gridName, out result);
+            Type result = null;
+            if (gridName != null)
+            {
+                typeRowList.TryGetValue(gridName, out result);
+            }
             return result;
         }
 
@@ -1130,10 +1133,11 @@
         /// <summary>
         /// Returns row's columns.
         /// </summary>
-        private static List<GridColumn> TypeRowToGridColumn(App app, GridNameTypeRow gridName, Design design)
+        private static List<GridColumn> TypeRowToGridColumn(App app, GridNameTypeRow gridName)
         {
             var result = new List<GridColumn>();
             //
+            var config = app.GridData.Config;
             var columnList = UtilDataAccessLayer.ColumnList(gridName.TypeRow);
             double widthPercentTotal = 0;
             bool isLast = false;
@@ -1141,7 +1145,7 @@
             List<Cell> columnIsVisibleList = new List<Cell>();
             foreach (Cell column in columnList)
             {
-                bool isVisible = design.ColumnGet(app, gridName, column).IsVisible;
+                bool isVisible = config.ConfigColumnGet(gridName, column).IsVisible;
                 if (isVisible)
                 {
                     columnIsVisibleList.Add(column);
@@ -1152,7 +1156,7 @@
             foreach (Cell column in columnList)
             {
                 // Text
-                string text = design.ColumnGet(app, gridName, column).Text;
+                string text = config.ConfigColumnGet(gridName, column).Text;
                 //
                 bool isVisible = columnIsVisibleList.Contains(column);
                 if (isVisible)
@@ -1231,10 +1235,10 @@
         /// </summary>
         private void SaveJsonIsButtonHtmlFileUpload(GridNameTypeRow gridName, Index index, Cell cell, GridCell gridCell, Design design)
         {
-            DesignCell designCell = design.CellGet(App, gridName, cell);
+            ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridName, index, cell);
             //
-            gridCell.CellEnum = designCell.CellEnum;
-            gridCell.CssClass = designCell.CssClass.ToHtml();
+            gridCell.CellEnum = configCell.CellEnum;
+            gridCell.CssClass = configCell.CssClass.ToHtml();
         }
 
         /// <summary>
@@ -1279,7 +1283,7 @@
                 {
                     gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
                 }
-                gridDataJson.ColumnList[GridName.ToJson(gridName)] = TypeRowToGridColumn(App, gridNameTypeRow, design);
+                gridDataJson.ColumnList[GridName.ToJson(gridName)] = TypeRowToGridColumn(App, gridNameTypeRow);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {
@@ -1329,6 +1333,7 @@
                             }
                             string textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
                             DesignCell designCell = design.CellGet(App, gridNameTypeRow, cell);
+                            ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameTypeRow, index, cell);
                             if (designCell.CellEnum == GridCellEnum.Button && textJson == null)
                             {
                                 textJson = "Button"; // Default text for button.
