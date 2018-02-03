@@ -40,7 +40,9 @@
         protected virtual List<FrameworkApplicationView> DbApplicationList()
         {
             List<FrameworkApplicationView> result;
-            result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match. And sql view FrameworkApplicationView exists (Execute BuildTool runSqlCreate command). 
+            result = new List<FrameworkApplicationView>();
+            result.Add(new FrameworkApplicationView() { Type = "Application.AppDemo" });
+            // result = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match. And sql view FrameworkApplicationView exists (Execute BuildTool runSqlCreate command). 
             return result;
         }
 
