@@ -57,6 +57,11 @@
         {
             return UtilDataAccessLayer.Query(GetType());
         }
+
+        protected virtual internal void DesignGrid(DesignGrid result, ApplicationEventArgument e)
+        {
+
+        }
     }
 
     /// <summary>

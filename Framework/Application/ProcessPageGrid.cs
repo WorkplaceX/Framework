@@ -163,20 +163,21 @@
     {
         protected internal override void Run(App app)
         {
-            List<GridNameTypeRow> gridNameList = new List<GridNameTypeRow>(); // GridName to load.
+            List<GridNameTypeRow> gridNameTypeRowList = new List<GridNameTypeRow>(); // Grids to load.
             foreach (Grid grid in app.AppJson.ListAll().OfType<Grid>())
             {
-                if (grid.GridNameInternal is GridNameTypeRow && !gridNameList.Contains(grid.GridNameInternal))
+                GridNameTypeRow gridNameTypeRow = grid.GridNameInternal as GridNameTypeRow;
+                if (gridNameTypeRow != null && !gridNameTypeRowList.Contains(gridNameTypeRow))
                 {
-                    gridNameList.Add((GridNameTypeRow)grid.GridNameInternal);
+                    gridNameTypeRowList.Add(gridNameTypeRow);
                 }
             }
             //
-            foreach (GridNameTypeRow gridName in gridNameList)
+            foreach (GridNameTypeRow gridNameTypeRow in gridNameTypeRowList)
             {
-                if (app.GridData.TypeRow(gridName) == null)
+                if (app.GridData.TypeRow(gridNameTypeRow) == null) // Not yet loaded.
                 {
-                    app.GridData.LoadDatabase(gridName); // Keeps method LoadDatabase(); internal.
+                    app.GridData.LoadDatabase(gridNameTypeRow); // Keeps method LoadDatabase(); internal.
                 }
             }
         }

@@ -116,9 +116,12 @@
         internal GridData(App app)
         {
             this.App = app;
+            this.Design = new Design2(App);
         }
 
         internal readonly App App;
+
+        internal readonly Design2 Design;
 
         /// <summary>
         /// Returns list of loaded GridName.
@@ -155,7 +158,21 @@
         }
 
         /// <summary>
-        /// (GridName, TypeRow)
+        /// Returns GridNameTypeRow. This is GridName with TypeRow definition.
+        /// </summary>
+        internal GridNameTypeRow GridNameTypeRow(GridName gridName)
+        {
+            GridNameTypeRow result = null;
+            Type typeRow = TypeRow(gridName);
+            if (typeRow != null)
+            {
+                result = new GridNameTypeRow(typeRow, gridName);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// (GridName, TypeRow). See also: GridDataJson.GridQueryList.
         /// </summary>
         private Dictionary<GridName, Type> typeRowList = new Dictionary<GridName, Type>();
 
@@ -173,6 +190,17 @@
             {
                 typeRowList.Remove(gridName);
             }
+        }
+
+        internal List<GridNameTypeRow> GridNameTypeRowList()
+        {
+            List<GridNameTypeRow> result = new List<GridNameTypeRow>();
+            foreach (var item in typeRowList)
+            {
+                GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(item.Value, item.Key);
+                result.Add(gridNameTypeRow);
+            }
+            return result;
         }
 
         /// <summary>
@@ -588,7 +616,9 @@
             List<Row> rowList = new List<Row>();
             if (query != null)
             {
-                rowList = UtilDataAccessLayer.Select(gridName.TypeRow, filterList, columnNameOrderBy, isOrderByDesc, 0, 15, query);
+                Design.LoadDatabaseConfig(gridName);
+                int pageRowCount = Design.DesignGridGet(gridName).PageRowCount;
+                rowList = UtilDataAccessLayer.Select(gridName.TypeRow, filterList, columnNameOrderBy, isOrderByDesc, 0, pageRowCount, query);
             }
             LoadRow(gridName, rowList);
         }
@@ -677,7 +707,9 @@
                         bool isExcludeCalculatedColumn = UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without ColumnNameSql.
                         LoadDatabaseFilterList(gridName, out filterList, isExcludeCalculatedColumn);
                     }
-                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, ColumnNameOrderBy, isOrderByDesc, pageIndex, 15, query);
+                    Design.LoadDatabaseConfig(gridName);
+                    int pageRowCount = Design.DesignGridGet(GridNameTypeRow(gridName)).PageRowCount;
+                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, ColumnNameOrderBy, isOrderByDesc, pageIndex, pageRowCount, query);
                     if (pageIndex > 0 && rowList.Count == 0) // Page end reached.
                     {
                         queryList[gridName].PageIndex -= 1;

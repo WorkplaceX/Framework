@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using System.Threading.Tasks;
 
     public class ApplicationEventArgument
     {
@@ -359,6 +360,19 @@
         }
     }
 
+    public class DesignGrid
+    {
+        /// <summary>
+        /// Gets or sets PageRowCount. Number of rows loaded for grid.
+        /// </summary>
+        public int PageRowCount;
+
+        /// <summary>
+        /// Gets or sets IsInsert. If true, grid allows insert of new row.
+        /// </summary>
+        public bool IsInsert;
+    }
+
     public class DesignColumn
     {
         internal DesignColumn(Cell column)
@@ -421,6 +435,124 @@
         /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input cell.
         /// </summary>
         public string PlaceHolder;
+    }
+
+    internal class Design2
+    {
+        public Design2(App app)
+        {
+            this.App = app;
+            this.typeRowNameCSharpList = new List<string>();
+            this.dbConfigGridList = new List<FrameworkConfigGridView>();
+            this.dbConfigColumnList = new List<FrameworkConfigColumnView>();
+            this.designGridList = new Dictionary<GridNameTypeRow, DesignGrid>();
+        }
+
+        public readonly App App;
+
+        private string GridNameToTypeRowNameCSharp(GridName gridName)
+        {
+            string result = null;
+            GridNameTypeRow gridNameTypeRow = App.GridData.GridNameTypeRow(gridName);
+            if (gridNameTypeRow != null)
+            {
+                result = UtilDataAccessLayer.TypeRowToNameCSharp(gridNameTypeRow.TypeRow);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Load Config for GridName and all other known GridName.
+        /// </summary>
+        public void LoadDatabaseConfig(GridName gridName)
+        {
+            // Add gridName
+            List<string> typeRowNameCSharpList = new List<string>();
+            string typeRowNameCSharp = GridNameToTypeRowNameCSharp(gridName);
+            typeRowNameCSharpList.Add(typeRowNameCSharp);
+            // Add Grid (Also not yet loaded Grid)
+            foreach (Grid grid in App.AppJson.ListAll().OfType<Grid>())
+            {
+                GridNameTypeRow gridNameTypeRow = grid.GridNameInternal as GridNameTypeRow;
+                if (gridNameTypeRow != null)
+                {
+                    typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridNameTypeRow.TypeRow);
+                    typeRowNameCSharpList.Add(typeRowNameCSharp);
+                }
+            }
+            // In GridData defined grids.
+            foreach (GridNameTypeRow gridNameTypeRow in App.GridData.GridNameTypeRowList())
+            {
+                typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridNameTypeRow.TypeRow);
+                typeRowNameCSharpList.Add(typeRowNameCSharp);
+            }
+            //
+            typeRowNameCSharpList = typeRowNameCSharpList.Except(this.typeRowNameCSharpList).Distinct().Where(item => item != null).ToList(); // Exclude already loaded TableNameCSharp
+            this.typeRowNameCSharpList.AddRange(typeRowNameCSharpList);
+            //
+            if (typeRowNameCSharpList.Count > 0)
+            {
+                // Load grid config and column config in parallel.
+                Task taskLoadGrid = new Task(() =>
+                {
+                    var configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => typeRowNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
+                    this.dbConfigGridList.AddRange(configGridList);
+                });
+                Task taskLoadColumn = new Task(() =>
+                {
+                    var configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => typeRowNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
+                    this.dbConfigColumnList.AddRange(configColumnList);
+                });
+                taskLoadGrid.Start();
+                taskLoadColumn.Start();
+                Task.WhenAll(taskLoadGrid, taskLoadColumn).Wait();
+            }
+        }
+
+        /// <summary>
+        /// (TableNameCSharp). Ignores GridName and IsExist on database load.
+        /// </summary>
+        private readonly List<string> typeRowNameCSharpList;
+
+        private readonly List<FrameworkConfigGridView> dbConfigGridList;
+
+        private readonly List<FrameworkConfigColumnView> dbConfigColumnList;
+
+        private readonly Dictionary<GridNameTypeRow, DesignGrid> designGridList;
+
+        public DesignGrid DesignGridGet(GridNameTypeRow gridName)
+        {
+            if (!this.designGridList.ContainsKey(gridName))
+            {
+                DesignGrid designGrid = new DesignGrid() { PageRowCount = 15, IsInsert = true };
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
+                string gridNameString = gridName.NameExclusive;
+                var dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
+                if (dbConfigGrid != null)
+                {
+                    if (dbConfigGrid.PageRowCountDefault != null)
+                    {
+                        designGrid.PageRowCount = dbConfigGrid.PageRowCountDefault.Value;
+                    }
+                    if (dbConfigGrid.PageRowCount != null)
+                    {
+                        designGrid.PageRowCount = dbConfigGrid.PageRowCount.Value;
+                    }
+                    if (dbConfigGrid.IsInsertDefault != null)
+                    {
+                        designGrid.IsInsert = dbConfigGrid.IsInsertDefault.Value;
+                    }
+                    if (dbConfigGrid.IsInsert != null)
+                    {
+                        designGrid.IsInsert = dbConfigGrid.IsInsert.Value;
+                    }
+                }
+                Row row = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
+                row.DesignGrid(designGrid, new ApplicationEventArgument(App, gridName, null, null));
+                this.designGridList[gridName] = designGrid;
+            }
+            return this.designGridList[gridName];
+        }
     }
 
     public class Design
