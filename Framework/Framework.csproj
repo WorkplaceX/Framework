@@ -28,6 +28,9 @@
     <None Update="Server\wwwroot\GridOk.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Server\wwwroot\GridReadOnly.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Server\wwwroot\GridSave.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

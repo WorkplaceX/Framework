@@ -604,9 +604,21 @@
                     }
                     if (dbConfigColumn.IsVisible != null)
                     {
-                        if (dbConfigColumn.IsVisibleDefault == false) // // If factory setting is hide, it cannot be overridden.
+                        if (dbConfigColumn.IsVisibleDefault == false) // If factory setting is hide, it cannot be overridden.
                         {
                             result.IsVisible = dbConfigColumn.IsVisible.Value;
+                        }
+                    }
+                    // IsReadOnly
+                    if (dbConfigColumn.IsReadOnlyDefault != null)
+                    {
+                        result.IsReadOnly = dbConfigColumn.IsReadOnlyDefault.Value;
+                    }
+                    if (dbConfigColumn.IsReadOnly != null)
+                    {
+                        if (dbConfigColumn.IsReadOnlyDefault != true) // If factory setting IsReadOnly, it cannot be overridden.
+                        {
+                            result.IsReadOnly = dbConfigColumn.IsReadOnly.Value;
                         }
                     }
                 }
@@ -640,8 +652,25 @@
                     result.CssClass.Add("gridNew");
                     break;
             }
+            ConfigColumn configColumn = ConfigColumnGet(gridName, cell);
+            if (configColumn.IsReadOnly)
+            {
+                result.IsReadOnly = true; // If column IsReadOnly, every cell IsReadOnly.
+            }
+            if (result.IsReadOnly)
+            {
+                if (index.Enum != IndexEnum.Filter) // No readonly for filter!
+                {
+                    result.CellEnum = GridCellEnum.Html;
+                    result.CssClass.Remove("gridNew");
+                    result.CssClass.Add("gridReadOnly");
+                }
+            }
             // Override programmatically
-            cell.ConfigCell(result, new ApplicationEventArgument(App, gridName, index, cell.ColumnNameCSharp));
+            if (index.Enum != IndexEnum.Filter)
+            {
+                cell.ConfigCell(result, new ApplicationEventArgument(App, gridName, index, cell.ColumnNameCSharp));
+            }
             return result;
         }
     }

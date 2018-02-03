@@ -129,6 +129,14 @@ img {
     background-position: right;
 }
 
+.gridReadOnly {
+    padding-right: 18px;
+    background-image: url('/GridReadOnly.png'); /* fallback */
+    background-repeat: no-repeat;
+    background-position: right;
+    color: gray;
+}
+
 .gridRowFilter {
     background-image: linear-gradient(to bottom, #808080, #fff); /* W3C */
 }
