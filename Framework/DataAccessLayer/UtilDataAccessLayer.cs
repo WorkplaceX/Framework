@@ -85,7 +85,7 @@
         /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace. This is for example identical to FrameworkConfigGridView.TableNameCSharp.
         /// </summary>
-        internal static string TypeRowToNameCSharp(Type typeRow)
+        internal static string TypeRowToTableNameCSharp(Type typeRow)
         {
             string result = null;
             if (typeRow != null)
@@ -121,12 +121,12 @@
         /// <summary>
         /// Returns row type. Searches also for Framework tables.
         /// </summary>
-        /// <param name="name">For example: "Database.dbo.User".</param>
-        internal static Type TypeRowFromName(string name, Type typeRowInAssembly)
+        /// <param name="tableNameCSharp">For example: "Database.dbo.User".</param>
+        internal static Type TypeRowFromTableNameCSharp(string tableNameCSharp, Type typeRowInAssembly)
         {
-            name = "Database." + name;
+            tableNameCSharp = "Database." + tableNameCSharp;
             Type[] typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeRowInAssembly);
-            Type result = UtilFramework.TypeFromName(name, typeInAssemblyList);
+            Type result = UtilFramework.TypeFromName(tableNameCSharp, typeInAssemblyList);
             UtilFramework.Assert(UtilFramework.IsSubclassOf(result, typeof(Row)), "Wrong type!");
             return result;
         }
@@ -152,7 +152,7 @@
             List<Cell> result = new List<Cell>();
             if (typeRow != null)
             {
-                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                 foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(typeRow))
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
@@ -238,7 +238,7 @@
 
         public static IQueryable Query(Type typeRow)
         {
-            UtilFramework.LogDebug(string.Format("QUERY ({0})", UtilDataAccessLayer.TypeRowToNameCSharp(typeRow)));
+            UtilFramework.LogDebug(string.Format("QUERY ({0})", UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow)));
             //
             DbContext dbContext = DbContext(typeRow);
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // For SQL views. No primary key.
@@ -302,7 +302,7 @@
 
         internal static List<Row> Select(Type typeRow, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, int pageIndex, int pageRowCount, IQueryable query = null)
         {
-            UtilFramework.LogDebug(string.Format("SELECT ({0})",  UtilDataAccessLayer.TypeRowToNameCSharp(typeRow)));
+            UtilFramework.LogDebug(string.Format("SELECT ({0})",  UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow)));
             //
             UtilFramework.Assert(query.ElementType == typeRow);
             if (query == null)
@@ -355,7 +355,7 @@
         /// </summary>
         public static void Update(Row row, Row rowNew)
         {
-            UtilFramework.LogDebug(string.Format("UPDATE ({0})", UtilDataAccessLayer.TypeRowToNameCSharp(row.GetType())));
+            UtilFramework.LogDebug(string.Format("UPDATE ({0})", UtilDataAccessLayer.TypeRowToTableNameCSharp(row.GetType())));
             //
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             if (!IsRowEqual(row, rowNew)) // Rows are equal for example after user reverted input after error.
@@ -373,7 +373,7 @@
         /// </summary>
         public static void Insert(Row row)
         {
-            UtilFramework.LogDebug(string.Format("INSERT ({0})", UtilDataAccessLayer.TypeRowToNameCSharp(row.GetType())));
+            UtilFramework.LogDebug(string.Format("INSERT ({0})", UtilDataAccessLayer.TypeRowToTableNameCSharp(row.GetType())));
             //
             Row rowClone = UtilDataAccessLayer.RowClone(row);
             DbContext dbContext = DbContext(row.GetType());

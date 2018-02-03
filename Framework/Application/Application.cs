@@ -126,34 +126,6 @@
         public FrameworkApplicationView DbFrameworkApplication { get; private set; }
 
         /// <summary>
-        /// (TypeRowName, Config)
-        /// </summary>
-        private Dictionary<string, List<FrameworkConfigColumnView>> cacheDbConfigColumnList = new Dictionary<string, List<FrameworkConfigColumnView>>();
-
-        /// <summary>
-        /// Returns ConfigColumnList for a grid.
-        /// </summary>
-        protected virtual internal List<FrameworkConfigColumnView> DbConfigColumnList(GridName gridName)
-        {
-            List<FrameworkConfigColumnView> result;
-            string typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRowInternal);
-            if (cacheDbConfigColumnList.ContainsKey(typeRowNameCSharp))
-            {
-                result = cacheDbConfigColumnList[typeRowNameCSharp];
-            }
-            else
-            {
-                result = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => 
-                    item.GridName == gridName.NameExclusive &
-                    item.TableNameCSharp == typeRowNameCSharp & 
-                    item.TableIsExist == true &
-                    item.ColumnIsExist == true).ToList();
-                cacheDbConfigColumnList[typeRowNameCSharp] = result;
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
         /// </summary>
         virtual internal Type TypeComponentInNamespace()
@@ -173,32 +145,6 @@
         /// Gets or sets AppJson. This is the application root json component being transferred between server and client.
         /// </summary>
         public AppJson AppJson { get; private set; }
-
-        /// <summary>
-        /// Define for example grid column header globaly. See also method Cell.DesignColumn();
-        /// </summary>
-        protected virtual internal void DesignColumn(GridNameTypeRow gridName, DesignColumn result)
-        {
-            
-        }
-
-        /// <summary>
-        /// Define for example grid column header globaly. See also method Cell.DesignCell();
-        /// </summary>
-        protected virtual internal void DesignCell(GridName gridName, Index index, Cell cell, DesignCell result)
-        {
-            switch (index.Enum)
-            {
-                case IndexEnum.Filter:
-                    result.PlaceHolder = "Search";
-                    result.CssClass.Add("gridFilter");
-                    break;
-                case IndexEnum.New:
-                    result.PlaceHolder = "New";
-                    result.CssClass.Add("gridNew");
-                    break;
-            }
-        }
 
         /// <summary>
         /// Called after method UtilDataAccessLayer.RowValueToText();

@@ -43,7 +43,7 @@
             //
             if (isNameExclusive == false)
             {
-                this.Name = UtilDataAccessLayer.TypeRowToNameCSharp(TypeRowInternal) + "." + Name;
+                this.Name = UtilDataAccessLayer.TypeRowToTableNameCSharp(TypeRowInternal) + "." + Name;
             }
             //
             if (UtilFramework.IsSubclassOf(this.GetType(), typeof(GridNameTypeRow)))
@@ -311,7 +311,7 @@
     /// <summary>
     /// Html cascading style sheets information.
     /// </summary>
-    public class DesignCssClass
+    public class ConfigCssClass
     {
         private List<string> valueList = new List<string>();
 
@@ -415,71 +415,7 @@
         /// <summary>
         /// Gets or sets CssClass. Html cascading style sheets information for cell.
         /// </summary>
-        public DesignCssClass CssClass;
-
-        /// <summary>
-        /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input cell.
-        /// </summary>
-        public string PlaceHolder;
-    }
-
-    public class DesignColumn
-    {
-        internal DesignColumn(Cell column)
-        {
-            this.ColumnInternal = column;
-        }
-
-        internal readonly Cell ColumnInternal;
-
-        /// <summary>
-        /// Gets or sets Text. This is the grid column header.
-        /// </summary>
-        public string Text;
-
-        /// <summary>
-        /// Gets or sets IsReadOnly. Column read only flag.
-        /// </summary>
-        public bool IsReadOnly;
-
-        /// <summary>
-        /// Gets or sets IsVisible. If false, data is not shown but still transfered to client.
-        /// </summary>
-        public bool IsVisible;
-
-        /// <summary>
-        /// Gets WidthPercent. This is the column width.
-        /// </summary>
-        public double WidthPercent
-        {
-            get;
-            internal set;
-        }
-
-        internal DesignCell DesignCell;
-    }
-
-    public class DesignCell
-    {
-        public DesignCell()
-        {
-            this.CssClass = new DesignCssClass();
-        }
-
-        /// <summary>
-        /// Gets or sets IsReadOnly.
-        /// </summary>
-        public bool IsReadOnly;
-
-        /// <summary>
-        /// Gets or sets CellEnum. If not rendered as default (null), cell can be rendered as Button, Html or FileUpload.
-        /// </summary>
-        public GridCellEnum? CellEnum;
-
-        /// <summary>
-        /// Gets or sets CssClass. Html cascading style sheets information for cell.
-        /// </summary>
-        public DesignCssClass CssClass;
+        public ConfigCssClass CssClass;
 
         /// <summary>
         /// Gets or sets PlaceHolder. For example "Search" for filter or "New" for new row, when no text is displayed in input cell.
@@ -492,7 +428,7 @@
         public ConfigInternal(App app)
         {
             this.App = app;
-            this.typeRowNameCSharpList = new List<string>();
+            this.tableNameCSharpList = new List<string>();
             this.dbConfigGridList = new List<FrameworkConfigGridView>();
             this.dbConfigColumnList = new List<FrameworkConfigColumnView>();
             this.configGridList = new Dictionary<GridNameTypeRow, ConfigGrid>();
@@ -501,13 +437,13 @@
 
         public readonly App App;
 
-        private string GridNameToTypeRowNameCSharp(GridName gridName)
+        private string GridNameToTableNameCSharp(GridName gridName)
         {
             string result = null;
             GridNameTypeRow gridNameTypeRow = App.GridData.GridNameTypeRow(gridName);
             if (gridNameTypeRow != null)
             {
-                result = UtilDataAccessLayer.TypeRowToNameCSharp(gridNameTypeRow.TypeRow);
+                result = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameTypeRow.TypeRow);
             }
             return result;
         }
@@ -518,40 +454,40 @@
         public void LoadDatabaseConfig(GridName gridName)
         {
             // Add gridName
-            List<string> typeRowNameCSharpList = new List<string>();
-            string typeRowNameCSharp = GridNameToTypeRowNameCSharp(gridName);
-            typeRowNameCSharpList.Add(typeRowNameCSharp);
+            List<string> tableNameCSharpList = new List<string>();
+            string tableNameCSharp = GridNameToTableNameCSharp(gridName);
+            tableNameCSharpList.Add(tableNameCSharp);
             // Add Grid (Also not yet loaded Grid)
             foreach (Grid grid in App.AppJson.ListAll().OfType<Grid>())
             {
                 GridNameTypeRow gridNameTypeRow = grid.GridNameInternal as GridNameTypeRow;
                 if (gridNameTypeRow != null)
                 {
-                    typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridNameTypeRow.TypeRow);
-                    typeRowNameCSharpList.Add(typeRowNameCSharp);
+                    tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameTypeRow.TypeRow);
+                    tableNameCSharpList.Add(tableNameCSharp);
                 }
             }
             // In GridData defined grids.
             foreach (GridNameTypeRow gridNameTypeRow in App.GridData.GridNameTypeRowList())
             {
-                typeRowNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridNameTypeRow.TypeRow);
-                typeRowNameCSharpList.Add(typeRowNameCSharp);
+                tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameTypeRow.TypeRow);
+                tableNameCSharpList.Add(tableNameCSharp);
             }
             //
-            typeRowNameCSharpList = typeRowNameCSharpList.Except(this.typeRowNameCSharpList).Distinct().Where(item => item != null).ToList(); // Exclude already loaded TableNameCSharp
-            this.typeRowNameCSharpList.AddRange(typeRowNameCSharpList);
+            tableNameCSharpList = tableNameCSharpList.Except(this.tableNameCSharpList).Distinct().Where(item => item != null).ToList(); // Exclude already loaded TableNameCSharp
+            this.tableNameCSharpList.AddRange(tableNameCSharpList);
             //
-            if (typeRowNameCSharpList.Count > 0)
+            if (tableNameCSharpList.Count > 0)
             {
                 // Load grid config and column config in parallel.
                 Task taskLoadGrid = new Task(() =>
                 {
-                    var configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => typeRowNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
+                    var configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
                     this.dbConfigGridList.AddRange(configGridList);
                 });
                 Task taskLoadColumn = new Task(() =>
                 {
-                    var configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => typeRowNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
+                    var configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
                     this.dbConfigColumnList.AddRange(configColumnList);
                 });
                 taskLoadGrid.Start();
@@ -563,7 +499,7 @@
         /// <summary>
         /// (TableNameCSharp). Ignores GridName and IsExist on database load.
         /// </summary>
-        private List<string> typeRowNameCSharpList;
+        private List<string> tableNameCSharpList;
 
         private List<FrameworkConfigGridView> dbConfigGridList;
 
@@ -578,12 +514,12 @@
 
         private void AssertLoadConfig(GridNameTypeRow gridName)
         {
-            string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
-            if (!typeRowNameCSharpList.Contains(tableNameCSharp))
+            string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
+            if (!tableNameCSharpList.Contains(tableNameCSharp))
             {
                 LoadDatabaseConfig(null); // Happens, if request did not cause any grid to load.
             }
-            UtilFramework.Assert(typeRowNameCSharpList.Contains(tableNameCSharp));
+            UtilFramework.Assert(tableNameCSharpList.Contains(tableNameCSharp));
         }
 
         public ConfigGrid ConfigGridGet(GridNameTypeRow gridName)
@@ -598,7 +534,7 @@
                     IsInsert = true
                 };
                 //
-                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
                 string gridNameString = gridName.NameExclusive;
                 FrameworkConfigGridView dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
                 if (dbConfigGrid != null)
@@ -648,7 +584,7 @@
                     IsVisible = UtilApplication.ConfigColumnNameSqlIsId(column.ColumnNameSql) == false
                 };
                 //
-                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridName.TypeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
                 string gridNameString = gridName.NameExclusive;
                 var dbList = dbConfigColumnList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString);
                 FrameworkConfigColumnView dbConfigColumn = dbList.Where(item => item.ColumnNameCSharp == column.ColumnNameCSharp && item.TableIsExist == true && item.GridIsExist == true && item.ColumnIsExist == true).SingleOrDefault();
@@ -690,7 +626,7 @@
             {
                 IsReadOnly = false,
                 CellEnum = null, // GridCellEnum.None,
-                CssClass = new DesignCssClass(),
+                CssClass = new ConfigCssClass(),
                 PlaceHolder = null
             };
             switch (index.Enum)
@@ -707,132 +643,6 @@
             // Override programmatically
             cell.ConfigCell(result, new ApplicationEventArgument(App, gridName, index, cell.ColumnNameCSharp));
             return result;
-        }
-    }
-
-    public class Design
-    {
-        internal Design(App app)
-        {
-            this.App = app;
-        }
-
-        internal readonly App App;
-
-        private GridNameTypeRow gridName;
-
-        /// <summary>
-        /// (ColumnNameCSharp, Column).
-        /// </summary>
-        Dictionary<string, DesignColumn> designColumnList = new Dictionary<string, DesignColumn>();
-
-        internal void ColumnInit(App app, GridNameTypeRow gridName)
-        {
-            UtilFramework.Assert(app == App);
-            this.gridName = gridName;
-            //
-            designColumnList = new Dictionary<string, DesignColumn>();
-            var columnList = UtilDataAccessLayer.ColumnList(gridName.TypeRow);
-            foreach (Cell column in columnList)
-            {
-                designColumnList[column.ColumnNameCSharp] = new DesignColumn(column);
-            }
-            // Config from Db
-            List<FrameworkConfigColumnView> configColumnList = app.DbConfigColumnList(gridName);
-            // IsVisible
-            foreach (DesignColumn designColumn in designColumnList.Values)
-            {
-                FrameworkConfigColumnView configColumn = configColumnList.Where(item => item.ColumnNameCSharp == designColumn.ColumnInternal.ColumnNameCSharp).SingleOrDefault();
-                // IsVisible
-                bool isVisible = UtilApplication.ConfigColumnNameSqlIsId(designColumn.ColumnInternal.ColumnNameSql) == false;
-                if (configColumn != null)
-                {
-                    if (configColumn.IsVisibleDefault != null)
-                    {
-                        isVisible = configColumn.IsVisibleDefault.Value;
-                    }
-                    if (configColumn.IsVisible != null)
-                    {
-                        isVisible = configColumn.IsVisible.Value;
-                    }
-                }
-                designColumn.IsVisible = isVisible;
-                // Text
-                string text = designColumn.ColumnInternal.ColumnNameSql;
-                if (text == null)
-                {
-                    text = designColumn.ColumnInternal.ColumnNameCSharp; // Calculated column has no ColumnNameSql.
-                }
-                if (configColumn != null)
-                {
-                    if (configColumn.TextDefault != null)
-                    {
-                        text = configColumn.TextDefault;
-                    }
-                    if (configColumn.Text != null)
-                    {
-                        text = configColumn.Text;
-                    }
-                }
-                designColumn.Text = text;
-            }
-            // Override App
-            foreach (DesignColumn designColumn in designColumnList.Values)
-            {
-                app.DesignColumn(gridName, designColumn);
-            }
-            // Override Column
-            foreach (DesignColumn designColumn in designColumnList.Values)
-            {
-                designColumn.ColumnInternal.DesignColumn(designColumn, new ApplicationEventArgument(app, gridName, null, null));
-            }
-        }
-
-        internal void CellInit(App app, GridNameTypeRow gridName, Row row, Index index)
-        {
-            foreach (DesignColumn designColumn in designColumnList.Values)
-            {
-                designColumn.DesignCell = new DesignCell();
-            }
-            //
-            foreach (string columnNameCSharp in designColumnList.Keys)
-            {
-                DesignColumn designColumn = designColumnList[columnNameCSharp];
-                Cell cell = designColumn.ColumnInternal;
-                UtilFramework.Assert(cell.Row == null);
-                try
-                {
-                    cell.Constructor(row); // Column to cell;
-                    designColumn.DesignCell.PlaceHolder = app.GridData.CellGet(gridName, index, columnNameCSharp).PlaceHolder; // PlaceHolder loaded back from json request.
-                    if (designColumn.IsVisible)
-                    {
-                        app.DesignCell(gridName, index, cell, designColumn.DesignCell);
-                        cell.DesignCell(designColumn.DesignCell, new ApplicationEventArgument(app, gridName, index, null));
-                    }
-                }
-                finally
-                {
-                    cell.Constructor(null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Returns DesignColumn.
-        /// </summary>
-        internal DesignColumn ColumnGet(App app, GridNameTypeRow gridName, Cell column)
-        {
-            UtilFramework.Assert(this.App == app && this.gridName == gridName);
-            return designColumnList[column.ColumnNameCSharp];
-        }
-
-        /// <summary>
-        /// Returns DesignCell.
-        /// </summary>
-        internal DesignCell CellGet(App app, GridNameTypeRow gridName, Cell column)
-        {
-            UtilFramework.Assert(this.App == app && this.gridName == gridName);
-            return designColumnList[column.ColumnNameCSharp].DesignCell;
         }
     }
 

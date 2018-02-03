@@ -124,16 +124,6 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void DesignColumn(DesignColumn result, ApplicationEventArgument e)
-        {
-
-        }
-
-        protected virtual internal void DesignCell(DesignCell result, ApplicationEventArgument e)
-        {
-
-        }
-
         protected virtual internal void ConfigColumn(ConfigColumn result, ApplicationEventArgument e)
         {
 

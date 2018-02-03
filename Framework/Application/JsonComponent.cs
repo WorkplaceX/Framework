@@ -416,6 +416,9 @@
     {
         public string GridName;
 
+        /// <summary>
+        /// TableNameCSharp.
+        /// </summary>
         public string TypeRow;
 
         public string ColumnNameOrderBy;

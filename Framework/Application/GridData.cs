@@ -1036,8 +1036,8 @@
             //
             GridDataJson gridDataJson = App.AppJson.GridDataJson;
             //
-            string typeRowString = gridDataJson.GridQueryList[GridName.ToJson(gridName)].TypeRow;
-            Type typeRow = UtilDataAccessLayer.TypeRowFromName(typeRowString, UtilApplication.TypeRowInAssembly(App));
+            string tableNameCSharp = gridDataJson.GridQueryList[GridName.ToJson(gridName)].TypeRow;
+            Type typeRow = UtilDataAccessLayer.TypeRowFromTableNameCSharp(tableNameCSharp, UtilApplication.TypeRowInAssembly(App));
             TypeRowSet(new GridNameTypeRow(typeRow, gridName));
             //
             foreach (GridRow row in gridDataJson.RowList[GridName.ToJson(gridName)])
@@ -1233,7 +1233,7 @@
         /// <summary>
         /// Render cell as Button, Html or FileUpload.
         /// </summary>
-        private void SaveJsonIsButtonHtmlFileUpload(GridNameTypeRow gridName, Index index, Cell cell, GridCell gridCell, Design design)
+        private void SaveJsonIsButtonHtmlFileUpload(GridNameTypeRow gridName, Index index, Cell cell, GridCell gridCell)
         {
             ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridName, index, cell);
             //
@@ -1268,10 +1268,7 @@
                 Type typeRow = TypeRowGet(gridName);
                 GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeRow, gridName);
                 //
-                Design design = new Design(App);
-                design.ColumnInit(App, gridNameTypeRow);
-                //
-                gridDataJson.GridQueryList[GridName.ToJson(gridName)] = new GridQuery() { GridName = GridName.ToJson(gridName), TypeRow = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow) };
+                gridDataJson.GridQueryList[GridName.ToJson(gridName)] = new GridQuery() { GridName = GridName.ToJson(gridName), TypeRow = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow) };
                 // Row
                 if (gridDataJson.RowList == null)
                 {
@@ -1310,7 +1307,6 @@
                         default:
                             throw new Exception("Enum unknown!");
                     }
-                    design.CellInit(App, gridNameTypeRow, row, index);
                     string errorRow = ErrorRowGet(gridName, index);
                     GridRow gridRowJson = new GridRow() { Index = index.Value, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
                     gridRowJson.IsFilter = index.Enum == IndexEnum.Filter;
@@ -1332,9 +1328,8 @@
                                 value = cell.PropertyInfo.GetValue(row);
                             }
                             string textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
-                            DesignCell designCell = design.CellGet(App, gridNameTypeRow, cell);
                             ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameTypeRow, index, cell);
-                            if (designCell.CellEnum == GridCellEnum.Button && textJson == null)
+                            if (configCell.CellEnum == GridCellEnum.Button && textJson == null)
                             {
                                 textJson = "Button"; // Default text for button.
                             }
@@ -1349,7 +1344,7 @@
                             GridCell gridCellJson = new GridCell();
                             gridDataJson.CellList[GridName.ToJson(gridName)][columnName][index.Value] = gridCellJson;
                             //
-                            SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson, design);
+                            SaveJsonIsButtonHtmlFileUpload(gridNameTypeRow, index, cell, gridCellJson);
                             //
                             if (gridCellInternal.IsOriginal == false || gridCellInternal.IsParseSuccess)
                             {
@@ -1361,7 +1356,7 @@
                                 gridCellJson.T = gridCellInternal.Text; // Never overwrite user entered text.
                                 gridCellJson.IsO = true;
                             }
-                            gridCellJson.PlaceHolder = designCell.PlaceHolder;
+                            gridCellJson.PlaceHolder = configCell.PlaceHolder;
                             gridCellJson.IsClick = gridCellInternal.IsClick;
                             gridCellJson.IsModify = gridCellInternal.IsModify;
                             gridCellJson.E = errorCell;

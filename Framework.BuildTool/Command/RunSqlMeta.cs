@@ -142,7 +142,7 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 string tableNameSql = "NULL";
                 if (tableAttribute != null && (tableAttribute.SqlSchemaName != null || tableAttribute.SqlTableName != null))
@@ -181,7 +181,7 @@
             bool isFirst = true;
             foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
-                string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -203,7 +203,7 @@
                         //
                         Type gridTypeRow = (Type)gridName.GetType().GetField("TypeRowInternal", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
                         string gridNameExclusive = (string)gridName.GetType().GetTypeInfo().GetProperty("NameExclusive", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
-                        string gridTableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(gridTypeRow);
+                        string gridTableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridTypeRow);
                         sqlSelect.Append(" UNION ALL\r\n");
                         sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, '{1}' AS GridName", gridTableNameCSharp, gridNameExclusive));
                     }
@@ -249,7 +249,7 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                    string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                     string columnNameCSharp = column.ColumnNameCSharp;
                     string columnNameSql = column.ColumnNameSql == null ? "NULL" : string.Format("'[{0}]'", column.ColumnNameSql);
                     sqlSelect.Append(string.Format("(SELECT '{0}' AS TableNameCSharp, '{1}' AS ColumnNameCSharp, {2} AS ColumnNameSql)", tableNameCSharp, columnNameCSharp, columnNameSql));
@@ -294,7 +294,7 @@
                     {
                         sqlSelect.Append(" UNION ALL\r\n");
                     }
-                    string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                    string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                     sqlSelect.Append(string.Format(
                         "SELECT (SELECT Config.GridId FROM FrameworkConfigGridView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp)) AS GridId, {2} AS PageRowCount, {3} AS IsInsert",
                         UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
@@ -365,7 +365,7 @@
                         {
                             sqlSelect.Append(" UNION ALL\r\n");
                         }
-                        string tableNameCSharp = UtilDataAccessLayer.TypeRowToNameCSharp(typeRow);
+                        string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                         sqlSelect.Append(string.Format(
                             "SELECT " +
                             "(SELECT Config.GridId FROM FrameworkConfigColumnView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp, Config.ColumnNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp, {2} AS ColumnNameCSharp)) AS GridId, " +

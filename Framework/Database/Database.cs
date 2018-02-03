@@ -15,7 +15,7 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Download : Cell<FrameworkFileStorage>
     {
-        protected internal override void DesignCell(DesignCell result, ApplicationEventArgument e)
+        protected internal override void ConfigCell(ConfigCell result, ApplicationEventArgument e)
         {
             result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
@@ -53,7 +53,7 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage>
     {
-        protected internal override void DesignCell(DesignCell result, ApplicationEventArgument e)
+        protected internal override void ConfigCell(ConfigCell result, ApplicationEventArgument e)
         {
             result.CellEnum = GridCellEnum.FileUpload;
         }
