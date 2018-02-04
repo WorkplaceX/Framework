@@ -83,11 +83,21 @@
         }
 
         /// <summary>
-        /// Constructor for column and cell. Switch between column and cell mode. (Column mode: row = null; Cell mode: row != null).
+        /// Constructor for cell mode. (Column mode: row = null; Cell mode: row != null. See also method ConstructorColumn();).
         /// </summary>
         internal Cell Constructor(object row)
         {
+            UtilFramework.Assert(row != null);
             this.Row = row;
+            return this;
+        }
+
+        /// <summary>
+        /// Constructor for column. (Switch back to column mode).
+        /// </summary>
+        internal Cell ConstructorColumn()
+        {
+            this.Row = null;
             return this;
         }
 

@@ -239,6 +239,27 @@
     }
 
     /// <summary>
+    /// Postpone method call GridData.RowNewAdd(); till Config is loaded.
+    /// </summary>
+    internal class ProcessGridIsInsert : Process
+    {
+        protected internal override void Run(App app)
+        {
+            foreach (GridName gridName in app.GridData.GridNameList())
+            {
+                if (app.GridData.QueryGet(gridName).IsInsert)
+                {
+                    GridNameTypeRow gridNameTypeRow = app.GridData.GridNameTypeRow(gridName);
+                    if (app.GridData.Config.ConfigGridGet(gridNameTypeRow).IsInsert)
+                    {
+                        app.GridData.RowNewAdd(gridName);
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Select first row of grid, if no row is yet selected.
     /// </summary>
     internal class ProcessGridRowSelectFirst : Process
@@ -298,7 +319,7 @@
                         if (gridRowIndex.Enum == IndexEnum.Index || gridRowIndex.Enum == IndexEnum.New)
                         {
                             GridData gridData = app.GridData;
-                            var row = gridData.Row(GridName.FromJson(gridName), gridRowIndex);
+                            var row = gridData.RowGet(GridName.FromJson(gridName), gridRowIndex);
                             MasterDetailIsClick(app, GridName.FromJson(gridName), row);
                             break;
                         }
@@ -395,7 +416,7 @@
                         if (item.Key.Enum == IndexEnum.Index)
                         {
                             GridData gridData = app.GridData;
-                            rowLookup = gridData.Row(gridNameLookup, item.Key);
+                            rowLookup = gridData.RowGet(gridNameLookup, item.Key);
                         }
                     }
                 }
@@ -414,7 +435,7 @@
                 string columnNameLookup = gridDataJson.SelectColumnName;
                 // Set IsModify
                 gridData.CellIsModifySet(gridName, index, columnName); // Put row into edit mode.
-                var row = gridData.Row(gridName, index);
+                var row = gridData.RowGet(gridName, index);
                 Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.ColumnNameCSharp == columnName).First();
                 // Cell of lookup which user clicked.
                 Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.ColumnNameCSharp == columnNameLookup).First();
@@ -475,7 +496,7 @@
             GridData gridData = app.GridData;
             if (isLookupOpen)
             {
-                Row row = gridData.Row(gridName, index);
+                Row row = gridData.RowGet(gridName, index);
                 GridCellInternal gridCellInternal = gridData.CellGet(gridName, index, columnName);
                 //
                 Type typeRow = gridData.TypeRow(gridName);
@@ -643,7 +664,7 @@
             //
             if (gridNameClick != null)
             {
-                Row row = app.GridData.Row(GridName.FromJson(gridNameClick), new Index(indexClick));
+                Row row = app.GridData.RowGet(GridName.FromJson(gridNameClick), new Index(indexClick));
                 Type typeRow = app.GridData.TypeRow(GridName.FromJson(gridNameClick));
                 Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == columnNameClick).Single();
                 bool isReload = false;

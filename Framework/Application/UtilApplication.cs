@@ -423,6 +423,9 @@
         public string PlaceHolder;
     }
 
+    /// <summary>
+    /// Loads database tables FrameworkConfigGridView and FrameworkConfigColumnView.
+    /// </summary>
     internal class ConfigInternal
     {
         public ConfigInternal(App app)
@@ -522,6 +525,9 @@
             UtilFramework.Assert(tableNameCSharpList.Contains(tableNameCSharp));
         }
 
+        /// <summary>
+        /// Grid config.
+        /// </summary>
         public ConfigGrid ConfigGridGet(GridNameTypeRow gridName)
         {
             AssertLoadConfig(gridName);
@@ -553,7 +559,7 @@
                     }
                     if (dbConfigGrid.IsInsert != null)
                     {
-                        if (dbConfigGrid.IsInsertDefault == false) // If factory setting is no insert, it cannot be overridden.
+                        if (dbConfigGrid.IsInsertDefault != false) // If factory setting is no insert, it cannot be overridden.
                         {
                             result.IsInsert = dbConfigGrid.IsInsert.Value;
                         }
@@ -568,6 +574,9 @@
             return this.configGridList[gridName];
         }
 
+        /// <summary>
+        /// Column config.
+        /// </summary>
         public ConfigColumn ConfigColumnGet(GridNameTypeRow gridName, Cell column)
         {
             AssertLoadConfig(gridName);
@@ -630,6 +639,9 @@
             return this.configColumnList[gridName][column.ColumnNameCSharp];
         }
 
+        /// <summary>
+        /// Cell config.
+        /// </summary>
         internal ConfigCell ConfigCellGet(GridNameTypeRow gridName, Index index, Cell cell)
         {
             AssertLoadConfig(gridName);
@@ -670,6 +682,14 @@
             if (index.Enum != IndexEnum.Filter)
             {
                 cell.ConfigCell(result, new ApplicationEventArgument(App, gridName, index, cell.ColumnNameCSharp));
+            }
+            // IsReadOnly config
+            if (result.IsReadOnly)
+            {
+                if (index.Enum != IndexEnum.Filter) // No readonly for filter!
+                {
+                    result.CellEnum = GridCellEnum.Html;
+                }
             }
             return result;
         }

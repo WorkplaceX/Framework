@@ -109,6 +109,11 @@
         public int PageIndex;
 
         public int PageHorizontalIndex;
+
+        /// <summary>
+        /// Gets or sets IsInsert. This data is internal and never sent to client. Indicating method GridData.RowNewAdd(); has to be called once Config is loaded.
+        /// </summary>
+        public bool IsInsert;
     }
 
     public class GridData
@@ -209,9 +214,9 @@
         /// <summary>
         /// Returns data row.
         /// </summary>
-        internal Row Row(GridName gridName, Index index)
+        internal Row RowGet(GridName gridName, Index index)
         {
-            var row = RowGet(gridName, index);
+            var row = RowInternalGet(gridName, index);
             switch (index.Enum)
             {
                 case IndexEnum.Index:
@@ -363,7 +368,7 @@
 
         internal string SelectColumnName;
 
-        private GridRowInternal RowGet(GridName gridName, Index index)
+        private GridRowInternal RowInternalGet(GridName gridName, Index index)
         {
             GridRowInternal result = null;
             if (rowList.ContainsKey(gridName))
@@ -471,7 +476,7 @@
         /// </summary>
         private string ErrorRowGet(GridName gridName, Index index)
         {
-            return RowGet(gridName, index).Error;
+            return RowInternalGet(gridName, index).Error;
         }
 
         /// <summary>
@@ -479,7 +484,7 @@
         /// </summary>
         internal void ErrorRowSet(GridName gridName, Index index, string text)
         {
-            RowGet(gridName, index).Error = text;
+            RowInternalGet(gridName, index).Error = text;
         }
 
         /// <summary>
@@ -508,7 +513,7 @@
         /// </summary>
         internal void CellIsModifySet(GridName gridName, Index index, string columnName)
         {
-            GridRowInternal gridRow = RowGet(gridName, index);
+            GridRowInternal gridRow = RowInternalGet(gridName, index);
             if (index.Enum == IndexEnum.Index && gridRow.RowNew == null)
             {
                 gridRow.RowNew = UtilDataAccessLayer.RowClone(gridRow.Row);
@@ -651,7 +656,7 @@
         {
             Type typeRow = TypeRowGet(gridName);
             filterList = new List<Filter>();
-            Row rowFilter = RowGet(gridName, Index.Filter).RowFilter; // Data row with parsed filter values.
+            Row rowFilter = RowInternalGet(gridName, Index.Filter).RowFilter; // Data row with parsed filter values.
             Row rowFilterDefault = UtilDataAccessLayer.RowCreate(typeRow);
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
@@ -759,7 +764,7 @@
                 {
                     RowSet(gridName, new Index(index.ToString()), new GridRowInternal() { Row = rowList[index], RowNew = null });
                 }
-                RowNewAdd(gridName);
+                QueryGet(gridName).IsInsert = true; // Postpone call of method RowNewAdd(gridName); till Config is loaded.
                 //
                 if (cellListFilter != null)
                 {
@@ -801,7 +806,7 @@
         /// <summary>
         /// Add data row of enum New to RowList.
         /// </summary>
-        private void RowNewAdd(GridName gridName)
+        internal void RowNewAdd(GridName gridName)
         {
             // (Index)
             Dictionary<Index, GridRowInternal> rowListCopy = rowList[gridName];
@@ -898,7 +903,7 @@
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
-                                        RowNewAdd(gridName); // Make "New" to "Index" and add "New"
+                                        RowNewAdd(gridName); // User entered text in "New" row. Make "New" to "Index" and add "New". No Config check. It has to be Grid.IsInsert once we reached this point.
                                         SaveDatabaseSelectGridLastIndex(gridName);
                                     }
                                     catch (Exception exception)
@@ -928,7 +933,7 @@
                     if (IsModifyRowCell(gridName, index, false) || (index.Enum == IndexEnum.Filter && isFilterParse))
                     {
                         Type typeRow = TypeRowGet(gridName);
-                        var row = RowGet(gridName, index);
+                        var row = RowInternalGet(gridName, index);
                         if (row.Row != null)
                         {
                             UtilFramework.Assert(row.Row.GetType() == typeRow);
@@ -1040,11 +1045,11 @@
             Type typeRow = UtilDataAccessLayer.TypeRowFromTableNameCSharp(tableNameCSharp, UtilApplication.TypeRowInAssembly(App));
             TypeRowSet(new GridNameTypeRow(typeRow, gridName));
             //
-            foreach (GridRow row in gridDataJson.RowList[GridName.ToJson(gridName)])
+            foreach (GridRow rowJson in gridDataJson.RowList[GridName.ToJson(gridName)])
             {
-                Index rowIndex = new Index(row.Index);
+                Index rowIndex = new Index(rowJson.Index);
                 IndexEnum indexEnum = rowIndex.Enum;
-                GridRowInternal gridRow = new GridRowInternal() { IsSelect = row.IsSelect, IsClick = row.IsClick };
+                GridRowInternal gridRow = new GridRowInternal() { IsSelect = rowJson.IsSelect, IsClick = rowJson.IsClick };
                 Row resultRow = (Row)UtilFramework.TypeToObject(typeRow);
                 switch (indexEnum)
                 {
@@ -1063,10 +1068,11 @@
                 RowSet(gridName, rowIndex, gridRow);
                 foreach (Cell cell in ColumnList(gridName))
                 {
-                    cell.Constructor(gridRow.Row);
+                    Row row = this.RowGet(gridName, rowIndex);
+                    cell.Constructor(row);
                     string columnName = cell.ColumnNameCSharp;
                     //
-                    GridCell gridCell = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][row.Index];
+                    GridCell gridCell = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index];
                     GridCellInternal gridCellInternal = CellGet(gridName, rowIndex, columnName);
                     gridCellInternal.IsClick = gridCell.IsClick;
                     gridCellInternal.IsModify = gridCell.IsModify;
@@ -1076,25 +1082,25 @@
                     gridCellInternal.FocusIdRequest = gridCell.FocusIdRequest;
                     gridCellInternal.PlaceHolder = gridCell.PlaceHolder;
                     string text;
-                    if (gridDataJson.CellList[GridName.ToJson(gridName)][cell.ColumnNameCSharp][row.Index].IsO)
+                    if (gridDataJson.CellList[GridName.ToJson(gridName)][cell.ColumnNameCSharp][rowJson.Index].IsO)
                     {
-                        text = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][row.Index].O; // Original text.
-                        string textModify = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][row.Index].T; // User modified text.
+                        text = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].O; // Original text.
+                        string textModify = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].T; // User modified text.
                         CellTextSet(gridName, rowIndex, columnName, textModify, true, text);
                     }
                     else
                     {
-                        text = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][row.Index].T; // Original text.
+                        text = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].T; // Original text.
                         CellTextSet(gridName, rowIndex, columnName, text, false, null);
                     }
                     // ErrorCell
-                    string errorCellText = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][row.Index].E;
+                    string errorCellText = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].E;
                     if (errorCellText != null)
                     {
                         ErrorCellSet(gridName, rowIndex, columnName, errorCellText);
                     }
                     // ErrorRow
-                    string errorRowText = row.Error;
+                    string errorRowText = rowJson.Error;
                     if (errorRowText != null)
                     {
                         ErrorRowSet(gridName, rowIndex, errorRowText);
@@ -1292,21 +1298,7 @@
                 foreach (Index index in rowList[gridName].Keys)
                 {
                     GridRowInternal gridRow = rowList[gridName][index];
-                    Row row;
-                    switch (index.Enum)
-                    {
-                        case IndexEnum.Index:
-                            row = gridRow.Row;
-                            break;
-                        case IndexEnum.Filter:
-                            row = gridRow.RowFilter;
-                            break;
-                        case IndexEnum.New:
-                            row = gridRow.RowNew;
-                            break;
-                        default:
-                            throw new Exception("Enum unknown!");
-                    }
+                    Row row = RowGet(gridName, index);
                     string errorRow = ErrorRowGet(gridName, index);
                     GridRow gridRowJson = new GridRow() { Index = index.Value, IsSelect = gridRow.IsSelect, IsClick = gridRow.IsClick, Error = errorRow };
                     gridRowJson.IsFilter = index.Enum == IndexEnum.Filter;

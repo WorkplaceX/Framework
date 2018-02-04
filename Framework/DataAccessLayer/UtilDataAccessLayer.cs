@@ -144,7 +144,7 @@
             {
                 foreach (Cell column in cacheColumnList[typeRow])
                 {
-                    column.Constructor(null); // Column mode.
+                    column.ConstructorColumn(); // Column mode.
                 }
                 return cacheColumnList[typeRow];
             }
