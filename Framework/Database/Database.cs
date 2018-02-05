@@ -15,12 +15,12 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Download : Cell<FrameworkFileStorage>
     {
-        protected internal override void ConfigCell(ConfigCell result, ApplicationEventArgument e)
+        protected internal override void ConfigCell(ConfigCell result, AppEventArg e)
         {
             result.CellEnum = Framework.Component.GridCellEnum.Html;
         }
 
-        protected internal override void RowValueToText(ref string result, ApplicationEventArgument e)
+        protected internal override void RowValueToText(ref string result, AppEventArg e)
         {
             result = null;
             if (e.Index.Enum == IndexEnum.Index && Row.Name != null)
@@ -41,7 +41,7 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage
     {
-        protected internal override void Insert(Row rowNew, ApplicationEventArgument e)
+        protected internal override void Insert(Row rowNew, AppEventArg e)
         {
             if (e.App.DbFrameworkApplication != null)
             {
@@ -53,12 +53,12 @@ namespace Database.dbo
 
     public partial class FrameworkFileStorage_Data : Cell<FrameworkFileStorage>
     {
-        protected internal override void ConfigCell(ConfigCell result, ApplicationEventArgument e)
+        protected internal override void ConfigCell(ConfigCell result, AppEventArg e)
         {
             result.CellEnum = GridCellEnum.FileUpload;
         }
 
-        protected internal override void RowValueToText(ref string result, ApplicationEventArgument e)
+        protected internal override void RowValueToText(ref string result, AppEventArg e)
         {
             result = "File Upload";
         }
@@ -66,7 +66,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView
     {
-        protected internal override void Update(Row row, Row rowNew, ApplicationEventArgument e)
+        protected internal override void Update(Row row, Row rowNew, AppEventArg e)
         {
             // Row
             var application = new FrameworkApplication();
@@ -79,7 +79,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).Single(), this);
         }
 
-        protected internal override void Insert(Row rowNew, ApplicationEventArgument e)
+        protected internal override void Insert(Row rowNew, AppEventArg e)
         {
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
@@ -95,7 +95,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void TextParse(string text, ApplicationEventArgument e)
+        protected internal override void TextParse(string text, AppEventArg e)
         {
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
             if (applicationType == null)
@@ -106,12 +106,12 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override GridNameTypeRow Lookup(ApplicationEventArgument e)
+        protected internal override GridNameTypeRow Lookup(AppEventArg e)
         {
             return FrameworkApplicationType.Lookup;
         }
 
-        protected internal override void LookupIsClick(Row rowLookup, ApplicationEventArgument e)
+        protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)
         {
             Row.ApplicationTypeId = ((FrameworkApplicationType)rowLookup).Id;
         }
@@ -119,7 +119,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumnView
     {
-        protected internal override void Update(Row row, Row rowNew, ApplicationEventArgument e)
+        protected internal override void Update(Row row, Row rowNew, AppEventArg e)
         {
             FrameworkConfigColumn config = UtilDataAccessLayer.Query<FrameworkConfigColumn>().Where(item => item.Id == this.ConfigId).SingleOrDefault();
             if (config == null)
@@ -162,7 +162,7 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGridView
     {
-        protected internal override void Update(Row row, Row rowNew, ApplicationEventArgument e)
+        protected internal override void Update(Row row, Row rowNew, AppEventArg e)
         {
             var config = UtilDataAccessLayer.Query<FrameworkConfigGrid>().Where(item => item.Id == this.ConfigId).SingleOrDefault();
             if (config == null)

@@ -16,7 +16,7 @@
         /// </summary>
         /// <param name="row">Old data row.</param>
         /// <param name="rowNew">New data row. Set properties on this rowNew, for example to read back updated content from db.</param>
-        protected virtual internal void Update(Row row, Row rowNew, ApplicationEventArgument e)
+        protected virtual internal void Update(Row row, Row rowNew, AppEventArg e)
         {
             UtilFramework.Assert(this == rowNew);
             if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No update on database, if only calculated column has been modified.
@@ -28,7 +28,7 @@
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(Row rowNew, ApplicationEventArgument e)
+        protected virtual internal void Insert(Row rowNew, AppEventArg e)
         {
             UtilFramework.Assert(rowNew == this);
             if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No insert on database, if only calculated column has been modified.
@@ -53,12 +53,12 @@
             return UtilDataAccessLayer.Query(GetType());
         }
 
-        protected virtual internal IQueryable QueryLookup(Row rowLookup, ApplicationEventArgument e)
+        protected virtual internal IQueryable QueryLookup(Row rowLookup, AppEventArg e)
         {
             return UtilDataAccessLayer.Query(GetType());
         }
 
-        protected virtual internal void ConfigGrid(ConfigGrid result, ApplicationEventArgument e)
+        protected virtual internal void ConfigGrid(ConfigGrid result, AppEventArg e)
         {
 
         }
@@ -134,12 +134,12 @@
         /// </summary>
         public object Row { get; private set; }
 
-        protected virtual internal void ConfigColumn(ConfigColumn result, ApplicationEventArgument e)
+        protected virtual internal void ConfigColumn(ConfigColumn result, AppEventArg e)
         {
 
         }
 
-        protected virtual internal void ConfigCell(ConfigCell result, ApplicationEventArgument e)
+        protected virtual internal void ConfigCell(ConfigCell result, AppEventArg e)
         {
 
         }
@@ -147,7 +147,7 @@
         /// <summary>
         /// Parse user entered text and write result to Row.
         /// </summary>
-        protected virtual internal void TextParse(string text, ApplicationEventArgument e)
+        protected virtual internal void TextParse(string text, AppEventArg e)
         {
             object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(e.ColumnName).PropertyType); // Default parse text.
             Row.GetType().GetProperty(e.ColumnName).SetValue(Row, value);
@@ -156,7 +156,7 @@
         /// <summary>
         /// Override for custom formatting like adding units of measurement. Called after method UtilDataAccessLayer.RowValueToText(); Inverse function is CellValueFromText.
         /// </summary>
-        protected virtual internal void RowValueToText(ref string result, ApplicationEventArgument e)
+        protected virtual internal void RowValueToText(ref string result, AppEventArg e)
         {
 
         }
@@ -164,7 +164,7 @@
         /// <summary>
         /// Override to parse custom formating like value with units of measurement. Called before user entered text is parsed with method UtilDataAccessLayer.ValueFromText(); Inverse function is CellValueToText.
         /// </summary>
-        protected virtual internal void RowValueFromText(ref string result, ApplicationEventArgument e)
+        protected virtual internal void RowValueFromText(ref string result, AppEventArg e)
         {
             
         }
@@ -177,7 +177,7 @@
         /// <summary>
         /// Returns GridName for lookup grid window. See also method Row.QueryLookup(); to filter rows.
         /// </summary>
-        protected virtual internal GridNameTypeRow Lookup(ApplicationEventArgument e)
+        protected virtual internal GridNameTypeRow Lookup(AppEventArg e)
         {
             return null;
         }
@@ -186,7 +186,7 @@
         /// Override to handle clicked Lookup row.
         /// </summary>
         /// <param name="rowLookup">LoowUp row which has been clicked.</param>
-        protected virtual internal void LookupIsClick(Row rowLookup, ApplicationEventArgument e)
+        protected virtual internal void LookupIsClick(Row rowLookup, AppEventArg e)
         {
         
         }
@@ -194,7 +194,7 @@
         /// <summary>
         /// Override this method to handle button click event. For example delete button.
         /// </summary>
-        protected virtual internal void ButtonIsClick(ref bool isReload, ApplicationEventArgument e)
+        protected virtual internal void ButtonIsClick(ref bool isReload, AppEventArg e)
         {
 
         }

@@ -395,7 +395,7 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>> cellList = new Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>>();
 
-        internal void CellAll(Action<GridCellInternal, ApplicationEventArgument> callback)
+        internal void CellAll(Action<GridCellInternal, AppEventArg> callback)
         {
             foreach (GridName gridName in cellList.Keys)
             {
@@ -403,7 +403,7 @@
                 {
                     foreach (string columnName in cellList[gridName][index].Keys)
                     {
-                        callback(cellList[gridName][index][columnName], new ApplicationEventArgument(App, gridName, index, columnName));
+                        callback(cellList[gridName][index][columnName], new AppEventArg(App, gridName, index, columnName));
                     }
                 }
             }
@@ -414,12 +414,12 @@
         /// </summary>
         internal void LookupOpen(GridName gridName, Index index, string columnName, GridName gridNameLookup)
         {
-            CellAll((GridCellInternal gridCell, ApplicationEventArgument e) =>
+            CellAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 gridCell.IsLookup = false;
                 gridCell.GridNameLookup = null;
             });
-            CellAll((GridCellInternal gridCell, ApplicationEventArgument e) =>
+            CellAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 bool isLookup = gridName == e.GridName && index == e.Index && columnName == e.ColumnName;
                 if (isLookup)
@@ -435,7 +435,7 @@
         /// </summary>
         internal void LookupClose()
         {
-            CellAll((GridCellInternal gridCell, ApplicationEventArgument e) =>
+            CellAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 gridCell.IsLookup = false;
                 gridCell.GridNameLookup = null;
@@ -619,7 +619,7 @@
             }
             else
             {
-                query = rowTable.QueryLookup(rowLookup, new ApplicationEventArgument(App, gridName, indexLookup, null));
+                query = rowTable.QueryLookup(rowLookup, new AppEventArg(App, gridName, indexLookup, null));
             }
             List<Row> rowList = new List<Row>();
             if (query != null)
@@ -885,7 +885,7 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Update(row.Row, row.RowNew, new ApplicationEventArgument(App, gridName, index, null));
+                                        row.RowNew.Update(row.Row, row.RowNew, new AppEventArg(App, gridName, index, null));
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -899,7 +899,7 @@
                                 {
                                     try
                                     {
-                                        row.RowNew.Insert(row.RowNew, new ApplicationEventArgument(App, gridName, index, null));
+                                        row.RowNew.Insert(row.RowNew, new AppEventArg(App, gridName, index, null));
                                         ErrorRowSet(gridName, index, null);
                                         row.Row = row.RowNew;
                                         CellTextClear(gridName, index);
@@ -967,17 +967,17 @@
                             {
                                 try
                                 {
-                                    var applicationEventArgument  = new ApplicationEventArgument(App, gridName, index, columnName);
-                                    App.CellTextParse(cell, ref text, applicationEventArgument);
-                                    cell.TextParse(text, applicationEventArgument);
+                                    var appEventArg  = new AppEventArg(App, gridName, index, columnName);
+                                    App.CellTextParse(cell, ref text, appEventArg);
+                                    cell.TextParse(text, appEventArg);
                                     text = text == "" ? null : text;
                                     //
                                     string textCompare = null;
                                     {
                                         textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
-                                        App.CellRowValueToText(cell, ref textCompare, applicationEventArgument); // Override text generic.
+                                        App.CellRowValueToText(cell, ref textCompare, appEventArg); // Override text generic.
                                         textCompare = textCompare == "" ? null : textCompare;
-                                        cell.RowValueToText(ref textCompare, applicationEventArgument); // Override text.
+                                        cell.RowValueToText(ref textCompare, appEventArg); // Override text.
                                         textCompare = textCompare == "" ? null : textCompare;
                                     }
                                     if (textCompare != text) // For example user entered "8.". It would be overwritten on screen with "8".
@@ -1112,8 +1112,8 @@
                     {
                         ErrorRowSet(gridName, rowIndex, errorRowText);
                     }
-                    App.CellRowValueFromText(cell, ref text, new ApplicationEventArgument(App, gridName, rowIndex, cell.ColumnNameCSharp));
-                    cell.RowValueFromText(ref text, new ApplicationEventArgument(App, gridName, rowIndex, null));
+                    App.CellRowValueFromText(cell, ref text, new AppEventArg(App, gridName, rowIndex, cell.ColumnNameCSharp));
+                    cell.RowValueFromText(ref text, new AppEventArg(App, gridName, rowIndex, null));
                     object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
                     cell.PropertyInfo.SetValue(resultRow, value);
                 }
@@ -1332,8 +1332,8 @@
                             {
                                 textJson = "Button"; // Default text for button.
                             }
-                            App.CellRowValueToText(cell, ref textJson, new ApplicationEventArgument(App, gridName, index, null)); // Override text generic.
-                            cell.RowValueToText(ref textJson, new ApplicationEventArgument(App, gridName, index, null)); // Override text.
+                            App.CellRowValueToText(cell, ref textJson, new AppEventArg(App, gridName, index, null)); // Override text generic.
+                            cell.RowValueToText(ref textJson, new AppEventArg(App, gridName, index, null)); // Override text.
                             GridCellInternal gridCellInternal = CellGet(gridName, index, columnName);
                             if (!gridDataJson.CellList[GridName.ToJson(gridName)].ContainsKey(columnName))
                             {

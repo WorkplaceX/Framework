@@ -10,9 +10,9 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class ApplicationEventArgument
+    public class AppEventArg
     {
-        internal ApplicationEventArgument(App app, GridName gridName, Index index, string columnName)
+        internal AppEventArg(App app, GridName gridName, Index index, string columnName)
         {
             this.App = app;
             this.GridName = gridName;
@@ -567,7 +567,7 @@
                 }
                 Row row = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
                 // Override programmatically
-                row.ConfigGrid(result, new ApplicationEventArgument(App, gridName, null, null));
+                row.ConfigGrid(result, new AppEventArg(App, gridName, null, null));
                 //
                 this.configGridList[gridName] = result;
             }
@@ -632,9 +632,9 @@
                     }
                 }
                 // Override programmatically
-                var applicationEventArgument = new ApplicationEventArgument(App, gridName, null, null);
-                App.CellConfigColumn(column, result, applicationEventArgument);
-                column.ConfigColumn(result, applicationEventArgument);
+                var appEventArg = new AppEventArg(App, gridName, null, null);
+                App.CellConfigColumn(column, result, appEventArg);
+                column.ConfigColumn(result, appEventArg);
                 //
                 this.configColumnList[gridName][column.ColumnNameCSharp] = result;
             }
@@ -683,7 +683,7 @@
             // Override programmatically
             if (index.Enum != IndexEnum.Filter)
             {
-                cell.ConfigCell(result, new ApplicationEventArgument(App, gridName, index, cell.ColumnNameCSharp));
+                cell.ConfigCell(result, new AppEventArg(App, gridName, index, cell.ColumnNameCSharp));
             }
             // IsReadOnly config
             if (result.IsReadOnly)
@@ -845,9 +845,9 @@
         }
 
         /// <summary>
-        /// Serialize ApplicationEventArgument.
+        /// Serialize AppEventArg.
         /// </summary>
-        public static string ApplicationEventArgumentToJson(ApplicationEventArgument e)
+        public static string AppEventArgToJson(AppEventArg e)
         {
             string gridNameJson = GridNameToJson(e.GridName);
             string indexJson = IndexToJson(e.Index);
@@ -862,9 +862,9 @@
         }
 
         /// <summary>
-        /// Deserialize ApplicationEventArgument.
+        /// Deserialize AppEventArg.
         /// </summary>
-        public static ApplicationEventArgument ApplicationEventArgumentFromJson(App app, string json)
+        public static AppEventArg AppEventArgFromJson(App app, string json)
         {
             string gridNameJson = json.Split("-")[0];
             string indexJson = json.Split("-")[1];
@@ -874,7 +874,7 @@
             Index index = IndexFromJson(indexJson);
             string columnName = columnNameJson;
             //
-            ApplicationEventArgument result = new ApplicationEventArgument(app, gridName, index, columnName);
+            AppEventArg result = new AppEventArg(app, gridName, index, columnName);
             return result;
         }
     }

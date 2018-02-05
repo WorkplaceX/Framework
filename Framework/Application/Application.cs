@@ -160,7 +160,7 @@
         /// <summary>
         /// Called after method UtilDataAccessLayer.RowValueToText();
         /// </summary>
-        protected virtual internal void CellRowValueToText(Cell cell, ref string result, ApplicationEventArgument e)
+        protected virtual internal void CellRowValueToText(Cell cell, ref string result, AppEventArg e)
         {
             if (IsNamingConvention)
             {
@@ -186,7 +186,7 @@
         /// <summary>
         /// Called before text is parsed with method UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellRowValueFromText(Cell cell, ref string result, ApplicationEventArgument e)
+        protected virtual internal void CellRowValueFromText(Cell cell, ref string result, AppEventArg e)
         {
             if (IsNamingConvention)
             {
@@ -211,7 +211,7 @@
         /// <summary>
         /// Called before user entered text is parsed with method UtilDataAccessLayer.RowValueToText();
         /// </summary>
-        protected virtual internal void CellTextParse(Cell cell, ref string result, ApplicationEventArgument e)
+        protected virtual internal void CellTextParse(Cell cell, ref string result, AppEventArg e)
         {
             if (IsNamingConvention)
             {
@@ -268,7 +268,7 @@
         /// <summary>
         /// Called before method Cell.ConfigColumn();
         /// </summary>
-        protected virtual internal void CellConfigColumn(Cell column, ConfigColumn result, ApplicationEventArgument e)
+        protected virtual internal void CellConfigColumn(Cell column, ConfigColumn result, AppEventArg e)
         {
             if (IsNamingConvention)
             {
