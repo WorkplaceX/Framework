@@ -22,11 +22,11 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.071 Server";
+                return "v1.072 Server";
             }
         }
 
-        public static void Assert(bool isAssert, string exceptionText)
+        internal static void Assert(bool isAssert, string exceptionText)
         {
             if (!isAssert)
             {
@@ -34,7 +34,7 @@ namespace Framework
             }
         }
 
-        public static void Assert(bool isAssert)
+        internal static void Assert(bool isAssert)
         {
             Assert(isAssert, "Assert!");
         }
@@ -73,7 +73,7 @@ namespace Framework
         /// <summary>
         /// Gets root FolderName.
         /// </summary>
-        public static string FolderName
+        internal static string FolderName
         {
             get
             {
@@ -87,7 +87,7 @@ namespace Framework
         /// <summary>
         /// Gets IsLinux. True, if running for example on Ubuntu.
         /// </summary>
-        public static bool IsLinux
+        internal static bool IsLinux
         {
             get
             {
@@ -98,7 +98,7 @@ namespace Framework
         /// <summary>
         /// Gets FolderNameIsIss. True, if running on ISS server.
         /// </summary>
-        public static bool FolderNameIsIss
+        internal static bool FolderNameIsIss
         {
             get
             {
@@ -109,12 +109,12 @@ namespace Framework
             }
         }
 
-        public static string FileRead(string fileName)
+        internal static string FileRead(string fileName)
         {
             return File.ReadAllText(fileName);
         }
 
-        public static void FileWrite(string fileName, string value)
+        internal static void FileWrite(string fileName, string value)
         {
             lock (typeof(object))
             {
@@ -122,14 +122,14 @@ namespace Framework
             }
         }
 
-        public static string[] FileNameList(string folderName, string searchPattern)
+        internal static string[] FileNameList(string folderName, string searchPattern)
         {
             var list = Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories);
             var result = list.Select(item => item.Replace(@"\", "/")).ToArray();
             return result;
         }
 
-        public static string[] FileNameList(string folderName)
+        internal static string[] FileNameList(string folderName)
         {
             return FileNameList(folderName, "*.*");
         }
@@ -137,7 +137,7 @@ namespace Framework
         /// <summary>
         /// Returns external ip address.
         /// </summary>
-        public static string Ip()
+        internal static string Ip()
         {
             string result = null;
             try
@@ -160,7 +160,7 @@ namespace Framework
         /// <summary>
         /// Returns Exception as text including InnerException.
         /// </summary>
-        public static string ExceptionToText(Exception exception)
+        internal static string ExceptionToText(Exception exception)
         {
             string result = null;
             while (exception != null)
@@ -191,7 +191,7 @@ namespace Framework
         /// <summary>
         /// Returns list of assemblies. Including Framework assembly.
         /// </summary>
-        public static Type[] TypeInAssemblyList(Type typeInAssembly)
+        internal static Type[] TypeInAssemblyList(Type typeInAssembly)
         {
             List<Type> result = new List<Type>();
             result.Add(typeof(UtilFramework));
@@ -234,7 +234,7 @@ namespace Framework
             return Activator.CreateInstance(type);
         }
 
-        public static bool IsSubclassOf(Type type, Type typeBase)
+        internal static bool IsSubclassOf(Type type, Type typeBase)
         {
             if (type == null)
             {
@@ -246,7 +246,7 @@ namespace Framework
         /// <summary>
         /// Write to stdout.
         /// </summary>
-        public static void Log(string text)
+        internal static void Log(string text)
         {
             Console.WriteLine(text);
         }
@@ -278,7 +278,7 @@ namespace Framework
         /// <summary>
         /// Change font color.
         /// </summary>
-        public static void LogColor(ConsoleColor color)
+        internal static void LogColor(ConsoleColor color)
         {
             if (colorDefault == null)
             {
@@ -290,7 +290,7 @@ namespace Framework
         /// <summary>
         /// Change font color back to default color.
         /// </summary>
-        public static void LogColorDefault()
+        internal static void LogColorDefault()
         {
             if (colorDefault != null)
             {
@@ -301,7 +301,7 @@ namespace Framework
         /// <summary>
         /// Write to stderr.
         /// </summary>
-        public static void LogError(string text)
+        internal static void LogError(string text)
         {
             Console.Error.WriteLine(text);
         }
@@ -309,7 +309,7 @@ namespace Framework
         /// <summary>
         /// Returns underlying tpye, if any.
         /// </summary>
-        public static Type TypeUnderlying(Type type)
+        internal static Type TypeUnderlying(Type type)
         {
             Type result = type;
             Type typeUnderlying = Nullable.GetUnderlyingType(type);

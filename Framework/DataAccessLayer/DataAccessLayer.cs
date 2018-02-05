@@ -145,7 +145,7 @@
         }
 
         /// <summary>
-        /// Parse user entered text.
+        /// Parse user entered text and write result to Row.
         /// </summary>
         protected virtual internal void TextParse(string text, ApplicationEventArgument e)
         {
@@ -194,7 +194,7 @@
         /// <summary>
         /// Override this method to handle button click event. For example delete button.
         /// </summary>
-        protected virtual internal void ButtonIsClick(App app, GridName gridName, Index index, Row row, string columnName, ref bool isReload)
+        protected virtual internal void ButtonIsClick(ref bool isReload, ApplicationEventArgument e)
         {
 
         }

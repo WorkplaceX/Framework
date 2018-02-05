@@ -726,7 +726,7 @@
         /// <summary>
         /// Returns list of available class App.
         /// </summary>
-        public static Type[] ApplicationTypeList(Type typeInAssembly)
+        internal static Type[] ApplicationTypeList(Type typeInAssembly)
         {
             List<Type> result = new List<Type>();
             foreach (Type itemTypeInAssembly in UtilFramework.TypeInAssemblyList(typeInAssembly))
@@ -745,7 +745,7 @@
         /// <summary>
         /// Returns TypeRowInAssembly. This is a type in an assembly. Search for row class in this assembly when deserializing json. (For example: "dbo.Airport")
         /// </summary>
-        public static Type TypeRowInAssembly(App app)
+        internal static Type TypeRowInAssembly(App app)
         {
             return app.GetType();
         }
@@ -780,7 +780,7 @@
         /// <summary>
         /// Returns true, if column name contains "Id" according default naming convention.
         /// </summary>
-        public static bool ConfigColumnNameSqlIsId(string columnNameSql)
+        internal static bool ConfigColumnNameSqlIsId(string columnNameSql)
         {
             bool result = false;
             if (columnNameSql != null)
@@ -813,7 +813,7 @@
         }
 
         /// <summary>
-        /// Use to serialize GridName or GridNameTypeRow object.
+        /// Serialize GridName or GridNameTypeRow object.
         /// </summary>
         public static string GridNameToJson(GridName gridName)
         {
@@ -821,11 +821,61 @@
         }
 
         /// <summary>
-        /// Use to deserialize GridName. Always returns a GridName object.
+        /// Deserialize GridName. Always returns a GridName object. Never a GridNameTypeRow object.
         /// </summary>
         public static GridName GridNameFromJson(string json)
         {
             return GridName.FromJson(json);
+        }
+
+        /// <summary>
+        /// Serialize Index object.
+        /// </summary>
+        public static string IndexToJson(Index index)
+        {
+            return index.Value;
+        }
+
+        /// <summary>
+        /// Deserialize Index object.
+        /// </summary>
+        public static Index IndexFromJson(string json)
+        {
+            return new Index(json);
+        }
+
+        /// <summary>
+        /// Serialize ApplicationEventArgument.
+        /// </summary>
+        public static string ApplicationEventArgumentToJson(ApplicationEventArgument e)
+        {
+            string gridNameJson = GridNameToJson(e.GridName);
+            string indexJson = IndexToJson(e.Index);
+            string columnNameJson = e.ColumnName;
+            //
+            UtilFramework.Assert(!gridNameJson.Contains("-"));
+            UtilFramework.Assert(!indexJson.Contains("-"));
+            UtilFramework.Assert(!columnNameJson.Contains("-"));
+            //
+            string result = string.Format("{0}-{1}-{2}", gridNameJson, indexJson, columnNameJson);
+            return result;
+        }
+
+        /// <summary>
+        /// Deserialize ApplicationEventArgument.
+        /// </summary>
+        public static ApplicationEventArgument ApplicationEventArgumentFromJson(App app, string json)
+        {
+            string gridNameJson = json.Split("-")[0];
+            string indexJson = json.Split("-")[1];
+            string columnNameJson = json.Split("-")[2];
+            //
+            GridName gridName = GridNameFromJson(gridNameJson);
+            Index index = IndexFromJson(indexJson);
+            string columnName = columnNameJson;
+            //
+            ApplicationEventArgument result = new ApplicationEventArgument(app, gridName, index, columnName);
+            return result;
         }
     }
 }

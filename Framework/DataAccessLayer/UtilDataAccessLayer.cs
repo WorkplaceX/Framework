@@ -542,7 +542,7 @@
         /// <summary>
         /// Clone data row.
         /// </summary>
-        internal static Row RowClone(Row row)
+        public static Row RowClone(Row row)
         {
             Row result = (Row)UtilFramework.TypeToObject(row.GetType());
             RowCopy(row, result);
@@ -552,7 +552,7 @@
         /// <summary>
         /// Clone data row.
         /// </summary>
-        internal static TRow RowClone<TRow>(TRow row) where TRow : Row
+        public static TRow RowClone<TRow>(TRow row) where TRow : Row
         {
             return (TRow)RowClone((Row)row);
         }

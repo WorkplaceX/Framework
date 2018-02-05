@@ -671,7 +671,7 @@
                 bool isException = false;
                 try
                 {
-                    cell.ButtonIsClick(app, GridName.FromJson(gridNameClick), new Index(indexClick), row, columnNameClick, ref isReload);
+                    cell.ButtonIsClick(ref isReload, new ApplicationEventArgument(app, GridName.FromJson(gridNameClick), new Index(indexClick), columnNameClick));
                 }
                 catch (Exception exception)
                 {

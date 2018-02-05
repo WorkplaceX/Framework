@@ -214,7 +214,7 @@
         /// <summary>
         /// Returns data row.
         /// </summary>
-        internal Row RowGet(GridName gridName, Index index)
+        public Row RowGet(GridName gridName, Index index)
         {
             var row = RowInternalGet(gridName, index);
             switch (index.Enum)
@@ -693,7 +693,7 @@
         /// <summary>
         /// Reload data from database with current grid filter and current sorting.
         /// </summary>
-        internal void LoadDatabaseReload(GridName gridName)
+        public void LoadDatabaseReload(GridName gridName)
         {
             if (!IsErrorRowCell(gridName, Index.Filter)) // Do not reload data grid if there is text parse error in filter.
             {
@@ -1328,7 +1328,7 @@
                             }
                             string textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
                             ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameTypeRow, index, cell);
-                            if (configCell.CellEnum == GridCellEnum.Button && textJson == null)
+                            if (configCell.CellEnum == GridCellEnum.Button && textJson == null && cell.TypeColumn == typeof(string))
                             {
                                 textJson = "Button"; // Default text for button.
                             }
