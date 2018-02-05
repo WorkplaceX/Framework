@@ -323,7 +323,7 @@
                 HttpResponseMessage response;
                 try
                 {
-                    response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure project Framework.UniversalExpress is running.
+                    response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
                 }
                 catch (HttpRequestException exception)
                 {

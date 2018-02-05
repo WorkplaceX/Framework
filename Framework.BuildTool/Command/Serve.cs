@@ -19,7 +19,7 @@
             else
             {
                 UtilBuildTool.DotNetRun(UtilFramework.FolderName + "Server/", false);
-                UtilBuildTool.Node(UtilFramework.FolderName + "Submodule/Framework.UniversalExpress/Universal/", "index.js", false);
+                UtilBuildTool.Node(UtilFramework.FolderName + "Server/Universal/", "index.js", false);
                 UtilBuildTool.OpenBrowser("http://localhost:5000");
             }
         }
