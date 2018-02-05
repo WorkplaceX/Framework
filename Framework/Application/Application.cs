@@ -11,14 +11,15 @@
     using System.Linq;
 
     /// <summary>
-    /// Run multiple applications on same ASP.NET Core and same database instance.
+    /// Run multiple applications on same ASP.NET Core and same database instance. Mapping of url to class App is defined in sql FrameworkApplicationView.
+    /// AppSelector has to be in the same assembly like the App classes.
     /// </summary>
     public class AppSelector
     {
         /// <summary>
         /// Constructor with default app, if no database connection exists.
         /// </summary>
-        public AppSelector(Type typeAppDefault)
+        internal AppSelector(Type typeAppDefault)
         {
             this.TypeAppDefault = typeAppDefault;
         }
@@ -37,6 +38,9 @@
         /// </summary>
         public readonly Type TypeAppDefault;
 
+        /// <summary>
+        /// Database access of sql FrameworkApplicationView.
+        /// </summary>
         protected virtual List<FrameworkApplicationView> DbApplicationList()
         {
             List<FrameworkApplicationView> result;

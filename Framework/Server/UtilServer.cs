@@ -16,6 +16,10 @@
 
     public static class UtilServer
     {
+        /// <summary>
+        /// Run one application on this ASP.NET Core and database instance. Every WebRequest goes through here. 
+        /// </summary>
+        /// <param name="typeAppDefault">Type of application (See also: class App)</param>
         public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, Type typeAppDefault)
         {
             string requestPathBase;
@@ -25,6 +29,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Run multiple applications on this ASP.NET Core and database instance. Every WebRequest goes through here. 
+        /// </summary>
         public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, AppSelector appSelector)
         {
             string requestPathBase;
@@ -34,49 +41,11 @@
             return result;
         }
 
-        public static string StreamToString(Stream stream)
+        internal static string StreamToString(Stream stream)
         {
             using (var streamReader = new StreamReader(stream))
             {
                 return streamReader.ReadToEnd();
-            }
-        }
-
-        /// <summary>
-        /// Uri for Windows and Linux.
-        /// </summary>
-        public class Uri
-        {
-            public Uri(string uriString)
-            {
-                if (uriString.StartsWith("/"))
-                {
-                    this.isLinux = true;
-                    uriString = "Linux:" + uriString;
-                }
-                this.uriSystem = new System.Uri(uriString);
-            }
-
-            public Uri(Uri baseUri, string relativeUri)
-            {
-                this.uriSystem = new System.Uri(baseUri.uriSystem, relativeUri);
-            }
-
-            private readonly bool isLinux;
-
-            private readonly System.Uri uriSystem;
-
-            public string LocalPath
-            {
-                get
-                {
-                    string result = uriSystem.LocalPath;
-                    if (isLinux)
-                    {
-                        result = result.Substring("Linux:".Length);
-                    }
-                    return result;
-                }
             }
         }
 
@@ -108,7 +77,7 @@
         /// <summary>
         /// Returns FileContentResult.
         /// </summary>
-        public static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName)
+        internal static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName)
         {
             string contentType = FileNameToFileContentType(fileName);
             // Read file
@@ -120,7 +89,7 @@
         /// <summary>
         /// Returns FileContentResult.
         /// </summary>
-        public static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName, byte[] data)
+        internal static FileContentResult FileNameToFileContentResult(ControllerBase controller, string fileName, byte[] data)
         {
             string contentType = FileNameToFileContentType(fileName);
             return controller.File(data, contentType);
@@ -129,7 +98,7 @@
         /// <summary>
         /// Returns FolderName Framework/Server/. Different folder if running on IIS.
         /// </summary>
-        public static string FolderNameFrameworkServer()
+        internal static string FolderNameFrameworkServer()
         {
             if (UtilFramework.FolderNameIsIss)
             {
@@ -144,7 +113,7 @@
         /// <summary>
         /// Returns FolderName Server/.
         /// </summary>
-        public static string FolderNameServer()
+        internal static string FolderNameServer()
         {
             if (UtilFramework.FolderNameIsIss)
             {
@@ -156,7 +125,7 @@
             }
         }
 
-        public static string FileNameIndex()
+        internal static string FileNameIndex()
         {
             string result = FolderNameFrameworkServer() + "wwwroot/" + "index.html";
             string fileNameOverride = FolderNameServer() + "wwwroot/" + "index.html";
@@ -167,7 +136,7 @@
             return result;
         }
 
-        public static string FileNameIndexUniversal()
+        internal static string FileNameIndexUniversal()
         {
             string result = FolderNameFrameworkServer() + "wwwroot/" + "indexUniversal.html";
             string fileNameOverride = FolderNameServer() + "wwwroot/" + "indexUniversal.html";
@@ -202,7 +171,7 @@
         /// </summary>
         /// <param name="typeComponentInNamespace">Additional namespace in which to search for json class when deserializing.</param>
         /// <returns></returns>
-        internal async Task<IActionResult> WebRequest()
+        public async Task<IActionResult> WebRequest()
         {
             string requestPath = Controller.HttpContext.Request.Path.ToString();
             UtilFramework.LogDebug(string.Format("Request ({0})", requestPath));
@@ -306,7 +275,7 @@
                     else
                     {
                         // Running in Visual Studio
-                        url = "http://localhost:1337/Universal/index.js"; // Call UniversalExpress when running in Visual Studio.
+                        url = "http://localhost:4000/Universal/index.js"; // Call Universal server when running in Visual Studio.
                         htmlUniversal = await Post(url, jsonText, true);
                     }
                 }
@@ -351,7 +320,15 @@
         {
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure project Framework.UniversalExpress is running.
+                HttpResponseMessage response;
+                try
+                {
+                    response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure project Framework.UniversalExpress is running.
+                }
+                catch (HttpRequestException exception)
+                {
+                    throw new Exception(string.Format("Http request failed! ({0})", url), exception);
+                }
                 if (isEnsureSuccessStatusCode)
                 {
                     response.EnsureSuccessStatusCode();

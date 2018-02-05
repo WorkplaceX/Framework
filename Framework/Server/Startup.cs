@@ -1,13 +1,16 @@
 ﻿namespace Server
 {
+    using Framework;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using System.Diagnostics;
+    using System.IO;
 
     /// <summary>
-    /// Derived class Startup has to be declared in Server project.
+    /// Derived class Startup has to be declared in Server assembly.
     /// </summary>
     public abstract class StartupBase
     {
@@ -17,6 +20,22 @@
         {
             services.AddMvc();
             services.AddMemoryCache();
+            //
+            if (Debugger.IsAttached)
+            {
+                string folderName = UtilFramework.FolderName + "Server/Universal/";
+                if (Directory.Exists(folderName))
+                {
+                    // Start Universal server, if running in Visual Studio environment.
+                    ProcessStartInfo info = new ProcessStartInfo();
+                    info.WorkingDirectory = folderName;
+                    info.FileName = "node.exe";
+                    info.Arguments = "index.js";
+                    info.UseShellExecute = true;
+                    info.WindowStyle = ProcessWindowStyle.Minimized;
+                    Process.Start(info);
+                }
+            }
         }
 
         private static bool debugIsException = true; // Enable exception page. // If running on IIS make sure web.config contains: arguments="Server.dll" if you get HTTP Error 502.5 - Process Failure
