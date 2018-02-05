@@ -590,7 +590,7 @@
                 ConfigColumn result = new ConfigColumn() // Default
                 {
                     Text = column.ColumnNameCSharp,
-                    IsVisible = UtilApplication.ConfigColumnNameSqlIsId(column.ColumnNameSql) == false
+                    IsVisible = true
                 };
                 //
                 string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
@@ -632,7 +632,9 @@
                     }
                 }
                 // Override programmatically
-                column.ConfigColumn(result, new ApplicationEventArgument(App, gridName, null, null));
+                var applicationEventArgument = new ApplicationEventArgument(App, gridName, null, null);
+                App.CellConfigColumn(column, result, applicationEventArgument);
+                column.ConfigColumn(result, applicationEventArgument);
                 //
                 this.configColumnList[gridName][column.ColumnNameCSharp] = result;
             }

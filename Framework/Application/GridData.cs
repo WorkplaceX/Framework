@@ -967,13 +967,20 @@
                             {
                                 try
                                 {
-                                    cell.TextParse(text, new ApplicationEventArgument(App, gridName, index, columnName));
-                                    string textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
-                                    if (text == "")
+                                    var applicationEventArgument  = new ApplicationEventArgument(App, gridName, index, columnName);
+                                    App.CellTextParse(cell, ref text, applicationEventArgument);
+                                    cell.TextParse(text, applicationEventArgument);
+                                    text = text == "" ? null : text;
+                                    //
+                                    string textCompare = null;
                                     {
-                                        text = null;
+                                        textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
+                                        App.CellRowValueToText(cell, ref textCompare, applicationEventArgument); // Override text generic.
+                                        textCompare = textCompare == "" ? null : textCompare;
+                                        cell.RowValueToText(ref textCompare, applicationEventArgument); // Override text.
+                                        textCompare = textCompare == "" ? null : textCompare;
                                     }
-                                    if (UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn) != text) // For example user entered "8.". It would be overwritten on screen with "8".
+                                    if (textCompare != text) // For example user entered "8.". It would be overwritten on screen with "8".
                                     {
                                         ErrorCellSet(gridName, index, columnName, "Value invalid!");
                                         row.RowNew = null; // Do not save.
@@ -1105,8 +1112,8 @@
                     {
                         ErrorRowSet(gridName, rowIndex, errorRowText);
                     }
+                    App.CellRowValueFromText(cell, ref text, new ApplicationEventArgument(App, gridName, rowIndex, cell.ColumnNameCSharp));
                     cell.RowValueFromText(ref text, new ApplicationEventArgument(App, gridName, rowIndex, null));
-                    App.CellRowValueFromText(gridName, rowIndex, cell, ref text);
                     object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
                     cell.PropertyInfo.SetValue(resultRow, value);
                 }
@@ -1325,8 +1332,8 @@
                             {
                                 textJson = "Button"; // Default text for button.
                             }
+                            App.CellRowValueToText(cell, ref textJson, new ApplicationEventArgument(App, gridName, index, null)); // Override text generic.
                             cell.RowValueToText(ref textJson, new ApplicationEventArgument(App, gridName, index, null)); // Override text.
-                            App.CellRowValueToText(gridName, index, cell, ref textJson); // Override text generic.
                             GridCellInternal gridCellInternal = CellGet(gridName, index, columnName);
                             if (!gridDataJson.CellList[GridName.ToJson(gridName)].ContainsKey(columnName))
                             {

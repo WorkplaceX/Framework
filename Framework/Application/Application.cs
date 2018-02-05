@@ -103,6 +103,7 @@
         /// </summary>
         public App()
         {
+            this.IsNamingConvention = true;
             ProcessInit(processList);
         }
 
@@ -112,7 +113,7 @@
             this.DbFrameworkApplication = dbFrameworkApplication;
         }
 
-        public WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
+        internal WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
 
         /// <summary>
         /// Returns value from ASP.NET memory cache.
@@ -152,24 +153,127 @@
         public AppJson AppJson { get; private set; }
 
         /// <summary>
+        /// Gets IsNamingConvention. If true, bool is displayed as "Yes", "No" instead of "True", "False". Or if ColumnName ends with "Id", column is hidden.
+        /// </summary>
+        public bool IsNamingConvention { get; private set; }
+
+        /// <summary>
         /// Called after method UtilDataAccessLayer.RowValueToText();
         /// </summary>
-        protected virtual internal void CellRowValueToText(GridName gridName, Index index, Cell cell, ref string result)
+        protected virtual internal void CellRowValueToText(Cell cell, ref string result, ApplicationEventArgument e)
         {
-
+            if (IsNamingConvention)
+            {
+                Type type = UtilFramework.TypeUnderlying(cell.TypeColumn);
+                if (type == typeof(bool))
+                {
+                    if ((bool?)cell.Value == false)
+                    {
+                        result = "No";
+                    }
+                    if ((bool?)cell.Value == true)
+                    {
+                        result = "Yes";
+                    }
+                }
+                if (type == typeof(DateTime))
+                {
+                    // result = string.Format("{0:yyyy-MM-dd HH:mm}", cell.Value); // Use this line to get format with time.
+                }
+            }
         }
 
         /// <summary>
-        /// Called before user entered text is parsed with UtilDataAccessLayer.ValueFromText();
+        /// Called before text is parsed with method UtilDataAccessLayer.ValueFromText();
         /// </summary>
-        protected virtual internal void CellRowValueFromText(GridName gridName, Index index, Cell cell, ref string result)
+        protected virtual internal void CellRowValueFromText(Cell cell, ref string result, ApplicationEventArgument e)
         {
-
+            if (IsNamingConvention)
+            {
+                Type type = UtilFramework.TypeUnderlying(cell.TypeColumn);
+                if (type == typeof(bool))
+                {
+                    if (result != null)
+                    {
+                        if (result.ToUpper() == "YES")
+                        {
+                            result = "True";
+                        }
+                        if (result.ToUpper() == "NO")
+                        {
+                            result = "False";
+                        }
+                    }
+                }
+            }
         }
 
-        protected virtual internal void ColumnIsVisible(GridName gridName, Cell cell, ref bool result)
+        /// <summary>
+        /// Called before user entered text is parsed with method UtilDataAccessLayer.RowValueToText();
+        /// </summary>
+        protected virtual internal void CellTextParse(Cell cell, ref string result, ApplicationEventArgument e)
         {
+            if (IsNamingConvention)
+            {
+                Type type = UtilFramework.TypeUnderlying(cell.TypeColumn);
+                // Bool
+                if (type == typeof(bool))
+                {
+                    string text = result.ToUpper();
+                    if (text != null)
+                    {
+                        if (text == "YES")
+                        {
+                            result = "True";
+                        }
+                        if (text == "NO")
+                        {
+                            result = "False";
+                        }
+                        // Key short cut
+                        if (cell.Value == null)
+                        {
+                            if (text.StartsWith("Y"))
+                            {
+                                result = "True";
+                            }
+                            if (text.StartsWith("N"))
+                            {
+                                result = "False";
+                            }
+                        }
+                    }
+                }
+                // DateTime
+                if (type == typeof(DateTime))
+                {
+                    if (result != null)
+                    {
+                        // Make user entered text less restrictive. Allow for example "2018-1-1" and "2018-01-01"
+                        string text = result;
+                        object value = UtilDataAccessLayer.RowValueFromText(text, cell.TypeColumn);
+                        string textCompare = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
+                        if (textCompare != null)
+                        {
+                            if (text.Replace("0", "") == textCompare.Replace("0", ""))
+                            {
+                                result = textCompare;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
+        /// <summary>
+        /// Called before method Cell.ConfigColumn();
+        /// </summary>
+        protected virtual internal void CellConfigColumn(Cell column, ConfigColumn result, ApplicationEventArgument e)
+        {
+            if (IsNamingConvention)
+            {
+                result.IsVisible = UtilApplication.ConfigColumnNameSqlIsId(column.ColumnNameSql) == false;
+            }
         }
 
         internal AppJson Run(AppJson appJson, HttpContext httpContext)
