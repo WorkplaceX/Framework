@@ -93,7 +93,7 @@
             commandShortCutList.Add("generate");
             commandShortCutList.Add("generate --framework");
             commandShortCutList.Add("buildClient");
-            commandShortCutList.Add("serve --client");
+            commandShortCutList.Add("serve --clientLiveDevelopment");
             //
             return Command.CommandLineApplicationCreate(commandShortCutList);
         }
@@ -232,7 +232,7 @@
         public static void Node(string workingDirectory, string fileName, bool isWait = true)
         {
             string nodeFileName = ConnectionManagerBuildTool.NodeFileName;
-            Start(workingDirectory, nodeFileName, fileName, false, isWait, new KeyValuePair<string, string>("PORT", "1337"));
+            Start(workingDirectory, nodeFileName, fileName, false, isWait, new KeyValuePair<string, string>("PORT", "4000")); // Default port. See also: Submodule/Client/src/server.ts
         }
 
         public static void NpmRun(string workingDirectory, string script, bool isWait = true)

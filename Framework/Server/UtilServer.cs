@@ -41,6 +41,26 @@
             return result;
         }
 
+        /// <summary>
+        /// Start Universal server. Used for debug and BuildTool.
+        /// </summary>
+        internal static void StartUniversalServer()
+        {
+            string folderName = UtilFramework.FolderName + "Server/Universal/";
+            if (Directory.Exists(folderName))
+            {
+                // Start Universal server, if running in Visual Studio environment.
+                ProcessStartInfo info = new ProcessStartInfo();
+                info.WorkingDirectory = folderName;
+                info.FileName = "node.exe";
+                info.Arguments = "index.js";
+                info.UseShellExecute = true;
+                // info.Environment.Add("PORT", "4000"); // Does not work in connection with "info.UseShellExecute = true;". For default port see also: Submodule/Client/src/server.ts
+                info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
+                System.Diagnostics.Process.Start(info);
+            }
+        }
+
         internal static string StreamToString(Stream stream)
         {
             using (var streamReader = new StreamReader(stream))

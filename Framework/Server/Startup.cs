@@ -1,6 +1,7 @@
 ﻿namespace Server
 {
     using Framework;
+    using Framework.Server;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -23,18 +24,7 @@
             //
             if (Debugger.IsAttached)
             {
-                string folderName = UtilFramework.FolderName + "Server/Universal/";
-                if (Directory.Exists(folderName))
-                {
-                    // Start Universal server, if running in Visual Studio environment.
-                    ProcessStartInfo info = new ProcessStartInfo();
-                    info.WorkingDirectory = folderName;
-                    info.FileName = "node.exe";
-                    info.Arguments = "index.js";
-                    info.UseShellExecute = true;
-                    info.WindowStyle = ProcessWindowStyle.Minimized;
-                    Process.Start(info);
-                }
+                UtilServer.StartUniversalServer();
             }
         }
 
