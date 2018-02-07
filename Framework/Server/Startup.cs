@@ -20,7 +20,8 @@
         {
             services.AddMvc();
             services.AddMemoryCache();
-            services.AddSingleton(new UnitTestService());
+            services.AddSingleton<UnitTestService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Needed for IIS. Otherwise new HttpContextAccessor(); results in null reference exception.
             //
             if (Debugger.IsAttached)
             {
