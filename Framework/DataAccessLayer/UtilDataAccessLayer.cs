@@ -1,7 +1,9 @@
 ﻿namespace Framework.DataAccessLayer
 {
     using Framework.Server;
+    using global::Server;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.EntityFrameworkCore.Metadata.Conventions;
     using Microsoft.EntityFrameworkCore.Query.Internal;
     using System;
@@ -193,18 +195,35 @@
         }
 
         /// <summary>
-        /// Returns DbContext with ConnectionString and model for row defined in typeRow.
+        /// Build model for one typeRow or all Row classes in case of InMemory unit test mode.
         /// </summary>
-        private static DbContext DbContext(Type typeRow)
+        private static IMutableModel DbContextModel(Type typeRow)
         {
+            List<Type> typeRowList = new List<Type>();
+            UnitTestService unitTestService = UnitTestService.Instance;
+            if (unitTestService.IsUnitTest)
+            {
+                if (unitTestService.Model != null)
+                {
+                    return unitTestService.Model;
+                }
+                typeRowList.AddRange(UtilFramework.TypeList(unitTestService.TypeInAssembly, typeof(Row))); // Add all Row classes for InMemory unit test mode.
+                typeRowList.Remove(typeof(Row));
+            }
+            else
+            {
+                typeRowList.Add(typeRow);
+            }
             var conventionSet = new ConventionSet();
             var builder = new ModelBuilder(conventionSet);
+            // Build model
+            foreach (Type itemTypeRow in typeRowList)
             {
-                var entity = builder.Entity(typeRow);
-                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                var entity = builder.Entity(itemTypeRow);
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)itemTypeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
                 entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName);
                 bool isFirst = true;
-                foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(typeRow))
+                foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(itemTypeRow))
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
                     if (columnAttribute == null || columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
@@ -223,14 +242,34 @@
                     }
                 }
             }
+            var model = builder.Model;
+            if (unitTestService.IsUnitTest)
+            {
+                unitTestService.Model = model;
+            }
+            return model;
+        }
+
+        /// <summary>
+        /// Returns DbContext with ConnectionString and model for one row, defined in typeRow.
+        /// </summary>
+        private static DbContext DbContext(Type typeRow)
+        {
             var options = new DbContextOptionsBuilder<DbContext>();
             string connectionString = ConnectionManagerServer.ConnectionString(typeRow);
             if (connectionString == null)
             {
                 throw new Exception("ConnectionString is null! (See also file: ConnectionManagerServer.json)");
             }
-            options.UseSqlServer(connectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
-            options.UseModel(builder.Model);
+            if (UnitTestService.Instance.IsUnitTest == false)
+            {
+                options.UseSqlServer(connectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
+            }
+            else
+            {
+                options.UseInMemoryDatabase(databaseName: "Memory");
+            }
+            options.UseModel(DbContextModel(typeRow));
             DbContext result = new DbContext(options.Options);
             //
             return result;

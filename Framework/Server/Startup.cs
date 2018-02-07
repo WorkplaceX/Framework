@@ -8,7 +8,6 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using System.Diagnostics;
-    using System.IO;
 
     /// <summary>
     /// Derived class Startup has to be declared in Server assembly.
@@ -21,6 +20,7 @@
         {
             services.AddMvc();
             services.AddMemoryCache();
+            services.AddSingleton(new UnitTestService());
             //
             if (Debugger.IsAttached)
             {

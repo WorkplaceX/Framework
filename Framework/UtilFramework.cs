@@ -5,6 +5,8 @@
 
 namespace Framework
 {
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore.Metadata;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -15,6 +17,21 @@ namespace Framework
 
     public static class UtilFramework
     {
+        /// <summary>
+        /// Enable InMemory database for unit tests.
+        /// </summary>
+        /// <param name="typeInAssembly">Assembly to scan for Row classes.</param>
+        /// <param name="init">Write for example FrameworkApplicationView records to InMemory database.</param>
+        public static void UnitTest(Type typeInAssembly, Action init)
+        {
+            UnitTestService.Instance.TypeInAssembly = typeInAssembly;
+            if (UnitTestService.Instance.IsUnitTest == false)
+            {
+                UnitTestService.Instance.IsUnitTest = true;
+                init();
+            }
+        }
+
         public static string VersionServer
         {
             get
@@ -189,6 +206,31 @@ namespace Framework
         }
 
         /// <summary>
+        /// Returns all types of type with base class typeBase in typeInAssembly. Searches also Framework assembly.
+        /// </summary>
+        internal static List<Type> TypeList(Type typeInAssembly, Type typeBase)
+        {
+            List<Type> result = new List<Type>();
+            List<Assembly> assemblyList = new List<Assembly>();
+            assemblyList.Add(typeInAssembly.Assembly);
+            if (typeof(UtilFramework).Assembly != typeInAssembly.Assembly)
+            {
+                assemblyList.Add(typeof(UtilFramework).Assembly);
+            }
+            foreach (Assembly assembly in assemblyList)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (UtilFramework.IsSubclassOf(type, typeBase))
+                    {
+                        result.Add(type);
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns list of assemblies. Including Framework assembly.
         /// </summary>
         internal static Type[] TypeInAssemblyList(Type typeInAssembly)
@@ -318,6 +360,35 @@ namespace Framework
                 result = typeUnderlying;
             }
             return result;
+        }
+    }
+
+    /// <summary>
+    /// Enable InMemory database for unit tests.
+    /// </summary>
+    internal class UnitTestService
+    {
+        /// <summary>
+        /// Gets or sets IsUnitTest. Run application in UnitTest mode.
+        /// </summary>
+        public bool IsUnitTest { get; set; }
+
+        /// <summary>
+        /// Gets or sets App. App of current request.
+        /// </summary>
+        public Type TypeInAssembly { get; set; }
+
+        public IMutableModel Model { get; set; }
+
+        /// <summary>
+        /// Gets Instance. Singelton.
+        /// </summary>
+        public static UnitTestService Instance
+        {
+            get
+            {
+                return (UnitTestService)new HttpContextAccessor().HttpContext.RequestServices.GetService(typeof(UnitTestService));
+            }
         }
     }
 }
