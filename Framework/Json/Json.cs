@@ -146,19 +146,20 @@
             {
                 if (value != null)
                 {
-                    if (value.GetType() == typeof(string))
+                    Type valueGetType = value.GetType();
+                    if (valueGetType == typeof(string))
                     {
                         typeGroup = TypeGroup.Value;
                         valueType = typeof(string);
                         return;
                     }
-                    if (value.GetType() == typeof(int) || value.GetType() == typeof(double) || value.GetType() == typeof(Int64))
+                    if (valueGetType == typeof(int) || valueGetType == typeof(double) || valueGetType == typeof(Int64))
                     {
                         typeGroup = TypeGroup.Value;
                         valueType = typeof(double);
                         return;
                     }
-                    if (value.GetType() == typeof(bool))
+                    if (valueGetType == typeof(bool))
                     {
                         typeGroup = TypeGroup.Value;
                         valueType = typeof(bool);
@@ -166,22 +167,23 @@
                     }
                 }
             }
-            if (fieldType.GetTypeInfo().IsValueType)
+            TypeInfo fieldTypeGetTypeInfo = fieldType.GetTypeInfo();
+            if (fieldTypeGetTypeInfo.IsValueType)
             {
                 typeGroup = TypeGroup.Value;
                 valueType = fieldType;
                 return;
             }
-            if (fieldType.GetTypeInfo().IsGenericType && fieldType.GetTypeInfo().GetGenericTypeDefinition() == typeof(List<>))
+            if (fieldTypeGetTypeInfo.IsGenericType && fieldTypeGetTypeInfo.GetGenericTypeDefinition() == typeof(List<>))
             {
                 typeGroup = TypeGroup.List;
-                valueType = fieldType.GetTypeInfo().GetGenericArguments().First();
+                valueType = fieldTypeGetTypeInfo.GetGenericArguments().First();
                 return;
             }
-            if (fieldType.GetTypeInfo().IsGenericType && fieldType.GetTypeInfo().GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            if (fieldTypeGetTypeInfo.IsGenericType && fieldTypeGetTypeInfo.GetGenericTypeDefinition() == typeof(Dictionary<,>))
             {
                 typeGroup = TypeGroup.Dictionary;
-                valueType = fieldType.GetTypeInfo().GetGenericArguments()[1];
+                valueType = fieldTypeGetTypeInfo.GetGenericArguments()[1];
                 return;
             }
             if (fieldType == typeof(string))
@@ -190,7 +192,7 @@
                 valueType = fieldType;
                 return;
             }
-            if (fieldType.GetTypeInfo().GetConstructors().Count() > 0)
+            if (fieldTypeGetTypeInfo.GetConstructors().Count() > 0)
             {
                 typeGroup = TypeGroup.Object;
                 valueType = fieldType;
