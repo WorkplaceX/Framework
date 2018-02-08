@@ -17,8 +17,8 @@ namespace Framework
     using System.Linq.Dynamic.Core;
     using System.Net.Http;
     using System.Reflection;
+    using System.Runtime.Loader;
     using System.Threading;
-    using System.Threading.Tasks;
 
     public static class UtilFramework
     {
@@ -29,7 +29,7 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.078 Server";
+                return "v1.079 Server";
             }
         }
 
@@ -72,12 +72,37 @@ namespace Framework
         /// <summary>
         /// Enable InMemory database for unit tests.
         /// </summary>
-        public static void UnitTest(Type typeApplication)
+        public static void UnitTest(Type typeApp)
         {
-            Type typeInAssembly = typeApplication;
+            Type typeInAssembly = typeApp;
             UnitTest(typeInAssembly, () => {
-                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { Type = UtilFramework.TypeToName(typeApplication), IsActive = true, IsExist = true });
+                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { Type = UtilFramework.TypeToName(typeApp), IsActive = true, IsExist = true });
                 UtilDataAccessLayer.Insert(new FrameworkApplicationView() { Type = UtilFramework.TypeToName(typeof(AppConfig)), IsActive = true, IsExist = true, Path = "config" });
+            });
+        }
+
+        /// <summary>
+        /// Dynamically loads assembly Framework.UnitTest.
+        /// </summary>
+        /// <returns></returns>
+        public static Assembly AssemblyUnitTest()
+        {
+            string fileName = UtilFramework.FolderName + "/Submodule/Framework.UnitTest/bin/Debug/netcoreapp2.0/Framework.UnitTest.dll";
+            Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(fileName);
+            return assembly;
+        }
+
+        /// <summary>
+        /// Enable InMemory database for unit tests. Load dynamically Framework.UnitTest.
+        /// </summary>
+        public static void UnitTest()
+        {
+            string typeAppString = "MyApp";
+            Assembly assembly = AssemblyUnitTest();
+            var typeList = assembly.GetTypes();
+            Type typeApp = typeList.Where(item => item.Name == typeAppString).Single();
+            UtilFramework.UnitTest(typeApp, () => {
+                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { Type = UtilFramework.TypeToName(typeApp), IsActive = true, IsExist = true });
             });
         }
 
@@ -274,11 +299,17 @@ namespace Framework
         internal static Type[] TypeInAssemblyList(Type typeInAssembly)
         {
             List<Type> result = new List<Type>();
-            result.Add(typeof(UtilFramework));
-            if (result.First().GetTypeInfo().Assembly != typeInAssembly.GetTypeInfo().Assembly)
+            //
+            result.Add(typeof(UtilFramework)); // Add Framework assembly.
+            if (UnitTestService.Instance.IsUnitTest)
             {
-                result.Add(typeInAssembly);
+                result.Add(AssemblyUnitTest().GetTypes().First()); // Add Framework.UnitTest assembly.
             }
+            if (result.Where(item => item.Assembly == typeInAssembly.Assembly).Count() == 0)
+            {
+                result.Add(typeInAssembly); // Add assembly.
+            }
+            //
             return result.ToArray();
         }
 
@@ -419,7 +450,7 @@ namespace Framework
         public IMutableModel Model { get; set; }
 
         /// <summary>
-        /// Field used, if running as Framework.BuildTool unit test.
+        /// Field used, if running as Framework.UnitTest.
         /// </summary>
         // [ThreadStatic] // Multiple threads will access. See also: method ConfigInternal.LoadDatabaseConfig(); command Task.WhenAll();
         private static UnitTestService instance;
@@ -432,7 +463,7 @@ namespace Framework
             get
             {
                 HttpContext httpContext = new HttpContextAccessor().HttpContext;
-                if (httpContext == null) // Running as Framework.BuildTool unit test.
+                if (httpContext == null) // Running as Framework.UnitTest.
                 {
                     if (instance == null)
                     {
