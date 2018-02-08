@@ -18,6 +18,7 @@ namespace Framework
     using System.Net.Http;
     using System.Reflection;
     using System.Threading;
+    using System.Threading.Tasks;
 
     public static class UtilFramework
     {
@@ -28,7 +29,7 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.077 Server";
+                return "v1.078 Server";
             }
         }
 
@@ -418,6 +419,12 @@ namespace Framework
         public IMutableModel Model { get; set; }
 
         /// <summary>
+        /// Field used, if running as Framework.BuildTool unit test.
+        /// </summary>
+        // [ThreadStatic] // Multiple threads will access. See also: method ConfigInternal.LoadDatabaseConfig(); command Task.WhenAll();
+        private static UnitTestService instance;
+
+        /// <summary>
         /// Gets Instance. Singelton.
         /// </summary>
         public static UnitTestService Instance
@@ -425,9 +432,13 @@ namespace Framework
             get
             {
                 HttpContext httpContext = new HttpContextAccessor().HttpContext;
-                if (httpContext == null) // Running as BuildTool
+                if (httpContext == null) // Running as Framework.BuildTool unit test.
                 {
-                    return new UnitTestService();
+                    if (instance == null)
+                    {
+                        instance = new UnitTestService();
+                    }
+                    return instance;
                 }
                 else
                 {

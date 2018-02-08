@@ -272,13 +272,13 @@
         private static DbContext DbContext(Type typeRow)
         {
             var options = new DbContextOptionsBuilder<DbContext>();
-            string connectionString = ConnectionManagerServer.ConnectionString(typeRow);
-            if (connectionString == null)
-            {
-                throw new Exception("ConnectionString is null! (See also file: ConnectionManagerServer.json)");
-            }
             if (UnitTestService.Instance.IsUnitTest == false)
             {
+                string connectionString = ConnectionManagerServer.ConnectionString(typeRow);
+                if (connectionString == null)
+                {
+                    throw new Exception("ConnectionString is null! (See also file: ConnectionManagerServer.json)");
+                }
                 options.UseSqlServer(connectionString); // See also: ConnectionManagerServer.json (Data Source=localhost; Initial Catalog=Database; Integrated Security=True;)
             }
             else

@@ -481,7 +481,7 @@
 
         public Guid? Session;
 
-        public string RequestUrl;
+        // public string RequestUrl; // Removed because of unit test.
 
         /// <summary>
         /// Gets or sets GridData.

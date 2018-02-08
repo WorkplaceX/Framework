@@ -166,6 +166,43 @@
             }
             return result;
         }
+
+        /// <summary>
+        /// Post to json url.
+        /// </summary>
+        internal static async Task<string> WebPost(string url, string json, bool isEnsureSuccessStatusCode)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response;
+                try
+                {
+                    response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
+                }
+                catch (HttpRequestException exception)
+                {
+                    throw new Exception(string.Format("Http request failed! ({0})", url), exception);
+                }
+                if (isEnsureSuccessStatusCode)
+                {
+                    response.EnsureSuccessStatusCode();
+                    string result = await response.Content.ReadAsStringAsync();
+                    return result;
+                }
+                else
+                {
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        string result = await response.Content.ReadAsStringAsync();
+                        return result;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
     }
 
     internal class UtilWebController
@@ -214,7 +251,7 @@
             // Html request
             if (requestPath.StartsWith(RequestPathBase) && (requestPath.EndsWith("/") || requestPath.EndsWith(".html")))
             {
-                AppJson appJsonOut = App.Run(null, Controller.HttpContext);
+                AppJson appJsonOut = App.Run(null);
                 string htmlUniversal = null;
                 string html = UtilFramework.FileRead(UtilServer.FileNameIndex());
                 htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
@@ -228,7 +265,7 @@
                 AppJson appJsonOut;
                 try
                 {
-                    appJsonOut = App.Run(appJsonIn, Controller.HttpContext);
+                    appJsonOut = App.Run(appJsonIn);
                     appJsonOut.ErrorProcess = null;
                 }
                 catch (Exception exception)
@@ -290,13 +327,13 @@
                     if (UtilFramework.FolderNameIsIss)
                     {
                         // Running on IIS Server.
-                        htmlUniversal = await Post(url, jsonText, true); // Call Angular Universal server side rendering service.
+                        htmlUniversal = await UtilServer.WebPost(url, jsonText, true); // Call Angular Universal server side rendering service.
                     }
                     else
                     {
                         // Running in Visual Studio
                         url = "http://localhost:4000/Universal/index.js"; // Call Universal server when running in Visual Studio.
-                        htmlUniversal = await Post(url, jsonText, true);
+                        htmlUniversal = await UtilServer.WebPost(url, jsonText, true);
                     }
                 }
                 //
@@ -331,43 +368,6 @@
             }
             UtilFramework.Assert(resultAssert != result, "Adding browserJson failed!");
             return result;
-        }
-
-        /// <summary>
-        /// Post to json url.
-        /// </summary>
-        private async Task<string> Post(string url, string json, bool isEnsureSuccessStatusCode)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                HttpResponseMessage response;
-                try
-                {
-                    response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
-                }
-                catch (HttpRequestException exception)
-                {
-                    throw new Exception(string.Format("Http request failed! ({0})", url), exception);
-                }
-                if (isEnsureSuccessStatusCode)
-                {
-                    response.EnsureSuccessStatusCode();
-                    string result = await response.Content.ReadAsStringAsync();
-                    return result;
-                }
-                else
-                {
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        string result = await response.Content.ReadAsStringAsync();
-                        return result;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }
         }
     }
 }

@@ -276,7 +276,7 @@
             }
         }
 
-        internal AppJson Run(AppJson appJson, HttpContext httpContext)
+        internal AppJson Run(AppJson appJson)
         {
             this.AppJson = appJson;
             if (AppJson == null || AppJson.Session == null) // First request.
@@ -285,7 +285,7 @@
                 AppJson = new AppJson();
                 AppJson.RequestCount = requestCount;
                 AppJson.Session = Guid.NewGuid();
-                AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
+                // AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value); // Removed because of unit test.
                 GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
                 Type typePage = TypePageMain();
                 PageShow(AppJson, typePage);
