@@ -1,13 +1,14 @@
 ﻿namespace Framework.Server
 {
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Caching.Memory;
 
     public abstract class WebControllerBase : Controller
     {
-        public WebControllerBase(IMemoryCache memoryCache)
+        public WebControllerBase()
         {
-            this.MemoryCache = memoryCache;
+            this.MemoryCache = (IMemoryCache)new HttpContextAccessor().HttpContext.RequestServices.GetService(typeof(IMemoryCache));
         }
 
         public readonly IMemoryCache MemoryCache;

@@ -5,6 +5,9 @@
 
 namespace Framework
 {
+    using Database.dbo;
+    using Framework.Application.Config;
+    using Framework.DataAccessLayer;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore.Metadata;
     using System;
@@ -17,12 +20,23 @@ namespace Framework
 
     public static class UtilFramework
     {
+        public static string VersionServer
+        {
+            get
+            {
+                // .NET Core 2.0
+                // node 8.9.2 LTS
+                // npm 5.5.1
+                return "v1.075 Server";
+            }
+        }
+
         /// <summary>
         /// Enable InMemory database for unit tests.
         /// </summary>
         /// <param name="typeInAssembly">Assembly to scan for Row classes.</param>
         /// <param name="init">Write for example FrameworkApplicationView records to InMemory database.</param>
-        public static void UnitTest(Type typeInAssembly, Action init)
+        internal static void UnitTest(Type typeInAssembly, Action init)
         {
             UnitTestService.Instance.TypeInAssembly = typeInAssembly;
             if (UnitTestService.Instance.IsUnitTest == false)
@@ -32,15 +46,16 @@ namespace Framework
             }
         }
 
-        public static string VersionServer
+        /// <summary>
+        /// Enable InMemory database for unit tests.
+        /// </summary>
+        public static void UnitTest(Type typeApplication)
         {
-            get
-            {
-                // .NET Core 2.0
-                // node 8.9.2 LTS
-                // npm 5.5.1
-                return "v1.074 Server";
-            }
+            Type typeInAssembly = typeApplication;
+            UnitTest(typeInAssembly, () => {
+                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { Type = UtilFramework.TypeToName(typeApplication), IsActive = true, IsExist = true });
+                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { Type = UtilFramework.TypeToName(typeof(AppConfig)), IsActive = true, IsExist = true, Path = "config" });
+            });
         }
 
         internal static void Assert(bool isAssert, string exceptionText)
