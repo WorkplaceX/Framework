@@ -14,6 +14,7 @@ namespace Framework
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Net.Http;
     using System.Reflection;
     using System.Threading;
@@ -27,8 +28,29 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.076 Server";
+                return "v1.077 Server";
             }
+        }
+
+        /// <summary>
+        /// First LinqDynamic query is slow. This is a warm up query for better performance.
+        /// </summary>
+        internal static void LinqDynamicBoot()
+        {
+            var list = new List<LinqDynamic>();
+            list.Add(new LinqDynamic() { Text = "F" });
+            var query = list.AsQueryable();
+            var queryDynamic = query.OrderBy("Text"); // Takes ca. 360ms the first time.
+            var result = queryDynamic.ToDynamicArray();
+            if (result.Count() == 0)
+            {
+                UtilFramework.Assert(true);
+            }
+        }
+
+        internal class LinqDynamic
+        {
+            public string Text;
         }
 
         /// <summary>
