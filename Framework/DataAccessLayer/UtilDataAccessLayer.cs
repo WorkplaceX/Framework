@@ -166,7 +166,10 @@
                     Type typeCell = typeof(Cell); // Default cell api.
                     if (columnAttribute != null) // Reference from entity property to cell. If no cell api is defined, stick, with default cell api.
                     {
-                        typeCell = columnAttribute.TypeCell;
+                        if (columnAttribute.TypeCell != null)
+                        {
+                            typeCell = columnAttribute.TypeCell; // Override default value.
+                        }
                     }
                     Cell cell = (Cell)UtilFramework.TypeToObject(typeCell);
                     cell.Constructor(tableNameCSharp, sqlColumnName, propertyInfo.Name, typeRow, propertyInfo.PropertyType, propertyInfo);
@@ -221,9 +224,13 @@
             {
                 var entity = builder.Entity(itemTypeRow);
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)itemTypeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-                entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName);
-                bool isFirst = true;
-                foreach (PropertyInfo propertyInfo in UtilDataAccessLayer.TypeRowToPropertyList(itemTypeRow))
+                if (tableAttribute != null) // InMemory Row for UnitTest might not have an sql table name defined.
+                {
+                    entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName); // By default EF maps sql table name to class name.
+                }
+                bool isPrimaryKey = false;
+                PropertyInfo[] propertyInfoList = UtilDataAccessLayer.TypeRowToPropertyList(itemTypeRow);
+                foreach (PropertyInfo propertyInfo in propertyInfoList)
                 {
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
                     if (columnAttribute == null || columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
@@ -232,14 +239,23 @@
                     }
                     else
                     {
-                        if (isFirst)
+                        // Primary key
+                        if (columnAttribute == null || columnAttribute.IsPrimaryKey)
                         {
-                            isFirst = false;
-                            entity.HasKey(propertyInfo.Name); // Assume first property is primary key. Be aware of property order in partial classes!
+                            isPrimaryKey = true;
+                            entity.HasKey(propertyInfo.Name);
                             entity.Property(propertyInfo.Name).ValueGeneratedOnAdd(); // Read back auto increment key value.
                         }
                         entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.SqlColumnName);
                     }
+                }
+                if (isPrimaryKey == false)
+                {
+                    // No primary key defined. For example View. In order to prevent NullException when inserting row,
+                    // set artificial "Primary Key" on first column. See also method UtilDataAccessLayer.Insert();
+                    PropertyInfo propertyInfo = propertyInfoList.First();
+                    entity.HasKey(propertyInfo.Name);
+                    entity.Property(propertyInfo.Name).ValueGeneratedOnAdd(); // Read back auto increment key value. // Applies also to InMemory Rows.
                 }
             }
             var model = builder.Model;
@@ -416,7 +432,7 @@
             //
             Row rowClone = UtilDataAccessLayer.RowClone(row);
             DbContext dbContext = DbContext(row.GetType());
-            dbContext.Add(row);
+            dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
             try
             {
                 dbContext.SaveChanges();

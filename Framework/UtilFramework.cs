@@ -27,7 +27,7 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.075 Server";
+                return "v1.076 Server";
             }
         }
 
@@ -402,7 +402,15 @@ namespace Framework
         {
             get
             {
-                return (UnitTestService)new HttpContextAccessor().HttpContext.RequestServices.GetService(typeof(UnitTestService));
+                HttpContext httpContext = new HttpContextAccessor().HttpContext;
+                if (httpContext == null) // Running as BuildTool
+                {
+                    return new UnitTestService();
+                }
+                else
+                {
+                    return (UnitTestService)httpContext.RequestServices.GetService(typeof(UnitTestService));
+                }
             }
         }
     }

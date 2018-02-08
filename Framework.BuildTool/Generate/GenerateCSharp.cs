@@ -196,7 +196,14 @@
                     result.AppendLine();
                 }
                 string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
-                result.AppendLine(string.Format("        [SqlColumn(\"{0}\", typeof({1}))]", item.Schema.ColumnName, item.TableNameCSharp + "_" + item.ColumnNameCSharp));
+                if (item.IsPrimaryKey == false)
+                {
+                    result.AppendLine(string.Format("        [SqlColumn(\"{0}\", typeof({1}))]", item.Schema.ColumnName, item.TableNameCSharp + "_" + item.ColumnNameCSharp));
+                }
+                else
+                {
+                    result.AppendLine(string.Format("        [SqlColumn(\"{0}\", typeof({1}), {2})]", item.Schema.ColumnName, item.TableNameCSharp + "_" + item.ColumnNameCSharp, item.IsPrimaryKey.ToString().ToLower()));
+                }
                 result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.ColumnNameCSharp));
             }
         }

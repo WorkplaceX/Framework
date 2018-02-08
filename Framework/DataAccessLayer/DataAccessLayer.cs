@@ -31,7 +31,7 @@
         protected virtual internal void Insert(Row rowNew, AppEventArg e)
         {
             UtilFramework.Assert(rowNew == this);
-            if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No insert on database, if only calculated column has been modified.
+            // if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No insert on database, if only calculated column has been modified. // User can also enter text into calculated field. Data can be stored anywhere.
             {
                 UtilDataAccessLayer.Insert(this);
             }
@@ -255,13 +255,25 @@
     /// </summary>
     public class SqlColumnAttribute : Attribute
     {
-        public SqlColumnAttribute(string sqlColumnName, Type typeCell)
+        public SqlColumnAttribute(string sqlColumnName, Type typeCell, bool isPrimaryKey)
         {
             this.SqlColumnName = sqlColumnName;
+            this.IsPrimaryKey = isPrimaryKey;
             this.TypeCell = typeCell;
         }
 
+        public SqlColumnAttribute(string sqlColumnName, Type typeCell) 
+            : this(sqlColumnName, typeCell, false)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets or sets SqlColumnName. If null, it's a calculated column.
+        /// </summary>
         public readonly string SqlColumnName;
+
+        public readonly bool IsPrimaryKey;
 
         public readonly Type TypeCell;
     }

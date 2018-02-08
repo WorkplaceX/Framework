@@ -52,6 +52,7 @@
                     SchemaNameCSharp = schemaNameCSharp,
                     TableNameCSharp = tableNameCSharp,
                     ColumnNameCSharp = columnNameCSharp,
+                    IsPrimaryKey = column.IsPrimaryKey
                 });
             }
         }
@@ -68,5 +69,7 @@
         public string TableNameCSharp { get; set; }
 
         public string ColumnNameCSharp { get; set; }
+
+        public bool IsPrimaryKey { get; set; }
     }
 }
