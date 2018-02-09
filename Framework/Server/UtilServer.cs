@@ -13,9 +13,21 @@
     using System.Linq;
     using System.Net.Http;
     using System.Text;
+    using Microsoft.AspNetCore.Http;
 
     public static class UtilServer
     {
+        internal static string RequestUrl()
+        {
+            string result = null;
+            HttpContext httpContext = new HttpContextAccessor().HttpContext;
+            if (httpContext != null) // Otherwise running in unit test mode.
+            {
+                result = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
+            }
+            return result;
+        }
+
         /// <summary>
         /// Run one application on this ASP.NET Core and database instance. Every WebRequest goes through here. 
         /// </summary>

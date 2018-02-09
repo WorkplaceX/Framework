@@ -19,7 +19,7 @@
         protected virtual internal void Update(Row row, Row rowNew, AppEventArg e)
         {
             UtilFramework.Assert(this == rowNew);
-            if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No update on database, if only calculated column has been modified.
+            // if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No update on database, if only calculated column has been modified. // User can also enter text into calculated field. Data can be stored anywhere.
             {
                 UtilDataAccessLayer.Update(row, this);
             }

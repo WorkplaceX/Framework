@@ -1,13 +1,9 @@
 ﻿namespace UnitTest.Application
 {
+    using Database.UnitTest.Application;
     using Framework;
     using Framework.Application;
     using Framework.Component;
-    using Framework.Server;
-    using global::UnitTest.Application;
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Threading.Tasks;
 
     public class UnitTestApplication : UnitTestBase
     {
@@ -16,10 +12,18 @@
             UtilFramework.UnitTest(typeof(MyApp)); // Enable InMemory database.
             var app = new MyApp();
             AppJson appJson = app.Run(null);
-            string json = Framework.Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
-            // UtilServer.StartUniversalServer();
-            // string url = "http://localhost:4000/Universal/index.js"; // Call Universal server when running in Visual Studio.
-            // string html = UtilServer.WebPost(url, json, true).Result;
+
+            GridName gridName = new GridName<MyRow>();
+            string gridNameJson = UtilApplication.GridNameToJson(gridName);
+
+            UtilFramework.Assert(appJson.GridDataJson.RowList[gridNameJson][0].Index == "Filter");
+            UtilFramework.Assert(appJson.GridDataJson.CellList[gridNameJson]["IsActive"]["Filter"].T == null); // No text in filter if bool not nullable.
+            {
+                // string json = Framework.Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
+                // UtilServer.StartUniversalServer();
+                // string url = "http://localhost:4000/Universal/index.js"; // Call Universal server when running in Visual Studio.
+                // string html = UtilServer.WebPost(url, json, true).Result;
+            }
         }
     }
 }
@@ -60,6 +64,12 @@ namespace Database.UnitTest.Application
 
         [SqlColumn("Text", typeof(MyRow_Text))]
         public string Text { get; set; }
+
+        [SqlColumn("Text2", typeof(MyRow_Text))]
+        public string Text2 { get; set; }
+
+        [SqlColumn("IsActive", null)]
+        public bool IsActive { get; set; }
     }
 
     public class MyRow_Text : Cell<MyRow>

@@ -29,7 +29,7 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.079 Server";
+                return "v1.080 Server";
             }
         }
 

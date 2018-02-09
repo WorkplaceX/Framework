@@ -531,8 +531,14 @@ export class GridField {
       gridCell.IsO = null;
       gridCell.O = null;
     }
+    // IsDeleteKey
+    let textLength: number = gridCell.T == null ? 0 : gridCell.T.length;
+    let textNewLength: number = textNew == null ? 0 : textNew.length;
+    let isDeleteKey: boolean = textNewLength < textLength;
+    
     gridCell.T = textNew;
     gridCell.IsModify = true;
+    gridCell.IsDeleteKey = isDeleteKey;
     // GridSave icon.
     if (gridCell.CssClass == null || gridCell.CssClass.indexOf('gridSave') == -1) {
       gridCell.CssClass += " gridSave";

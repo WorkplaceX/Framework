@@ -211,7 +211,10 @@
         /// <summary>
         /// Called before user entered text is parsed with method UtilDataAccessLayer.RowValueToText();
         /// </summary>
-        protected virtual internal void CellTextParse(Cell cell, ref string result, AppEventArg e)
+        /// <param name="cell">Cell to parse.</param>
+        /// <param name="result">Parsed result by default to adjust.</param>
+        /// <param name="isDeleteKey">User pressed delete or backspace key.</param>
+        protected virtual internal void CellTextParse(Cell cell, ref string result, bool isDeleteKey, AppEventArg e)
         {
             if (IsNamingConvention)
             {
@@ -231,7 +234,7 @@
                             result = "False";
                         }
                         // Key short cut
-                        if (cell.Value == null)
+                        if (isDeleteKey == false)
                         {
                             if (text.StartsWith("Y"))
                             {
@@ -285,7 +288,7 @@
                 AppJson = new AppJson();
                 AppJson.RequestCount = requestCount;
                 AppJson.Session = Guid.NewGuid();
-                // AppJson.RequestUrl = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value); // Removed because of unit test.
+                AppJson.RequestUrl = UtilServer.RequestUrl();
                 GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
                 Type typePage = TypePageMain();
                 PageShow(AppJson, typePage);

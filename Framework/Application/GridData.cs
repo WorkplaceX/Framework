@@ -62,6 +62,11 @@
         public bool IsModify;
 
         /// <summary>
+        /// Gets or sets IsDeleteKey. Sent by client indicating user pressed delete or backspace button.
+        /// </summary>
+        public bool IsDeleteKey;
+
+        /// <summary>
         /// Gets or sets IsParseSuccess. For internal use only. Never sent to client. Indicates user modified text could be parsed successfully.
         /// </summary>
         public bool IsParseSuccess;
@@ -712,7 +717,7 @@
                         ColumnNameOrderBy = queryList[gridName].ColumnNameOrderBy;
                         isOrderByDesc = queryList[gridName].IsOrderByDesc;
                         pageIndex = queryList[gridName].PageIndex;
-                        bool isExcludeCalculatedColumn = UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without ColumnNameSql.
+                        bool isExcludeCalculatedColumn = false; // UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without ColumnNameSql.
                         LoadDatabaseFilterList(gridName, out filterList, isExcludeCalculatedColumn);
                     }
                     Config.LoadDatabaseConfig(gridName);
@@ -913,6 +918,21 @@
                                 }
                             }
                         }
+                        else
+                        {
+                            // Set error on IsModify cell which could not be saved, because of an other error.
+                            foreach (string columnName in cellList[gridName][index].Keys)
+                            {
+                                GridCellInternal cell = cellList[gridName][index][columnName];
+                                if (cell.IsModify)
+                                {
+                                    if (ErrorCellGet(gridName, index, columnName) == null)
+                                    {
+                                        ErrorCellSet(gridName, index, columnName, "Not saved! Fix other error.");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -961,23 +981,28 @@
                             string columnName = cell.ColumnNameCSharp;
                             //
                             GridCellInternal cellInternal = CellGet(gridName, index, columnName);
+                            bool isDeleteKey = cellInternal.IsDeleteKey; // User hit delete or backspace key.
                             string text = cellInternal.Text;
                             bool isModify = cellInternal.IsModify;
-                            if (isModify)
+                            if (isModify || cellInternal.Error != null) // Cell IsModify or has an error from a previous request.
                             {
                                 try
                                 {
                                     var appEventArg  = new AppEventArg(App, gridName, index, columnName);
-                                    App.CellTextParse(cell, ref text, appEventArg);
+                                    App.CellTextParse(cell, ref text, isDeleteKey, appEventArg);
                                     cell.TextParse(text, appEventArg);
                                     text = text == "" ? null : text;
                                     //
                                     string textCompare = null;
                                     {
-                                        textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
-                                        App.CellRowValueToText(cell, ref textCompare, appEventArg); // Override text generic.
-                                        textCompare = textCompare == "" ? null : textCompare;
-                                        cell.RowValueToText(ref textCompare, appEventArg); // Override text.
+                                        if (index.Enum == IndexEnum.Index)
+                                        {
+                                            textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
+                                        }
+                                        else
+                                        {
+                                            textCompare = CellTextGet(gridName, index, columnName); // Do not read value from row for filter! It could be non nullable int. Do not show "0" in filter.
+                                        }
                                         textCompare = textCompare == "" ? null : textCompare;
                                     }
                                     if (textCompare != text) // For example user entered "8.". It would be overwritten on screen with "8".
@@ -997,8 +1022,8 @@
                                     row.RowNew = null; // Do not save.
                                     break;
                                 }
+                                ErrorCellSet(gridName, index, columnName, null); // Clear error.
                             }
-                            ErrorCellSet(gridName, index, columnName, null); // Clear error.
                         }
                     }
                 }
@@ -1083,25 +1108,26 @@
                     GridCellInternal gridCellInternal = CellGet(gridName, rowIndex, columnName);
                     gridCellInternal.IsClick = gridCell.IsClick;
                     gridCellInternal.IsModify = gridCell.IsModify;
+                    gridCellInternal.IsDeleteKey = gridCell.IsDeleteKey;
                     gridCellInternal.IsLookup = gridCell.IsLookup;
                     gridCellInternal.GridNameLookup = gridCell.GridNameLookup;
                     gridCellInternal.FocusId = gridCell.FocusId;
                     gridCellInternal.FocusIdRequest = gridCell.FocusIdRequest;
                     gridCellInternal.PlaceHolder = gridCell.PlaceHolder;
                     string text;
-                    if (gridDataJson.CellList[GridName.ToJson(gridName)][cell.ColumnNameCSharp][rowJson.Index].IsO)
+                    if (gridCell.IsO)
                     {
-                        text = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].O; // Original text.
-                        string textModify = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].T; // User modified text.
+                        text = gridCell.O; // Original text.
+                        string textModify = gridCell.T; // User modified text.
                         CellTextSet(gridName, rowIndex, columnName, textModify, true, text);
                     }
                     else
                     {
-                        text = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].T; // Original text.
+                        text = gridCell.T; // Original text.
                         CellTextSet(gridName, rowIndex, columnName, text, false, null);
                     }
                     // ErrorCell
-                    string errorCellText = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index].E;
+                    string errorCellText = gridCell.E;
                     if (errorCellText != null)
                     {
                         ErrorCellSet(gridName, rowIndex, columnName, errorCellText);
@@ -1114,8 +1140,15 @@
                     }
                     App.CellRowValueFromText(cell, ref text, new AppEventArg(App, gridName, rowIndex, cell.ColumnNameCSharp));
                     cell.RowValueFromText(ref text, new AppEventArg(App, gridName, rowIndex, null));
-                    object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
-                    cell.PropertyInfo.SetValue(resultRow, value);
+                    if (rowIndex.Enum == IndexEnum.Index)
+                    {
+                        object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
+                        cell.PropertyInfo.SetValue(resultRow, value);
+                    }
+                    else
+                    {
+                        // Do not load text into RowFilter. RowFilter could have non nullable int. But filter is null!
+                    }
                 }
             }
         }
@@ -1326,14 +1359,22 @@
                             {
                                 value = cell.PropertyInfo.GetValue(row);
                             }
-                            string textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
+                            string textJson;
+                            if (index.Enum == IndexEnum.Index)
+                            {
+                                textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
+                                App.CellRowValueToText(cell, ref textJson, new AppEventArg(App, gridName, index, columnName)); // Override text generic.
+                                cell.RowValueToText(ref textJson, new AppEventArg(App, gridName, index, columnName)); // Override text.
+                            }
+                            else
+                            {
+                                textJson = CellTextGet(gridName, index, columnName); // Filter could bo not nullable int. Do not show "0" in filter.
+                            }
                             ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameTypeRow, index, cell);
                             if (configCell.CellEnum == GridCellEnum.Button && textJson == null && cell.TypeColumn == typeof(string))
                             {
                                 textJson = "Button"; // Default text for button.
                             }
-                            App.CellRowValueToText(cell, ref textJson, new AppEventArg(App, gridName, index, null)); // Override text generic.
-                            cell.RowValueToText(ref textJson, new AppEventArg(App, gridName, index, null)); // Override text.
                             GridCellInternal gridCellInternal = CellGet(gridName, index, columnName);
                             if (!gridDataJson.CellList[GridName.ToJson(gridName)].ContainsKey(columnName))
                             {

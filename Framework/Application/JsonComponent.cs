@@ -334,6 +334,11 @@
         public bool IsModify;
 
         /// <summary>
+        /// Gets or sets IsDeleteKey. Sent by client indicating user pressed delete or backspace button.
+        /// </summary>
+        public bool IsDeleteKey;
+
+        /// <summary>
         /// Gets or sets CellEnum. Render cell as button, html or file upload button.
         /// </summary>
         public GridCellEnum? CellEnum;
@@ -481,7 +486,7 @@
 
         public Guid? Session;
 
-        // public string RequestUrl; // Removed because of unit test.
+        public string RequestUrl; // Used also for ClientLiveDevelopment.
 
         /// <summary>
         /// Gets or sets GridData.
