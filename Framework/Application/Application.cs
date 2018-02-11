@@ -279,28 +279,37 @@
             }
         }
 
-        internal AppJson Run(AppJson appJson)
+        /// <summary>
+        /// Process AppJson request and return AppJson response.
+        /// </summary>
+        /// <param name="appJson">AppJson request. (POST)</param>
+        /// <param name="isRun">If false, used for unit test only. To test GridData object.</param>
+        /// <returns>AppJson response.</returns>
+        internal AppJson Run(AppJson appJson, bool isRun = true)
         {
             this.AppJson = appJson;
-            if (AppJson == null || AppJson.Session == null) // First request.
+            if (isRun)
             {
-                int requestCount = AppJson != null ? AppJson.RequestCount : 0;
-                AppJson = new AppJson();
-                AppJson.RequestCount = requestCount;
-                AppJson.Session = Guid.NewGuid();
-                AppJson.RequestUrl = UtilServer.RequestUrl();
-                GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
-                Type typePage = TypePageMain();
-                PageShow(AppJson, typePage);
+                if (AppJson == null || AppJson.Session == null) // First request.
+                {
+                    int requestCount = AppJson != null ? AppJson.RequestCount : 0;
+                    AppJson = new AppJson();
+                    AppJson.RequestCount = requestCount;
+                    AppJson.Session = Guid.NewGuid();
+                    AppJson.RequestUrl = UtilServer.RequestUrl();
+                    GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
+                    Type typePage = TypePageMain();
+                    PageShow(AppJson, typePage);
+                }
+                //
+                foreach (Process process in processList)
+                {
+                    process.Run(this);
+                }
+                //
+                AppJson.ResponseCount += 1;
+                AppJson.VersionServer = UtilFramework.VersionServer;
             }
-            //
-            foreach (Process process in processList)
-            {
-                process.Run(this);
-            }
-            //
-            AppJson.ResponseCount += 1;
-            AppJson.VersionServer = UtilFramework.VersionServer;
             //
             return AppJson;
         }

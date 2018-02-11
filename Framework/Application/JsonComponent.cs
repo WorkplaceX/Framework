@@ -292,7 +292,7 @@
         /// <summary>
         /// Gets or sets IsO. If true, original text has been stored in property O.
         /// </summary>
-        public bool IsO;
+        public bool? IsO;
 
         /// <summary>
         /// Original text. (Not user modified).

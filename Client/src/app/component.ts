@@ -541,6 +541,7 @@ export class GridField {
     gridCell.IsDeleteKey = isDeleteKey;
     // GridSave icon.
     if (gridCell.CssClass == null || gridCell.CssClass.indexOf('gridSave') == -1) {
+      gridCell.CssClass = gridCell.CssClass == null ? "" : gridCell.CssClass; // Prevent 'undefined'
       gridCell.CssClass += " gridSave";
     }
   }

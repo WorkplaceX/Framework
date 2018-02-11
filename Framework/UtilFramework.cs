@@ -29,7 +29,7 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.080 Server";
+                return "v1.081 Server";
             }
         }
 
@@ -87,9 +87,17 @@ namespace Framework
         /// <returns></returns>
         public static Assembly AssemblyUnitTest()
         {
-            string fileName = UtilFramework.FolderName + "/Submodule/Framework.UnitTest/bin/Debug/netcoreapp2.0/Framework.UnitTest.dll";
-            Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(fileName);
-            return assembly;
+            Type typeUnitTest = Type.GetType("UnitTest.Application.UnitTestApplication, Framework.UnitTest");
+            if (typeUnitTest != null)
+            {
+                return typeUnitTest.Assembly; // Assembly Framework.UnitTest is already loaded for example when project started by Framework.UnitTest. Load it again would result in exception.
+            }
+            else
+            {
+                string fileName = UtilFramework.FolderName + "/Submodule/Framework.UnitTest/bin/Debug/netcoreapp2.0/Framework.UnitTest.dll";
+                Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(fileName);
+                return assembly;
+            }
         }
 
         /// <summary>
@@ -122,32 +130,29 @@ namespace Framework
         private static void FolderNamePrivate(out string folderName, out bool isIss)
         {
             Uri uri = new Uri(typeof(UtilFramework).GetTypeInfo().Assembly.CodeBase);
-            string result;
             isIss = false;
             if (uri.AbsolutePath.EndsWith("/Build/bin/Debug/netcoreapp2.0/Framework.dll") || uri.AbsolutePath.EndsWith("/BuildTool/bin/Debug/netcoreapp2.0/Framework.dll")) // Running in Visual Studio
             {
-                result = new Uri(uri, "../../../../").AbsolutePath;
+                folderName = new Uri(uri, "../../../../").AbsolutePath;
+                return;
             }
-            else
+            if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp2.0/Framework.dll")) // Running in Visual Studio
             {
-                if (uri.AbsolutePath.EndsWith("Server/bin/Debug/netcoreapp2.0/Framework.dll")) // Running in Visual Studio
-                {
-                    result = new Uri(uri, "../../../../").AbsolutePath;
-                }
-                else
-                {
-                    if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
-                    {
-                        result = new Uri(uri, "./").AbsolutePath;
-                        isIss = true;
-                    }
-                    else
-                    {
-                        throw new Exception("FileName unknown!");
-                    }
-                }
+                folderName = new Uri(uri, "../../../../").AbsolutePath;
+                return;
             }
-            folderName = result;
+            if (uri.AbsolutePath.EndsWith("Submodule/Framework.UnitTest/bin/Debug/netcoreapp2.0/Framework.dll")) // Framework.UnitTest running in Visual Studio
+            {
+                folderName = new Uri(uri, "../../../../../").AbsolutePath;
+                return;
+            }
+            if (uri.AbsolutePath.EndsWith("Framework.dll")) // On IIS
+            {
+                folderName = new Uri(uri, "./").AbsolutePath;
+                isIss = true;
+                return;
+            }
+            throw new Exception("FileName unknown!");
         }
 
         /// <summary>

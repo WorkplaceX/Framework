@@ -990,7 +990,7 @@
                                 {
                                     var appEventArg  = new AppEventArg(App, gridName, index, columnName);
                                     App.CellTextParse(cell, ref text, isDeleteKey, appEventArg);
-                                    cell.TextParse(text, appEventArg);
+                                    cell.TextParse(text, appEventArg); // Write to row
                                     text = text == "" ? null : text;
                                     //
                                     string textCompare = null;
@@ -1001,7 +1001,14 @@
                                         }
                                         else
                                         {
-                                            textCompare = CellTextGet(gridName, index, columnName); // Do not read value from row for filter! It could be non nullable int. Do not show "0" in filter.
+                                            if (text != null) // Not default value has been written to Row.
+                                            {
+                                                textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
+                                            }
+                                            else
+                                            {
+                                                textCompare = CellTextGet(gridName, index, columnName); // Do not read value from row for filter! It could be non nullable int. Do not show "0" in filter.
+                                            }
                                         }
                                         textCompare = textCompare == "" ? null : textCompare;
                                     }
@@ -1115,7 +1122,7 @@
                     gridCellInternal.FocusIdRequest = gridCell.FocusIdRequest;
                     gridCellInternal.PlaceHolder = gridCell.PlaceHolder;
                     string text;
-                    if (gridCell.IsO)
+                    if (gridCell.IsO == true)
                     {
                         text = gridCell.O; // Original text.
                         string textModify = gridCell.T; // User modified text.
