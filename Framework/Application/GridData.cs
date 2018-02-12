@@ -334,7 +334,7 @@
         /// </summary>
         private Dictionary<GridName, GridQueryInternal> queryList = new Dictionary<GridName, GridQueryInternal>();
 
-        internal GridQueryInternal QueryGet(GridName gridName)
+        internal GridQueryInternal QueryInternalGet(GridName gridName)
         {
             if (!queryList.ContainsKey(gridName))
             {
@@ -348,7 +348,7 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<string, GridColumnInternal>> columnList = new Dictionary<GridName, Dictionary<string, GridColumnInternal>>();
 
-        private GridColumnInternal ColumnGet(GridName gridName, string columnName)
+        private GridColumnInternal ColumnInternalGet(GridName gridName, string columnName)
         {
             if (!columnList.ContainsKey(gridName))
             {
@@ -376,7 +376,7 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, GridRowInternal>> rowList = new Dictionary<GridName, Dictionary<Index, GridRowInternal>>();
 
-        internal Dictionary<Index, GridRowInternal> RowList(GridName gridName)
+        internal Dictionary<Index, GridRowInternal> RowInternalList(GridName gridName)
         {
             return rowList[gridName];
         }
@@ -461,7 +461,7 @@
             });
         }
 
-        internal GridCellInternal CellGet(GridName gridName, Index index, string columnName)
+        internal GridCellInternal CellInternalGet(GridName gridName, Index index, string columnName)
         {
             GridCellInternal result = null;
             if (cellList.ContainsKey(gridName))
@@ -512,7 +512,7 @@
         /// <returns>If null, user has not changed text.</returns>
         internal string CellTextGet(GridName gridName, Index index, string columnName)
         {
-            return CellGet(gridName, index, columnName).Text;
+            return CellInternalGet(gridName, index, columnName).Text;
         }
 
         /// <summary>
@@ -521,7 +521,7 @@
         /// <param name="text">If null, user has not changed text.</param>
         private void CellTextSet(GridName gridName, Index index, string columnName, string text, bool isOriginal, string textOriginal)
         {
-            GridCellInternal cell = CellGet(gridName, index, columnName);
+            GridCellInternal cell = CellInternalGet(gridName, index, columnName);
             cell.Text = text;
             cell.IsOriginal = isOriginal;
             cell.TextOriginal = textOriginal;
@@ -537,7 +537,7 @@
             {
                 gridRow.RowNew = UtilDataAccessLayer.RowClone(gridRow.Row);
             }
-            GridCellInternal gridCell = CellGet(gridName, index, columnName);
+            GridCellInternal gridCell = CellInternalGet(gridName, index, columnName);
             gridCell.IsModify = true;
         }
 
@@ -561,12 +561,12 @@
 
         private string ErrorCellGet(GridName gridName, Index index, string columnName)
         {
-            return CellGet(gridName, index, columnName).Error;
+            return CellInternalGet(gridName, index, columnName).Error;
         }
 
         private void ErrorCellSet(GridName gridName, Index index, string columnName, string text)
         {
-            CellGet(gridName, index, columnName).Error = text;
+            CellInternalGet(gridName, index, columnName).Error = text;
         }
 
         /// <summary>
@@ -783,7 +783,7 @@
                 {
                     RowSet(gridName, new Index(index.ToString()), new GridRowInternal() { Row = rowList[index], RowNew = null });
                 }
-                QueryGet(gridName).IsInsert = true; // Postpone call of method RowNewAdd(gridName); till Config is loaded.
+                QueryInternalGet(gridName).IsInsert = true; // Postpone call of method RowNewAdd(gridName); till Config is loaded.
                 //
                 if (cellListFilter != null)
                 {
@@ -994,7 +994,7 @@
                             cell.Constructor(rowWrite);
                             string columnName = cell.ColumnNameCSharp;
                             //
-                            GridCellInternal cellInternal = CellGet(gridName, index, columnName);
+                            GridCellInternal cellInternal = CellInternalGet(gridName, index, columnName);
                             bool isDeleteKey = cellInternal.IsDeleteKey; // User hit delete or backspace key.
                             string text = cellInternal.Text;
                             bool isModify = cellInternal.IsModify;
@@ -1061,7 +1061,7 @@
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
                 GridQuery gridQueryJson = gridDataJson.GridQueryList[gridName];
-                GridQueryInternal gridQuery = QueryGet(GridName.FromJson(gridName));
+                GridQueryInternal gridQuery = QueryInternalGet(GridName.FromJson(gridName));
                 gridQuery.ColumnNameOrderBy = gridQueryJson.ColumnNameOrderBy;
                 gridQuery.IsOrderByDesc = gridQueryJson.IsOrderByDesc;
                 gridQuery.PageIndex = gridQueryJson.PageIndex;
@@ -1079,7 +1079,7 @@
             {
                 foreach (GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
-                    GridColumnInternal gridColumn = ColumnGet(GridName.FromJson(gridName), gridColumnJson.ColumnName);
+                    GridColumnInternal gridColumn = ColumnInternalGet(GridName.FromJson(gridName), gridColumnJson.ColumnName);
                     gridColumn.ColumnName = gridColumnJson.ColumnName;
                     gridColumn.IsClick = gridColumnJson.IsClick;
                 }
@@ -1127,7 +1127,7 @@
                     string columnName = cell.ColumnNameCSharp;
                     //
                     GridCell gridCell = gridDataJson.CellList[GridName.ToJson(gridName)][columnName][rowJson.Index];
-                    GridCellInternal gridCellInternal = CellGet(gridName, rowIndex, columnName);
+                    GridCellInternal gridCellInternal = CellInternalGet(gridName, rowIndex, columnName);
                     gridCellInternal.IsClick = gridCell.IsClick;
                     gridCellInternal.IsModify = gridCell.IsModify;
                     gridCellInternal.IsDeleteKey = gridCell.IsDeleteKey;
@@ -1268,7 +1268,7 @@
             {
                 foreach (GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
-                    GridColumnInternal gridColumn = ColumnGet(GridName.FromJson(gridName), gridColumnJson.ColumnName);
+                    GridColumnInternal gridColumn = ColumnInternalGet(GridName.FromJson(gridName), gridColumnJson.ColumnName);
                     gridColumnJson.IsClick = gridColumn.IsClick;
                 }
             }
@@ -1397,7 +1397,7 @@
                             {
                                 textJson = "Button"; // Default text for button.
                             }
-                            GridCellInternal gridCellInternal = CellGet(gridName, index, columnName);
+                            GridCellInternal gridCellInternal = CellInternalGet(gridName, index, columnName);
                             if (!gridDataJson.CellList[GridName.ToJson(gridName)].ContainsKey(columnName))
                             {
                                 gridDataJson.CellList[GridName.ToJson(gridName)][columnName] = new Dictionary<string, GridCell>();

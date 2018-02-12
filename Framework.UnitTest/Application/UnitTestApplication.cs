@@ -160,18 +160,18 @@
         public void UserGridFilter()
         {
             var response = Process(null);
-            UtilFramework.Assert(response.App.GridData.RowList(MyRow.GridName).Count == 4); // With filter and new
+            UtilFramework.Assert(response.App.GridData.RowInternalList(MyRow.GridName).Count == 4); // With filter and new
             
             // User enters "X" text into filter.
             GridCellTextSet(response.AppJson, MyRow.GridName, "Text", Index.Filter, "X");
             response = Process(response.AppJson);
-            UtilFramework.Assert(response.App.GridData.RowList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(response.App.GridData.RowInternalList(MyRow.GridName).Count == 3);
             UtilFramework.Assert(GridCellGet(response.AppJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
 
             // User enters "" text into filter.
             GridCellTextSet(response.AppJson, MyRow.GridName, "Text", Index.Filter, "");
             response = Process(response.AppJson);
-            UtilFramework.Assert(response.App.GridData.RowList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(response.App.GridData.RowInternalList(MyRow.GridName).Count == 4);
             UtilFramework.Assert(GridCellGet(response.AppJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
         }
 

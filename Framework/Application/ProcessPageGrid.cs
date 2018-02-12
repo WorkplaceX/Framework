@@ -22,7 +22,7 @@
                 {
                     if (gridColumn.IsClick)
                     {
-                        GridQueryInternal gridQuery = app.GridData.QueryGet(gridName);
+                        GridQueryInternal gridQuery = app.GridData.QueryInternalGet(gridName);
                         if (gridQuery.ColumnNameOrderBy == gridColumn.ColumnName)
                         {
                             gridQuery.IsOrderByDesc = !gridQuery.IsOrderByDesc;
@@ -96,30 +96,30 @@
                 // PageIndex
                 if (gridQueryList[gridName].IsPageIndexNext)
                 {
-                    gridData.QueryGet(GridName.FromJson(gridName)).PageIndex += 1;
+                    gridData.QueryInternalGet(GridName.FromJson(gridName)).PageIndex += 1;
                     gridData.LoadDatabaseReload(GridName.FromJson(gridName));
                 }
                 if (gridQueryList[gridName].IsPageIndexPrevious)
                 {
-                    gridData.QueryGet(GridName.FromJson(gridName)).PageIndex -= 1;
-                    if (gridData.QueryGet(GridName.FromJson(gridName)).PageIndex < 0)
+                    gridData.QueryInternalGet(GridName.FromJson(gridName)).PageIndex -= 1;
+                    if (gridData.QueryInternalGet(GridName.FromJson(gridName)).PageIndex < 0)
                     {
-                        gridData.QueryGet(GridName.FromJson(gridName)).PageIndex = 0;
+                        gridData.QueryInternalGet(GridName.FromJson(gridName)).PageIndex = 0;
                     }
                     gridData.LoadDatabaseReload(GridName.FromJson(gridName));
                 }
                 // PageIndex Horizontal
                 if (gridQueryList[gridName].IsPageHorizontalIndexNext)
                 {
-                    gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex += 1;
+                    gridData.QueryInternalGet(GridName.FromJson(gridName)).PageHorizontalIndex += 1;
                     gridData.LoadDatabaseReload(GridName.FromJson(gridName));
                 }
                 if (gridQueryList[gridName].IsPageIndexPrevious)
                 {
-                    gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex -= 1;
-                    if (gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex < 0)
+                    gridData.QueryInternalGet(GridName.FromJson(gridName)).PageHorizontalIndex -= 1;
+                    if (gridData.QueryInternalGet(GridName.FromJson(gridName)).PageHorizontalIndex < 0)
                     {
-                        gridData.QueryGet(GridName.FromJson(gridName)).PageHorizontalIndex = 0;
+                        gridData.QueryInternalGet(GridName.FromJson(gridName)).PageHorizontalIndex = 0;
                     }
                     gridData.LoadDatabaseReload(GridName.FromJson(gridName));
                 }
@@ -247,7 +247,7 @@
         {
             foreach (GridName gridName in app.GridData.GridNameList())
             {
-                if (app.GridData.QueryGet(gridName).IsInsert)
+                if (app.GridData.QueryInternalGet(gridName).IsInsert)
                 {
                     GridNameTypeRow gridNameTypeRow = app.GridData.GridNameTypeRow(gridName);
                     if (app.GridData.Config.ConfigGridGet(gridNameTypeRow).IsInsert)
@@ -409,7 +409,7 @@
             Row rowLookup = null; // Clicked row
             if (gridNameLookup != null)
             {
-                foreach (KeyValuePair<Index, GridRowInternal> item in app.GridData.RowList(gridNameLookup))
+                foreach (KeyValuePair<Index, GridRowInternal> item in app.GridData.RowInternalList(gridNameLookup))
                 {
                     if (item.Value.IsClick)
                     {
@@ -439,7 +439,7 @@
                 Cell cell = UtilDataAccessLayer.CellList(row.GetType(), row).Where(item => item.ColumnNameCSharp == columnName).First();
                 // Cell of lookup which user clicked.
                 Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.ColumnNameCSharp == columnNameLookup).First();
-                string text = app.GridData.CellGet(gridNameLookup, indexLookup, columnNameLookup).Text;
+                string text = app.GridData.CellInternalGet(gridNameLookup, indexLookup, columnNameLookup).Text;
                 cell.LookupIsClick(rowLookup, new AppEventArg(app, gridName, index, cell.ColumnNameCSharp)); // (cellLookup.ColumnNameCSharp, text);
                 //
                 app.GridData.SelectGridName = GridName.ToJson(gridName);
@@ -497,7 +497,7 @@
             if (isLookupOpen)
             {
                 Row row = gridData.RowGet(gridName, index);
-                GridCellInternal gridCellInternal = gridData.CellGet(gridName, index, columnName);
+                GridCellInternal gridCellInternal = gridData.CellInternalGet(gridName, index, columnName);
                 //
                 Type typeRow = gridData.TypeRow(gridName);
                 Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == columnName).Single();
@@ -554,7 +554,7 @@
                             int? focusIdRequest = gridCell.FocusIdRequest;
                             FocusClear(app);
                             gridCell.FocusId = focusIdRequest;
-                            app.GridData.CellGet(GridName.FromJson(gridNameItem), new Index(gridRow.Index), gridColumn.ColumnName).FocusId = focusIdRequest; 
+                            app.GridData.CellInternalGet(GridName.FromJson(gridNameItem), new Index(gridRow.Index), gridColumn.ColumnName).FocusId = focusIdRequest; 
                             break;
                         }
                     }
