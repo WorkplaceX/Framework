@@ -354,7 +354,7 @@
             processList.Add<ProcessPageBegin>();
             // Grid
             {
-                processList.Add<ProcessGridLoad>();
+                processList.Add<ProcessGridLoadJson>();
                 processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridPageIndex>();
@@ -372,7 +372,6 @@
                 processList.Add<ProcessGridCellIsSelect>();
                 processList.Add<ProcessGridFocus>();
                 processList.Add<ProcessGridFieldWithLabelIndex>();
-                processList.Add<ProcessGridCellIsModifyFalse>();
                 processList.Add<ProcessGridIsClickFalse>();
             }
             //

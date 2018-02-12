@@ -157,9 +157,9 @@
     }
 
     /// <summary>
-    /// Initial load of grid.
+    /// Load from json.
     /// </summary>
-    internal class ProcessGridLoad : Process
+    internal class ProcessGridLoadJson : Process
     {
         protected internal override void Run(App app)
         {
@@ -177,6 +177,7 @@
             {
                 if (app.GridData.TypeRow(gridNameTypeRow) == null) // Not yet loaded.
                 {
+                    app.GridData.QueryInternalCreate(gridNameTypeRow);
                     app.GridData.LoadDatabase(gridNameTypeRow); // Keeps method LoadDatabase(); internal.
                 }
             }
@@ -307,20 +308,18 @@
 
         protected internal override void Run(App app)
         {
-            GridDataJson gridDataJson = app.AppJson.GridDataJson;
-            foreach (GridQuery gridQuery in gridDataJson.GridQueryList.Values)
+            foreach (GridName gridName in app.GridData.GridNameList())
             {
-                string gridName = gridQuery.GridName;
-                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                foreach (var indexRow in app.GridData.RowInternalList(gridName))
                 {
-                    if (gridRow.IsClick)
+                    Index index = indexRow.Key;
+                    GridRowInternal rowInternal = indexRow.Value;
+                    if (rowInternal.IsClick)
                     {
-                        Index gridRowIndex = new Index(gridRow.Index);
-                        if (gridRowIndex.Enum == IndexEnum.Index || gridRowIndex.Enum == IndexEnum.New)
+                        if (index.Enum == IndexEnum.Index || index.Enum == IndexEnum.New)
                         {
-                            GridData gridData = app.GridData;
-                            var row = gridData.RowGet(GridName.FromJson(gridName), gridRowIndex);
-                            MasterDetailIsClick(app, GridName.FromJson(gridName), row);
+                            Row row = app.GridData.RowGet(gridName, index);
+                            MasterDetailIsClick(app, gridName, row);
                             break;
                         }
                     }
@@ -368,29 +367,6 @@
         }
     }
 
-    internal class ProcessGridCellIsModifyFalse : Process
-    {
-        protected internal override void Run(App app)
-        {
-            GridDataJson gridDataJson = app.AppJson.GridDataJson;
-            //
-            foreach (string gridName in gridDataJson.RowList.Keys)
-            {
-                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
-                {
-                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
-                    {
-                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.ColumnName][gridRow.Index];
-                        if (gridCell.IsModify)
-                        {
-                            gridCell.IsModify = false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     internal class ProcessGridLookupIsClick : Process
     {
         protected internal override void Run(App app)
@@ -402,7 +378,6 @@
                 if (gridCell.IsLookup)
                 {
                     gridNameLookup = GridName.FromJson(gridCell.GridNameLookup);
-                    app.GridData.LookupClose(); // Close lookup window.
                 }
             });
             //
@@ -446,6 +421,8 @@
                 app.GridData.SelectIndex = index;
                 app.GridData.SelectColumnName = columnName;
             }
+            //
+            app.GridData.LookupClose(app); // Close lookup window.
         }
     }
 
@@ -491,6 +468,11 @@
                     GridNameTypeRow gridNameLookup = cell.Lookup(new AppEventArg(app, e.GridName, e.Index, e.ColumnName));
                     if (gridNameLookup != null)
                     {
+                        if (gridData.QueryInternalIsExist(gridNameLookup))
+                        {
+                            gridData.QueryInternalDestroy(gridNameLookup);
+                        }
+                        gridData.QueryInternalCreate(gridNameLookup);
                         gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, e.Index);
                         gridData.LookupOpen(e.GridName, e.Index, e.ColumnName, gridNameLookup);
                     }
@@ -498,7 +480,7 @@
             }
             else
             {
-                gridData.LookupClose();
+                gridData.LookupClose(app);
             }
         }
     }
@@ -586,12 +568,9 @@
             }
             if (isExist == false)
             {
-                if (app.AppJson.GridDataJson != null)
-                {
-                    app.AppJson.GridDataJson.SelectColumnName = null;
-                    app.AppJson.GridDataJson.SelectGridName = null;
-                    app.AppJson.GridDataJson.SelectIndex = null;
-                }
+                app.AppJson.GridDataJson.SelectColumnName = null;
+                app.AppJson.GridDataJson.SelectGridName = null;
+                app.AppJson.GridDataJson.SelectIndex = null;
             }
             //
             IsSelect(gridDataJson);
@@ -614,6 +593,9 @@
         protected internal override void Run(App app)
         {
             app.GridData.SaveDatabase();
+            app.GridData.CellInternalAll((GridCellInternal cell, AppEventArg e) => {
+                cell.IsModify = false;
+            });
         }
     }
 

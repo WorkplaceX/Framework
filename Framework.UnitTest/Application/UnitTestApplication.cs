@@ -96,6 +96,15 @@
         }
 
         /// <summary>
+        /// Emulate client component.ts of user clicking a cell.
+        /// </summary>
+        private static void GridCellIsClick(AppJson appJson, GridName gridName, string columnName, Index index)
+        {
+            GridCell gridCell = GridCellGet(appJson, gridName, columnName, index);
+            gridCell.IsClick = true;
+        }
+
+        /// <summary>
         /// Emulate client component.ts of user clicking column sort.
         /// </summary>
         private static void GridColumnClick(AppJson appJson, GridName gridName, string columnName)
@@ -301,6 +310,23 @@
             Process(appJson, out app, out appJson);
             UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0)).T == null);
         }
+
+        public void GridUserLookup()
+        {
+            Process(null, out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 2);
+
+            // User enters two airports
+            GridCellTextSet(appJson, Airport.GridName, "Code", Index.New, "LAX");
+            GridCellTextSet(appJson, Airport.GridName, "Text", Index.New, "Los Angeles");
+            Process(appJson, out app, out appJson);
+            GridCellTextSet(appJson, Airport.GridName, "Code", Index.New, "DTW");
+            GridCellTextSet(appJson, Airport.GridName, "Text", Index.New, "Detroit Metropolitan Wayne County Airport");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 4);
+            UtilFramework.Assert(app.GridData.QueryInternalIsExist(Airport.GridNameLookup) == false); // No lookup data loaded
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "AirportCode", Index.Row(0)).IsLookup == false);
+        }
     }
 }
 
@@ -324,6 +350,7 @@ namespace UnitTest.Application
         protected internal override void InitJson(App app)
         {
             new Grid(app.AppJson, MyRow.GridName);
+            new Grid(app.AppJson, Airport.GridName);
         }
     }
 }
@@ -352,10 +379,43 @@ namespace Database.UnitTest.Application
 
         [SqlColumn("IsActiveNullable", null)]
         public bool? IsActiveNullable { get; set; }
+
+        [SqlColumn("AirportCode", typeof(MyRow_AirportCode))]
+        public string AirportCode { get; set; }
+
+        public string AirportText { get; set; }
+    }
+
+    public class Airport : Row
+    {
+        public static GridNameTypeRow GridName = new GridName<Airport>();
+
+        public static GridNameTypeRow GridNameLookup = new GridName<Airport>("Lookup");
+
+        public int Id { get; set; }
+
+        [SqlColumn("Code", null)]
+        public string Code { get; set; }
+
+        [SqlColumn("Text", null)]
+        public string Text { get; set; }
     }
 
     public class MyRow_Text : Cell<MyRow>
     {
 
+    }
+
+    public class MyRow_AirportCode : Cell<MyRow>
+    {
+        protected internal override GridNameTypeRow Lookup(AppEventArg e)
+        {
+            return Airport.GridNameLookup;
+        }
+
+        protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)
+        {
+            base.LookupIsClick(rowLookup, e);
+        }
     }
 }

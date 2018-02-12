@@ -309,6 +309,9 @@
         /// </summary>
         public bool IsSelect;
 
+        /// <summary>
+        /// Gets or sets IsLookup. If true lookup on cell is open.
+        /// </summary>
         public bool IsLookup;
 
         /// <summary>

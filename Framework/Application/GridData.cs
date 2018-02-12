@@ -57,7 +57,7 @@
         public string Error;
 
         /// <summary>
-        /// Gets or sets IsModify. Text has been modified on last request.
+        /// Gets or sets IsModify. Text has been modified on last request. Serves as pulse.
         /// </summary>
         public bool IsModify;
 
@@ -143,7 +143,7 @@
         /// </summary>
         internal List<GridName> GridNameList()
         {
-            List<GridName> result = new List<GridName>(rowList.Keys);
+            List<GridName> result = new List<GridName>(queryList.Keys);
             return result;
         }
 
@@ -201,15 +201,6 @@
             return result;
         }
 
-        private void TypeRowSet(GridNameTypeRow gridName)
-        {
-            typeRowList[gridName] = gridName.TypeRow;
-            if (gridName.TypeRow == null)
-            {
-                typeRowList.Remove(gridName);
-            }
-        }
-
         internal List<GridNameTypeRow> GridNameTypeRowList()
         {
             List<GridNameTypeRow> result = new List<GridNameTypeRow>();
@@ -250,7 +241,7 @@
         internal Row RowSelect(GridName gridName, Index index)
         {
             Row result = null;
-            if (rowList.ContainsKey(gridName))
+            if (QueryInternalIsExist(gridName))
             {
                 foreach (Index key in rowList[gridName].Keys)
                 {
@@ -275,7 +266,7 @@
         public Row RowSelected(GridName gridName)
         {
             Row result = null;
-            if (rowList.ContainsKey(gridName))
+            if (QueryInternalIsExist(gridName))
             {
                 foreach (var item in rowList[gridName].Values)
                 {
@@ -295,7 +286,7 @@
         public TRow RowSelected<TRow>(GridName<TRow> gridName) where TRow : Row
         {
             Row result = null;
-            if (rowList.ContainsKey(gridName))
+            if (QueryInternalIsExist(gridName))
             {
                 foreach (var item in rowList[gridName].Values)
                 {
@@ -315,7 +306,7 @@
         internal Index RowSelectedIndex(GridName gridName)
         {
             Index result = null;
-            if (rowList.ContainsKey(gridName))
+            if (QueryInternalIsExist(gridName))
             {
                 foreach (Index index in rowList[gridName].Keys)
                 {
@@ -334,13 +325,30 @@
         /// </summary>
         private Dictionary<GridName, GridQueryInternal> queryList = new Dictionary<GridName, GridQueryInternal>();
 
+        internal void QueryInternalCreate(GridNameTypeRow gridName)
+        {
+            queryList.Add(gridName, new GridQueryInternal());
+            cellList.Add(gridName, new Dictionary<Index, Dictionary<string, GridCellInternal>>());
+            rowList.Add(gridName, new Dictionary<Index, GridRowInternal>());
+            typeRowList.Add(gridName, gridName.TypeRow);
+        }
+
+        internal void QueryInternalDestroy(GridName gridName)
+        {
+            queryList.Remove(gridName);
+            cellList.Remove(gridName);
+            rowList.Remove(gridName);
+            typeRowList.Remove(gridName);
+        }
+
         internal GridQueryInternal QueryInternalGet(GridName gridName)
         {
-            if (!queryList.ContainsKey(gridName))
-            {
-                queryList[gridName] = new GridQueryInternal();
-            }
             return queryList[gridName];
+        }
+
+        internal bool QueryInternalIsExist(GridName gridName)
+        {
+            return queryList.ContainsKey(gridName);
         }
 
         /// <summary>
@@ -390,7 +398,7 @@
         private GridRowInternal RowInternalGet(GridName gridName, Index index)
         {
             GridRowInternal result = null;
-            if (rowList.ContainsKey(gridName))
+            if (QueryInternalIsExist(gridName))
             {
                 if (rowList[gridName].ContainsKey(index))
                 {
@@ -402,10 +410,6 @@
 
         private void RowSet(GridName gridName, Index index, GridRowInternal gridRow)
         {
-            if (!rowList.ContainsKey(gridName))
-            {
-                rowList[gridName] = new Dictionary<Index, GridRowInternal>();
-            }
             rowList[gridName][index] = gridRow;
         }
 
@@ -458,19 +462,30 @@
         /// <summary>
         /// Set IsLookup flag to false.
         /// </summary>
-        internal void LookupClose()
+        internal void LookupClose(App app)
         {
+            string gridNameLookup = null;
             CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
-                gridCell.IsLookup = false;
-                gridCell.GridNameLookup = null;
+                if (gridCell.IsLookup)
+                {
+                    UtilFramework.Assert(gridNameLookup == null);
+                    UtilFramework.Assert(e.App == app);
+                    gridNameLookup = gridCell.GridNameLookup;
+                    gridCell.IsLookup = false;
+                    gridCell.GridNameLookup = null;
+                }
             });
+            if (gridNameLookup != null)
+            {
+                app.GridData.QueryInternalDestroy(GridName.FromJson(gridNameLookup));
+            }
         }
 
         internal GridCellInternal CellInternalGet(GridName gridName, Index index, string columnName)
         {
             GridCellInternal result = null;
-            if (cellList.ContainsKey(gridName))
+            if (QueryInternalIsExist(gridName))
             {
                 if (cellList[gridName].ContainsKey(index))
                 {
@@ -483,10 +498,6 @@
             if (result == null)
             {
                 result = new GridCellInternal();
-                if (!cellList.ContainsKey(gridName))
-                {
-                    cellList[gridName] = new Dictionary<Index, Dictionary<string, GridCellInternal>>();
-                }
                 if (!cellList[gridName].ContainsKey(index))
                 {
                     cellList[gridName][index] = new Dictionary<string, GridCellInternal>();
@@ -556,15 +567,12 @@
         /// </summary>
         private void CellTextClear(GridName gridName, Index index)
         {
-            if (cellList.ContainsKey(gridName))
+            if (cellList[gridName].ContainsKey(index))
             {
-                if (cellList[gridName].ContainsKey(index))
+                foreach (GridCellInternal cell in cellList[gridName][index].Values)
                 {
-                    foreach (GridCellInternal cell in cellList[gridName][index].Values)
-                    {
-                        cell.Text = null;
-                        cell.IsOriginal = false;
-                    }
+                    cell.Text = null;
+                    cell.IsOriginal = false;
                 }
             }
         }
@@ -585,17 +593,14 @@
         private bool IsErrorRowCell(GridName gridName, Index index)
         {
             bool result = false;
-            if (cellList.ContainsKey(gridName))
+            if (cellList[gridName].ContainsKey(index))
             {
-                if (cellList[gridName].ContainsKey(index))
+                foreach (string columnName in cellList[gridName][index].Keys)
                 {
-                    foreach (string columnName in cellList[gridName][index].Keys)
+                    if (cellList[gridName][index][columnName].Error != null)
                     {
-                        if (cellList[gridName][index][columnName].Error != null)
-                        {
-                            result = true;
-                            break;
-                        }
+                        result = true;
+                        break;
                     }
                 }
             }
@@ -610,22 +615,19 @@
         {
             bool result = false;
             Type typeRow = TypeRowGet(gridName);
-            if (cellList.ContainsKey(gridName))
+            if (cellList[gridName].ContainsKey(index))
             {
-                if (cellList[gridName].ContainsKey(index))
+                foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
                 {
-                    foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
+                    if (isCalculatedColumnExclude == false || (column.ColumnNameSql != null)) // Exclude calculated column.
                     {
-                        if (isCalculatedColumnExclude == false || (column.ColumnNameSql != null)) // Exclude calculated column.
+                        string columnName = column.ColumnNameCSharp;
+                        if (cellList[gridName][index].ContainsKey(columnName))
                         {
-                            string columnName = column.ColumnNameCSharp;
-                            if (cellList[gridName][index].ContainsKey(columnName))
+                            if (cellList[gridName][index][columnName].IsModify)
                             {
-                                if (cellList[gridName][index][columnName].IsModify)
-                                {
-                                    result = true;
-                                    break;
-                                }
+                                result = true;
+                                break;
                             }
                         }
                     }
@@ -639,7 +641,6 @@
         /// </summary>
         internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, bool isLookup, Row rowLookup, Index indexLookup)
         {
-            TypeRowSet(gridName);
             Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
             IQueryable query;
             if (isLookup == false)
@@ -665,6 +666,7 @@
         /// </summary>
         public void LoadDatabaseInit(GridNameTypeRow gridName)
         {
+            QueryInternalCreate(gridName);
             List<Row> rowList = new List<Row>();
             LoadRow(gridName, rowList);
         }
@@ -733,12 +735,12 @@
                 List<Filter> filterList = null;
                 if (query != null)
                 {
-                    string ColumnNameOrderBy = null;
+                    string columnNameOrderBy = null;
                     bool isOrderByDesc = false;
                     int pageIndex = 0;
                     if (queryList.ContainsKey(gridName)) // Reload
                     {
-                        ColumnNameOrderBy = queryList[gridName].ColumnNameOrderBy;
+                        columnNameOrderBy = queryList[gridName].ColumnNameOrderBy;
                         isOrderByDesc = queryList[gridName].IsOrderByDesc;
                         pageIndex = queryList[gridName].PageIndex;
                         bool isExcludeCalculatedColumn = false; // UtilDataAccessLayer.QueryProviderIsDatabase(query); // If IQueryable.Provider is database, exclude columns without ColumnNameSql.
@@ -746,12 +748,12 @@
                     }
                     Config.LoadDatabaseConfig(gridName);
                     int pageRowCount = Config.ConfigGridGet(GridNameTypeRow(gridName)).PageRowCount;
-                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, ColumnNameOrderBy, isOrderByDesc, pageIndex, pageRowCount, query);
+                    rowList = UtilDataAccessLayer.Select(typeRow, filterList, columnNameOrderBy, isOrderByDesc, pageIndex, pageRowCount, query);
                     if (pageIndex > 0 && rowList.Count == 0) // Page end reached.
                     {
                         queryList[gridName].PageIndex -= 1;
                         pageIndex = queryList[gridName].PageIndex;
-                        rowList = UtilDataAccessLayer.Select(typeRow, filterList, ColumnNameOrderBy, isOrderByDesc, pageIndex, 15, query);
+                        rowList = UtilDataAccessLayer.Select(typeRow, filterList, columnNameOrderBy, isOrderByDesc, pageIndex, 15, query);
                     }
                 }
                 LoadRow(new GridNameTypeRow(typeRow, gridName), rowList);
@@ -766,9 +768,10 @@
             bool result = gridName.TypeRow != null && rowList != null;
             if (result == false)
             {
-                TypeRowSet(gridName);
-                cellList.Remove(gridName);
-                this.rowList.Remove(gridName);
+                if (QueryInternalIsExist(gridName))
+                {
+                    QueryInternalDestroy(gridName);
+                }
             }
             else
             {
@@ -779,14 +782,17 @@
                 //
                 Dictionary<string, GridCellInternal> cellListFilter = null;
                 GridRowInternal rowFilter = null;
-                if (cellList.ContainsKey(gridName))
+                cellList[gridName].TryGetValue(Index.Filter, out cellListFilter); // Save filter user text.
+                this.rowList[gridName].TryGetValue(Index.Filter, out rowFilter); // Save parsed row.
                 {
-                    cellList[gridName].TryGetValue(Index.Filter, out cellListFilter); // Save filter user text.
-                    this.rowList[gridName].TryGetValue(Index.Filter, out rowFilter); // Save parsed row.
+                    GridQueryInternal query = queryList[gridName];
+                    QueryInternalDestroy(gridName); // cellList (Clear user modified text and attached errors), rowList (Clear data)
+                    QueryInternalCreate(gridName);
+                    queryList[gridName].ColumnNameOrderBy = query.ColumnNameOrderBy;
+                    queryList[gridName].IsOrderByDesc = query.IsOrderByDesc;
+                    queryList[gridName].PageIndex = query.PageIndex;
+                    queryList[gridName].PageHorizontalIndex = query.PageHorizontalIndex;
                 }
-                cellList.Remove(gridName); // Clear user modified text and attached errors.
-                this.rowList[gridName] = new Dictionary<Index, GridRowInternal>(); // Clear data
-                TypeRowSet(gridName);
                 //
                 RowFilterAdd(gridName);
                 for (int index = 0; index < rowList.Count; index++)
@@ -839,7 +845,7 @@
         {
             // (Index)
             Dictionary<Index, GridRowInternal> rowListCopy = rowList[gridName];
-            rowList[gridName] = new Dictionary<Index, GridRowInternal>();
+            rowList[gridName] = new Dictionary<Index, GridRowInternal>(); // Has to exist. See line above.
             // Filter
             foreach (Index index in rowListCopy.Keys)
             {
@@ -1053,14 +1059,17 @@
         /// <summary>
         /// Load Query data from json.
         /// </summary>
-        private void LoadJsonQuery(AppJson appJson)
+        private void LoadJsonQuery(App app)
         {
-            GridDataJson gridDataJson = appJson.GridDataJson;
+            GridDataJson gridDataJson = app.AppJson.GridDataJson;
             //
             foreach (string gridName in gridDataJson.GridQueryList.Keys)
             {
                 GridQuery gridQueryJson = gridDataJson.GridQueryList[gridName];
-                GridQueryInternal gridQuery = QueryInternalGet(GridName.FromJson(gridName));
+                Type typeRow = UtilDataAccessLayer.TypeRowFromTableNameCSharp(gridQueryJson.TypeRow, app.GetType());
+                GridNameTypeRow gridNameTypeRow = new GridNameTypeRow(typeRow, gridName, true);
+                QueryInternalCreate(gridNameTypeRow);
+                GridQueryInternal gridQuery = QueryInternalGet(gridNameTypeRow);
                 gridQuery.ColumnNameOrderBy = gridQueryJson.ColumnNameOrderBy;
                 gridQuery.IsOrderByDesc = gridQueryJson.IsOrderByDesc;
                 gridQuery.PageIndex = gridQueryJson.PageIndex;
@@ -1096,7 +1105,6 @@
             //
             string tableNameCSharp = gridDataJson.GridQueryList[GridName.ToJson(gridName)].TypeRow;
             Type typeRow = UtilDataAccessLayer.TypeRowFromTableNameCSharp(tableNameCSharp, UtilApplication.TypeRowInAssembly(App));
-            TypeRowSet(new GridNameTypeRow(typeRow, gridName));
             //
             foreach (GridRow rowJson in gridDataJson.RowList[GridName.ToJson(gridName)])
             {
@@ -1176,17 +1184,17 @@
             //
             if (gridDataJson != null)
             {
-                LoadJsonQuery(App.AppJson);
+                LoadJsonQuery(App);
                 LoadJsonColumn(App.AppJson);
                 //
                 foreach (string gridName in gridDataJson.GridQueryList.Keys)
                 {
                     LoadJson(GridName.FromJson(gridName));
                 }
-                //
-                SelectGridName = gridDataJson.SelectGridName;
-                SelectIndex = new Index(gridDataJson.SelectIndex);
-                SelectColumnName = gridDataJson.SelectColumnName;
+            //
+            SelectGridName = gridDataJson.SelectGridName;
+            SelectIndex = new Index(gridDataJson.SelectIndex);
+            SelectColumnName = gridDataJson.SelectColumnName;
             }
         }
 
@@ -1414,6 +1422,7 @@
                             gridCellJson.PlaceHolder = configCell.PlaceHolder;
                             gridCellJson.IsClick = gridCellInternal.IsClick;
                             gridCellJson.IsModify = gridCellInternal.IsModify;
+                            UtilFramework.Assert(gridCellInternal.IsModify == false);
                             gridCellJson.E = errorCell;
                             gridCellJson.IsLookup = gridCellInternal.IsLookup;
                             gridCellJson.GridNameLookup = gridCellInternal.GridNameLookup;
