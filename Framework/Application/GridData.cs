@@ -47,7 +47,7 @@
     internal class GridCellInternal
     {
         /// <summary>
-        /// Gets or sets user modified text.
+        /// Gets or sets user modified text. If "" then null".
         /// </summary>
         public string Text;
 
@@ -527,6 +527,10 @@
         /// <param name="text">If null, user has not changed text.</param>
         private void CellTextSet(GridName gridName, Index index, string columnName, string text, bool isOriginal, string textOriginal)
         {
+            if (text == "") // Text coming from client json request can be "".
+            {
+                text = null;
+            }
             GridCellInternal cell = CellInternalGet(gridName, index, columnName);
             cell.Text = text;
             cell.IsOriginal = isOriginal;
@@ -689,7 +693,7 @@
                 object value = column.Constructor(rowFilter).Value;
                 object valueDefault = column.Constructor(rowFilterDefault).Value;
                 string text = CellTextGet(gridName, Index.Filter, columnNameCSharp); // Value could be non nullable int and allways return "0" instead of null.
-                if (!string.IsNullOrEmpty(text)) // Use filter only when value set.
+                if (text != null) // Use filter only when value set.
                 {
                     if (isExcludeCalculatedColumn == false || (column.ColumnNameSql != null)) // Do not filter on calculated column if query provider is database.
                     {

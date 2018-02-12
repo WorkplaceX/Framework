@@ -244,7 +244,7 @@
             GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Filter, "");
             Process(appJson, out app, out appJson);
             UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == "");
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == null);
 
             // User writes "y" into filter of nullable column.
             GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "y");
@@ -256,7 +256,7 @@
             GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "");
             Process(appJson, out app, out appJson);
             UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == "");
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == null);
         }
 
         public void GridUserInvalidValue()
@@ -273,7 +273,7 @@
             // User writes "" into row of not nullable column.
             GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Row(0), "");
             Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "");
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == null);
             UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).E == "Value invalid!");
         }
 
@@ -287,6 +287,19 @@
             GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.New, "y");
             Process(appJson, out app, out appJson);
             UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(2)).T == "Yes");
+        }
+
+        public void GridTextNull()
+        {
+            Process(null, out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 5);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == null);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
+
+            // User writes ""
+            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0), "");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0)).T == null);
         }
     }
 }

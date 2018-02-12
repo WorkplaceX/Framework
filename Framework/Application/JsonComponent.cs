@@ -285,7 +285,7 @@
     public class GridCell
     {
         /// <summary>
-        /// Text.
+        /// Text. Coming from client can be "" or null.
         /// </summary>
         public string T;
 

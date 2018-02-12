@@ -222,7 +222,7 @@
                 // Bool
                 if (type == typeof(bool))
                 {
-                    string text = result.ToUpper();
+                    string text = result == null ? null : result.ToUpper();
                     if (text != null)
                     {
                         if (text == "YES")
