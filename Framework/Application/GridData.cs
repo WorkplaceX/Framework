@@ -102,6 +102,11 @@
 
     internal class GridColumnInternal
     {
+        /// <summary>
+        /// Gets or sets ColumnName. For internal use only. Never sent to client.
+        /// </summary>
+        public string ColumnName;
+
         public bool IsClick;
     }
 
@@ -355,6 +360,15 @@
             }
             //
             return columnList[gridName][columnName];
+        }
+
+        internal List<GridColumnInternal> ColumnInternalList(GridName gridName)
+        {
+            if (!columnList.ContainsKey(gridName))
+            {
+                columnList[gridName] = new Dictionary<string, GridColumnInternal>();
+            }
+            return new List<GridColumnInternal>(columnList[gridName].Values);
         }
 
         /// <summary>
@@ -1066,6 +1080,7 @@
                 foreach (GridColumn gridColumnJson in gridDataJson.ColumnList[gridName])
                 {
                     GridColumnInternal gridColumn = ColumnGet(GridName.FromJson(gridName), gridColumnJson.ColumnName);
+                    gridColumn.ColumnName = gridColumnJson.ColumnName;
                     gridColumn.IsClick = gridColumnJson.IsClick;
                 }
             }

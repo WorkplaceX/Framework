@@ -16,13 +16,13 @@
         {
             AppJson appJson = app.AppJson;
             // Detect OrderBy click
-            foreach (string gridName in appJson.GridDataJson.ColumnList.Keys.ToArray())
+            foreach (GridName gridName in app.GridData.GridNameList())
             {
-                foreach (GridColumn gridColumn in appJson.GridDataJson.ColumnList[gridName])
+                foreach (GridColumnInternal gridColumn in app.GridData.ColumnInternalList(gridName))
                 {
                     if (gridColumn.IsClick)
                     {
-                        GridQuery gridQuery = appJson.GridDataJson.GridQueryList[gridName];
+                        GridQueryInternal gridQuery = app.GridData.QueryGet(gridName);
                         if (gridQuery.ColumnNameOrderBy == gridColumn.ColumnName)
                         {
                             gridQuery.IsOrderByDesc = !gridQuery.IsOrderByDesc;
@@ -33,7 +33,7 @@
                             gridQuery.IsOrderByDesc = false;
                         }
                         app.GridData.TextParse(isFilterParse: true);
-                        app.GridData.LoadDatabaseReload(GridName.FromJson(gridName));
+                        app.GridData.LoadDatabaseReload(gridName);
                         break;
                     }
                 }

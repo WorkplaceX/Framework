@@ -363,7 +363,7 @@ export class GridColumn {
   }
 
   click(){
-    this.json.IsSelect = !this.json.IsSelect;
+    // this.json.IsSelect = !this.json.IsSelect;
     this.json.IsClick = true;
     this.dataService.update();
   }

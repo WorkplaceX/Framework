@@ -202,7 +202,7 @@
     /// </summary>
     public class Index
     {
-        public Index(string value)
+        internal Index(string value)
         {
             this.Value = value;
             this.Enum = UtilApplication.IndexEnumFromText(value);
@@ -267,6 +267,14 @@
                 }
                 return indexTotal;
             }
+        }
+
+        /// <summary>
+        /// Returns index for a row.
+        /// </summary>
+        public static Index Row(int index)
+        {
+            return new Index(index.ToString());
         }
 
         public readonly string Value;
