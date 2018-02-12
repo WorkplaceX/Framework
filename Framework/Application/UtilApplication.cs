@@ -27,6 +27,8 @@
         public readonly Index Index;
 
         public readonly string ColumnName;
+
+        internal bool IsBreak;
     }
 
     /// <summary>
@@ -699,6 +701,7 @@
                 if (index.Enum != IndexEnum.Filter) // No readonly for filter!
                 {
                     result.CellEnum = GridCellEnum.Html;
+                    // result.CssClass.Add("gridReadOnly"); // Do not set ReadOnly icon by default. Read only field might have an other icon showing like up or down. Only one icon per field is possible.
                 }
             }
             return result;

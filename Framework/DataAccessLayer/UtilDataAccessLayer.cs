@@ -26,7 +26,7 @@
 
     public class Filter
     {
-        public string ColumnName;
+        public string ColumnNameCSharp;
 
         public FilterOperator FilterOperator;
 
@@ -330,7 +330,7 @@
                     {
                         filterSql += " AND ";
                     }
-                    filterSql += filter.ColumnName;
+                    filterSql += filter.ColumnNameCSharp;
                     switch (filter.FilterOperator)
                     {
                         case FilterOperator.Equal:

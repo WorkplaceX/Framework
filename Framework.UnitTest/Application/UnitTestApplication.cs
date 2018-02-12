@@ -104,6 +104,12 @@
             gridColumn.IsClick = true;
         }
 
+        private static void GridPageIndexNextClick(AppJson appJson, GridName gridName)
+        {
+            string gridNameJson = UtilApplication.GridNameToJson(gridName);
+            appJson.GridDataJson.GridQueryList[gridNameJson].IsPageIndexNext = true;
+        }
+
         /// <summary>
         /// Filter for not nullable bool has to bee empty.
         /// </summary>
@@ -193,7 +199,94 @@
             Process(appJson, out app, out appJson);
             UtilFramework.Assert(GridColumnGet(appJson, MyRow.GridName, "Text").Text.StartsWith("▼"));
             UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "Y");
-            // UtilFramework.Assert(response.App.GridData.RowList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+        }
+
+        /// <summary>
+        /// User filters grid and clicks next page. Filter still applies.
+        /// </summary>
+        public void GridUserFilterThenNextPage()
+        {
+            Process(null, out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User enters "X" text into filter.
+            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.Filter, "X");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+
+            // User click next page button. Filter remains applied.
+            GridPageIndexNextClick(appJson, MyRow.GridName);
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+
+            // User click column header for sorting. Filter remains applied.
+            GridColumnClick(appJson, MyRow.GridName, "Text2");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+        }
+
+        public void GridUserFilter()
+        {
+            Process(null, out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User writes "y" into filter of not nullable column.
+            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Filter, "y");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 2);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == "Yes"); // IsNamingConvention for bool cicked in!
+
+            // User writes "" into filter of not nullable column. (Removes filter)
+            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Filter, "");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == "");
+
+            // User writes "y" into filter of nullable column.
+            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "y");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 2);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == "Yes"); // IsNamingConvention for bool cicked in!
+
+            // User writes "" into filter of nullable column. (Removes filter)
+            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == "");
+        }
+
+        public void GridUserInvalidValue()
+        {
+            Process(null, out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User writes "y" into row of not nullable column.
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "No"); 
+            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Row(0), "Yes");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "Yes");
+
+            // User writes "" into row of not nullable column.
+            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Row(0), "");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "");
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).E == "Value invalid!");
+        }
+
+        public void GridUserNew()
+        {
+            Process(null, out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User writes "y" into new row of nullable column.
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
+            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.New, "y");
+            Process(appJson, out app, out appJson);
+            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(2)).T == "Yes");
         }
     }
 }

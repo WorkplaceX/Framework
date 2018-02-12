@@ -137,7 +137,7 @@
             AppJson appJson = app.AppJson;
             //
             List<string> gridNameList = new List<string>(); // Grids to reload after filter changed.
-            app.GridData.CellAll((GridCellInternal gridCell, AppEventArg e) =>
+            app.GridData.CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 if (e.Index.Enum == IndexEnum.Filter && gridCell.IsModify)
                 {
@@ -397,7 +397,7 @@
         {
             GridDataJson gridDataJson = app.AppJson.GridDataJson;
             GridName gridNameLookup = null;
-            app.GridData.CellAll((GridCellInternal gridCell, AppEventArg e) => 
+            app.GridData.CellInternalAll((GridCellInternal gridCell, AppEventArg e) => 
             {
                 if (gridCell.IsLookup)
                 {
@@ -457,57 +457,42 @@
         /// <summary>
         /// Returns true, if cell has been clicked or text has been entered.
         /// </summary>
-        private bool IsLookupOpen(App app, out GridName gridName, out Index index, out string columnName)
+        private bool IsLookupOpen(App app, out AppEventArg e)
         {
             bool result = false;
-            gridName = null;
-            index = null;
-            columnName = null;
+            AppEventArg eLocal = null;
             //
-            GridDataJson gridDataJson = app.AppJson.GridDataJson;
-            foreach (string gridNameItem in gridDataJson.RowList.Keys)
-            {
-                foreach (GridRow gridRow in gridDataJson.RowList[gridNameItem])
+            app.GridData.CellInternalAll((GridCellInternal cell, AppEventArg eAll) => {
+                if (cell.IsClick || cell.IsModify)
                 {
-                    foreach (var gridColumn in gridDataJson.ColumnList[gridNameItem])
-                    {
-                        GridCell gridCell = gridDataJson.CellList[gridNameItem][gridColumn.ColumnName][gridRow.Index];
-                        if (gridCell.IsClick || gridCell.IsModify)
-                        {
-                            result = true;
-                            gridName = GridName.FromJson(gridNameItem);
-                            index = new Index(gridRow.Index);
-                            columnName = gridColumn.ColumnName;
-                            break;
-                        }
-                    }
+                    result = true;
+                    eLocal = eAll;
+                    eAll.IsBreak = true;
                 }
-            }
+            });
+            e = eLocal;
             return result;
         }
 
         protected internal override void Run(App app)
         {
-            GridName gridName;
-            Index index;
-            string columnName;
-            bool isLookupOpen = IsLookupOpen(app, out gridName, out index, out columnName);
+            bool isLookupOpen = IsLookupOpen(app, out AppEventArg e);
             //
             GridData gridData = app.GridData;
             if (isLookupOpen)
             {
-                Row row = gridData.RowGet(gridName, index);
-                GridCellInternal gridCellInternal = gridData.CellInternalGet(gridName, index, columnName);
+                Row row = gridData.RowGet(e.GridName, e.Index);
+                GridCellInternal gridCellInternal = gridData.CellInternalGet(e.GridName, e.Index, e.ColumnName);
                 //
-                Type typeRow = gridData.TypeRow(gridName);
-                Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == columnName).Single();
-                if (index.Enum != IndexEnum.Filter) // No Lookup for filter column for now. It would work though for example for distinct.
+                Type typeRow = gridData.TypeRow(e.GridName);
+                Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == e.ColumnName).Single();
+                if (e.Index.Enum != IndexEnum.Filter) // No Lookup for filter column for now. It would work though for example for distinct.
                 {
-                    GridNameTypeRow gridNameLookup = cell.Lookup(new AppEventArg(app, gridName, index, columnName));
+                    GridNameTypeRow gridNameLookup = cell.Lookup(new AppEventArg(app, e.GridName, e.Index, e.ColumnName));
                     if (gridNameLookup != null)
                     {
-                        gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, index);
-                        gridData.LookupOpen(gridName, index, columnName, gridNameLookup);
+                        gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, e.Index);
+                        gridData.LookupOpen(e.GridName, e.Index, e.ColumnName, gridNameLookup);
                     }
                 }
             }
@@ -536,7 +521,7 @@
                 }
             }
             //
-            app.GridData.CellAll((GridCellInternal gridCellInternal, AppEventArg e) => { gridCellInternal.FocusId = null; gridCellInternal.FocusIdRequest = null; });
+            app.GridData.CellInternalAll((GridCellInternal gridCellInternal, AppEventArg e) => { gridCellInternal.FocusId = null; gridCellInternal.FocusIdRequest = null; });
         }
 
         protected internal override void Run(App app)

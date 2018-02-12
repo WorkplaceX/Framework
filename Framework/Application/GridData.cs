@@ -414,17 +414,23 @@
         /// </summary>
         private Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>> cellList = new Dictionary<GridName, Dictionary<Index, Dictionary<string, GridCellInternal>>>();
 
-        internal void CellAll(Action<GridCellInternal, AppEventArg> callback)
+        internal void CellInternalAll(Action<GridCellInternal, AppEventArg> callback)
         {
+            bool isBreak = false;
             foreach (GridName gridName in cellList.Keys)
             {
                 foreach (Index index in cellList[gridName].Keys)
                 {
                     foreach (string columnName in cellList[gridName][index].Keys)
                     {
-                        callback(cellList[gridName][index][columnName], new AppEventArg(App, gridName, index, columnName));
+                        AppEventArg e = new AppEventArg(App, gridName, index, columnName);
+                        callback(cellList[gridName][index][columnName], e);
+                        isBreak = e.IsBreak;
+                        if (isBreak) { break; }
                     }
+                    if (isBreak) { break; }
                 }
+                if (isBreak) { break; }
             }
         }
 
@@ -433,12 +439,12 @@
         /// </summary>
         internal void LookupOpen(GridName gridName, Index index, string columnName, GridName gridNameLookup)
         {
-            CellAll((GridCellInternal gridCell, AppEventArg e) =>
+            CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 gridCell.IsLookup = false;
                 gridCell.GridNameLookup = null;
             });
-            CellAll((GridCellInternal gridCell, AppEventArg e) =>
+            CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 bool isLookup = gridName == e.GridName && index == e.Index && columnName == e.ColumnName;
                 if (isLookup)
@@ -454,7 +460,7 @@
         /// </summary>
         internal void LookupClose()
         {
-            CellAll((GridCellInternal gridCell, AppEventArg e) =>
+            CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 gridCell.IsLookup = false;
                 gridCell.GridNameLookup = null;
@@ -679,10 +685,11 @@
             Row rowFilterDefault = UtilDataAccessLayer.RowCreate(typeRow);
             foreach (Cell column in UtilDataAccessLayer.ColumnList(typeRow))
             {
-                string columnName = column.ColumnNameCSharp;
+                string columnNameCSharp = column.ColumnNameCSharp;
                 object value = column.Constructor(rowFilter).Value;
                 object valueDefault = column.Constructor(rowFilterDefault).Value;
-                if (!object.Equals(value, valueDefault)) // Use filter only when value set.
+                string text = CellTextGet(gridName, Index.Filter, columnNameCSharp); // Value could be non nullable int and allways return "0" instead of null.
+                if (!string.IsNullOrEmpty(text)) // Use filter only when value set.
                 {
                     if (isExcludeCalculatedColumn == false || (column.ColumnNameSql != null)) // Do not filter on calculated column if query provider is database.
                     {
@@ -693,7 +700,6 @@
                         }
                         else
                         {
-                            string text = CellTextGet(gridName, Index.Filter, columnName);
                             if (text.Contains(">"))
                             {
                                 filterOperator = FilterOperator.Greater;
@@ -703,7 +709,7 @@
                                 filterOperator = FilterOperator.Greater;
                             }
                         }
-                        filterList.Add(new Filter() { ColumnName = columnName, FilterOperator = filterOperator, Value = value });
+                        filterList.Add(new Filter() { ColumnNameCSharp = columnNameCSharp, FilterOperator = filterOperator, Value = value });
                     }
                 }
             }
@@ -1007,40 +1013,29 @@
                                     cell.TextParse(text, appEventArg); // Write to row
                                     text = text == "" ? null : text;
                                     //
-                                    string textCompare = null;
+                                    if (index.Enum == IndexEnum.Filter && text == null) 
                                     {
-                                        if (index.Enum == IndexEnum.Index)
-                                        {
-                                            textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
-                                        }
-                                        else
-                                        {
-                                            if (text != null) // Not default value has been written to Row.
-                                            {
-                                                textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
-                                            }
-                                            else
-                                            {
-                                                textCompare = CellTextGet(gridName, index, columnName); // Do not read value from row for filter! It could be non nullable int. Do not show "0" in filter.
-                                            }
-                                        }
-                                        textCompare = textCompare == "" ? null : textCompare;
-                                    }
-                                    if (textCompare != text) // For example user entered "8.". It would be overwritten on screen with "8".
-                                    {
-                                        ErrorCellSet(gridName, index, columnName, "Value invalid!");
-                                        row.RowNew = null; // Do not save.
-                                        break;
+                                        // No "Value invalid" validation for empty filter. It could be non nullable int.
                                     }
                                     else
                                     {
-                                        cellInternal.IsParseSuccess = true;
+                                        string textCompare = UtilDataAccessLayer.RowValueToText(cell.Value, cell.TypeColumn);
+                                        if (textCompare != text) // For example user entered "8.". It would be overwritten on screen with "8".
+                                        {
+                                            ErrorCellSet(gridName, index, columnName, "Value invalid!");
+                                            row.RowNew = null; // Do not save.
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            cellInternal.IsParseSuccess = true;
+                                        }
                                     }
                                 }
                                 catch (Exception exception)
                                 {
                                     ErrorCellSet(gridName, index, columnName, exception.Message);
-                                    row.RowNew = null; // Do not save.
+                                    // row.RowNew = null; // Do not save. // Not save is detected by error message.
                                     break;
                                 }
                                 ErrorCellSet(gridName, index, columnName, null); // Clear error.
@@ -1162,15 +1157,8 @@
                     }
                     App.CellRowValueFromText(cell, ref text, new AppEventArg(App, gridName, rowIndex, cell.ColumnNameCSharp));
                     cell.RowValueFromText(ref text, new AppEventArg(App, gridName, rowIndex, null));
-                    if (rowIndex.Enum == IndexEnum.Index)
-                    {
-                        object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
-                        cell.PropertyInfo.SetValue(resultRow, value);
-                    }
-                    else
-                    {
-                        // Do not load text into RowFilter. RowFilter could have non nullable int. But filter is null!
-                    }
+                    object value = UtilDataAccessLayer.RowValueFromText(text, cell.PropertyInfo.PropertyType);
+                    cell.PropertyInfo.SetValue(resultRow, value);
                 }
             }
         }
@@ -1381,16 +1369,17 @@
                             {
                                 value = cell.PropertyInfo.GetValue(row);
                             }
+                            string text = CellTextGet(gridName, index, columnName);
                             string textJson;
-                            if (index.Enum == IndexEnum.Index)
+                            if (index.Enum == IndexEnum.Filter && text == null)
+                            {
+                                textJson = null; // Filter could bo not nullable int. Do not show "0" in filter.
+                            }
+                            else
                             {
                                 textJson = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
                                 App.CellRowValueToText(cell, ref textJson, new AppEventArg(App, gridName, index, columnName)); // Override text generic.
                                 cell.RowValueToText(ref textJson, new AppEventArg(App, gridName, index, columnName)); // Override text.
-                            }
-                            else
-                            {
-                                textJson = CellTextGet(gridName, index, columnName); // Filter could bo not nullable int. Do not show "0" in filter.
                             }
                             ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameTypeRow, index, cell);
                             if (configCell.CellEnum == GridCellEnum.Button && textJson == null && cell.TypeColumn == typeof(string))
