@@ -72,7 +72,7 @@
         }
     }
 
-    internal class ProcessTextParse : Process
+    internal class ProcessGridTextParse : Process
     {
         protected internal override void Run(App app)
         {

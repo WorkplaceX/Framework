@@ -358,7 +358,7 @@
                 processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridPageIndex>();
-                processList.Add<ProcessTextParse>();
+                processList.Add<ProcessGridTextParse>();
                 processList.Add<ProcessGridLookupIsClick>();
                 processList.Add<ProcessGridFilter>();
                 processList.Add<ProcessGridIsClickMasterDetail>();
