@@ -932,18 +932,24 @@
                                 }
                                 if (indexEnum == IndexEnum.New) // Database Insert
                                 {
+                                    string exceptionText = null;
                                     try
                                     {
                                         row.RowNew.Insert(row.RowNew, new AppEventArg(App, gridName, index, null));
-                                        ErrorRowSet(gridName, index, null);
-                                        row.Row = row.RowNew;
-                                        CellTextClear(gridName, index);
-                                        RowNewAdd(gridName); // User entered text in "New" row. Make "New" to "Index" and add "New". No Config check. It has to be Grid.IsInsert once we reached this point.
-                                        SaveDatabaseSelectGridLastIndex(gridName);
                                     }
                                     catch (Exception exception)
                                     {
-                                        ErrorRowSet(gridName, index, UtilFramework.ExceptionToText(exception));
+                                        exceptionText = UtilFramework.ExceptionToText(exception);
+                                    }
+                                    ErrorRowSet(gridName, index, null);
+                                    row.Row = row.RowNew;
+                                    CellTextClear(gridName, index);
+                                    RowNewAdd(gridName); // User entered text in "New" row. Make "New" to "Index" and add "New". No Config check. It has to be Grid.IsInsert once we reached this point.
+                                    SaveDatabaseSelectGridLastIndex(gridName);
+                                    //
+                                    if (exceptionText != null)
+                                    {
+                                        ErrorRowSet(gridName, index, exceptionText);
                                     }
                                 }
                             }
@@ -1441,6 +1447,9 @@
                     gridDataJson.RowList[GridName.ToJson(gridName)] = new List<GridRow>();
                 }
             }
+            //
+            gridDataJson.SelectGridName = SelectGridName;
+            //
             SaveJsonColumn(appJson);
             SaveJsonQuery(appJson);
             SaveJsonSelect(appJson);

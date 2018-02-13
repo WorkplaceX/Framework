@@ -136,7 +136,9 @@
         public void GridUserEnterRow()
         {
             Process(null, out App app, out AppJson appJson);
-            // User enters "X" text.
+            // User clicks cell and enters "X" text.
+            GridCellIsClick(appJson, MyRow.GridName, "Text", Index.New);
+            Process(appJson, out app, out appJson);
             GridCellTextSet(appJson, MyRow.GridName, "Text", Index.New, "X");
             Process(appJson, out app, out appJson);
             GridCell gridCell = GridCellGet(appJson, MyRow.GridName, "Text", new Index("0"));
@@ -291,8 +293,10 @@
             Process(null, out App app, out AppJson appJson);
             UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
 
-            // User writes "y" into new row of nullable column.
+            // User clicks cell and writes "y" into new row of nullable column.
             UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
+            GridCellIsClick(appJson, MyRow.GridName, "IsActiveNullable", Index.New);
+            Process(appJson, out app, out appJson);
             GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.New, "y");
             Process(appJson, out app, out appJson);
             UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(2)).T == "Yes");
@@ -317,8 +321,12 @@
             UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 2);
 
             // User enters two airports
+            GridCellIsClick(appJson, Airport.GridName, "Code", Index.New);
+            Process(appJson, out app, out appJson);
             GridCellTextSet(appJson, Airport.GridName, "Code", Index.New, "LAX");
             GridCellTextSet(appJson, Airport.GridName, "Text", Index.New, "Los Angeles");
+            Process(appJson, out app, out appJson);
+            GridCellIsClick(appJson, Airport.GridName, "Code", Index.New);
             Process(appJson, out app, out appJson);
             GridCellTextSet(appJson, Airport.GridName, "Code", Index.New, "DTW");
             GridCellTextSet(appJson, Airport.GridName, "Text", Index.New, "Detroit Metropolitan Wayne County Airport");

@@ -354,8 +354,8 @@
             processList.Add<ProcessPageBegin>();
             // Grid
             {
+                processList.Add<ProcessGridIsClick>(); // Needs to run before ProcessGridLoadJson. It prepares the data.
                 processList.Add<ProcessGridLoadJson>();
-                processList.Add<ProcessGridIsClick>();
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridPageIndex>();
                 processList.Add<ProcessGridTextParse>();
