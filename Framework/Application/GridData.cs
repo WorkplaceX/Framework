@@ -1312,12 +1312,9 @@
         {
             AppJson appJson = App.AppJson;
             //
-            if (appJson.GridDataJson == null)
-            {
-                appJson.GridDataJson = new GridDataJson();
-                appJson.GridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
-                appJson.GridDataJson.RowList = new Dictionary<string, List<GridRow>>();
-            }
+            appJson.GridDataJson = new GridDataJson(); // Full save. AppJson is incremental save.
+            appJson.GridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
+            appJson.GridDataJson.RowList = new Dictionary<string, List<GridRow>>();
             GridDataJson gridDataJson = appJson.GridDataJson;
             //
             if (gridDataJson.GridQueryList == null)
@@ -1425,15 +1422,6 @@
                             gridCellJson.FocusIdRequest = gridCellInternal.FocusIdRequest;
                         }
                     }
-                }
-            }
-            // Query removed rows. For example methos LoadRow("Table", null, null);
-            foreach (GridName gridName in queryList.Keys)
-            {
-                if (!rowList.ContainsKey(gridName))
-                {
-                    gridDataJson.ColumnList[GridName.ToJson(gridName)] = new List<GridColumn>(); // Remove GridColumn (header).
-                    gridDataJson.RowList[GridName.ToJson(gridName)] = new List<GridRow>();
                 }
             }
             //

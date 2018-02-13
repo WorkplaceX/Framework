@@ -492,7 +492,7 @@
         public string RequestUrl; // Used also for ClientLiveDevelopment.
 
         /// <summary>
-        /// Gets or sets GridData.
+        /// Gets or sets GridData. Full save. AppJson is incremental save.
         /// </summary>
         public GridDataJson GridDataJson;
     }
