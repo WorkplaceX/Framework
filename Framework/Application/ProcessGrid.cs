@@ -42,7 +42,7 @@
     }
 
     /// <summary>
-    /// Set OrderBy up or down arrow.
+    /// Runs after ProcessGridSaveJson. Set OrderBy up or down arrow.
     /// </summary>
     internal class ProcessGridOrderByText : Process
     {
@@ -185,7 +185,7 @@
     }
 
     /// <summary>
-    /// Grid row or cell is clicked. Set IsSelect.
+    /// Runs before ProcessGridLoadJson. ProcessGridLoadJson Grid row or cell is clicked. Set IsSelect.
     /// </summary>
     internal class ProcessGridIsClick : Process
     {
@@ -290,17 +290,25 @@
         internal static void MasterDetailIsClick(App app, GridName gridNameMaster, Row rowMaster)
         {
             GridData gridData = app.GridData;
-            foreach (GridName gridNameDetail in gridData.GridNameList())
+            var list = gridData.GridNameList();
+            foreach (GridName gridNameDetail in list)
             {
                 if (gridNameMaster != gridNameDetail)
                 {
-                    Type typeRow = gridData.TypeRow(gridNameDetail);
-                    Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
-                    bool isReload = false;
-                    rowTable.MasterIsClick(app, gridNameMaster, rowMaster, ref isReload);
-                    if (isReload)
+                    if (GridName.FromJson(app.AppJson.GridDataJson.SelectGridNamePrevious) == gridNameMaster && app.GridData.RowSelectedIndex(gridNameMaster) == new Index(app.AppJson.GridDataJson.SelectIndexPrevious))
                     {
-                        gridData.LoadDatabaseReload(gridNameDetail);
+                        // Selected row did not change. User clicked a cell in the same row. No detail reload.
+                    }
+                    else
+                    {
+                        Type typeRow = gridData.TypeRow(gridNameDetail);
+                        Row rowTable = UtilDataAccessLayer.RowCreate(typeRow); // RowTable is the API. No data in record!
+                        bool isReload = false;
+                        rowTable.MasterIsClick(gridNameMaster, rowMaster, ref isReload, new AppEventArg(app, gridNameDetail, null, null));
+                        if (isReload)
+                        {
+                            gridData.LoadDatabaseReload(gridNameDetail);
+                        }
                     }
                 }
             }
@@ -340,7 +348,7 @@
     }
 
     /// <summary>
-    /// Set row and cell IsClick to false
+    /// Runs after ProcessGridSaveJson. Set row and cell IsClick to false
     /// </summary>
     internal class ProcessGridIsClickFalse : Process
     {
@@ -367,7 +375,33 @@
         }
     }
 
-    internal class ProcessGridLookupIsClick : Process
+    /// <summary>
+    /// Runs after ProcessGridSaveJson.
+    /// </summary>
+    internal class ProcessGridCellIsModifyFalse : Process
+    {
+        protected internal override void Run(App app)
+        {
+            GridDataJson gridDataJson = app.AppJson.GridDataJson;
+            //
+            foreach (string gridName in gridDataJson.RowList.Keys)
+            {
+                foreach (GridRow gridRow in gridDataJson.RowList[gridName])
+                {
+                    foreach (var gridColumn in gridDataJson.ColumnList[gridName])
+                    {
+                        GridCell gridCell = gridDataJson.CellList[gridName][gridColumn.ColumnName][gridRow.Index];
+                        if (gridCell.IsModify)
+                        {
+                            gridCell.IsModify = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    internal class ProcessGridLookupRowIsClick : Process
     {
         protected internal override void Run(App app)
         {
@@ -420,16 +454,16 @@
                 app.GridData.SelectGridName = GridName.ToJson(gridName);
                 app.GridData.SelectIndex = index;
                 app.GridData.SelectColumnName = columnName;
+                //
+                app.GridData.LookupClose(app); // Close lookup window.
             }
-            //
-            app.GridData.LookupClose(app); // Close lookup window.
         }
     }
 
     /// <summary>
     /// Open Lookup grid.
     /// </summary>
-    internal class ProcessGridLookup : Process
+    internal class ProcessGridLookupOpen : Process
     {
         /// <summary>
         /// Returns true, if cell has been clicked or text has been entered.
@@ -442,9 +476,12 @@
             app.GridData.CellInternalAll((GridCellInternal cell, AppEventArg eAll) => {
                 if (cell.IsClick || cell.IsModify)
                 {
-                    result = true;
-                    eLocal = eAll;
-                    eAll.IsBreak = true;
+                    if (cell.IsLookupClose == false)
+                    {
+                        result = true;
+                        eLocal = eAll;
+                        eAll.IsBreak = true;
+                    }
                 }
             });
             e = eLocal;
@@ -476,15 +513,18 @@
                         gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, e.Index);
                         gridData.LookupOpen(e.GridName, e.Index, e.ColumnName, gridNameLookup);
                     }
+                    else
+                    {
+                        gridData.LookupClose(app);
+                    }
                 }
-            }
-            else
-            {
-                gridData.LookupClose(app);
             }
         }
     }
 
+    /// <summary>
+    /// Runs after ProcessGridSaveJson.
+    /// </summary>
     internal class ProcessGridFocus : Process
     {
         private void FocusClear(App app)
@@ -532,7 +572,7 @@
 
 
     /// <summary>
-    /// Set IsSelect on selected GridCell, or to null, if cell does not exist anymore.
+    /// Runs after ProcessGridSaveJson. Set IsSelect on selected GridCell, or to null, if cell does not exist anymore.
     /// </summary>
     internal class ProcessGridCellIsSelect : Process
     {
@@ -577,6 +617,9 @@
         }
     }
 
+    /// <summary>
+    /// Runs after ProcessGridSaveJson.
+    /// </summary>
     internal class ProcessGridFieldWithLabelIndex : Process
     {
         protected internal override void Run(App app)
@@ -593,9 +636,6 @@
         protected internal override void Run(App app)
         {
             app.GridData.SaveDatabase();
-            app.GridData.CellInternalAll((GridCellInternal cell, AppEventArg e) => {
-                cell.IsModify = false;
-            });
         }
     }
 

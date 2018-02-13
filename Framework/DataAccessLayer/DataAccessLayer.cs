@@ -40,10 +40,11 @@
         /// <summary>
         /// Override this method to filter detail grid when master row has been clicked.
         /// </summary>
-        /// <param name="gridNameMaster">Master gridName.</param>
+        /// <param name="gridNameMaster">Clicked master gridName.</param>
         /// <param name="rowMaster">Clicked master grid row.</param>
-        /// <param name="isReload">If true, this grid (detail) gets reloaded. Override also method Row.Query(); to filter detail grid.</param>
-        protected virtual internal void MasterIsClick(App app, GridName gridNameMaster, Row rowMaster, ref bool isReload)
+        /// <param name="isReload">If true, this grid (this detail grid) gets reloaded. Override also method Row.Query(); to filter detail grid.</param>
+        /// <param name="e">This detail grid.</param>
+        protected virtual internal void MasterIsClick(GridName gridNameMaster, Row rowMaster, ref bool isReload, AppEventArg e)
         {
 
         }

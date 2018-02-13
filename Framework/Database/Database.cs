@@ -137,7 +137,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.GridId == this.GridId && item.ColumnId == this.ColumnId).Single(), this); // Read back whole row to update ConfigId, if inserted.
         }
 
-        protected internal override void MasterIsClick(App app, GridName gridNameMaster, Row rowMaster, ref bool isReload)
+        protected internal override void MasterIsClick(GridName gridNameMaster, Row rowMaster, ref bool isReload, AppEventArg e)
         {
             FrameworkConfigGridView configTable = rowMaster as FrameworkConfigGridView;
             if (configTable != null)

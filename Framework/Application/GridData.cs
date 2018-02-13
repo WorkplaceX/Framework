@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Framework.Component;
+    using System.Diagnostics;
 
     internal class GridRowInternal
     {
@@ -72,6 +73,11 @@
         public bool IsParseSuccess;
 
         public bool IsLookup;
+
+        /// <summary>
+        /// Gets or sets IsLookupClose. Prevent opening lookup right again after lookupup row has been clicked. For internal use only. Never sent to client.
+        /// </summary>
+        public bool IsLookupClose;
 
         public string GridNameLookup;
 
@@ -241,20 +247,17 @@
         internal Row RowSelect(GridName gridName, Index index)
         {
             Row result = null;
-            if (QueryInternalIsExist(gridName))
+            foreach (Index key in rowList[gridName].Keys)
             {
-                foreach (Index key in rowList[gridName].Keys)
+                if (key == index)
                 {
-                    if (key == index)
-                    {
-                        rowList[gridName][key].IsSelectSet(true);
-                        UtilFramework.Assert(result == null);
-                        result = rowList[gridName][key].Row;
-                    }
-                    else
-                    {
-                        rowList[gridName][key].IsSelectSet(false);
-                    }
+                    rowList[gridName][key].IsSelectSet(true);
+                    UtilFramework.Assert(result == null);
+                    result = rowList[gridName][key].Row;
+                }
+                else
+                {
+                    rowList[gridName][key].IsSelectSet(false);
                 }
             }
             return result;
@@ -266,15 +269,12 @@
         public Row RowSelected(GridName gridName)
         {
             Row result = null;
-            if (QueryInternalIsExist(gridName))
+            foreach (var item in rowList[gridName].Values)
             {
-                foreach (var item in rowList[gridName].Values)
+                if (item.IsSelectGet())
                 {
-                    if (item.IsSelectGet())
-                    {
-                        result = item.Row;
-                        break;
-                    }
+                    result = item.Row;
+                    break;
                 }
             }
             return result;
@@ -286,15 +286,12 @@
         public TRow RowSelected<TRow>(GridName<TRow> gridName) where TRow : Row
         {
             Row result = null;
-            if (QueryInternalIsExist(gridName))
+            foreach (var item in rowList[gridName].Values)
             {
-                foreach (var item in rowList[gridName].Values)
+                if (item.IsSelectGet())
                 {
-                    if (item.IsSelectGet())
-                    {
-                        result = item.Row;
-                        break;
-                    }
+                    result = item.Row;
+                    break;
                 }
             }
             return (TRow)result;
@@ -306,15 +303,12 @@
         internal Index RowSelectedIndex(GridName gridName)
         {
             Index result = null;
-            if (QueryInternalIsExist(gridName))
+            foreach (Index index in rowList[gridName].Keys)
             {
-                foreach (Index index in rowList[gridName].Keys)
+                if (rowList[gridName][index].IsSelectGet())
                 {
-                    if (rowList[gridName][index].IsSelectGet())
-                    {
-                        result = index;
-                        break;
-                    }
+                    result = index;
+                    break;
                 }
             }
             return result;
@@ -398,12 +392,9 @@
         private GridRowInternal RowInternalGet(GridName gridName, Index index)
         {
             GridRowInternal result = null;
-            if (QueryInternalIsExist(gridName))
+            if (rowList[gridName].ContainsKey(index))
             {
-                if (rowList[gridName].ContainsKey(index))
-                {
-                    result = rowList[gridName][index];
-                }
+                result = rowList[gridName][index];
             }
             return result;
         }
@@ -473,6 +464,7 @@
                     UtilFramework.Assert(e.App == app);
                     gridNameLookup = gridCell.GridNameLookup;
                     gridCell.IsLookup = false;
+                    gridCell.IsLookupClose = true;
                     gridCell.GridNameLookup = null;
                 }
             });
@@ -485,14 +477,11 @@
         internal GridCellInternal CellInternalGet(GridName gridName, Index index, string columnName)
         {
             GridCellInternal result = null;
-            if (QueryInternalIsExist(gridName))
+            if (cellList[gridName].ContainsKey(index))
             {
-                if (cellList[gridName].ContainsKey(index))
+                if (cellList[gridName][index].ContainsKey(columnName))
                 {
-                    if (cellList[gridName][index].ContainsKey(columnName))
-                    {
-                        result = cellList[gridName][index][columnName];
-                    }
+                    result = cellList[gridName][index][columnName];
                 }
             }
             if (result == null)
@@ -775,6 +764,7 @@
             }
             else
             {
+                // Debug.WriteLine(""); Debug.WriteLine(DateTime.Now.Ticks + " " + gridName.Name + " " + "(" + rowList.Count + ")"); Debug.WriteLine("");
                 foreach (Row row in rowList)
                 {
                     UtilFramework.Assert(row.GetType() == gridName.TypeRow);
@@ -1428,7 +1418,6 @@
                             gridCellJson.PlaceHolder = configCell.PlaceHolder;
                             gridCellJson.IsClick = gridCellInternal.IsClick;
                             gridCellJson.IsModify = gridCellInternal.IsModify;
-                            UtilFramework.Assert(gridCellInternal.IsModify == false);
                             gridCellJson.E = errorCell;
                             gridCellJson.IsLookup = gridCellInternal.IsLookup;
                             gridCellJson.GridNameLookup = gridCellInternal.GridNameLookup;
@@ -1447,8 +1436,6 @@
                     gridDataJson.RowList[GridName.ToJson(gridName)] = new List<GridRow>();
                 }
             }
-            //
-            gridDataJson.SelectGridName = SelectGridName;
             //
             SaveJsonColumn(appJson);
             SaveJsonQuery(appJson);

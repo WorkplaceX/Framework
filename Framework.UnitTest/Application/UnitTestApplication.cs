@@ -4,12 +4,207 @@
     using Framework;
     using Framework.Application;
     using Framework.Component;
-    using Framework.Json;
     using Framework.Server;
     using System;
     using System.Linq;
 
     public class UnitTestApplication : UnitTestBase
+    {
+        /// <summary>
+        /// Filter for not nullable bool has to bee empty.
+        /// </summary>
+        public void GridNotNullableFilter()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            GridCell gridCell = Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter);
+            UtilFramework.Assert(gridCell.T == null);
+            UtilFramework.Assert(gridCell.PlaceHolder == "Search");
+        }
+
+        /// <summary>
+        /// User adds two rows to database.
+        /// </summary>
+        public void GridUserEnterRow()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            // User clicks cell and enters "X" text.
+            Emulate.GridCellIsClick(appJson, out app, out appJson, MyRow.GridName, "Text", Index.New);
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.New, "X");
+            GridCell gridCell = Emulate.GridCellGet(appJson, MyRow.GridName, "Text", new Index("0"));
+            UtilFramework.Assert(gridCell.T == "X"); // New record entered by user.
+            
+            // User enters "Y" text.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.New, "Y");
+            gridCell = Emulate.GridCellGet(appJson, MyRow.GridName, "Text", new Index("1"));
+            UtilFramework.Assert(gridCell.T == "Y"); // New record entered by user.
+        }
+
+        /// <summary>
+        /// User modifies text.
+        /// </summary>
+        public void GridUserModify()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            Guid? sessionOne = appJson.Session;
+            // User enters "X" text.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.Row(0), "X2");
+
+            // Read back from new session
+            Emulate.Process(out app, out appJson);
+            Guid? sessionTow = appJson.Session;
+            UtilFramework.Assert(sessionOne != sessionTow);
+            GridCell gridCell = Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0));
+            UtilFramework.Assert(gridCell.T == "X2"); // User modified text.
+        }
+
+        /// <summary>
+        /// User filters data grid.
+        /// </summary>
+        public void UserGridFilter()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4); // With filter and new
+
+            // User enters "X" text into filter.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.Filter, "X");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+
+            // User enters "" text into filter.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.Filter, "");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+        }
+
+        /// <summary>
+        /// User clicks column sort.
+        /// </summary>
+        public void GridUserSort()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(Emulate.GridColumnGet(appJson, MyRow.GridName, "Text").Text == "Text");
+            
+            // Click column
+            Emulate.GridColumnClick(appJson, out app, out appJson, MyRow.GridName, "Text");
+            UtilFramework.Assert(Emulate.GridColumnGet(appJson, MyRow.GridName, "Text").Text.StartsWith("▲"));
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+
+            // Click column 2nd time
+            Emulate.GridColumnClick(appJson, out app, out appJson, MyRow.GridName, "Text");
+            UtilFramework.Assert(Emulate.GridColumnGet(appJson, MyRow.GridName, "Text").Text.StartsWith("▼"));
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "Y");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+        }
+
+        /// <summary>
+        /// User filters grid and clicks next page. Filter still applies.
+        /// </summary>
+        public void GridUserFilterThenNextPage()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User enters "X" text into filter.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.Filter, "X");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+
+            // User click next page button. Filter remains applied.
+            Emulate.GridPageIndexNextClick(appJson, out app, out appJson, MyRow.GridName);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+
+            // User click column header for sorting. Filter remains applied.
+            Emulate.GridColumnClick(appJson, out app, out appJson, MyRow.GridName, "Text2");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
+        }
+
+        public void GridUserFilter()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User writes "y" into filter of not nullable column.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActive", Index.Filter, "y");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 2);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == "Yes"); // IsNamingConvention for bool cicked in!
+
+            // User writes "" into filter of not nullable column. (Removes filter)
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActive", Index.Filter, "");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == null);
+
+            // User writes "y" into filter of nullable column.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "y");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 2);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == "Yes"); // IsNamingConvention for bool cicked in!
+
+            // User writes "" into filter of nullable column. (Removes filter)
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "");
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == null);
+        }
+
+        public void GridUserInvalidValue()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User writes "y" into row of not nullable column.
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "No");
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActive", Index.Row(0), "Yes");
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "Yes");
+
+            // User writes "" into row of not nullable column.
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActive", Index.Row(0), "");
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == null);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).E == "Value invalid!");
+        }
+
+        public void GridUserNew()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
+
+            // User clicks cell and writes "y" into new row of nullable column.
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
+            Emulate.GridCellIsClick(appJson, out app, out appJson, MyRow.GridName, "IsActiveNullable", Index.New);
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActiveNullable", Index.New, "y");
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(2)).T == "Yes");
+        }
+
+        public void GridTextNull()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 5);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == null);
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
+
+            // User writes ""
+            Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0), "");
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0)).T == null);
+        }
+
+        public void GridUserLookup()
+        {
+            Emulate.Process(out App app, out AppJson appJson);
+            UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 2);
+
+            // User enters two airports
+            Emulate.GridCellIsClick(appJson, out app, out appJson, Airport.GridName, "Code", Index.New);
+            Emulate.GridCellTextSet(appJson, out app, out appJson, Airport.GridName, "Code", Index.New, "LAX");
+            Emulate.GridCellTextSet(appJson, out app, out appJson, Airport.GridName, "Text", Index.New, "Los Angeles");
+            Emulate.GridCellIsClick(appJson, out app, out appJson, Airport.GridName, "Code", Index.New);
+            Emulate.GridCellTextSet(appJson, out app, out appJson, Airport.GridName, "Code", Index.New, "DTW");
+            Emulate.GridCellTextSet(appJson, out app, out appJson, Airport.GridName, "Text", Index.New, "Detroit Metropolitan Wayne County Airport");
+            // UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 4); // TODO
+            UtilFramework.Assert(app.GridData.QueryInternalIsExist(Airport.GridNameLookup) == false); // No lookup data loaded
+            UtilFramework.Assert(Emulate.GridCellGet(appJson, MyRow.GridName, "AirportCode", Index.Row(0)).IsLookup == false);
+        }
+    }
+
+    public static class Emulate
     {
         /// <summary>
         /// Gets or sets isDebugHtml. Set manually to true. Writes every response into ApplicationDebug.html.
@@ -47,7 +242,15 @@
             appResponse.Run(appJsonResponse, false); // Deserialize but do not run process.
         }
 
-        private static GridCell GridCellGet(AppJson appJson, GridName gridName, string columnName, Index index)
+        /// <summary>
+        /// First request of a session.
+        /// </summary>
+        public static void Process(out App appResponse, out AppJson appJsonResponse)
+        {
+            Process(null, out appResponse, out appJsonResponse);
+        }
+
+        public static GridCell GridCellGet(AppJson appJson, GridName gridName, string columnName, Index index)
         {
             string gridNameJson = UtilApplication.GridNameToJson(gridName);
             string indexJson = UtilApplication.IndexToJson(index);
@@ -55,7 +258,7 @@
             return result;
         }
 
-        private static GridColumn GridColumnGet(AppJson appJson, GridName gridName, string columnName)
+        public static GridColumn GridColumnGet(AppJson appJson, GridName gridName, string columnName)
         {
             string gridNameJson = UtilApplication.GridNameToJson(gridName);
             GridColumn result = appJson.GridDataJson.ColumnList[gridNameJson].Where(item => item.ColumnName == columnName).First();
@@ -65,9 +268,9 @@
         /// <summary>
         /// Emulate client component.ts of user entering text.
         /// </summary>
-        private static void GridCellTextSet(AppJson appJson, GridName gridName, string columnName, Index index, string textNew)
+        private static void GridCellTextSet(AppJson appJsonRequest, GridName gridName, string columnName, Index index, string textNew)
         {
-            GridCell gridCell = GridCellGet(appJson, gridName, columnName, index);
+            GridCell gridCell = GridCellGet(appJsonRequest, gridName, columnName, index);
             // Backup old text.
             if (gridCell.IsO == null)
             {
@@ -95,245 +298,52 @@
             }
         }
 
+        public static void GridCellTextSet(AppJson appJsonRequest, out App appResponse, out AppJson appJsonResponse, GridName gridName, string columnName, Index index, string textNew)
+        {
+            GridCellTextSet(appJsonRequest, gridName, columnName, index, textNew);
+            Process(appJsonRequest, out appResponse, out appJsonResponse);
+        }
+
         /// <summary>
         /// Emulate client component.ts of user clicking a cell.
         /// </summary>
-        private static void GridCellIsClick(AppJson appJson, GridName gridName, string columnName, Index index)
+        private static void GridCellIsClick(AppJson appJsonRequest, GridName gridName, string columnName, Index index)
         {
-            GridCell gridCell = GridCellGet(appJson, gridName, columnName, index);
+            GridCell gridCell = GridCellGet(appJsonRequest, gridName, columnName, index);
             gridCell.IsClick = true;
+        }
+
+        public static void GridCellIsClick(AppJson appJsonRequest, out App appResponse, out AppJson appJsonResponse, GridName gridName, string columnName, Index index)
+        {
+            GridCellIsClick(appJsonRequest, gridName, columnName, index);
+            Process(appJsonRequest, out appResponse, out appJsonResponse);
         }
 
         /// <summary>
         /// Emulate client component.ts of user clicking column sort.
         /// </summary>
-        private static void GridColumnClick(AppJson appJson, GridName gridName, string columnName)
+        private static void GridColumnClick(AppJson appJsonRequest, GridName gridName, string columnName)
         {
-            GridColumn gridColumn = GridColumnGet(appJson, gridName, columnName);
+            GridColumn gridColumn = GridColumnGet(appJsonRequest, gridName, columnName);
             gridColumn.IsClick = true;
         }
 
-        private static void GridPageIndexNextClick(AppJson appJson, GridName gridName)
+        public static void GridColumnClick(AppJson appJsonRequest, out App appResponse, out AppJson appJsonResponse, GridName gridName, string columnName)
+        {
+            GridColumnClick(appJsonRequest, gridName, columnName);
+            Process(appJsonRequest, out appResponse, out appJsonResponse);
+        }
+
+        private static void GridPageIndexNextClick(AppJson appJsonRequest, GridName gridName)
         {
             string gridNameJson = UtilApplication.GridNameToJson(gridName);
-            appJson.GridDataJson.GridQueryList[gridNameJson].IsPageIndexNext = true;
+            appJsonRequest.GridDataJson.GridQueryList[gridNameJson].IsPageIndexNext = true;
         }
 
-        /// <summary>
-        /// Filter for not nullable bool has to bee empty.
-        /// </summary>
-        public void GridNotNullableFilter()
+        public static void GridPageIndexNextClick(AppJson appJsonRequest, out App appResponse, out AppJson appJsonResponse, GridName gridName)
         {
-            Process(null, out App app, out AppJson appJson);
-            GridCell gridCell = GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter);
-            UtilFramework.Assert(gridCell.T == null);
-            UtilFramework.Assert(gridCell.PlaceHolder == "Search");
-        }
-
-        /// <summary>
-        /// User adds two rows to database.
-        /// </summary>
-        public void GridUserEnterRow()
-        {
-            Process(null, out App app, out AppJson appJson);
-            // User clicks cell and enters "X" text.
-            GridCellIsClick(appJson, MyRow.GridName, "Text", Index.New);
-            Process(appJson, out app, out appJson);
-            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.New, "X");
-            Process(appJson, out app, out appJson);
-            GridCell gridCell = GridCellGet(appJson, MyRow.GridName, "Text", new Index("0"));
-            UtilFramework.Assert(gridCell.T == "X"); // New record entered by user.
-            
-            // User enters "Y" text.
-            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.New, "Y");
-            Process(appJson, out app, out appJson);
-            gridCell = GridCellGet(appJson, MyRow.GridName, "Text", new Index("1"));
-            UtilFramework.Assert(gridCell.T == "Y"); // New record entered by user.
-        }
-
-        /// <summary>
-        /// User modifies text.
-        /// </summary>
-        public void GridUserModify()
-        {
-            Process(null, out App app, out AppJson appJson);
-            Guid? sessionOne = appJson.Session;
-            // User enters "X" text.
-            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.Row(0), "X2");
-            Process(appJson, out app, out appJson);
-
-            // Read back from new session
-            Process(null, out app, out appJson);
-            Guid? sessionTow = appJson.Session;
-            UtilFramework.Assert(sessionOne != sessionTow);
-            GridCell gridCell = GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0));
-            UtilFramework.Assert(gridCell.T == "X2"); // User modified text.
-        }
-
-        /// <summary>
-        /// User filters data grid.
-        /// </summary>
-        public void UserGridFilter()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4); // With filter and new
-            
-            // User enters "X" text into filter.
-            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.Filter, "X");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
-
-            // User enters "" text into filter.
-            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.Filter, "");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
-        }
-
-        /// <summary>
-        /// User clicks column sort.
-        /// </summary>
-        public void GridUserSort()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(GridColumnGet(appJson, MyRow.GridName, "Text").Text == "Text");
-            
-            // Click column
-            GridColumnClick(appJson, MyRow.GridName, "Text");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridColumnGet(appJson, MyRow.GridName, "Text").Text.StartsWith("▲"));
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
-
-            // Click column 2nd time
-            GridColumnClick(appJson, MyRow.GridName, "Text");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridColumnGet(appJson, MyRow.GridName, "Text").Text.StartsWith("▼"));
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "Y");
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-        }
-
-        /// <summary>
-        /// User filters grid and clicks next page. Filter still applies.
-        /// </summary>
-        public void GridUserFilterThenNextPage()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-
-            // User enters "X" text into filter.
-            GridCellTextSet(appJson, MyRow.GridName, "Text", Index.Filter, "X");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
-
-            // User click next page button. Filter remains applied.
-            GridPageIndexNextClick(appJson, MyRow.GridName);
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
-
-            // User click column header for sorting. Filter remains applied.
-            GridColumnClick(appJson, MyRow.GridName, "Text2");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 3);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "Text", Index.Row(0)).T == "X2");
-        }
-
-        public void GridUserFilter()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-
-            // User writes "y" into filter of not nullable column.
-            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Filter, "y");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 2);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == "Yes"); // IsNamingConvention for bool cicked in!
-
-            // User writes "" into filter of not nullable column. (Removes filter)
-            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Filter, "");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Filter).T == null);
-
-            // User writes "y" into filter of nullable column.
-            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "y");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 2);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == "Yes"); // IsNamingConvention for bool cicked in!
-
-            // User writes "" into filter of nullable column. (Removes filter)
-            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter, "");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == null);
-        }
-
-        public void GridUserInvalidValue()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-
-            // User writes "y" into row of not nullable column.
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "No"); 
-            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Row(0), "Yes");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == "Yes");
-
-            // User writes "" into row of not nullable column.
-            GridCellTextSet(appJson, MyRow.GridName, "IsActive", Index.Row(0), "");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).T == null);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActive", Index.Row(0)).E == "Value invalid!");
-        }
-
-        public void GridUserNew()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 4);
-
-            // User clicks cell and writes "y" into new row of nullable column.
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
-            GridCellIsClick(appJson, MyRow.GridName, "IsActiveNullable", Index.New);
-            Process(appJson, out app, out appJson);
-            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.New, "y");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(2)).T == "Yes");
-        }
-
-        public void GridTextNull()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(MyRow.GridName).Count == 5);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Filter).T == null);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.New).T == null);
-
-            // User writes ""
-            GridCellTextSet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0), "");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "IsActiveNullable", Index.Row(0)).T == null);
-        }
-
-        public void GridUserLookup()
-        {
-            Process(null, out App app, out AppJson appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 2);
-
-            // User enters two airports
-            GridCellIsClick(appJson, Airport.GridName, "Code", Index.New);
-            Process(appJson, out app, out appJson);
-            GridCellTextSet(appJson, Airport.GridName, "Code", Index.New, "LAX");
-            GridCellTextSet(appJson, Airport.GridName, "Text", Index.New, "Los Angeles");
-            Process(appJson, out app, out appJson);
-            GridCellIsClick(appJson, Airport.GridName, "Code", Index.New);
-            Process(appJson, out app, out appJson);
-            GridCellTextSet(appJson, Airport.GridName, "Code", Index.New, "DTW");
-            GridCellTextSet(appJson, Airport.GridName, "Text", Index.New, "Detroit Metropolitan Wayne County Airport");
-            Process(appJson, out app, out appJson);
-            UtilFramework.Assert(app.GridData.RowInternalList(Airport.GridName).Count == 4);
-            UtilFramework.Assert(app.GridData.QueryInternalIsExist(Airport.GridNameLookup) == false); // No lookup data loaded
-            UtilFramework.Assert(GridCellGet(appJson, MyRow.GridName, "AirportCode", Index.Row(0)).IsLookup == false);
+            GridPageIndexNextClick(appJsonRequest, gridName);
+            Process(appJsonRequest, out appResponse, out appJsonResponse);
         }
     }
 }
