@@ -12,6 +12,7 @@ namespace Framework
     using Microsoft.EntityFrameworkCore.Metadata;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Linq.Dynamic.Core;
@@ -367,25 +368,50 @@ namespace Framework
             Console.WriteLine(text);
         }
 
+        internal enum LogDebugOutput { None = 0, File = 1, Console = 2  };
+
         /// <summary>
         /// Write Debug.csv file.
         /// </summary>
-        /// <param name="text"></param>
-        internal static void LogDebug(string text)
+        internal static void LogDebug(string text, bool isDebug = false)
         {
-            string fileName = FolderName + "Submodule/Framework/Debug.csv";
-            int threadId = Thread.CurrentThread.ManagedThreadId;
-            text = text.Replace(",", ";");
-            text = text.Replace("\r", "");
-            text = text.Replace("\n", "");
-            text = text.Replace("\"", "");
-            string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            string result = string.Format("=\"{0}\",{1:000},{2}" + "\r\n", time, threadId, text);
-            // if (!File.Exists(fileName))
-            // {
-            //     File.AppendAllText(fileName, "Time,ThreadId,Text" + "\r\n");
-            // }
-            // File.AppendAllText(fileName, result);
+            if (isDebug == false)
+            {
+                return;
+            }
+            //
+            LogDebugOutput logDebugOutput = LogDebugOutput.Console; // Switch debug output manually.
+            if (logDebugOutput != LogDebugOutput.None)
+            {
+                StackTrace stackTrace = new StackTrace();
+                string caller1 = stackTrace.GetFrame(1)?.GetMethod().DeclaringType.Name + "." + stackTrace.GetFrame(1)?.GetMethod().Name + "();";
+                string caller2 = stackTrace.GetFrame(2)?.GetMethod().DeclaringType.Name + "." + stackTrace.GetFrame(2)?.GetMethod().Name + "();";
+                string caller3 = stackTrace.GetFrame(3)?.GetMethod().DeclaringType.Name + "." + stackTrace.GetFrame(3)?.GetMethod().Name + "();";
+                //
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+                text = text.Replace(",", ";");
+                text = text.Replace("\r", "");
+                text = text.Replace("\n", "");
+                text = text.Replace("\"", "");
+                string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                string result = string.Format("=\"{0}\",{1:000},{2},({3}, {4}, {5})", time, threadId, text, caller1, caller2, caller3);
+                //
+                if (logDebugOutput == LogDebugOutput.File)
+                {
+                    string fileName = FolderName + "Submodule/Framework/Debug.csv";
+                    if (!File.Exists(fileName))
+                    {
+                        File.AppendAllText(fileName, "Time,ThreadId,Text,Caller" + "\r\n");
+                    }
+                    File.AppendAllText(fileName, result);
+                }
+                if (logDebugOutput == LogDebugOutput.Console)
+                {
+                    Debug.WriteLine("");
+                    Debug.WriteLine(result);
+                    Debug.WriteLine("");
+                }
+            }
         }
 
         [ThreadStatic]

@@ -6,7 +6,6 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Framework.Component;
-    using System.Diagnostics;
 
     internal class GridRowInternal
     {
@@ -321,6 +320,7 @@
 
         internal void QueryInternalCreate(GridNameTypeRow gridName)
         {
+            UtilFramework.LogDebug("QueryCreate " + gridName.Name, true);
             queryList.Add(gridName, new GridQueryInternal());
             cellList.Add(gridName, new Dictionary<Index, Dictionary<string, GridCellInternal>>());
             rowList.Add(gridName, new Dictionary<Index, GridRowInternal>());
@@ -329,10 +329,12 @@
 
         internal void QueryInternalDestroy(GridName gridName)
         {
-            queryList.Remove(gridName);
-            cellList.Remove(gridName);
-            rowList.Remove(gridName);
-            typeRowList.Remove(gridName);
+            UtilFramework.LogDebug("QueryDestroy " + gridName.Name, true);
+            //
+            UtilFramework.Assert(queryList.Remove(gridName) == true);
+            UtilFramework.Assert(cellList.Remove(gridName) == true);
+            UtilFramework.Assert(rowList.Remove(gridName) == true);
+            UtilFramework.Assert(typeRowList.Remove(gridName) == true);
         }
 
         internal GridQueryInternal QueryInternalGet(GridName gridName)
@@ -436,11 +438,6 @@
         {
             CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
-                gridCell.IsLookup = false;
-                gridCell.GridNameLookup = null;
-            });
-            CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
-            {
                 bool isLookup = gridName == e.GridName && index == e.Index && columnName == e.ColumnName;
                 if (isLookup)
                 {
@@ -455,20 +452,19 @@
         /// </summary>
         internal void LookupClose(App app)
         {
-            string gridNameLookup = null;
+            List<string> gridNameLookupList = new List<string>();
             CellInternalAll((GridCellInternal gridCell, AppEventArg e) =>
             {
                 if (gridCell.IsLookup)
                 {
-                    UtilFramework.Assert(gridNameLookup == null);
                     UtilFramework.Assert(e.App == app);
-                    gridNameLookup = gridCell.GridNameLookup;
+                    gridNameLookupList.Add(gridCell.GridNameLookup);
                     gridCell.IsLookup = false;
                     gridCell.IsLookupClose = true;
                     gridCell.GridNameLookup = null;
                 }
             });
-            if (gridNameLookup != null)
+            foreach (string gridNameLookup in gridNameLookupList)
             {
                 app.GridData.QueryInternalDestroy(GridName.FromJson(gridNameLookup));
             }
@@ -752,69 +748,39 @@
         /// <summary>
         /// Load data directly from list into data grid. Returns false, if data grid has been removed.
         /// </summary>
-        internal bool LoadRow(GridNameTypeRow gridName, List<Row> rowList)
+        internal void LoadRow(GridNameTypeRow gridName, List<Row> rowList)
         {
-            bool result = gridName.TypeRow != null && rowList != null;
-            if (result == false)
+            // Debug.WriteLine(""); Debug.WriteLine(DateTime.Now.Ticks + " " + gridName.Name + " " + "(" + rowList.Count + ")"); Debug.WriteLine("");
+            foreach (Row row in rowList)
             {
-                if (QueryInternalIsExist(gridName))
-                {
-                    QueryInternalDestroy(gridName);
-                }
+                UtilFramework.Assert(row.GetType() == gridName.TypeRow);
             }
-            else
+            //
+            Dictionary<string, GridCellInternal> cellListFilter = null;
+            GridRowInternal rowFilter = null;
+            cellList[gridName].TryGetValue(Index.Filter, out cellListFilter); // Save filter user text.
+            this.rowList[gridName].TryGetValue(Index.Filter, out rowFilter); // Save parsed row.
             {
-                // Debug.WriteLine(""); Debug.WriteLine(DateTime.Now.Ticks + " " + gridName.Name + " " + "(" + rowList.Count + ")"); Debug.WriteLine("");
-                foreach (Row row in rowList)
-                {
-                    UtilFramework.Assert(row.GetType() == gridName.TypeRow);
-                }
-                //
-                Dictionary<string, GridCellInternal> cellListFilter = null;
-                GridRowInternal rowFilter = null;
-                cellList[gridName].TryGetValue(Index.Filter, out cellListFilter); // Save filter user text.
-                this.rowList[gridName].TryGetValue(Index.Filter, out rowFilter); // Save parsed row.
-                {
-                    GridQueryInternal query = queryList[gridName];
-                    QueryInternalDestroy(gridName); // cellList (Clear user modified text and attached errors), rowList (Clear data)
-                    QueryInternalCreate(gridName);
-                    queryList[gridName].ColumnNameOrderBy = query.ColumnNameOrderBy;
-                    queryList[gridName].IsOrderByDesc = query.IsOrderByDesc;
-                    queryList[gridName].PageIndex = query.PageIndex;
-                    queryList[gridName].PageHorizontalIndex = query.PageHorizontalIndex;
-                }
-                //
-                RowFilterAdd(gridName);
-                for (int index = 0; index < rowList.Count; index++)
-                {
-                    RowSet(gridName, new Index(index.ToString()), new GridRowInternal() { Row = rowList[index], RowNew = null });
-                }
-                QueryInternalGet(gridName).IsInsert = true; // Postpone call of method RowNewAdd(gridName); till Config is loaded.
-                //
-                if (cellListFilter != null)
-                {
-                    cellList[gridName] = new Dictionary<Index, Dictionary<string, GridCellInternal>>();
-                    cellList[gridName][Index.Filter] = cellListFilter; // Load back filter user text.
-                    this.rowList[gridName][Index.Filter] = rowFilter;
-                }
+                GridQueryInternal query = queryList[gridName];
+                queryList[gridName].ColumnNameOrderBy = query.ColumnNameOrderBy;
+                queryList[gridName].IsOrderByDesc = query.IsOrderByDesc;
+                queryList[gridName].PageIndex = query.PageIndex;
+                queryList[gridName].PageHorizontalIndex = query.PageHorizontalIndex;
             }
-            return result;
-        }
-
-        /// <summary>
-        /// Load data from single row into data grid.
-        /// </summary>
-        internal void LoadRow(GridNameTypeRow gridName, Row row)
-        {
-            if (row == null)
+            //
+            this.rowList[gridName].Clear();
+            RowFilterAdd(gridName);
+            for (int index = 0; index < rowList.Count; index++)
             {
-                LoadRow(gridName, (List<Row>)null); // Remove data grid.
+                RowSet(gridName, new Index(index.ToString()), new GridRowInternal() { Row = rowList[index], RowNew = null });
             }
-            else
+            QueryInternalGet(gridName).IsInsert = true; // Postpone call of method RowNewAdd(gridName); till Config is loaded.
+                                                        //
+            if (cellListFilter != null)
             {
-                List<Row> rowList = new List<Row>();
-                rowList.Add(row);
-                LoadRow(gridName, rowList);
+                cellList[gridName] = new Dictionary<Index, Dictionary<string, GridCellInternal>>();
+                cellList[gridName][Index.Filter] = cellListFilter; // Load back filter user text.
+                this.rowList[gridName][Index.Filter] = rowFilter;
             }
         }
 
