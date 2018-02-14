@@ -839,9 +839,9 @@
         }
 
         /// <summary>
-        /// Select last row of data grid.
+        /// Keep row selected if user entered text in new row.
         /// </summary>
-        private void SaveDatabaseSelectGridLastIndex(GridName gridName)
+        private void SaveDatabaseNewRowSelectIndex(GridName gridName)
         {
             UtilFramework.Assert(SelectGridName == GridName.ToJson(gridName));
             Index indexLast = null;
@@ -854,6 +854,31 @@
             }
             UtilFramework.Assert(indexLast != null);
             SelectIndex = indexLast;
+        }
+
+        /// <summary>
+        /// Keep lookup window open if user entered text in new row.
+        /// </summary>
+        private void SaveDatabaseNewRowLookup(GridName gridName)
+        {
+            foreach (GridColumnInternal column in ColumnInternalList(gridName))
+            {
+                GridCellInternal cellNew = this.CellInternalGet(gridName, Index.New, column.ColumnName);
+                if (cellNew.IsLookup)
+                {
+                    GridCellInternal cellIndex = this.CellInternalGet(gridName, SelectIndex, column.ColumnName);
+                    cellIndex.GridNameLookup = cellNew.GridNameLookup;
+                    cellIndex.IsLookup = cellNew.IsLookup;
+                    cellIndex.IsModify = cellNew.IsModify;
+                    // cellIndex.IsParseSuccess = cellNew.IsParseSuccess;
+                    cellIndex.FocusId = cellNew.FocusId;
+                    cellNew.GridNameLookup = null;
+                    cellNew.IsLookup = false;
+                    cellNew.FocusId = null;
+                    cellNew.IsModify = false;
+                    // cellNew.IsParseSuccess = false;
+                }
+            }
         }
 
         /// <summary>
@@ -902,7 +927,8 @@
                                     row.Row = row.RowNew;
                                     CellTextClear(gridName, index);
                                     RowNewAdd(gridName); // User entered text in "New" row. Make "New" to "Index" and add "New". No Config check. It has to be Grid.IsInsert once we reached this point.
-                                    SaveDatabaseSelectGridLastIndex(gridName);
+                                    SaveDatabaseNewRowSelectIndex(gridName);
+                                    SaveDatabaseNewRowLookup(gridName);
                                     //
                                     if (exceptionText != null)
                                     {
