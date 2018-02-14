@@ -320,7 +320,8 @@
 
         internal void QueryInternalCreate(GridNameTypeRow gridName)
         {
-            UtilFramework.LogDebug("QueryCreate " + gridName.Name, true);
+            UtilFramework.LogDebug("QueryCreate " + gridName.Name);
+            //
             queryList.Add(gridName, new GridQueryInternal());
             cellList.Add(gridName, new Dictionary<Index, Dictionary<string, GridCellInternal>>());
             rowList.Add(gridName, new Dictionary<Index, GridRowInternal>());
@@ -329,7 +330,7 @@
 
         internal void QueryInternalDestroy(GridName gridName)
         {
-            UtilFramework.LogDebug("QueryDestroy " + gridName.Name, true);
+            UtilFramework.LogDebug("QueryDestroy " + gridName.Name);
             //
             UtilFramework.Assert(queryList.Remove(gridName) == true);
             UtilFramework.Assert(cellList.Remove(gridName) == true);

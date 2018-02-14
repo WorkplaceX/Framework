@@ -30,7 +30,7 @@ namespace Framework
                 // .NET Core 2.0
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.087 Server";
+                return "v1.088 Server";
             }
         }
 
@@ -380,7 +380,7 @@ namespace Framework
                 return;
             }
             //
-            LogDebugOutput logDebugOutput = LogDebugOutput.Console; // Switch debug output manually.
+            LogDebugOutput logDebugOutput = LogDebugOutput.None; // Switch debug output manually.
             if (logDebugOutput != LogDebugOutput.None)
             {
                 StackTrace stackTrace = new StackTrace();
