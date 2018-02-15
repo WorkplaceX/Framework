@@ -294,6 +294,7 @@
                 {
                     int requestCount = AppJson != null ? AppJson.RequestCount : 0;
                     AppJson = new AppJson();
+                    AppJson.BrowserUrl = appJson?.BrowserUrl;
                     AppJson.RequestCount = requestCount;
                     AppJson.Session = Guid.NewGuid();
                     AppJson.RequestUrl = UtilServer.RequestUrl();

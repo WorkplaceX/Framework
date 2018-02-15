@@ -475,6 +475,9 @@
 
         }
 
+        /// <summary>
+        /// Gets or sets IsBrowser. If false, json has been rendered for universal and injected into html. If true, json has been rendered for client.
+        /// </summary>
         public bool IsBrowser;
 
         public string VersionServer;
@@ -485,11 +488,22 @@
 
         public int ResponseCount;
 
+        /// <summary>
+        /// Gets or sets ErrorProcess. If error, browser reloads application. See also file dataService.ts
+        /// </summary>
         public string ErrorProcess;
 
         public Guid? Session;
 
+        /// <summary>
+        /// Gets or sets RequestUrl. This value is set by the server.
+        /// </summary>
         public string RequestUrl; // Used also for ClientLiveDevelopment.
+
+        /// <summary>
+        /// Gets or sets BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.
+        /// </summary>
+        public string BrowserUrl;
 
         /// <summary>
         /// Gets or sets GridData. Full save. AppJson is incremental save.

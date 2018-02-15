@@ -28,9 +28,20 @@ namespace Framework
             get
             {
                 // .NET Core 2.0
+                return "v1.090 Server";
+            }
+        }
+
+        /// <summary>
+        /// Gets VersionClient. This is the expected client version. See also file util.ts
+        /// </summary>
+        public static string VersionClient
+        {
+            get
+            {
                 // node 8.9.2 LTS
                 // npm 5.5.1
-                return "v1.089 Server";
+                return "v1.090 Client";
             }
         }
 

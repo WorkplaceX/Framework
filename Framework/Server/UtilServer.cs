@@ -17,6 +17,59 @@
 
     public static class UtilServer
     {
+        /// <summary>
+        /// If application runs embedded in another web page, urlRelative is returned as absolute url.
+        /// </summary>
+        public static string EmbeddedUrl(App app, string urlRelative, out bool isEmbedded)
+        {
+            string result = urlRelative;
+            isEmbedded = false;
+            if (app.AppJson.BrowserUrl != null)
+            {
+                isEmbedded = new Uri(app.AppJson.BrowserUrl).Authority != new Uri(app.AppJson.RequestUrl).Authority;
+                if (isEmbedded)
+                {
+                    result = app.AppJson.RequestUrl;
+                    if (result.EndsWith("/"))
+                    {
+                        result = result.Substring(0, result.Length - 1);
+                    }
+                    result += urlRelative;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// If application runs embedded in another web page, urlRelative is returned as absolute url.
+        /// </summary>
+        public static string EmbeddedUrl(App app, string urlRelative)
+        {
+            return EmbeddedUrl(app, urlRelative, out bool isEmbedded);
+        }
+
+        /// <summary>
+        /// If application runs embedded in another web page, urlRelative is returned as absolute url. Refers to "url('')" tag in style sheet.
+        /// </summary>
+        /// <param name="fileName">Style sheet (*.css) file name.</param>
+        public static FileContentResult EmbeddedCss(ControllerBase controller, string fileName)
+        {
+            if (controller.HttpContext.Request.Query["embedded"].FirstOrDefault() != null)
+            {
+                string contentType = FileNameToFileContentType(fileName);
+                // Read file
+                string text = UtilFramework.FileRead(fileName);
+                text = text.Replace("url('/", "url('" + UtilServer.RequestUrl());
+                var byteList = Encoding.UTF8.GetBytes(text);
+                var result = controller.File(byteList, contentType);
+                return result;
+            }
+            else
+            {
+                return FileNameToFileContentResult(controller, fileName);
+            }
+        }
+
         internal static string RequestUrl()
         {
             string result = null;
@@ -244,14 +297,23 @@
         {
             string requestPath = Controller.HttpContext.Request.Path.ToString();
             UtilFramework.LogDebug(string.Format("Request ({0})", requestPath));
-            // Framework/Server/wwwroot/*.* content request
+            // Framework/Server/wwwroot/*.* content request. For example styles.css
             if (Path.GetFileName(requestPath).Contains("."))
             {
                 string fileName = Path.GetFileName(requestPath);
                 fileName = UtilServer.FolderNameFrameworkServer() + "wwwroot/" + fileName;
                 if (File.Exists(fileName))
                 {
-                    return UtilServer.FileNameToFileContentResult(Controller, fileName);
+                    FileContentResult fileContentResult;
+                    if (fileName.EndsWith("styles.css"))
+                    {
+                        fileContentResult = UtilServer.EmbeddedCss(Controller, fileName);
+                    }
+                    else
+                    {
+                        fileContentResult = UtilServer.FileNameToFileContentResult(Controller, fileName);
+                    }
+                    return fileContentResult;
                 }
             }
             // App specific request
@@ -287,9 +349,16 @@
                     appJsonOut.ErrorProcess = UtilFramework.ExceptionToText(exception);
                 }
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
-                if (Debugger.IsAttached)
+                UtilServer.EmbeddedUrl(App, "", out bool isEmbedded);
+                if (new Uri(appJsonIn.BrowserUrl).Authority != new Uri(appJsonIn.RequestUrl).Authority)
                 {
-                    Controller.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:4200"); // Avoid "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir
+                    string url = appJsonIn.BrowserUrl;
+                    if (url.EndsWith("/"))
+                    {
+                        url = url.Substring(0, url.Length - 1);
+                    }
+                    // Script is embeded in a different web page.
+                    Controller.Response.Headers.Add("Access-Control-Allow-Origin", url); // Avoid "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir
                 }
                 return Controller.Content(jsonOutText, "application/json");
             }

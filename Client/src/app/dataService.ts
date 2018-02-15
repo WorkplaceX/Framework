@@ -9,11 +9,12 @@ declare var browserJson: any; // Params from browser
 
 export class Json {
     Name: string;
-    RequestUrl: string;
+    RequestUrl: string; // Set by server
+    BrowserUrl: string; // Set by client. Value is different from RequestUrl, if running embeded in a different web page.
     VersionClient: string; // Angular client version.
     VersionServer: string; // Angular client version.
     List:any;
-    IsBrowser:any;
+    IsBrowser:any; // If false, json has been rendered for universal and injected into html. If true, json has been rendered for client.
     Session:string;
     RequestLog: string;
     RequestCount: number;
@@ -60,12 +61,17 @@ export class DataService {
                 this.json = browserJson;
                 this.log = "";
                 this.json.Name = "dataService.ts=" + util.currentTime();
-                this.json.RequestUrl = "";
+                if (this.json.IsBrowser == undefined)
+                {
+                    // Embedded mode. Server sets it to false (rendered for Universal) or true (rendered for client).
+                    this.update();
+                }
             }
         }
     }
 
     update() {
+        this.json.BrowserUrl = window.location.href;
         if (this.isSend == null) { this.isSend = false };
         if (this.RequestCount == null) { this.RequestCount = 0; };
         if (this.log == null) { this.log = "" };
@@ -90,7 +96,7 @@ export class DataService {
                         this.log += "Error RequestCount; "
                     }
                     if (this.json.ErrorProcess != null) {
-                        window.location.replace(this.json.RequestUrl);
+                        window.location.replace(this.json.BrowserUrl); // Reload application after error.
                     }
                     this.isSend = false;
                     if (this.isWait == true) {
