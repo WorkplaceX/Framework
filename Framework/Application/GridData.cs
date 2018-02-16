@@ -627,7 +627,7 @@
         /// </summary>
         /// <param name="gridName"></param>
         /// <param name="isLookup">If true, gridName is a lookup data grid.</param>
-        internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, bool isLookup, Row rowLookup, Index indexLookup)
+        internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, bool isLookup, Row rowLookup, Index indexLookup, IQueryable queryLookup)
         {
             Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
             IQueryable query;
@@ -638,6 +638,10 @@
             else
             {
                 query = rowTable.QueryLookup(rowLookup, new AppEventArg(App, gridName, indexLookup, null));
+                if (queryLookup != null)
+                {
+                    query = queryLookup;
+                }
             }
             List<Row> rowList = new List<Row>();
             if (query != null)
@@ -664,7 +668,7 @@
         /// </summary>
         internal void LoadDatabase(GridNameTypeRow gridName)
         {
-            LoadDatabase(gridName, null, null, false, false, null, null);
+            LoadDatabase(gridName, null, null, false, false, null, null, null);
         }
 
         /// <summary>

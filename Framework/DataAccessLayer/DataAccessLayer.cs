@@ -189,6 +189,12 @@
             return null;
         }
 
+        protected virtual internal void Lookup(out GridNameTypeRow gridName, out IQueryable query)
+        {
+            gridName = null;
+            query = null;
+        }
+
         /// <summary>
         /// Override to handle clicked Lookup row.
         /// </summary>

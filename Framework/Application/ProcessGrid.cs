@@ -503,12 +503,20 @@
                 if (e.Index.Enum != IndexEnum.Filter) // No Lookup for filter column for now. It would work though for example for distinct.
                 {
                     GridNameTypeRow gridNameLookup = cell.Lookup(new AppEventArg(app, e.GridName, e.Index, e.ColumnName));
+                    cell.Lookup(out GridNameTypeRow gridName, out IQueryable query);
                     gridData.LookupClose(app);
                     if (gridNameLookup != null)
                     {
                         gridData.QueryInternalCreate(gridNameLookup);
-                        gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, e.Index);
+                        gridData.LoadDatabase(gridNameLookup, null, null, false, true, row, e.Index, null);
                         gridData.LookupOpen(e.GridName, e.Index, e.ColumnName, gridNameLookup);
+                    }
+                    if (gridName != null)
+                    {
+                        UtilFramework.Assert(gridName.TypeRow == query.ElementType);
+                        gridData.QueryInternalCreate(gridName);
+                        gridData.LoadDatabase(gridName, null, null, false, true, row, e.Index, query);
+                        gridData.LookupOpen(e.GridName, e.Index, e.ColumnName, gridName);
                     }
                 }
             }
