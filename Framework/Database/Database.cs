@@ -106,9 +106,10 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override GridNameTypeRow Lookup(AppEventArg e)
+        protected internal override void Lookup(out GridNameTypeRow gridName, out IQueryable query)
         {
-            return FrameworkApplicationType.Lookup;
+            gridName = FrameworkApplicationType.Lookup;
+            query = UtilDataAccessLayer.Query<FrameworkApplicationType>();
         }
 
         protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)

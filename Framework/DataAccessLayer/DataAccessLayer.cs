@@ -54,17 +54,6 @@
             return UtilDataAccessLayer.Query(GetType());
         }
 
-        /// <summary>
-        /// Define where clause for this lookup grid.
-        /// </summary>
-        /// <param name="rowLookup">Row for which the lookup grid has been opened.</param>
-        /// <param name="e">This lookup data grid.</param>
-        /// <returns>Returns filtered lookup query.</returns>
-        protected virtual internal IQueryable QueryLookup(Row rowLookup, AppEventArg e)
-        {
-            return UtilDataAccessLayer.Query(GetType());
-        }
-
         protected virtual internal void ConfigGrid(ConfigGrid result, AppEventArg e)
         {
 
@@ -179,14 +168,6 @@
         protected virtual internal void WidthPercent(ref double widthPercent)
         {
 
-        }
-
-        /// <summary>
-        /// Returns GridName for lookup grid window. See also method Row.QueryLookup(); to filter rows.
-        /// </summary>
-        protected virtual internal GridNameTypeRow Lookup(AppEventArg e)
-        {
-            return null;
         }
 
         protected virtual internal void Lookup(out GridNameTypeRow gridName, out IQueryable query)

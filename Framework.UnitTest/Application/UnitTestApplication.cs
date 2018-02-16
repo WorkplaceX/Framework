@@ -375,6 +375,7 @@ namespace UnitTest.Application
 
 namespace Database.UnitTest.Application
 {
+    using System.Linq;
     using Framework.Application;
     using Framework.DataAccessLayer;
 
@@ -426,9 +427,10 @@ namespace Database.UnitTest.Application
 
     public class MyRow_AirportCode : Cell<MyRow>
     {
-        protected internal override GridNameTypeRow Lookup(AppEventArg e)
+        protected internal override void Lookup(out GridNameTypeRow gridName, out IQueryable query)
         {
-            return Airport.GridNameLookup;
+            gridName = Airport.GridNameLookup;
+            query = UtilDataAccessLayer.Query<Airport>();
         }
 
         protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)
