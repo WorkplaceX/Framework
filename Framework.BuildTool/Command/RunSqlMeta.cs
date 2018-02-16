@@ -2,6 +2,7 @@
 {
     using Database.dbo;
     using Framework.Application;
+    using Framework.Component;
     using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
@@ -215,6 +216,48 @@
         }
 
         /// <summary>
+        /// Populate and update table FrameworkPage.
+        /// </summary>
+        private void RunSqlPage()
+        {
+            UtilFramework.Log("### Start RunSqlPage");
+            string sql = "UPDATE FrameworkPage SET IsExist = 0";
+            UtilBuildTool.SqlCommand(sql, true);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkPage AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT Source.PageNameCSharp
+                    EXCEPT
+                    SELECT Target.PageNameCSharp)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (PageNameCSharp, IsExist)
+	            VALUES (Source.PageNameCSharp, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<Type> typePageList = UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(Page));
+            foreach (Type typePage in typePageList)
+            {
+                string pageNameCSharp = UtilFramework.TypeToName(typePage);
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    sqlSelect.Append(" UNION ALL\r\n");
+                }
+                sqlSelect.Append(string.Format("SELECT '{0}' AS PageNameCSharp", pageNameCSharp));
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilFramework.Log("### Exit RunSqlPage");
+        }
+
+        /// <summary>
         /// Populate and update table FrameworkColumn.
         /// </summary>
         private void RunSqlColumn()
@@ -401,6 +444,7 @@
             RunSqlTable();
             RunSqlColumn();
             RunSqlGrid();
+            RunSqlPage();
             RunSqlConfigGrid();
             RunSqlConfigColumn();
             RunSqlApplicationType();

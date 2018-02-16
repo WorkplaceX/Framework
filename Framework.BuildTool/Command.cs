@@ -141,7 +141,10 @@
                 }
                 if (isFind == false)
                 {
-                    CommandShortCutExecute(result, line);
+                    if (!string.IsNullOrEmpty(line))
+                    {
+                        CommandShortCutExecute(result, line);
+                    }
                 }
                 Console.Write("Press Enter...");
                 Console.ReadLine();

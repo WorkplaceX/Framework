@@ -108,14 +108,26 @@
         /// <summary>
         /// Set IsRun flag on database table FrameworkScript.
         /// </summary>
-        private void IsRunSet(string fileName, bool isFrameworkDb, bool isDrop, bool value)
+        private void IsRunSet(string fileName, bool isFrameworkDb, bool isDrop, bool value, DateTime dateTime)
         {
             string name = FileNameToName(fileName, isFrameworkDb, isDrop);
+            object dateTimeCreate = DBNull.Value;
+            object dateTimeDrop = DBNull.Value;
+            if (value == true)
+            {
+                dateTimeCreate = dateTime;
+            }
+            else
+            {
+                dateTimeDrop = dateTime;
+            }
             UtilBuildTool.SqlCommand(
-                "UPDATE FrameworkScript SET IsRun = @IsRun WHERE Name = @Name",
+                "UPDATE FrameworkScript SET IsRun = @IsRun, DateCreate = @DateCreate, DateDrop = @DateDrop WHERE Name = @Name",
                 true,
-                new SqlParameter("IsRun", System.Data.SqlDbType.Bit) { Value = value }, 
-                new SqlParameter("Name", System.Data.SqlDbType.NVarChar) { Value = name }
+                new SqlParameter("IsRun", System.Data.SqlDbType.Bit) { Value = value },
+                new SqlParameter("Name", System.Data.SqlDbType.NVarChar) { Value = name },
+                new SqlParameter("DateCreate", System.Data.SqlDbType.DateTime2) { Value = dateTimeCreate },
+                new SqlParameter("DateDrop", System.Data.SqlDbType.DateTime2) { Value = dateTimeDrop }
             );
         }
 
@@ -124,6 +136,7 @@
         /// </summary>
         private void ScriptExecute(bool isFrameworkDb, bool isDrop)
         {
+            DateTime dateTime = DateTime.Now;
             // Run existing scripts.
             {
                 string folderName = FolderName(isFrameworkDb, isDrop, false);
@@ -141,7 +154,7 @@
                         string text = UtilFramework.FileRead(fileName);
                         var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
                         UtilBuildTool.SqlCommand(sqlList.ToList(), isFrameworkDb);
-                        IsRunSet(fileName, isFrameworkDb, isDrop, !isDrop);
+                        IsRunSet(fileName, isFrameworkDb, isDrop, !isDrop, dateTime);
                     }
                     UtilFramework.Log(string.Format("### Exit RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
                 }
@@ -156,7 +169,7 @@
                     string fileNameNotExist = FileNameFromName(name, isFrameworkDb, isDrop);
                     if (!File.Exists(fileNameNotExist))
                     {
-                        IsRunSet(fileNameNotExist, isFrameworkDb, isDrop, !isDrop);
+                        IsRunSet(fileNameNotExist, isFrameworkDb, isDrop, !isDrop, dateTime);
                     }
                 }
             }

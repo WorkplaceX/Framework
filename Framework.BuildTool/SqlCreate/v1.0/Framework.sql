@@ -178,3 +178,12 @@ CREATE TABLE FrameworkFileStorage
 	IsDelete BIT,
 	INDEX IX_FrameworkFileStorage UNIQUE (ApplicationId, Name)
 )
+
+GO
+
+CREATE TABLE FrameworkPage
+(
+	Id INT PRIMARY KEY IDENTITY,
+	PageNameCSharp NVARCHAR(256),
+	IsExist BIT NOT NULL
+)

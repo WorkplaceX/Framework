@@ -7,6 +7,7 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
     public class AppBuildTool
@@ -23,17 +24,20 @@
 
         public void Run(string[] args)
         {
-            CommandLineApplication commandLineApplication = UtilBuildTool.CommandLineApplicationCreate();
-            RegisterCommand(commandLineApplication);
-            try
+            do
             {
-                commandLineApplication.Execute(args);
-            }
-            catch (Exception exception)
-            {
-                UtilFramework.LogError(UtilFramework.ExceptionToText(exception));
-                Environment.Exit(1); // echo Exit Code is %errorlevel%
-            }
+                CommandLineApplication commandLineApplication = UtilBuildTool.CommandLineApplicationCreate();
+                RegisterCommand(commandLineApplication);
+                try
+                {
+                    commandLineApplication.Execute(args);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.LogError(UtilFramework.ExceptionToText(exception));
+                    Environment.Exit(1); // echo Exit Code is %errorlevel%
+                }
+            } while (Debugger.IsAttached); // Running in Visual Studio.
         }
 
         /// <summary>

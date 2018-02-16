@@ -1,4 +1,5 @@
-﻿DROP TABLE FrameworkFileStorage
+﻿DROP TABLE FrameworkPage
+DROP TABLE FrameworkFileStorage
 DROP VIEW FrameworkConfigGridView
 DROP TABLE FrameworkConfigGrid
 DROP VIEW FrameworkConfigColumnView
