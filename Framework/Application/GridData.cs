@@ -625,6 +625,8 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
+        /// <param name="gridName"></param>
+        /// <param name="isLookup">If true, gridName is a lookup data grid.</param>
         internal void LoadDatabase(GridNameTypeRow gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, bool isLookup, Row rowLookup, Index indexLookup)
         {
             Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);

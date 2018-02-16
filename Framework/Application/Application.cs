@@ -297,7 +297,7 @@
                     AppJson.BrowserUrl = appJson?.BrowserUrl;
                     AppJson.RequestCount = requestCount;
                     AppJson.Session = Guid.NewGuid();
-                    AppJson.RequestUrl = UtilServer.RequestUrl();
+                    AppJson.RequestUrl = UtilServer.RequestUrl(false);
                     GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
                     Type typePage = TypePageMain();
                     PageShow(AppJson, typePage);

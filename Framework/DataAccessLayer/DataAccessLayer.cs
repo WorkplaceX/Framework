@@ -54,6 +54,12 @@
             return UtilDataAccessLayer.Query(GetType());
         }
 
+        /// <summary>
+        /// Define where clause for this lookup grid.
+        /// </summary>
+        /// <param name="rowLookup">Row for which the lookup grid has been opened.</param>
+        /// <param name="e">This lookup data grid.</param>
+        /// <returns>Returns filtered lookup query.</returns>
         protected virtual internal IQueryable QueryLookup(Row rowLookup, AppEventArg e)
         {
             return UtilDataAccessLayer.Query(GetType());
