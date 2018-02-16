@@ -90,7 +90,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationType : Row
     {
-        public static GridNameTypeRow Lookup { get { return new GridName<FrameworkApplicationType>("Lookup"); } }
+        public static GridNameWithType Lookup { get { return new GridName<FrameworkApplicationType>("Lookup"); } }
     }
 
     public partial class FrameworkApplicationView_Type
@@ -106,7 +106,7 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override void Lookup(out GridNameTypeRow gridName, out IQueryable query)
+        protected internal override void Lookup(out GridNameWithType gridName, out IQueryable query)
         {
             gridName = FrameworkApplicationType.Lookup;
             query = UtilDataAccessLayer.Query<FrameworkApplicationType>();

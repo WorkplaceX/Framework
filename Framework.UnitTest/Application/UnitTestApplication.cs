@@ -382,7 +382,7 @@ namespace Database.UnitTest.Application
     [SqlTable("dbo", "MyRow")]
     public class MyRow : Row
     {
-        public static GridNameTypeRow GridName = new GridName<MyRow>();
+        public static GridNameWithType GridName = new GridName<MyRow>();
 
         [SqlColumn(null, null, true)]
         public int Id { get; set; }
@@ -407,9 +407,9 @@ namespace Database.UnitTest.Application
 
     public class Airport : Row
     {
-        public static GridNameTypeRow GridName = new GridName<Airport>();
+        public static GridNameWithType GridName = new GridName<Airport>();
 
-        public static GridNameTypeRow GridNameLookup = new GridName<Airport>("Lookup");
+        public static GridNameWithType GridNameLookup = new GridName<Airport>("Lookup");
 
         public int Id { get; set; }
 
@@ -427,7 +427,7 @@ namespace Database.UnitTest.Application
 
     public class MyRow_AirportCode : Cell<MyRow>
     {
-        protected internal override void Lookup(out GridNameTypeRow gridName, out IQueryable query)
+        protected internal override void Lookup(out GridNameWithType gridName, out IQueryable query)
         {
             gridName = Airport.GridNameLookup;
             query = UtilDataAccessLayer.Query<Airport>();

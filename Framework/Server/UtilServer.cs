@@ -29,7 +29,7 @@
                 isEmbedded = new Uri(app.AppJson.BrowserUrl).Authority != new Uri(app.AppJson.RequestUrl).Authority;
                 if (isEmbedded)
                 {
-                    result = app.AppJson.RequestUrl;
+                    result = RequestUrl();
                     if (result.EndsWith("/"))
                     {
                         result = result.Substring(0, result.Length - 1);

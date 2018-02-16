@@ -1,4 +1,10 @@
 Release
+-Table FrameworkScript add column DateCreate, DateDrop
+-Add method CellTextParseAutoComplete(); Calculate IsDeleteKey on server not in component.ts
+-Update ConfigGridAttribute and ConfigColumnAttribute architecture
+-Update WidthPercent architecture
+
+Release b2.0
 -ViewEncapsulation.Native (https://stackoverflow.com/questions/39452729/angular2-setting-view-encapsulation-globally)
 -Disable file name hashing on client build.
 -Json serialize debug remove. [Done]
