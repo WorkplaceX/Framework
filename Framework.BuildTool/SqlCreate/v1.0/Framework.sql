@@ -181,9 +181,29 @@ CREATE TABLE FrameworkFileStorage
 
 GO
 
-CREATE TABLE FrameworkPage
+CREATE TABLE FrameworkComponent
 (
 	Id INT PRIMARY KEY IDENTITY,
-	PageNameCSharp NVARCHAR(256),
+	ComponentNameCSharp NVARCHAR(256)  NOT NULL,
 	IsExist BIT NOT NULL
 )
+
+CREATE TABLE FrameworkCmsNavigation
+(
+	Id INT PRIMARY KEY IDENTITY,
+  	Text NVARCHAR(256),
+	ComponentId INT FOREIGN KEY REFERENCES FrameworkComponent(Id),
+)
+
+GO
+
+CREATE VIEW FrameworkCmsNavigationView AS
+SELECT
+	Navigation.Id AS Id,
+	Navigation.Text AS Text,
+	Navigation.ComponentId,
+	Component.ComponentNameCSharp
+FROM
+	FrameworkCmsNavigation Navigation
+LEFT JOIN
+	FrameworkComponent Component ON (Component.Id = Navigation.ComponentId)

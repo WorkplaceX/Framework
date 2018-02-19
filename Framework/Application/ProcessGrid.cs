@@ -449,6 +449,7 @@
                 // Cell of lookup which user clicked.
                 Cell cellLookup = UtilDataAccessLayer.CellList(rowLookup.GetType(), rowLookup).Where(item => item.ColumnNameCSharp == columnNameLookup).First();
                 string text = app.GridData.CellInternalGet(gridNameLookup, indexLookup, columnNameLookup).Text;
+                app.GridData.ErrorCellSet(gridName, index, columnName, null); // Clear error
                 cell.LookupIsClick(rowLookup, new AppEventArg(app, gridName, index, cell.ColumnNameCSharp)); // (cellLookup.ColumnNameCSharp, text);
                 //
                 app.GridData.SelectGridName = GridName.ToJson(gridName);

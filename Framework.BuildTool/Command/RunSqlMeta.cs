@@ -196,6 +196,7 @@
             //
             foreach (Type typeRow in UtilDataAccessLayer.TypeRowList(UtilApplication.TypeRowInAssembly(AppBuildTool.App)))
             {
+                // Property
                 foreach (PropertyInfo propertyInfo in typeRow.GetProperties(BindingFlags.Static | BindingFlags.Public)) // Static declared GridName property on class Row.
                 {
                     if (UtilFramework.IsSubclassOf(propertyInfo.PropertyType, typeof(GridName)))
@@ -205,8 +206,28 @@
                         Type gridTypeRow = (Type)gridName.GetType().GetField("TypeRowInternal", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
                         string gridNameExclusive = (string)gridName.GetType().GetTypeInfo().GetProperty("NameExclusive", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
                         string gridTableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridTypeRow);
-                        sqlSelect.Append(" UNION ALL\r\n");
-                        sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, '{1}' AS GridName", gridTableNameCSharp, gridNameExclusive));
+                        if (gridNameExclusive != null) // Gets added automatically anyway: "public static GridName<Flight> GridName { get { return new GridName<Flight>(); } }"
+                        {
+                            sqlSelect.Append(" UNION ALL\r\n");
+                            sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, '{1}' AS GridName", gridTableNameCSharp, gridNameExclusive));
+                        }
+                    }
+                }
+                // Field
+                foreach (FieldInfo fieldInfo in typeRow.GetFields(BindingFlags.Static | BindingFlags.Public)) // Static declared GridName property on class Row.
+                {
+                    if (UtilFramework.IsSubclassOf(fieldInfo.FieldType, typeof(GridName)))
+                    {
+                        GridName gridName = (GridName)fieldInfo.GetValue(null);
+                        //
+                        Type gridTypeRow = (Type)gridName.GetType().GetField("TypeRowInternal", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
+                        string gridNameExclusive = (string)gridName.GetType().GetTypeInfo().GetProperty("NameExclusive", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gridName);
+                        string gridTableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridTypeRow);
+                        if (gridNameExclusive != null) // Gets added automatically anyway: "public static GridName<Flight> GridName { get { return new GridName<Flight>(); } }"
+                        {
+                            sqlSelect.Append(" UNION ALL\r\n");
+                            sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, '{1}' AS GridName", gridTableNameCSharp, gridNameExclusive));
+                        }
                     }
                 }
             }
@@ -216,32 +237,32 @@
         }
 
         /// <summary>
-        /// Populate and update table FrameworkPage.
+        /// Populate and update table FrameworkComponent.
         /// </summary>
-        private void RunSqlPage()
+        private void RunSqlComponent()
         {
             UtilFramework.Log("### Start RunSqlPage");
-            string sql = "UPDATE FrameworkPage SET IsExist = 0";
+            string sql = "UPDATE FrameworkComponent SET IsExist = 0";
             UtilBuildTool.SqlCommand(sql, true);
             string sqlUpsert = @"
-            MERGE INTO FrameworkPage AS Target
+            MERGE INTO FrameworkComponent AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT Source.PageNameCSharp
+                    SELECT Source.ComponentNameCSharp
                     EXCEPT
-                    SELECT Target.PageNameCSharp)
+                    SELECT Target.ComponentNameCSharp)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (PageNameCSharp, IsExist)
-	            VALUES (Source.PageNameCSharp, 1);
+	            INSERT (ComponentNameCSharp, IsExist)
+	            VALUES (Source.ComponentNameCSharp, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            List<Type> typePageList = UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(Page));
+            List<Type> typePageList = UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(Component));
             foreach (Type typePage in typePageList)
             {
-                string pageNameCSharp = UtilFramework.TypeToName(typePage);
+                string componentNameCSharp = UtilFramework.TypeToName(typePage);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -250,7 +271,7 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlSelect.Append(string.Format("SELECT '{0}' AS PageNameCSharp", pageNameCSharp));
+                sqlSelect.Append(string.Format("SELECT '{0}' AS ComponentNameCSharp", componentNameCSharp));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true);
@@ -444,7 +465,7 @@
             RunSqlTable();
             RunSqlColumn();
             RunSqlGrid();
-            RunSqlPage();
+            RunSqlComponent();
             RunSqlConfigGrid();
             RunSqlConfigColumn();
             RunSqlApplicationType();

@@ -1,10 +1,10 @@
 ﻿namespace Framework.Application
 {
     using Database.dbo;
+    using Framework.Application.Config;
     using Framework.Component;
     using Framework.DataAccessLayer;
     using Framework.Server;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Caching.Memory;
     using System;
     using System.Collections.Generic;
@@ -134,9 +134,9 @@
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
         /// </summary>
-        virtual internal Type TypeComponentInNamespace()
+        virtual internal Type[] TypeComponentInNamespaceList()
         {
-            return GetType();
+            return new Type[] { GetType(), typeof(AppConfig) }; // Enable serialization of components in App and AppConfig namespace.
         }
 
         /// <summary>

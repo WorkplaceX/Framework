@@ -231,7 +231,7 @@
                     isUniversalRunning = true;
                     UtilServer.StartUniversalServer();
                 }
-                string json = Framework.Json.JsonConvert.Serialize(appJsonResponse, app.TypeComponentInNamespace());
+                string json = Framework.Json.JsonConvert.Serialize(appJsonResponse, app.TypeComponentInNamespaceList());
                 string url = "http://localhost:4000/Universal/index.js"; // Call Universal server when running in Visual Studio.
                 string html = UtilServer.WebPost(url, json, true).Result;
                 string fileName = UtilFramework.FolderName + "ApplicationDebug.html";

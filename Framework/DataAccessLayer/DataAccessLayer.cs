@@ -143,10 +143,10 @@
         /// <summary>
         /// Parse user entered text and write result to Row.
         /// </summary>
-        protected virtual internal void TextParse(string text, AppEventArg e)
+        protected virtual internal void TextParse(ref string text, bool isDeleteKey, AppEventArg e)
         {
             object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(e.ColumnName).PropertyType); // Default parse text.
-            Row.GetType().GetProperty(e.ColumnName).SetValue(Row, value);
+            Row.GetType().GetProperty(e.ColumnName).SetValue(Row, value); // Write to Row.
         }
 
         /// <summary>

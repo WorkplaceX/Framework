@@ -8,7 +8,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkApplication")]
     public partial class FrameworkApplication : Row
     {
-        [SqlColumn("Id", typeof(FrameworkApplication_Id))]
+        [SqlColumn("Id", typeof(FrameworkApplication_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("Text", typeof(FrameworkApplication_Text))]
@@ -37,7 +37,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkApplicationType")]
     public partial class FrameworkApplicationType : Row
     {
-        [SqlColumn("Id", typeof(FrameworkApplicationType_Id))]
+        [SqlColumn("Id", typeof(FrameworkApplicationType_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("Name", typeof(FrameworkApplicationType_Name))]
@@ -93,10 +93,53 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_IsActive : Cell<FrameworkApplicationView> { }
 
+    [SqlTable("dbo", "FrameworkCmsNavigation")]
+    public partial class FrameworkCmsNavigation : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkCmsNavigation_Id), true)]
+        public int Id { get; set; }
+
+        [SqlColumn("Text", typeof(FrameworkCmsNavigation_Text))]
+        public string Text { get; set; }
+
+        [SqlColumn("ComponentId", typeof(FrameworkCmsNavigation_ComponentId))]
+        public int? ComponentId { get; set; }
+    }
+
+    public partial class FrameworkCmsNavigation_Id : Cell<FrameworkCmsNavigation> { }
+
+    public partial class FrameworkCmsNavigation_Text : Cell<FrameworkCmsNavigation> { }
+
+    public partial class FrameworkCmsNavigation_ComponentId : Cell<FrameworkCmsNavigation> { }
+
+    [SqlTable("dbo", "FrameworkCmsNavigationView")]
+    public partial class FrameworkCmsNavigationView : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkCmsNavigationView_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("Text", typeof(FrameworkCmsNavigationView_Text))]
+        public string Text { get; set; }
+
+        [SqlColumn("ComponentId", typeof(FrameworkCmsNavigationView_ComponentId))]
+        public int? ComponentId { get; set; }
+
+        [SqlColumn("ComponentNameCSharp", typeof(FrameworkCmsNavigationView_ComponentNameCSharp))]
+        public string ComponentNameCSharp { get; set; }
+    }
+
+    public partial class FrameworkCmsNavigationView_Id : Cell<FrameworkCmsNavigationView> { }
+
+    public partial class FrameworkCmsNavigationView_Text : Cell<FrameworkCmsNavigationView> { }
+
+    public partial class FrameworkCmsNavigationView_ComponentId : Cell<FrameworkCmsNavigationView> { }
+
+    public partial class FrameworkCmsNavigationView_ComponentNameCSharp : Cell<FrameworkCmsNavigationView> { }
+
     [SqlTable("dbo", "FrameworkColumn")]
     public partial class FrameworkColumn : Row
     {
-        [SqlColumn("Id", typeof(FrameworkColumn_Id))]
+        [SqlColumn("Id", typeof(FrameworkColumn_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("TableId", typeof(FrameworkColumn_TableId))]
@@ -122,10 +165,29 @@ namespace Database.dbo
 
     public partial class FrameworkColumn_IsExist : Cell<FrameworkColumn> { }
 
+    [SqlTable("dbo", "FrameworkComponent")]
+    public partial class FrameworkComponent : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkComponent_Id), true)]
+        public int Id { get; set; }
+
+        [SqlColumn("ComponentNameCSharp", typeof(FrameworkComponent_ComponentNameCSharp))]
+        public string ComponentNameCSharp { get; set; }
+
+        [SqlColumn("IsExist", typeof(FrameworkComponent_IsExist))]
+        public bool IsExist { get; set; }
+    }
+
+    public partial class FrameworkComponent_Id : Cell<FrameworkComponent> { }
+
+    public partial class FrameworkComponent_ComponentNameCSharp : Cell<FrameworkComponent> { }
+
+    public partial class FrameworkComponent_IsExist : Cell<FrameworkComponent> { }
+
     [SqlTable("dbo", "FrameworkConfigColumn")]
     public partial class FrameworkConfigColumn : Row
     {
-        [SqlColumn("Id", typeof(FrameworkConfigColumn_Id))]
+        [SqlColumn("Id", typeof(FrameworkConfigColumn_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("GridId", typeof(FrameworkConfigColumn_GridId))]
@@ -340,7 +402,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkConfigGrid")]
     public partial class FrameworkConfigGrid : Row
     {
-        [SqlColumn("Id", typeof(FrameworkConfigGrid_Id))]
+        [SqlColumn("Id", typeof(FrameworkConfigGrid_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("GridId", typeof(FrameworkConfigGrid_GridId))]
@@ -460,7 +522,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkFileStorage")]
     public partial class FrameworkFileStorage : Row
     {
-        [SqlColumn("Id", typeof(FrameworkFileStorage_Id))]
+        [SqlColumn("Id", typeof(FrameworkFileStorage_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("ApplicationId", typeof(FrameworkFileStorage_ApplicationId))]
@@ -494,7 +556,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkGrid")]
     public partial class FrameworkGrid : Row
     {
-        [SqlColumn("Id", typeof(FrameworkGrid_Id))]
+        [SqlColumn("Id", typeof(FrameworkGrid_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("TableId", typeof(FrameworkGrid_TableId))]
@@ -518,7 +580,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkScript")]
     public partial class FrameworkScript : Row
     {
-        [SqlColumn("Id", typeof(FrameworkScript_Id))]
+        [SqlColumn("Id", typeof(FrameworkScript_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("Name", typeof(FrameworkScript_Name))]
@@ -529,6 +591,12 @@ namespace Database.dbo
 
         [SqlColumn("IsRun", typeof(FrameworkScript_IsRun))]
         public bool IsRun { get; set; }
+
+        [SqlColumn("DateCreate", typeof(FrameworkScript_DateCreate))]
+        public DateTime? DateCreate { get; set; }
+
+        [SqlColumn("DateDrop", typeof(FrameworkScript_DateDrop))]
+        public DateTime? DateDrop { get; set; }
     }
 
     public partial class FrameworkScript_Id : Cell<FrameworkScript> { }
@@ -539,10 +607,14 @@ namespace Database.dbo
 
     public partial class FrameworkScript_IsRun : Cell<FrameworkScript> { }
 
+    public partial class FrameworkScript_DateCreate : Cell<FrameworkScript> { }
+
+    public partial class FrameworkScript_DateDrop : Cell<FrameworkScript> { }
+
     [SqlTable("dbo", "FrameworkSession")]
     public partial class FrameworkSession : Row
     {
-        [SqlColumn("Id", typeof(FrameworkSession_Id))]
+        [SqlColumn("Id", typeof(FrameworkSession_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("Name", typeof(FrameworkSession_Name))]
@@ -561,7 +633,7 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkTable")]
     public partial class FrameworkTable : Row
     {
-        [SqlColumn("Id", typeof(FrameworkTable_Id))]
+        [SqlColumn("Id", typeof(FrameworkTable_Id), true)]
         public int Id { get; set; }
 
         [SqlColumn("TableNameCSharp", typeof(FrameworkTable_TableNameCSharp))]

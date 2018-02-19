@@ -423,7 +423,7 @@
         }
 
         /// <summary>
-        /// Returns type found in namespace.
+        /// Returns type found in exact namespace. Not only in assembly.
         /// </summary>
         /// <param name="objectTypeString">Type as string. For example "MyComponent".</param>
         /// <param name="typeInNamespace">A type defined in namespace in which to search.</param>
@@ -451,7 +451,7 @@
             }
             foreach (Type type in typeInNamespaceList)
             {
-                result = TypeGetExact(objectTypeString, type);
+                result = TypeGetExact(objectTypeString, type); // Search in exact namespace. Not just in assembly.
                 if (result != null && !resultList.Contains(result))
                 {
                     resultList.Add(result);
@@ -463,7 +463,7 @@
             }
             if (resultList.Count > 1)
             {
-                JsonConvert.Assert(false, "More than one type found!");
+                JsonConvert.Assert(false, "More than one type found!"); // Type with same name defined in more than one namespace (not assembly!)
             }
             return resultList.Single();
         }

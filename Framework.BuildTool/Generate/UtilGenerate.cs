@@ -90,6 +90,9 @@
                 case 61: // datetime
                     type = typeof(DateTime);
                     break;
+                case 42: // datetime2
+                    type = typeof(DateTime);
+                    break;
                 case 40: // date
                     type = typeof(DateTime);
                     break;

@@ -1,4 +1,6 @@
-﻿DROP TABLE FrameworkPage
+﻿DROP VIEW FrameworkCmsNavigationView
+DROP TABLE FrameworkCmsNavigation
+DROP TABLE FrameworkComponent
 DROP TABLE FrameworkFileStorage
 DROP VIEW FrameworkConfigGridView
 DROP TABLE FrameworkConfigGrid

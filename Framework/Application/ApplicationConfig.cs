@@ -27,4 +27,13 @@
             new Grid(this, new GridName<FrameworkConfigColumnView>());
         }
     }
+
+    public class PageCmsConfig : Page
+    {
+        protected internal override void InitJson(App app)
+        {
+            new Literal(this) { TextHtml = "<h1>Navigation</h1>" };
+            new Grid(this, new GridName<FrameworkCmsNavigationView>());
+        }
+    }
 }

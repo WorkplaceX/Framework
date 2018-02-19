@@ -563,12 +563,12 @@
             }
         }
 
-        private string ErrorCellGet(GridName gridName, Index index, string columnName)
+        internal string ErrorCellGet(GridName gridName, Index index, string columnName)
         {
             return CellInternalGet(gridName, index, columnName).Error;
         }
 
-        private void ErrorCellSet(GridName gridName, Index index, string columnName, string text)
+        internal void ErrorCellSet(GridName gridName, Index index, string columnName, string text)
         {
             CellInternalGet(gridName, index, columnName).Error = text;
         }
@@ -1010,7 +1010,7 @@
                                 {
                                     var appEventArg  = new AppEventArg(App, gridName, index, columnName);
                                     App.CellTextParse(cell, ref text, isDeleteKey, appEventArg);
-                                    cell.TextParse(text, appEventArg); // Write to row
+                                    cell.TextParse(ref text, isDeleteKey, appEventArg); // Write to row
                                     text = text == "" ? null : text;
                                     //
                                     if (index.Enum == IndexEnum.Filter && text == null) 

@@ -14,6 +14,7 @@
     using System.Net.Http;
     using System.Text;
     using Microsoft.AspNetCore.Http;
+    using Framework.Application.Config;
 
     public static class UtilServer
     {
@@ -347,7 +348,7 @@
             if (requestPath.StartsWith(RequestPathBase) && requestPath.EndsWith("Application.json"))
             {
                 string jsonInText = UtilServer.StreamToString(Controller.Request.Body);
-                AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() });
+                AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, App.TypeComponentInNamespaceList());
                 AppJson appJsonOut;
                 try
                 {
@@ -357,10 +358,10 @@
                 catch (Exception exception)
                 {
                     // Prevent Internal Error 500 on process exception.
-                    appJsonOut = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { App.TypeComponentInNamespace() }); // Send AppJsonIn back.
+                    appJsonOut = JsonConvert.Deserialize<AppJson>(jsonInText, App.TypeComponentInNamespaceList()); // Send AppJsonIn back.
                     appJsonOut.ErrorProcess = UtilFramework.ExceptionToText(exception);
                 }
-                string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, new Type[] { App.TypeComponentInNamespace() });
+                string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, App.TypeComponentInNamespaceList());
                 UtilServer.EmbeddedUrl(App, "", out bool isEmbedded);
                 if (new Uri(appJsonIn.BrowserUrl).Authority != new Uri(appJsonIn.RequestUrl).Authority)
                 {
@@ -413,7 +414,7 @@
             {
                 string url = "http://" + Controller.Request.Host.ToUriComponent() + "/Universal/index.js";
                 appJson.IsBrowser = false; // Server side rendering mode.
-                string jsonText = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
+                string jsonText = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespaceList());
                 string htmlUniversal;
                 // Universal rendering
                 {
@@ -451,7 +452,7 @@
                 result = result.Replace(htmlFind, "data-innerHTML=\""); // Prefix data for html5.
             }
             appJson.IsBrowser = true; // Client side rendering mode.
-            string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespace());
+            string jsonTextBrowser = Json.JsonConvert.Serialize(appJson, app.TypeComponentInNamespaceList());
             string resultAssert = result;
             // Add json to index.html (Client/index.html)
             {

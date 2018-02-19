@@ -7,6 +7,90 @@ using Framework.Component;
 
 namespace Database.dbo
 {
+    public partial class FrameworkCmsNavigationView
+    {
+        private void Reload()
+        {
+            var row = UtilDataAccessLayer.Query<FrameworkCmsNavigationView>().Where(item => item.Id == Id).Single();
+            UtilDataAccessLayer.RowCopy(row, this);
+        }
+
+        protected internal override void Update(Row row, Row rowNew, AppEventArg e)
+        {
+            var rowNavigation = UtilDataAccessLayer.RowCopy<FrameworkCmsNavigation>(row);
+            var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkCmsNavigation>(rowNew);
+            UtilDataAccessLayer.Update(rowNavigation, rowNewNavigation); // Write to table. Not to view.
+            //
+            Reload();
+        }
+
+        protected internal override void Insert(Row rowNew, AppEventArg e)
+        {
+            var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkCmsNavigation>(rowNew);
+            rowNewNavigation.ComponentId = ((FrameworkCmsNavigationView)rowNew).ComponentId;
+            Id = UtilDataAccessLayer.Insert(rowNewNavigation).Id; // Write to table. Not to view.
+            //
+            Reload();
+        }
+    }
+
+    public partial class FrameworkCmsNavigationView_ComponentNameCSharp : Cell<FrameworkCmsNavigationView>
+    {
+        protected internal override void Lookup(out GridNameWithType gridName, out IQueryable query)
+        {
+            gridName = FrameworkComponent.GridNameLookup;
+            if (Row.ComponentNameCSharp == null)
+            {
+                query = UtilDataAccessLayer.Query<FrameworkComponent>().OrderBy(item => item.ComponentNameCSharp);
+            }
+            else
+            {
+                query = UtilDataAccessLayer.Query<FrameworkComponent>().Where(item => item.ComponentNameCSharp.Contains(Row.ComponentNameCSharp)).OrderBy(item => item.ComponentNameCSharp);
+            }
+        }
+
+        protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)
+        {
+            Row.ComponentNameCSharp = ((FrameworkComponent)rowLookup).ComponentNameCSharp;
+            Row.ComponentId = ((FrameworkComponent)rowLookup).Id;
+        }
+
+        protected internal override void TextParse(ref string text, bool isDeleteKey, AppEventArg e)
+        {
+            base.TextParse(ref text, isDeleteKey, e);
+            //
+            if (e.Index.Enum == IndexEnum.Filter)
+            {
+                return; // No further parsing ncessary like date.
+            }
+            if (text == null)
+            {
+                Row.ComponentId = null;
+            }
+            else
+            {
+                string textLocal = text;
+                var query = UtilDataAccessLayer.Query<FrameworkComponent>().Where(item => item.ComponentNameCSharp.Contains(textLocal)).Take(2);
+                var rowComponentList = query.ToArray();
+                if (rowComponentList.Length == 1 && isDeleteKey == false)
+                {
+                    Row.ComponentId = rowComponentList[0].Id;
+                    text = rowComponentList[0].ComponentNameCSharp;
+                    base.TextParse(ref text, isDeleteKey, e);
+                }
+                else
+                { 
+                    throw new Exception("Component not found!");
+                }
+            }
+        }
+    }
+
+    public partial class FrameworkComponent
+    {
+        public static GridName<FrameworkComponent> GridNameLookup = new GridName<FrameworkComponent>("Lookup");
+    }
+
     public partial class FrameworkFileStorage
     {
         [SqlColumn(null, typeof(FrameworkFileStorage_Download))]
@@ -95,9 +179,10 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_Type
     {
-        protected internal override void TextParse(string text, AppEventArg e)
+        protected internal override void TextParse(ref string text, bool isDeleteKey, AppEventArg e)
         {
-            var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == text).FirstOrDefault();
+            string textLocal = text;
+            var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.Name == textLocal).FirstOrDefault();
             if (applicationType == null)
             {
                 throw new Exception(string.Format("Type unknown! ({0})", text));

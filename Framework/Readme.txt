@@ -1,8 +1,11 @@
 Release
+-Method Cell.TextParse(); api for reference tables.
+-Method Cell.Lookup(); api combine with GridName.
 -Table FrameworkScript add column DateCreate, DateDrop
 -Add method CellTextParseAutoComplete(); Calculate IsDeleteKey on server not in component.ts
 -Update ConfigGridAttribute and ConfigColumnAttribute architecture
 -Update WidthPercent architecture
+-Angular 5; https://angular.io/guide/dynamic-component-loader
 
 Release b2.0
 -ViewEncapsulation.Native (https://stackoverflow.com/questions/39452729/angular2-setting-view-encapsulation-globally)

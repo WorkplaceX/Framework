@@ -424,9 +424,9 @@
         }
 
         /// <summary>
-        /// Insert data record. Primary key needs to be 0!
+        /// Insert data record. Primary key needs to be 0! Returned new row contains new primary key.
         /// </summary>
-        public static void Insert(Row row)
+        public static TRow Insert<TRow>(TRow row) where TRow : Row
         {
             UtilFramework.LogDebug(string.Format("INSERT ({0})", UtilDataAccessLayer.TypeRowToTableNameCSharp(row.GetType())));
             //
@@ -448,6 +448,7 @@
                 UtilDataAccessLayer.RowCopy(rowClone, row); // In case of exception, EF might change for example auto incremental id to -2147482647. Reverse it back.
                 throw exception;
             }
+            return row; // Return Row with new primary key.
         }
 
         /// <summary>
@@ -595,7 +596,7 @@
         }
 
         /// <summary>
-        /// Clone data row.
+        /// Clone data row. Like method RowCopy(); but source and dest are of same type.
         /// </summary>
         public static Row RowClone(Row row)
         {
@@ -605,7 +606,7 @@
         }
 
         /// <summary>
-        /// Clone data row.
+        /// Clone data row. Like method RowCopy(); but source and dest are of same type.
         /// </summary>
         public static TRow RowClone<TRow>(TRow row) where TRow : Row
         {
@@ -616,7 +617,7 @@
         /// Copy data row. Source and dest need not to be of same type. Only cells available on
         /// both records are copied. See also RowClone();
         /// </summary>
-        internal static void RowCopy(Row rowSource, Row rowDest)
+        public static void RowCopy(Row rowSource, Row rowDest)
         {
             var propertyInfoDestList = UtilDataAccessLayer.TypeRowToPropertyList(rowDest.GetType());
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
@@ -632,11 +633,30 @@
         }
 
         /// <summary>
+        /// Copy data row. Source and dest need not to be of same type. Only cells available on
+        /// both records are copied. See also RowClone();
+        /// </summary>
+        public static TRowDest RowCopy<TRowDest>(Row rowSource) where TRowDest : Row
+        {
+            TRowDest rowDest = UtilDataAccessLayer.RowCreate<TRowDest>();
+            RowCopy(rowSource, rowDest);
+            return rowDest;
+        }
+
+        /// <summary>
         /// Returns new data row.
         /// </summary>
-        internal static Row RowCreate(Type typeRow)
+        public static Row RowCreate(Type typeRow)
         {
             return (Row)UtilFramework.TypeToObject(typeRow);
+        }
+
+        /// <summary>
+        /// Returns new data row.
+        /// </summary>
+        public static TRowType RowCreate<TRowType>() where TRowType : Row
+        {
+            return (TRowType)RowCreate(typeof(TRowType));
         }
     }
 }
