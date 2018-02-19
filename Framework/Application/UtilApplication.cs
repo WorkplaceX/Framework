@@ -97,7 +97,7 @@
         /// <summary>
         /// Returns GridName or GridNameWithType as json string. In case of GridNameTypeRow type information gets lost!
         /// </summary>
-        internal static string ToJson(GridName gridName)
+        public static string ToJson(GridName gridName)
         {
             return gridName.Name;
         }
@@ -105,7 +105,7 @@
         /// <summary>
         /// Returns GridName loaded from json. It never returns a GridNameWithType object.
         /// </summary>
-        internal static GridName FromJson(string json)
+        public static GridName FromJson(string json)
         {
             GridName result = new GridName(null);
             result.Name = json;
@@ -289,6 +289,22 @@
         public override string ToString()
         {
             return base.ToString() + $" ({Value})";
+        }
+
+        /// <summary>
+        /// Serialize Index object.
+        /// </summary>
+        public static string ToJson(Index index)
+        {
+            return index.Value;
+        }
+
+        /// <summary>
+        /// Deserialize Index object.
+        /// </summary>
+        public static Index FromJson(string json)
+        {
+            return new Index(json);
         }
 
         public override int GetHashCode()
@@ -827,44 +843,12 @@
         }
 
         /// <summary>
-        /// Serialize GridName or GridNameWithType object.
-        /// </summary>
-        public static string GridNameToJson(GridName gridName)
-        {
-            return GridName.ToJson(gridName);
-        }
-
-        /// <summary>
-        /// Deserialize GridName. Always returns a GridName object. Never a GridNameWithType object.
-        /// </summary>
-        public static GridName GridNameFromJson(string json)
-        {
-            return GridName.FromJson(json);
-        }
-
-        /// <summary>
-        /// Serialize Index object.
-        /// </summary>
-        public static string IndexToJson(Index index)
-        {
-            return index.Value;
-        }
-
-        /// <summary>
-        /// Deserialize Index object.
-        /// </summary>
-        public static Index IndexFromJson(string json)
-        {
-            return new Index(json);
-        }
-
-        /// <summary>
         /// Serialize AppEventArg.
         /// </summary>
         public static string AppEventArgToJson(AppEventArg e)
         {
-            string gridNameJson = GridNameToJson(e.GridName);
-            string indexJson = IndexToJson(e.Index);
+            string gridNameJson = GridName.ToJson(e.GridName);
+            string indexJson = Index.ToJson(e.Index);
             string columnNameJson = e.ColumnName;
             //
             UtilFramework.Assert(!gridNameJson.Contains("-"));
@@ -884,8 +868,8 @@
             string indexJson = json.Split("-")[1];
             string columnNameJson = json.Split("-")[2];
             //
-            GridName gridName = GridNameFromJson(gridNameJson);
-            Index index = IndexFromJson(indexJson);
+            GridName gridName = GridName.FromJson(gridNameJson);
+            Index index = Index.FromJson(indexJson);
             string columnName = columnNameJson;
             //
             AppEventArg result = new AppEventArg(app, gridName, index, columnName);

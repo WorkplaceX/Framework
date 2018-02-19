@@ -252,15 +252,15 @@
 
         public static GridCell GridCellGet(AppJson appJson, GridName gridName, string columnName, Index index)
         {
-            string gridNameJson = UtilApplication.GridNameToJson(gridName);
-            string indexJson = UtilApplication.IndexToJson(index);
+            string gridNameJson = GridName.ToJson(gridName);
+            string indexJson = Index.ToJson(index);
             GridCell result = appJson.GridDataJson.CellList[gridNameJson][columnName][indexJson];
             return result;
         }
 
         public static GridColumn GridColumnGet(AppJson appJson, GridName gridName, string columnName)
         {
-            string gridNameJson = UtilApplication.GridNameToJson(gridName);
+            string gridNameJson = GridName.ToJson(gridName);
             GridColumn result = appJson.GridDataJson.ColumnList[gridNameJson].Where(item => item.ColumnName == columnName).First();
             return result;
         }
@@ -336,7 +336,7 @@
 
         private static void GridPageIndexNextClick(AppJson appJsonRequest, GridName gridName)
         {
-            string gridNameJson = UtilApplication.GridNameToJson(gridName);
+            string gridNameJson = GridName.ToJson(gridName);
             appJsonRequest.GridDataJson.GridQueryList[gridNameJson].IsPageIndexNext = true;
         }
 

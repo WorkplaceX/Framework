@@ -23,7 +23,7 @@ namespace Database.dbo
         protected internal override void ButtonIsClick(ref bool isReload, AppEventArg e)
         {
             Type type = UtilFramework.TypeFromName(Row.ComponentNameCSharp, e.App.TypeComponentInNamespaceList());
-            Grid grid = e.App.AppJson.ListAll().OfType<Grid>().Where(item => UtilApplication.GridNameFromJson(item.GridName) == new GridName<FrameworkCmsNavigationView>()).First();
+            Grid grid = e.App.AppJson.ListAll().OfType<Grid>().Where(item => GridName.FromJson(item.GridName) == new GridName<FrameworkCmsNavigationView>()).First();
             e.App.PageShow(grid.Owner(e.App.AppJson), type);
         }
     }
