@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.Component;
     using System;
+    using System.Linq;
 
     public class AppConfig : App
     {
@@ -33,17 +34,44 @@
         protected internal override void InitJson(App app)
         {
             new Literal(this) { TextHtml = "<h1>Navigation</h1>" };
-            new Grid(this, new GridName<FrameworkCmsNavigationView>());
-            app.PageShow<PageCmsNavigate>(this);
+            var div = new Div(this);
+            new Grid(div, new GridName<FrameworkCmsNavigationView>());
+            div = new Div(this);
+            new CmsNavigation(this);
         }
     }
 
-    public class PageCmsNavigate : Page
+    public class CmsNavigation : Div
     {
-        protected internal override void InitJson(App app)
+        public CmsNavigation() { }
+
+        public CmsNavigation(Component owner) 
+            : base(owner)
         {
-            new Button(this) { Text = "Hello" };
-            new GridFieldSingle(this);
+            new Div(this) { Name = "Navigation" };
+            new Div(this) { Name = "Content" };
+        }
+
+        public Div DivNavigation()
+        {
+            return List.OfType<Div>().Where(item => item.Name == "Navigation").First();
+        }
+
+        public Div DivContent()
+        {
+            return List.OfType<Div>().Where(item => item.Name == "Content").First();
+        }
+
+        protected internal override void RunEnd(App app)
+        {
+            Div divNavigation = DivNavigation();
+            divNavigation.List.Clear();
+            // new GridFieldSingle(divNavigation, new GridName<FrameworkCmsNavigationView>(), "Text", Index.Filter); // Search the navigation bar.
+            var indexList = app.GridData.IndexList(new GridName<FrameworkCmsNavigationView>()).Where(item => item.Enum == IndexEnum.Index);
+            foreach (Index index in indexList)
+            {
+                new GridFieldSingle(divNavigation, new GridName<FrameworkCmsNavigationView>(), "Button", index) { CssClass = "btnCmsNavigation" };
+            }
         }
     }
 }

@@ -172,11 +172,25 @@
     {
         public GridFieldSingle() { }
 
-        public GridFieldSingle(Component owner)
+        public GridFieldSingle(Component owner, GridName gridName, string columnName, Index index)
             : base(owner)
+        {
+            this.GridName = gridName == null ? null : Application.GridName.ToJson(gridName);
+            this.ColumnName = columnName;
+            this.Index = index == null ? null : Application.Index.ToJson(index);
+        }
+
+        public GridFieldSingle(Component owner) 
+            : this(owner, null, null, null)
         {
 
         }
+
+        public string GridName;
+
+        public string ColumnName;
+
+        public string Index;
     }
 
     /// <summary>
@@ -196,7 +210,7 @@
 
         public string Text;
 
-        public readonly string GridName;
+        public string GridName;
 
         public string ColumnName;
 
@@ -525,6 +539,16 @@
             : base(owner)
         {
             TypeSet(typeof(Div));
+        }
+
+        protected virtual internal void RunBegin(App app)
+        {
+
+        }
+
+        protected virtual internal void RunEnd(App app)
+        {
+
         }
     }
 

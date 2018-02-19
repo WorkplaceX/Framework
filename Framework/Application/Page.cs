@@ -26,15 +26,5 @@
         {
 
         }
-
-        protected virtual internal void RunBegin(App app)
-        {
-
-        }
-
-        protected virtual internal void RunEnd(App app)
-        {
-
-        }
     }
 }

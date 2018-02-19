@@ -114,29 +114,29 @@
     }
 
     /// <summary>
-    /// Call method Page.ProcessBegin(); at the begin of the process chain.
+    /// Call method Div.ProcessBegin(); at the begin of the process chain.
     /// </summary>
-    internal class ProcessPageBegin : Process
+    internal class ProcessDivBegin : Process
     {
         protected internal override void Run(App app)
         {
-            foreach (var page in app.AppJson.ListAll().OfType<Page>())
+            foreach (var div in app.AppJson.ListAll().OfType<Div>())
             {
-                page.RunBegin(app);
+                div.RunBegin(app);
             }
         }
     }
 
     /// <summary>
-    /// Call method Page.ProcessEnd(); at the End of the process chain.
+    /// Call method Div.ProcessEnd(); at the End of the process chain.
     /// </summary>
-    internal class ProcessPageEnd : Process
+    internal class ProcessDivEnd : Process
     {
         protected internal override void Run(App app)
         {
-            foreach (var page in app.AppJson.ListAll().OfType<Page>())
+            foreach (var div in app.AppJson.ListAll().OfType<Div>())
             {
-                page.RunEnd(app);
+                div.RunEnd(app);
             }
         }
     }

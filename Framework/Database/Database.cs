@@ -5,6 +5,7 @@ using Framework.DataAccessLayer;
 using System.Linq;
 using Framework.Component;
 using Framework;
+using Framework.Application.Config;
 
 namespace Database.dbo
 {
@@ -17,14 +18,27 @@ namespace Database.dbo
 
         protected internal override void RowValueToText(ref string result, AppEventArg e)
         {
-            result = "Button (" + Row.Text + ")";
+            result = Row.Text;
         }
 
         protected internal override void ButtonIsClick(ref bool isReload, AppEventArg e)
         {
             Type type = UtilFramework.TypeFromName(Row.ComponentNameCSharp, e.App.TypeComponentInNamespaceList());
-            Grid grid = e.App.AppJson.ListAll().OfType<Grid>().Where(item => GridName.FromJson(item.GridName) == new GridName<FrameworkCmsNavigationView>()).First();
-            e.App.PageShow(grid.Owner(e.App.AppJson), type);
+            Div divContent = e.App.AppJson.ListAll().OfType<CmsNavigation>().First().DivContent();
+            if (type == null)
+            {
+                divContent.List.Clear();
+            }
+            if (UtilFramework.IsSubclassOf(type, typeof(Page)))
+            {
+                e.App.PageShow(divContent, type);
+            }
+            else
+            {
+                divContent.List.Clear();
+                Component component = (Component)UtilFramework.TypeToObject(type);
+                component.Constructor(divContent, null);
+            }
         }
     }
 
@@ -52,6 +66,11 @@ namespace Database.dbo
             Id = UtilDataAccessLayer.Insert(rowNewNavigation).Id; // Write to table. Not to view.
             //
             Reload();
+        }
+
+        protected internal override IQueryable Query(App app, GridName gridName)
+        {
+            return UtilDataAccessLayer.Query<FrameworkCmsNavigationView>().OrderBy(item => item.Text);
         }
 
         [SqlColumn(null, typeof(FrameworkCmsNavigationView_Button))]

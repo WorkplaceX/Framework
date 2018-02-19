@@ -103,7 +103,7 @@ export class GridFieldWithLabel {
   selector: '[data-GridFieldSingle]',
   template: `
   <div [ngClass]="json.CssClass" data-RemoveSelector>
-    <div data-GridField></div>
+    <div data-GridField [gridName]=json.GridName [columnName]=json.ColumnName [index]=json.Index></div>
   </div>  
 `
 })

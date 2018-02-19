@@ -352,7 +352,7 @@
         /// </summary>
         internal virtual void ProcessInit(ProcessList processList)
         {
-            processList.Add<ProcessPageBegin>();
+            processList.Add<ProcessDivBegin>();
             // Grid
             {
                 processList.Add<ProcessGridIsClick>(); // Needs to run before ProcessGridLoadJson. It prepares the data.
@@ -379,7 +379,7 @@
             //
             processList.Add<ProcessButtonIsClickFalse>();
             processList.Add<ProcessLayout>();
-            processList.Add<ProcessPageEnd>();
+            processList.Add<ProcessDivEnd>();
         }
 
         /// <summary>

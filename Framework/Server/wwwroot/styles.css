@@ -13,20 +13,35 @@ input {
     outline: 0;
 }
 
+.inline {
+    display:inline-block;
+}
+
+.btnCmsNavigation {
+    display: inline-block;
+    margin: 3px;
+}
+
+.btnCmsNavigation > div > div > button {
+    padding: 5px;
+    background-color: #7CB1CC
+}
+
+
 .btn {
     background: #AECFFF;
     border: 0px;
     padding: 0;
 }
 
-    .btn:hover {
-        background: #8ccfed;
-        cursor: pointer;
-    }
+.btn:hover {
+    background: #8ccfed;
+    cursor: pointer;
+}
 
-    .btn:focus {
-        outline: 0;
-    }
+.btn:focus {
+    outline: 0;
+}
 
 img {
     width: 100%

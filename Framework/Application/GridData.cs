@@ -653,9 +653,12 @@
         /// </summary>
         public void LoadDatabaseInit(GridNameWithType gridName)
         {
-            QueryInternalCreate(gridName);
-            List<Row> rowList = new List<Row>();
-            LoadRow(gridName, rowList);
+            if (!QueryInternalIsExist(gridName)) // Init only if it does not yet exist. For example if method App.PageShow(); is called again.
+            {
+                QueryInternalCreate(gridName);
+                List<Row> rowList = new List<Row>();
+                LoadRow(gridName, rowList);
+            }
         }
 
         /// <summary>
