@@ -98,17 +98,17 @@
             return result;
         }
 
-        private void Owner(Component component, ref Component result)
+        private void Owner(Component componentTop, Component componentSearch, ref Component result)
         {
-            if (component.List.Contains(this))
+            if (componentTop.List.Contains(componentSearch))
             {
-                result = component;
+                result = componentTop; // Owner
             }
-            if (result != null)
+            if (result == null)
             {
-                foreach (var item in List)
+                foreach (var item in componentTop.List)
                 {
-                    item.Owner(component, ref result);
+                    item.Owner(item, componentSearch, ref result);
                     if (result != null)
                     {
                         break;
@@ -120,11 +120,11 @@
         /// <summary>
         /// Returns owner of this json component.
         /// </summary>
-        /// <param name="component">Component to start search from top to down.</param>
-        public Component Owner(Component component)
+        /// <param name="componentTop">Component to start search from top to down.</param>
+        public Component Owner(Component componentTop)
         {
             Component result = null;
-            Owner(component, ref result);
+            Owner(componentTop, this, ref result);
             return result;
         }
     }

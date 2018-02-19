@@ -136,7 +136,7 @@
         {
             foreach (var page in app.AppJson.ListAll().OfType<Page>())
             {
-                page.RunEnd();
+                page.RunEnd(app);
             }
         }
     }

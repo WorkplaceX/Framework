@@ -252,10 +252,19 @@
                 if (isPrimaryKey == false)
                 {
                     // No primary key defined. For example View. In order to prevent NullException when inserting row,
-                    // set artificial "Primary Key" on first column. See also method UtilDataAccessLayer.Insert();
-                    PropertyInfo propertyInfo = propertyInfoList.First();
-                    entity.HasKey(propertyInfo.Name);
-                    entity.Property(propertyInfo.Name).ValueGeneratedOnAdd(); // Read back auto increment key value. // Applies also to InMemory Rows.
+                    // set artificial "Primary Key" on first column (not calculated column). See also method UtilDataAccessLayer.Insert();
+                    PropertyInfo propertyInfoFirst = null;
+                    foreach (PropertyInfo propertyInfo in propertyInfoList)
+                    {
+                        SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
+                        if (columnAttribute != null && columnAttribute.SqlColumnName != null)
+                        {
+                            propertyInfoFirst = propertyInfo;
+                            break;
+                        }
+                    }
+                    entity.HasKey(propertyInfoFirst.Name);
+                    entity.Property(propertyInfoFirst.Name).ValueGeneratedOnAdd(); // Read back auto increment key value. // Applies also to InMemory Rows.
                 }
             }
             var model = builder.Model;

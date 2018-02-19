@@ -4,9 +4,30 @@ using Framework.Application;
 using Framework.DataAccessLayer;
 using System.Linq;
 using Framework.Component;
+using Framework;
 
 namespace Database.dbo
 {
+    public partial class FrameworkCmsNavigationView_Button : Cell<FrameworkCmsNavigationView>
+    {
+        protected internal override void ConfigCell(ConfigCell result, AppEventArg e)
+        {
+            result.CellEnum = GridCellEnum.Button;
+        }
+
+        protected internal override void RowValueToText(ref string result, AppEventArg e)
+        {
+            result = "Button (" + Row.Text + ")";
+        }
+
+        protected internal override void ButtonIsClick(ref bool isReload, AppEventArg e)
+        {
+            Type type = UtilFramework.TypeFromName(Row.ComponentNameCSharp, e.App.TypeComponentInNamespaceList());
+            Grid grid = e.App.AppJson.ListAll().OfType<Grid>().Where(item => UtilApplication.GridNameFromJson(item.GridName) == new GridName<FrameworkCmsNavigationView>()).First();
+            e.App.PageShow(grid.Owner(e.App.AppJson), type);
+        }
+    }
+
     public partial class FrameworkCmsNavigationView
     {
         private void Reload()
@@ -32,6 +53,9 @@ namespace Database.dbo
             //
             Reload();
         }
+
+        [SqlColumn(null, typeof(FrameworkCmsNavigationView_Button))]
+        public string Button { get; set; }
     }
 
     public partial class FrameworkCmsNavigationView_ComponentNameCSharp : Cell<FrameworkCmsNavigationView>
