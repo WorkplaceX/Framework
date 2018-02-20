@@ -355,8 +355,8 @@
             processList.Add<ProcessDivBegin>();
             // Grid
             {
-                processList.Add<ProcessGridIsClick>(); // Needs to run before ProcessGridLoadJson. It prepares the data.
-                processList.Add<ProcessGridLoadJson>(); // LoadJson
+                processList.Add<ProcessGridIsClick>(); // Needs to run before ProcessGridLoadDatabase. It prepares the data.
+                processList.Add<ProcessGridLoadDatabase>(); 
                 processList.Add<ProcessGridOrderBy>();
                 processList.Add<ProcessGridPageIndex>();
                 processList.Add<ProcessGridTextParse>();
@@ -367,6 +367,7 @@
                 processList.Add<ProcessGridLookupOpen>();
                 processList.Add<ProcessGridCellButtonIsClick>();
                 processList.Add<ProcessGridRowSelectFirst>();
+                processList.Add<ProcessNavigationButtonIsClickFirst>();
                 processList.Add<ProcessGridIsInsert>();
                 processList.Add<ProcessGridSaveJson>(); // SaveJson
                 processList.Add<ProcessGridOrderByText>();

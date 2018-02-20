@@ -162,14 +162,6 @@
         }
 
         /// <summary>
-        /// Returns list of loaded row index.
-        /// </summary>
-        internal List<Index> IndexList(GridName gridName)
-        {
-            return new List<Index>(rowList[gridName].Keys);
-        }
-
-        /// <summary>
         /// Returns TypeRow of loaded data. (Works also if load selected no rows).
         /// </summary>
         internal Type TypeRow(GridName gridName)
@@ -217,6 +209,14 @@
             return result;
         }
 
+        /// <summary>
+        /// Returns list of loaded row index.
+        /// </summary>
+        internal List<Index> RowIndexList(GridName gridName)
+        {
+            return new List<Index>(rowList[gridName].Keys);
+        }
+        
         /// <summary>
         /// Returns data row.
         /// </summary>
@@ -576,7 +576,7 @@
         /// <summary>
         /// Returns true, if data row contains text parse error.
         /// </summary>
-        private bool IsErrorRowCell(GridName gridName, Index index)
+        internal bool IsErrorRowCell(GridName gridName, Index index)
         {
             bool result = false;
             if (cellList[gridName].ContainsKey(index))

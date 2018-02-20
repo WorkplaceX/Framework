@@ -185,10 +185,11 @@ CREATE TABLE FrameworkComponent
 (
 	Id INT PRIMARY KEY IDENTITY,
 	ComponentNameCSharp NVARCHAR(256)  NOT NULL,
+	IsPage BIT NOT NULL, /* Derives from Page */
 	IsExist BIT NOT NULL
 )
 
-CREATE TABLE FrameworkCmsNavigation
+CREATE TABLE FrameworkNavigation
 (
 	Id INT PRIMARY KEY IDENTITY,
   	Text NVARCHAR(256),
@@ -197,13 +198,13 @@ CREATE TABLE FrameworkCmsNavigation
 
 GO
 
-CREATE VIEW FrameworkCmsNavigationView AS
+CREATE VIEW FrameworkNavigationView AS
 SELECT
 	Navigation.Id AS Id,
 	Navigation.Text AS Text,
 	Navigation.ComponentId,
 	Component.ComponentNameCSharp
 FROM
-	FrameworkCmsNavigation Navigation
+	FrameworkNavigation Navigation
 LEFT JOIN
 	FrameworkComponent Component ON (Component.Id = Navigation.ComponentId)

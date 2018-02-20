@@ -9,7 +9,7 @@ using Framework.Application.Config;
 
 namespace Database.dbo
 {
-    public partial class FrameworkCmsNavigationView_Button : Cell<FrameworkCmsNavigationView>
+    public partial class FrameworkNavigationView_Button : Cell<FrameworkNavigationView>
     {
         protected internal override void ConfigCell(ConfigCell result, AppEventArg e)
         {
@@ -23,37 +23,25 @@ namespace Database.dbo
 
         protected internal override void ButtonIsClick(ref bool isReload, AppEventArg e)
         {
-            Type type = UtilFramework.TypeFromName(Row.ComponentNameCSharp, e.App.TypeComponentInNamespaceList());
-            Div divContent = e.App.AppJson.ListAll().OfType<CmsNavigation>().First().DivContent();
-            if (type == null)
+            foreach (Navigation navigation in e.App.AppJson.ListAll().OfType<Navigation>())
             {
-                divContent.List.Clear();
-            }
-            if (UtilFramework.IsSubclassOf(type, typeof(Page)))
-            {
-                e.App.PageShow(divContent, type);
-            }
-            else
-            {
-                divContent.List.Clear();
-                Component component = (Component)UtilFramework.TypeToObject(type);
-                component.Constructor(divContent, null);
+                navigation.ButtonIsClick(e);
             }
         }
     }
 
-    public partial class FrameworkCmsNavigationView
+    public partial class FrameworkNavigationView
     {
         private void Reload()
         {
-            var row = UtilDataAccessLayer.Query<FrameworkCmsNavigationView>().Where(item => item.Id == Id).Single();
+            var row = UtilDataAccessLayer.Query<FrameworkNavigationView>().Where(item => item.Id == Id).Single();
             UtilDataAccessLayer.RowCopy(row, this);
         }
 
         protected internal override void Update(Row row, Row rowNew, AppEventArg e)
         {
-            var rowNavigation = UtilDataAccessLayer.RowCopy<FrameworkCmsNavigation>(row);
-            var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkCmsNavigation>(rowNew);
+            var rowNavigation = UtilDataAccessLayer.RowCopy<FrameworkNavigation>(row);
+            var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkNavigation>(rowNew);
             UtilDataAccessLayer.Update(rowNavigation, rowNewNavigation); // Write to table. Not to view.
             //
             Reload();
@@ -61,8 +49,8 @@ namespace Database.dbo
 
         protected internal override void Insert(Row rowNew, AppEventArg e)
         {
-            var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkCmsNavigation>(rowNew);
-            rowNewNavigation.ComponentId = ((FrameworkCmsNavigationView)rowNew).ComponentId;
+            var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkNavigation>(rowNew);
+            rowNewNavigation.ComponentId = ((FrameworkNavigationView)rowNew).ComponentId;
             Id = UtilDataAccessLayer.Insert(rowNewNavigation).Id; // Write to table. Not to view.
             //
             Reload();
@@ -70,14 +58,14 @@ namespace Database.dbo
 
         protected internal override IQueryable Query(App app, GridName gridName)
         {
-            return UtilDataAccessLayer.Query<FrameworkCmsNavigationView>().OrderBy(item => item.Text);
+            return UtilDataAccessLayer.Query<FrameworkNavigationView>().OrderBy(item => item.Text);
         }
 
-        [SqlColumn(null, typeof(FrameworkCmsNavigationView_Button))]
+        [SqlColumn(null, typeof(FrameworkNavigationView_Button))]
         public string Button { get; set; }
     }
 
-    public partial class FrameworkCmsNavigationView_ComponentNameCSharp : Cell<FrameworkCmsNavigationView>
+    public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationView>
     {
         protected internal override void Lookup(out GridNameWithType gridName, out IQueryable query)
         {
@@ -115,10 +103,21 @@ namespace Database.dbo
                 string textLocal = text;
                 var query = UtilDataAccessLayer.Query<FrameworkComponent>().Where(item => item.ComponentNameCSharp.Contains(textLocal)).Take(2);
                 var rowComponentList = query.ToArray();
-                if (rowComponentList.Length == 1 && isDeleteKey == false)
+                if (rowComponentList.Length == 1)
                 {
-                    Row.ComponentId = rowComponentList[0].Id;
-                    text = rowComponentList[0].ComponentNameCSharp;
+                    if (isDeleteKey == true)
+                    {
+                        if (rowComponentList[0].ComponentNameCSharp != text)
+                        {
+                            throw new Exception("Component not found!");
+                        }
+                    }
+                    else
+                    { 
+                        // Auto Complete
+                        Row.ComponentId = rowComponentList[0].Id;
+                        text = rowComponentList[0].ComponentNameCSharp;
+                    }
                     base.TextParse(ref text, isDeleteKey, e);
                 }
                 else

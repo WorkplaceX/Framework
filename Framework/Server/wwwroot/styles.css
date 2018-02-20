@@ -17,12 +17,12 @@ input {
     display:inline-block;
 }
 
-.btnCmsNavigation {
+.btnNavigation {
     display: inline-block;
-    margin: 3px;
+    margin-right: 3px;
 }
 
-.btnCmsNavigation > div > div > button {
+.btnNavigation > div > div > button {
     padding: 5px;
     background-color: #7CB1CC
 }

@@ -1,5 +1,6 @@
 ﻿namespace Framework.Application
 {
+    using Framework.Application.Config;
     using Framework.Component;
     using Framework.DataAccessLayer;
     using System;
@@ -157,9 +158,9 @@
     }
 
     /// <summary>
-    /// Load from json.
+    /// Load grid from database where not yet loaded.
     /// </summary>
-    internal class ProcessGridLoadJson : Process
+    internal class ProcessGridLoadDatabase : Process
     {
         protected internal override void Run(App app)
         {
@@ -273,14 +274,25 @@
                 Index index = gridData.RowSelectedIndex(gridName);
                 if (index == null)
                 {
-                    Index indexFirst = gridData.IndexList(gridName).Where(item => item.Enum == IndexEnum.Index).FirstOrDefault();
+                    Index indexFirst = gridData.RowIndexList(gridName).Where(item => item.Enum == IndexEnum.Index).FirstOrDefault();
                     if (indexFirst == null)
                     {
-                        indexFirst = gridData.IndexList(gridName).Where(item => item.Enum == IndexEnum.New).FirstOrDefault();
+                        indexFirst = gridData.RowIndexList(gridName).Where(item => item.Enum == IndexEnum.New).FirstOrDefault();
                     }
                     Row rowSelect = gridData.RowSelect(gridName, indexFirst);
                     ProcessGridIsClickMasterDetail.MasterDetailIsClick(app, gridName, rowSelect);
                 }
+            }
+        }
+    }
+
+    internal class ProcessNavigationButtonIsClickFirst : Process
+    {
+        protected internal override void Run(App app)
+        {
+            foreach (Navigation navigation in app.AppJson.ListAll().OfType<Navigation>())
+            {
+                navigation.ProcessButtonIsClickFirst(app);
             }
         }
     }

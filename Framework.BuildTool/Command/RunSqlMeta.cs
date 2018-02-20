@@ -252,17 +252,17 @@
                     EXCEPT
                     SELECT Target.ComponentNameCSharp)
             WHEN MATCHED THEN
-	            UPDATE SET Target.IsExist = 1
+	            UPDATE SET Target.IsPage = Source.IsPage, Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (ComponentNameCSharp, IsExist)
-	            VALUES (Source.ComponentNameCSharp, 1);
+	            INSERT (ComponentNameCSharp, IsPage, IsExist)
+	            VALUES (Source.ComponentNameCSharp, Source.IsPage, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
-            List<Type> typePageList = UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(Component));
-            foreach (Type typePage in typePageList)
+            List<Type> typeComponentList = UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(Component));
+            foreach (Type typeComponent in typeComponentList)
             {
-                string componentNameCSharp = UtilFramework.TypeToName(typePage);
+                string componentNameCSharp = UtilFramework.TypeToName(typeComponent);
                 if (isFirst)
                 {
                     isFirst = false;
@@ -271,7 +271,8 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlSelect.Append(string.Format("SELECT '{0}' AS ComponentNameCSharp", componentNameCSharp));
+                bool isPage = UtilFramework.IsSubclassOf(typeComponent, typeof(Page));
+                sqlSelect.Append(string.Format("SELECT '{0}' AS ComponentNameCSharp, {1} AS IsPage", componentNameCSharp, isPage ? 1 : 0));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true);

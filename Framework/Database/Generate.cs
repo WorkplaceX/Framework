@@ -93,49 +93,6 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_IsActive : Cell<FrameworkApplicationView> { }
 
-    [SqlTable("dbo", "FrameworkCmsNavigation")]
-    public partial class FrameworkCmsNavigation : Row
-    {
-        [SqlColumn("Id", typeof(FrameworkCmsNavigation_Id), true)]
-        public int Id { get; set; }
-
-        [SqlColumn("Text", typeof(FrameworkCmsNavigation_Text))]
-        public string Text { get; set; }
-
-        [SqlColumn("ComponentId", typeof(FrameworkCmsNavigation_ComponentId))]
-        public int? ComponentId { get; set; }
-    }
-
-    public partial class FrameworkCmsNavigation_Id : Cell<FrameworkCmsNavigation> { }
-
-    public partial class FrameworkCmsNavigation_Text : Cell<FrameworkCmsNavigation> { }
-
-    public partial class FrameworkCmsNavigation_ComponentId : Cell<FrameworkCmsNavigation> { }
-
-    [SqlTable("dbo", "FrameworkCmsNavigationView")]
-    public partial class FrameworkCmsNavigationView : Row
-    {
-        [SqlColumn("Id", typeof(FrameworkCmsNavigationView_Id))]
-        public int Id { get; set; }
-
-        [SqlColumn("Text", typeof(FrameworkCmsNavigationView_Text))]
-        public string Text { get; set; }
-
-        [SqlColumn("ComponentId", typeof(FrameworkCmsNavigationView_ComponentId))]
-        public int? ComponentId { get; set; }
-
-        [SqlColumn("ComponentNameCSharp", typeof(FrameworkCmsNavigationView_ComponentNameCSharp))]
-        public string ComponentNameCSharp { get; set; }
-    }
-
-    public partial class FrameworkCmsNavigationView_Id : Cell<FrameworkCmsNavigationView> { }
-
-    public partial class FrameworkCmsNavigationView_Text : Cell<FrameworkCmsNavigationView> { }
-
-    public partial class FrameworkCmsNavigationView_ComponentId : Cell<FrameworkCmsNavigationView> { }
-
-    public partial class FrameworkCmsNavigationView_ComponentNameCSharp : Cell<FrameworkCmsNavigationView> { }
-
     [SqlTable("dbo", "FrameworkColumn")]
     public partial class FrameworkColumn : Row
     {
@@ -174,6 +131,9 @@ namespace Database.dbo
         [SqlColumn("ComponentNameCSharp", typeof(FrameworkComponent_ComponentNameCSharp))]
         public string ComponentNameCSharp { get; set; }
 
+        [SqlColumn("IsPage", typeof(FrameworkComponent_IsPage))]
+        public bool IsPage { get; set; }
+
         [SqlColumn("IsExist", typeof(FrameworkComponent_IsExist))]
         public bool IsExist { get; set; }
     }
@@ -181,6 +141,8 @@ namespace Database.dbo
     public partial class FrameworkComponent_Id : Cell<FrameworkComponent> { }
 
     public partial class FrameworkComponent_ComponentNameCSharp : Cell<FrameworkComponent> { }
+
+    public partial class FrameworkComponent_IsPage : Cell<FrameworkComponent> { }
 
     public partial class FrameworkComponent_IsExist : Cell<FrameworkComponent> { }
 
@@ -576,6 +538,49 @@ namespace Database.dbo
     public partial class FrameworkGrid_GridName : Cell<FrameworkGrid> { }
 
     public partial class FrameworkGrid_IsExist : Cell<FrameworkGrid> { }
+
+    [SqlTable("dbo", "FrameworkNavigation")]
+    public partial class FrameworkNavigation : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkNavigation_Id), true)]
+        public int Id { get; set; }
+
+        [SqlColumn("Text", typeof(FrameworkNavigation_Text))]
+        public string Text { get; set; }
+
+        [SqlColumn("ComponentId", typeof(FrameworkNavigation_ComponentId))]
+        public int? ComponentId { get; set; }
+    }
+
+    public partial class FrameworkNavigation_Id : Cell<FrameworkNavigation> { }
+
+    public partial class FrameworkNavigation_Text : Cell<FrameworkNavigation> { }
+
+    public partial class FrameworkNavigation_ComponentId : Cell<FrameworkNavigation> { }
+
+    [SqlTable("dbo", "FrameworkNavigationView")]
+    public partial class FrameworkNavigationView : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkNavigationView_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("Text", typeof(FrameworkNavigationView_Text))]
+        public string Text { get; set; }
+
+        [SqlColumn("ComponentId", typeof(FrameworkNavigationView_ComponentId))]
+        public int? ComponentId { get; set; }
+
+        [SqlColumn("ComponentNameCSharp", typeof(FrameworkNavigationView_ComponentNameCSharp))]
+        public string ComponentNameCSharp { get; set; }
+    }
+
+    public partial class FrameworkNavigationView_Id : Cell<FrameworkNavigationView> { }
+
+    public partial class FrameworkNavigationView_Text : Cell<FrameworkNavigationView> { }
+
+    public partial class FrameworkNavigationView_ComponentId : Cell<FrameworkNavigationView> { }
+
+    public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationView> { }
 
     [SqlTable("dbo", "FrameworkScript")]
     public partial class FrameworkScript : Row
