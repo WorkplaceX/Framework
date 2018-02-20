@@ -32,6 +32,8 @@ namespace Database.dbo
 
     public partial class FrameworkNavigationView
     {
+        public static GridNameWithType GridNameConfig = new GridName<FrameworkNavigationView>("Config");
+
         private void Reload()
         {
             var row = UtilDataAccessLayer.Query<FrameworkNavigationView>().Where(item => item.Id == Id).Single();

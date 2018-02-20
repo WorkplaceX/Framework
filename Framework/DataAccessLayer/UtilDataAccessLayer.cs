@@ -642,6 +642,30 @@
         }
 
         /// <summary>
+        /// Returns true, if row and rowNew have different values.
+        /// </summary>
+        internal static bool RowIsModify(Row row, Row rowNew)
+        {
+            UtilFramework.Assert(row.GetType() == rowNew.GetType());
+            //
+            bool result = false;
+            var propertyInfoDestList = UtilDataAccessLayer.TypeRowToPropertyList(row.GetType());
+            foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
+            {
+                string columnName = propertyInfoDest.Name;
+                PropertyInfo propertyInfoSource = row.GetType().GetTypeInfo().GetProperty(columnName);
+                object value = propertyInfoSource.GetValue(row);
+                object valueNew = propertyInfoSource.GetValue(rowNew);
+                if (!object.Equals(value, valueNew))
+                {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Copy data row. Source and dest need not to be of same type. Only cells available on
         /// both records are copied. See also RowClone();
         /// </summary>

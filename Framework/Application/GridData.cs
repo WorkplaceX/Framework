@@ -633,6 +633,7 @@
             {
                 Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
                 query = rowTable.Query(App, gridName);
+                App.RowQuery(ref query, gridName);
             }
             else
             {
@@ -904,16 +905,19 @@
                                 var row = rowList[gridName][index];
                                 if (indexEnum == IndexEnum.Index) // Database Update
                                 {
-                                    try
+                                    if (UtilDataAccessLayer.RowIsModify(row.Row, row.RowNew)) // For example if button has been clicked, but no data has been modifed.
                                     {
-                                        row.RowNew.Update(row.Row, row.RowNew, new AppEventArg(App, gridName, index, null));
-                                        ErrorRowSet(gridName, index, null);
-                                        row.Row = row.RowNew;
-                                        CellTextClear(gridName, index);
-                                    }
-                                    catch (Exception exception)
-                                    {
-                                        ErrorRowSet(gridName, index, UtilFramework.ExceptionToText(exception));
+                                        try
+                                        {
+                                            row.RowNew.Update(row.Row, row.RowNew, new AppEventArg(App, gridName, index, null));
+                                            ErrorRowSet(gridName, index, null);
+                                            row.Row = row.RowNew;
+                                            CellTextClear(gridName, index);
+                                        }
+                                        catch (Exception exception)
+                                        {
+                                            ErrorRowSet(gridName, index, UtilFramework.ExceptionToText(exception));
+                                        }
                                     }
                                 }
                                 if (indexEnum == IndexEnum.New) // Database Insert

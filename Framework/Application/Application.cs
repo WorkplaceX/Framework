@@ -280,6 +280,14 @@
         }
 
         /// <summary>
+        /// Called after method Row.Query(); Used to override default Row query.
+        /// </summary>
+        protected virtual internal void RowQuery(ref IQueryable result, GridName gridName)
+        {
+
+        }
+
+        /// <summary>
         /// Process AppJson request and return AppJson response.
         /// </summary>
         /// <param name="appJson">AppJson request. (POST)</param>
