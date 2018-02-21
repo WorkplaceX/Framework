@@ -28,7 +28,7 @@ namespace Framework
             get
             {
                 // .NET Core 2.0
-                return "v1.101 Server";
+                return "v1.102 Server";
             }
         }
 

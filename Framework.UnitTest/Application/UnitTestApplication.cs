@@ -46,7 +46,7 @@
         {
             Emulate.Process(out App app, out AppJson appJson);
             Guid? sessionOne = appJson.Session;
-            // User enters "X" text.
+            // User enters "X2" text.
             Emulate.GridCellTextSet(appJson, out app, out appJson, MyRow.GridName, "Text", Index.Row(0), "X2");
 
             // Read back from new session
@@ -384,7 +384,7 @@ namespace Database.UnitTest.Application
     {
         public static GridNameWithType GridName = new GridName<MyRow>();
 
-        [SqlColumn(null, null, true)]
+        [SqlColumn("Id", null, true)]
         public int Id { get; set; }
 
         [SqlColumn("Text", typeof(MyRow_Text))]

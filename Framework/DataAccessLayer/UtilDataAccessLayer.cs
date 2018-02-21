@@ -235,12 +235,16 @@
                     SqlColumnAttribute columnAttribute = (SqlColumnAttribute)propertyInfo.GetCustomAttribute(typeof(SqlColumnAttribute));
                     if (columnAttribute == null || columnAttribute.SqlColumnName == null) // Calculated column. Do not include it in sql select. For example button added to row.
                     {
+                        if (columnAttribute != null && columnAttribute.IsPrimaryKey)
+                        {
+                            throw new Exception("Primary key can not be calculated!");
+                        }
                         entity.Ignore(propertyInfo.Name);
                     }
                     else
                     {
                         // Primary key
-                        if (columnAttribute == null || columnAttribute.IsPrimaryKey)
+                        if (columnAttribute != null && columnAttribute.IsPrimaryKey)
                         {
                             isPrimaryKey = true;
                             entity.HasKey(propertyInfo.Name);
@@ -262,6 +266,10 @@
                             propertyInfoFirst = propertyInfo;
                             break;
                         }
+                    }
+                    if (propertyInfoFirst == null)
+                    {
+                        propertyInfoFirst = propertyInfoList.First(); // No artificial primary key found! For example calculated rows (views) which read only and do not write back.
                     }
                     entity.HasKey(propertyInfoFirst.Name);
                     entity.Property(propertyInfoFirst.Name).ValueGeneratedOnAdd(); // Read back auto increment key value. // Applies also to InMemory Rows.

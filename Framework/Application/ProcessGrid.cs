@@ -158,7 +158,7 @@
     }
 
     /// <summary>
-    /// Load grid from database where not yet loaded.
+    /// Load grid from database where not yet loaded. Prevents load of GridConfig multiple times!
     /// </summary>
     internal class ProcessGridLoadDatabase : Process
     {
@@ -179,7 +179,7 @@
                 if (app.GridData.TypeRow(gridNameWithType) == null) // Not yet loaded.
                 {
                     app.GridData.QueryInternalCreate(gridNameWithType);
-                    app.GridData.LoadDatabase(gridNameWithType); // Keeps method LoadDatabase(); internal.
+                    app.GridData.LoadDatabase(gridNameWithType); // Keeps method LoadDatabase(); internal and prevents load of GridConfig multiple times.
                 }
             }
         }
