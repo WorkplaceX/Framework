@@ -170,15 +170,15 @@
         }
 
         /// <summary>
-        /// Returns GridNameWithType. This is GridName with TypeRow definition.
+        /// Returns GridNameType. This is GridName with TypeRow definition.
         /// </summary>
-        internal GridNameWithType GridNameWithType(GridName gridName)
+        internal GridNameType GridNameType(GridName gridName)
         {
-            GridNameWithType result = null;
+            GridNameType result = null;
             Type typeRow = TypeRow(gridName);
             if (typeRow != null)
             {
-                result = new GridNameWithType(typeRow, gridName);
+                result = new GridNameType(typeRow, gridName);
             }
             return result;
         }
@@ -198,13 +198,13 @@
             return result;
         }
 
-        internal List<GridNameWithType> GridNameWithType()
+        internal List<GridNameType> GridNameType()
         {
-            List<GridNameWithType> result = new List<GridNameWithType>();
+            List<GridNameType> result = new List<GridNameType>();
             foreach (var item in typeRowList)
             {
-                GridNameWithType gridNameWithType = new GridNameWithType(item.Value, item.Key);
-                result.Add(gridNameWithType);
+                GridNameType gridNameType = new GridNameType(item.Value, item.Key);
+                result.Add(gridNameType);
             }
             return result;
         }
@@ -318,7 +318,7 @@
         /// </summary>
         private Dictionary<GridName, GridQueryInternal> queryList = new Dictionary<GridName, GridQueryInternal>();
 
-        internal void QueryInternalCreate(GridNameWithType gridName)
+        internal void QueryInternalCreate(GridNameType gridName)
         {
             UtilFramework.LogDebug("QueryCreate " + gridName.Name);
             //
@@ -626,7 +626,7 @@
         /// Load data from Sql database.
         /// </summary>
         /// <param name="gridName"></param>
-        internal void LoadDatabase(GridNameWithType gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, IQueryable queryLookup)
+        internal void LoadDatabase(GridNameType gridName, List<Filter> filterList, string columnNameOrderBy, bool isOrderByDesc, IQueryable queryLookup)
         {
             IQueryable query;
             if (queryLookup == null)
@@ -652,7 +652,7 @@
         /// <summary>
         /// Use this method for detail grid. See also method Row.MasterIsClick();
         /// </summary>
-        public void LoadDatabaseInit(GridNameWithType gridName)
+        public void LoadDatabaseInit(GridNameType gridName)
         {
             if (!QueryInternalIsExist(gridName)) // Init only if it does not yet exist. For example if method App.PageShow(); is called again.
             {
@@ -665,7 +665,7 @@
         /// <summary>
         /// Load data from Sql database.
         /// </summary>
-        internal void LoadDatabase(GridNameWithType gridName)
+        internal void LoadDatabase(GridNameType gridName)
         {
             LoadDatabase(gridName, null, null, false, null);
         }
@@ -738,7 +738,7 @@
                         LoadDatabaseFilterList(gridName, out filterList, isExcludeCalculatedColumn);
                     }
                     Config.LoadDatabaseConfig(gridName);
-                    int pageRowCount = Config.ConfigGridGet(GridNameWithType(gridName)).PageRowCount;
+                    int pageRowCount = Config.ConfigGridGet(GridNameType(gridName)).PageRowCount;
                     rowList = UtilDataAccessLayer.Select(typeRow, filterList, columnNameOrderBy, isOrderByDesc, pageIndex, pageRowCount, query);
                     if (pageIndex > 0 && rowList.Count == 0) // Page end reached.
                     {
@@ -747,14 +747,14 @@
                         rowList = UtilDataAccessLayer.Select(typeRow, filterList, columnNameOrderBy, isOrderByDesc, pageIndex, 15, query);
                     }
                 }
-                LoadRow(new GridNameWithType(typeRow, gridName), rowList);
+                LoadRow(new GridNameType(typeRow, gridName), rowList);
             }
         }
 
         /// <summary>
         /// Load data directly from list into data grid. Returns false, if data grid has been removed.
         /// </summary>
-        internal void LoadRow(GridNameWithType gridName, List<Row> rowList)
+        internal void LoadRow(GridNameType gridName, List<Row> rowList)
         {
             // Debug.WriteLine(""); Debug.WriteLine(DateTime.Now.Ticks + " " + gridName.Name + " " + "(" + rowList.Count + ")"); Debug.WriteLine("");
             foreach (Row row in rowList)
@@ -1064,9 +1064,9 @@
             {
                 GridQuery gridQueryJson = gridDataJson.GridQueryList[gridName];
                 Type typeRow = UtilDataAccessLayer.TypeRowFromTableNameCSharp(gridQueryJson.TypeRow, app.GetType());
-                GridNameWithType gridNameWithType = new GridNameWithType(typeRow, gridName, true);
-                QueryInternalCreate(gridNameWithType);
-                GridQueryInternal gridQuery = QueryInternalGet(gridNameWithType);
+                GridNameType gridNameType = new GridNameType(typeRow, gridName, true);
+                QueryInternalCreate(gridNameType);
+                GridQueryInternal gridQuery = QueryInternalGet(gridNameType);
                 gridQuery.ColumnNameOrderBy = gridQueryJson.ColumnNameOrderBy;
                 gridQuery.IsOrderByDesc = gridQueryJson.IsOrderByDesc;
                 gridQuery.PageIndex = gridQueryJson.PageIndex;
@@ -1198,7 +1198,7 @@
         /// <summary>
         /// Returns row's columns.
         /// </summary>
-        private static List<GridColumn> TypeRowToGridColumn(App app, GridNameWithType gridName)
+        private static List<GridColumn> TypeRowToGridColumn(App app, GridNameType gridName)
         {
             var result = new List<GridColumn>();
             //
@@ -1298,7 +1298,7 @@
         /// <summary>
         /// Render cell as Button, Html or FileUpload.
         /// </summary>
-        private void SaveJsonIsButtonHtmlFileUpload(GridNameWithType gridName, Index index, Cell cell, GridCell gridCell)
+        private void SaveJsonIsButtonHtmlFileUpload(GridNameType gridName, Index index, Cell cell, GridCell gridCell)
         {
             ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridName, index, cell);
             //
@@ -1328,7 +1328,7 @@
                 UtilFramework.LogDebug(string.Format("DataToJson ({0})", GridName.ToJson(gridName)));
                 //
                 Type typeRow = TypeRowGet(gridName);
-                GridNameWithType gridNameWithType = new GridNameWithType(typeRow, gridName);
+                GridNameType gridNameType = new GridNameType(typeRow, gridName);
                 //
                 gridDataJson.GridQueryList[GridName.ToJson(gridName)] = new GridQuery() { GridName = GridName.ToJson(gridName), TypeRow = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow) };
                 // Row
@@ -1342,7 +1342,7 @@
                 {
                     gridDataJson.ColumnList = new Dictionary<string, List<GridColumn>>();
                 }
-                gridDataJson.ColumnList[GridName.ToJson(gridName)] = TypeRowToGridColumn(App, gridNameWithType);
+                gridDataJson.ColumnList[GridName.ToJson(gridName)] = TypeRowToGridColumn(App, gridNameType);
                 // Cell
                 if (gridDataJson.CellList == null)
                 {
@@ -1387,7 +1387,7 @@
                                 App.CellRowValueToText(cell, ref textJson, new AppEventArg(App, gridName, index, columnName)); // Override text generic.
                                 cell.RowValueToText(ref textJson, new AppEventArg(App, gridName, index, columnName)); // Override text.
                             }
-                            ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameWithType, index, cell);
+                            ConfigCell configCell = App.GridData.Config.ConfigCellGet(gridNameType, index, cell);
                             if (configCell.CellEnum == GridCellEnum.Button && textJson == null && cell.TypeColumn == typeof(string))
                             {
                                 textJson = "Button"; // Default text for button.
@@ -1401,7 +1401,7 @@
                             GridCell gridCellJson = new GridCell();
                             gridDataJson.CellList[GridName.ToJson(gridName)][columnName][index.Value] = gridCellJson;
                             //
-                            SaveJsonIsButtonHtmlFileUpload(gridNameWithType, index, cell, gridCellJson);
+                            SaveJsonIsButtonHtmlFileUpload(gridNameType, index, cell, gridCellJson);
                             //
                             if (gridCellInternal.IsOriginal == false || gridCellInternal.IsParseSuccess)
                             {

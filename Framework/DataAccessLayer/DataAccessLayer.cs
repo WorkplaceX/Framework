@@ -170,7 +170,7 @@
 
         }
 
-        protected virtual internal void Lookup(out GridNameWithType gridName, out IQueryable query)
+        protected virtual internal void Lookup(out GridNameType gridName, out IQueryable query)
         {
             gridName = null;
             query = null;

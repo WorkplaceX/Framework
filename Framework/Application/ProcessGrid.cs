@@ -164,22 +164,22 @@
     {
         protected internal override void Run(App app)
         {
-            List<GridNameWithType> gridNameWithTypeList = new List<GridNameWithType>(); // Grids to load.
+            List<GridNameType> gridNameTypeList = new List<GridNameType>(); // Grids to load.
             foreach (Grid grid in app.AppJson.ListAll().OfType<Grid>())
             {
-                GridNameWithType gridNameWithType = grid.GridNameInternal as GridNameWithType;
-                if (gridNameWithType != null && !gridNameWithTypeList.Contains(gridNameWithType))
+                GridNameType gridNameType = grid.GridNameInternal as GridNameType;
+                if (gridNameType != null && !gridNameTypeList.Contains(gridNameType))
                 {
-                    gridNameWithTypeList.Add(gridNameWithType);
+                    gridNameTypeList.Add(gridNameType);
                 }
             }
             //
-            foreach (GridNameWithType gridNameWithType in gridNameWithTypeList)
+            foreach (GridNameType gridNameType in gridNameTypeList)
             {
-                if (app.GridData.TypeRow(gridNameWithType) == null) // Not yet loaded.
+                if (app.GridData.TypeRow(gridNameType) == null) // Not yet loaded.
                 {
-                    app.GridData.QueryInternalCreate(gridNameWithType);
-                    app.GridData.LoadDatabase(gridNameWithType); // Keeps method LoadDatabase(); internal and prevents load of GridConfig multiple times.
+                    app.GridData.QueryInternalCreate(gridNameType);
+                    app.GridData.LoadDatabase(gridNameType); // Keeps method LoadDatabase(); internal and prevents load of GridConfig multiple times.
                 }
             }
         }
@@ -251,8 +251,8 @@
             {
                 if (app.GridData.QueryInternalGet(gridName).IsInsert)
                 {
-                    GridNameWithType gridNameWithType = app.GridData.GridNameWithType(gridName);
-                    if (app.GridData.Config.ConfigGridGet(gridNameWithType).IsInsert)
+                    GridNameType gridNameType = app.GridData.GridNameType(gridName);
+                    if (app.GridData.Config.ConfigGridGet(gridNameType).IsInsert)
                     {
                         app.GridData.RowNewAdd(gridName);
                     }
@@ -515,7 +515,7 @@
                 Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == e.ColumnName).Single();
                 if (e.Index.Enum != IndexEnum.Filter) // No Lookup for filter column for now. It would work though for example for distinct.
                 {
-                    cell.Lookup(out GridNameWithType gridName, out IQueryable query);
+                    cell.Lookup(out GridNameType gridName, out IQueryable query);
                     gridData.LookupClose(app);
                     if (gridName != null)
                     {

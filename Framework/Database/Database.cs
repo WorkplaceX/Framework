@@ -32,7 +32,7 @@ namespace Database.dbo
 
     public partial class FrameworkNavigationView
     {
-        public static GridNameWithType GridNameConfig = new GridName<FrameworkNavigationView>("Config");
+        public static GridNameType GridNameConfig = new GridName<FrameworkNavigationView>("Config");
 
         private void Reload()
         {
@@ -69,7 +69,7 @@ namespace Database.dbo
 
     public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationView>
     {
-        protected internal override void Lookup(out GridNameWithType gridName, out IQueryable query)
+        protected internal override void Lookup(out GridNameType gridName, out IQueryable query)
         {
             gridName = FrameworkComponent.GridNameLookup;
             if (Row.ComponentNameCSharp == null)
@@ -218,7 +218,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationType : Row
     {
-        public static GridNameWithType Lookup { get { return new GridName<FrameworkApplicationType>("Lookup"); } }
+        public static GridNameType Lookup { get { return new GridName<FrameworkApplicationType>("Lookup"); } }
     }
 
     public partial class FrameworkApplicationView_Type
@@ -235,7 +235,7 @@ namespace Database.dbo
             Row.ApplicationTypeId = applicationType.Id;
         }
 
-        protected internal override void Lookup(out GridNameWithType gridName, out IQueryable query)
+        protected internal override void Lookup(out GridNameType gridName, out IQueryable query)
         {
             gridName = FrameworkApplicationType.Lookup;
             query = UtilDataAccessLayer.Query<FrameworkApplicationType>();

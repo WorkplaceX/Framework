@@ -48,7 +48,7 @@
                 this.Name = UtilDataAccessLayer.TypeRowToTableNameCSharp(TypeRowInternal) + "." + Name;
             }
             //
-            if (UtilFramework.IsSubclassOf(this.GetType(), typeof(GridNameWithType)))
+            if (UtilFramework.IsSubclassOf(this.GetType(), typeof(GridNameType)))
             {
                 UtilFramework.Assert(this.TypeRowInternal != null);
             }
@@ -63,7 +63,7 @@
         public string Name { get; private set; }
 
         /// <summary>
-        /// Gets or sets TypeRowInternal. Not null only in derived class GridNameWithType.
+        /// Gets or sets TypeRowInternal. Not null only in derived class GridNameType.
         /// </summary>
         internal readonly Type TypeRowInternal;
 
@@ -95,7 +95,7 @@
         }
 
         /// <summary>
-        /// Returns GridName or GridNameWithType as json string. In case of GridNameTypeRow type information gets lost!
+        /// Returns GridName or GridNameType as json string. In case of GridNameTypeRow type information gets lost!
         /// </summary>
         public static string ToJson(GridName gridName)
         {
@@ -103,7 +103,7 @@
         }
 
         /// <summary>
-        /// Returns GridName loaded from json. It never returns a GridNameWithType object.
+        /// Returns GridName loaded from json. It never returns a GridNameType object.
         /// </summary>
         public static GridName FromJson(string json)
         {
@@ -149,21 +149,21 @@
     /// <summary>
     /// GridName with type information about the containing rows.
     /// </summary>
-    public class GridNameWithType : GridName
+    public class GridNameType : GridName
     {
-        public GridNameWithType(Type typeRow) 
+        public GridNameType(Type typeRow) 
             : base(null, typeRow, false)
         {
 
         }
 
-        public GridNameWithType(Type typeRow, string name, bool isNameExclusive = false) 
+        public GridNameType(Type typeRow, string name, bool isNameExclusive = false) 
             : base(name, typeRow, isNameExclusive)
         {
 
         }
 
-        public GridNameWithType(Type typeRow, GridName gridName)
+        public GridNameType(Type typeRow, GridName gridName)
             : this(typeRow, gridName.NameExclusive, gridName.IsNameExclusive)
         {
 
@@ -178,7 +178,7 @@
         }
     }
 
-    public class GridName<TRow> : GridNameWithType where TRow : Row
+    public class GridName<TRow> : GridNameType where TRow : Row
     {
         public GridName()
             : base(typeof(TRow))
@@ -463,8 +463,8 @@
             this.tableNameCSharpList = new List<string>();
             this.dbConfigGridList = new List<FrameworkConfigGridView>();
             this.dbConfigColumnList = new List<FrameworkConfigColumnView>();
-            this.configGridList = new Dictionary<GridNameWithType, ConfigGrid>();
-            this.configColumnList = new Dictionary<GridNameWithType, Dictionary<string, ConfigColumn>>();
+            this.configGridList = new Dictionary<GridNameType, ConfigGrid>();
+            this.configColumnList = new Dictionary<GridNameType, Dictionary<string, ConfigColumn>>();
         }
 
         public readonly App App;
@@ -472,10 +472,10 @@
         private string GridNameToTableNameCSharp(GridName gridName)
         {
             string result = null;
-            GridNameWithType gridNameWithType = App.GridData.GridNameWithType(gridName);
-            if (gridNameWithType != null)
+            GridNameType gridNameType = App.GridData.GridNameType(gridName);
+            if (gridNameType != null)
             {
-                result = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameWithType.TypeRow);
+                result = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameType.TypeRow);
             }
             return result;
         }
@@ -492,17 +492,17 @@
             // Add Grid (Also not yet loaded Grid)
             foreach (Grid grid in App.AppJson.ListAll().OfType<Grid>())
             {
-                GridNameWithType gridNameWithType = grid.GridNameInternal as GridNameWithType;
-                if (gridNameWithType != null)
+                GridNameType gridNameType = grid.GridNameInternal as GridNameType;
+                if (gridNameType != null)
                 {
-                    tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameWithType.TypeRow);
+                    tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameType.TypeRow);
                     tableNameCSharpList.Add(tableNameCSharp);
                 }
             }
             // In GridData defined grids.
-            foreach (GridNameWithType gridNameWithType in App.GridData.GridNameWithType())
+            foreach (GridNameType gridNameType in App.GridData.GridNameType())
             {
-                tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameWithType.TypeRow);
+                tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridNameType.TypeRow);
                 tableNameCSharpList.Add(tableNameCSharp);
             }
             //
@@ -537,14 +537,14 @@
 
         private List<FrameworkConfigColumnView> dbConfigColumnList;
 
-        private Dictionary<GridNameWithType, ConfigGrid> configGridList;
+        private Dictionary<GridNameType, ConfigGrid> configGridList;
 
         /// <summary>
         /// (GridName, ColumnNameCSharp, ConfigColumn).
         /// </summary>
-        private Dictionary<GridNameWithType, Dictionary<string, ConfigColumn>> configColumnList;
+        private Dictionary<GridNameType, Dictionary<string, ConfigColumn>> configColumnList;
 
-        private void AssertLoadConfig(GridNameWithType gridName)
+        private void AssertLoadConfig(GridNameType gridName)
         {
             string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
             if (!tableNameCSharpList.Contains(tableNameCSharp))
@@ -557,7 +557,7 @@
         /// <summary>
         /// Grid config.
         /// </summary>
-        public ConfigGrid ConfigGridGet(GridNameWithType gridName)
+        public ConfigGrid ConfigGridGet(GridNameType gridName)
         {
             AssertLoadConfig(gridName);
             //
@@ -606,7 +606,7 @@
         /// <summary>
         /// Column config.
         /// </summary>
-        public ConfigColumn ConfigColumnGet(GridNameWithType gridName, Cell column)
+        public ConfigColumn ConfigColumnGet(GridNameType gridName, Cell column)
         {
             AssertLoadConfig(gridName);
             //
@@ -673,7 +673,7 @@
         /// <summary>
         /// Cell config.
         /// </summary>
-        internal ConfigCell ConfigCellGet(GridNameWithType gridName, Index index, Cell cell)
+        internal ConfigCell ConfigCellGet(GridNameType gridName, Index index, Cell cell)
         {
             AssertLoadConfig(gridName);
             //
