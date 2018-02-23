@@ -28,7 +28,7 @@ namespace Framework
             get
             {
                 // .NET Core 2.0
-                return "v1.102 Server";
+                return "v1.103 Server";
             }
         }
 
@@ -381,6 +381,8 @@ namespace Framework
 
         internal enum LogDebugOutput { None = 0, File = 1, Console = 2  };
 
+        private static DateTime logDebugDateTime = DateTime.Now;
+
         /// <summary>
         /// Write Debug.csv file.
         /// </summary>
@@ -406,6 +408,12 @@ namespace Framework
                 text = text.Replace("\"", "");
                 string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 string result = string.Format("=\"{0}\",{1:000},{2},({3}, {4}, {5})", time, threadId, text, caller1, caller2, caller3);
+                TimeSpan timeSpan = DateTime.Now - logDebugDateTime;
+                if (timeSpan.TotalSeconds > 3)
+                {
+                    logDebugDateTime = DateTime.Now;
+                    result = "-----------------------------\r\n\r\n" + result; // Seperator
+                }
                 //
                 if (logDebugOutput == LogDebugOutput.File)
                 {

@@ -539,6 +539,30 @@ namespace Database.dbo
 
     public partial class FrameworkGrid_IsExist : Cell<FrameworkGrid> { }
 
+    [SqlTable("dbo", "FrameworkLoginUser")]
+    public partial class FrameworkLoginUser : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkLoginUser_Id), true)]
+        public int Id { get; set; }
+
+        [SqlColumn("ApplicationId", typeof(FrameworkLoginUser_ApplicationId))]
+        public int? ApplicationId { get; set; }
+
+        [SqlColumn("UserName", typeof(FrameworkLoginUser_UserName))]
+        public string UserName { get; set; }
+
+        [SqlColumn("Password", typeof(FrameworkLoginUser_Password))]
+        public string Password { get; set; }
+    }
+
+    public partial class FrameworkLoginUser_Id : Cell<FrameworkLoginUser> { }
+
+    public partial class FrameworkLoginUser_ApplicationId : Cell<FrameworkLoginUser> { }
+
+    public partial class FrameworkLoginUser_UserName : Cell<FrameworkLoginUser> { }
+
+    public partial class FrameworkLoginUser_Password : Cell<FrameworkLoginUser> { }
+
     [SqlTable("dbo", "FrameworkNavigation")]
     public partial class FrameworkNavigation : Row
     {

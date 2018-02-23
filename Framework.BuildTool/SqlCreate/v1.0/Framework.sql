@@ -208,3 +208,14 @@ FROM
 	FrameworkNavigation Navigation
 LEFT JOIN
 	FrameworkComponent Component ON (Component.Id = Navigation.ComponentId)
+
+GO
+
+CREATE TABLE FrameworkLoginUser
+(
+	Id INT PRIMARY KEY IDENTITY,
+    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id), /* User belongs to this application */
+  	UserName NVARCHAR(256),
+	Password NVARCHAR(256),
+	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, UserName)
+)

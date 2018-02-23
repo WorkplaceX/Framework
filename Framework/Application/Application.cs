@@ -136,7 +136,11 @@
         /// </summary>
         virtual internal Type[] TypeComponentInNamespaceList()
         {
-            return new Type[] { GetType(), typeof(AppConfig) }; // Enable serialization of components in App and AppConfig namespace.
+            return (new Type[] {
+                GetType(), // Namespace of running application.
+                typeof(App), // Used for example for class Navigation.
+                typeof(AppConfig) // Used for example to show configuration pages on running application and not only on AppConfig.
+            }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }
 
         /// <summary>
@@ -431,6 +435,124 @@
         public TPage PageShow<TPage>(Component owner, bool isPageVisibleRemove = true) where TPage : Page, new()
         {
             return (TPage)PageShow(owner, typeof(TPage), isPageVisibleRemove);
+        }
+    }
+
+    /// <summary>
+    /// Navigation pane.
+    /// </summary>
+    public class Navigation : Div
+    {
+        public Navigation() { }
+
+        public Navigation(Component owner, GridName gridName = null)
+            : base(owner)
+        {
+            if (gridName == null)
+            {
+                gridName = new GridName<FrameworkNavigationView>(); // Default grid.
+            }
+            this.GridNameJson = Application.GridName.ToJson(gridName);
+            new Grid(this, gridName).IsHide = true;
+            new Div(this) { Name = "Navigation", CssClass = "navigation" }; // Navigation pane.
+            new Div(this) { Name = "Content" }; // Content pane.
+        }
+
+        public string GridNameJson;
+
+        /// <summary>
+        /// Returns sql FrameworkNavigationView.
+        /// </summary>
+        public GridName GridName()
+        {
+            return Application.GridName.FromJson(GridNameJson);
+        }
+
+        /// <summary>
+        /// Returns navigation pane.
+        /// </summary>
+        /// <returns></returns>
+        public Div DivNavigation()
+        {
+            return List.OfType<Div>().Where(item => item.Name == "Navigation").First();
+        }
+
+        /// <summary>
+        /// Returns content pane.
+        /// </summary>
+        public Div DivContent()
+        {
+            return List.OfType<Div>().Where(item => item.Name == "Content").First();
+        }
+
+        /// <summary>
+        /// Button is clicked on sql FrameworkNavigationView data grid.
+        /// </summary>
+        public void ButtonIsClick(AppEventArg e)
+        {
+            var Row = (FrameworkNavigationView)e.App.GridData.RowGet(e.GridName, e.Index);
+            Type type = null;
+            if (Row.ComponentNameCSharp != null)
+            {
+                type = UtilFramework.TypeFromName(Row.ComponentNameCSharp, e.App.TypeComponentInNamespaceList());
+            }
+            Div divContent = DivContent();
+            //
+            if (type == null)
+            {
+                divContent.List.Clear();
+            }
+            else
+            {
+                if (UtilFramework.IsSubclassOf(type, typeof(Page)))
+                {
+                    e.App.PageShow(divContent, type);
+                    new ProcessGridLoadDatabase().Run(e.App); // LoadDatabase if not yet loaded.
+                }
+                else
+                {
+                    divContent.List.Clear();
+                    Component component = (Component)UtilFramework.TypeToObject(type);
+                    component.Constructor(divContent, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Make sure, if there is no content shown, auto click button of first row.
+        /// </summary>
+        internal void ProcessButtonIsClickFirst(App app)
+        {
+            if (DivContent().List.Count == 0)
+            {
+                GridName gridName = GridName();
+                if (app.GridData.QueryInternalIsExist(gridName))
+                {
+                    if (app.GridData.RowIndexList(gridName).Contains(Index.Row(0)))
+                    {
+                        if (!app.GridData.IsErrorRowCell(gridName, Index.Row(0))) // Don't auto click button if there is errors.
+                        {
+                            ButtonIsClick(new AppEventArg(app, gridName, Index.Row(0), null));
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Populate navigation pane with buttons.
+        /// </summary>
+        protected internal override void RunEnd(App app)
+        {
+            Div divNavigation = DivNavigation();
+            divNavigation.List.Clear();
+            //
+            GridName gridName = GridName();
+            var indexList = app.GridData.RowIndexList(gridName).Where(item => item.Enum == IndexEnum.Index);
+            foreach (Index index in indexList)
+            {
+                new GridFieldSingle(divNavigation, gridName, "Button", index) { CssClass = "btnNavigation" };
+            }
         }
     }
 }

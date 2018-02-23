@@ -2,6 +2,7 @@
 {
     using Database.dbo;
     using Framework.Component;
+    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -17,10 +18,12 @@
         {
             if (gridName == FrameworkNavigationView.GridNameConfig)
             {
+                // Returns static navigation for AppConfig.
                 List<FrameworkNavigationView> list = new List<FrameworkNavigationView>();
                 list.Add(new FrameworkNavigationView() { Text = "Application", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageApplicationConfig)) });
                 list.Add(new FrameworkNavigationView() { Text = "Navigation", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageNavigationConfig)) });
                 list.Add(new FrameworkNavigationView() { Text = "Grid", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageGridConfig)) });
+                list.Add(new FrameworkNavigationView() { Text = "User", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageLoginUserConfig)) });
                 result = list.AsQueryable();
             }
         }
@@ -45,6 +48,9 @@
         }
     }
 
+    /// <summary>
+    /// List of applications running on this instance.
+    /// </summary>
     public class PageApplicationConfig : Page
     {
         protected internal override void InitJson(App app)
@@ -55,6 +61,9 @@
         }
     }
 
+    /// <summary>
+    /// Navigation pane configuration.
+    /// </summary>
     public class PageNavigationConfig : Page
     {
         protected internal override void InitJson(App app)
@@ -65,6 +74,9 @@
         }
     }
 
+    /// <summary>
+    /// Data grid configuration.
+    /// </summary>
     public class PageGridConfig : Page
     {
         protected internal override void InitJson(App app)
@@ -81,104 +93,26 @@
     }
 
     /// <summary>
-    /// Navigation bar.
+    /// LoginUser configuration.
     /// </summary>
-    public class Navigation : Div
+    public class PageLoginUserConfig : Page
     {
-        public Navigation() { }
+        public PageLoginUserConfig() { }
 
-        public Navigation(Component owner, GridName gridName = null) 
+        public PageLoginUserConfig(Component owner)
             : base(owner)
         {
-            if (gridName == null)
-            {
-                gridName = new GridName<FrameworkNavigationView>(); // Default grid.
-            }
-            this.GridNameJson = Application.GridName.ToJson(gridName);
-            new Grid(this, gridName).IsHide = true;
-            new Div(this) { Name = "Navigation", CssClass = "navigation" };
-            new Div(this) { Name = "Content" };
+
         }
 
-        public string GridNameJson;
-
-        public GridName GridName()
+        protected internal override void InitJson(App app)
         {
-            return Application.GridName.FromJson(GridNameJson);
-        }
-
-        public Div DivNavigation()
-        {
-            return List.OfType<Div>().Where(item => item.Name == "Navigation").First();
-        }
-
-        public Div DivContent()
-        {
-            return List.OfType<Div>().Where(item => item.Name == "Content").First();
-        }
-
-        public void ButtonIsClick(AppEventArg e)
-        {
-            var Row = (FrameworkNavigationView)e.App.GridData.RowGet(e.GridName, e.Index);
-            Type type = null;
-            if (Row.ComponentNameCSharp != null)
-            {
-                type = UtilFramework.TypeFromName(Row.ComponentNameCSharp, e.App.TypeComponentInNamespaceList());
-            }
-            Div divContent = DivContent();
-            //
-            if (type == null)
-            {
-                divContent.List.Clear();
-            }
-            else
-            {
-                if (UtilFramework.IsSubclassOf(type, typeof(Page)))
-                {
-                    e.App.PageShow(divContent, type);
-                    new ProcessGridLoadDatabase().Run(e.App); // LoadDatabase if not yet loaded.
-                }
-                else
-                {
-                    divContent.List.Clear();
-                    Component component = (Component)UtilFramework.TypeToObject(type);
-                    component.Constructor(divContent, null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Make sure, if there is no content shown, auto click button of first row.
-        /// </summary>
-        internal void ProcessButtonIsClickFirst(App app)
-        {
-            if (DivContent().List.Count == 0)
-            {
-                GridName gridName = GridName();
-                if (app.GridData.QueryInternalIsExist(gridName))
-                {
-                    if (app.GridData.RowIndexList(gridName).Contains(Index.Row(0)))
-                    { 
-                        if (!app.GridData.IsErrorRowCell(gridName, Index.Row(0))) // Don't auto click button if there is errors.
-                        {
-                            ButtonIsClick(new AppEventArg(app, gridName, Index.Row(0), null));
-                        }
-                    }
-                }
-            }
-        }
-
-        protected internal override void RunEnd(App app)
-        {
-            Div divNavigation = DivNavigation();
-            divNavigation.List.Clear();
-            //
-            GridName gridName = GridName();
-            var indexList = app.GridData.RowIndexList(gridName).Where(item => item.Enum == IndexEnum.Index);
-            foreach (Index index in indexList)
-            {
-                new GridFieldSingle(divNavigation, gridName, "Button", index) { CssClass = "btnNavigation" };
-            }
+            var literalImage = new Literal(this);
+            string url = UtilServer.EmbeddedUrl(app, "/UserLogin.png");
+            literalImage.TextHtml = string.Format("<img class='imgLogo' src='{0}' />", url);
+            new Literal(this) { TextHtml = "<h1>Login User List<h1>" };
+            new Literal(this) { TextHtml = "<p>Following list shos all users having access to the system.<p>" };
+            new Grid(this, new GridName<FrameworkLoginUser>());
         }
     }
 }
