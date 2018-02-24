@@ -1,4 +1,8 @@
-﻿DROP TABLE FrameworkLoginUser
+﻿DROP VIEW FrameworkLoginDisplay
+DROP TABLE FrameworkLoginUserRole
+DROP TABLE FrameworkLoginRole
+DROP TABLE FrameworkLoginUser
+DROP TABLE FrameworkLoginUser
 DROP VIEW FrameworkNavigationView
 DROP TABLE FrameworkNavigation
 DROP TABLE FrameworkComponent

@@ -214,8 +214,51 @@ GO
 CREATE TABLE FrameworkLoginUser
 (
 	Id INT PRIMARY KEY IDENTITY,
-    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id), /* User belongs to this application */
-  	UserName NVARCHAR(256),
+    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL, /* User belongs to this application */
+  	Name NVARCHAR(256),
 	Password NVARCHAR(256),
-	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, UserName)
+	IsBuiltIn BIT NOT NULL, /* BuiltIn user like Administrator */
+	IsBuiltInExist BIT NOT NULL,
+	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, Name)
 )
+
+CREATE TABLE FrameworkLoginRole
+(
+	Id INT PRIMARY KEY IDENTITY,
+    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL, /* Role belongs to this application */
+  	Name NVARCHAR(256),
+  	Description NVARCHAR(256),
+	IsBuiltIn BIT NOT NULL, /* BuiltIn role like Developer */
+	IsBuiltInExist BIT NOT NULL,
+	INDEX IX_FrameworkLoginrRole UNIQUE (ApplicationId, Name)
+)
+
+CREATE TABLE FrameworkLoginUserRole
+(
+	Id INT PRIMARY KEY IDENTITY,
+    UserId INT FOREIGN KEY REFERENCES FrameworkLoginUser(Id) NOT NULL,
+    RoleId INT FOREIGN KEY REFERENCES FrameworkLoginRole(Id) NOT NULL,
+  	IsActive BIT NOT NULL
+	INDEX IX_FrameworkLoginrRole UNIQUE (UserId, RoleId)
+)
+
+GO
+
+CREATE VIEW FrameworkLoginDisplay
+AS
+SELECT
+	UserX.Id AS UserId,
+	UserX.ApplicationId AS UserApplicationId,
+	UserX.Name AS UserName,
+	UserX.Password AS UserPassword,
+	UserX.IsBuiltIn AS UserIsBuiltIn,
+	Role.Id AS RoleId,
+	Role.Name AS RoleName,
+	Role.Description AS RoleDescription,
+	Role.IsBuiltIn AS RoleIsBuiltIn,
+	(SELECT UserRole.Id AS UserRoleId FROM FrameworkLoginUserRole UserRole WHERE UserRole.UserId = UserX.Id AND UserRole.RoleId = Role.Id) AS UserRoleId,
+	(SELECT UserRole.IsActive AS UserRoleIsActive FROM FrameworkLoginUserRole UserRole WHERE UserRole.UserId = UserX.Id AND UserRole.RoleId = Role.Id) AS UserRoleIsActive
+FROM
+	FrameworkLoginUser UserX
+LEFT JOIN
+	FrameworkLoginRole Role ON (Role.ApplicationId = UserX.ApplicationId)
