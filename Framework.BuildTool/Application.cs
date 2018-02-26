@@ -70,7 +70,7 @@
         internal List<FrameworkApplicationView> DbFrameworkApplicationView()
         {
             List<FrameworkApplicationView> result = new List<FrameworkApplicationView>();
-            result.Add(new FrameworkApplicationView() { Text = "Application Config", Path = "config", IsActive = true, Type = UtilFramework.TypeToName(typeof(AppConfig)) });
+            result.Add(new FrameworkApplicationView() { Text = "Application Config", Path = "config", IsActive = true, TypeName = UtilFramework.TypeToName(typeof(AppConfig)) });
             DbFrameworkApplicationView(result); // Override to register new applications.
             return result;
         }

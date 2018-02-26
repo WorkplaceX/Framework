@@ -515,7 +515,7 @@
                 Cell cell = UtilDataAccessLayer.CellList(typeRow, row).Where(item => item.ColumnNameCSharp == e.ColumnName).Single();
                 if (e.Index.Enum != IndexEnum.Filter) // No Lookup for filter column for now. It would work though for example for distinct.
                 {
-                    cell.Lookup(out GridNameType gridName, out IQueryable query);
+                    cell.Lookup(out GridNameType gridName, out IQueryable query, e);
                     gridData.LookupClose(app);
                     if (gridName != null)
                     {

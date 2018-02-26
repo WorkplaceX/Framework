@@ -427,7 +427,7 @@ namespace Database.UnitTest.Application
 
     public class MyRow_AirportCode : Cell<MyRow>
     {
-        protected internal override void Lookup(out GridNameType gridName, out IQueryable query)
+        protected internal override void Lookup(out GridNameType gridName, out IQueryable query, AppEventArg e)
         {
             gridName = Airport.GridNameLookup;
             query = UtilDataAccessLayer.Query<Airport>();

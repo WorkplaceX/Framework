@@ -110,9 +110,9 @@
             var literalImage = new Literal(this);
             string url = UtilServer.EmbeddedUrl(app, "/UserLogin.png");
             literalImage.TextHtml = string.Format("<img class='imgLogo' src='{0}' />", url);
-            new Literal(this) { TextHtml = "<h1>Login User List<h1>" };
+            new Literal(this) { TextHtml = "<h1>Login User<h1>" };
             new Literal(this) { TextHtml = "<p>Following list shos all users having access to the system.<p>" };
-            new Grid(this, new GridName<FrameworkLoginUser>());
+            new Grid(this, new GridName<FrameworkLoginUserDisplay>());
         }
     }
 }

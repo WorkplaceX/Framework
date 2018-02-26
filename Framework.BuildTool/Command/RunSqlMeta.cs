@@ -59,10 +59,10 @@
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
                 sqlSelect.Append(string.Format(
-                    "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Name = {2}) AS ApplicationTypeId, {3} AS IsActive)",
+                    "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = {2}) AS ApplicationTypeId, {3} AS IsActive)",
                     UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
                     UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
-                    UtilDataAccessLayer.Parameter(frameworkApplication.Type, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.Parameter(frameworkApplication.TypeName, SqlDbType.NVarChar, parameterList),
                     UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
@@ -82,14 +82,14 @@
             MERGE INTO FrameworkApplicationType AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT Source.Name
+                    SELECT Source.TypeName
                     EXCEPT
-                    SELECT Target.Name)
+                    SELECT Target.TypeName)
             WHEN MATCHED THEN
 	            UPDATE SET Target.IsExist = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (Name, IsExist)
-	            VALUES (Source.Name, 1);
+	            INSERT (TypeName, IsExist)
+	            VALUES (Source.TypeName, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
@@ -103,7 +103,7 @@
                 {
                     sqlSelect.Append(" UNION ALL\r\n");
                 }
-                sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", UtilFramework.TypeToName(type)));
+                sqlSelect.Append(string.Format("(SELECT '{0}' AS TypeName)", UtilFramework.TypeToName(type)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
             UtilBuildTool.SqlCommand(sqlUpsert, true);

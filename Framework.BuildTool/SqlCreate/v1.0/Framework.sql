@@ -1,7 +1,7 @@
 ﻿CREATE TABLE FrameworkApplicationType
 (
 	Id INT PRIMARY KEY IDENTITY,
-  	Name NVARCHAR(256) NOT NULL UNIQUE,
+  	TypeName NVARCHAR(256) NOT NULL UNIQUE,
 	IsExist BIT NOT NULL
 )
 
@@ -22,7 +22,7 @@ SELECT
 	Application.Text,
 	Application.Path,
 	Application.ApplicationTypeId,
-	(SELECT ApplicationType.Name FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS Type,
+	(SELECT ApplicationType.TypeName FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS TypeName,
 	(SELECT ApplicationType.IsExist FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId) AS IsExist,
 	Application.IsActive
 
@@ -215,22 +215,22 @@ CREATE TABLE FrameworkLoginUser
 (
 	Id INT PRIMARY KEY IDENTITY,
     ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL, /* User belongs to this application */
-  	Name NVARCHAR(256),
+  	UserName NVARCHAR(256),
 	Password NVARCHAR(256),
 	IsBuiltIn BIT NOT NULL, /* BuiltIn user like Administrator */
 	IsBuiltInExist BIT NOT NULL,
-	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, Name)
+	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, UserName)
 )
 
 CREATE TABLE FrameworkLoginRole
 (
 	Id INT PRIMARY KEY IDENTITY,
     ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL, /* Role belongs to this application */
-  	Name NVARCHAR(256),
+  	RoleName NVARCHAR(256),
   	Description NVARCHAR(256),
 	IsBuiltIn BIT NOT NULL, /* BuiltIn role like Developer */
 	IsBuiltInExist BIT NOT NULL,
-	INDEX IX_FrameworkLoginrRole UNIQUE (ApplicationId, Name)
+	INDEX IX_FrameworkLoginrRole UNIQUE (ApplicationId, RoleName)
 )
 
 CREATE TABLE FrameworkLoginUserRole
@@ -243,17 +243,32 @@ CREATE TABLE FrameworkLoginUserRole
 )
 
 GO
-
-CREATE VIEW FrameworkLoginDisplay
+CREATE VIEW FrameworkLoginUserDisplay
 AS
 SELECT
 	UserX.Id AS UserId,
 	UserX.ApplicationId AS UserApplicationId,
-	UserX.Name AS UserName,
+	(SELECT Application.TypeName AS ApplicationTypeName FROM FrameworkApplicationView Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationTypeName,
+	(SELECT Application.Path AS ApplicationPath FROM FrameworkApplicationView Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationPath,
+	UserX.UserName AS UserUserName,
+	UserX.Password AS UserPassword,
+	UserX.IsBuiltIn AS UserIsBuiltIn,
+	UserX.IsBuiltInExist AS UserIsBuiltInExist
+FROM
+	FrameworkLoginUser UserX
+
+
+GO
+CREATE VIEW FrameworkLoginUserRoleDisplay
+AS
+SELECT
+	UserX.Id AS UserId,
+	UserX.ApplicationId AS UserApplicationId,
+	UserX.UserName AS UserUserName,
 	UserX.Password AS UserPassword,
 	UserX.IsBuiltIn AS UserIsBuiltIn,
 	Role.Id AS RoleId,
-	Role.Name AS RoleName,
+	Role.RoleName AS RoleRoleName,
 	Role.Description AS RoleDescription,
 	Role.IsBuiltIn AS RoleIsBuiltIn,
 	(SELECT UserRole.Id AS UserRoleId FROM FrameworkLoginUserRole UserRole WHERE UserRole.UserId = UserX.Id AND UserRole.RoleId = Role.Id) AS UserRoleId,

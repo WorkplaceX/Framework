@@ -6,6 +6,7 @@ Release
 -Update ConfigGridAttribute and ConfigColumnAttribute architecture
 -Update WidthPercent architecture
 -Angular 5; https://angular.io/guide/dynamic-component-loader
+-EXEC sp_rename 'DBO.FrameworkApplicationType.Name', 'TypeName', 'COLUMN';
 
 Release b2.0
 -ViewEncapsulation.Native (https://stackoverflow.com/questions/39452729/angular2-setting-view-encapsulation-globally)

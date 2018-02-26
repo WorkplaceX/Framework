@@ -909,7 +909,12 @@
                                     {
                                         try
                                         {
-                                            row.RowNew.Update(row.Row, row.RowNew, new AppEventArg(App, gridName, index, null));
+                                            bool isReload = false;
+                                            row.RowNew.Update(row.Row, row.RowNew, ref isReload, new AppEventArg(App, gridName, index, null));
+                                            if (isReload)
+                                            {
+                                                row.RowNew.Reload();
+                                            }
                                             ErrorRowSet(gridName, index, null);
                                             row.Row = row.RowNew;
                                             CellTextClear(gridName, index);
@@ -925,7 +930,12 @@
                                     string exceptionText = null;
                                     try
                                     {
-                                        row.RowNew.Insert(row.RowNew, new AppEventArg(App, gridName, index, null));
+                                        bool isReload = false;
+                                        row.RowNew.Insert(row.RowNew, ref isReload, new AppEventArg(App, gridName, index, null));
+                                        if (isReload)
+                                        {
+                                            row.RowNew.Reload();
+                                        }
                                     }
                                     catch (Exception exception)
                                     {

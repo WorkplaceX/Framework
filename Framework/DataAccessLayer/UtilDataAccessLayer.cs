@@ -634,12 +634,12 @@
         /// Copy data row. Source and dest need not to be of same type. Only cells available on
         /// both records are copied. See also RowClone();
         /// </summary>
-        public static void RowCopy(Row rowSource, Row rowDest)
+        public static void RowCopy(Row rowSource, Row rowDest, string columnNamePrefix = null)
         {
             var propertyInfoDestList = UtilDataAccessLayer.TypeRowToPropertyList(rowDest.GetType());
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
             {
-                string columnName = propertyInfoDest.Name;
+                string columnName = columnNamePrefix + propertyInfoDest.Name;
                 PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(columnName);
                 if (propertyInfoSource != null)
                 {
@@ -677,10 +677,11 @@
         /// Copy data row. Source and dest need not to be of same type. Only cells available on
         /// both records are copied. See also RowClone();
         /// </summary>
-        public static TRowDest RowCopy<TRowDest>(Row rowSource) where TRowDest : Row
+        /// <param name="columnNamePrefix">Used for example if sql view prefixes underling tables uniquely.</param>
+        public static TRowDest RowCopy<TRowDest>(Row rowSource, string columnNamePrefix = null) where TRowDest : Row
         {
             TRowDest rowDest = UtilDataAccessLayer.RowCreate<TRowDest>();
-            RowCopy(rowSource, rowDest);
+            RowCopy(rowSource, rowDest, columnNamePrefix);
             return rowDest;
         }
 

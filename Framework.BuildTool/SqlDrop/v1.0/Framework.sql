@@ -1,7 +1,7 @@
-﻿DROP VIEW FrameworkLoginDisplay
+﻿DROP VIEW FrameworkLoginUserDisplay
+DROP VIEW FrameworkLoginUserRoleDisplay
 DROP TABLE FrameworkLoginUserRole
 DROP TABLE FrameworkLoginRole
-DROP TABLE FrameworkLoginUser
 DROP TABLE FrameworkLoginUser
 DROP VIEW FrameworkNavigationView
 DROP TABLE FrameworkNavigation

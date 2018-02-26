@@ -79,7 +79,7 @@
                     {
                         typeInAssembly = TypeAppDefault;
                     }
-                    Type type = UtilFramework.TypeFromName(frameworkApplication.Type, UtilFramework.TypeInAssemblyList(typeInAssembly));
+                    Type type = UtilFramework.TypeFromName(frameworkApplication.TypeName, UtilFramework.TypeInAssemblyList(typeInAssembly));
                     if (UtilFramework.IsSubclassOf(type, typeof(App)))
                     {
                         result = (App)UtilFramework.TypeToObject(type);

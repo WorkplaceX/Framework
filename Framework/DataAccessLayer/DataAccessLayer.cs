@@ -12,11 +12,23 @@
     public class Row
     {
         /// <summary>
+        /// Reload single record. Prior to reload stored procedure can be executed for example to validate row.
+        /// </summary>
+        protected virtual internal void Reload()
+        {
+            // Example:
+
+            // FrameworkLoginUserDisplay rowReload = UtilDataAccessLayer.Query<FrameworkLoginUserDisplay>().Where(item => item.UserId == UserId).Single();
+            // UtilDataAccessLayer.RowCopy(rowReload, this);
+        }
+
+        /// <summary>
         /// Update data row on database.
         /// </summary>
         /// <param name="row">Old data row.</param>
         /// <param name="rowNew">New data row. Set properties on this rowNew, for example to read back updated content from db.</param>
-        protected virtual internal void Update(Row row, Row rowNew, AppEventArg e)
+        /// <param name="isReload">If true, framework will reload this row. Used for example to reload sql view containing further references. See also method Reload();</param>
+        protected virtual internal void Update(Row row, Row rowNew, ref bool isReload, AppEventArg e)
         {
             UtilFramework.Assert(this == rowNew);
             if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No update on database, if only calculated column has been modified. It would result in an sql update failed error!
@@ -28,7 +40,8 @@
         /// <summary>
         /// Override this method for example to save data to underlying database tables from sql view.
         /// </summary>
-        protected virtual internal void Insert(Row rowNew, AppEventArg e)
+        /// <param name="isReload">If true, framework will reload this row. Used for example to reload sql view containing further references. See also method Reload();</param>
+        protected virtual internal void Insert(Row rowNew, ref bool isReload, AppEventArg e)
         {
             UtilFramework.Assert(rowNew == this);
             // if (e.App.GridData.IsModifyRowCell(e.GridName, e.Index, true)) // No insert on database, if only calculated column has been modified. // User can also enter text into calculated field. Data can be stored anywhere.
@@ -170,7 +183,7 @@
 
         }
 
-        protected virtual internal void Lookup(out GridNameType gridName, out IQueryable query)
+        protected virtual internal void Lookup(out GridNameType gridName, out IQueryable query, AppEventArg e)
         {
             gridName = null;
             query = null;
