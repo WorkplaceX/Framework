@@ -62,16 +62,16 @@
         /// <summary>
         /// Override to register application on table FrameworkApplication.
         /// </summary>
-        protected virtual void DbFrameworkApplicationView(List<FrameworkApplicationView> result)
+        protected virtual void DbFrameworkApplicationDisplay(List<FrameworkApplicationDisplay> result)
         {
 
         }
 
-        internal List<FrameworkApplicationView> DbFrameworkApplicationView()
+        internal List<FrameworkApplicationDisplay> DbFrameworkApplicationView()
         {
-            List<FrameworkApplicationView> result = new List<FrameworkApplicationView>();
-            result.Add(new FrameworkApplicationView() { Text = "Application Config", Path = "config", IsActive = true, TypeName = UtilFramework.TypeToName(typeof(AppConfig)) });
-            DbFrameworkApplicationView(result); // Override to register new applications.
+            List<FrameworkApplicationDisplay> result = new List<FrameworkApplicationDisplay>();
+            result.Add(new FrameworkApplicationDisplay() { Text = "Application Config", Path = "config", IsActive = true, TypeName = UtilFramework.TypeToName(typeof(AppConfig)) });
+            DbFrameworkApplicationDisplay(result); // Override to register new applications.
             return result;
         }
 

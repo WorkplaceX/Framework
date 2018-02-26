@@ -461,8 +461,8 @@
         {
             this.App = app;
             this.tableNameCSharpList = new List<string>();
-            this.dbConfigGridList = new List<FrameworkConfigGridView>();
-            this.dbConfigColumnList = new List<FrameworkConfigColumnView>();
+            this.dbConfigGridList = new List<FrameworkConfigGridDisplay>();
+            this.dbConfigColumnList = new List<FrameworkConfigColumnDisplay>();
             this.configGridList = new Dictionary<GridNameType, ConfigGrid>();
             this.configColumnList = new Dictionary<GridNameType, Dictionary<string, ConfigColumn>>();
         }
@@ -514,12 +514,12 @@
                 // Load grid config and column config in parallel.
                 Task taskLoadGrid = new Task(() =>
                 {
-                    var configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
+                    var configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridDisplay>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
                     this.dbConfigGridList.AddRange(configGridList);
                 });
                 Task taskLoadColumn = new Task(() =>
                 {
-                    var configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
+                    var configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnDisplay>().Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // IsExist is not filtered here.
                     this.dbConfigColumnList.AddRange(configColumnList);
                 });
                 taskLoadGrid.Start();
@@ -533,9 +533,9 @@
         /// </summary>
         private List<string> tableNameCSharpList;
 
-        private List<FrameworkConfigGridView> dbConfigGridList;
+        private List<FrameworkConfigGridDisplay> dbConfigGridList;
 
-        private List<FrameworkConfigColumnView> dbConfigColumnList;
+        private List<FrameworkConfigColumnDisplay> dbConfigColumnList;
 
         private Dictionary<GridNameType, ConfigGrid> configGridList;
 
@@ -571,7 +571,7 @@
                 //
                 string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
                 string gridNameString = gridName.NameExclusive;
-                FrameworkConfigGridView dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
+                FrameworkConfigGridDisplay dbConfigGrid = dbConfigGridList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString && item.GridIsExist == true && item.TableIsExist == true).SingleOrDefault();
                 if (dbConfigGrid != null)
                 {
                     if (dbConfigGrid.PageRowCountDefault != null)
@@ -625,7 +625,7 @@
                 string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(gridName.TypeRow);
                 string gridNameString = gridName.NameExclusive;
                 var dbList = dbConfigColumnList.Where(item => item.TableNameCSharp == tableNameCSharp && item.GridName == gridNameString);
-                FrameworkConfigColumnView dbConfigColumn = dbList.Where(item => item.ColumnNameCSharp == column.ColumnNameCSharp && item.TableIsExist == true && item.GridIsExist == true && item.ColumnIsExist == true).SingleOrDefault();
+                FrameworkConfigColumnDisplay dbConfigColumn = dbList.Where(item => item.ColumnNameCSharp == column.ColumnNameCSharp && item.TableIsExist == true && item.GridIsExist == true && item.ColumnIsExist == true).SingleOrDefault();
                 if (dbConfigColumn != null)
                 {
                     if (dbConfigColumn.TextDefault != null)

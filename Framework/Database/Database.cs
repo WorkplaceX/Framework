@@ -62,8 +62,8 @@ namespace Database.dbo
     {
         protected internal override void Lookup(out GridNameType gridName, out IQueryable query, AppEventArg e)
         {
-            gridName = FrameworkApplicationView.GridNameLookup;
-            var result = UtilDataAccessLayer.Query<FrameworkApplicationView>();
+            gridName = FrameworkApplicationDisplay.GridNameLookup;
+            var result = UtilDataAccessLayer.Query<FrameworkApplicationDisplay>();
             if (e.App.GetType() != typeof(AppConfig))
             {
                 // Only AppConfig can add users of other applications.
@@ -75,7 +75,7 @@ namespace Database.dbo
 
         protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)
         {
-            FrameworkApplicationView application = (FrameworkApplicationView)rowLookup;
+            FrameworkApplicationDisplay application = (FrameworkApplicationDisplay)rowLookup;
             Row.UserApplicationId = application.Id;
             Row.ApplicationText = application.Text;
         }
@@ -86,7 +86,7 @@ namespace Database.dbo
             if (text != null)
             {
                 string textLocal = text;
-                FrameworkApplicationView application = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Text == textLocal).FirstOrDefault();
+                FrameworkApplicationDisplay application = UtilDataAccessLayer.Query<FrameworkApplicationDisplay>().Where(item => item.Text == textLocal).FirstOrDefault();
                 if (application != null)
                 {
                     Row.UserApplicationId = application.Id;
@@ -100,7 +100,7 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkNavigationView_Button : Cell<FrameworkNavigationView>
+    public partial class FrameworkNavigationView_Button : Cell<FrameworkNavigationDisplay>
     {
         protected internal override void ConfigCell(ConfigCell result, AppEventArg e)
         {
@@ -121,13 +121,13 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkNavigationView
+    public partial class FrameworkNavigationDisplay
     {
-        public static GridNameType GridNameConfig = new GridName<FrameworkNavigationView>("Config");
+        public static GridNameType GridNameConfig = new GridName<FrameworkNavigationDisplay>("Config");
 
         protected override internal void Reload(AppEventArg e)
         {
-            var row = UtilDataAccessLayer.Query<FrameworkNavigationView>().Where(item => item.Id == Id).Single();
+            var row = UtilDataAccessLayer.Query<FrameworkNavigationDisplay>().Where(item => item.Id == Id).Single();
             UtilDataAccessLayer.RowCopy(row, this);
         }
 
@@ -143,7 +143,7 @@ namespace Database.dbo
         protected internal override void Insert(Row rowNew, ref bool isReload, AppEventArg e)
         {
             var rowNewNavigation = UtilDataAccessLayer.RowCopy<FrameworkNavigation>(rowNew);
-            rowNewNavigation.ComponentId = ((FrameworkNavigationView)rowNew).ComponentId;
+            rowNewNavigation.ComponentId = ((FrameworkNavigationDisplay)rowNew).ComponentId;
             Id = UtilDataAccessLayer.Insert(rowNewNavigation).Id; // Write to table. Not to view.
             //
             isReload = true;
@@ -151,14 +151,14 @@ namespace Database.dbo
 
         protected internal override IQueryable Query(GridName gridName, AppEventArg e)
         {
-            return UtilDataAccessLayer.Query<FrameworkNavigationView>().OrderBy(item => item.Text);
+            return UtilDataAccessLayer.Query<FrameworkNavigationDisplay>().OrderBy(item => item.Text);
         }
 
         [SqlColumn(null, typeof(FrameworkNavigationView_Button))]
         public string Button { get; set; }
     }
 
-    public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationView>
+    public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationDisplay>
     {
         protected internal override void Lookup(out GridNameType gridName, out IQueryable query, AppEventArg e)
         {
@@ -300,9 +300,9 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkApplicationView
+    public partial class FrameworkApplicationDisplay
     {
-        public static GridNameType GridNameLookup = new GridName<FrameworkApplicationView>("Lookup");
+        public static GridNameType GridNameLookup = new GridName<FrameworkApplicationDisplay>("Lookup");
 
         protected internal override void Update(Row row, Row rowNew, ref bool isReload, AppEventArg e)
         {
@@ -314,7 +314,7 @@ namespace Database.dbo
             UtilDataAccessLayer.RowCopy(rowNew, applicationNew);
             //
             UtilDataAccessLayer.Update(application, applicationNew);
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == this.Id).Single(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationDisplay>().Where(item => item.Id == this.Id).Single(), this);
         }
 
         protected internal override void Insert(Row rowNew, ref bool isReload, AppEventArg e)
@@ -322,7 +322,7 @@ namespace Database.dbo
             var application = new FrameworkApplication();
             UtilDataAccessLayer.RowCopy(this, application);
             UtilDataAccessLayer.Insert(application);
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Id == application.Id).Single(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkApplicationDisplay>().Where(item => item.Id == application.Id).Single(), this);
         }
     }
 
@@ -331,7 +331,7 @@ namespace Database.dbo
         public static GridNameType GridNameLookup { get { return new GridName<FrameworkApplicationType>("Lookup"); } }
     }
 
-    public partial class FrameworkApplicationView_TypeName
+    public partial class FrameworkApplicationDisplay_TypeName
     {
         protected internal override void TextParse(ref string text, AppEventArg e)
         {
@@ -357,7 +357,7 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkConfigColumnView
+    public partial class FrameworkConfigColumnDisplay
     {
         protected internal override void Update(Row row, Row rowNew, ref bool isReload, AppEventArg e)
         {
@@ -374,12 +374,12 @@ namespace Database.dbo
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.GridId == this.GridId && item.ColumnId == this.ColumnId).Single(), this); // Read back whole row to update ConfigId, if inserted.
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigColumnDisplay>().Where(item => item.GridId == this.GridId && item.ColumnId == this.ColumnId).Single(), this); // Read back whole row to update ConfigId, if inserted.
         }
 
         protected internal override void MasterIsClick(GridName gridNameMaster, Row rowMaster, ref bool isReload, AppEventArg e)
         {
-            FrameworkConfigGridView configTable = rowMaster as FrameworkConfigGridView;
+            FrameworkConfigGridDisplay configTable = rowMaster as FrameworkConfigGridDisplay;
             if (configTable != null)
             {
                 isReload = true;
@@ -388,10 +388,10 @@ namespace Database.dbo
 
         protected internal override IQueryable Query(GridName gridName, AppEventArg e)
         {
-            var configTable = e.App.GridData.RowSelected(new GridName<FrameworkConfigGridView>());
+            var configTable = e.App.GridData.RowSelected(new GridName<FrameworkConfigGridDisplay>());
             if (configTable != null)
             {
-                return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.GridId == configTable.GridId && item.TableNameCSharp == configTable.TableNameCSharp);
+                return UtilDataAccessLayer.Query<FrameworkConfigColumnDisplay>().Where(item => item.GridId == configTable.GridId && item.TableNameCSharp == configTable.TableNameCSharp);
             }
             else
             {
@@ -400,7 +400,7 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkConfigGridView
+    public partial class FrameworkConfigGridDisplay
     {
         protected internal override void Update(Row row, Row rowNew, ref bool isReload, AppEventArg e)
         {
@@ -417,7 +417,7 @@ namespace Database.dbo
                 UtilDataAccessLayer.RowCopy(rowNew, configNew);
                 UtilDataAccessLayer.Update(config, configNew);
             }
-            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.GridId == this.GridId && item.TableId == this.TableId).SingleOrDefault(), this);
+            UtilDataAccessLayer.RowCopy(UtilDataAccessLayer.Query<FrameworkConfigGridDisplay>().Where(item => item.GridId == this.GridId && item.TableId == this.TableId).SingleOrDefault(), this);
         }
     }
 }

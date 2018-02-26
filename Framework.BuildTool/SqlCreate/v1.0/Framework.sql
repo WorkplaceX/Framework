@@ -16,7 +16,7 @@ CREATE TABLE FrameworkApplication
 
 GO
 
-CREATE VIEW FrameworkApplicationView AS
+CREATE VIEW FrameworkApplicationDisplay AS
 SELECT
 	Application.Id,
 	Application.Text,
@@ -99,7 +99,7 @@ CREATE TABLE FrameworkConfigColumn
 
 GO
 
-CREATE VIEW FrameworkConfigGridView AS
+CREATE VIEW FrameworkConfigGridDisplay AS
 SELECT
 	Grid.Id AS GridId,
 	Grid.GridName,
@@ -127,7 +127,7 @@ LEFT JOIN
 
 GO
 
-CREATE VIEW FrameworkConfigColumnView AS
+CREATE VIEW FrameworkConfigColumnDisplay AS
 SELECT
 	Grid.Id AS GridId,
 	Grid.GridName,
@@ -198,7 +198,7 @@ CREATE TABLE FrameworkNavigation
 
 GO
 
-CREATE VIEW FrameworkNavigationView AS
+CREATE VIEW FrameworkNavigationDisplay AS
 SELECT
 	Navigation.Id AS Id,
 	Navigation.Text AS Text,
@@ -248,7 +248,7 @@ AS
 SELECT
 	UserX.Id AS UserId,
 	UserX.ApplicationId AS UserApplicationId,
-	(SELECT Application.Text AS ApplicationText FROM FrameworkApplicationView Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationText,
+	(SELECT Application.Text AS ApplicationText FROM FrameworkApplicationDisplay Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationText,
 	UserX.UserName AS UserUserName,
 	UserX.Password AS UserPassword,
 	UserX.IsBuiltIn AS UserIsBuiltIn,

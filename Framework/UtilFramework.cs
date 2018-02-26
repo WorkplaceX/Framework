@@ -28,7 +28,7 @@ namespace Framework
             get
             {
                 // .NET Core 2.0
-                return "v1.105 Server";
+                return "v1.106 Server";
             }
         }
 
@@ -88,8 +88,8 @@ namespace Framework
         {
             Type typeInAssembly = typeApp;
             UnitTest(typeInAssembly, () => {
-                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { TypeName = UtilFramework.TypeToName(typeApp), IsActive = true, IsExist = true });
-                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { TypeName = UtilFramework.TypeToName(typeof(AppConfig)), IsActive = true, IsExist = true, Path = "config" });
+                UtilDataAccessLayer.Insert(new FrameworkApplicationDisplay() { TypeName = UtilFramework.TypeToName(typeApp), IsActive = true, IsExist = true });
+                UtilDataAccessLayer.Insert(new FrameworkApplicationDisplay() { TypeName = UtilFramework.TypeToName(typeof(AppConfig)), IsActive = true, IsExist = true, Path = "config" });
             });
         }
 
@@ -122,7 +122,7 @@ namespace Framework
             var typeList = assembly.GetTypes();
             Type typeApp = typeList.Where(item => item.Name == typeAppString).Single();
             UtilFramework.UnitTest(typeApp, () => {
-                UtilDataAccessLayer.Insert(new FrameworkApplicationView() { TypeName = UtilFramework.TypeToName(typeApp), IsActive = true, IsExist = true });
+                UtilDataAccessLayer.Insert(new FrameworkApplicationDisplay() { TypeName = UtilFramework.TypeToName(typeApp), IsActive = true, IsExist = true });
             });
         }
 

@@ -18,8 +18,8 @@
         {
             MetaSql metaSql = new MetaSql(isFrameworkDb, appBuildTool);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
-            FrameworkConfigGridView[] configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridView>().Where(item => item.ConfigId != null).ToArray();
-            FrameworkConfigColumnView[] configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.ConfigId != null).ToArray();
+            FrameworkConfigGridDisplay[] configGridList = UtilDataAccessLayer.Query<FrameworkConfigGridDisplay>().Where(item => item.ConfigId != null).ToArray();
+            FrameworkConfigColumnDisplay[] configColumnList = UtilDataAccessLayer.Query<FrameworkConfigColumnDisplay>().Where(item => item.ConfigId != null).ToArray();
             string cSharp;
             new CSharpGenerate(metaCSharp).Run(configGridList, configColumnList, out cSharp);
             if (isFrameworkDb == false)

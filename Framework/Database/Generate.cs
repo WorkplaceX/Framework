@@ -34,6 +34,45 @@ namespace Database.dbo
 
     public partial class FrameworkApplication_IsActive : Cell<FrameworkApplication> { }
 
+    [SqlTable("dbo", "FrameworkApplicationDisplay")]
+    public partial class FrameworkApplicationDisplay : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkApplicationDisplay_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("Text", typeof(FrameworkApplicationDisplay_Text))]
+        public string Text { get; set; }
+
+        [SqlColumn("Path", typeof(FrameworkApplicationDisplay_Path))]
+        public string Path { get; set; }
+
+        [SqlColumn("ApplicationTypeId", typeof(FrameworkApplicationDisplay_ApplicationTypeId))]
+        public int ApplicationTypeId { get; set; }
+
+        [SqlColumn("TypeName", typeof(FrameworkApplicationDisplay_TypeName))]
+        public string TypeName { get; set; }
+
+        [SqlColumn("IsExist", typeof(FrameworkApplicationDisplay_IsExist))]
+        public bool? IsExist { get; set; }
+
+        [SqlColumn("IsActive", typeof(FrameworkApplicationDisplay_IsActive))]
+        public bool? IsActive { get; set; }
+    }
+
+    public partial class FrameworkApplicationDisplay_Id : Cell<FrameworkApplicationDisplay> { }
+
+    public partial class FrameworkApplicationDisplay_Text : Cell<FrameworkApplicationDisplay> { }
+
+    public partial class FrameworkApplicationDisplay_Path : Cell<FrameworkApplicationDisplay> { }
+
+    public partial class FrameworkApplicationDisplay_ApplicationTypeId : Cell<FrameworkApplicationDisplay> { }
+
+    public partial class FrameworkApplicationDisplay_TypeName : Cell<FrameworkApplicationDisplay> { }
+
+    public partial class FrameworkApplicationDisplay_IsExist : Cell<FrameworkApplicationDisplay> { }
+
+    public partial class FrameworkApplicationDisplay_IsActive : Cell<FrameworkApplicationDisplay> { }
+
     [SqlTable("dbo", "FrameworkApplicationType")]
     public partial class FrameworkApplicationType : Row
     {
@@ -52,46 +91,6 @@ namespace Database.dbo
     public partial class FrameworkApplicationType_TypeName : Cell<FrameworkApplicationType> { }
 
     public partial class FrameworkApplicationType_IsExist : Cell<FrameworkApplicationType> { }
-
-    [SqlTable("dbo", "FrameworkApplicationView")]
-    public partial class FrameworkApplicationView : Row
-    {
-        [SqlColumn("Id", typeof(FrameworkApplicationView_Id))]
-        public int Id { get; set; }
-
-        [SqlColumn("Text", typeof(FrameworkApplicationView_Text))]
-        public string Text { get; set; }
-
-        [SqlColumn("Path", typeof(FrameworkApplicationView_Path))]
-        public string Path { get; set; }
-
-        [SqlColumn("ApplicationTypeId", typeof(FrameworkApplicationView_ApplicationTypeId))]
-        public int ApplicationTypeId { get; set; }
-
-        [SqlColumn("TypeName", typeof(FrameworkApplicationView_TypeName))]
-        public string TypeName { get; set; }
-
-        [SqlColumn("IsExist", typeof(FrameworkApplicationView_IsExist))]
-        public bool? IsExist { get; set; }
-
-        [SqlColumn("IsActive", typeof(FrameworkApplicationView_IsActive))]
-        public bool? IsActive { get; set; }
-    }
-
-    public partial class FrameworkApplicationView_Id : Cell<FrameworkApplicationView> { }
-
-    public partial class FrameworkApplicationView_Text : Cell<FrameworkApplicationView> { }
-
-    public partial class FrameworkApplicationView_Path : Cell<FrameworkApplicationView> { }
-
-    public partial class FrameworkApplicationView_ApplicationTypeId : Cell<FrameworkApplicationView> { }
-
-    public partial class FrameworkApplicationView_TypeName : Cell<FrameworkApplicationView> { }
-
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkApplicationView_IsExist : Cell<FrameworkApplicationView> { }
-
-    public partial class FrameworkApplicationView_IsActive : Cell<FrameworkApplicationView> { }
 
     [SqlTable("dbo", "FrameworkColumn")]
     public partial class FrameworkColumn : Row
@@ -225,141 +224,129 @@ namespace Database.dbo
 
     public partial class FrameworkConfigColumn_WidthPercent : Cell<FrameworkConfigColumn> { }
 
-    [SqlTable("dbo", "FrameworkConfigColumnView")]
-    public partial class FrameworkConfigColumnView : Row
+    [SqlTable("dbo", "FrameworkConfigColumnDisplay")]
+    public partial class FrameworkConfigColumnDisplay : Row
     {
-        [SqlColumn("GridId", typeof(FrameworkConfigColumnView_GridId))]
+        [SqlColumn("GridId", typeof(FrameworkConfigColumnDisplay_GridId))]
         public int GridId { get; set; }
 
-        [SqlColumn("GridName", typeof(FrameworkConfigColumnView_GridName))]
+        [SqlColumn("GridName", typeof(FrameworkConfigColumnDisplay_GridName))]
         public string GridName { get; set; }
 
-        [SqlColumn("GridIsExist", typeof(FrameworkConfigColumnView_GridIsExist))]
+        [SqlColumn("GridIsExist", typeof(FrameworkConfigColumnDisplay_GridIsExist))]
         public bool GridIsExist { get; set; }
 
-        [SqlColumn("TableId", typeof(FrameworkConfigColumnView_TableId))]
+        [SqlColumn("TableId", typeof(FrameworkConfigColumnDisplay_TableId))]
         public int? TableId { get; set; }
 
-        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigColumnView_TableNameCSharp))]
+        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigColumnDisplay_TableNameCSharp))]
         public string TableNameCSharp { get; set; }
 
-        [SqlColumn("TableNameSql", typeof(FrameworkConfigColumnView_TableNameSql))]
+        [SqlColumn("TableNameSql", typeof(FrameworkConfigColumnDisplay_TableNameSql))]
         public string TableNameSql { get; set; }
 
-        [SqlColumn("TableIsExist", typeof(FrameworkConfigColumnView_TableIsExist))]
+        [SqlColumn("TableIsExist", typeof(FrameworkConfigColumnDisplay_TableIsExist))]
         public bool? TableIsExist { get; set; }
 
-        [SqlColumn("ColumnId", typeof(FrameworkConfigColumnView_ColumnId))]
+        [SqlColumn("ColumnId", typeof(FrameworkConfigColumnDisplay_ColumnId))]
         public int? ColumnId { get; set; }
 
-        [SqlColumn("ColumnNameCSharp", typeof(FrameworkConfigColumnView_ColumnNameCSharp))]
+        [SqlColumn("ColumnNameCSharp", typeof(FrameworkConfigColumnDisplay_ColumnNameCSharp))]
         public string ColumnNameCSharp { get; set; }
 
-        [SqlColumn("ColumnNameSql", typeof(FrameworkConfigColumnView_ColumnNameSql))]
+        [SqlColumn("ColumnNameSql", typeof(FrameworkConfigColumnDisplay_ColumnNameSql))]
         public string ColumnNameSql { get; set; }
 
-        [SqlColumn("ColumnIsExist", typeof(FrameworkConfigColumnView_ColumnIsExist))]
+        [SqlColumn("ColumnIsExist", typeof(FrameworkConfigColumnDisplay_ColumnIsExist))]
         public bool? ColumnIsExist { get; set; }
 
-        [SqlColumn("ConfigId", typeof(FrameworkConfigColumnView_ConfigId))]
+        [SqlColumn("ConfigId", typeof(FrameworkConfigColumnDisplay_ConfigId))]
         public int? ConfigId { get; set; }
 
-        [SqlColumn("TextDefault", typeof(FrameworkConfigColumnView_TextDefault))]
+        [SqlColumn("TextDefault", typeof(FrameworkConfigColumnDisplay_TextDefault))]
         public string TextDefault { get; set; }
 
-        [SqlColumn("Text", typeof(FrameworkConfigColumnView_Text))]
+        [SqlColumn("Text", typeof(FrameworkConfigColumnDisplay_Text))]
         public string Text { get; set; }
 
-        [SqlColumn("DescriptionDefault", typeof(FrameworkConfigColumnView_DescriptionDefault))]
+        [SqlColumn("DescriptionDefault", typeof(FrameworkConfigColumnDisplay_DescriptionDefault))]
         public string DescriptionDefault { get; set; }
 
-        [SqlColumn("Description", typeof(FrameworkConfigColumnView_Description))]
+        [SqlColumn("Description", typeof(FrameworkConfigColumnDisplay_Description))]
         public string Description { get; set; }
 
-        [SqlColumn("IsVisibleDefault", typeof(FrameworkConfigColumnView_IsVisibleDefault))]
+        [SqlColumn("IsVisibleDefault", typeof(FrameworkConfigColumnDisplay_IsVisibleDefault))]
         public bool? IsVisibleDefault { get; set; }
 
-        [SqlColumn("IsVisible", typeof(FrameworkConfigColumnView_IsVisible))]
+        [SqlColumn("IsVisible", typeof(FrameworkConfigColumnDisplay_IsVisible))]
         public bool? IsVisible { get; set; }
 
-        [SqlColumn("IsReadOnlyDefault", typeof(FrameworkConfigColumnView_IsReadOnlyDefault))]
+        [SqlColumn("IsReadOnlyDefault", typeof(FrameworkConfigColumnDisplay_IsReadOnlyDefault))]
         public bool? IsReadOnlyDefault { get; set; }
 
-        [SqlColumn("IsReadOnly", typeof(FrameworkConfigColumnView_IsReadOnly))]
+        [SqlColumn("IsReadOnly", typeof(FrameworkConfigColumnDisplay_IsReadOnly))]
         public bool? IsReadOnly { get; set; }
 
-        [SqlColumn("SortDefault", typeof(FrameworkConfigColumnView_SortDefault))]
+        [SqlColumn("SortDefault", typeof(FrameworkConfigColumnDisplay_SortDefault))]
         public double? SortDefault { get; set; }
 
-        [SqlColumn("Sort", typeof(FrameworkConfigColumnView_Sort))]
+        [SqlColumn("Sort", typeof(FrameworkConfigColumnDisplay_Sort))]
         public double? Sort { get; set; }
 
-        [SqlColumn("WidthPercentDefault", typeof(FrameworkConfigColumnView_WidthPercentDefault))]
+        [SqlColumn("WidthPercentDefault", typeof(FrameworkConfigColumnDisplay_WidthPercentDefault))]
         public double? WidthPercentDefault { get; set; }
 
-        [SqlColumn("WidthPercent", typeof(FrameworkConfigColumnView_WidthPercent))]
+        [SqlColumn("WidthPercent", typeof(FrameworkConfigColumnDisplay_WidthPercent))]
         public double? WidthPercent { get; set; }
     }
 
-    public partial class FrameworkConfigColumnView_GridId : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_GridId : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_GridName : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_GridName : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_GridIsExist : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_GridIsExist : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_TableId : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_TableId : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: false, isReadOnlyIsNull: true, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_TableNameCSharp : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_TableNameCSharp : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: false, isReadOnlyIsNull: true, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_TableNameSql : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_TableNameSql : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_TableIsExist : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_TableIsExist : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_ColumnId : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_ColumnId : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_ColumnNameCSharp : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_ColumnNameCSharp : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_ColumnNameSql : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_ColumnNameSql : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_ColumnIsExist : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_ColumnIsExist : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_ConfigId : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_ConfigId : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_TextDefault : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_TextDefault : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_Text : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_Text : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_DescriptionDefault : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_DescriptionDefault : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: false, isReadOnly: false, isReadOnlyIsNull: true, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_Description : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_Description : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_IsVisibleDefault : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_IsVisibleDefault : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_IsVisible : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_IsVisible : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_IsReadOnlyDefault : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_IsReadOnlyDefault : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_IsReadOnly : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_IsReadOnly : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_SortDefault : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_SortDefault : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_Sort : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_Sort : Cell<FrameworkConfigColumnDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigColumnView_WidthPercentDefault : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_WidthPercentDefault : Cell<FrameworkConfigColumnDisplay> { }
 
-    public partial class FrameworkConfigColumnView_WidthPercent : Cell<FrameworkConfigColumnView> { }
+    public partial class FrameworkConfigColumnDisplay_WidthPercent : Cell<FrameworkConfigColumnDisplay> { }
 
     [SqlTable("dbo", "FrameworkConfigGrid")]
     public partial class FrameworkConfigGrid : Row
@@ -405,81 +392,79 @@ namespace Database.dbo
 
     public partial class FrameworkConfigGrid_IsInsert : Cell<FrameworkConfigGrid> { }
 
-    [SqlTable("dbo", "FrameworkConfigGridView")]
-    public partial class FrameworkConfigGridView : Row
+    [SqlTable("dbo", "FrameworkConfigGridDisplay")]
+    public partial class FrameworkConfigGridDisplay : Row
     {
-        [SqlColumn("GridId", typeof(FrameworkConfigGridView_GridId))]
+        [SqlColumn("GridId", typeof(FrameworkConfigGridDisplay_GridId))]
         public int GridId { get; set; }
 
-        [SqlColumn("GridName", typeof(FrameworkConfigGridView_GridName))]
+        [SqlColumn("GridName", typeof(FrameworkConfigGridDisplay_GridName))]
         public string GridName { get; set; }
 
-        [SqlColumn("GridIsExist", typeof(FrameworkConfigGridView_GridIsExist))]
+        [SqlColumn("GridIsExist", typeof(FrameworkConfigGridDisplay_GridIsExist))]
         public bool GridIsExist { get; set; }
 
-        [SqlColumn("TableId", typeof(FrameworkConfigGridView_TableId))]
+        [SqlColumn("TableId", typeof(FrameworkConfigGridDisplay_TableId))]
         public int? TableId { get; set; }
 
-        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigGridView_TableNameCSharp))]
+        [SqlColumn("TableNameCSharp", typeof(FrameworkConfigGridDisplay_TableNameCSharp))]
         public string TableNameCSharp { get; set; }
 
-        [SqlColumn("TableNameSql", typeof(FrameworkConfigGridView_TableNameSql))]
+        [SqlColumn("TableNameSql", typeof(FrameworkConfigGridDisplay_TableNameSql))]
         public string TableNameSql { get; set; }
 
-        [SqlColumn("TableIsExist", typeof(FrameworkConfigGridView_TableIsExist))]
+        [SqlColumn("TableIsExist", typeof(FrameworkConfigGridDisplay_TableIsExist))]
         public bool? TableIsExist { get; set; }
 
-        [SqlColumn("ConfigId", typeof(FrameworkConfigGridView_ConfigId))]
+        [SqlColumn("ConfigId", typeof(FrameworkConfigGridDisplay_ConfigId))]
         public int? ConfigId { get; set; }
 
-        [SqlColumn("PageRowCountDefault", typeof(FrameworkConfigGridView_PageRowCountDefault))]
+        [SqlColumn("PageRowCountDefault", typeof(FrameworkConfigGridDisplay_PageRowCountDefault))]
         public int? PageRowCountDefault { get; set; }
 
-        [SqlColumn("PageRowCount", typeof(FrameworkConfigGridView_PageRowCount))]
+        [SqlColumn("PageRowCount", typeof(FrameworkConfigGridDisplay_PageRowCount))]
         public int? PageRowCount { get; set; }
 
-        [SqlColumn("PageColumnCountDefault", typeof(FrameworkConfigGridView_PageColumnCountDefault))]
+        [SqlColumn("PageColumnCountDefault", typeof(FrameworkConfigGridDisplay_PageColumnCountDefault))]
         public int? PageColumnCountDefault { get; set; }
 
-        [SqlColumn("PageColumnCount", typeof(FrameworkConfigGridView_PageColumnCount))]
+        [SqlColumn("PageColumnCount", typeof(FrameworkConfigGridDisplay_PageColumnCount))]
         public int? PageColumnCount { get; set; }
 
-        [SqlColumn("IsInsertDefault", typeof(FrameworkConfigGridView_IsInsertDefault))]
+        [SqlColumn("IsInsertDefault", typeof(FrameworkConfigGridDisplay_IsInsertDefault))]
         public bool? IsInsertDefault { get; set; }
 
-        [SqlColumn("IsInsert", typeof(FrameworkConfigGridView_IsInsert))]
+        [SqlColumn("IsInsert", typeof(FrameworkConfigGridDisplay_IsInsert))]
         public bool? IsInsert { get; set; }
     }
 
-    public partial class FrameworkConfigGridView_GridId : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_GridId : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_GridName : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_GridName : Cell<FrameworkConfigGridDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigGridView_GridIsExist : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_GridIsExist : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_TableId : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_TableId : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_TableNameCSharp : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_TableNameCSharp : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_TableNameSql : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_TableNameSql : Cell<FrameworkConfigGridDisplay> { }
 
-    [ConfigColumn(gridName: null, text: null, description: null, isVisible: false, isVisibleIsNull: true, isReadOnly: true, isReadOnlyIsNull: false, sort: 0, sortIsNull: true, widthPercent: 0, widthPercentIsNull: true)]
-    public partial class FrameworkConfigGridView_TableIsExist : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_TableIsExist : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_ConfigId : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_ConfigId : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_PageRowCountDefault : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_PageRowCountDefault : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_PageRowCount : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_PageRowCount : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_PageColumnCountDefault : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_PageColumnCountDefault : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_PageColumnCount : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_PageColumnCount : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_IsInsertDefault : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_IsInsertDefault : Cell<FrameworkConfigGridDisplay> { }
 
-    public partial class FrameworkConfigGridView_IsInsert : Cell<FrameworkConfigGridView> { }
+    public partial class FrameworkConfigGridDisplay_IsInsert : Cell<FrameworkConfigGridDisplay> { }
 
     [SqlTable("dbo", "FrameworkFileStorage")]
     public partial class FrameworkFileStorage : Row
@@ -748,29 +733,29 @@ namespace Database.dbo
 
     public partial class FrameworkNavigation_ComponentId : Cell<FrameworkNavigation> { }
 
-    [SqlTable("dbo", "FrameworkNavigationView")]
-    public partial class FrameworkNavigationView : Row
+    [SqlTable("dbo", "FrameworkNavigationDisplay")]
+    public partial class FrameworkNavigationDisplay : Row
     {
-        [SqlColumn("Id", typeof(FrameworkNavigationView_Id))]
+        [SqlColumn("Id", typeof(FrameworkNavigationDisplay_Id))]
         public int Id { get; set; }
 
-        [SqlColumn("Text", typeof(FrameworkNavigationView_Text))]
+        [SqlColumn("Text", typeof(FrameworkNavigationDisplay_Text))]
         public string Text { get; set; }
 
-        [SqlColumn("ComponentId", typeof(FrameworkNavigationView_ComponentId))]
+        [SqlColumn("ComponentId", typeof(FrameworkNavigationDisplay_ComponentId))]
         public int? ComponentId { get; set; }
 
-        [SqlColumn("ComponentNameCSharp", typeof(FrameworkNavigationView_ComponentNameCSharp))]
+        [SqlColumn("ComponentNameCSharp", typeof(FrameworkNavigationDisplay_ComponentNameCSharp))]
         public string ComponentNameCSharp { get; set; }
     }
 
-    public partial class FrameworkNavigationView_Id : Cell<FrameworkNavigationView> { }
+    public partial class FrameworkNavigationDisplay_Id : Cell<FrameworkNavigationDisplay> { }
 
-    public partial class FrameworkNavigationView_Text : Cell<FrameworkNavigationView> { }
+    public partial class FrameworkNavigationDisplay_Text : Cell<FrameworkNavigationDisplay> { }
 
-    public partial class FrameworkNavigationView_ComponentId : Cell<FrameworkNavigationView> { }
+    public partial class FrameworkNavigationDisplay_ComponentId : Cell<FrameworkNavigationDisplay> { }
 
-    public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationView> { }
+    public partial class FrameworkNavigationDisplay_ComponentNameCSharp : Cell<FrameworkNavigationDisplay> { }
 
     [SqlTable("dbo", "FrameworkScript")]
     public partial class FrameworkScript : Row

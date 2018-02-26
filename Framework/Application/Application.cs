@@ -41,10 +41,10 @@
         /// <summary>
         /// Database access of sql FrameworkApplicationView.
         /// </summary>
-        protected virtual List<FrameworkApplicationView> DbApplicationList()
+        protected virtual List<FrameworkApplicationDisplay> DbApplicationList()
         {
-            List<FrameworkApplicationView> result;
-            result = UtilDataAccessLayer.Query<FrameworkApplicationView>().ToList();
+            List<FrameworkApplicationDisplay> result;
+            result = UtilDataAccessLayer.Query<FrameworkApplicationDisplay>().ToList();
             result = result.Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match. And sql view FrameworkApplicationView exists (Execute BuildTool runSqlCreate command). 
             return result;
         }
@@ -58,7 +58,7 @@
             {
                 requestUrl += "/";
             }
-            foreach (FrameworkApplicationView frameworkApplication in DbApplicationList())
+            foreach (FrameworkApplicationDisplay frameworkApplication in DbApplicationList())
             {
                 string path = frameworkApplication.Path;
                 if (string.IsNullOrEmpty(path))
@@ -107,7 +107,7 @@
             ProcessInit(processList);
         }
 
-        internal void Constructor(WebControllerBase webController, FrameworkApplicationView dbFrameworkApplication)
+        internal void Constructor(WebControllerBase webController, FrameworkApplicationDisplay dbFrameworkApplication)
         {
             this.WebController = webController;
             this.DbFrameworkApplication = dbFrameworkApplication;
@@ -129,7 +129,7 @@
         /// <summary>
         /// Gets DbFrameworkApplication. Used in connection with class AppSelector. See also database table FrameworkApplication.
         /// </summary>
-        public FrameworkApplicationView DbFrameworkApplication { get; private set; }
+        public FrameworkApplicationDisplay DbFrameworkApplication { get; private set; }
 
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
@@ -461,7 +461,7 @@
         {
             if (gridName == null)
             {
-                gridName = new GridName<FrameworkNavigationView>(); // Default grid.
+                gridName = new GridName<FrameworkNavigationDisplay>(); // Default grid.
             }
             this.GridNameJson = Application.GridName.ToJson(gridName);
             new Grid(this, gridName).IsHide = true;
@@ -501,7 +501,7 @@
         /// </summary>
         public void ButtonIsClick(AppEventArg e)
         {
-            var Row = (FrameworkNavigationView)e.App.GridData.RowGet(e.GridName, e.Index);
+            var Row = (FrameworkNavigationDisplay)e.App.GridData.RowGet(e.GridName, e.Index);
             Type type = null;
             if (Row.ComponentNameCSharp != null)
             {

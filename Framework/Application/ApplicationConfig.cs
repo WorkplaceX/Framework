@@ -16,14 +16,14 @@
 
         protected internal override void RowQuery(ref IQueryable result, GridName gridName)
         {
-            if (gridName == FrameworkNavigationView.GridNameConfig)
+            if (gridName == FrameworkNavigationDisplay.GridNameConfig)
             {
                 // Returns static navigation for AppConfig.
-                List<FrameworkNavigationView> list = new List<FrameworkNavigationView>();
-                list.Add(new FrameworkNavigationView() { Text = "Application", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageApplicationConfig)) });
-                list.Add(new FrameworkNavigationView() { Text = "Navigation", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageNavigationConfig)) });
-                list.Add(new FrameworkNavigationView() { Text = "Grid", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageGridConfig)) });
-                list.Add(new FrameworkNavigationView() { Text = "User", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageLoginUserConfig)) });
+                List<FrameworkNavigationDisplay> list = new List<FrameworkNavigationDisplay>();
+                list.Add(new FrameworkNavigationDisplay() { Text = "Application", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageApplicationConfig)) });
+                list.Add(new FrameworkNavigationDisplay() { Text = "Navigation", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageNavigationConfig)) });
+                list.Add(new FrameworkNavigationDisplay() { Text = "Grid", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageGridConfig)) });
+                list.Add(new FrameworkNavigationDisplay() { Text = "User", ComponentNameCSharp = UtilFramework.TypeToName(typeof(PageLoginUserConfig)) });
                 result = list.AsQueryable();
             }
         }
@@ -33,18 +33,18 @@
     {
         protected internal override void InitJson(App app)
         {
-            new Navigation(this, FrameworkNavigationView.GridNameConfig);
+            new Navigation(this, FrameworkNavigationDisplay.GridNameConfig);
             return;
             //
             new Label(this) { Text = $"Version={ UtilFramework.VersionServer }" };
             new Literal(this) { TextHtml = "<h1>Application</h1>" };
-            new Grid(this, new GridName<FrameworkApplicationView>());
+            new Grid(this, new GridName<FrameworkApplicationDisplay>());
             // ConfigGrid
             new Literal(this) { TextHtml = "<h1>Config Grid</h1>" };
-            new Grid(this, new GridName<FrameworkConfigGridView>());
+            new Grid(this, new GridName<FrameworkConfigGridDisplay>());
             // ConfigColumn
             new Literal(this) { TextHtml = "<h1>Config Column</h1>" };
-            new Grid(this, new GridName<FrameworkConfigColumnView>());
+            new Grid(this, new GridName<FrameworkConfigColumnDisplay>());
         }
     }
 
@@ -57,7 +57,7 @@
         {
             new Literal(this) { TextHtml = "<h1>Application Configuration</h1>" };
             new Literal(this) { TextHtml = "<p>Following list shows all applications running on this instance. Configure for example url for each application.</p>" };
-            new Grid(this, new GridName<FrameworkApplicationView>());
+            new Grid(this, new GridName<FrameworkApplicationDisplay>());
         }
     }
 
@@ -70,7 +70,7 @@
         {
             new Literal(this) { TextHtml = "<h1>Navigation Configuration</h1>" };
             new Literal(this) { TextHtml = "<p>Define the page navigation of each application.</p>" };
-            new Grid(this, new GridName<FrameworkNavigationView>());
+            new Grid(this, new GridName<FrameworkNavigationDisplay>());
         }
     }
 
@@ -85,10 +85,10 @@
             new Literal(this) { TextHtml = "<p>Following list shows all available data grids. Configure for example header text or IsReadOnly for each column.</p>" };
             // ConfigGrid
             new Literal(this) { TextHtml = "<h2>Config Grid</h2>" };
-            new Grid(this, new GridName<FrameworkConfigGridView>());
+            new Grid(this, new GridName<FrameworkConfigGridDisplay>());
             // ConfigColumn
             new Literal(this) { TextHtml = "<h2>Config Column</h2>" };
-            new Grid(this, new GridName<FrameworkConfigColumnView>());
+            new Grid(this, new GridName<FrameworkConfigColumnDisplay>());
         }
     }
 

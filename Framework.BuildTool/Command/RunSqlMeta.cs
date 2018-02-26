@@ -48,7 +48,7 @@
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
             List<SqlParameter> parameterList = new List<SqlParameter>();
-            foreach (FrameworkApplicationView frameworkApplication in AppBuildTool.DbFrameworkApplicationView())
+            foreach (FrameworkApplicationDisplay frameworkApplication in AppBuildTool.DbFrameworkApplicationView())
             {
                 if (isFirst)
                 {
