@@ -11,9 +11,25 @@ namespace Database.dbo
 {
     public partial class FrameworkLoginUserDisplay
     {
-        protected override internal void Reload()
+        /// <summary>
+        /// AppConfig shows users from all applications.
+        /// </summary>
+        private static IQueryable<FrameworkLoginUserDisplay> Filter(IQueryable<FrameworkLoginUserDisplay> query, AppEventArg e)
         {
-            FrameworkLoginUserDisplay rowReload = UtilDataAccessLayer.Query<FrameworkLoginUserDisplay>().Where(item => item.UserId == UserId).Single();
+            var result = query;
+            if (e.App.GetType() != typeof(AppConfig))
+            {
+                int applicationId = e.App.DbFrameworkApplication.Id;
+                result = result.Where(item => item.UserApplicationId == applicationId);
+            }
+            return result;
+        }
+
+        protected override internal void Reload(AppEventArg e)
+        {
+            var query = UtilDataAccessLayer.Query<FrameworkLoginUserDisplay>().Where(item => item.UserId == UserId);
+            query = Filter(query, e);
+            FrameworkLoginUserDisplay rowReload = query.Single();
             UtilDataAccessLayer.RowCopy(rowReload, this);
         }
 
@@ -32,9 +48,16 @@ namespace Database.dbo
             UtilDataAccessLayer.Update(user, userNew);
             isReload = true;
         }
+
+        protected internal override IQueryable Query(GridName gridName, AppEventArg e)
+        {
+            var result = (IQueryable< FrameworkLoginUserDisplay>)base.Query(gridName, e);
+            result = Filter(result, e);
+            return result;
+        }
     }
 
-    public partial class FrameworkLoginUserDisplay_ApplicationTypeName
+    public partial class FrameworkLoginUserDisplay_ApplicationText
     {
         protected internal override void Lookup(out GridNameType gridName, out IQueryable query, AppEventArg e)
         {
@@ -43,8 +66,8 @@ namespace Database.dbo
             if (e.App.GetType() != typeof(AppConfig))
             {
                 // Only AppConfig can add users of other applications.
-                string name = UtilFramework.TypeToName(e.App.GetType());
-                result = result.Where(item => item.TypeName == name);
+                int applicationId = e.App.DbFrameworkApplication.Id;
+                result = result.Where(item => item.Id == applicationId);
             }
             query = result;
         }
@@ -53,6 +76,7 @@ namespace Database.dbo
         {
             FrameworkApplicationView application = (FrameworkApplicationView)rowLookup;
             Row.UserApplicationId = application.Id;
+            Row.ApplicationText = application.Text;
         }
     }
 
@@ -81,7 +105,7 @@ namespace Database.dbo
     {
         public static GridNameType GridNameConfig = new GridName<FrameworkNavigationView>("Config");
 
-        protected override internal void Reload()
+        protected override internal void Reload(AppEventArg e)
         {
             var row = UtilDataAccessLayer.Query<FrameworkNavigationView>().Where(item => item.Id == Id).Single();
             UtilDataAccessLayer.RowCopy(row, this);
@@ -102,10 +126,10 @@ namespace Database.dbo
             rowNewNavigation.ComponentId = ((FrameworkNavigationView)rowNew).ComponentId;
             Id = UtilDataAccessLayer.Insert(rowNewNavigation).Id; // Write to table. Not to view.
             //
-            Reload();
+            isReload = true;
         }
 
-        protected internal override IQueryable Query(App app, GridName gridName)
+        protected internal override IQueryable Query(GridName gridName, AppEventArg e)
         {
             return UtilDataAccessLayer.Query<FrameworkNavigationView>().OrderBy(item => item.Text);
         }
@@ -325,9 +349,9 @@ namespace Database.dbo
             }
         }
 
-        protected internal override IQueryable Query(App app, GridName gridName)
+        protected internal override IQueryable Query(GridName gridName, AppEventArg e)
         {
-            var configTable = app.GridData.RowSelected(new GridName<FrameworkConfigGridView>());
+            var configTable = e.App.GridData.RowSelected(new GridName<FrameworkConfigGridView>());
             if (configTable != null)
             {
                 return UtilDataAccessLayer.Query<FrameworkConfigColumnView>().Where(item => item.GridId == configTable.GridId && item.TableNameCSharp == configTable.TableNameCSharp);

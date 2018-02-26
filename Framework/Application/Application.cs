@@ -501,6 +501,7 @@
             if (type == null)
             {
                 divContent.List.Clear();
+                e.App.PageShow(divContent, typeof(Page)); // Empty page. Prevents method ProcessButtonIsClickFirst(); to display default page.
             }
             else
             {

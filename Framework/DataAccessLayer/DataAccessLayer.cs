@@ -14,7 +14,7 @@
         /// <summary>
         /// Reload single record. Prior to reload stored procedure can be executed for example to validate row.
         /// </summary>
-        protected virtual internal void Reload()
+        protected virtual internal void Reload(AppEventArg e)
         {
             // Example:
 
@@ -62,7 +62,7 @@
 
         }
 
-        protected virtual internal IQueryable Query(App app, GridName gridName)
+        protected virtual internal IQueryable Query(GridName gridName, AppEventArg e)
         {
             return UtilDataAccessLayer.Query(GetType());
         }

@@ -616,11 +616,8 @@ namespace Database.dbo
         [SqlColumn("UserApplicationId", typeof(FrameworkLoginUserDisplay_UserApplicationId))]
         public int UserApplicationId { get; set; }
 
-        [SqlColumn("ApplicationTypeName", typeof(FrameworkLoginUserDisplay_ApplicationTypeName))]
-        public string ApplicationTypeName { get; set; }
-
-        [SqlColumn("ApplicationPath", typeof(FrameworkLoginUserDisplay_ApplicationPath))]
-        public string ApplicationPath { get; set; }
+        [SqlColumn("ApplicationText", typeof(FrameworkLoginUserDisplay_ApplicationText))]
+        public string ApplicationText { get; set; }
 
         [SqlColumn("UserUserName", typeof(FrameworkLoginUserDisplay_UserUserName))]
         public string UserUserName { get; set; }
@@ -639,9 +636,7 @@ namespace Database.dbo
 
     public partial class FrameworkLoginUserDisplay_UserApplicationId : Cell<FrameworkLoginUserDisplay> { }
 
-    public partial class FrameworkLoginUserDisplay_ApplicationTypeName : Cell<FrameworkLoginUserDisplay> { }
-
-    public partial class FrameworkLoginUserDisplay_ApplicationPath : Cell<FrameworkLoginUserDisplay> { }
+    public partial class FrameworkLoginUserDisplay_ApplicationText : Cell<FrameworkLoginUserDisplay> { }
 
     public partial class FrameworkLoginUserDisplay_UserUserName : Cell<FrameworkLoginUserDisplay> { }
 

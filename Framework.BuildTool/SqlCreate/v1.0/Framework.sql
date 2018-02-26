@@ -248,15 +248,13 @@ AS
 SELECT
 	UserX.Id AS UserId,
 	UserX.ApplicationId AS UserApplicationId,
-	(SELECT Application.TypeName AS ApplicationTypeName FROM FrameworkApplicationView Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationTypeName,
-	(SELECT Application.Path AS ApplicationPath FROM FrameworkApplicationView Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationPath,
+	(SELECT Application.Text AS ApplicationText FROM FrameworkApplicationView Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationText,
 	UserX.UserName AS UserUserName,
 	UserX.Password AS UserPassword,
 	UserX.IsBuiltIn AS UserIsBuiltIn,
 	UserX.IsBuiltInExist AS UserIsBuiltInExist
 FROM
 	FrameworkLoginUser UserX
-
 
 GO
 CREATE VIEW FrameworkLoginUserRoleDisplay

@@ -632,7 +632,7 @@
             if (queryLookup == null)
             {
                 Row rowTable = UtilDataAccessLayer.RowCreate(gridName.TypeRow);
-                query = rowTable.Query(App, gridName);
+                query = rowTable.Query(gridName, new AppEventArg(App, gridName, null, null));
                 App.RowQuery(ref query, gridName);
             }
             else
@@ -721,7 +721,7 @@
             {
                 Type typeRow = TypeRowGet(gridName);
                 Row rowTable = UtilDataAccessLayer.RowCreate(typeRow);
-                IQueryable query = rowTable.Query(App, gridName);
+                IQueryable query = rowTable.Query(gridName, new AppEventArg(App, gridName, null, null));
                 List<Row> rowList = new List<Row>();
                 List<Filter> filterList = null;
                 if (query != null)
@@ -910,10 +910,11 @@
                                         try
                                         {
                                             bool isReload = false;
-                                            row.RowNew.Update(row.Row, row.RowNew, ref isReload, new AppEventArg(App, gridName, index, null));
+                                            var appEventArg = new AppEventArg(App, gridName, index, null);
+                                            row.RowNew.Update(row.Row, row.RowNew, ref isReload, appEventArg);
                                             if (isReload)
                                             {
-                                                row.RowNew.Reload();
+                                                row.RowNew.Reload(appEventArg);
                                             }
                                             ErrorRowSet(gridName, index, null);
                                             row.Row = row.RowNew;
@@ -931,10 +932,11 @@
                                     try
                                     {
                                         bool isReload = false;
-                                        row.RowNew.Insert(row.RowNew, ref isReload, new AppEventArg(App, gridName, index, null));
+                                        var appEventArg = new AppEventArg(App, gridName, index, null);
+                                        row.RowNew.Insert(row.RowNew, ref isReload, appEventArg);
                                         if (isReload)
                                         {
-                                            row.RowNew.Reload();
+                                            row.RowNew.Reload(appEventArg);
                                         }
                                     }
                                     catch (Exception exception)
@@ -942,11 +944,14 @@
                                         exceptionText = UtilFramework.ExceptionToText(exception);
                                     }
                                     ErrorRowSet(gridName, index, null);
-                                    row.Row = row.RowNew;
-                                    CellTextClear(gridName, index);
-                                    RowNewAdd(gridName); // User entered text in "New" row. Make "New" to "Index" and add "New". No Config check. It has to be Grid.IsInsert once we reached this point.
-                                    SaveDatabaseNewRowSelectIndex(gridName);
-                                    SaveDatabaseNewRowLookup(gridName);
+                                    if (exceptionText == null)
+                                    {
+                                        row.Row = row.RowNew;
+                                        CellTextClear(gridName, index);
+                                        RowNewAdd(gridName); // User entered text in "New" row. Make "New" to "Index" and add "New". No Config check. It has to be Grid.IsInsert once we reached this point.
+                                        SaveDatabaseNewRowSelectIndex(gridName);
+                                        SaveDatabaseNewRowLookup(gridName);
+                                    }
                                     //
                                     if (exceptionText != null)
                                     {
