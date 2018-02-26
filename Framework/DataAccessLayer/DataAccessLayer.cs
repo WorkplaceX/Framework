@@ -156,10 +156,18 @@
         /// <summary>
         /// Parse user entered text and write result to Row.
         /// </summary>
-        protected virtual internal void TextParse(ref string text, bool isDeleteKey, AppEventArg e)
+        protected virtual internal void TextParse(ref string text, AppEventArg e)
         {
             object value = UtilDataAccessLayer.RowValueFromText(text, Row.GetType().GetProperty(e.ColumnName).PropertyType); // Default parse text.
             Row.GetType().GetProperty(e.ColumnName).SetValue(Row, value); // Write to Row.
+        }
+
+        /// <summary>
+        /// Parse user entered text and write result to Row. Allows auto complete. For example "y" can be turned into "Yes".
+        /// </summary>
+        protected virtual internal void TextParseAuto(ref string text, AppEventArg e)
+        {
+            TextParse(ref text, e);
         }
 
         /// <summary>

@@ -406,6 +406,7 @@
                         if (gridCell.IsModify)
                         {
                             gridCell.IsModify = false;
+                            gridCell.TOld = null;
                         }
                     }
                 }

@@ -521,24 +521,21 @@ export class GridField {
 
   set Text(textNew: string) {
     let gridCell = this.gridCell();
-    // Backup old text.
+    // Backup original text.
     if (gridCell.IsO == null) { 
       gridCell.IsO = true;
       gridCell.O = gridCell.T;
     }
-    // New text back to old text.
+    // New text back to original text.
     if (gridCell.IsO == true && gridCell.O == textNew) {
       gridCell.IsO = null;
       gridCell.O = null;
     }
-    // IsDeleteKey
-    let textLength: number = gridCell.T == null ? 0 : gridCell.T.length;
-    let textNewLength: number = textNew == null ? 0 : textNew.length;
-    let isDeleteKey: boolean = textNewLength < textLength;
+    // TextOld (Not the same like Original! Used to detect IsDeleteKey)
+    gridCell.TOld = gridCell.T;
     
     gridCell.T = textNew;
     gridCell.IsModify = true;
-    gridCell.IsDeleteKey = isDeleteKey;
     // GridSave icon.
     if (gridCell.CssClass == null || gridCell.CssClass.indexOf('gridSave') == -1) {
       gridCell.CssClass = gridCell.CssClass == null ? "" : gridCell.CssClass; // Prevent 'undefined'

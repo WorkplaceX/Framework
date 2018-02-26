@@ -351,9 +351,9 @@
         public bool IsModify;
 
         /// <summary>
-        /// Gets or sets IsDeleteKey. Sent by client indicating user pressed delete or backspace button.
+        /// Gets or sets TOld. Old text sent by client before latest user modification. This is different from text Original. It's used to detect IsDeleteKey.
         /// </summary>
-        public bool IsDeleteKey;
+        public string TOld;
 
         /// <summary>
         /// Gets or sets CellEnum. Render cell as button, html or file upload button.

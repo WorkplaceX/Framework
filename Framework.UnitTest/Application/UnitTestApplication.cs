@@ -277,20 +277,17 @@
                 gridCell.IsO = true;
                 gridCell.O = gridCell.T;
             }
-            // New text back to old text.
+            // New text back to original text.
             if (gridCell.IsO == true && gridCell.O == textNew)
             {
                 gridCell.IsO = null;
                 gridCell.O = null;
             }
-            // IsDeleteKey
-            int textLength = gridCell.T == null ? 0 : gridCell.T.Length;
-            int textNewLength = textNew == null ? 0 : textNew.Length;
-            bool isDeleteKey = textNewLength < textLength;
+            // TextOld (Not the same like Original! Used to detect IsDeleteKey)
+            gridCell.TOld = textNew;
 
             gridCell.T = textNew;
             gridCell.IsModify = true;
-            gridCell.IsDeleteKey = isDeleteKey;
             // GridSave icon.
             if (gridCell.CssClass == null || gridCell.CssClass.IndexOf("gridSave") == -1)
             {

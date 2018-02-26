@@ -216,9 +216,8 @@
         /// Called before user entered text is parsed with method UtilDataAccessLayer.RowValueToText();
         /// </summary>
         /// <param name="cell">Cell to parse.</param>
-        /// <param name="result">Parsed result by default to adjust.</param>
-        /// <param name="isDeleteKey">User pressed delete or backspace key.</param>
-        protected virtual internal void CellTextParse(Cell cell, ref string result, bool isDeleteKey, AppEventArg e)
+        /// <param name="text">Parsed result by default to adjust.</param>
+        protected virtual internal void CellTextParse(Cell cell, ref string text, AppEventArg e)
         {
             if (IsNamingConvention)
             {
@@ -226,45 +225,57 @@
                 // Bool
                 if (type == typeof(bool))
                 {
-                    string text = result == null ? null : result.ToUpper();
-                    if (text != null)
+                    string textUpper = text == null ? null : text.ToUpper();
+                    if (textUpper != null)
                     {
-                        if (text == "YES")
+                        if (textUpper == "YES")
                         {
-                            result = "True";
+                            text = "True";
                         }
-                        if (text == "NO")
+                        if (textUpper == "NO")
                         {
-                            result = "False";
+                            text = "False";
                         }
-                        // Key short cut
-                        if (isDeleteKey == false)
+                    }
+                }
+            }
+        }
+
+        protected virtual internal void CellTextParseAuto(Cell cell, ref string text, AppEventArg e)
+        {
+            if (IsNamingConvention)
+            {
+                Type type = UtilFramework.TypeUnderlying(cell.TypeColumn);
+                // Bool
+                if (type == typeof(bool))
+                {
+                    string textLocal = text == null ? null : text.ToUpper();
+                    if (textLocal != null)
+                    {
+                        if (textLocal.StartsWith("Y"))
                         {
-                            if (text.StartsWith("Y"))
-                            {
-                                result = "True";
-                            }
-                            if (text.StartsWith("N"))
-                            {
-                                result = "False";
-                            }
+                            text = "True";
+                        }
+                        if (textLocal.StartsWith("N"))
+                        {
+                            text = "False";
                         }
                     }
                 }
                 // DateTime
                 if (type == typeof(DateTime))
                 {
-                    if (result != null)
+                    if (text != null)
                     {
                         // Make user entered text less restrictive. Allow for example "2018-1-1" and "2018-01-01"
-                        string text = result;
-                        object value = UtilDataAccessLayer.RowValueFromText(text, cell.TypeColumn);
+                        string textLocal = text;
+                        object value = UtilDataAccessLayer.RowValueFromText(textLocal, cell.TypeColumn);
                         string textCompare = UtilDataAccessLayer.RowValueToText(value, cell.TypeColumn);
                         if (textCompare != null)
                         {
-                            if (text.Replace("0", "") == textCompare.Replace("0", ""))
+                            if (textLocal.Replace("0", "") == textCompare.Replace("0", ""))
                             {
-                                result = textCompare;
+                                text = textCompare;
                             }
                         }
                     }

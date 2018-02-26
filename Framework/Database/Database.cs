@@ -6,6 +6,7 @@ using System.Linq;
 using Framework.Component;
 using Framework;
 using Framework.Application.Config;
+using Microsoft.EntityFrameworkCore;
 
 namespace Database.dbo
 {
@@ -77,6 +78,25 @@ namespace Database.dbo
             FrameworkApplicationView application = (FrameworkApplicationView)rowLookup;
             Row.UserApplicationId = application.Id;
             Row.ApplicationText = application.Text;
+        }
+
+        protected internal override void TextParse(ref string text, AppEventArg e)
+        {
+            base.TextParse(ref text, e);
+            if (text != null)
+            {
+                string textLocal = text;
+                FrameworkApplicationView application = UtilDataAccessLayer.Query<FrameworkApplicationView>().Where(item => item.Text == textLocal).FirstOrDefault();
+                if (application != null)
+                {
+                    Row.UserApplicationId = application.Id;
+                    Row.ApplicationText = application.Text;
+                }
+                else
+                {
+                    throw new Exception("Application not found!");
+                }
+            }
         }
     }
 
@@ -159,13 +179,13 @@ namespace Database.dbo
             Row.ComponentId = ((FrameworkComponent)rowLookup).Id;
         }
 
-        protected internal override void TextParse(ref string text, bool isDeleteKey, AppEventArg e)
+        protected internal override void TextParse(ref string text, AppEventArg e)
         {
-            base.TextParse(ref text, isDeleteKey, e);
+            base.TextParse(ref text, e);
             //
             if (e.Index.Enum == IndexEnum.Filter)
             {
-                return; // No further parsing ncessary like date.
+                return; // No further parsing necessary like date.
             }
             if (text == null)
             {
@@ -174,27 +194,44 @@ namespace Database.dbo
             else
             {
                 string textLocal = text;
-                var query = UtilDataAccessLayer.Query<FrameworkComponent>().Where(item => item.ComponentNameCSharp.Contains(textLocal)).Take(2);
-                var rowComponentList = query.ToArray();
-                if (rowComponentList.Length == 1)
+                FrameworkComponent component = UtilDataAccessLayer.Query<FrameworkComponent>().Where(item => item.ComponentNameCSharp == textLocal).SingleOrDefault();
+                if (component != null)
                 {
-                    if (isDeleteKey == true)
-                    {
-                        if (rowComponentList[0].ComponentNameCSharp != text)
-                        {
-                            throw new Exception("Component not found!");
-                        }
-                    }
-                    else
-                    { 
-                        // Auto Complete
-                        Row.ComponentId = rowComponentList[0].Id;
-                        text = rowComponentList[0].ComponentNameCSharp;
-                    }
-                    base.TextParse(ref text, isDeleteKey, e);
+                    Row.ComponentId = component.Id;
+                    text = component.ComponentNameCSharp;
+                    base.TextParse(ref text, e);
                 }
                 else
-                { 
+                {
+                    throw new Exception("Component not found!");
+                }
+            }
+        }
+
+        protected internal override void TextParseAuto(ref string text, AppEventArg e)
+        {
+            base.TextParse(ref text, e);
+            //
+            if (e.Index.Enum == IndexEnum.Filter)
+            {
+                return; // No further parsing necessary like date.
+            }
+            if (text == null)
+            {
+                Row.ComponentId = null;
+            }
+            else
+            {
+                string textLocal = text;
+                var componentList = UtilDataAccessLayer.Query<FrameworkComponent>().Where(item => EF.Functions.Like(item.ComponentNameCSharp, '%' + textLocal + '%')).Take(2).ToArray();
+                if (componentList.Count() == 1)
+                {
+                    Row.ComponentId = componentList[0].Id;
+                    text = componentList[0].ComponentNameCSharp;
+                    base.TextParse(ref text, e);
+                }
+                else
+                {
                     throw new Exception("Component not found!");
                 }
             }
@@ -296,7 +333,7 @@ namespace Database.dbo
 
     public partial class FrameworkApplicationView_TypeName
     {
-        protected internal override void TextParse(ref string text, bool isDeleteKey, AppEventArg e)
+        protected internal override void TextParse(ref string text, AppEventArg e)
         {
             string textLocal = text;
             var applicationType = UtilDataAccessLayer.Query<FrameworkApplicationType>().Where(item => item.TypeName == textLocal).FirstOrDefault();

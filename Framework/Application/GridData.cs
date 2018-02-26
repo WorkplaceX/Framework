@@ -1031,8 +1031,16 @@
                                 try
                                 {
                                     var appEventArg  = new AppEventArg(App, gridName, index, columnName);
-                                    App.CellTextParse(cell, ref text, isDeleteKey, appEventArg);
-                                    cell.TextParse(ref text, isDeleteKey, appEventArg); // Write to row
+                                    if (isDeleteKey == false)
+                                    {
+                                        App.CellTextParseAuto(cell, ref text, appEventArg);
+                                        cell.TextParseAuto(ref text, appEventArg); // Write to row
+                                    }
+                                    else
+                                    {
+                                        App.CellTextParse(cell, ref text, appEventArg);
+                                        cell.TextParse(ref text, appEventArg); // Write to row
+                                    }
                                     text = text == "" ? null : text;
                                     //
                                     if (index.Enum == IndexEnum.Filter && text == null) 
@@ -1107,6 +1115,23 @@
         }
 
         /// <summary>
+        /// Returns true, if user hit delete or backspace key.
+        /// </summary>
+        private bool IsDeleteKey(string textOld, string textNew)
+        {
+            bool result = false;
+            if (textOld != null && textNew != null)
+            {
+                result = textNew.Length < textOld.Length;
+                if (textNew.Length == 1 && (textNew.Substring(0, 1) != textOld.Substring(0, 1))) // User selected whole text.
+                {
+                    result = false;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Load data from http json request.
         /// </summary>
         internal void LoadJson(GridName gridName)
@@ -1149,7 +1174,7 @@
                     GridCellInternal gridCellInternal = CellInternalGet(gridName, rowIndex, columnName);
                     gridCellInternal.IsClick = gridCell.IsClick;
                     gridCellInternal.IsModify = gridCell.IsModify;
-                    gridCellInternal.IsDeleteKey = gridCell.IsDeleteKey;
+                    gridCellInternal.IsDeleteKey = IsDeleteKey(gridCell.TOld, gridCell.T);
                     gridCellInternal.IsLookup = gridCell.IsLookup;
                     gridCellInternal.GridNameLookup = gridCell.GridNameLookup;
                     gridCellInternal.FocusId = gridCell.FocusId;
