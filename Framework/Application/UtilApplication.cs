@@ -524,7 +524,7 @@
                 });
                 taskLoadGrid.Start();
                 taskLoadColumn.Start();
-                Task.WhenAll(taskLoadGrid, taskLoadColumn).Wait();
+                Task.WhenAll(taskLoadGrid, taskLoadColumn).GetAwaiter().GetResult(); // .Wait();
             }
         }
 

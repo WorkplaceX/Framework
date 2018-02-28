@@ -1,5 +1,8 @@
-﻿DROP VIEW FrameworkLoginUserDisplay
+﻿DROP TABLE FrameworkSession
 DROP VIEW FrameworkLoginUserRoleDisplay
+DROP VIEW FrameworkLoginUserDisplay
+DROP TABLE FrameworkLoginRolePermission
+DROP TABLE FrameworkLoginPermission
 DROP TABLE FrameworkLoginUserRole
 DROP TABLE FrameworkLoginRole
 DROP TABLE FrameworkLoginUser
@@ -14,7 +17,6 @@ DROP TABLE FrameworkConfigColumn
 DROP TABLE FrameworkGrid
 DROP TABLE FrameworkColumn
 DROP TABLE FrameworkTable
-DROP TABLE FrameworkSession
 DROP VIEW FrameworkApplicationDisplay
 DROP TABLE FrameworkApplication
 DROP TABLE FrameworkApplicationType

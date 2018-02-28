@@ -27,6 +27,14 @@
                 result = list.AsQueryable();
             }
         }
+
+        /// <summary>
+        /// Returns BuiltIn Admin User for this AppConfig.
+        /// </summary>
+        public static FrameworkLoginUser UserAdmin()
+        {
+            return new FrameworkLoginUser("Admin", "Admin");
+        }
     }
 
     public class PageConfig : Page

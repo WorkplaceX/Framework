@@ -2,12 +2,14 @@
 {
     using Database.dbo;
     using Framework.Application;
+    using Framework.Application.Config;
     using Framework.Component;
     using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Linq;
     using System.Reflection;
     using System.Text;
 
@@ -461,6 +463,208 @@
             UtilFramework.Log("### Exit RunSqlConfigColumn");
         }
 
+        private class BuiltInRole
+        {
+            public string ApplicationTypeName;
+
+            public string RoleName;
+
+            public string PermissionName;
+
+            public string UserName;
+        }
+
+        private void RunSqlBuiltInRole(List<BuiltInRole> roleList)
+        {
+            string sql = "UPDATE FrameworkLoginRole SET IsBuiltInExist = 0 WHERE IsBuiltIn = 1";
+            UtilBuildTool.SqlCommand(sql, true);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkLoginRole AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT (SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName) AS ApplicationTypeId, Source.RoleName, 1 AS IsBuiltIn
+                    EXCEPT
+                    SELECT Target.ApplicationTypeId, Target.RoleName, Target.IsBuiltIn)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsBuiltInExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (ApplicationTypeId, RoleName, IsBuiltIn, IsBuiltInExist)
+	            VALUES ((SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName), Source.RoleName, 1, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            UtilFramework.Assert(roleList.Where(item => item.ApplicationTypeName.EndsWith(" - ")).Count() == 0);
+            foreach (BuiltInRole rolePermission in roleList.GroupBy(item => item.ApplicationTypeName + " - " + item.RoleName).Select(group => group.First()))
+            {
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    sqlSelect.Append(" UNION ALL\r\n");
+                }
+                sqlSelect.Append(string.Format(
+                    "SELECT {0} AS ApplicationTypeName, {1} AS RoleName",
+                    UtilDataAccessLayer.Parameter(rolePermission.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.Parameter(rolePermission.RoleName, SqlDbType.NVarChar, parameterList)));
+            }
+            if (isFirst == false)
+            {
+                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
+        }
+
+        private void RunSqlBuiltInRolePermission(List<BuiltInRole> roleList)
+        {
+            string sql = "UPDATE FrameworkLoginRolePermission SET IsActive = 0 WHERE IsBuiltIn = 1";
+            UtilBuildTool.SqlCommand(sql, true);
+        }
+
+        private void RunSqlBuiltInUserRole(List<BuiltInRole> roleList)
+        {
+            string sql = "UPDATE FrameworkLoginUserRole SET IsActive = 0 WHERE IsBuiltIn = 1";
+            UtilBuildTool.SqlCommand(sql, true);
+        }
+
+        private void RunSqlBuiltInPermission(List<BuiltInRole> roleList)
+        {
+            UtilFramework.Log("### Start RunSqlPermission");
+            string sql = "UPDATE FrameworkLoginPermission SET IsExist = 0";
+            UtilBuildTool.SqlCommand(sql, true);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkLoginPermission AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT (SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName) AS ApplicationTypeId, Source.PermissionName
+                    EXCEPT
+                    SELECT Target.ApplicationTypeId, Target.PermissionName)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.Description = Source.Description, Target.IsExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (ApplicationTypeId, PermissionName, Description, IsExist)
+	            VALUES ((SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName), Source.PermissionName, Source.Description, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            foreach (Type typeApp in UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(App)))
+            {
+                UtilFramework.TypeToObject(typeApp);
+                foreach (MethodInfo methodInfo in typeApp.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy))
+                {
+                    if (methodInfo.ReturnType == typeof(FrameworkLoginPermission))
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                        }
+                        else
+                        {
+                            sqlSelect.Append(" UNION ALL\r\n");
+                        }
+                        FrameworkLoginPermission permission = (FrameworkLoginPermission)methodInfo.Invoke(null, new object[] { });
+                        string applicationTypeName = UtilFramework.TypeToName(typeApp);
+                        sqlSelect.Append(string.Format(
+                            "SELECT {0} AS ApplicationTypeName, {1} AS PermissionName, {2} AS Description",
+                            UtilDataAccessLayer.Parameter(applicationTypeName, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(permission.PermissionName, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(permission.Description, SqlDbType.NVarChar, parameterList)));
+                        // RolePermission
+                        foreach (string roleName in permission.BuiltInRoleList())
+                        {
+                            roleList.Add(new BuiltInRole() { ApplicationTypeName = applicationTypeName, PermissionName = permission.PermissionName, RoleName = roleName });
+                        }
+                    }
+                }
+            }
+            if (isFirst == false)
+            {
+                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilFramework.Log("### Exit RunSqlPermission");
+        }
+
+        private void RunSqlBuiltInUser(List<BuiltInRole> roleList)
+        {
+            UtilFramework.Log("### Start RunSqlUser");
+            string sql = "UPDATE FrameworkLoginUser SET IsBuiltInExist = 0 WHERE IsBuiltIn = 1";
+            UtilBuildTool.SqlCommand(sql, true);
+            string sqlUpsert = @"
+            MERGE INTO FrameworkLoginUser AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT (SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName) AS ApplicationTypeId, Source.UserName, 1 AS IsBuiltIn
+                    EXCEPT
+                    SELECT Target.ApplicationTypeId, Target.UserName, Target.IsBuiltIn)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsBuiltInExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (ApplicationTypeId, UserName, IsBuiltIn, IsBuiltInExist)
+	            VALUES ((SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName), Source.UserName, 1, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            foreach (Type typeApp in UtilFramework.TypeList(AppBuildTool.App.GetType(), typeof(App)))
+            {
+                foreach (MethodInfo methodInfo in typeApp.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy))
+                {
+                    if (methodInfo.ReturnType == typeof(FrameworkLoginUser))
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                        }
+                        else
+                        {
+                            sqlSelect.Append(" UNION ALL\r\n");
+                        }
+                        FrameworkLoginUser user = (FrameworkLoginUser)methodInfo.Invoke(null, new object[] { });
+                        string applicationTypeName = UtilFramework.TypeToName(typeApp);
+                        sqlSelect.Append(string.Format(
+                            "SELECT {0} AS ApplicationTypeName, {1} AS UserName",
+                            UtilDataAccessLayer.Parameter(applicationTypeName, SqlDbType.NVarChar, parameterList),
+                            UtilDataAccessLayer.Parameter(user.UserName, SqlDbType.NVarChar, parameterList)));
+                        // UserRole
+                        foreach (string roleName in user.BuiltInRoleList())
+                        {
+                            roleList.Add(new BuiltInRole() { ApplicationTypeName = applicationTypeName, RoleName = roleName, UserName = user.UserName });
+                        }
+                    }
+                }
+            }
+            if (isFirst == false)
+            {
+                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilFramework.Log("### Exit RunSqlPermission");
+        }
+
+        /// <summary>
+        /// Insert and update table FrameworkLoginPermission, FrameworkLoginRole, FrameworkLoginUser.
+        /// </summary>
+        private void RunSqlBuiltIn()
+        {
+            List<BuiltInRole> roleList = new List<BuiltInRole>();
+            RunSqlBuiltInPermission(roleList);
+            RunSqlBuiltInUser(roleList);
+            RunSqlBuiltInRolePermission(roleList);
+            RunSqlBuiltInUserRole(roleList);
+            //
+            RunSqlBuiltInRole(roleList);
+        }
+
         public override void Run()
         {
             RunSqlTable();
@@ -471,6 +675,7 @@
             RunSqlConfigColumn();
             RunSqlApplicationType();
             RunSqlApplication();
+            RunSqlBuiltIn();
         }
     }
 }

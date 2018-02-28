@@ -31,13 +31,6 @@ FROM
 
 GO
 
-CREATE TABLE FrameworkSession
-(
-	Id INT PRIMARY KEY IDENTITY,
-  	Name UNIQUEIDENTIFIER NOT NULL UNIQUE,
-	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL,
-)
-
 CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -214,32 +207,56 @@ GO
 CREATE TABLE FrameworkLoginUser
 (
 	Id INT PRIMARY KEY IDENTITY,
-    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL, /* User belongs to this application */
+    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id), /* User belongs to this application instance */
+    ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id), /* BuiltIn User like Guest or Admin */
   	UserName NVARCHAR(256),
 	Password NVARCHAR(256),
-	IsBuiltIn BIT NOT NULL, /* BuiltIn user like Administrator */
+	IsBuiltIn BIT NOT NULL, /* BuiltIn User like Guest and Admin */
 	IsBuiltInExist BIT NOT NULL,
-	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, UserName)
+	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, ApplicationTypeId, UserName, IsBuiltIn)
 )
 
 CREATE TABLE FrameworkLoginRole
 (
 	Id INT PRIMARY KEY IDENTITY,
-    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL, /* Role belongs to this application */
+    ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id), /* User defined Role belongs to this application instance */
+    ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id), /* BuiltIn Role like Guest or Admin */
   	RoleName NVARCHAR(256),
   	Description NVARCHAR(256),
-	IsBuiltIn BIT NOT NULL, /* BuiltIn role like Developer */
+	IsBuiltIn BIT NOT NULL, /* BuiltIn Role like Guest, Admin, Developer */
 	IsBuiltInExist BIT NOT NULL,
-	INDEX IX_FrameworkLoginrRole UNIQUE (ApplicationId, RoleName)
+	INDEX IX_FrameworkLoginrRole UNIQUE (ApplicationId, ApplicationTypeId, RoleName, IsBuiltIn)
 )
 
+GO
 CREATE TABLE FrameworkLoginUserRole
 (
 	Id INT PRIMARY KEY IDENTITY,
     UserId INT FOREIGN KEY REFERENCES FrameworkLoginUser(Id) NOT NULL,
     RoleId INT FOREIGN KEY REFERENCES FrameworkLoginRole(Id) NOT NULL,
+	IsBuiltIn BIT NOT NULL,
   	IsActive BIT NOT NULL
-	INDEX IX_FrameworkLoginrRole UNIQUE (UserId, RoleId)
+	INDEX IX_FrameworkLoginrRole UNIQUE (UserId, RoleId, IsBuiltIn)
+)
+
+CREATE TABLE FrameworkLoginPermission
+(
+	Id INT PRIMARY KEY IDENTITY,
+    ApplicationTypeId INT FOREIGN KEY REFERENCES FrameworkApplicationType(Id) NOT NULL, /* Permission belongs to this Application */
+  	PermissionName NVARCHAR(256),
+	Description NVARCHAR(256),
+	IsExist BIT NOT NULL,
+	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationTypeId, PermissionName)
+)
+
+CREATE TABLE FrameworkLoginRolePermission
+(
+	Id INT PRIMARY KEY IDENTITY,
+    RoleId INT FOREIGN KEY REFERENCES FrameworkLoginRole(Id) NOT NULL,
+    PermissionId INT FOREIGN KEY REFERENCES FrameworkLoginPermission(Id) NOT NULL,
+	IsBuiltIn BIT NOT NULL,
+  	IsActive BIT NOT NULL
+	INDEX IX_FrameworkLoginrRole UNIQUE (RoleId, PermissionId, IsBuiltIn)
 )
 
 GO
@@ -275,3 +292,13 @@ FROM
 	FrameworkLoginUser UserX
 LEFT JOIN
 	FrameworkLoginRole Role ON (Role.ApplicationId = UserX.ApplicationId)
+
+GO
+CREATE TABLE FrameworkSession
+(
+	Id INT PRIMARY KEY IDENTITY,
+  	Session UNIQUEIDENTIFIER NOT NULL UNIQUE,
+	ApplicationId INT FOREIGN KEY REFERENCES FrameworkApplication(Id) NOT NULL,
+	UserId INT FOREIGN KEY REFERENCES FrameworkLoginUser(Id) NOT NULL
+)
+

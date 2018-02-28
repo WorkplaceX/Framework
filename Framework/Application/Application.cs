@@ -447,6 +447,32 @@
         {
             return (TPage)PageShow(owner, typeof(TPage), isPageVisibleRemove);
         }
+
+        /// <summary>
+        /// Returns BuiltIn guest User for this app.
+        /// </summary>
+        public static FrameworkLoginUser UserGuest()
+        {
+            return new FrameworkLoginUser("Guest", "Guest");
+        }
+
+        /// <summary>
+        /// Returns BuiltIn Permission to configure Factory settings.
+        /// </summary>
+        public static FrameworkLoginPermission PermissionFactoryFull()
+        {
+            return new FrameworkLoginPermission("FactoryFull", "Allow to configure factory settings.", "Developer");
+        }
+
+        public static FrameworkLoginPermission PermissionUserFull()
+        {
+            return new FrameworkLoginPermission("UserFull", "Add and remove User and manage Permission.");
+        }
+
+        public static FrameworkLoginPermission PermissionRoleFull()
+        {
+            return new FrameworkLoginPermission("RoleFull", "Define User Role.");
+        }
     }
 
     /// <summary>

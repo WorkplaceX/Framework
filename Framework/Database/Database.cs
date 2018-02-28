@@ -4,12 +4,86 @@ using Framework.Application;
 using Framework.DataAccessLayer;
 using System.Linq;
 using Framework.Component;
-using Framework;
 using Framework.Application.Config;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database.dbo
 {
+    public partial class FrameworkLoginUser : Row
+    {
+        public FrameworkLoginUser() : base() { }
+
+        /// <summary>
+        /// Constructor for BuiltIn User.
+        /// </summary>
+        public FrameworkLoginUser(string userName, params string[] builtInRoleList)
+        {
+            this.UserName = userName;
+            this.builtInRoleList = builtInRoleList;
+        }
+
+        private string[] builtInRoleList;
+
+        /// <summary>
+        /// Returns BuiltIn Roles of this BuiltIn User.
+        /// </summary>
+        public string[] BuiltInRoleList()
+        {
+            if (builtInRoleList == null)
+            {
+                return new string[] { };
+            }
+            else
+            {
+                return builtInRoleList;
+            }
+        }
+    }
+
+    public partial class FrameworkLoginPermission
+    {
+        public FrameworkLoginPermission() : base() { }
+
+        /// <summary>
+        /// Constructor for (BuiltIn) Role.
+        /// </summary>
+        public FrameworkLoginPermission(string permissionName, string description, params string[] builtInRoleList)
+        {
+            this.PermissionName = permissionName;
+            this.Description = description;
+            this.builtInRoleList = builtInRoleList;
+            //
+            this.builtInRoleList = AddRoleAdmin(this.builtInRoleList);
+        }
+
+        private static string[] AddRoleAdmin(string[] builtInRoleList)
+        {
+            List<string> result = new List<string>(builtInRoleList);
+            if (!result.Contains("Admin"))
+            {
+                result.Add("Admin");
+            }
+            return result.ToArray();
+        }
+
+        private string[] builtInRoleList;
+
+        /// <summary>
+        /// Returns BuiltIn Role list for Permission.
+        /// </summary>
+        public string[] BuiltInRoleList()
+        {
+            if (builtInRoleList == null)
+            {
+                return new string[] { };
+            }
+            else
+            {
+                return builtInRoleList;
+            }
+        }
+    }
+
     public partial class FrameworkLoginUserDisplay
     {
         /// <summary>
