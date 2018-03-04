@@ -260,6 +260,33 @@ CREATE TABLE FrameworkLoginRolePermission
 )
 
 GO
+CREATE VIEW FrameworkLoginRolePermissionDisplay
+AS
+SELECT 
+	Data.Id,
+	Data.RoleId,
+	Data.PermissionId,
+	Data.IsBuiltIn,
+	Data.IsActive,
+	Role.Id AS RoleRoleId,
+	Role.RoleName AS RoleRoleName,
+	Role.IsBuiltIn AS RoleIsBuiltIn,
+	Role.IsBuiltInExist AS RoleIsBuiltInExist,
+	Permission.Id AS PermissionPermissionId,
+	Permission.PermissionName AS PermissionPermissionName,
+	Permission.IsExist AS PermissionIsExist,
+	ApplicationType.Id AS ApplicationTypeId,
+	ApplicationType.TypeName AS ApplicationTypeTypeName
+FROM
+	FrameworkLoginRolePermission Data
+LEFT JOIN
+	FrameworkLoginRole Role ON Role.Id = Data.RoleId
+LEFT JOIN
+	FrameworkLoginPermission Permission ON Permission.Id = Data.PermissionId
+LEFT JOIN
+    FrameworkApplicationType ApplicationType ON ApplicationType.Id = Permission.ApplicationTypeId
+
+GO
 CREATE VIEW FrameworkLoginUserDisplay
 AS
 SELECT

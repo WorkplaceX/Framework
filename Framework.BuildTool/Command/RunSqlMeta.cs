@@ -494,8 +494,7 @@
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
             List<SqlParameter> parameterList = new List<SqlParameter>();
-            UtilFramework.Assert(roleList.Where(item => item.ApplicationTypeName.EndsWith(" - ")).Count() == 0);
-            foreach (BuiltInRole rolePermission in roleList.GroupBy(item => item.ApplicationTypeName + " - " + item.RoleName).Select(group => group.First()))
+            foreach (BuiltInRole rolePermission in roleList.GroupBy(item => new { item.ApplicationTypeName, item.RoleName }).Select(group => group.First()))
             {
                 if (isFirst)
                 {
@@ -523,6 +522,45 @@
         {
             string sql = "UPDATE FrameworkLoginRolePermission SET IsActive = 0 WHERE IsBuiltIn = 1";
             UtilBuildTool.SqlCommand(sql, true);
+            return;
+            string sqlUpsert = @"
+            MERGE INTO FrameworkLoginRolePermission AS Target
+            USING ({0}) AS Source
+	            ON NOT EXISTS(
+                    SELECT (SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName) AS ApplicationTypeId, Source.RoleName, 1 AS IsBuiltIn
+                    EXCEPT
+                    SELECT Target.ApplicationTypeId, Target.RoleName, Target.IsBuiltIn)
+            WHEN MATCHED THEN
+	            UPDATE SET Target.IsBuiltInExist = 1
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT (ApplicationTypeId, RoleName, IsBuiltIn, IsBuiltInExist)
+	            VALUES ((SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName), Source.RoleName, 1, 1);
+            ";
+            StringBuilder sqlSelect = new StringBuilder();
+            bool isFirst = true;
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            foreach (BuiltInRole rolePermission in roleList.GroupBy(item => new { item.ApplicationTypeName, item.RoleName, item.PermissionName }).Select(group => group.First()))
+            {
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    sqlSelect.Append(" UNION ALL\r\n");
+                }
+                sqlSelect.Append(string.Format(
+                    "SELECT {0} AS ApplicationTypeName, {1} AS RoleName",
+                    UtilDataAccessLayer.Parameter(rolePermission.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.Parameter(rolePermission.RoleName, SqlDbType.NVarChar, parameterList)));
+            }
+            if (isFirst == false)
+            {
+                sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            }
+            sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
+            UtilBuildTool.SqlCommand(sqlUpsert, true);
         }
 
         private void RunSqlBuiltInUserRole(List<BuiltInRole> roleList)

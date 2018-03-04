@@ -592,50 +592,6 @@ namespace Database.dbo
 
     public partial class FrameworkLoginRole_IsBuiltInExist : Cell<FrameworkLoginRole> { }
 
-    [SqlTable("dbo", "FrameworkLoginRoleDisplay")]
-    public partial class FrameworkLoginRoleDisplay : Row
-    {
-        [SqlColumn("Id", typeof(FrameworkLoginRoleDisplay_Id))]
-        public int Id { get; set; }
-
-        [SqlColumn("ApplicationId", typeof(FrameworkLoginRoleDisplay_ApplicationId))]
-        public int? ApplicationId { get; set; }
-
-        [SqlColumn("ApplicationTypeId", typeof(FrameworkLoginRoleDisplay_ApplicationTypeId))]
-        public int? ApplicationTypeId { get; set; }
-
-        [SqlColumn("ApplicationTypeName", typeof(FrameworkLoginRoleDisplay_ApplicationTypeName))]
-        public string ApplicationTypeName { get; set; }
-
-        [SqlColumn("RoleName", typeof(FrameworkLoginRoleDisplay_RoleName))]
-        public string RoleName { get; set; }
-
-        [SqlColumn("Description", typeof(FrameworkLoginRoleDisplay_Description))]
-        public string Description { get; set; }
-
-        [SqlColumn("IsBuiltIn", typeof(FrameworkLoginRoleDisplay_IsBuiltIn))]
-        public bool IsBuiltIn { get; set; }
-
-        [SqlColumn("IsBuiltInExist", typeof(FrameworkLoginRoleDisplay_IsBuiltInExist))]
-        public bool IsBuiltInExist { get; set; }
-    }
-
-    public partial class FrameworkLoginRoleDisplay_Id : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_ApplicationId : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_ApplicationTypeId : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_ApplicationTypeName : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_RoleName : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_Description : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_IsBuiltIn : Cell<FrameworkLoginRoleDisplay> { }
-
-    public partial class FrameworkLoginRoleDisplay_IsBuiltInExist : Cell<FrameworkLoginRoleDisplay> { }
-
     [SqlTable("dbo", "FrameworkLoginRolePermission")]
     public partial class FrameworkLoginRolePermission : Row
     {
@@ -664,6 +620,80 @@ namespace Database.dbo
     public partial class FrameworkLoginRolePermission_IsBuiltIn : Cell<FrameworkLoginRolePermission> { }
 
     public partial class FrameworkLoginRolePermission_IsActive : Cell<FrameworkLoginRolePermission> { }
+
+    [SqlTable("dbo", "FrameworkLoginRolePermissionDisplay")]
+    public partial class FrameworkLoginRolePermissionDisplay : Row
+    {
+        [SqlColumn("Id", typeof(FrameworkLoginRolePermissionDisplay_Id))]
+        public int Id { get; set; }
+
+        [SqlColumn("RoleId", typeof(FrameworkLoginRolePermissionDisplay_RoleId))]
+        public int RoleId { get; set; }
+
+        [SqlColumn("PermissionId", typeof(FrameworkLoginRolePermissionDisplay_PermissionId))]
+        public int PermissionId { get; set; }
+
+        [SqlColumn("IsBuiltIn", typeof(FrameworkLoginRolePermissionDisplay_IsBuiltIn))]
+        public bool IsBuiltIn { get; set; }
+
+        [SqlColumn("IsActive", typeof(FrameworkLoginRolePermissionDisplay_IsActive))]
+        public bool IsActive { get; set; }
+
+        [SqlColumn("RoleRoleId", typeof(FrameworkLoginRolePermissionDisplay_RoleRoleId))]
+        public int? RoleRoleId { get; set; }
+
+        [SqlColumn("RoleRoleName", typeof(FrameworkLoginRolePermissionDisplay_RoleRoleName))]
+        public string RoleRoleName { get; set; }
+
+        [SqlColumn("RoleIsBuiltIn", typeof(FrameworkLoginRolePermissionDisplay_RoleIsBuiltIn))]
+        public bool? RoleIsBuiltIn { get; set; }
+
+        [SqlColumn("RoleIsBuiltInExist", typeof(FrameworkLoginRolePermissionDisplay_RoleIsBuiltInExist))]
+        public bool? RoleIsBuiltInExist { get; set; }
+
+        [SqlColumn("PermissionPermissionId", typeof(FrameworkLoginRolePermissionDisplay_PermissionPermissionId))]
+        public int? PermissionPermissionId { get; set; }
+
+        [SqlColumn("PermissionPermissionName", typeof(FrameworkLoginRolePermissionDisplay_PermissionPermissionName))]
+        public string PermissionPermissionName { get; set; }
+
+        [SqlColumn("PermissionIsExist", typeof(FrameworkLoginRolePermissionDisplay_PermissionIsExist))]
+        public bool? PermissionIsExist { get; set; }
+
+        [SqlColumn("ApplicationTypeId", typeof(FrameworkLoginRolePermissionDisplay_ApplicationTypeId))]
+        public int? ApplicationTypeId { get; set; }
+
+        [SqlColumn("ApplicationTypeTypeName", typeof(FrameworkLoginRolePermissionDisplay_ApplicationTypeTypeName))]
+        public string ApplicationTypeTypeName { get; set; }
+    }
+
+    public partial class FrameworkLoginRolePermissionDisplay_Id : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_RoleId : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_PermissionId : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_IsBuiltIn : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_IsActive : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_RoleRoleId : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_RoleRoleName : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_RoleIsBuiltIn : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_RoleIsBuiltInExist : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_PermissionPermissionId : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_PermissionPermissionName : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_PermissionIsExist : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_ApplicationTypeId : Cell<FrameworkLoginRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginRolePermissionDisplay_ApplicationTypeTypeName : Cell<FrameworkLoginRolePermissionDisplay> { }
 
     [SqlTable("dbo", "FrameworkLoginUser")]
     public partial class FrameworkLoginUser : Row

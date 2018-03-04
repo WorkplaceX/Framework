@@ -1,6 +1,7 @@
 ﻿DROP TABLE FrameworkSession
 DROP VIEW FrameworkLoginUserRoleDisplay
 DROP VIEW FrameworkLoginUserDisplay
+DROP VIEW FrameworkLoginRolePermissionDisplay
 DROP TABLE FrameworkLoginRolePermission
 DROP TABLE FrameworkLoginPermission
 DROP TABLE FrameworkLoginUserRole
