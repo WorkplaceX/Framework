@@ -522,37 +522,49 @@
         {
             string sql = "UPDATE FrameworkLoginRolePermission SET IsActive = 0 WHERE IsBuiltIn = 1";
             UtilBuildTool.SqlCommand(sql, true);
-            return;
             string sqlUpsert = @"
             MERGE INTO FrameworkLoginRolePermission AS Target
             USING ({0}) AS Source
 	            ON NOT EXISTS(
-                    SELECT (SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName) AS ApplicationTypeId, Source.RoleName, 1 AS IsBuiltIn
+                    SELECT 
+                        (SELECT Data.Id FROM FrameworkLoginRoleDisplay Data WHERE Data.ApplicationTypeName = Source.ApplicationTypeName AND Data.RoleName = Source.RoleName) AS RoleId,
+                        (SELECT Data.Id AS PermissionId FROM FrameworkLoginPermissionDisplay Data WHERE Data.ApplicationTypeName = Source.ApplicationTypeName AND Data.PermissionName = Source.PermissionName) AS PermissionId,
+                        1 AS IsBuiltIn
                     EXCEPT
-                    SELECT Target.ApplicationTypeId, Target.RoleName, Target.IsBuiltIn)
+                    SELECT 
+                        Target.RoleId, 
+                        Target.PermissionId, 
+                        Target.IsBuiltIn)
             WHEN MATCHED THEN
-	            UPDATE SET Target.IsBuiltInExist = 1
+	            UPDATE SET Target.IsActive = 1
             WHEN NOT MATCHED BY TARGET THEN
-	            INSERT (ApplicationTypeId, RoleName, IsBuiltIn, IsBuiltInExist)
-	            VALUES ((SELECT ApplicationType.Id AS ApplicationTypeId FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = Source.ApplicationTypeName), Source.RoleName, 1, 1);
+	            INSERT (RoleId, PermissionId, IsBuiltIn, IsActive)
+	            VALUES (
+                    (SELECT Data.Id FROM FrameworkLoginRoleDisplay Data WHERE Data.ApplicationTypeName = Source.ApplicationTypeName AND Data.RoleName = Source.RoleName), -- AS RoleId, 
+                    (SELECT Data.Id AS PermissionId FROM FrameworkLoginPermissionDisplay Data WHERE Data.ApplicationTypeName = Source.ApplicationTypeName AND Data.PermissionName = Source.PermissionName), -- AS PermissionId, 
+                    1, 1);
             ";
             StringBuilder sqlSelect = new StringBuilder();
             bool isFirst = true;
             List<SqlParameter> parameterList = new List<SqlParameter>();
             foreach (BuiltInRole rolePermission in roleList.GroupBy(item => new { item.ApplicationTypeName, item.RoleName, item.PermissionName }).Select(group => group.First()))
             {
-                if (isFirst)
+                if (rolePermission.RoleName != null && rolePermission.PermissionName != null)
                 {
-                    isFirst = false;
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        sqlSelect.Append(" UNION ALL\r\n");
+                    }
+                    sqlSelect.Append(string.Format(
+                        "SELECT {0} AS ApplicationTypeName, {1} AS PermissionName, {2} AS RoleName",
+                        UtilDataAccessLayer.Parameter(rolePermission.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(rolePermission.PermissionName, SqlDbType.NVarChar, parameterList),
+                        UtilDataAccessLayer.Parameter(rolePermission.RoleName, SqlDbType.NVarChar, parameterList)));
                 }
-                else
-                {
-                    sqlSelect.Append(" UNION ALL\r\n");
-                }
-                sqlSelect.Append(string.Format(
-                    "SELECT {0} AS ApplicationTypeName, {1} AS RoleName",
-                    UtilDataAccessLayer.Parameter(rolePermission.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
-                    UtilDataAccessLayer.Parameter(rolePermission.RoleName, SqlDbType.NVarChar, parameterList)));
             }
             if (isFirst == false)
             {
@@ -696,11 +708,10 @@
         {
             List<BuiltInRole> roleList = new List<BuiltInRole>();
             RunSqlBuiltInPermission(roleList);
+            RunSqlBuiltInRole(roleList);
             RunSqlBuiltInUser(roleList);
             RunSqlBuiltInRolePermission(roleList);
             RunSqlBuiltInUserRole(roleList);
-            //
-            RunSqlBuiltInRole(roleList);
         }
 
         public override void Run()

@@ -1,11 +1,13 @@
 ﻿DROP TABLE FrameworkSession
 DROP VIEW FrameworkLoginUserRoleDisplay
-DROP VIEW FrameworkLoginUserDisplay
 DROP VIEW FrameworkLoginRolePermissionDisplay
 DROP TABLE FrameworkLoginRolePermission
+DROP VIEW FrameworkLoginPermissionDisplay
 DROP TABLE FrameworkLoginPermission
 DROP TABLE FrameworkLoginUserRole
+DROP VIEW FrameworkLoginRoleDisplay
 DROP TABLE FrameworkLoginRole
+DROP VIEW FrameworkLoginUserDisplay
 DROP TABLE FrameworkLoginUser
 DROP VIEW FrameworkNavigationDisplay
 DROP TABLE FrameworkNavigation

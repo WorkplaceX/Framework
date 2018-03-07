@@ -15,7 +15,6 @@ CREATE TABLE FrameworkApplication
 )
 
 GO
-
 CREATE VIEW FrameworkApplicationDisplay AS
 SELECT
 	Application.Id,
@@ -30,7 +29,6 @@ FROM
 	FrameworkApplication Application
 
 GO
-
 CREATE TABLE FrameworkTable /* Used for configuration. Contains all in source code defined tables. */
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -91,7 +89,6 @@ CREATE TABLE FrameworkConfigColumn
 )
 
 GO
-
 CREATE VIEW FrameworkConfigGridDisplay AS
 SELECT
 	Grid.Id AS GridId,
@@ -119,7 +116,6 @@ LEFT JOIN
 	FrameworkConfigGrid Config ON Config.GridId = Grid.Id
 
 GO
-
 CREATE VIEW FrameworkConfigColumnDisplay AS
 SELECT
 	Grid.Id AS GridId,
@@ -160,7 +156,6 @@ LEFT JOIN
 	FrameworkConfigColumn Config ON Config.GridId = Grid.Id AND Config.ColumnId = ColumnX.Id
 
 GO
-
 CREATE TABLE FrameworkFileStorage
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -173,7 +168,6 @@ CREATE TABLE FrameworkFileStorage
 )
 
 GO
-
 CREATE TABLE FrameworkComponent
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -190,7 +184,6 @@ CREATE TABLE FrameworkNavigation
 )
 
 GO
-
 CREATE VIEW FrameworkNavigationDisplay AS
 SELECT
 	Navigation.Id AS Id,
@@ -203,7 +196,6 @@ LEFT JOIN
 	FrameworkComponent Component ON (Component.Id = Navigation.ComponentId)
 
 GO
-
 CREATE TABLE FrameworkLoginUser
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -216,6 +208,23 @@ CREATE TABLE FrameworkLoginUser
 	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationId, ApplicationTypeId, UserName, IsBuiltIn)
 )
 
+GO
+CREATE VIEW FrameworkLoginUserDisplay
+AS
+SELECT
+	Data.Id,
+	Data.ApplicationId,
+	(SELECT Data2.Text FROM FrameworkApplication Data2 WHERE Data2.Id = Data.ApplicationId) AS ApplicationText,
+	Data.ApplicationTypeId,
+	(SELECT Data2.TypeName FROM FrameworkApplicationType Data2 WHERE Data2.Id = Data.ApplicationTypeId) AS ApplicationTypeName,
+	Data.UserName,
+	Data.Password,
+	Data.IsBuiltIn,
+	Data.IsBuiltInExist
+FROM
+	FrameworkLoginUser Data
+
+GO
 CREATE TABLE FrameworkLoginRole
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -227,6 +236,21 @@ CREATE TABLE FrameworkLoginRole
 	IsBuiltInExist BIT NOT NULL,
 	INDEX IX_FrameworkLoginrRole UNIQUE (ApplicationId, ApplicationTypeId, RoleName, IsBuiltIn)
 )
+
+GO
+CREATE VIEW FrameworkLoginRoleDisplay
+AS
+SELECT
+	Data.Id,
+	Data.ApplicationId,
+	Data.ApplicationTypeId,
+	(SELECT ApplicationType.TypeName FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Data.ApplicationTypeId) AS ApplicationTypeName,
+	Data.RoleName,
+	Data.Description,
+	Data.IsBuiltIn,
+	Data.IsBuiltInExist
+FROM
+	FrameworkLoginRole Data
 
 GO
 CREATE TABLE FrameworkLoginUserRole
@@ -249,6 +273,20 @@ CREATE TABLE FrameworkLoginPermission
 	INDEX IX_FrameworkLoginUser UNIQUE (ApplicationTypeId, PermissionName)
 )
 
+GO
+CREATE VIEW FrameworkLoginPermissionDisplay
+AS
+SELECT
+	Data.Id,
+	Data.ApplicationTypeId,
+	(SELECT ApplicationType.TypeName FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Data.ApplicationTypeId) AS ApplicationTypeName,
+	Data.PermissionName,
+	Data.Description,
+	Data.IsExist
+FROM
+	FrameworkLoginPermission Data
+
+GO
 CREATE TABLE FrameworkLoginRolePermission
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -285,20 +323,6 @@ LEFT JOIN
 	FrameworkLoginPermission Permission ON Permission.Id = Data.PermissionId
 LEFT JOIN
     FrameworkApplicationType ApplicationType ON ApplicationType.Id = Permission.ApplicationTypeId
-
-GO
-CREATE VIEW FrameworkLoginUserDisplay
-AS
-SELECT
-	UserX.Id AS UserId,
-	UserX.ApplicationId AS UserApplicationId,
-	(SELECT Application.Text AS ApplicationText FROM FrameworkApplicationDisplay Application WHERE Application.Id = UserX.ApplicationId) AS ApplicationText,
-	UserX.UserName AS UserUserName,
-	UserX.Password AS UserPassword,
-	UserX.IsBuiltIn AS UserIsBuiltIn,
-	UserX.IsBuiltInExist AS UserIsBuiltInExist
-FROM
-	FrameworkLoginUser UserX
 
 GO
 CREATE VIEW FrameworkLoginUserRoleDisplay

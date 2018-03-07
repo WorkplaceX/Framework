@@ -95,14 +95,14 @@ namespace Database.dbo
             if (e.App.GetType() != typeof(AppConfig))
             {
                 int applicationId = e.App.DbFrameworkApplication.Id;
-                result = result.Where(item => item.UserApplicationId == applicationId);
+                result = result.Where(item => item.ApplicationId == applicationId);
             }
             return result;
         }
 
         protected override internal void Reload(AppEventArg e)
         {
-            var query = UtilDataAccessLayer.Query<FrameworkLoginUserDisplay>().Where(item => item.UserId == UserId);
+            var query = UtilDataAccessLayer.Query<FrameworkLoginUserDisplay>().Where(item => item.Id == Id);
             query = Filter(query, e);
             FrameworkLoginUserDisplay rowReload = query.Single();
             UtilDataAccessLayer.RowCopy(rowReload, this);
@@ -112,7 +112,7 @@ namespace Database.dbo
         {
             FrameworkLoginUser user = UtilDataAccessLayer.RowCopy<FrameworkLoginUser>(this, "User");
             UtilDataAccessLayer.Insert(user);
-            UserId = user.Id; // Read back new UserId for reload.
+            Id = user.Id; // Read back new UserId for reload.
             isReload = true;
         }
 
@@ -150,7 +150,7 @@ namespace Database.dbo
         protected internal override void LookupIsClick(Row rowLookup, AppEventArg e)
         {
             FrameworkApplicationDisplay application = (FrameworkApplicationDisplay)rowLookup;
-            Row.UserApplicationId = application.Id;
+            Row.ApplicationId = application.Id;
             Row.ApplicationText = application.Text;
         }
 
@@ -163,7 +163,7 @@ namespace Database.dbo
                 FrameworkApplicationDisplay application = UtilDataAccessLayer.Query<FrameworkApplicationDisplay>().Where(item => item.Text == textLocal).FirstOrDefault();
                 if (application != null)
                 {
-                    Row.UserApplicationId = application.Id;
+                    Row.ApplicationId = application.Id;
                     Row.ApplicationText = application.Text;
                 }
                 else
