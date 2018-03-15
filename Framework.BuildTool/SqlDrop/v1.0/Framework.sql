@@ -1,9 +1,9 @@
 ﻿DROP TABLE FrameworkSession
-DROP VIEW FrameworkLoginUserRoleDisplay
 DROP VIEW FrameworkLoginRolePermissionDisplay
 DROP TABLE FrameworkLoginRolePermission
 DROP VIEW FrameworkLoginPermissionDisplay
 DROP TABLE FrameworkLoginPermission
+DROP VIEW FrameworkLoginUserRoleDisplay
 DROP TABLE FrameworkLoginUserRole
 DROP VIEW FrameworkLoginRoleDisplay
 DROP TABLE FrameworkLoginRole

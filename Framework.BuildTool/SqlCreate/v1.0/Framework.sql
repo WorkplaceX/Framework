@@ -263,6 +263,36 @@ CREATE TABLE FrameworkLoginUserRole
 	INDEX IX_FrameworkLoginrRole UNIQUE (UserId, RoleId, IsBuiltIn)
 )
 
+GO
+CREATE VIEW FrameworkLoginUserRoleDisplay
+AS
+SELECT
+	Data.Id,
+	Data.UserId,
+	UserX.UserName,
+	Data.RoleId,
+	Role.RoleName,
+	Role.Description AS RoleDescription,
+	Data.IsBuiltIn,
+	Data.IsActive,
+	Application.Text,
+	ApplicationType.TypeName AS ApplicationTypeName
+FROM
+	FrameworkLoginUserRole Data
+LEFT JOIN
+	FrameworkLoginUser UserX ON UserX.Id = Data.UserId
+LEFT JOIN
+	FrameworkLoginRole Role ON Role.Id = Data.RoleId
+LEFT JOIN
+	FrameworkApplication Application ON Application.Id = UserX.ApplicationId
+CROSS APPLY
+(
+	SELECT * FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = UserX.ApplicationTypeId
+	UNION ALL
+	SELECT * FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId
+) ApplicationType
+
+GO
 CREATE TABLE FrameworkLoginPermission
 (
 	Id INT PRIMARY KEY IDENTITY,
@@ -322,27 +352,13 @@ LEFT JOIN
 LEFT JOIN
 	FrameworkLoginPermission Permission ON Permission.Id = Data.PermissionId
 LEFT JOIN
-    FrameworkApplicationType ApplicationType ON ApplicationType.Id = Permission.ApplicationTypeId
-
-GO
-CREATE VIEW FrameworkLoginUserRoleDisplay
-AS
-SELECT
-	UserX.Id AS UserId,
-	UserX.ApplicationId AS UserApplicationId,
-	UserX.UserName AS UserUserName,
-	UserX.Password AS UserPassword,
-	UserX.IsBuiltIn AS UserIsBuiltIn,
-	Role.Id AS RoleId,
-	Role.RoleName AS RoleRoleName,
-	Role.Description AS RoleDescription,
-	Role.IsBuiltIn AS RoleIsBuiltIn,
-	(SELECT UserRole.Id AS UserRoleId FROM FrameworkLoginUserRole UserRole WHERE UserRole.UserId = UserX.Id AND UserRole.RoleId = Role.Id) AS UserRoleId,
-	(SELECT UserRole.IsActive AS UserRoleIsActive FROM FrameworkLoginUserRole UserRole WHERE UserRole.UserId = UserX.Id AND UserRole.RoleId = Role.Id) AS UserRoleIsActive
-FROM
-	FrameworkLoginUser UserX
-LEFT JOIN
-	FrameworkLoginRole Role ON (Role.ApplicationId = UserX.ApplicationId)
+	FrameworkApplication Application ON Application.Id = Role.ApplicationId
+CROSS APPLY
+(
+	SELECT * FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Role.ApplicationTypeId
+	UNION ALL
+	SELECT * FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId
+) ApplicationType
 
 GO
 CREATE TABLE FrameworkSession
