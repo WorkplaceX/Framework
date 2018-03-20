@@ -100,10 +100,9 @@
         /// <param name="typeAppDefault">Type of application (See also: class App)</param>
         public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, Type typeAppDefault)
         {
-            string requestPathBase;
-            App app = new AppSelector(typeAppDefault).Create(webController, controllerPath, out requestPathBase);
+            AppSelectorResult appSelectorResult = new AppSelector(typeAppDefault).Create(webController, controllerPath);
             string url = webController.Request.Path; // For debug.
-            var result = await new UtilWebController(webController, controllerPath, app).WebRequest();
+            var result = await new UtilWebController(webController, appSelectorResult).WebRequest();
             return result;
         }
 
@@ -112,10 +111,9 @@
         /// </summary>
         public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, AppSelector appSelector)
         {
-            string requestPathBase;
-            App app = appSelector.Create(webController, controllerPath, out requestPathBase);
+            AppSelectorResult appSelectorResult = appSelector.Create(webController, controllerPath);
             string url = webController.Request.Path; // For debug.
-            var result = await new UtilWebController(webController, requestPathBase, app).WebRequest();
+            var result = await new UtilWebController(webController, appSelectorResult).WebRequest();
             return result;
         }
 
@@ -141,10 +139,12 @@
 
         internal static string StreamToString(Stream stream)
         {
+            string result;
             using (var streamReader = new StreamReader(stream))
             {
-                return streamReader.ReadToEnd();
+                result = streamReader.ReadToEnd();
             }
+            return result;
         }
 
         /// <summary>
@@ -285,21 +285,50 @@
 
     internal class UtilWebController
     {
-        public UtilWebController(ControllerBase controller, string requestPathBase, App app)
+        public UtilWebController(ControllerBase controller, AppSelectorResult appSelectorResult)
         {
             this.Controller = controller;
-            this.RequestPathBase = requestPathBase;
-            this.App = app;
+            this.AppSelectorResult = appSelectorResult;
         }
 
         public readonly ControllerBase Controller;
 
+        public readonly AppSelectorResult AppSelectorResult;
+
         /// <summary>
         /// Gets RequestPathBase. For example "/web/framework/".
         /// </summary>
-        public readonly string RequestPathBase;
+        public string RequestPathBase
+        {
+            get
+            {
+                return AppSelectorResult.RequestPathBase;
+            }
+        }
 
-        public readonly App App;
+        public App App
+        {
+            get
+            {
+                return AppSelectorResult.App;
+            }
+        }
+
+        public string AppJsonInText
+        {
+            get
+            {
+                return AppSelectorResult.AppJsonInText;
+            }
+        }
+
+        public AppJson AppJsonIn
+        {
+            get
+            {
+                return AppSelectorResult.AppJsonIn;
+            }
+        }
 
         /// <summary>
         /// Web request.
@@ -338,7 +367,8 @@
             // Html request
             if (requestPath.StartsWith(RequestPathBase) && (requestPath.EndsWith("/") || requestPath.EndsWith(".html")))
             {
-                AppJson appJsonOut = App.Run(null);
+                UtilFramework.Assert(AppJsonIn == null);
+                AppJson appJsonOut = App.Run(AppJsonIn, (Guid)AppSelectorResult.Session);
                 string htmlUniversal = null;
                 string html = UtilFramework.FileRead(UtilServer.FileNameIndex());
                 htmlUniversal = await HtmlUniversal(html, appJsonOut, true, App); // Angular Universal server side rendering.
@@ -347,25 +377,24 @@
             // Json API request
             if (requestPath.StartsWith(RequestPathBase) && requestPath.EndsWith("Application.json"))
             {
-                string jsonInText = UtilServer.StreamToString(Controller.Request.Body);
-                AppJson appJsonIn = JsonConvert.Deserialize<AppJson>(jsonInText, App.TypeComponentInNamespaceList());
+                UtilFramework.Assert(AppJsonIn != null);
                 AppJson appJsonOut;
                 try
                 {
-                    appJsonOut = App.Run(appJsonIn);
+                    appJsonOut = App.Run(AppJsonIn, (Guid)AppSelectorResult.Session);
                     appJsonOut.ErrorProcess = null;
                 }
                 catch (Exception exception)
                 {
                     // Prevent Internal Error 500 on process exception.
-                    appJsonOut = JsonConvert.Deserialize<AppJson>(jsonInText, App.TypeComponentInNamespaceList()); // Send AppJsonIn back.
+                    appJsonOut = JsonConvert.Deserialize<AppJson>(AppJsonInText, App.TypeComponentInNamespaceList()); // Send AppJsonIn back.
                     appJsonOut.ErrorProcess = UtilFramework.ExceptionToText(exception);
                 }
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, App.TypeComponentInNamespaceList());
                 UtilServer.EmbeddedUrl(App, "", out bool isEmbedded);
-                if (new Uri(appJsonIn.BrowserUrl).Authority != new Uri(appJsonIn.RequestUrl).Authority)
+                if (new Uri(AppJsonIn.BrowserUrl).Authority != new Uri(AppJsonIn.RequestUrl).Authority)
                 {
-                    string url = appJsonIn.BrowserUrl;
+                    string url = AppJsonIn.BrowserUrl;
                     if (url.EndsWith("/"))
                     {
                         url = url.Substring(0, url.Length - 1);

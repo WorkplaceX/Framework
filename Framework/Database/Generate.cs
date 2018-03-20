@@ -944,6 +944,65 @@ namespace Database.dbo
 
     public partial class FrameworkLoginUserRoleDisplay_ApplicationTypeName : Cell<FrameworkLoginUserRoleDisplay> { }
 
+    [SqlTable("dbo", "FrameworkLoginUserRolePermissionDisplay")]
+    public partial class FrameworkLoginUserRolePermissionDisplay : Row
+    {
+        [SqlColumn("UserId", typeof(FrameworkLoginUserRolePermissionDisplay_UserId))]
+        public int UserId { get; set; }
+
+        [SqlColumn("UserIsBuiltIn", typeof(FrameworkLoginUserRolePermissionDisplay_UserIsBuiltIn))]
+        public bool UserIsBuiltIn { get; set; }
+
+        [SqlColumn("UserIsBuiltInExist", typeof(FrameworkLoginUserRolePermissionDisplay_UserIsBuiltInExist))]
+        public bool UserIsBuiltInExist { get; set; }
+
+        [SqlColumn("ApplicationId", typeof(FrameworkLoginUserRolePermissionDisplay_ApplicationId))]
+        public int? ApplicationId { get; set; }
+
+        [SqlColumn("ApplicationTypeId", typeof(FrameworkLoginUserRolePermissionDisplay_ApplicationTypeId))]
+        public int? ApplicationTypeId { get; set; }
+
+        [SqlColumn("ApplicationTypeName", typeof(FrameworkLoginUserRolePermissionDisplay_ApplicationTypeName))]
+        public string ApplicationTypeName { get; set; }
+
+        [SqlColumn("RoleId", typeof(FrameworkLoginUserRolePermissionDisplay_RoleId))]
+        public int? RoleId { get; set; }
+
+        [SqlColumn("RoleName", typeof(FrameworkLoginUserRolePermissionDisplay_RoleName))]
+        public string RoleName { get; set; }
+
+        [SqlColumn("PermissionId", typeof(FrameworkLoginUserRolePermissionDisplay_PermissionId))]
+        public int? PermissionId { get; set; }
+
+        [SqlColumn("PermissionName", typeof(FrameworkLoginUserRolePermissionDisplay_PermissionName))]
+        public string PermissionName { get; set; }
+
+        [SqlColumn("IsExist", typeof(FrameworkLoginUserRolePermissionDisplay_IsExist))]
+        public bool? IsExist { get; set; }
+    }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_UserId : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_UserIsBuiltIn : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_UserIsBuiltInExist : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_ApplicationId : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_ApplicationTypeId : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_ApplicationTypeName : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_RoleId : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_RoleName : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_PermissionId : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_PermissionName : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
+    public partial class FrameworkLoginUserRolePermissionDisplay_IsExist : Cell<FrameworkLoginUserRolePermissionDisplay> { }
+
     [SqlTable("dbo", "FrameworkNavigation")]
     public partial class FrameworkNavigation : Row
     {

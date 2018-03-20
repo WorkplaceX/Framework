@@ -4,11 +4,28 @@
     using Framework.Application.Config;
     using Framework.Component;
     using Framework.DataAccessLayer;
+    using Framework.Json;
     using Framework.Server;
     using Microsoft.Extensions.Caching.Memory;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
+    internal class AppSelectorResult
+    {
+        public App App;
+
+        public string AppJsonInText;
+
+        public AppJson AppJsonIn;
+
+        public string RequestPathBase;
+
+        /// <summary>
+        /// Gets or sets Session defined in cookie. See also AppJson.Session
+        /// </summary>
+        public Guid? Session;
+    }
 
     /// <summary>
     /// Run multiple applications on same ASP.NET Core and same database instance. Mapping of url to class App is defined in sql FrameworkApplicationView.
@@ -49,15 +66,58 @@
             return result;
         }
 
-        internal App Create(WebControllerBase webController, string controllerPath, out string requestPathBase)
+        internal AppSelectorResult Create(WebControllerBase webController, string controllerPath)
         {
-            App result = null;
-            requestPathBase = controllerPath;
+            AppSelectorResult result = new AppSelectorResult();
+            result.RequestPathBase = controllerPath;
             string requestUrl = webController.HttpContext.Request.Path.ToString();
             if (!requestUrl.EndsWith("/"))
             {
                 requestUrl += "/";
             }
+            CreateAppFromSessionCookie(webController, result);
+            if (result.App == null)
+            {
+                CreateAppFromUrl(webController, controllerPath, requestUrl, result);
+            }
+            AppJson(webController, result);
+            webController.Response.Cookies.Append("Session", result.Session.ToString());
+            return result;
+        }
+
+        private static void CreateAppFromSessionCookie(WebControllerBase webController, AppSelectorResult result)
+        {
+            string sessionText = webController.Request.Cookies["Session"];
+            if (Guid.TryParse(sessionText, out Guid session))
+            {
+                result.Session = session;
+            }
+        }
+
+        /// <summary>
+        /// Extract AppJson from POST request.
+        /// </summary>
+        private static void AppJson(WebControllerBase webController, AppSelectorResult result)
+        {
+            string appJsonInText = UtilServer.StreamToString(webController.Request.Body);
+            if (appJsonInText != "")
+            {
+                result.AppJsonInText = appJsonInText;
+                result.AppJsonIn = JsonConvert.Deserialize<AppJson>(appJsonInText, result.App.TypeComponentInNamespaceList());
+                result.Session = result.AppJsonIn.Session;
+            }
+            else
+            {
+                result.Session = Guid.NewGuid(); // New Session.
+            }
+        }
+
+        /// <summary>
+        /// CreateApp if App can't be determined by session. For example first request.
+        /// </summary>
+        private void CreateAppFromUrl(WebControllerBase webController, string controllerPath, string requestUrl, AppSelectorResult result)
+        {
+            // Create App
             foreach (FrameworkApplicationDisplay frameworkApplication in DbApplicationList())
             {
                 string path = frameworkApplication.Path;
@@ -82,14 +142,13 @@
                     Type type = UtilFramework.TypeFromName(frameworkApplication.TypeName, UtilFramework.TypeInAssemblyList(typeInAssembly));
                     if (UtilFramework.IsSubclassOf(type, typeof(App)))
                     {
-                        result = (App)UtilFramework.TypeToObject(type);
-                        result.Constructor(webController, frameworkApplication);
-                        requestPathBase = controllerPath + path;
+                        result.App = (App)UtilFramework.TypeToObject(type);
+                        result.App.Constructor(webController, frameworkApplication);
+                        result.RequestPathBase = controllerPath + path;
                         break;
                     }
                 }
             }
-            return result;
         }
     }
 
@@ -306,9 +365,10 @@
         /// Process AppJson request and return AppJson response.
         /// </summary>
         /// <param name="appJson">AppJson request. (POST)</param>
+        /// <param name="sessionNew">New session for first request.</param>
         /// <param name="isRun">If false, used for unit test only. To test GridData object.</param>
         /// <returns>AppJson response.</returns>
-        internal AppJson Run(AppJson appJson, bool isRun = true)
+        internal AppJson Run(AppJson appJson, Guid sessionNew, bool isRun = true)
         {
             this.AppJson = appJson;
             if (isRun)
@@ -319,7 +379,7 @@
                     AppJson = new AppJson();
                     AppJson.BrowserUrl = appJson?.BrowserUrl;
                     AppJson.RequestCount = requestCount;
-                    AppJson.Session = Guid.NewGuid();
+                    AppJson.Session = sessionNew;
                     AppJson.RequestUrl = UtilServer.RequestUrl(false);
                     GridData.SaveJson(); // Initialize AppJson.GridDataJson object.
                     Type typePage = TypePageMain();

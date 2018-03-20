@@ -174,7 +174,7 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkNavigationView_Button : Cell<FrameworkNavigationDisplay>
+    public partial class FrameworkNavigationDisplay_Button : Cell<FrameworkNavigationDisplay>
     {
         protected internal override void ConfigCell(ConfigCell result, AppEventArg e)
         {
@@ -228,11 +228,11 @@ namespace Database.dbo
             return UtilDataAccessLayer.Query<FrameworkNavigationDisplay>().OrderBy(item => item.Text);
         }
 
-        [SqlColumn(null, typeof(FrameworkNavigationView_Button))]
+        [SqlColumn(null, typeof(FrameworkNavigationDisplay_Button))]
         public string Button { get; set; }
     }
 
-    public partial class FrameworkNavigationView_ComponentNameCSharp : Cell<FrameworkNavigationDisplay>
+    public partial class FrameworkNavigationDisplay_ComponentNameCSharp
     {
         protected internal override void Lookup(out GridNameType gridName, out IQueryable query, AppEventArg e)
         {

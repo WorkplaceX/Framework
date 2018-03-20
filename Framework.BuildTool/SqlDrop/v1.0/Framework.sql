@@ -1,4 +1,5 @@
 ﻿DROP TABLE FrameworkSession
+DROP VIEW FrameworkLoginUserRolePermissionDisplay
 DROP VIEW FrameworkLoginRolePermissionDisplay
 DROP TABLE FrameworkLoginRolePermission
 DROP VIEW FrameworkLoginPermissionDisplay

@@ -222,7 +222,7 @@
             // appJson = JsonConvert.Deserialize<AppJson>(jsonInText, new Type[] { typeof(UtilFramework), typeof(UnitTestApplication) });
             UtilFramework.UnitTest(typeof(MyApp)); // Enable InMemory database.
             MyApp app = new MyApp();
-            appJsonResponse = app.Run(appJsonRequest); // Process rquest.
+            appJsonResponse = app.Run(appJsonRequest, Guid.NewGuid()); // Process rquest.
             //
             if (isDebugHtml)
             {
@@ -239,7 +239,7 @@
             }
             //
             appResponse = new MyApp();
-            appResponse.Run(appJsonResponse, false); // Deserialize but do not run process.
+            appResponse.Run(appJsonResponse, Guid.NewGuid(), false); // Deserialize but do not run process.
         }
 
         /// <summary>

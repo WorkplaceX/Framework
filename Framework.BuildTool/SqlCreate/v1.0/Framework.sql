@@ -361,6 +361,40 @@ CROSS APPLY
 ) ApplicationType
 
 GO
+CREATE VIEW FrameworkLoginUserRolePermissionDisplay
+AS
+SELECT
+	UserX.Id AS UserId,
+	UserX.IsBuiltIn AS UserIsBuiltIn,
+	UserX.IsBuiltInExist AS UserIsBuiltInExist,
+	Userx.ApplicationId,
+	UserX.ApplicationTypeId,
+	ApplicationType.TypeName AS ApplicationTypeName,
+	Role.Id AS RoleId,
+	Role.RoleName,
+	Permission.Id AS PermissionId,
+	Permission.PermissionName,
+	Permission.IsExist
+FROM
+	FrameworkLoginUser UserX
+LEFT JOIN
+	FrameworkApplication Application ON Application.Id = UserX.ApplicationId
+CROSS APPLY
+(
+	SELECT * FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = UserX.ApplicationTypeId
+	UNION ALL
+	SELECT * FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.Id = Application.ApplicationTypeId
+) ApplicationType
+LEFT JOIN
+	FrameworkLoginUserRole UserRole ON UserRole.UserId = UserX.Id
+LEFT JOIN
+	FrameworkLoginRole Role ON Role.Id = UserRole.RoleId
+LEFT JOIN
+	FrameworkLoginRolePermission RolePermission ON RolePermission.RoleId = Role.Id
+LEFT JOIN
+	FrameworkLoginPermission Permission ON Permission.Id = RolePermission.PermissionId
+
+GO
 CREATE TABLE FrameworkSession
 (
 	Id INT PRIMARY KEY IDENTITY,
