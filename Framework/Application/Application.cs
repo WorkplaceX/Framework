@@ -56,7 +56,7 @@
         public readonly Type TypeAppDefault;
 
         /// <summary>
-        /// Database access of sql FrameworkApplicationView.
+        /// Database access of sql FrameworkApplicationDisplay.
         /// </summary>
         protected virtual List<FrameworkApplicationDisplay> DbApplicationList()
         {

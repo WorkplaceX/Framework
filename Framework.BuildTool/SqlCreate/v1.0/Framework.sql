@@ -403,3 +403,67 @@ CREATE TABLE FrameworkSession
 	UserId INT FOREIGN KEY REFERENCES FrameworkLoginUser(Id) NOT NULL
 )
 
+GO
+CREATE VIEW FrameworkSessionPermissionDisplay
+AS
+SELECT
+	Session.Id AS SessionId,
+	Session.Session AS Session,
+	Session.UserId AS UserId,
+	Application.Id AS ApplicationId,
+	ApplicationType.Id AS ApplicationTypeId,
+	ApplicationType.TypeName AS ApplicationTypeName,
+	Permission.Id AS PermissionId,
+	Permission.PermissionName AS PermissionName,
+	Permission.IsExist AS PermissionIsExist
+FROM
+	FrameworkSession Session
+LEFT JOIN
+	FrameworkApplication Application ON Application.Id = Session.ApplicationId
+LEFT JOIN
+	FrameworkApplicationType ApplicationType ON ApplicationType.Id = Application.ApplicationTypeId
+LEFT JOIN
+	FrameworkLoginUserRole UserRole ON UserRole.UserId = Session.UserId
+LEFT JOIN
+	FrameworkLoginRolePermission RolePermission ON RolePermission.RoleId = UserRole.RoleId
+LEFT JOIN
+	FrameworkLoginPermission Permission ON Permission.Id = RolePermission.PermissionId
+
+GO
+CREATE PROCEDURE FrameworkLogin
+(
+	@Path NVARCHAR(256),
+	@UserName NVARCHAR(256),
+	@UserNameIsBuiltIn BIT,
+	@Session UNIQUEIDENTIFIER
+)
+AS
+BEGIN
+	DECLARE @ApplicationId INT, @ApplicationTypeId INT
+	
+	SELECT 
+		@ApplicationId = Id,
+		@ApplicationTypeId = ApplicationTypeId 
+	FROM 
+		FrameworkApplication WHERE ISNULL(Path, '') = ISNULL(@Path, '')
+
+	DECLARE @UserId INT 
+
+	IF (@UserNameIsBuiltIn = 1)
+		SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationTypeId = @ApplicationTypeId AND UserName = @UserName)
+	ELSE
+		SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationId = @ApplicationId AND UserName = @UserName)
+
+	IF (@Session IS NULL)
+	BEGIN
+		SET @Session = NEWID()
+		INSERT INTO FrameworkSession(Session, ApplicationId, UserId)
+		SELECT @Session, @ApplicationId, @UserId
+	END
+	ELSE
+	BEGIN
+		UPDATE FrameworkSession SET ApplicationId = @ApplicationId, UserId = @UserId WHERE Session = @Session
+	END
+
+	SELECT * FROM FrameworkSessionPermissionDisplay WHERE Session = @Session
+END

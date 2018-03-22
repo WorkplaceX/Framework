@@ -1104,6 +1104,55 @@ namespace Database.dbo
 
     public partial class FrameworkSession_UserId : Cell<FrameworkSession> { }
 
+    [SqlTable("dbo", "FrameworkSessionPermissionDisplay")]
+    public partial class FrameworkSessionPermissionDisplay : Row
+    {
+        [SqlColumn("SessionId", typeof(FrameworkSessionPermissionDisplay_SessionId))]
+        public int SessionId { get; set; }
+
+        [SqlColumn("Session", typeof(FrameworkSessionPermissionDisplay_Session))]
+        public Guid Session { get; set; }
+
+        [SqlColumn("UserId", typeof(FrameworkSessionPermissionDisplay_UserId))]
+        public int UserId { get; set; }
+
+        [SqlColumn("ApplicationId", typeof(FrameworkSessionPermissionDisplay_ApplicationId))]
+        public int? ApplicationId { get; set; }
+
+        [SqlColumn("ApplicationTypeId", typeof(FrameworkSessionPermissionDisplay_ApplicationTypeId))]
+        public int? ApplicationTypeId { get; set; }
+
+        [SqlColumn("ApplicationTypeName", typeof(FrameworkSessionPermissionDisplay_ApplicationTypeName))]
+        public string ApplicationTypeName { get; set; }
+
+        [SqlColumn("PermissionId", typeof(FrameworkSessionPermissionDisplay_PermissionId))]
+        public int? PermissionId { get; set; }
+
+        [SqlColumn("PermissionName", typeof(FrameworkSessionPermissionDisplay_PermissionName))]
+        public string PermissionName { get; set; }
+
+        [SqlColumn("PermissionIsExist", typeof(FrameworkSessionPermissionDisplay_PermissionIsExist))]
+        public bool? PermissionIsExist { get; set; }
+    }
+
+    public partial class FrameworkSessionPermissionDisplay_SessionId : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_Session : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_UserId : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_ApplicationId : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_ApplicationTypeId : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_ApplicationTypeName : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_PermissionId : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_PermissionName : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_PermissionIsExist : Cell<FrameworkSessionPermissionDisplay> { }
+
     [SqlTable("dbo", "FrameworkTable")]
     public partial class FrameworkTable : Row
     {
