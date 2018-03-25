@@ -9,6 +9,7 @@
     using Microsoft.Extensions.Caching.Memory;
     using System;
     using System.Collections.Generic;
+    using System.Data.SqlClient;
     using System.Linq;
 
     internal class AppSelectorResult
@@ -75,6 +76,9 @@
             {
                 requestUrl += "/";
             }
+            //
+            // CreateApp(webController, controllerPath, result);
+            //
             CreateAppFromSessionCookie(webController, result);
             if (result.App == null)
             {
@@ -83,6 +87,23 @@
             AppJson(webController, result);
             webController.Response.Cookies.Append("Session", result.Session.ToString());
             return result;
+        }
+
+        private static void CreateApp(WebControllerBase webController, string controllerPath, AppSelectorResult result)
+        {
+            string sessionText = webController.Request.Cookies["Session"];
+            if (Guid.TryParse(sessionText, out Guid session))
+            {
+                result.Session = session;
+            }
+            //
+            List<SqlParameter> parameterList = new List<SqlParameter>();
+            UtilDataAccessLayer.Parameter(controllerPath, System.Data.SqlDbType.NVarChar, parameterList);
+            UtilDataAccessLayer.Parameter(App.UserGuest().UserName, System.Data.SqlDbType.NVarChar, parameterList);
+            UtilDataAccessLayer.Parameter(true, System.Data.SqlDbType.Int, parameterList);
+            UtilDataAccessLayer.Parameter(result.Session, System.Data.SqlDbType.UniqueIdentifier, parameterList);
+
+            var d = UtilDataAccessLayer.Execute("EXEC FrameworkLogin @Path=@P0, @UserName=@P1, @UserNameIsBuiltIn=@P2, @Session=@P3", parameterList.ToArray());
         }
 
         private static void CreateAppFromSessionCookie(WebControllerBase webController, AppSelectorResult result)
@@ -143,7 +164,7 @@
                     if (UtilFramework.IsSubclassOf(type, typeof(App)))
                     {
                         result.App = (App)UtilFramework.TypeToObject(type);
-                        result.App.Constructor(webController, frameworkApplication);
+                        result.App.Constructor(webController, frameworkApplication, null);
                         result.RequestPathBase = controllerPath + path;
                         break;
                     }
@@ -166,10 +187,11 @@
             ProcessInit(processList);
         }
 
-        internal void Constructor(WebControllerBase webController, FrameworkApplicationDisplay dbFrameworkApplication)
+        internal void Constructor(WebControllerBase webController, FrameworkApplicationDisplay dbFrameworkApplication, List<FrameworkSessionPermissionDisplay> dbFrameworkSessionPermissionDisplay)
         {
             this.WebController = webController;
             this.DbFrameworkApplication = dbFrameworkApplication;
+            this.DbFrameworkSessionPermissionDisplay = dbFrameworkSessionPermissionDisplay;
         }
 
         internal WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
@@ -189,6 +211,27 @@
         /// Gets DbFrameworkApplication. Used in connection with class AppSelector. See also database table FrameworkApplication.
         /// </summary>
         public FrameworkApplicationDisplay DbFrameworkApplication { get; private set; }
+
+        public List<FrameworkSessionPermissionDisplay> DbFrameworkSessionPermissionDisplay { get; private set; }
+
+        /// <summary>
+        /// Gets ApplicationId. See also sql table: FrameworkApplication.
+        /// </summary>
+        public int ApplicationId
+        {
+            get
+            {
+                return DbFrameworkSessionPermissionDisplay.First().ApplicationId.Value;
+            }
+        }
+
+        /// <summary>
+        /// Returns true, if application has certain permission.
+        /// </summary>
+        public bool IsPermission(FrameworkLoginPermission permission)
+        {
+            return DbFrameworkSessionPermissionDisplay.Where(item => item.PermissionName == permission.PermissionName).Count() > 0;
+        }
 
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
