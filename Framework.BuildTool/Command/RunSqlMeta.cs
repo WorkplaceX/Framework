@@ -645,9 +645,12 @@
                 UtilFramework.TypeToObject(typeApp);
                 foreach (MethodInfo methodInfo in typeApp.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 {
-                    if (methodInfo.ReturnType == typeof(FrameworkLoginPermission))
+                    if (methodInfo.ReturnType == typeof(FrameworkLoginPermissionDisplay))
                     {
-                        FrameworkLoginPermission permission = (FrameworkLoginPermission)methodInfo.Invoke(null, new object[] { });
+                        FrameworkLoginPermissionDisplay permission = (FrameworkLoginPermissionDisplay)methodInfo.Invoke(null, new object[] { });
+                        var typeInAssemblyList = UtilFramework.TypeInAssemblyList(typeApp);
+                        Type typeAppDeclaredOnPermission = UtilFramework.TypeFromName(permission.ApplicationTypeName, typeInAssemblyList); // ApplicationTypeName declared on BuiltIn Permission.
+                        UtilFramework.Assert(UtilFramework.IsSubclassOf(typeApp, typeAppDeclaredOnPermission)); // Permission gets derived.
                         string applicationTypeName = UtilFramework.TypeToName(typeApp);
                         // RolePermission
                         foreach (string roleName in permission.BuiltInRoleList())

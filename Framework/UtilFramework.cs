@@ -28,7 +28,7 @@ namespace Framework
             get
             {
                 // .NET Core 2.0
-                return "v1.109 Server";
+                return "v1.110 Server";
             }
         }
 
@@ -330,6 +330,9 @@ namespace Framework
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Returns for example type of: "Framework.Application.App"
+        /// </summary>
         public static Type TypeFromName(string name, params Type[] typeInAssemblyList)
         {
             List<Type> resultList = new List<Type>();

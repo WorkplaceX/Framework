@@ -6,6 +6,7 @@ using System.Linq;
 using Framework.Component;
 using Framework.Application.Config;
 using Microsoft.EntityFrameworkCore;
+using Framework;
 
 namespace Database.dbo
 {
@@ -40,15 +41,18 @@ namespace Database.dbo
         }
     }
 
-    public partial class FrameworkLoginPermission
+    public partial class FrameworkLoginPermissionDisplay
     {
-        public FrameworkLoginPermission() : base() { }
+        public FrameworkLoginPermissionDisplay() : base() { }
 
         /// <summary>
-        /// Constructor for (BuiltIn) Role.
+        /// Constructor for (BuiltIn) Permission.
         /// </summary>
-        public FrameworkLoginPermission(string permissionName, string description, params string[] builtInRoleList)
+        public FrameworkLoginPermissionDisplay(Type typeApp, string permissionName, string description, params string[] builtInRoleList)
         {
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(typeApp, typeof(App)));
+            //
+            this.ApplicationTypeName = UtilFramework.TypeToName(typeApp);
             this.PermissionName = permissionName;
             this.Description = description;
             this.builtInRoleList = builtInRoleList;
@@ -56,6 +60,11 @@ namespace Database.dbo
             this.builtInRoleList = AddRoleAdmin(this.builtInRoleList);
         }
 
+        /// <summary>
+        /// Add Admin Role to Role list.
+        /// </summary>
+        /// <param name="builtInRoleList">List of Roles.</param>
+        /// <returns>List of Roles including Admin Role.</returns>
         private static string[] AddRoleAdmin(string[] builtInRoleList)
         {
             List<string> result = new List<string>(builtInRoleList);

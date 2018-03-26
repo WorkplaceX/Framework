@@ -212,6 +212,9 @@
         /// </summary>
         public FrameworkApplicationDisplay DbFrameworkApplication { get; private set; }
 
+        /// <summary>
+        /// Gets DbFrameworkSessionPermissionDisplay. This list is returned by the stored procedure FrameworkLogin.
+        /// </summary>
         public List<FrameworkSessionPermissionDisplay> DbFrameworkSessionPermissionDisplay { get; private set; }
 
         /// <summary>
@@ -228,9 +231,15 @@
         /// <summary>
         /// Returns true, if application has certain permission.
         /// </summary>
-        public bool IsPermission(FrameworkLoginPermission permission)
+        public bool IsPermission(FrameworkLoginPermissionDisplay permission)
         {
-            return DbFrameworkSessionPermissionDisplay.Where(item => item.PermissionName == permission.PermissionName).Count() > 0;
+            var typeInAssemblyList = UtilFramework.TypeInAssemblyList(GetType());
+            Type appTypePermission = UtilFramework.TypeFromName(permission.ApplicationTypeName); // AppType declared on permission.
+            return DbFrameworkSessionPermissionDisplay.Where
+                (
+                    item => item.PermissionName == permission.PermissionName && 
+                    UtilFramework.IsSubclassOf(UtilFramework.TypeFromName(item.ApplicationTypeName, typeInAssemblyList), appTypePermission) // Permission can be declared on a base App.
+                ).Count() > 0;
         }
 
         /// <summary>
@@ -562,19 +571,23 @@
         /// <summary>
         /// Returns BuiltIn Permission to configure Factory settings.
         /// </summary>
-        public static FrameworkLoginPermission PermissionFactoryFull()
+        public static FrameworkLoginPermissionDisplay PermissionFactoryFull()
         {
-            return new FrameworkLoginPermission("FactoryFull", "Allow to configure factory settings.", "Developer");
+            return new FrameworkLoginPermissionDisplay(typeof(App), "FactoryFull", "Configure factory settings.", "Developer");
         }
 
-        public static FrameworkLoginPermission PermissionUserFull()
+        /// <summary>
+        /// Returns BuiltIn Permission to add and remove users.
+        /// </summary>
+        /// <returns></returns>
+        public static FrameworkLoginPermissionDisplay PermissionUserFull()
         {
-            return new FrameworkLoginPermission("UserFull", "Add and remove User and manage Permission.");
+            return new FrameworkLoginPermissionDisplay(typeof(App), "UserFull", "Add and remove User.");
         }
 
-        public static FrameworkLoginPermission PermissionRoleFull()
+        public static FrameworkLoginPermissionDisplay PermissionRoleFull()
         {
-            return new FrameworkLoginPermission("RoleFull", "Define User Role.");
+            return new FrameworkLoginPermissionDisplay(typeof(App), "RoleFull", "Define User Role.");
         }
     }
 
