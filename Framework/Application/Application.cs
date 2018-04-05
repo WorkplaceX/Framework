@@ -29,7 +29,7 @@
     }
 
     /// <summary>
-    /// Run multiple applications on same ASP.NET Core and same database instance. Mapping of url to class App is defined in sql FrameworkApplicationView.
+    /// Run multiple applications on same ASP.NET Core and same database instance. Mapping of url to class App is defined in sql view FrameworkApplicationDisplay.
     /// AppSelector has to be in the same assembly like the App classes.
     /// </summary>
     public class AppSelector
@@ -57,7 +57,7 @@
         public readonly Type TypeAppDefault;
 
         /// <summary>
-        /// Database access of sql FrameworkApplicationDisplay.
+        /// Database access of sql view FrameworkApplicationDisplay.
         /// </summary>
         protected virtual List<FrameworkApplicationDisplay> DbApplicationList()
         {
@@ -97,13 +97,18 @@
                 result.Session = session;
             }
             //
+            List<SqlParameter> list = new List<SqlParameter>();
+            UtilDataAccessLayer.Parameter(null, System.Data.SqlDbType.Int, list, false);
+            var d2 = UtilDataAccessLayer.Execute2("SELECT @P0 AS X", list, false);
+
+            //
             List<SqlParameter> parameterList = new List<SqlParameter>();
             UtilDataAccessLayer.Parameter(controllerPath, System.Data.SqlDbType.NVarChar, parameterList);
             UtilDataAccessLayer.Parameter(App.UserGuest().UserName, System.Data.SqlDbType.NVarChar, parameterList);
             UtilDataAccessLayer.Parameter(true, System.Data.SqlDbType.Int, parameterList);
             UtilDataAccessLayer.Parameter(result.Session, System.Data.SqlDbType.UniqueIdentifier, parameterList);
 
-            var d = UtilDataAccessLayer.Execute("EXEC FrameworkLogin @Path=@P0, @UserName=@P1, @UserNameIsBuiltIn=@P2, @Session=@P3", parameterList.ToArray());
+            var d = UtilDataAccessLayer.Execute("EXEC FrameworkLogin @Path=@P0, @UserName=@P1, @UserNameIsBuiltIn=@P2, @Session=@P3", parameterList);
         }
 
         private static void CreateAppFromSessionCookie(WebControllerBase webController, AppSelectorResult result)

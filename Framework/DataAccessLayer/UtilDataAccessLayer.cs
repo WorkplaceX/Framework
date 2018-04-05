@@ -490,16 +490,18 @@
 
         /// <summary>
         /// Read data from stored procedure or database table. Returns multiple result sets.
-        /// (ResultSet, Row, ColumnName, Value).
         /// </summary>
-        public static List<List<Dictionary<string, object>>> Execute(string sql, params SqlParameter[] paramList)
+        /// <param name="sql">For example: Execute("SELECT 1 AS A SELECT 2 AS B")</param>
+        /// <param name="paramList"></param>
+        /// <returns>Returns (ResultSet, Row, ColumnName, Value).</returns>
+        public static List<List<Dictionary<string, object>>> Execute(string sql, bool isUseParam, List<SqlParameter> paramList)
         {
             List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
             List<string> sqlList = new List<string>();
             sqlList.Add(sql);
             SqlCommand(sqlList, (sqlCommand) =>
             {
-                sqlCommand.Parameters.AddRange(paramList);
+                sqlCommand.Parameters.AddRange(paramList.ToArray());
                 using (SqlDataReader reader = sqlCommand.ExecuteReader())
                 {
                     while (reader.HasRows)
@@ -522,6 +524,159 @@
                 }
             }, false);
             return result;
+        }
+
+        public static List<List<Dictionary<string, object>>> Execute(string sql)
+        {
+            return Execute(sql, true, new List<SqlParameter>());
+        }
+
+        public static List<List<Dictionary<string, object>>> Execute(string sql, List<SqlParameter> paramList)
+        {
+            return Execute(sql, true, paramList);
+        }
+
+
+        /// <summary>
+        /// Returns parameter value as sql text.
+        /// </summary>
+        private static string Execute2ParameterToSqlText(SqlParameter parameter)
+        {
+            if (parameter.Value == DBNull.Value)
+            {
+                return "NULL";
+            }
+            if (parameter.Value is int)
+            {
+                return parameter.Value.ToString();
+            }
+            if (parameter.Value is string)
+            {
+                string valueString = parameter.Value.ToString().Replace("'", "''"); // Escape single quote.
+                return string.Format("'{0}'", valueString);
+            }
+            throw new Exception("Type unknown!");
+        }
+
+        /// <summary>
+        /// Replace parameter name with actual parameter text value.
+        /// </summary>
+        private static void Execute2ParameterReplace(ref string sql, List<SqlParameter> paramList)
+        {
+            for (int i = 0; i < paramList.Count; i++)
+            {
+                SqlParameter parameter = paramList[i];
+                string parameterText = Execute2ParameterToSqlText(parameter);
+                UtilFramework.Assert(parameterText.Contains("@P") == false); // Parameter value does not contain parameter name.
+                string parameterName = $"@P{ i }";
+                sql = sql.Replace(parameterName, parameterText);
+            }
+        }
+
+        /// <summary>
+        /// Add sql parameter to list.
+        /// </summary>
+        internal static void Execute2ParameterAdd(object value, SqlDbType dbType, List<SqlParameter> paramList)
+        {
+            string name = $"@P{ paramList.Count }";
+            if (value == null)
+            {
+                value = DBNull.Value;
+            }
+            SqlParameter parameter = new SqlParameter(name, dbType) { Value = value };
+            paramList.Add(parameter);
+        }
+
+        private static void Execute2ParameterReplace(ref string sql, List<SqlParameter> paramList, bool isUseParam = true)
+        {
+            if (isUseParam == false)
+            {
+                Execute2ParameterReplace(ref sql, paramList);
+                paramList.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Read data from stored procedure or database table. Returns multiple result sets.
+        /// </summary>
+        /// <param name="sql">For example: Execute("SELECT 1 AS A SELECT 2 AS B"); or with parameter: Execute("SELECT @P0 AS A");</param>
+        /// <param name="paramList">See also method ExecuteParameterAdd();</param>
+        /// <param name="isUseParam">If false, sql parameters are replaced with sql text. Use for example to debug. Be aware of SQL injection!</param>
+        /// <returns>Returns (ResultSet, Row, ColumnName, Value).</returns>
+        public static List<List<Dictionary<string, object>>> Execute2(string sql, List<SqlParameter> paramList, bool isUseParam = true)
+        {
+            Execute2ParameterReplace(ref sql, paramList, isUseParam);
+            //
+            List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
+            List<string> sqlList = new List<string>();
+            sqlList.Add(sql);
+            SqlCommand(sqlList, (sqlCommand) =>
+            {
+                sqlCommand.Parameters.AddRange(paramList.ToArray());
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    while (reader.HasRows)
+                    {
+                        var rowList = new List<Dictionary<string, object>>();
+                        result.Add(rowList);
+                        while (reader.Read())
+                        {
+                            var row = new Dictionary<string, object>();
+                            rowList.Add(row);
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                string columnName = reader.GetName(i);
+                                object value = reader.GetValue(i);
+                                if (value == DBNull.Value)
+                                {
+                                    value = null;
+                                }
+                                row.Add(columnName, value);
+                            }
+                        }
+                        reader.NextResult();
+                    }
+                }
+            }, false);
+            return result;
+        }
+
+        /// <summary>
+        /// Convert one sql multiple result set to typed row list.
+        /// </summary>
+        /// <param name="valueList">Result of method Execute();</param>
+        /// <param name="resultSetIndex">Sql multiple result set index.</param>
+        /// <param name="typeRow">Type of row to copy to. Copy one multiple result set.</param>
+        /// <returns>List of typed rows.</returns>
+        public static List<object> Execute2ResultCopy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
+        {
+            List<object> result = new List<object>();
+            PropertyInfo[] propertyInfoList = UtilDataAccessLayer.TypeRowToPropertyList(typeRow);
+            foreach (Dictionary<string, object> row in valueList[resultSetIndex])
+            {
+                Row rowResult = UtilDataAccessLayer.RowCreate(typeRow);
+                foreach (string columnName in row.Keys)
+                {
+                    object value = row[columnName];
+                    PropertyInfo propertyInfo = propertyInfoList.Where(item => item.Name == columnName).First();
+                    propertyInfo.SetValue(rowResult, value);
+                }
+                result.Add(rowResult);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Convert one sql multiple result set to typed row list.
+        /// </summary>
+        /// <typeparam name="T">Type of row to copy to. Copy one multiple result set.</typeparam>
+        /// <param name="valueList">Result of method Execute();</param>
+        /// <param name="resultSetIndex">Sql multiple result set index.</param>
+        /// <returns>Type of row to copy to. Copy one multiple result set.</returns>
+        public static List<T> Execute2ResultCopy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
+        {
+            List<object> result = Execute2ResultCopy(valueList, resultSetIndex, typeof(T));
+            return result.Cast<T>().ToList();
         }
 
         /// <summary>
