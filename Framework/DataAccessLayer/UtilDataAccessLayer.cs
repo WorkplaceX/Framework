@@ -587,7 +587,7 @@
             paramList.Add(parameter);
         }
 
-        private static void Execute2ParameterReplace(ref string sql, List<SqlParameter> paramList, bool isUseParam = true)
+        private static void Execute2ParameterReplace(ref string sql, List<SqlParameter> paramList, bool isUseParam)
         {
             if (isUseParam == false)
             {
@@ -648,7 +648,7 @@
         /// <param name="resultSetIndex">Sql multiple result set index.</param>
         /// <param name="typeRow">Type of row to copy to. Copy one multiple result set.</param>
         /// <returns>List of typed rows.</returns>
-        public static List<object> Execute2ResultCopy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
+        public static List<object> Execute2Copy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
         {
             List<object> result = new List<object>();
             PropertyInfo[] propertyInfoList = UtilDataAccessLayer.TypeRowToPropertyList(typeRow);
@@ -658,8 +658,11 @@
                 foreach (string columnName in row.Keys)
                 {
                     object value = row[columnName];
-                    PropertyInfo propertyInfo = propertyInfoList.Where(item => item.Name == columnName).First();
-                    propertyInfo.SetValue(rowResult, value);
+                    PropertyInfo propertyInfo = propertyInfoList.Where(item => item.Name == columnName).FirstOrDefault();
+                    if (propertyInfo != null)
+                    {
+                        propertyInfo.SetValue(rowResult, value);
+                    }
                 }
                 result.Add(rowResult);
             }
@@ -673,9 +676,9 @@
         /// <param name="valueList">Result of method Execute();</param>
         /// <param name="resultSetIndex">Sql multiple result set index.</param>
         /// <returns>Type of row to copy to. Copy one multiple result set.</returns>
-        public static List<T> Execute2ResultCopy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
+        public static List<T> Execute2Copy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
         {
-            List<object> result = Execute2ResultCopy(valueList, resultSetIndex, typeof(T));
+            List<object> result = Execute2Copy(valueList, resultSetIndex, typeof(T));
             return result.Cast<T>().ToList();
         }
 

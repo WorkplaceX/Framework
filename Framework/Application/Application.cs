@@ -98,9 +98,9 @@
             }
             //
             List<SqlParameter> list = new List<SqlParameter>();
-            UtilDataAccessLayer.Parameter(null, System.Data.SqlDbType.Int, list, false);
-            var d2 = UtilDataAccessLayer.Execute2("SELECT @P0 AS X", list, false);
-
+            UtilDataAccessLayer.Execute2ParameterAdd(7, System.Data.SqlDbType.Int, list);
+            var d2 = UtilDataAccessLayer.Execute2("EXEC MyProc @Id = @P0", list);
+            var l = UtilDataAccessLayer.Execute2Copy<FrameworkApplication>(d2, 0);
             //
             List<SqlParameter> parameterList = new List<SqlParameter>();
             UtilDataAccessLayer.Parameter(controllerPath, System.Data.SqlDbType.NVarChar, parameterList);
