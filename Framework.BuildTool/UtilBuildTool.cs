@@ -24,11 +24,19 @@
         /// <summary>
         /// Execute sql command. Run one sql statement.
         /// </summary>
-        public static void SqlExecute(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
+        public static void SqlExecute(string sql, bool isFrameworkDb, List<SqlParameter> paramList, bool isUseParam = true)
         {
             List<string> sqlList = new List<string>();
             sqlList.Add(sql);
-            UtilDataAccessLayer.Execute(sqlList, isFrameworkDb, paramList.ToList(), true, (sqlCommand) => sqlCommand.ExecuteNonQuery());
+            UtilDataAccessLayer.Execute(sqlList, isFrameworkDb, paramList, isUseParam, (sqlCommand) => sqlCommand.ExecuteNonQuery());
+        }
+
+        /// <summary>
+        /// Execute sql command. Run one sql statement.
+        /// </summary>
+        public static void SqlExecute(string sql, bool isFrameworkDb)
+        {
+            SqlExecute(sql, isFrameworkDb, new List<SqlParameter>());
         }
 
         public static CommandLineApplication CommandLineApplicationCreate()

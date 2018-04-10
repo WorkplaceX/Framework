@@ -62,13 +62,13 @@
                 }
                 sqlSelect.Append(string.Format(
                     "(SELECT {0} AS Text, {1} AS Path, (SELECT ApplicationType.Id FROM FrameworkApplicationType ApplicationType WHERE ApplicationType.TypeName = {2}) AS ApplicationTypeId, {3} AS IsActive)",
-                    UtilDataAccessLayer.Parameter(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
-                    UtilDataAccessLayer.Parameter(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
-                    UtilDataAccessLayer.Parameter(frameworkApplication.TypeName, SqlDbType.NVarChar, parameterList),
-                    UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
+                    UtilDataAccessLayer.ExecuteParameterAdd(frameworkApplication.Text, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.ExecuteParameterAdd(frameworkApplication.Path, SqlDbType.NVarChar, parameterList),
+                    UtilDataAccessLayer.ExecuteParameterAdd(frameworkApplication.TypeName, SqlDbType.NVarChar, parameterList, isUseParam: false),
+                    UtilDataAccessLayer.ExecuteParameterAdd(frameworkApplication.IsActive, SqlDbType.Bit, parameterList, isUseParam: false)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+            UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             UtilFramework.Log("### Exit RunSqlApplication");
         }
 
@@ -373,7 +373,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
             UtilFramework.Log("### Exit RunSqlConfigGrid");
         }
@@ -458,7 +458,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
             UtilFramework.Log("### Exit RunSqlConfigColumn");
         }
@@ -523,7 +523,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
         }
 
@@ -578,7 +578,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
         }
 
@@ -633,7 +633,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
         }
 
@@ -720,7 +720,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
         }
 
@@ -765,7 +765,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList);
             }
         }
 

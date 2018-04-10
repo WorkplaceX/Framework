@@ -126,13 +126,15 @@
             {
                 dateTimeDrop = dateTime;
             }
+            List<SqlParameter> paramList = new List<SqlParameter>();
+            UtilDataAccessLayer.ExecuteParameterAdd("@IsRun", value, System.Data.SqlDbType.Bit, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@Name", name, System.Data.SqlDbType.NVarChar, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@DateCreate", dateTimeCreate, System.Data.SqlDbType.DateTime2, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@DateDrop", dateTimeDrop, System.Data.SqlDbType.DateTime2, paramList);
             UtilBuildTool.SqlExecute(
                 "UPDATE FrameworkScript SET IsRun = @IsRun, DateCreate = @DateCreate, DateDrop = @DateDrop WHERE Name = @Name",
-                true,
-                new SqlParameter("IsRun", System.Data.SqlDbType.Bit) { Value = value },
-                new SqlParameter("Name", System.Data.SqlDbType.NVarChar) { Value = name },
-                new SqlParameter("DateCreate", System.Data.SqlDbType.DateTime2) { Value = dateTimeCreate },
-                new SqlParameter("DateDrop", System.Data.SqlDbType.DateTime2) { Value = dateTimeDrop }
+                isFrameworkDb: true,
+                paramList: paramList
             );
         }
 

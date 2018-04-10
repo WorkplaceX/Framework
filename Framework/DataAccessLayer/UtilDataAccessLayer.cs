@@ -536,7 +536,7 @@
         }
 
         /// <summary>
-        /// Replace parameter name with actual parameter text value.
+        /// Replace parameter name with actual parameter text value. Be aware of sql injection when using with sql parameter type of text.
         /// </summary>
         private static void ExecuteParameterReplace(ref string sql, List<SqlParameter> paramList)
         {
@@ -555,15 +555,39 @@
         /// <summary>
         /// Add sql parameter to list.
         /// </summary>
+        /// <param name="name">Parameter name. For example: @Text</param>
+        /// <param name="value">Parameter value.</param>
         internal static void ExecuteParameterAdd(string name, object value, SqlDbType dbType, List<SqlParameter> paramList)
         {
             UtilFramework.Assert(name.StartsWith("@"), "Parameter does not start with @!");
+            UtilFramework.Assert(paramList.Where(item => item.ParameterName == name).Count() == 0, string.Format("ParameterName already exists! ({0})", name));
             if (value == null)
             {
                 value = DBNull.Value;
             }
             SqlParameter parameter = new SqlParameter(name, dbType) { Value = value };
             paramList.Add(parameter);
+        }
+
+        /// <summary>
+        /// Returns parameter name or value as sql text.
+        /// </summary>
+        /// <param name="isUseParam">If true, method returns parameter name. For example @P0. If false, method returns value as sql text. For example: 'Name'</param>
+        internal static string ExecuteParameterAdd(object value, SqlDbType dbType, List<SqlParameter> paramList, bool isUseParam = true)
+        {
+            string result;
+            string name = $"@P{ paramList.Count }";
+            ExecuteParameterAdd(name, value, dbType, paramList);
+            if (isUseParam)
+            {
+                result = name;
+            }
+            else
+            {
+                result = ExecuteParameterToSqlText(paramList[paramList.Count - 1]);
+                paramList.RemoveAt(paramList.Count - 1);
+            }
+            return result;
         }
 
         private static void ExecuteParameterReplace(ref string sql, List<SqlParameter> paramList, bool isUseParam)
@@ -574,7 +598,6 @@
                 paramList.Clear();
             }
         }
-
         /// <summary>
         /// Read data from stored procedure or database table. Returns multiple result sets.
         /// </summary>
