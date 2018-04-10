@@ -392,7 +392,7 @@
                 }
                 string jsonOutText = Json.JsonConvert.Serialize(appJsonOut, App.TypeComponentInNamespaceList());
                 UtilServer.EmbeddedUrl(App, "", out bool isEmbedded);
-                if (new Uri(AppJsonIn.BrowserUrl).Authority != new Uri(AppJsonIn.RequestUrl).Authority)
+                // if (new Uri(AppJsonIn.BrowserUrl).Authority != new Uri(AppJsonIn.RequestUrl).Authority)
                 {
                     string url = AppJsonIn.BrowserUrl;
                     if (url.EndsWith("/"))
