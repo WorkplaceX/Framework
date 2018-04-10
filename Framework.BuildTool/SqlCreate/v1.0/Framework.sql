@@ -447,6 +447,12 @@ BEGIN
 	FROM 
 		FrameworkApplication WHERE ISNULL(Path, '') = ISNULL(@Path, '')
 
+	IF @ApplicationId IS NULL 
+	BEGIN
+		DECLARE @Message NVARCHAR(MAX) = 'Login failed! No path defined on sql table FrameworkApplication. (' + ISNULL(@Path, '') + ')';
+		THROW 50000, @Message, 1
+	END
+
 	DECLARE @UserId INT 
 
 	IF (@UserNameIsBuiltIn = 1)

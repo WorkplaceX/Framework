@@ -33,7 +33,7 @@
         {
             UtilFramework.Log("### Start RunSqlApplication");
             string sql = "UPDATE FrameworkApplication SET IsActive = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkApplication AS Target
             USING ({0}) AS Source
@@ -68,7 +68,7 @@
                     UtilDataAccessLayer.Parameter(frameworkApplication.IsActive, SqlDbType.Bit, parameterList)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+            UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             UtilFramework.Log("### Exit RunSqlApplication");
         }
 
@@ -79,7 +79,7 @@
         {
             UtilFramework.Log("### Start RunSqlApplicationType");
             string sql = "UPDATE FrameworkApplicationType SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkApplicationType AS Target
             USING ({0}) AS Source
@@ -108,7 +108,7 @@
                 sqlSelect.Append(string.Format("(SELECT '{0}' AS TypeName)", UtilFramework.TypeToName(type)));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilBuildTool.SqlExecute(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlApplicationType");
         }
 
@@ -119,7 +119,7 @@
         {
             UtilFramework.Log("### Start RunSqlTable");
             string sql = "UPDATE FrameworkTable SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkTable AS Target
             USING ({0}) AS Source
@@ -155,7 +155,7 @@
                 sqlSelect.Append(string.Format("SELECT '{0}' AS TableNameCSharp, {1} AS TableNameSql", tableNameCSharp, tableNameSql));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilBuildTool.SqlExecute(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlTable");
         }
 
@@ -166,7 +166,7 @@
         {
             UtilFramework.Log("### Start RunSqlGrid");
             string sql = "UPDATE FrameworkGrid SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkGrid AS Target
             USING ({0}) AS Source
@@ -234,7 +234,7 @@
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilBuildTool.SqlExecute(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlGrid");
         }
 
@@ -245,7 +245,7 @@
         {
             UtilFramework.Log("### Start RunSqlPage");
             string sql = "UPDATE FrameworkComponent SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkComponent AS Target
             USING ({0}) AS Source
@@ -277,7 +277,7 @@
                 sqlSelect.Append(string.Format("SELECT '{0}' AS ComponentNameCSharp, {1} AS IsPage", componentNameCSharp, isPage ? 1 : 0));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilBuildTool.SqlExecute(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlPage");
         }
 
@@ -288,7 +288,7 @@
         {
             UtilFramework.Log("### Start RunSqlColumn");
             string sql = "UPDATE FrameworkColumn SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkColumn AS Target
             USING ({0}) AS Source
@@ -323,7 +323,7 @@
                 }
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilBuildTool.SqlExecute(sqlUpsert, true);
             UtilFramework.Log("### Exit RunSqlColumn");
         }
 
@@ -373,7 +373,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
             UtilFramework.Log("### Exit RunSqlConfigGrid");
         }
@@ -458,7 +458,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
             UtilFramework.Log("### Exit RunSqlConfigColumn");
         }
@@ -485,7 +485,7 @@
         private void RunSqlBuiltInRole(List<BuiltInRole> roleList)
         {
             string sql = "UPDATE FrameworkLoginRole SET IsBuiltInExist = 0 WHERE IsBuiltIn = 1";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkLoginRole AS Target
             USING ({0}) AS Source
@@ -523,14 +523,14 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
         }
 
         private void RunSqlBuiltInRolePermission(List<BuiltInRole> roleList)
         {
             string sql = "UPDATE FrameworkLoginRolePermission SET IsActive = 0 WHERE IsBuiltIn = 1";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkLoginRolePermission AS Target
             USING ({0}) AS Source
@@ -578,14 +578,14 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
         }
 
         private void RunSqlBuiltInUserRole(List<BuiltInRole> roleList)
         {
             string sql = "UPDATE FrameworkLoginUserRole SET IsActive = 0 WHERE IsBuiltIn = 1";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkLoginUserRole AS Target
             USING ({0}) AS Source
@@ -633,7 +633,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
         }
 
@@ -681,7 +681,7 @@
         private void RunSqlBuiltInPermission(List<BuiltInRole> roleList)
         {
             string sql = "UPDATE FrameworkLoginPermission SET IsExist = 0";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkLoginPermission AS Target
             USING ({0}) AS Source
@@ -720,14 +720,14 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
         }
 
         private void RunSqlBuiltInUser(List<BuiltInRole> roleList)
         {
             string sql = "UPDATE FrameworkLoginUser SET IsBuiltInExist = 0 WHERE IsBuiltIn = 1";
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             string sqlUpsert = @"
             MERGE INTO FrameworkLoginUser AS Target
             USING ({0}) AS Source
@@ -765,7 +765,7 @@
             if (isFirst == false)
             {
                 sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-                UtilBuildTool.SqlCommand(sqlUpsert, true, parameterList.ToArray());
+                UtilBuildTool.SqlExecute(sqlUpsert, true, parameterList.ToArray());
             }
         }
 

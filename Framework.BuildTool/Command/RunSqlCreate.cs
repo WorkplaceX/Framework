@@ -1,6 +1,8 @@
 ﻿namespace Framework.BuildTool
 {
+    using Database.dbo;
     using Framework.BuildTool.DataAccessLayer;
+    using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
@@ -100,8 +102,11 @@
         private bool IsRunGet(string fileName, bool isFrameworkDb, bool isDrop)
         {
             string name = FileNameToName(fileName, isFrameworkDb, isDrop);
-            var rowList = UtilBuildTool.SqlRead("SELECT * FROM FrameworkScript WHERE Name = @Name", true, new SqlParameter("Name", System.Data.SqlDbType.NVarChar) { Value = name });
-            bool result = (bool)rowList.Single()["IsRun"];
+            List<SqlParameter> paramList = new List<SqlParameter>();
+            UtilDataAccessLayer.ExecuteParameterAdd("@Name", name, System.Data.SqlDbType.NVarChar, paramList);
+            var resultSet = UtilDataAccessLayer.ExecuteReader("SELECT * FROM FrameworkScript WHERE Name = @Name", paramList);
+            bool result = UtilDataAccessLayer.ExecuteResultCopy<FrameworkScript>(resultSet, 0).First().IsRun;
+            //
             return result;
         }
 
@@ -121,7 +126,7 @@
             {
                 dateTimeDrop = dateTime;
             }
-            UtilBuildTool.SqlCommand(
+            UtilBuildTool.SqlExecute(
                 "UPDATE FrameworkScript SET IsRun = @IsRun, DateCreate = @DateCreate, DateDrop = @DateDrop WHERE Name = @Name",
                 true,
                 new SqlParameter("IsRun", System.Data.SqlDbType.Bit) { Value = value },
@@ -153,7 +158,7 @@
                     {
                         string text = UtilFramework.FileRead(fileName);
                         var sqlList = text.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
-                        UtilBuildTool.SqlCommand(sqlList.ToList(), isFrameworkDb);
+                        UtilBuildTool.SqlExecute(sqlList.ToList(), isFrameworkDb);
                         IsRunSet(fileName, isFrameworkDb, isDrop, !isDrop, dateTime);
                     }
                     UtilFramework.Log(string.Format("### Exit RunSql={0}; OptionDrop={1}; IsRun={2};", fileName, OptionDrop.IsOn, isRun));
@@ -180,7 +185,7 @@
         /// </summary>
         private void Upsert(string[] nameList)
         {
-            UtilBuildTool.SqlCommand("UPDATE FrameworkScript SET IsExist = 0", true);
+            UtilBuildTool.SqlExecute("UPDATE FrameworkScript SET IsExist = 0", true);
             //
             string sqlUpsert = @"
             MERGE INTO FrameworkScript AS Target
@@ -210,7 +215,7 @@
                 sqlSelect.Append(string.Format("(SELECT '{0}' AS Name)", name));
             }
             sqlUpsert = string.Format(sqlUpsert, sqlSelect.ToString());
-            UtilBuildTool.SqlCommand(sqlUpsert, true);
+            UtilBuildTool.SqlExecute(sqlUpsert, true);
         }
 
         private void RunSqlCreate()
@@ -218,7 +223,7 @@
             // Create table FrameworkScript
             string fileNameScript = UtilFramework.FolderName + "Submodule/Framework.BuildTool/Sql/Script.sql";
             string sql = UtilGenerate.FileLoad(fileNameScript);
-            UtilBuildTool.SqlCommand(sql, true);
+            UtilBuildTool.SqlExecute(sql, true);
             //
             string[] nameList = new string[] { };
             NameList(false, false, ref nameList);

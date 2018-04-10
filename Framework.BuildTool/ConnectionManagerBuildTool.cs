@@ -130,7 +130,7 @@ namespace Framework.BuildTool
             string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
             try
             {
-                UtilBuildTool.SqlCommand("SELECT 1", isFrameworkDb);
+                UtilBuildTool.SqlExecute("SELECT 1", isFrameworkDb);
                 UtilFramework.Log("SQL Connection [ok]");
             }
             catch (Exception exception)

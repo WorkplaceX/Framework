@@ -471,17 +471,32 @@
         /// <summary>
         /// Wrap SqlCommand into SqlConnection.
         /// </summary>
-        private static void SqlCommand(List<string> sqlList, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
+        /// <param name="sqlList">List of sql statements.</param>
+        /// <param name="isFrameworkDb">Execute sql on Appliation or Framework database.</param>
+        /// <param name="paramList">Do not use if multiple sqlList.</param>
+        /// <param name="isUseParam">If false, parameters are replaced with sql text.</param>
+        /// <param name="execute">Callback method.</param>
+        internal static void Execute(List<string> sqlList, bool isFrameworkDb, List<SqlParameter> paramList, bool isUseParam, Action<SqlCommand> execute)
         {
+            if (sqlList.Count > 1)
+            {
+                UtilFramework.Assert(paramList.Count == 0, "No paramList if multiple sql statement!");
+            }
             string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new Exception("ConnectionString missing!");
+            }
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
                 foreach (string sql in sqlList)
                 {
-                    using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection))
+                    string sqlForeach = sql;
+                    ExecuteParameterReplace(ref sqlForeach, paramList, isUseParam);
+                    using (SqlCommand sqlCommand = new SqlCommand(sqlForeach, sqlConnection))
                     {
-                        sqlCommand.Parameters.AddRange(paramList);
+                        sqlCommand.Parameters.AddRange(paramList.ToArray());
                         execute(sqlCommand); // Call back
                     }
                 }
@@ -489,58 +504,9 @@
         }
 
         /// <summary>
-        /// Read data from stored procedure or database table. Returns multiple result sets.
-        /// </summary>
-        /// <param name="sql">For example: Execute("SELECT 1 AS A SELECT 2 AS B")</param>
-        /// <param name="paramList"></param>
-        /// <returns>Returns (ResultSet, Row, ColumnName, Value).</returns>
-        public static List<List<Dictionary<string, object>>> Execute(string sql, bool isUseParam, List<SqlParameter> paramList)
-        {
-            List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
-            List<string> sqlList = new List<string>();
-            sqlList.Add(sql);
-            SqlCommand(sqlList, (sqlCommand) =>
-            {
-                sqlCommand.Parameters.AddRange(paramList.ToArray());
-                using (SqlDataReader reader = sqlCommand.ExecuteReader())
-                {
-                    while (reader.HasRows)
-                    {
-                        var rowList = new List<Dictionary<string, object>>();
-                        result.Add(rowList);
-                        while (reader.Read())
-                        {
-                            var row = new Dictionary<string, object>();
-                            rowList.Add(row);
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                string columnName = reader.GetName(i);
-                                object value = reader.GetValue(i);
-                                row.Add(columnName, value);
-                            }
-                        }
-                        reader.NextResult();
-                    }
-                }
-            }, false);
-            return result;
-        }
-
-        public static List<List<Dictionary<string, object>>> Execute(string sql)
-        {
-            return Execute(sql, true, new List<SqlParameter>());
-        }
-
-        public static List<List<Dictionary<string, object>>> Execute(string sql, List<SqlParameter> paramList)
-        {
-            return Execute(sql, true, paramList);
-        }
-
-
-        /// <summary>
         /// Returns parameter value as sql text.
         /// </summary>
-        private static string Execute2ParameterToSqlText(SqlParameter parameter)
+        private static string ExecuteParameterToSqlText(SqlParameter parameter)
         {
             if (parameter.Value == DBNull.Value)
             {
@@ -549,6 +515,17 @@
             if (parameter.Value is int)
             {
                 return parameter.Value.ToString();
+            }
+            if (parameter.Value is bool)
+            {
+                if ((bool)parameter.Value == true)
+                {
+                    return "1";
+                }
+                else
+                {
+                    return "0";
+                }
             }
             if (parameter.Value is string)
             {
@@ -561,14 +538,16 @@
         /// <summary>
         /// Replace parameter name with actual parameter text value.
         /// </summary>
-        private static void Execute2ParameterReplace(ref string sql, List<SqlParameter> paramList)
+        private static void ExecuteParameterReplace(ref string sql, List<SqlParameter> paramList)
         {
+            paramList = paramList.OrderByDescending(item => item.ParameterName).ToList(); // Replace first long names.
             for (int i = 0; i < paramList.Count; i++)
             {
                 SqlParameter parameter = paramList[i];
-                string parameterText = Execute2ParameterToSqlText(parameter);
+                string parameterText = ExecuteParameterToSqlText(parameter);
                 UtilFramework.Assert(parameterText.Contains("@P") == false); // Parameter value does not contain parameter name.
-                string parameterName = $"@P{ i }";
+                string parameterName = parameter.ParameterName;
+                UtilFramework.Assert(sql.Contains(parameterName), "Parameter not found in sql statement!");
                 sql = sql.Replace(parameterName, parameterText);
             }
         }
@@ -576,9 +555,9 @@
         /// <summary>
         /// Add sql parameter to list.
         /// </summary>
-        internal static void Execute2ParameterAdd(object value, SqlDbType dbType, List<SqlParameter> paramList)
+        internal static void ExecuteParameterAdd(string name, object value, SqlDbType dbType, List<SqlParameter> paramList)
         {
-            string name = $"@P{ paramList.Count }";
+            UtilFramework.Assert(name.StartsWith("@"), "Parameter does not start with @!");
             if (value == null)
             {
                 value = DBNull.Value;
@@ -587,11 +566,11 @@
             paramList.Add(parameter);
         }
 
-        private static void Execute2ParameterReplace(ref string sql, List<SqlParameter> paramList, bool isUseParam)
+        private static void ExecuteParameterReplace(ref string sql, List<SqlParameter> paramList, bool isUseParam)
         {
             if (isUseParam == false)
             {
-                Execute2ParameterReplace(ref sql, paramList);
+                ExecuteParameterReplace(ref sql, paramList);
                 paramList.Clear();
             }
         }
@@ -599,20 +578,17 @@
         /// <summary>
         /// Read data from stored procedure or database table. Returns multiple result sets.
         /// </summary>
-        /// <param name="sql">For example: Execute("SELECT 1 AS A SELECT 2 AS B"); or with parameter: Execute("SELECT @P0 AS A");</param>
+        /// <param name="sql">For example: ExecuteReader("SELECT 1 AS A SELECT 2 AS B"); or with parameter: ExecuteReader("SELECT @P0 AS A");</param>
         /// <param name="paramList">See also method ExecuteParameterAdd();</param>
         /// <param name="isUseParam">If false, sql parameters are replaced with sql text. Use for example to debug. Be aware of SQL injection!</param>
         /// <returns>Returns (ResultSet, Row, ColumnName, Value).</returns>
-        public static List<List<Dictionary<string, object>>> Execute2(string sql, List<SqlParameter> paramList, bool isUseParam = true)
+        public static List<List<Dictionary<string, object>>> ExecuteReader(string sql, List<SqlParameter> paramList, bool isUseParam = true)
         {
-            Execute2ParameterReplace(ref sql, paramList, isUseParam);
-            //
             List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
             List<string> sqlList = new List<string>();
             sqlList.Add(sql);
-            SqlCommand(sqlList, (sqlCommand) =>
+            Execute(sqlList, false, paramList, isUseParam, (sqlCommand) =>
             {
-                sqlCommand.Parameters.AddRange(paramList.ToArray());
                 using (SqlDataReader reader = sqlCommand.ExecuteReader())
                 {
                     while (reader.HasRows)
@@ -637,8 +613,33 @@
                         reader.NextResult();
                     }
                 }
-            }, false);
+            });
             return result;
+        }
+
+        public static List<List<Dictionary<string, object>>> ExecuteReader(string sql)
+        {
+            return ExecuteReader(sql, new List<SqlParameter>());
+        }
+
+        /// <summary>
+        /// Execute non query sql statement. For example: INSERT INTO MyTable (Name) SELECT @P0 or EXEC MyStoredProc
+        /// </summary>
+        /// <returns>Returns rows affected.</returns>
+        public static int ExecuteNonQuery(string sql, List<SqlParameter> paramList, bool isUseParam = true)
+        {
+            List<string> sqlList = new List<string>(new string[] { sql });
+            int result = 0;
+            Execute(sqlList, false, paramList, isUseParam, (sqlCommand) =>
+            {
+                result = sqlCommand.ExecuteNonQuery();
+            });
+            return result;
+        }
+
+        public static int ExecuteNonQuery(string sql)
+        {
+            return ExecuteNonQuery(sql, new List<SqlParameter>());
         }
 
         /// <summary>
@@ -648,7 +649,7 @@
         /// <param name="resultSetIndex">Sql multiple result set index.</param>
         /// <param name="typeRow">Type of row to copy to. Copy one multiple result set.</param>
         /// <returns>List of typed rows.</returns>
-        public static List<object> Execute2Copy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
+        public static List<object> ExecuteResultCopy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
         {
             List<object> result = new List<object>();
             PropertyInfo[] propertyInfoList = UtilDataAccessLayer.TypeRowToPropertyList(typeRow);
@@ -670,15 +671,15 @@
         }
 
         /// <summary>
-        /// Convert one sql multiple result set to typed row list.
+        /// Convert sql multiple result set to one typed row list.
         /// </summary>
         /// <typeparam name="T">Type of row to copy to. Copy one multiple result set.</typeparam>
-        /// <param name="valueList">Result of method Execute();</param>
+        /// <param name="valueList">Result of method Execute(); multiple result set.</param>
         /// <param name="resultSetIndex">Sql multiple result set index.</param>
         /// <returns>Type of row to copy to. Copy one multiple result set.</returns>
-        public static List<T> Execute2Copy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
+        public static List<T> ExecuteResultCopy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
         {
-            List<object> result = Execute2Copy(valueList, resultSetIndex, typeof(T));
+            List<object> result = ExecuteResultCopy(valueList, resultSetIndex, typeof(T));
             return result.Cast<T>().ToList();
         }
 

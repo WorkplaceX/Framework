@@ -1,5 +1,6 @@
 ﻿namespace Framework.BuildTool
 {
+    using Framework.DataAccessLayer;
     using Framework.Server;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
@@ -13,74 +14,21 @@
     public static class UtilBuildTool
     {
         /// <summary>
-        /// Wrap SqlCommand into SqlConnection.
+        /// Execute sql command. Run multiple sql statements.
         /// </summary>
-        private static void SqlCommand(List<string> sqlList, Action<SqlCommand> execute, bool isFrameworkDb, params SqlParameter[] paramList)
+        public static void SqlExecute(List<string> sqlList, bool isFrameworkDb)
         {
-            string connectionString = ConnectionManagerServer.ConnectionString(isFrameworkDb);
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new Exception("ConnectionString missing!");
-            }
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                sqlConnection.Open();
-                foreach (string sql in sqlList)
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection))
-                    {
-                        sqlCommand.Parameters.AddRange(paramList);
-                        execute(sqlCommand); // Call back
-                    }
-                }
-            }
+            UtilDataAccessLayer.Execute(sqlList, isFrameworkDb, new List<SqlParameter>(), true, (sqlCommand) => sqlCommand.ExecuteNonQuery());
         }
 
         /// <summary>
-        /// Execute sql command.
+        /// Execute sql command. Run one sql statement.
         /// </summary>
-        public static void SqlCommand(List<string> sqlList, bool isFrameworkDb, params SqlParameter[] paramList)
-        {
-            SqlCommand(sqlList, (sqlCommand) => sqlCommand.ExecuteNonQuery(), isFrameworkDb, paramList);
-        }
-
-        /// <summary>
-        /// Execute sql command.
-        /// </summary>
-        public static void SqlCommand(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
+        public static void SqlExecute(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
         {
             List<string> sqlList = new List<string>();
             sqlList.Add(sql);
-            SqlCommand(sqlList, (sqlCommand) => sqlCommand.ExecuteNonQuery(), isFrameworkDb, paramList);
-        }
-
-        /// <summary>
-        /// Read table from database.
-        /// </summary>
-        public static List<Dictionary<string, object>> SqlRead(string sql, bool isFrameworkDb, params SqlParameter[] paramList)
-        {
-            List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
-            List<string> sqlList = new List<string>();
-            sqlList.Add(sql);
-            SqlCommand(sqlList, (sqlCommand) =>
-            {
-                sqlCommand.Parameters.AddRange(paramList);
-                using (SqlDataReader reader = sqlCommand.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var row = new Dictionary<string, object>();
-                        result.Add(row);
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            string columnName = reader.GetName(i);
-                            object value = reader.GetValue(i);
-                            row.Add(columnName, value);
-                        }
-                    }
-                }
-            }, isFrameworkDb);
-            return result;
+            UtilDataAccessLayer.Execute(sqlList, isFrameworkDb, paramList.ToList(), true, (sqlCommand) => sqlCommand.ExecuteNonQuery());
         }
 
         public static CommandLineApplication CommandLineApplicationCreate()

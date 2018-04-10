@@ -97,18 +97,20 @@
                 result.Session = session;
             }
             //
-            List<SqlParameter> list = new List<SqlParameter>();
-            UtilDataAccessLayer.Execute2ParameterAdd(7, System.Data.SqlDbType.Int, list);
-            var d2 = UtilDataAccessLayer.Execute2("EXEC MyProc @Id = @P0", list);
-            var l = UtilDataAccessLayer.Execute2Copy<FrameworkApplication>(d2, 0);
+            List<SqlParameter> listParam = new List<SqlParameter>();
+            UtilDataAccessLayer.ExecuteParameterAdd("@X", "f8", System.Data.SqlDbType.NVarChar, listParam);
+            
+            // var d3 = UtilDataAccessLayer.ExecuteReader("SELECT @X AS F", listParam, false);
+            // var d2 = UtilDataAccessLayer.ExecuteReader("EXEC MyProc @Id = @P0", listParam, false);
+            // var l = UtilDataAccessLayer.ExecuteResultCopy<FrameworkApplication>(d2, 0);
             //
-            List<SqlParameter> parameterList = new List<SqlParameter>();
-            UtilDataAccessLayer.Parameter(controllerPath, System.Data.SqlDbType.NVarChar, parameterList);
-            UtilDataAccessLayer.Parameter(App.UserGuest().UserName, System.Data.SqlDbType.NVarChar, parameterList);
-            UtilDataAccessLayer.Parameter(true, System.Data.SqlDbType.Int, parameterList);
-            UtilDataAccessLayer.Parameter(result.Session, System.Data.SqlDbType.UniqueIdentifier, parameterList);
+            List<SqlParameter> paramList = new List<SqlParameter>();
+            UtilDataAccessLayer.ExecuteParameterAdd("@Path", controllerPath, System.Data.SqlDbType.NVarChar, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@UserName", App.UserGuest().UserName, System.Data.SqlDbType.NVarChar, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@UserNameIsBuiltIn", true, System.Data.SqlDbType.Int, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@Session", result.Session, System.Data.SqlDbType.UniqueIdentifier, paramList);
 
-            var d = UtilDataAccessLayer.Execute("EXEC FrameworkLogin @Path=@P0, @UserName=@P1, @UserNameIsBuiltIn=@P2, @Session=@P3", parameterList);
+            var d = UtilDataAccessLayer.ExecuteReader("EXEC FrameworkLogin @Path, @UserName, @UserNameIsBuiltIn, @Session", paramList, false);
         }
 
         private static void CreateAppFromSessionCookie(WebControllerBase webController, AppSelectorResult result)
