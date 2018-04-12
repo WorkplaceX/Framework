@@ -364,10 +364,10 @@
                     string tableNameCSharp = UtilDataAccessLayer.TypeRowToTableNameCSharp(typeRow);
                     sqlSelect.Append(string.Format(
                         "SELECT (SELECT Config.GridId FROM FrameworkConfigGridView Config WHERE EXISTS(SELECT Config.GridName, Config.TableNameCSharp INTERSECT SELECT {0} AS GridName, {1} AS TableNameCSharp)) AS GridId, {2} AS PageRowCount, {3} AS IsInsert",
-                        UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(config.PageRowCount, SqlDbType.Int, parameterList),
-                        UtilDataAccessLayer.Parameter(config.IsInsert, SqlDbType.Bit, parameterList)));
+                        UtilDataAccessLayer.ExecuteParameterAdd(config.GridName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(tableNameCSharp, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(config.PageRowCount, SqlDbType.Int, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(config.IsInsert, SqlDbType.Bit, parameterList, false)));
                 }
             }
             if (isFirst == false)
@@ -443,15 +443,15 @@
                             "{6} AS IsReadOnly, " +
                             "{7} AS Sort, " +
                             "{8} AS WidthPercent",
-                            UtilDataAccessLayer.Parameter(config.GridName, SqlDbType.NVarChar, parameterList),
-                            UtilDataAccessLayer.Parameter(tableNameCSharp, SqlDbType.NVarChar, parameterList),
-                            UtilDataAccessLayer.Parameter(column.ColumnNameCSharp, SqlDbType.NVarChar, parameterList),
-                            UtilDataAccessLayer.Parameter(config.Text, SqlDbType.NVarChar, parameterList),
-                            UtilDataAccessLayer.Parameter(config.Description, SqlDbType.NVarChar, parameterList),
-                            UtilDataAccessLayer.Parameter(config.IsVisible, SqlDbType.Bit, parameterList),
-                            UtilDataAccessLayer.Parameter(config.IsReadOnly, SqlDbType.Bit, parameterList),
-                            UtilDataAccessLayer.Parameter(config.Sort, SqlDbType.Int, parameterList),
-                            UtilDataAccessLayer.Parameter(config.WidthPercent, SqlDbType.Int, parameterList)));
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.GridName, SqlDbType.NVarChar, parameterList, false),
+                            UtilDataAccessLayer.ExecuteParameterAdd(tableNameCSharp, SqlDbType.NVarChar, parameterList, false),
+                            UtilDataAccessLayer.ExecuteParameterAdd(column.ColumnNameCSharp, SqlDbType.NVarChar, parameterList, false),
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.Text, SqlDbType.NVarChar, parameterList, true),
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.Description, SqlDbType.NVarChar, parameterList, true),
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.IsVisible, SqlDbType.Bit, parameterList, false),
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.IsReadOnly, SqlDbType.Bit, parameterList, false),
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.Sort, SqlDbType.Int, parameterList, false),
+                            UtilDataAccessLayer.ExecuteParameterAdd(config.WidthPercent, SqlDbType.Int, parameterList, false)));
                     }
                 }
             }
@@ -516,8 +516,8 @@
                     }
                     sqlSelect.Append(string.Format(
                         "SELECT {0} AS ApplicationTypeName, {1} AS RoleName",
-                        UtilDataAccessLayer.Parameter(role.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(role.RoleName, SqlDbType.NVarChar, parameterList)));
+                        UtilDataAccessLayer.ExecuteParameterAdd(role.ApplicationTypeName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(role.RoleName, SqlDbType.NVarChar, parameterList, false)));
                 }
             }
             if (isFirst == false)
@@ -570,9 +570,9 @@
                     }
                     sqlSelect.Append(string.Format(
                         "SELECT {0} AS ApplicationTypeName, {1} AS PermissionName, {2} AS RoleName",
-                        UtilDataAccessLayer.Parameter(rolePermission.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(rolePermission.PermissionName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(rolePermission.RoleName, SqlDbType.NVarChar, parameterList)));
+                        UtilDataAccessLayer.ExecuteParameterAdd(rolePermission.ApplicationTypeName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(rolePermission.PermissionName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(rolePermission.RoleName, SqlDbType.NVarChar, parameterList, false)));
                 }
             }
             if (isFirst == false)
@@ -625,9 +625,9 @@
                     }
                     sqlSelect.Append(string.Format(
                         "SELECT {0} AS ApplicationTypeName, {1} AS UserName, {2} AS RoleName",
-                        UtilDataAccessLayer.Parameter(userRole.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(userRole.UserName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(userRole.RoleName, SqlDbType.NVarChar, parameterList)));
+                        UtilDataAccessLayer.ExecuteParameterAdd(userRole.ApplicationTypeName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(userRole.UserName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(userRole.RoleName, SqlDbType.NVarChar, parameterList, false)));
                 }
             }
             if (isFirst == false)
@@ -712,9 +712,9 @@
                     }
                     sqlSelect.Append(string.Format(
                         "SELECT {0} AS ApplicationTypeName, {1} AS PermissionName, {2} AS Description",
-                        UtilDataAccessLayer.Parameter(permission.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(permission.PermissionName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(permission.PermissionDescription, SqlDbType.NVarChar, parameterList)));
+                        UtilDataAccessLayer.ExecuteParameterAdd(permission.ApplicationTypeName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(permission.PermissionName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(permission.PermissionDescription, SqlDbType.NVarChar, parameterList, false)));
                 }
             }
             if (isFirst == false)
@@ -758,8 +758,8 @@
                     }
                     sqlSelect.Append(string.Format(
                         "SELECT {0} AS ApplicationTypeName, {1} AS UserName",
-                        UtilDataAccessLayer.Parameter(user.ApplicationTypeName, SqlDbType.NVarChar, parameterList),
-                        UtilDataAccessLayer.Parameter(user.UserName, SqlDbType.NVarChar, parameterList)));
+                        UtilDataAccessLayer.ExecuteParameterAdd(user.ApplicationTypeName, SqlDbType.NVarChar, parameterList, false),
+                        UtilDataAccessLayer.ExecuteParameterAdd(user.UserName, SqlDbType.NVarChar, parameterList, false)));
                 }
             }
             if (isFirst == false)

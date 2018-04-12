@@ -41,50 +41,6 @@
         }
 
         /// <summary>
-        /// Add parameter to sql.
-        /// </summary>
-        /// <param name="isUseParameter">If true, parameter is used, otherwise parameter is passed as literal.</param>
-        internal static string Parameter(object value, SqlDbType dbType, List<SqlParameter> parameterList, bool isUseParameter = true)
-        {
-            if (isUseParameter == true)
-            {
-                if (value == null)
-                {
-                    return "NULL";
-                }
-                if (value.GetType() == typeof(string))
-                {
-                    string valueString = (string)value;
-                    valueString = valueString.Replace("'", "''"); // Escape single quote.
-                    return string.Format("'{0}'", value);
-                }
-                if (value.GetType() == typeof(bool))
-                {
-                    bool valueBool = (bool)value;
-                    if (valueBool == false)
-                    {
-                        return "0";
-                    }
-                    else
-                    {
-                        return "1";
-                    }
-                }
-                return value.ToString();
-            }
-            else
-            {
-                string result = $"@P{ parameterList.Count }";
-                if (value == null)
-                {
-                    value = DBNull.Value;
-                }
-                parameterList.Add(new SqlParameter($"P{ parameterList.Count }", dbType) { Value = value });
-                return result;
-            }
-        }
-
-        /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace. This is for example identical to FrameworkConfigGridView.TableNameCSharp.
         /// </summary>
         internal static string TypeRowToTableNameCSharp(Type typeRow)
