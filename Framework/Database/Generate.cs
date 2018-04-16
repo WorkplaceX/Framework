@@ -1116,6 +1116,15 @@ namespace Database.dbo
         [SqlColumn("UserId", typeof(FrameworkSessionPermissionDisplay_UserId))]
         public int UserId { get; set; }
 
+        [SqlColumn("UserName", typeof(FrameworkSessionPermissionDisplay_UserName))]
+        public string UserName { get; set; }
+
+        [SqlColumn("UserIsBuiltIn", typeof(FrameworkSessionPermissionDisplay_UserIsBuiltIn))]
+        public bool? UserIsBuiltIn { get; set; }
+
+        [SqlColumn("UserIsBuiltInExist", typeof(FrameworkSessionPermissionDisplay_UserIsBuiltInExist))]
+        public bool? UserIsBuiltInExist { get; set; }
+
         [SqlColumn("ApplicationId", typeof(FrameworkSessionPermissionDisplay_ApplicationId))]
         public int? ApplicationId { get; set; }
 
@@ -1124,6 +1133,9 @@ namespace Database.dbo
 
         [SqlColumn("ApplicationTypeName", typeof(FrameworkSessionPermissionDisplay_ApplicationTypeName))]
         public string ApplicationTypeName { get; set; }
+
+        [SqlColumn("ApplicationTypeIsExist", typeof(FrameworkSessionPermissionDisplay_ApplicationTypeIsExist))]
+        public bool? ApplicationTypeIsExist { get; set; }
 
         [SqlColumn("PermissionId", typeof(FrameworkSessionPermissionDisplay_PermissionId))]
         public int? PermissionId { get; set; }
@@ -1141,11 +1153,19 @@ namespace Database.dbo
 
     public partial class FrameworkSessionPermissionDisplay_UserId : Cell<FrameworkSessionPermissionDisplay> { }
 
+    public partial class FrameworkSessionPermissionDisplay_UserName : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_UserIsBuiltIn : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_UserIsBuiltInExist : Cell<FrameworkSessionPermissionDisplay> { }
+
     public partial class FrameworkSessionPermissionDisplay_ApplicationId : Cell<FrameworkSessionPermissionDisplay> { }
 
     public partial class FrameworkSessionPermissionDisplay_ApplicationTypeId : Cell<FrameworkSessionPermissionDisplay> { }
 
     public partial class FrameworkSessionPermissionDisplay_ApplicationTypeName : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_ApplicationTypeIsExist : Cell<FrameworkSessionPermissionDisplay> { }
 
     public partial class FrameworkSessionPermissionDisplay_PermissionId : Cell<FrameworkSessionPermissionDisplay> { }
 

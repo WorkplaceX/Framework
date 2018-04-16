@@ -181,7 +181,7 @@
     }
 
     /// <summary>
-    /// Server side root object.
+    /// Server side application root object.
     /// </summary>
     public class App
     {

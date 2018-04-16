@@ -60,17 +60,22 @@
         }
 
         /// <summary>
-        /// Override to register application on table FrameworkApplication.
+        /// Override to register application on table FrameworkApplication for command BuildTool runSqlCreate.
         /// </summary>
         protected virtual void DbFrameworkApplicationDisplay(List<FrameworkApplicationDisplay> result)
         {
 
         }
 
-        internal List<FrameworkApplicationDisplay> DbFrameworkApplicationView()
+        /// <summary>
+        /// Returns list of applications to register in sql table FrameworkApplication.
+        /// </summary>
+        internal List<FrameworkApplicationDisplay> DbFrameworkApplicationDisplay()
         {
             List<FrameworkApplicationDisplay> result = new List<FrameworkApplicationDisplay>();
+            // Register AppConfig
             result.Add(new FrameworkApplicationDisplay() { Text = "Application Config", Path = "config", IsActive = true, TypeName = UtilFramework.TypeToName(typeof(AppConfig)) });
+            // Register other applications defined on BuildTool.
             DbFrameworkApplicationDisplay(result); // Override to register new applications.
             return result;
         }

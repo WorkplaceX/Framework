@@ -410,16 +410,22 @@ SELECT
 	Session.Id AS SessionId,
 	Session.Session AS Session,
 	Session.UserId AS UserId,
+	UserX.UserName AS UserName,
+	UserX.IsBuiltIn AS UserIsBuiltIn,
+	UserX.IsBuiltInExist AS UserIsBuiltInExist,
 	Application.Id AS ApplicationId,
 	ApplicationType.Id AS ApplicationTypeId,
 	ApplicationType.TypeName AS ApplicationTypeName,
+	ApplicationType.IsExist AS ApplicationTypeIsExist,
 	Permission.Id AS PermissionId,
 	Permission.PermissionName AS PermissionName,
 	Permission.IsExist AS PermissionIsExist
 FROM
 	FrameworkSession Session
 LEFT JOIN
-	FrameworkApplication Application ON Application.Id = Session.ApplicationId
+	FrameworkLoginUser UserX ON UserX.Id = Session.UserId
+LEFT JOIN
+	FrameworkApplication Application ON Application.Id = Session.ApplicationId -- UnitTest: AND UserX.ApplicationId = Application.Id
 LEFT JOIN
 	FrameworkApplicationType ApplicationType ON ApplicationType.Id = Application.ApplicationTypeId
 LEFT JOIN
