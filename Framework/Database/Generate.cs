@@ -1128,6 +1128,9 @@ namespace Database.dbo
         [SqlColumn("ApplicationId", typeof(FrameworkSessionPermissionDisplay_ApplicationId))]
         public int? ApplicationId { get; set; }
 
+        [SqlColumn("ApplicationPath", typeof(FrameworkSessionPermissionDisplay_ApplicationPath))]
+        public string ApplicationPath { get; set; }
+
         [SqlColumn("ApplicationTypeId", typeof(FrameworkSessionPermissionDisplay_ApplicationTypeId))]
         public int? ApplicationTypeId { get; set; }
 
@@ -1160,6 +1163,8 @@ namespace Database.dbo
     public partial class FrameworkSessionPermissionDisplay_UserIsBuiltInExist : Cell<FrameworkSessionPermissionDisplay> { }
 
     public partial class FrameworkSessionPermissionDisplay_ApplicationId : Cell<FrameworkSessionPermissionDisplay> { }
+
+    public partial class FrameworkSessionPermissionDisplay_ApplicationPath : Cell<FrameworkSessionPermissionDisplay> { }
 
     public partial class FrameworkSessionPermissionDisplay_ApplicationTypeId : Cell<FrameworkSessionPermissionDisplay> { }
 

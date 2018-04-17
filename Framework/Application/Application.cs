@@ -20,6 +20,9 @@
 
         public AppJson AppJsonIn;
 
+        /// <summary>
+        /// Gets RequestPathBase. For example: "subdirectory/config/".
+        /// </summary>
         public string RequestPathBase;
 
         /// <summary>
@@ -77,19 +80,22 @@
                 requestUrl += "/";
             }
             //
-            // CreateApp(webController, controllerPath, result);
+            CreateApp(webController, controllerPath, requestUrl, result);
+            // CreateAppFromUrl(webController, controllerPath, requestUrl, result);
             //
-            CreateAppFromSessionCookie(webController, result);
-            if (result.App == null)
-            {
-                CreateAppFromUrl(webController, controllerPath, requestUrl, result);
-            }
             AppJson(webController, result);
             webController.Response.Cookies.Append("Session", result.Session.ToString());
             return result;
         }
 
-        private static void CreateApp(WebControllerBase webController, string controllerPath, AppSelectorResult result)
+        /// <summary>
+        /// Create App object.
+        /// </summary>
+        /// <param name="webController"></param>
+        /// <param name="controllerPath">See als: StartupBase.ControllerPath</param>
+        /// <param name="requestUrl">See also: HttpContext.Request.Path</param>
+        /// <param name="result">Returns App object.</param>
+        private void CreateApp(WebControllerBase webController, string controllerPath, string requestUrl, AppSelectorResult result)
         {
             string sessionText = webController.Request.Cookies["Session"];
             if (Guid.TryParse(sessionText, out Guid session))
@@ -97,28 +103,26 @@
                 result.Session = session;
             }
             //
-            List<SqlParameter> listParam = new List<SqlParameter>();
-            UtilDataAccessLayer.ExecuteParameterAdd("@X", "f8", System.Data.SqlDbType.NVarChar, listParam);
-            
-            // var d3 = UtilDataAccessLayer.ExecuteReader("SELECT @X AS F", listParam, false);
-            // var d2 = UtilDataAccessLayer.ExecuteReader("EXEC MyProc @Id = @P0", listParam, false);
-            // var l = UtilDataAccessLayer.ExecuteResultCopy<FrameworkApplication>(d2, 0);
+            string path = requestUrl.Substring(controllerPath.Length);
             //
             List<SqlParameter> paramList = new List<SqlParameter>();
-            UtilDataAccessLayer.ExecuteParameterAdd("@Path", controllerPath, System.Data.SqlDbType.NVarChar, paramList);
-            UtilDataAccessLayer.ExecuteParameterAdd("@UserName", App.UserGuest().UserName, System.Data.SqlDbType.NVarChar, paramList);
-            UtilDataAccessLayer.ExecuteParameterAdd("@UserNameIsBuiltIn", true, System.Data.SqlDbType.Int, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@Path", path, System.Data.SqlDbType.NVarChar, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@UserNameDefault", App.UserGuest().UserName, System.Data.SqlDbType.NVarChar, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@UserName", null, System.Data.SqlDbType.NVarChar, paramList);
+            UtilDataAccessLayer.ExecuteParameterAdd("@UserNameIsBuiltIn", null, System.Data.SqlDbType.Int, paramList);
             UtilDataAccessLayer.ExecuteParameterAdd("@Session", result.Session, System.Data.SqlDbType.UniqueIdentifier, paramList);
-
-            var d = UtilDataAccessLayer.ExecuteReader("EXEC FrameworkLogin @Path, @UserName, @UserNameIsBuiltIn, @Session", paramList, false);
-        }
-
-        private static void CreateAppFromSessionCookie(WebControllerBase webController, AppSelectorResult result)
-        {
-            string sessionText = webController.Request.Cookies["Session"];
-            if (Guid.TryParse(sessionText, out Guid session))
+            var loginResult = UtilDataAccessLayer.ExecuteReader("EXEC FrameworkLogin @Path, @UserNameDefault, @UserName, @UserNameIsBuiltIn, @Session", paramList); // Call stored procedure FrameworkLogin.
+            List<FrameworkSessionPermissionDisplay> dbSessionPermissionList = UtilDataAccessLayer.ExecuteResultCopy<FrameworkSessionPermissionDisplay>(loginResult, 0);
+            //
+            Type typeInAssembly = GetType();
+            Type type = UtilFramework.TypeFromName(dbSessionPermissionList.First().ApplicationTypeName, UtilFramework.TypeInAssemblyList(typeInAssembly));
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(type, typeof(App)));
+            result.App = (App)UtilFramework.TypeToObject(type);
+            result.App.Constructor(webController, dbSessionPermissionList);
+            result.RequestPathBase = controllerPath + result.App.DbSessionPermissionDisplayList.First().ApplicationPath;
+            if (!result.RequestPathBase.EndsWith("/"))
             {
-                result.Session = session;
+                result.RequestPathBase += "/";
             }
         }
 
@@ -201,6 +205,12 @@
             this.DbFrameworkSessionPermissionDisplay = dbFrameworkSessionPermissionDisplay;
         }
 
+        internal void Constructor(WebControllerBase webController, List<FrameworkSessionPermissionDisplay> dbSessionPermissionDisplayList)
+        {
+            this.WebController = webController;
+            this.DbSessionPermissionDisplayList = dbSessionPermissionDisplayList;
+        }
+
         internal WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
 
         /// <summary>
@@ -212,6 +222,22 @@
             TValue result;
             result = WebController.MemoryCache.GetOrCreate<TValue>(key, entry => { return valueSet(); });
             return result;
+        }
+
+        /// <summary>
+        /// Gets DbSessionPermissionDisplayList. See also stored procedure FrameworkLogin.
+        /// </summary>
+        public List<FrameworkSessionPermissionDisplay> DbSessionPermissionDisplayList { get; private set; }
+
+        /// <summary>
+        /// Gets Session.
+        /// </summary>
+        public Guid Session
+        {
+            get
+            {
+                return DbSessionPermissionDisplayList.First().Session;
+            }
         }
 
         /// <summary>

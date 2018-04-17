@@ -414,6 +414,7 @@ SELECT
 	UserX.IsBuiltIn AS UserIsBuiltIn,
 	UserX.IsBuiltInExist AS UserIsBuiltInExist,
 	Application.Id AS ApplicationId,
+	Application.Path AS ApplicationPath,
 	ApplicationType.Id AS ApplicationTypeId,
 	ApplicationType.TypeName AS ApplicationTypeName,
 	ApplicationType.IsExist AS ApplicationTypeIsExist,
@@ -438,20 +439,26 @@ LEFT JOIN
 GO
 CREATE PROCEDURE FrameworkLogin
 (
-	@Path NVARCHAR(256),
-	@UserName NVARCHAR(256),
-	@UserNameIsBuiltIn BIT,
+	@Path NVARCHAR(256), -- Url path. For example config/xyz/
+	@UserNameDefault NVARCHAR(256), -- BuiltIn user for example Guest user.
+	@UserName NVARCHAR(256), -- Use for login. For example Admin user.
+	@UserNameIsBuiltIn BIT, -- BuiltIn or other user.
 	@Session UNIQUEIDENTIFIER
 )
 AS
 BEGIN
 	DECLARE @ApplicationId INT, @ApplicationTypeId INT
-	
-	SELECT 
+	print @Path
+	SELECT TOP 1
 		@ApplicationId = Id,
 		@ApplicationTypeId = ApplicationTypeId 
 	FROM 
-		FrameworkApplication WHERE ISNULL(Path, '') = ISNULL(@Path, '')
+		FrameworkApplicationDisplay 
+	WHERE 
+		IsExist = 1 AND IsActive = 1 AND
+		@Path LIKE CONCAT(Path, '%')
+	ORDER BY
+		Path DESC -- DESC: Make sure empty path is last match. And sql view FrameworkApplicationDisplay exists (Execute BuildTool runSqlCreate command). 
 
 	IF @ApplicationId IS NULL 
 	BEGIN
@@ -461,20 +468,27 @@ BEGIN
 
 	DECLARE @UserId INT 
 
-	IF (@UserNameIsBuiltIn = 1)
-		SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationTypeId = @ApplicationTypeId AND UserName = @UserName)
-	ELSE
-		SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationId = @ApplicationId AND UserName = @UserName)
+	IF (@UserNameDefault IS NOT NULL)
+		SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationTypeId = @ApplicationTypeId AND UserName = @UserNameDefault) -- UserNameDefault is always BuiltIn user.
 
-	IF (@Session IS NULL)
+	IF (@UserName IS NOT NULL)
+		IF (@UserNameIsBuiltIn = 1)
+			SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationTypeId = @ApplicationTypeId AND UserName = @UserName)
+		ELSE
+			SET @UserId = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationId = @ApplicationId AND UserName = @UserName)
+
+	IF (@Session IS NULL OR NOT EXISTS(SELECT Id FROM FrameworkSession WHERE Session = @Session)) -- New session or session does not exist.
 	BEGIN
 		SET @Session = NEWID()
+		DECLARE @UserIdDefault INT = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationTypeId = @ApplicationTypeId AND UserName = @UserNameDefault)
 		INSERT INTO FrameworkSession(Session, ApplicationId, UserId)
 		SELECT @Session, @ApplicationId, @UserId
 	END
 	ELSE
 	BEGIN
-		UPDATE FrameworkSession SET ApplicationId = @ApplicationId, UserId = @UserId WHERE Session = @Session
+		UPDATE FrameworkSession SET ApplicationId = @ApplicationId WHERE Session = @Session
+		IF @UserName IS NOT NULL
+			UPDATE FrameworkSession SET UserId = @UserId WHERE Session = @Session
 	END
 
 	SELECT * FROM FrameworkSessionPermissionDisplay WHERE Session = @Session
