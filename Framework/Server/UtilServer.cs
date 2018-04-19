@@ -144,6 +144,10 @@
             {
                 result = streamReader.ReadToEnd();
             }
+            if (result == "")
+            {
+                result = null;
+            }
             return result;
         }
 

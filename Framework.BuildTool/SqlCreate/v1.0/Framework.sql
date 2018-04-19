@@ -456,7 +456,7 @@ BEGIN
 		FrameworkApplicationDisplay 
 	WHERE 
 		IsExist = 1 AND IsActive = 1 AND
-		@Path LIKE CONCAT(Path, '%')
+		ISNULL(@Path, '') LIKE CONCAT(Path, '%')
 	ORDER BY
 		Path DESC -- DESC: Make sure empty path is last match. And sql view FrameworkApplicationDisplay exists (Execute BuildTool runSqlCreate command). 
 
@@ -479,7 +479,8 @@ BEGIN
 
 	IF (@Session IS NULL OR NOT EXISTS(SELECT Id FROM FrameworkSession WHERE Session = @Session)) -- New session or session does not exist.
 	BEGIN
-		SET @Session = NEWID()
+		IF @Session IS NULL
+			SET @Session = NEWID()
 		DECLARE @UserIdDefault INT = (SELECT Id FROM FrameworkLoginUser WHERE ApplicationTypeId = @ApplicationTypeId AND UserName = @UserNameDefault)
 		INSERT INTO FrameworkSession(Session, ApplicationId, UserId)
 		SELECT @Session, @ApplicationId, @UserId

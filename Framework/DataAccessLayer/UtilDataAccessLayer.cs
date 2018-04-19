@@ -517,6 +517,10 @@
         {
             UtilFramework.Assert(name.StartsWith("@"), "Parameter does not start with @!");
             UtilFramework.Assert(paramList.Where(item => item.ParameterName == name).Count() == 0, string.Format("ParameterName already exists! ({0})", name));
+            if (value is string && (string)value == "")
+            {
+                value = null;
+            }
             if (value == null)
             {
                 value = DBNull.Value;

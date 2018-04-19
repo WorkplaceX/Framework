@@ -7,6 +7,7 @@
     using Framework.Json;
     using Framework.Server;
     using Microsoft.Extensions.Caching.Memory;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
@@ -80,12 +81,47 @@
                 requestUrl += "/";
             }
             //
-            CreateApp(webController, controllerPath, requestUrl, result);
+            SessionGet(webController, out Guid? sessionFromCookie, out Guid? sessionFromJson, out string appJsonInText);
+            CreateApp(webController, controllerPath, requestUrl, sessionFromCookie, sessionFromJson, result);
             // CreateAppFromUrl(webController, controllerPath, requestUrl, result);
             //
-            AppJson(webController, result);
+            AppJson(appJsonInText, result);
             webController.Response.Cookies.Append("Session", result.Session.ToString());
+            UtilFramework.Assert(result.Session != null);
+            if (result.AppJsonIn != null)
+            {
+                UtilFramework.Assert(result.Session == result.AppJsonIn.Session);
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Returns session from cookie and or json http POST application object.
+        /// </summary>
+        /// <param name="sessionFromCookie">Returns session from browser cookie.</param>
+        /// <param name="sessionFromJson">Returns session from http POST json application object.</param>
+        /// <param name="appJsonInText">Returns json application from http POST if any.</param>
+        private void SessionGet(WebControllerBase webController, out Guid? sessionFromCookie, out Guid? sessionFromJson, out string appJsonInText)
+        {
+            sessionFromCookie = null;
+            sessionFromJson = null;
+            // Session from browser cookie.
+            string sessionFromCookieText = webController.Request.Cookies["Session"];
+            if (Guid.TryParse(sessionFromCookieText, out Guid sessionFromCookieLocal))
+            {
+                sessionFromCookie = sessionFromCookieLocal;
+            }
+            // Session from http POST json.
+            appJsonInText = UtilServer.StreamToString(webController.Request.Body); // Json from client http POST
+            if (appJsonInText != null)
+            {
+                var application = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(appJsonInText); // TODO Performance: See also method JsonConvert.Deserialize();
+                string sessionFromJsonText = application.Property("Session").Value.Value<string>();
+                if (Guid.TryParse(sessionFromJsonText, out Guid sessionFromJsonLocal))
+                {
+                    sessionFromJson = sessionFromJsonLocal;
+                }
+            }
         }
 
         /// <summary>
@@ -95,12 +131,15 @@
         /// <param name="controllerPath">See als: StartupBase.ControllerPath</param>
         /// <param name="requestUrl">See also: HttpContext.Request.Path</param>
         /// <param name="result">Returns App object.</param>
-        private void CreateApp(WebControllerBase webController, string controllerPath, string requestUrl, AppSelectorResult result)
+        private void CreateApp(WebControllerBase webController, string controllerPath, string requestUrl, Guid? sessionFromCookie, Guid? sessionFromJson, AppSelectorResult result)
         {
-            string sessionText = webController.Request.Cookies["Session"];
-            if (Guid.TryParse(sessionText, out Guid session))
+            if (sessionFromJson != null)
             {
-                result.Session = session;
+                result.Session = sessionFromJson;
+            }
+            if (sessionFromCookie != null)
+            {
+                result.Session = sessionFromCookie;
             }
             //
             string path = requestUrl.Substring(controllerPath.Length);
@@ -120,6 +159,7 @@
             result.App = (App)UtilFramework.TypeToObject(type);
             result.App.Constructor(webController, dbSessionPermissionList);
             result.RequestPathBase = controllerPath + result.App.DbSessionPermissionDisplayList.First().ApplicationPath;
+            result.Session = result.App.Session;
             if (!result.RequestPathBase.EndsWith("/"))
             {
                 result.RequestPathBase += "/";
@@ -129,18 +169,20 @@
         /// <summary>
         /// Extract AppJson from POST request.
         /// </summary>
-        private static void AppJson(WebControllerBase webController, AppSelectorResult result)
+        private static void AppJson(string appJsonInText, AppSelectorResult result)
         {
-            string appJsonInText = UtilServer.StreamToString(webController.Request.Body);
-            if (appJsonInText != "")
+            if (appJsonInText != null)
             {
                 result.AppJsonInText = appJsonInText;
                 result.AppJsonIn = JsonConvert.Deserialize<AppJson>(appJsonInText, result.App.TypeComponentInNamespaceList());
+            }
+            if (result.Session == null && result.AppJsonIn != null)
+            {
                 result.Session = result.AppJsonIn.Session;
             }
-            else
+            if (result.AppJsonIn != null)
             {
-                result.Session = Guid.NewGuid(); // New Session.
+                result.AppJsonIn.Session = result.Session;
             }
         }
 
