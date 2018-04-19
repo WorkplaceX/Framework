@@ -95,18 +95,6 @@
         }
 
         /// <summary>
-        /// Run one application on this ASP.NET Core and database instance. Every WebRequest goes through here. 
-        /// </summary>
-        /// <param name="typeAppDefault">Type of application (See also: class App)</param>
-        public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, Type typeAppDefault)
-        {
-            AppSelectorResult appSelectorResult = new AppSelector(typeAppDefault).Create(webController, controllerPath);
-            string url = webController.Request.Path; // For debug.
-            var result = await new UtilWebController(webController, appSelectorResult).WebRequest();
-            return result;
-        }
-
-        /// <summary>
         /// Run multiple applications on this ASP.NET Core and database instance. Every WebRequest goes through here. 
         /// </summary>
         public static async Task<IActionResult> ControllerWebRequest(WebControllerBase webController, string controllerPath, AppSelector appSelector)

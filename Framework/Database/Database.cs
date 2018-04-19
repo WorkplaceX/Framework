@@ -103,7 +103,7 @@ namespace Database.dbo
             var result = query;
             if (e.App.GetType() != typeof(AppConfig))
             {
-                int applicationId = e.App.DbFrameworkApplication.Id;
+                int applicationId = e.App.ApplicationId;
                 result = result.Where(item => item.ApplicationId == applicationId);
             }
             return result;
@@ -150,7 +150,7 @@ namespace Database.dbo
             if (e.App.GetType() != typeof(AppConfig))
             {
                 // Only AppConfig can add users of other applications.
-                int applicationId = e.App.DbFrameworkApplication.Id;
+                int applicationId = e.App.ApplicationId;
                 result = result.Where(item => item.Id == applicationId);
             }
             query = result;
@@ -362,10 +362,7 @@ namespace Database.dbo
     {
         protected internal override void Insert(Row rowNew, ref bool isReload, AppEventArg e)
         {
-            if (e.App.DbFrameworkApplication != null)
-            {
-                this.ApplicationId = e.App.DbFrameworkApplication.Id;
-            }
+            this.ApplicationId = e.App.ApplicationId;
             base.Insert(rowNew, ref isReload, e);
         }
     }

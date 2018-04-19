@@ -449,10 +449,11 @@
                 foreach (string sql in sqlList)
                 {
                     string sqlForeach = sql;
-                    ExecuteParameterReplace(ref sqlForeach, paramList, isUseParam);
+                    List<SqlParameter> paramListLocal = new List<SqlParameter>(paramList); // Prevent modification of passed list.
+                    ExecuteParameterReplace(ref sqlForeach, paramListLocal, isUseParam); // Modifies paramList!
                     using (SqlCommand sqlCommand = new SqlCommand(sqlForeach, sqlConnection))
                     {
-                        sqlCommand.Parameters.AddRange(paramList.ToArray());
+                        sqlCommand.Parameters.AddRange(paramListLocal.ToArray());
                         execute(sqlCommand); // Call back
                     }
                 }
@@ -487,6 +488,10 @@
             {
                 string valueString = parameter.Value.ToString().Replace("'", "''"); // Escape single quote.
                 return string.Format("'{0}'", valueString);
+            }
+            if (parameter.Value is Guid)
+            {
+                return $"'{ parameter.Value.ToString() }'";
             }
             throw new Exception("Type unknown!");
         }
@@ -572,6 +577,7 @@
             sqlList.Add(sql);
             Execute(sqlList, false, paramList, isUseParam, (sqlCommand) =>
             {
+                string sqlDebug = sqlCommand.CommandText; // Use for debug.
                 using (SqlDataReader reader = sqlCommand.ExecuteReader())
                 {
                     while (reader.HasRows)

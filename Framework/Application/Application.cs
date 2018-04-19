@@ -34,59 +34,19 @@
 
     /// <summary>
     /// Run multiple applications on same ASP.NET Core and same database instance. Mapping of url to class App is defined in sql view FrameworkApplicationDisplay.
-    /// AppSelector has to be in the same assembly like the App classes.
+    /// AppSelector has to be declared in same assembly as custom App class.
     /// </summary>
     public class AppSelector
     {
-        /// <summary>
-        /// Constructor with default app, if no database connection exists.
-        /// </summary>
-        internal AppSelector(Type typeAppDefault)
-        {
-            this.TypeAppDefault = typeAppDefault;
-        }
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public AppSelector()
-            : this(null)
-        {
-
-        }
-
-        /// <summary>
-        /// Gets TypeAppDefault. This is the default app, if no database connection exists.
-        /// </summary>
-        public readonly Type TypeAppDefault;
-
-        /// <summary>
-        /// Database access of sql view FrameworkApplicationDisplay.
-        /// </summary>
-        protected virtual List<FrameworkApplicationDisplay> DbApplicationList()
-        {
-            List<FrameworkApplicationDisplay> result;
-            result = UtilDataAccessLayer.Query<FrameworkApplicationDisplay>().ToList();
-            result = result.Where(item => item.IsExist == true && item.IsActive == true).OrderByDescending(item => item.Path).ToList(); // OrderByDescending: Make sure empty path is last match. And sql view FrameworkApplicationView exists (Execute BuildTool runSqlCreate command). 
-            return result;
-        }
-
         internal AppSelectorResult Create(WebControllerBase webController, string controllerPath)
         {
             AppSelectorResult result = new AppSelectorResult();
-            result.RequestPathBase = controllerPath;
-            string requestUrl = webController.HttpContext.Request.Path.ToString();
-            if (!requestUrl.EndsWith("/"))
-            {
-                requestUrl += "/";
-            }
             //
             SessionGet(webController, out Guid? sessionFromCookie, out Guid? sessionFromJson, out string appJsonInText);
-            CreateApp(webController, controllerPath, requestUrl, sessionFromCookie, sessionFromJson, result);
-            // CreateAppFromUrl(webController, controllerPath, requestUrl, result);
+            CreateApp(webController, controllerPath, sessionFromCookie, sessionFromJson, result);
+            SessionSet(webController, result.Session);
+            AppJson(appJsonInText, result); // If http POST.
             //
-            AppJson(appJsonInText, result);
-            webController.Response.Cookies.Append("Session", result.Session.ToString());
             UtilFramework.Assert(result.Session != null);
             if (result.AppJsonIn != null)
             {
@@ -125,13 +85,21 @@
         }
 
         /// <summary>
+        /// Set browser session cookie.
+        /// </summary>
+        private void SessionSet(WebControllerBase webController, Guid? session)
+        {
+            webController.Response.Cookies.Append("Session", session.ToString());
+        }
+
+        /// <summary>
         /// Create App object.
         /// </summary>
         /// <param name="webController"></param>
         /// <param name="controllerPath">See als: StartupBase.ControllerPath</param>
         /// <param name="requestUrl">See also: HttpContext.Request.Path</param>
         /// <param name="result">Returns App object.</param>
-        private void CreateApp(WebControllerBase webController, string controllerPath, string requestUrl, Guid? sessionFromCookie, Guid? sessionFromJson, AppSelectorResult result)
+        private void CreateApp(WebControllerBase webController, string controllerPath, Guid? sessionFromCookie, Guid? sessionFromJson, AppSelectorResult result)
         {
             if (sessionFromJson != null)
             {
@@ -142,6 +110,7 @@
                 result.Session = sessionFromCookie;
             }
             //
+            string requestUrl = webController.HttpContext.Request.Path.ToString();
             string path = requestUrl.Substring(controllerPath.Length);
             //
             List<SqlParameter> paramList = new List<SqlParameter>();
@@ -158,7 +127,7 @@
             UtilFramework.Assert(UtilFramework.IsSubclassOf(type, typeof(App)));
             result.App = (App)UtilFramework.TypeToObject(type);
             result.App.Constructor(webController, dbSessionPermissionList);
-            result.RequestPathBase = controllerPath + result.App.DbSessionPermissionDisplayList.First().ApplicationPath;
+            result.RequestPathBase = controllerPath + result.App.DbFrameworkSessionPermissionDisplayList.First().ApplicationPath;
             result.Session = result.App.Session;
             if (!result.RequestPathBase.EndsWith("/"))
             {
@@ -185,45 +154,6 @@
                 result.AppJsonIn.Session = result.Session;
             }
         }
-
-        /// <summary>
-        /// CreateApp if App can't be determined by session. For example first request.
-        /// </summary>
-        private void CreateAppFromUrl(WebControllerBase webController, string controllerPath, string requestUrl, AppSelectorResult result)
-        {
-            // Create App
-            foreach (FrameworkApplicationDisplay frameworkApplication in DbApplicationList())
-            {
-                string path = frameworkApplication.Path;
-                if (string.IsNullOrEmpty(path))
-                {
-                    path = null;
-                }
-                else
-                {
-                    if (!path.EndsWith("/"))
-                    {
-                        path = path + "/";
-                    }
-                }
-                if (requestUrl.StartsWith(controllerPath + path))
-                {
-                    Type typeInAssembly = GetType();
-                    if (TypeAppDefault != null)
-                    {
-                        typeInAssembly = TypeAppDefault;
-                    }
-                    Type type = UtilFramework.TypeFromName(frameworkApplication.TypeName, UtilFramework.TypeInAssemblyList(typeInAssembly));
-                    if (UtilFramework.IsSubclassOf(type, typeof(App)))
-                    {
-                        result.App = (App)UtilFramework.TypeToObject(type);
-                        result.App.Constructor(webController, frameworkApplication, null);
-                        result.RequestPathBase = controllerPath + path;
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -240,17 +170,10 @@
             ProcessInit(processList);
         }
 
-        internal void Constructor(WebControllerBase webController, FrameworkApplicationDisplay dbFrameworkApplication, List<FrameworkSessionPermissionDisplay> dbFrameworkSessionPermissionDisplay)
+        internal void Constructor(WebControllerBase webController, List<FrameworkSessionPermissionDisplay> dbFrameworkSessionPermissionDisplayList)
         {
             this.WebController = webController;
-            this.DbFrameworkApplication = dbFrameworkApplication;
-            this.DbFrameworkSessionPermissionDisplay = dbFrameworkSessionPermissionDisplay;
-        }
-
-        internal void Constructor(WebControllerBase webController, List<FrameworkSessionPermissionDisplay> dbSessionPermissionDisplayList)
-        {
-            this.WebController = webController;
-            this.DbSessionPermissionDisplayList = dbSessionPermissionDisplayList;
+            this.DbFrameworkSessionPermissionDisplayList = dbFrameworkSessionPermissionDisplayList;
         }
 
         internal WebControllerBase WebController { get; private set; } // TODO Use WebController.MemoryCache also to prevent "Information Disclosure" like table names on json object. See also https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/information-disclosure.
@@ -267,30 +190,20 @@
         }
 
         /// <summary>
-        /// Gets DbSessionPermissionDisplayList. See also stored procedure FrameworkLogin.
+        /// Gets DbFrameworkSessionPermissionDisplay. This list is returned by the stored procedure FrameworkLogin.
         /// </summary>
-        public List<FrameworkSessionPermissionDisplay> DbSessionPermissionDisplayList { get; private set; }
+        public List<FrameworkSessionPermissionDisplay> DbFrameworkSessionPermissionDisplayList { get; private set; }
 
         /// <summary>
-        /// Gets Session.
+        /// Gets Session. See also sql table: FrameworkSession.
         /// </summary>
         public Guid Session
         {
             get
             {
-                return DbSessionPermissionDisplayList.First().Session;
+                return DbFrameworkSessionPermissionDisplayList.First().Session;
             }
         }
-
-        /// <summary>
-        /// Gets DbFrameworkApplication. Used in connection with class AppSelector. See also database table FrameworkApplication.
-        /// </summary>
-        public FrameworkApplicationDisplay DbFrameworkApplication { get; private set; }
-
-        /// <summary>
-        /// Gets DbFrameworkSessionPermissionDisplay. This list is returned by the stored procedure FrameworkLogin.
-        /// </summary>
-        public List<FrameworkSessionPermissionDisplay> DbFrameworkSessionPermissionDisplay { get; private set; }
 
         /// <summary>
         /// Gets ApplicationId. See also sql table: FrameworkApplication.
@@ -299,7 +212,7 @@
         {
             get
             {
-                return DbFrameworkSessionPermissionDisplay.First().ApplicationId.Value;
+                return DbFrameworkSessionPermissionDisplayList.First().ApplicationId.Value;
             }
         }
 
@@ -310,7 +223,7 @@
         {
             var typeInAssemblyList = UtilFramework.TypeInAssemblyList(GetType());
             Type appTypePermission = UtilFramework.TypeFromName(permission.ApplicationTypeName); // AppType declared on permission.
-            return DbFrameworkSessionPermissionDisplay.Where
+            return DbFrameworkSessionPermissionDisplayList.Where
                 (
                     item => item.PermissionName == permission.PermissionName && 
                     UtilFramework.IsSubclassOf(UtilFramework.TypeFromName(item.ApplicationTypeName, typeInAssemblyList), appTypePermission) // Permission can be declared on a base App.
