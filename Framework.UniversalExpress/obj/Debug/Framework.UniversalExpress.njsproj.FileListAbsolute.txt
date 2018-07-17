@@ -1,0 +1,3 @@
+C:\Temp\GitHub\ApplicationHelloWorld\Submodule\Framework.UniversalExpress\obj\Debug\Framework.UniversalExpress.njsprojResolveAssemblyReference.cache
+C:\Temp\GitHub\ApplicationHelloWorld\Submodule\Framework.UniversalExpress\obj\Debug\Framework.UniversalExpress.njsproj.CoreCompileInputs.cache
+C:\Temp\GitHub\ApplicationHelloWorld\Submodule\Framework.UniversalExpress\bin\Microsoft.NodejsTools.WebRole.dll
