@@ -10,7 +10,7 @@ Framework to create database applications based on Angular 6 with server side re
 
 ## Version
 
-Versions to check of several tools:
+Some versions to check:
 ```cmd
 node --version
 v8.11.3
