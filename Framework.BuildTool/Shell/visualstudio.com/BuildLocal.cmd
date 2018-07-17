@@ -1,1 +1,0 @@
-powershell .\Build.ps1 -ConnectionString 'Data Source=localhost; Initial Catalog=Database; Integrated Security=True' -AzureGitUrl 'https://User:Password@Domain.scm.azurewebsites.net:443/Domain.git'

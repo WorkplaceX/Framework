@@ -1,7 +1,0 @@
-language: ruby
-dist: trusty
-sudo: required
-
-install: ./Submodule/Framework.BuildTool/Shell/travis-ci.org/Install.sh
-
-script: ./Submodule/Framework.BuildTool/Shell/travis-ci.org/Build.sh

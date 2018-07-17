@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "Framework.BuildTool": {
-      "commandName": "Project"
-    }
-  }
-}
