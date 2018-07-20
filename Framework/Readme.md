@@ -1,3 +1,3 @@
 # Framework
 
-Application framework.
+Application framework library.
