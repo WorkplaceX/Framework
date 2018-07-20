@@ -1,3 +1,3 @@
 # Framework.Test
 
-Application unit tests console application.
+Unit tests console application.
