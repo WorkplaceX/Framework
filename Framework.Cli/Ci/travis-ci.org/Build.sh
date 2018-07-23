@@ -1,6 +1,6 @@
-﻿FolderName=$(pwd) # Working directory
+﻿
 set -x # Enable print execute cammands to stdout.
-echo "Hello"
+echo "Hello Build"
 
 function Main
 {
