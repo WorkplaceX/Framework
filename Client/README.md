@@ -1,3 +1,58 @@
+# Client Application with Universal
+
+Default application has been created with
+
+```sh
+ng new Application
+```
+
+Universal rendering has been added according https://angular.io/guide/universal
+
+Following libraries have been added:
+
+```sh
+npm install @angular/platform-server @nguniversal/module-map-ngfactory-loader @nguniversal/express-engine --save
+npm install @types/express ts-loader webpack webpack-cli --save-dev
+```
+
+Following files have been added:
+* src\app\app.module.ts (Modified)
+* src\app\app.server.module.ts
+* src\main.server.ts
+* src\tsconfig.server.json
+* angular.json
+* server.ts
+* webpack.server.config.js
+
+## Build Client
+Following command builds client to "dist/browser"
+
+```sh
+ng build --prod --aot --output-hashing none
+```
+
+## Build Server
+
+Following command builds server to "dist/server"
+
+```sh
+ng run Application:server
+```
+
+Following command builds server to "dist/server.js"
+
+```sh
+npm run webpack:server
+```
+
+Following command starts server side rendering server
+
+```sh
+npm run serve:ssr
+```
+
+ng Generated:
+
 # Application
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.8.
