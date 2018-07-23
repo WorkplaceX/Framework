@@ -1,0 +1,1 @@
+﻿install: ./Submodule/Framework.Cli/Ci/travis-ci.org/Install.sh
