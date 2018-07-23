@@ -1,5 +1,4 @@
-﻿#!/bin/bash
-
+﻿
 set -x # Enable print execute cammands to stdout.
 echo "Hello"
 
