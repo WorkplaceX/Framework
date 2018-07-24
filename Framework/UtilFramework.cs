@@ -1,4 +1,8 @@
-﻿namespace Framework
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Framework.Cli")] // Internal functions used by Framework.Cli assembly.
+
+namespace Framework
 {
     using System;
 
@@ -52,7 +56,7 @@
         /// <summary>
         /// Write to console in color.
         /// </summary>
-        public static void ConsoleWriteLine(object value, ConsoleColor color)
+        internal static void ConsoleWriteLine(object value, ConsoleColor color)
         {
             ConsoleColor foregroundColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
@@ -64,6 +68,19 @@
             {
                 Console.ForegroundColor = foregroundColor;
             }
+        }
+
+        internal static void Assert(bool isAssert, string exceptionText)
+        {
+            if (!isAssert)
+            {
+                throw new Exception(exceptionText);
+            }
+        }
+
+        internal static void Assert(bool isAssert)
+        {
+            Assert(isAssert, "Assert!");
         }
     }
 }

@@ -62,6 +62,7 @@
         {
             new CommandBuild(this);
             new CommandStart(this);
+            new CommandDeploy(this);
         }
 
         private void RegisterCommandInit()

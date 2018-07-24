@@ -5,12 +5,17 @@ set -x # Enable print execute cammands to stdout.
 
 FolderName=$(pwd) # Working directory
 
-# Build Cli
+# Cli build
 cd $FolderName
 cd Application.Cli
 dotnet build
 
-# Cli run build command
+# Build
 cd $FolderName
 cd Application.Cli
 dotnet run --no-build -- build
+
+# Deploy
+cd $FolderName
+cd Application.Cli
+dotnet run --no-build -- deploy

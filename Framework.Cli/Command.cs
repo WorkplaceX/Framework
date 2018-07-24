@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace Framework.Cli
 {
@@ -27,7 +29,7 @@ namespace Framework.Cli
     public class CommandStart : CommandBase
     {
         public CommandStart(AppCliBase appCli)
-            : base(appCli, "start", "Start server")
+            : base(appCli, "start", "Start server and open browser")
         {
 
         }
@@ -39,6 +41,35 @@ namespace Framework.Cli
             UtilCli.DotNet(folderName, "run --no-build", false);
             string d = UtilFramework.FolderName;
             UtilCli.OpenWebBrowser("http://localhost:56093/"); // For port setting see also: Application.Server\Properties\launchSettings.json
+        }
+    }
+
+    public class CommandDeploy : CommandBase
+    {
+        public CommandDeploy(AppCliBase appCli) 
+            : base(appCli, "deploy", "Deploy to Azure git")
+        {
+
+        }
+
+        private CommandArgument azureGitUrlArgument;
+
+        protected internal override void Register(CommandLineApplication configuration)
+        {
+            azureGitUrlArgument = configuration.Argument("azureGitUrl", "Azure git url");
+        }
+
+        protected internal override void Execute()
+        {
+            string azureGitUrl = azureGitUrlArgument.Value;
+            string folderName = UtilFramework.FolderName + "Application.Server/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
+
+            UtilCli.FolderNameDelete(folderNamePublish);
+            UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
+
+            UtilCli.DotNet(folderName, "publish");
+            UtilFramework.Assert(Directory.Exists(folderNamePublish), "Publish failed!");
         }
     }
 }
