@@ -1,5 +1,7 @@
 ﻿namespace Framework
 {
+    using System;
+
     public class UtilFramework
     {
         /// <summary>
@@ -31,6 +33,36 @@
                 // ng --version
                 // Angular CLI: 6.0.8
                 return "v2.0 Client";
+            }
+        }
+
+        /// <summary>
+        /// Gets FolderName. This is the root folder name.
+        /// </summary>
+        public static string FolderName
+        {
+            get
+            {
+                Uri result = new Uri(typeof(UtilFramework).Assembly.CodeBase);
+                result = new Uri(result, "../../../../");
+                return result.AbsolutePath;
+            }
+        }
+
+        /// <summary>
+        /// Write to console in color.
+        /// </summary>
+        public static void ConsoleWriteLine(object value, ConsoleColor color)
+        {
+            ConsoleColor foregroundColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            try
+            {
+                Console.WriteLine(value);
+            }
+            finally
+            {
+                Console.ForegroundColor = foregroundColor;
             }
         }
     }

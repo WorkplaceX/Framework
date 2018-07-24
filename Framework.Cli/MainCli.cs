@@ -50,6 +50,8 @@
                     Console.ForegroundColor = color;
                 }
                 Console.WriteLine("Version={0}; {1}", UtilFramework.VersionServer, UtilFramework.VersionClient);
+
+                commandLineApplication.Execute("-h"); // Show list of available commands.
             }
         }
 
@@ -75,10 +77,12 @@
                         int result = 0;
                         try
                         {
+                            UtilFramework.ConsoleWriteLine($"Execute Framework CLI Command ({command.Name})", ConsoleColor.Yellow);
                             command.Execute();
                         }
                         catch (Exception exception)
                         {
+                            result = 1;
                             Console.WriteLine(exception);
                         }
                         return result;

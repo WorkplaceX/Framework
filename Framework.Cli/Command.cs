@@ -1,4 +1,7 @@
-﻿namespace Framework.Cli
+﻿using System;
+using System.Diagnostics;
+
+namespace Framework.Cli
 {
     /// <summary>
     /// Cli build command.
@@ -6,9 +9,15 @@
     public class CommandBuild : CommandBase
     {
         public CommandBuild(AppCliBase appCli)
-            : base(appCli, "Build", "Build client and server")
+            : base(appCli, "build", "Build client and server")
         {
 
+        }
+
+        protected internal override void Execute()
+        {
+            string folderName = UtilFramework.FolderName + @"Application.Server/";
+            UtilCli.DotNet(folderName, "build");
         }
     }
 
@@ -18,9 +27,18 @@
     public class CommandStart : CommandBase
     {
         public CommandStart(AppCliBase appCli)
-            : base(appCli, "Start", "Start server")
+            : base(appCli, "start", "Start server")
         {
 
+        }
+
+        protected internal override void Execute()
+        {
+            string folderName = UtilFramework.FolderName + @"Application.Server/";
+            UtilCli.DotNet(folderName, "build");
+            UtilCli.DotNet(folderName, "run --no-build", false);
+            string d = UtilFramework.FolderName;
+            UtilCli.OpenWebBrowser("http://localhost:56093/"); // For port setting see also: Application.Server\Properties\launchSettings.json
         }
     }
 }

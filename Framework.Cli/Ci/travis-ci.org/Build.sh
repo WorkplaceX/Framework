@@ -3,14 +3,14 @@
 
 set -x # Enable print execute cammands to stdout.
 
-echo "Hello Build"
+FolderName=$(pwd) # Working directory
 
-function Main
-{
-    # dotnet, npm, node version check
-	dotnet --version
-    npm --version
-    node --version
-}
+# Build Cli
+cd $FolderName
+cd Application.Cli
+dotnet build
 
-Main
+# Cli run build command
+cd $FolderName
+cd Application.Cli
+dotnet run --no-build -- build
