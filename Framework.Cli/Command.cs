@@ -52,16 +52,10 @@ namespace Framework.Cli
 
         }
 
-        private CommandArgument azureGitUrlArgument;
-
-        protected internal override void Register(CommandLineApplication configuration)
-        {
-            azureGitUrlArgument = configuration.Argument("azureGitUrl", "Azure git url");
-        }
-
         protected internal override void Execute()
         {
-            string azureGitUrl = azureGitUrlArgument.Value;
+            ConfigCli configCli = ConfigCli.Load();
+            string azureGitUrl = configCli.AzureGitUrl;
             string folderName = UtilFramework.FolderName + "Application.Server/";
             string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
 

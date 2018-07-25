@@ -1,6 +1,7 @@
 ﻿
 namespace Framework.Cli
 {
+    using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -45,6 +46,22 @@ namespace Framework.Cli
                 }
                 Directory.Delete(folderName, true);
             }
+        }
+
+        internal static string ArgumentValue(CommandArgument commandArgument)
+        {
+            string result = commandArgument.Value;
+            UtilFramework.Assert(commandArgument.Name.ToLower() == result.Substring(0, commandArgument.Name.Length).ToLower());
+            if (result.ToUpper().StartsWith(commandArgument.Name.ToUpper()))
+            {
+                result = result.Substring(commandArgument.Name.Length);
+            }
+            if (result.StartsWith("="))
+            {
+                result = result.Substring(1);
+            }
+            result = UtilFramework.StringNull(result);
+            return result;
         }
     }
 }

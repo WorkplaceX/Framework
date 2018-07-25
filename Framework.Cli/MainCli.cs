@@ -60,6 +60,7 @@
         /// </summary>
         protected virtual void RegisterCommand()
         {
+            new CommandConfig(this);
             new CommandBuild(this);
             new CommandStart(this);
             new CommandDeploy(this);
@@ -102,7 +103,14 @@
         {
             Title(args);
 
-            commandLineApplication.Execute(args);
+            try
+            {
+                commandLineApplication.Execute(args);
+            }
+            catch (Exception exception) // For example unrecognized option
+            {
+                Console.WriteLine(exception);
+            }
 
             if (Debugger.IsAttached)
             {

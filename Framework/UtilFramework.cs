@@ -4,7 +4,9 @@
 
 namespace Framework
 {
+    using Newtonsoft.Json;
     using System;
+    using System.IO;
 
     public class UtilFramework
     {
@@ -81,6 +83,38 @@ namespace Framework
         internal static void Assert(bool isAssert)
         {
             Assert(isAssert, "Assert!");
+        }
+
+        internal static T ConfigLoad<T>(string fileName)
+        {
+            object result = null;
+            if (!File.Exists(fileName))
+            {
+                result = Activator.CreateInstance(typeof(T));
+            }
+            else
+            {
+                string json = File.ReadAllText(fileName);
+                result = JsonConvert.DeserializeObject<T>(json);
+            }
+            return (T)result;
+        }
+
+        internal static void ConfigSave(object config, string fileName)
+        {
+            string json = JsonConvert.SerializeObject(config);
+            File.WriteAllText(fileName, json);
+
+            Console.WriteLine(string.Format("Config saved to ({0})", fileName));
+        }
+
+        internal static string StringNull(string value)
+        {
+            if (value == "")
+            {
+                value = null;
+            }
+            return value;
         }
     }
 }
