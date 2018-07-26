@@ -1,28 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using Microsoft.Extensions.CommandLineUtils;
-
-namespace Framework.Cli
+﻿namespace Framework.Cli
 {
-    /// <summary>
-    /// Cli build command.
-    /// </summary>
-    public class CommandBuild : CommandBase
-    {
-        public CommandBuild(AppCliBase appCli)
-            : base(appCli, "build", "Build client and server")
-        {
-
-        }
-
-        protected internal override void Execute()
-        {
-            string folderName = UtilFramework.FolderName + @"Application.Server/";
-            UtilCli.DotNet(folderName, "build");
-        }
-    }
-
     /// <summary>
     /// Cli start command.
     /// </summary>
