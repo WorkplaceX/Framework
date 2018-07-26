@@ -1,5 +1,9 @@
 # Framework
 
+[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationStart.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationStart)
+[![Build status](https://workplacex.visualstudio.com/Framework/_apis/build/status/ApplicationDemo%20CI)](https://workplacex.visualstudio.com/Framework/_build/latest?definitionId=6)
+(ApplicationStart; travis; visualstudio;)
+
 Framework to create database applications based on Angular 6 with server side rendering, ASP.NET Core 2.1 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
 
 ## Getting started
