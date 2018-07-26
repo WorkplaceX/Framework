@@ -58,7 +58,7 @@ namespace Framework
         /// <summary>
         /// Write to console in color.
         /// </summary>
-        internal static void ConsoleWriteLine(object value, ConsoleColor color)
+        internal static void ConsoleWriteLineColor(object value, ConsoleColor color)
         {
             ConsoleColor foregroundColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
@@ -69,6 +69,18 @@ namespace Framework
             finally
             {
                 Console.ForegroundColor = foregroundColor;
+            }
+        }
+
+        /// <summary>
+        /// Write to stderr.
+        /// </summary>
+        /// <param name="value"></param>
+        internal static void ConsoleWriteLineError(object value)
+        {
+            using (TextWriter textWriter = Console.Error)
+            {
+                textWriter.WriteLine(value);
             }
         }
 

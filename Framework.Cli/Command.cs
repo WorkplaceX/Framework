@@ -43,27 +43,4 @@ namespace Framework.Cli
             UtilCli.OpenWebBrowser("http://localhost:56093/"); // For port setting see also: Application.Server\Properties\launchSettings.json
         }
     }
-
-    public class CommandDeploy : CommandBase
-    {
-        public CommandDeploy(AppCliBase appCli) 
-            : base(appCli, "deploy", "Deploy to Azure git")
-        {
-
-        }
-
-        protected internal override void Execute()
-        {
-            ConfigCli configCli = ConfigCli.Load();
-            string azureGitUrl = configCli.AzureGitUrl;
-            string folderName = UtilFramework.FolderName + "Application.Server/";
-            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
-
-            UtilCli.FolderNameDelete(folderNamePublish);
-            UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
-
-            UtilCli.DotNet(folderName, "publish");
-            UtilFramework.Assert(Directory.Exists(folderNamePublish), "Publish failed!");
-        }
-    }
 }

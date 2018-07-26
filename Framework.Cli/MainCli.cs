@@ -76,18 +76,9 @@
                     command.Register(configuration);
                     configuration.OnExecute(() =>
                     {
-                        int result = 0;
-                        try
-                        {
-                            UtilFramework.ConsoleWriteLine($"Execute Framework CLI Command ({command.Name})", ConsoleColor.Yellow);
-                            command.Execute();
-                        }
-                        catch (Exception exception)
-                        {
-                            result = 1;
-                            Console.WriteLine(exception);
-                        }
-                        return result;
+                        UtilFramework.ConsoleWriteLineColor($"Execute Framework CLI Command ({command.Name})", ConsoleColor.Yellow);
+                        command.Execute();
+                        return 0;
                     });
 
                     configuration.HelpOption("-h | --help"); // Command help (to show arguments and options)
@@ -109,7 +100,8 @@
             }
             catch (Exception exception) // For example unrecognized option
             {
-                Console.WriteLine(exception);
+                UtilFramework.ConsoleWriteLineError(exception);
+                Environment.ExitCode = 1; // echo %errorlevel%
             }
 
             if (Debugger.IsAttached)
