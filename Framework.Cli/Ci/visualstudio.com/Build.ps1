@@ -14,19 +14,19 @@ function Main
 
 	# Config
     dotnet run --no-build -- config azureGitUrl="$AzureGitUrl" # Set AzureGitUrl
-	if %errorlevel% NEQ 0 exit %errorlevel%
+	if ($lastexitcode -ne 0) { exit $lastexitcode }
 
 	# Build
 	cd $FolderName
 	cd Application.Cli
 	dotnet run --no-build -- build
-	if %errorlevel% NEQ 0 exit %errorlevel%
+	if ($lastexitcode -ne 0) { exit $lastexitcode }
 
 	# Deploy
 	cd $FolderName
 	cd Application.Cli
 	dotnet run --no-build -- deploy
-	if %errorlevel% NEQ 0 exit %errorlevel%
+	if ($lastexitcode -ne 0) { exit $lastexitcode }
 }
 
 # Init
