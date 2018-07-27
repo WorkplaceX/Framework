@@ -106,6 +106,8 @@
 
             if (Debugger.IsAttached)
             {
+                Console.WriteLine();
+                Console.WriteLine("Press enter...");
                 Console.ReadLine();
             }
         }

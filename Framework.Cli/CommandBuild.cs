@@ -14,8 +14,8 @@
         private void BuildClient()
         {
             string folderName = UtilFramework.FolderName + "Framework/Client/";
-            UtilCli.Start(folderName, "npm", "install");
-            UtilCli.Start(folderName, "npm", "run build:ssr"); // Build Universal to folder Framework/Client/dist/
+            UtilCli.Npm(folderName, "install");
+            UtilCli.Npm(folderName, "run build:ssr"); // Build Universal to folder Framework/Client/dist/
 
             string folderNameSource = UtilFramework.FolderName + "Framework/Client/dist/browser/";
             string folderNameDest = UtilFramework.FolderName + "Application.Server/wwwroot/framework/";

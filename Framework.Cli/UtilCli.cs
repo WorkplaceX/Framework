@@ -6,12 +6,31 @@ namespace Framework.Cli
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Runtime.InteropServices;
 
     public static class UtilCli
     {
+        /// <summary>
+        /// Run dotnet command.
+        /// </summary>
         internal static void DotNet(string workingDirectory, string arguments, bool isWait = true)
         {
             Start(workingDirectory, "dotnet", arguments, isWait);
+        }
+
+        /// <summary>
+        /// Run npm command.
+        /// </summary>
+        internal static void Npm(string workingDirectory, string arguments)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments);
+            }
+            else
+            {
+                UtilCli.Start(workingDirectory, "npm", arguments);
+            }
         }
 
         /// <summary>
