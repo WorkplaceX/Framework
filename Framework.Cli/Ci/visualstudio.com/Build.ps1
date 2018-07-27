@@ -32,4 +32,9 @@ function Main
 # Init
 $FolderName = (get-item $PSCommandPath).Directory.Parent.Parent.Parent.Parent.FullName + "\"
 
-Main
+Main 1> Error.txt # Divert stderr to Error.txt
+If ((Get-Content "Error.txt") -ne $Null) {
+	echo "### Error"
+    type "Error.txt"
+	exit 1
+}

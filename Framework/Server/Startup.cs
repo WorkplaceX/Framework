@@ -46,10 +46,18 @@
             return;
         }
 
+        /// <summary>
+        /// Returns true, if file found in "framework/" folder.
+        /// </summary>
         private async Task<bool> ServeFrameworkFile(HttpContext context)
         {
             bool result = false;
-            string fileName = UtilServer.FolderNameWwwroot(Env) + "framework" + context.Request.Path;
+            string path = context.Request.Path;
+            if (path == "/")
+            {
+                path = "/index.html";
+            }
+            string fileName = UtilServer.FolderNameWwwroot(Env) + "framework" + path;
             if (File.Exists(fileName))
             {
                 await context.Response.SendFileAsync(fileName);
