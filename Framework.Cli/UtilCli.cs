@@ -64,6 +64,10 @@ namespace Framework.Cli
                         UtilFramework.ConsoleWriteLineColor(errorText, ConsoleColor.DarkGreen);
                     }
                 }
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception("Script failed!");
+                }
             }
 
             UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen);
