@@ -5,6 +5,7 @@ namespace Framework.Cli
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
 
     public static class UtilCli
     {
@@ -30,6 +31,7 @@ namespace Framework.Cli
             {
                 info.RedirectStandardError = true; // Do not write to stderr.
             }
+            // info.UseShellExecute = true;
             var process = Process.Start(info);
             if (isWait)
             {
@@ -79,6 +81,33 @@ namespace Framework.Cli
             }
             result = UtilFramework.StringNull(result);
             return result;
+        }
+
+        internal static void FolderCopy(string folderNameSource, string folderNameDest, string searchPattern, bool isAllDirectory)
+        {
+            var source = new DirectoryInfo(folderNameSource);
+            var dest = new DirectoryInfo(folderNameDest);
+            SearchOption searchOption = SearchOption.TopDirectoryOnly;
+            if (isAllDirectory)
+            {
+                searchOption = SearchOption.AllDirectories;
+            }
+            foreach (FileInfo file in source.GetFiles(searchPattern, searchOption))
+            {
+                string fileNameSource = file.FullName;
+                string fileNameDest = Path.Combine(dest.FullName, file.FullName.Substring(source.FullName.Length));
+                FileCopy(fileNameSource, fileNameDest);
+            }
+        }
+
+        internal static void FileCopy(string fileNameSource, string fileNameDest)
+        {
+            string folderNameDest = new FileInfo(fileNameDest).DirectoryName;
+            if (!Directory.Exists(folderNameDest))
+            {
+                Directory.CreateDirectory(folderNameDest);
+            }
+            File.Copy(fileNameSource, fileNameDest, true);
         }
     }
 }
