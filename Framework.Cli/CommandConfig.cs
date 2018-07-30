@@ -23,6 +23,7 @@
 
         protected internal override void Execute()
         {
+            UtilFramework.ConsoleWriteLineError("EERROORR");
             ConfigCli configCli = ConfigCli.Load();
             if (azureGitUrlArgument.Value != null)
             {
