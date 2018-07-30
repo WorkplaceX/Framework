@@ -1,4 +1,6 @@
-﻿namespace Framework.Cli
+﻿using System.IO;
+
+namespace Framework.Cli
 {
     /// <summary>
     /// Cli build command.
@@ -21,6 +23,8 @@
             string folderNameDest = UtilFramework.FolderName + "Application.Server/wwwroot/framework/";
 
             UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+
+            File.Delete(folderNameDest + "3rdpartylicenses.txt"); // Prevent "dotnet : warning: LF will be replaced by CRLF" beeing written to stderr during deployment.
         } 
 
         protected internal override void Execute()
