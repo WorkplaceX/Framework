@@ -77,6 +77,6 @@ function ErrorText
 
 trap ErrorText EXIT # Run ErrorText if exception
 
-Main 2> >(tee $FileNameErrorText # Run main with stderr to (stdout and Error.txt).
+Main 2> >(tee $FileNameErrorText) # Run main with stderr to (stdout and Error.txt).
 
 ErrorText
