@@ -55,12 +55,10 @@ function ErrorCheck
 	then 
 		exit $? 
 	fi
-	if [ -f $FileNameErrorText ] # File exists
+
+	if [ -s $FileNameErrorText ] # If Error.txt not empty
 	then
-		if [ -s $FileNameErrorText ] # If Error.txt not empty
-		then
-			exit 1
-		fi
+		exit 1
 	fi
 }
 
@@ -70,14 +68,15 @@ function ErrorText
 
     if [ -s $FileNameErrorText ] # If Error.txt not empty
 	then
-	set +x # Disable print command to avoid Error.txt double in log.
-	echo "### Error"
-	echo "$(<$FileNameErrorText)" # Print file Error.txt 
-	exit 1 # Set exit code
+    	set +x # Disable print command to avoid Error.txt double in log.
+	    echo "### Error"
+	    echo "$(<$FileNameErrorText)" # Print file Error.txt 
+	    exit 1 # Set exit code
 	fi
 }
 
 trap ErrorText EXIT # Run ErrorText if exception
 
 Main 2> $FileNameErrorText # Run main with stderr to Error.txt.
+
 ErrorText
