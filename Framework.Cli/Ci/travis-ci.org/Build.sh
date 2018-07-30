@@ -3,7 +3,8 @@
 
 echo "### Build.sh"
 
-# dotnet, npm, node version check
+# ubuntu, dotnet, npm, node version check
+lsb_release -a
 dotnet --version
 npm --version
 node --version
