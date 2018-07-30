@@ -13,7 +13,6 @@ BASH_XTRACEFD=1 # Print execute command to stdout. Not to stderr.
 set -x # Enable print execute cammands to stdout.
 
 FolderName=$(pwd)"/" # Working directory
-FileNameErrorText=$FolderName"Error.txt"
 
 function Main
 {
@@ -56,7 +55,8 @@ function ErrorCheck
 		exit $? 
 	fi
 
-	if [ -s $FileNameErrorText ] # If Error.txt not empty
+	cd $FolderName
+	if [ -s Error.txt ] # If Error.txt not empty
 	then
 		exit 1
 	fi
@@ -66,17 +66,19 @@ function ErrorText
 {
 	echo "### Build.sh (ErrorText) - ExitStatus=$?"
 
-    if [ -s $FileNameErrorText ] # If Error.txt not empty
+	cd $FolderName
+    if [ -s Error.txt ] # If Error.txt not empty
 	then
     	set +x # Disable print command to avoid Error.txt double in log.
 	    echo "### Error"
-	    echo "$(<$FileNameErrorText)" # Print file Error.txt 
+	    echo "$(<Error.txt)" # Print file Error.txt 
 	    exit 1 # Set exit code
 	fi
 }
 
 trap ErrorText EXIT # Run ErrorText if exception
 
-Main 2> $FileNameErrorText # Run main with stderr to Error.txt.
+cd $FolderName
+Main 2> Error.txt # Run main with stderr to Error.txt.
 
 ErrorText
