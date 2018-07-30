@@ -1,46 +1,76 @@
 ﻿#!/bin/bash
 # See also: https://unix.stackexchange.com/questions/27054/bin-bash-no-such-file-or-directory
 
+echo "### Build.sh"
+
 # dotnet, npm, node version check
 dotnet --version
 npm --version
 node --version
 
-function Main
-{
-	# Cli build
-	cd $FolderName
-	cd Application.Cli
-	dotnet build
-
-	# Config
-    set +x # Prevent AzureGitUrl in log
-    dotnet run --no-build -- config azureGitUrl="$AzureGitUrl" # Set AzureGitUrl
-    set -x
-
-	# Build
-	cd $FolderName
-	cd Application.Cli
-	dotnet run --no-build -- build
-
-	# Deploy
-	cd $FolderName
-	cd Application.Cli
-	dotnet run --no-build -- deploy
-}
-
 BASH_XTRACEFD=1 # Print execute command to stdout. Not to stderr.
 set -x # Enable print execute cammands to stdout.
 
-FolderName=$(pwd) # Working directory
+FolderName=$(pwd)/ # Working directory
+FileNameErrorText="$FolderName""Error.txt"
 
-cd $FolderName
-Main 2> >(tee Error.txt) # Run main with stderr to stdout and Error.txt.
-cd $FolderName
-if [ -s Error.txt ] # If Error.txt not empty
-then
-    set +x # Disable print command to avoid Error.txt double in log.
-	echo "### Error"
-	echo "$(<Error.txt)" # Print file Error.txt 
-	exit 1 # Set exit code
-fi
+function Main
+{
+	# Cli build
+	echo "### Build.sh (Cli Build)"
+	cd $FolderName
+	cd Application.Cli
+	dotnet build
+	ErrorCheck
+
+	# Config
+	echo "### Build.sh (Config)"
+    set +x # Prevent AzureGitUrl in log
+    dotnet run --no-build -- config azureGitUrl="$AzureGitUrl" # Set AzureGitUrl
+    set -x
+	ErrorCheck
+
+	# Build
+	echo "### Build.sh (Build)"
+	cd $FolderName
+	cd Application.Cli
+	dotnet run --no-build -- build
+	ErrorCheck
+
+	# Deploy
+	echo "### Build.sh (Deploy)"
+	cd $FolderName
+	cd Application.Cli
+	dotnet run --no-build -- deploy
+	ErrorCheck
+}
+
+function ErrorCheck
+{
+    # Check exitstatus and stderr
+	echo "### Build.sh (ErrorCheck)"
+	if [ $? != 0 ] then exit $? fi
+	if [ -s $FileNameErrorText ] then exit 1 fi # If Error.txt not empty
+}
+
+function ErrorText
+{
+	echo "### Build.sh (ErrorText) - ExitStatus=$?"
+
+	if [ -s $FileNameErrorText ] # If Error.txt not empty
+	then
+		set +x # Disable print command to avoid Error.txt double in log.
+		echo "### Error"
+		echo "$(<$FileNameErrorText)" # Print file Error.txt 
+		exit 1 # Set exit code
+	fi
+}
+
+{ # try
+	Main 2> >(tee $FileNameErrorText) # Run main with stderr to (stdout and Error.txt).
+} || 
+{ # catch
+
+}
+# finally
+ErrorText
