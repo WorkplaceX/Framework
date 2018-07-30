@@ -19,7 +19,7 @@ function Main
 {
 	# Cli build
 	echo "### Build.sh (Cli Build)"
-	cd $FolderName
+	cd "$FolderName"
 	cd Application.Cli
 	dotnet build
 	ErrorCheck
@@ -33,14 +33,14 @@ function Main
 
 	# Build
 	echo "### Build.sh (Build)"
-	cd $FolderName
+	cd "$FolderName"
 	cd Application.Cli
 	dotnet run --no-build -- build
 	ErrorCheck
 
 	# Deploy
 	echo "### Build.sh (Deploy)"
-	cd $FolderName
+	cd "$FolderName"
 	cd Application.Cli
 	dotnet run --no-build -- deploy
 	ErrorCheck
@@ -55,27 +55,32 @@ function ErrorCheck
 	then 
 		exit $? 
 	fi
-
-	if [ -s $FileNameErrorText ] # If Error.txt not empty
-	then 
-		exit 1 
-	fi 
+	if [ -f "$FileNameErrorText" ] # File exists
+	then
+		if [ -s "$FileNameErrorText" ] # If Error.txt not empty
+		then
+			exit 1
+		fi
+	fi
 }
 
 function ErrorText
 {
 	echo "### Build.sh (ErrorText) - ExitStatus=$?"
 
-	if [ -s $FileNameErrorText ] # If Error.txt not empty
+	if [ -f "$FileNameErrorText" ] # File exists
 	then
+      if [ -s "$FileNameErrorText" ] # If Error.txt not empty
+	  then
 		set +x # Disable print command to avoid Error.txt double in log.
 		echo "### Error"
-		echo "$(<$FileNameErrorText)" # Print file Error.txt 
+		echo "$(<"$FileNameErrorText")" # Print file Error.txt 
 		exit 1 # Set exit code
+	  fi
 	fi
 }
 
 trap ErrorText EXIT # Run ErrorText if exception
 
-Main 2> >(tee $FileNameErrorText) # Run main with stderr to (stdout and Error.txt).
+Main 2> >(tee "$FileNameErrorText") # Run main with stderr to (stdout and Error.txt).
 ErrorText
