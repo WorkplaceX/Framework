@@ -67,11 +67,7 @@ function ErrorText
 	fi
 }
 
-{ # try
-	Main 2> >(tee $FileNameErrorText) # Run main with stderr to (stdout and Error.txt).
-} || 
-{ # catch
+trap ErrorText EXIT # Run ErrorText if exception
 
-}
-# finally
+Main 2> >(tee $FileNameErrorText) # Run main with stderr to (stdout and Error.txt).
 ErrorText
