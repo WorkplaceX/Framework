@@ -50,8 +50,16 @@ function ErrorCheck
 {
     # Check exitstatus and stderr
 	echo "### Build.sh (ErrorCheck)"
-	if [ $? != 0 ] then exit $? fi
-	if [ -s $FileNameErrorText ] then exit 1 fi # If Error.txt not empty
+	
+	if [ $? != 0 ] # Exit status
+	then 
+		exit $? 
+	fi
+
+	if [ -s $FileNameErrorText ] # If Error.txt not empty
+	then 
+		exit 1 
+	fi 
 }
 
 function ErrorText
