@@ -45,7 +45,11 @@ app.get('/api/*', (req, res) => {
 // All regular routes use the Universal engine
 app.get('*', (req, res) => {
   // res.send('Express is working on IISNode!');
-  res.render('index', { req });
+  var view = 'index';
+  if (req.url.includes('?IsCustomIndexHtml=true')) {
+    view = '../../index'
+  }
+  res.render(view, { req });
 });
 
 // Start up the Node server
