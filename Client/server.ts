@@ -44,7 +44,8 @@ app.get('*.*', express.static(join(DIST_FOLDER, 'browser')));
 
 // All regular routes use the Universal engine
 app.get('*', (req, res) => {
-  res.render('index', { req });
+  res.send('Express is working on IISNode!');
+  // res.render('index', { req });
 });
 
 // Start up the Node server
