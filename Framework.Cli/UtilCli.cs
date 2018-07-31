@@ -10,6 +10,13 @@ namespace Framework.Cli
 
     public static class UtilCli
     {
+        internal static string Replace(string text, string find, string replace)
+        {
+            UtilFramework.Assert(text.Contains(find));
+            string result = text.Replace(find, replace);
+            return result;
+        }
+
         /// <summary>
         /// Run dotnet command.
         /// </summary>
@@ -131,6 +138,18 @@ namespace Framework.Cli
                 Directory.CreateDirectory(folderNameDest);
             }
             File.Copy(fileNameSource, fileNameDest, true);
+        }
+
+        internal static void FolderDelete(string folderName)
+        {
+            if (Directory.Exists(folderName))
+            {
+                foreach (FileInfo fileInfo in new DirectoryInfo(folderName).GetFiles("*.*", SearchOption.AllDirectories))
+                {
+                    fileInfo.Attributes = FileAttributes.Normal; // See also: https://stackoverflow.com/questions/1701457/directory-delete-doesnt-work-access-denied-error-but-under-windows-explorer-it/30673648
+                }
+                Directory.Delete(folderName, true);
+            }
         }
     }
 }

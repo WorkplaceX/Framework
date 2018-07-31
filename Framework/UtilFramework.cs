@@ -10,26 +10,13 @@ namespace Framework
 
     public class UtilFramework
     {
-        /// <summary>
-        /// Gets VersionServer.
-        /// </summary>
-        public static string VersionServer
+        public static string Version
         {
             get
             {
                 // dotnet --version
                 // 2.1.201
-                return "v2.0 Server";
-            }
-        }
 
-        /// <summary>
-        /// Gets VersionClient. This is the expected client version.
-        /// </summary>
-        public static string VersionClient
-        {
-            get
-            {
                 // node --version
                 // v8.11.3
 
@@ -38,7 +25,19 @@ namespace Framework
 
                 // ng --version
                 // Angular CLI: 6.0.8
-                return "v2.0 Client";
+
+                return "v2.01";
+            }
+        }
+
+        /// <summary>
+        /// Gets time and pc name of Ci build.
+        /// </summary>
+        public static string VersionBuild
+        {
+            get
+            {
+                return "Build (local)"; // See also: method CommandBuild.BuildServer();
             }
         }
 

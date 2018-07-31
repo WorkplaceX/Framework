@@ -3,7 +3,7 @@
 Default application has been created with
 
 ```sh
-ng new Application
+ng new Application --style=scss
 ```
 
 Universal rendering has been added according https://angular.io/guide/universal
@@ -25,7 +25,7 @@ Following files have been added:
 * webpack.server.config.js
 
 ## Build Client
-Following command builds client to "dist/browser"
+Following command builds client to "dist/browser" (See also: npm run build:ssr)
 
 ```sh
 ng build --prod --aot --output-hashing none
@@ -33,7 +33,7 @@ ng build --prod --aot --output-hashing none
 
 ## Build Server
 
-Following command builds server to "dist/server"
+Following command builds server to "dist/server"  (See also: npm run build:ssr)
 
 ```sh
 ng run Application:server

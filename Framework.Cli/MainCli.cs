@@ -49,7 +49,7 @@
                 {
                     Console.ForegroundColor = color;
                 }
-                Console.WriteLine("Version={0}; {1}", UtilFramework.VersionServer, UtilFramework.VersionClient);
+                Console.WriteLine("Version={0};", UtilFramework.Version);
 
                 commandLineApplication.Execute("-h"); // Show list of available commands.
             }
