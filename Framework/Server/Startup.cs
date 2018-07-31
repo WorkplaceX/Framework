@@ -57,7 +57,7 @@
             {
                 path = "/index.html";
             }
-            string fileName = UtilServer.FolderNameWwwroot(Env) + "framework/dist/browser" + path;
+            string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
             if (File.Exists(fileName))
             {
                 await context.Response.SendFileAsync(fileName);

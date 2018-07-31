@@ -9,9 +9,9 @@
         /// <summary>
         /// Returns location of ASP.NET server wwwroot folder.
         /// </summary>
-        public static string FolderNameWwwroot(IHostingEnvironment hostingEnvironment)
+        public static string FolderNameContentRoot(IHostingEnvironment hostingEnvironment)
         {
-            return new Uri(hostingEnvironment.WebRootPath).AbsolutePath + "/";
+            return new Uri(hostingEnvironment.ContentRootPath).AbsolutePath + "/";
         }
     }
 }

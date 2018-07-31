@@ -21,7 +21,7 @@ namespace Framework.Cli
             UtilCli.Npm(folderName, "run build:ssr"); // Build Universal to folder Framework/Client/dist/ // For ci stderror see also package.json: "webpack:server --progress --colors (removed); ng build --output-hashing none --no-progress (added); ng run --no-progress (added)
 
             string folderNameSource = UtilFramework.FolderName + "Framework/Client/dist/";
-            string folderNameDest = UtilFramework.FolderName + "Application.Server/wwwroot/framework/dist/";
+            string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/dist/";
 
             UtilCli.FolderDelete(folderNameDest);
             UtilFramework.Assert(!Directory.Exists(folderNameDest));
