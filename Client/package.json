@@ -9,7 +9,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "webpack:server": "webpack --config webpack.server.config.js",
-    "serve:ssr": "node dist/server.js",
+    "serve:ssr": "cd dist && node server.js",
     "build:ssr": "npm run build:client-and-server-bundles && npm run webpack:server",
     "build:client-and-server-bundles": "ng build --prod --aot --output-hashing none --no-progress && ng run Application:server --no-progress"
   },

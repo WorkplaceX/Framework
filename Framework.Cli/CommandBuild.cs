@@ -39,7 +39,7 @@ namespace Framework.Cli
             string text = File.ReadAllText(fileName);
 
             string find = "return \"Build (local)\"; // See also: method CommandBuild.BuildServer();";
-            string replace = string.Format("return \"Build ({0} - {1})\";", DateTime.Now.ToString("yyyy-MM-dd HH:mm"), System.Environment.MachineName);
+            string replace = string.Format("return \"Build ({0} - {1})\";", DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"), System.Environment.MachineName);
 
             // Write UtilFramework.cs
             string textNew = UtilCli.Replace(text, find, replace);
