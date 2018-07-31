@@ -3,6 +3,7 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
 
@@ -10,6 +11,14 @@
     {
         public static void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            if (UtilServer.IsIssServer == false)
+            {
+                if (ConfigFramework.Load().IsServerSideRendering)
+                {
+                    UtilServer.StartUniversalServer();
+                }
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -46,24 +55,73 @@
             return;
         }
 
+        private async Task ServerSideRendering(HttpContext context, string path)
+        {
+            context.Response.ContentType = UtilServer.ContentType(path);
+            string url;
+            if (UtilServer.IsIssServer)
+            {
+                // Running on IIS Server.
+                url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/dist/server.js";
+            }
+            else
+            {
+                // Running in Visual Studio
+                url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
+            }
+            string isCustomIndexHtml = ConfigFramework.Load().IsCustomIndexHtml ? "true" : "false";
+            url += "?IsCustomIndexHtml=" + isCustomIndexHtml;
+            string htmlServerSideRendering = await UtilServer.WebPost(url, null);
+            context.Response.ContentType = UtilServer.ContentType(path);
+            await context.Response.WriteAsync(htmlServerSideRendering);
+        }
+
         /// <summary>
         /// Returns true, if file found in "framework/dist/browser" folder.
         /// </summary>
         private async Task<bool> ServeFrameworkFile(HttpContext context)
         {
-            bool result = false;
             string path = context.Request.Path;
-            if (path == "/")
+
+            // index.html
+            if (UtilServer.PathIsFileName(path) == false)
             {
                 path = "/index.html";
             }
-            string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
-            if (File.Exists(fileName))
+
+            bool requestIsFileName = UtilServer.PathIsFileName(path);
+
+            if (path == "/index.html" && ConfigFramework.Load().IsServerSideRendering)
             {
-                await context.Response.SendFileAsync(fileName);
-                result = true;
+                await ServerSideRendering(context, path);
+                return true;
             }
-            return result;
+            else
+            {
+                if (requestIsFileName)
+                {
+                    if (path == "/index.html" && ConfigFramework.Load().IsCustomIndexHtml)
+                    {
+                        string fileNameIndexHtml = UtilServer.FolderNameContentRoot(Env) + "Framework" + path;
+                        context.Response.ContentType = UtilServer.ContentType(fileNameIndexHtml);
+                        await context.Response.SendFileAsync(fileNameIndexHtml);
+                        return true;
+                    }
+                    else
+                    {
+                        // Serve fileName
+                        string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
+                        if (File.Exists(fileName))
+                        {
+                            context.Response.ContentType = UtilServer.ContentType(fileName);
+                            await context.Response.SendFileAsync(fileName);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

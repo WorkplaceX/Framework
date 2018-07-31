@@ -101,7 +101,7 @@ namespace Framework
             object result = null;
             if (!File.Exists(fileName))
             {
-                result = Activator.CreateInstance(typeof(T));
+                result = JsonConvert.DeserializeObject<T>("{}");
             }
             else
             {
