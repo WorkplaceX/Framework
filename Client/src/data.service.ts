@@ -22,8 +22,10 @@ export class DataService {
   constructor(httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any) { 
     if (jsonServerSideRendering != null) {
       this.Json = jsonServerSideRendering;
+      this.Json.IsServerSideRendering = true;
     } else {
       this.Json = jsonBrowser;
+      this.Json.IsServerSideRendering = false;
     }
   }
 }

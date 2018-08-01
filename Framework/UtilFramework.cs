@@ -127,5 +127,12 @@ namespace Framework
             }
             return value;
         }
+
+        internal static string Replace(string text, string find, string replace)
+        {
+            UtilFramework.Assert(text.Contains(find));
+            string result = text.Replace(find, replace);
+            return result;
+        }
     }
 }

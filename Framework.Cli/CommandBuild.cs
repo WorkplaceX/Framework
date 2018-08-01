@@ -42,7 +42,7 @@ namespace Framework.Cli
             string replace = string.Format("return \"Build ({0} - {1})\";", DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"), System.Environment.MachineName);
 
             // Write UtilFramework.cs
-            string textNew = UtilCli.Replace(text, find, replace);
+            string textNew = UtilFramework.Replace(text, find, replace);
             File.WriteAllText(fileName, textNew);
 
             string folderName = UtilFramework.FolderName + "Application.Server/";

@@ -1,5 +1,6 @@
 ﻿namespace Framework.Server
 {
+    using Framework.Component;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -71,7 +72,15 @@
             }
             string isCustomIndexHtml = ConfigFramework.Load().IsCustomIndexHtml ? "true" : "false";
             url += "?IsCustomIndexHtml=" + isCustomIndexHtml;
-            string htmlServerSideRendering = await UtilServer.WebPost(url, "{ \"Name\": \"LLOOO\"}");
+            App app = new App(null);
+            string json = UtilJson.Serialize(app);
+            string htmlServerSideRendering = await UtilServer.WebPost(url, json);
+
+            // Set jsonBrowser in html.
+            string scriptFind = "var jsonBrowser = {};";
+            string scriptReplace = "var jsonBrowser = " + json + ";";
+            htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, scriptFind, scriptReplace);
+
             context.Response.ContentType = UtilServer.ContentType(path);
             await context.Response.WriteAsync(htmlServerSideRendering);
         }

@@ -8,15 +8,8 @@ namespace Framework.Cli
     using System.Linq;
     using System.Runtime.InteropServices;
 
-    public static class UtilCli
+    internal static class UtilCli
     {
-        internal static string Replace(string text, string find, string replace)
-        {
-            UtilFramework.Assert(text.Contains(find));
-            string result = text.Replace(find, replace);
-            return result;
-        }
-
         /// <summary>
         /// Run dotnet command.
         /// </summary>

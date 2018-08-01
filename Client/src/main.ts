@@ -11,7 +11,7 @@ if (environment.production) {
 platformBrowserDynamic(
   [
     { 
-      provide: 'jsonServerSideRendering', useValue: null // Default value.
+      provide: 'jsonServerSideRendering', useValue: null // Default value and make it injectable.
     }
   ]
 ).bootstrapModule(AppModule)
