@@ -1,5 +1,7 @@
 ﻿ToDo
--Json post
+-Delete folder "Framework\Client\dist" on build.
+-Container component for tree structure.
+-Json post [Ok]
 -Html5 valid
 -Universal [Ok]
 -Scss [Ok]
