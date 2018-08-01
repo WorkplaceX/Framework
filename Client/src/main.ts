@@ -8,5 +8,11 @@ if (environment.production) {
   enableProdMode();
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule)
+platformBrowserDynamic(
+  [
+    { 
+      provide: 'jsonServerSideRendering', useValue: null // Default value.
+    }
+  ]
+).bootstrapModule(AppModule)
   .catch(err => console.log(err));

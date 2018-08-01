@@ -71,7 +71,7 @@
             }
             string isCustomIndexHtml = ConfigFramework.Load().IsCustomIndexHtml ? "true" : "false";
             url += "?IsCustomIndexHtml=" + isCustomIndexHtml;
-            string htmlServerSideRendering = await UtilServer.WebPost(url, null);
+            string htmlServerSideRendering = await UtilServer.WebPost(url, "{ \"Name\": \"LLOOO\"}");
             context.Response.ContentType = UtilServer.ContentType(path);
             await context.Response.WriteAsync(htmlServerSideRendering);
         }

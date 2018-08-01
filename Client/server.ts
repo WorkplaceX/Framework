@@ -7,11 +7,15 @@ import { enableProdMode } from '@angular/core';
 import * as express from 'express';
 import { join } from 'path';
 
+import * as bodyParser from 'body-parser';
+
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
 
 // Express server
 const app = express();
+
+app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 4000;
 const DIST_FOLDER = join(process.cwd(), ''); // 'dist'
@@ -50,6 +54,24 @@ app.get('*', (req, res) => {
     view = '../../index'
   }
   res.render(view, { req });
+});
+
+app.post('*', (req, res) => {
+  var view = 'index';
+  if (req.url.includes('?IsCustomIndexHtml=true')) {
+    view = '../../index'
+  }
+  res.render(view,     
+    {
+      req: req,
+      res: res,
+      providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
+        {
+          provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
+        }
+      ]
+    },
+  );
 });
 
 // Start up the Node server
