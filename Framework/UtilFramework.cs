@@ -26,7 +26,7 @@ namespace Framework
                 // ng --version
                 // Angular CLI: 6.0.8
 
-                return "v2.01";
+                return "v2.011";
             }
         }
 
