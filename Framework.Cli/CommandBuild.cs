@@ -34,16 +34,23 @@ namespace Framework.Cli
 
         private void BuildServer()
         {
-            UtilCli.VersionTag(() => {
-                string folderName = UtilFramework.FolderName + "Application.Server/";
-                UtilCli.DotNet(folderName, "build");
-            });
+            string folderName = UtilFramework.FolderName + "Application.Server/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
+
+            // UtilCli.DotNet(folderName, "build"); // Use publish instead to build.
+
+            UtilCli.FolderNameDelete(folderNamePublish);
+            UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
+            UtilCli.DotNet(folderName, "publish");
+            UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
         }
 
         protected internal override void Execute()
         {
-            BuildClient();
-            BuildServer();
+            UtilCli.VersionBuild(() => {
+                BuildClient();
+                BuildServer();
+            });
         }
     }
 }

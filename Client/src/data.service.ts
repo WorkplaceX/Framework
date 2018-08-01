@@ -19,6 +19,8 @@ export class Json {
 export class DataService {
   public Json: Json;
 
+  public VersionBuild: string = "Build (local)";
+
   constructor(httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any) { 
     if (jsonServerSideRendering != null) {
       this.Json = jsonServerSideRendering;

@@ -182,24 +182,33 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Sets build version.
+        /// Tag version build.
         /// </summary>
-        internal static void VersionTag(Action build)
+        internal static void VersionBuild(Action build)
         {
             // Read UtilFramework.cs
-            string fileName = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
-            string text = File.ReadAllText(fileName);
+            string fileNameServer = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
+            string textServer = File.ReadAllText(fileNameServer);
+            string fileNameClient = UtilFramework.FolderName + "Framework/Client/src/data.service.ts";
+            string textClient = File.ReadAllText(fileNameClient);
 
-            string find = "return \"Build (local)\"; // See also: method CommandBuild.BuildServer();";
-            string replace = string.Format("return \"Build ({0} {1} - {2})\";", UtilCli.GitCommit(), DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"), System.Environment.MachineName);
+            string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2};)", UtilCli.GitCommit(), System.Environment.MachineName, DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"));
+
+            string findServer = "return \"Build (local)\";"; // See also: method CommandBuild.BuildServer();
+            string replaceServer = string.Format("return \"{0}\";", versionBuild);
+            string findClient = "public VersionBuild: string = \"Build (local)\";"; // See also: file data.service.ts
+            string replaceClient = string.Format("public VersionBuild: string = \"{0}\";", versionBuild);
 
             // Write UtilFramework.cs
-            string textNew = UtilFramework.Replace(text, find, replace);
-            File.WriteAllText(fileName, textNew);
+            string textNewServer = UtilFramework.Replace(textServer, findServer, replaceServer);
+            File.WriteAllText(fileNameServer, textNewServer);
+            string textNewClient = UtilFramework.Replace(textClient, findClient, replaceClient);
+            File.WriteAllText(fileNameClient, textNewClient);
 
             build();
 
-            File.WriteAllText(fileName, text); // Back to original text.
+            File.WriteAllText(fileNameServer, textServer); // Back to original text.
+            File.WriteAllText(fileNameClient, textClient); // Back to original text.
         }
     }
 }

@@ -18,14 +18,6 @@
             string folderName = UtilFramework.FolderName + "Application.Server/";
             string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
 
-            UtilCli.FolderNameDelete(folderNamePublish);
-            UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
-            UtilCli.VersionTag(() =>
-            {
-                UtilCli.DotNet(folderName, "publish");
-            });
-            UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
-
             UtilCli.Start(folderNamePublish, "git", "init");
             UtilCli.Start(folderNamePublish, "git", "config user.email \"deploy@deploy.deploy\""); // Prevent: Error "Please tell me who you are". See also: http://www.thecreativedev.com/solution-github-please-tell-me-who-you-are-error/
             UtilCli.Start(folderNamePublish, "git", "config user.name \"Deploy\"");
