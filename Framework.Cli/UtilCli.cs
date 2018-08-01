@@ -73,6 +73,24 @@ namespace Framework.Cli
             UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen);
         }
 
+        internal static string Start(string workingDirectory, string fileName, string arguments)
+        {
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.WorkingDirectory = workingDirectory;
+            info.FileName = fileName;
+            info.Arguments = arguments;
+            info.RedirectStandardOutput = true; // Do not write to stdout.
+            var process = Process.Start(info);
+            process.WaitForExit();
+            string result = process.StandardOutput.ReadToEnd();
+            if (process.ExitCode != 0)
+            {
+                throw new Exception("Script failed!");
+            }
+
+            return result;
+        }
+
         internal static void OpenWebBrowser(string url)
         {
             Start(null, "cmd", $"/c start {url}", false);
@@ -143,6 +161,45 @@ namespace Framework.Cli
                 }
                 Directory.Delete(folderName, true);
             }
+        }
+
+        /// <summary>
+        /// Returns git commit sha.
+        /// </summary>
+        internal static string GitCommit()
+        {
+            string result = "Commit";
+            try
+            {
+                result = UtilCli.Start(UtilFramework.FolderName, "git", "rev-parse --short HEAD");
+                result = result.Replace("\n", "");
+            }
+            catch
+            {
+                // Silent exception
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Sets build version.
+        /// </summary>
+        internal static void VersionTag(Action build)
+        {
+            // Read UtilFramework.cs
+            string fileName = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
+            string text = File.ReadAllText(fileName);
+
+            string find = "return \"Build (local)\"; // See also: method CommandBuild.BuildServer();";
+            string replace = string.Format("return \"Build ({0} {1} - {2})\";", UtilCli.GitCommit(), DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"), System.Environment.MachineName);
+
+            // Write UtilFramework.cs
+            string textNew = UtilFramework.Replace(text, find, replace);
+            File.WriteAllText(fileName, textNew);
+
+            build();
+
+            File.WriteAllText(fileName, text); // Back to original text.
         }
     }
 }

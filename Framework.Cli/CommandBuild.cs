@@ -34,21 +34,10 @@ namespace Framework.Cli
 
         private void BuildServer()
         {
-            // Read UtilFramework.cs
-            string fileName = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
-            string text = File.ReadAllText(fileName);
-
-            string find = "return \"Build (local)\"; // See also: method CommandBuild.BuildServer();";
-            string replace = string.Format("return \"Build ({0} - {1})\";", DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"), System.Environment.MachineName);
-
-            // Write UtilFramework.cs
-            string textNew = UtilFramework.Replace(text, find, replace);
-            File.WriteAllText(fileName, textNew);
-
-            string folderName = UtilFramework.FolderName + "Application.Server/";
-            UtilCli.DotNet(folderName, "build");
-
-            File.WriteAllText(fileName, text); // Back to original text.
+            UtilCli.VersionTag(() => {
+                string folderName = UtilFramework.FolderName + "Application.Server/";
+                UtilCli.DotNet(folderName, "build");
+            });
         }
 
         protected internal override void Execute()

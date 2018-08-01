@@ -20,8 +20,10 @@
 
             UtilCli.FolderNameDelete(folderNamePublish);
             UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
-
-            UtilCli.DotNet(folderName, "publish");
+            UtilCli.VersionTag(() =>
+            {
+                UtilCli.DotNet(folderName, "publish");
+            });
             UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
 
             UtilCli.Start(folderNamePublish, "git", "init");
