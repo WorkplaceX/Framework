@@ -1,1 +1,1 @@
-﻿powershell .\Build.ps1 -AzureGitUrl 'https://MyUserName:MyPassword@domain.scm.azurewebsites.net:443/domain.git' -ConnectionString 'Data Source=localhost; Initial Catalog=Database; Integrated Security=True'
+﻿powershell .\Build.ps1 -ConfigCliJson "{'AzureGitUrl':'https://MyUserName:MyPassword@domain.scm.azurewebsites.net:443/domain.git','WebsiteIncludeList':null}"

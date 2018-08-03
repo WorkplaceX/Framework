@@ -25,7 +25,7 @@ function Main
 	echo "### Build.ps1 (Config)"
 	cd $FolderName
 	cd Application.Cli
-    dotnet run --no-build -- config json="$ConfigCliJson" # Set AzureGitUrl
+    dotnet run --no-build -- config json=$ConfigCliJson # Set AzureGitUrl
 	ErrorCheck
 
 	# Build
@@ -57,8 +57,9 @@ function ErrorText
 
 	If ((Get-Content $FileNameErrorText) -ne $Null) # Not equal
 	{ 
-		echo "### Error"
+		echo "### Error (Begin)"
 		type $FileNameErrorText
+		echo "### Error (End)"
 		exit 1
 	}
 }
