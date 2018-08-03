@@ -31,19 +31,14 @@
                 if (UtilCli.ArgumentValue(this, jsonArgument, out string json))
                 {
                     // Write
-                    Console.WriteLine("### JSON Begin=");
-                    Console.WriteLine(json);
-                    Console.WriteLine("### JSON End");
-                    configCli = UtilFramework.ConfigFromJson<ConfigCli>(json);
+                    try
+                    {
+                        configCli = UtilFramework.ConfigFromJson<ConfigCli>(json);
+                    } catch (Exception exception)
+                    {
+                        throw new Exception("ConfigCliJson invalid!", exception);
+                    }
                     ConfigCli.Save(configCli);
-                }
-                else
-                {
-                    // Read
-                    Console.WriteLine("ConfigCli.json for ci build server:");
-                    json = UtilFramework.ConfigToJson(configCli);
-                    json = json.Replace("\"", "'"); // To use it in command prompt.
-                    Console.WriteLine(json);
                 }
             }
             
@@ -61,6 +56,14 @@
                     // Read
                     Console.WriteLine(azureGitUrlArgument.Name + "=" + configCli.AzureGitUrl);
                 }
+            }
+
+            // Read
+            {
+                Console.WriteLine("Add the following environment variable to ci build server (including quotation marks):");
+                string json = UtilFramework.ConfigToJson(configCli);
+                json = json.Replace("\"", "'"); // To use it in command prompt.
+                Console.WriteLine("ConfigCliJson=\"{0}\"", json);
             }
         }
     }
