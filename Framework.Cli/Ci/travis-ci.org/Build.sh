@@ -69,8 +69,9 @@ function ErrorText
     if [ -s "$FileNameErrorText" ] # If Error.txt not empty
 	then
     	set +x # Disable print command to avoid Error.txt double in log.
-	    echo "### Error"
+	    echo "### Error (Begin)"
 	    echo "$(<$FileNameErrorText)" # Print file Error.txt 
+	    echo "### Error (End)"
 	    exit 1 # Set exit code
 	fi
 }

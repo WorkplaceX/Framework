@@ -60,10 +60,12 @@
 
             // Read
             {
-                Console.WriteLine("Add the following environment variable to ci build server (including quotation marks):");
+                Console.WriteLine();
+                Console.WriteLine("Add the environment variable \"ConfigCliJson\" to ci build server: (Including double quotation marks for Travis! No double quotation marks for Visual Studio Team Services!)");
                 string json = UtilFramework.ConfigToJson(configCli);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
                 Console.WriteLine("ConfigCliJson=\"{0}\"", json);
+                Console.WriteLine();
             }
         }
     }
