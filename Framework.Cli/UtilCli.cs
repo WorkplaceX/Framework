@@ -73,7 +73,10 @@ namespace Framework.Cli
             UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen);
         }
 
-        internal static string Start(string workingDirectory, string fileName, string arguments)
+        /// <summary>
+        /// Returns stdout of command.
+        /// </summary>
+        internal static string StartStdout(string workingDirectory, string fileName, string arguments)
         {
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = workingDirectory;
@@ -224,7 +227,7 @@ namespace Framework.Cli
             string result = "Commit";
             try
             {
-                result = UtilCli.Start(UtilFramework.FolderName, "git", "rev-parse --short HEAD");
+                result = UtilCli.StartStdout(UtilFramework.FolderName, "git", "rev-parse --short HEAD");
                 result = result.Replace("\n", "");
             }
             catch

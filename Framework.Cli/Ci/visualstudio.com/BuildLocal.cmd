@@ -1,1 +1,3 @@
-﻿powershell .\Build.ps1 -ConfigCliJson "{'AzureGitUrl':'https://MyUserName:MyPassword@domain.scm.azurewebsites.net:443/domain.git','WebsiteIncludeList':null}"
+﻿cd Framework\Framework.Cli\Ci\visualstudio.com
+.\Build.ps1 -ConfigCliJson "{'AzureGitUrl':'https://MyUserName:MyPassword@domain.scm.azurewebsites.net:443/domain.git','WebsiteIncludeList':null}"
+echo $lastexitcode

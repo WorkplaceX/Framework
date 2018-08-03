@@ -49,13 +49,13 @@ function ErrorCheck
 	echo "### Build.ps1 (ErrorCheck)"
 	if ($lastexitcode -ne 0) 
     { 
-    	echo "### Build.ps1 (ErrorCheck; LastExitCode=$($lastexitcode))"
+    	echo "### Build.ps1 (ErrorCheck) - LastExitCode=$($lastexitcode)"
         exit $lastexitcode 
     }
 
 	If ((Get-Content $FileNameErrorText) -ne $Null) 
     { 
-    	echo "### Build.ps1 (ErrorCheck) - ErrorText)"
+    	echo "### Build.ps1 (ErrorCheck) - ErrorText"
         exit 0 
     }
 }
@@ -84,7 +84,7 @@ Try
 }
 Finally
 {
-	echo "### Build.ps1 (Finally)"
+	echo "### Build.ps1 (Finally) - LastExitCode=$($lastexitcode)"
 	ErrorText
 }
 echo "### Build.ps1 (LastExitCode=$($lastexitcode))"
