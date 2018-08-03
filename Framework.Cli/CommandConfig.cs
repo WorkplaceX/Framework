@@ -31,6 +31,7 @@
                 if (UtilCli.ArgumentValue(this, jsonArgument, out string json))
                 {
                     // Write
+                    Console.WriteLine("### JSON=" + json);
                     configCli = UtilFramework.ConfigFromJson<ConfigCli>(json);
                     ConfigCli.Save(configCli);
                 }
