@@ -1,4 +1,4 @@
-﻿param($AzureGitUrl, $ConnectionString)
+﻿param($ConfigCliJson)
 
 echo "### Build.ps1"
 
@@ -25,7 +25,7 @@ function Main
 	echo "### Build.ps1 (Config)"
 	cd $FolderName
 	cd Application.Cli
-    dotnet run --no-build -- config azureGitUrl="$AzureGitUrl" # Set AzureGitUrl
+    dotnet run --no-build -- config json="$ConfigCliJson" # Set AzureGitUrl
 	ErrorCheck
 
 	# Build
