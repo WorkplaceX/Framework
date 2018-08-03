@@ -55,21 +55,25 @@ function ErrorCheck
 
 	If ((Get-Content $FileNameErrorText) -ne $Null) 
     { 
-    	echo "### Build.ps1 (ErrorCheck; ErrorText)"
+    	echo "### Build.ps1 (ErrorCheck) - ErrorText)"
         exit 0 
     }
 }
 
 function ErrorText
 {
-	echo "### Build.ps1 (ErrorText; LastExitCode=$($lastexitcode))"
+	echo "### Build.ps1 (ErrorText)"
 
 	If ((Get-Content $FileNameErrorText) -ne $Null) # Not equal
 	{ 
-		echo "### Build.ps1 (ErrorTextBegin)"
+		echo "### Build.ps1 (ErrorText) - Begin"
 		type $FileNameErrorText
-		echo "### Build.ps1 (ErrorTextEnd)"
+		echo "### Build.ps1 (ErrorText) - End"
 		exit 1
+	}
+	else
+	{
+		echo "### Build.ps1 (ErrorText) - No Error"
 	}
 }
 
