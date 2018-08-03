@@ -108,20 +108,73 @@ namespace Framework.Cli
             }
         }
 
-        internal static string ArgumentValue(CommandArgument commandArgument)
+        /// <summary>
+        /// Adjustment for: If sequence of arguments is passed different than defined in CommandLineApplication values are wrong.
+        /// </summary>
+        /// <param name="commandBase"></param>
+        /// <param name="commandArgument"></param>
+        /// <returns></returns>
+        private static CommandArgument ArgumentValue(CommandBase command, CommandArgument commandArgument)
         {
-            string result = commandArgument.Value;
-            UtilFramework.Assert(commandArgument.Name.ToLower() == result.Substring(0, commandArgument.Name.Length).ToLower());
-            if (result.ToUpper().StartsWith(commandArgument.Name.ToUpper()))
+            CommandArgument result = null;
+            foreach (CommandArgument item in command.Configuration.Arguments)
             {
-                result = result.Substring(commandArgument.Name.Length);
+                string name = item.Value;
+                if (name?.IndexOf("=") != -1)
+                {
+                    name = name?.Substring(0, name.IndexOf("="));
+                }
+                if (name?.ToLower() == commandArgument.Name.ToLower())
+                {
+                    result = item;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true, if argument is used.
+        /// </summary>
+        internal static bool ArgumentValueIsExist(CommandBase command, CommandArgument commandArgument)
+        {
+            commandArgument = ArgumentValue(command, commandArgument); // Sequence of passed arguments might be wrong.
+
+            bool result = commandArgument != null && commandArgument.Value != null;
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true, if value has been set. (Use Argument=null to set a value to null).
+        /// </summary>
+        /// <param name="value">Returns value.</param>
+        internal static bool ArgumentValue(CommandBase command, CommandArgument commandArgument, out string value)
+        {
+            string name = commandArgument.Name;
+            commandArgument = ArgumentValue(command, commandArgument); // Sequence of passed arguments might be wrong.
+
+            bool isValue = false;
+            string result = commandArgument.Value;
+            UtilFramework.Assert(name.ToLower() == result.Substring(0, name.Length).ToLower());
+            if (result.ToUpper().StartsWith(name.ToUpper()))
+            {
+                result = result.Substring(name.Length);
             }
             if (result.StartsWith("="))
             {
                 result = result.Substring(1);
             }
             result = UtilFramework.StringNull(result);
-            return result;
+            if (result != null)
+            {
+                isValue = true;
+            }
+            if (result?.ToLower() == "null") // User sets value to null.
+            {
+                result = null;
+            }
+            value = result;
+            return isValue;
         }
 
         internal static void FolderCopy(string folderNameSource, string folderNameDest, string searchPattern, bool isAllDirectory)

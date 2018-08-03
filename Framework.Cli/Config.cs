@@ -6,7 +6,7 @@
     {
         public string AzureGitUrl { get; set; }
 
-        public List<ConfigWebsiteInclude> WebsiteExternalList { get; set; }
+        public List<ConfigCliWebsiteInclude> WebsiteIncludeList { get; set; }
 
         private static string FileName
         {
@@ -30,12 +30,17 @@
     /// <summary>
     /// Include "external" website.
     /// </summary>
-    public class ConfigWebsiteInclude
+    public class ConfigCliWebsiteInclude
     {
         /// <summary>
         /// Gets or sets DomainName. For example (example.com) or empty for default.
         /// </summary>
         public string DomainName { get; set; }
+
+        /// <summary>
+        /// Gets or sets DomainNameRedirect. Redirect domain. Empty if no redirect.
+        /// </summary>
+        public string DomainNameRedirect { get; set; }
 
         /// <summary>
         /// Gets or sets FolderNameNpmBuild. In this folder the following commands will be executed: "npm install", "npm build". Empty if GitUrl is used.

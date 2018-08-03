@@ -11,30 +11,52 @@
 
         }
 
-        private CommandArgument azureGitUrlArgument;
+        private CommandArgument jsonArgument;
 
-        private CommandOption getOption;
+        private CommandArgument azureGitUrlArgument;
 
         protected internal override void Register(CommandLineApplication configuration)
         {
-            azureGitUrlArgument = configuration.Argument("azureGitUrl", "Set Azure git url");
-            getOption = configuration.Option("-g | --get", "Get value", CommandOptionType.NoValue);
+            jsonArgument = configuration.Argument("json", "Get or set configuration");
+            azureGitUrlArgument = configuration.Argument("azureGitUrl", "Get or set Azure git url");
         }
 
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
-            if (azureGitUrlArgument.Value != null)
+            
+            // Command "json"
+            if (UtilCli.ArgumentValueIsExist(this, jsonArgument))
             {
-                if (getOption.Value() == "on")
+                if (UtilCli.ArgumentValue(this, jsonArgument, out string json))
                 {
-                    Console.WriteLine(azureGitUrlArgument.Name + "=" + configCli.AzureGitUrl);
+                    // Write
+                    configCli = UtilFramework.ConfigFromJson<ConfigCli>(json);
+                    ConfigCli.Save(configCli);
                 }
                 else
                 {
-                    string value = UtilCli.ArgumentValue(azureGitUrlArgument);
+                    // Read
+                    Console.WriteLine("ConfigCli.json for ci build server:");
+                    json = UtilFramework.ConfigToJson(configCli);
+                    json = json.Replace("\"", "'"); // To use it in command prompt.
+                    Console.WriteLine(json);
+                }
+            }
+            
+            // Command "azureGitUrl"
+            if (UtilCli.ArgumentValueIsExist(this, azureGitUrlArgument))
+            {
+                if (UtilCli.ArgumentValue(this, azureGitUrlArgument, out string value))
+                {
+                    // Write
                     configCli.AzureGitUrl = value;
                     ConfigCli.Save(configCli);
+                }
+                else
+                {
+                    // Read
+                    Console.WriteLine(azureGitUrlArgument.Name + "=" + configCli.AzureGitUrl);
                 }
             }
         }

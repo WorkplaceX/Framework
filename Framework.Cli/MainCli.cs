@@ -73,6 +73,7 @@
                 commandLineApplication.Command(command.Name, (configuration) =>
                 {
                     configuration.Description = command.Description;
+                    command.Configuration = configuration;
                     command.Register(configuration);
                     configuration.OnExecute(() =>
                     {
@@ -128,6 +129,8 @@
         public readonly string Name;
 
         public readonly string Description;
+
+        internal CommandLineApplication Configuration;
 
         protected virtual internal void Execute()
         {

@@ -96,6 +96,26 @@ namespace Framework
             Assert(isAssert, "Assert!");
         }
 
+        internal static T ConfigFromJson<T>(string json)
+        {
+            object result = null;
+            if (json == null)
+            {
+                result = JsonConvert.DeserializeObject<T>("{}");
+            }
+            else
+            {
+                result = JsonConvert.DeserializeObject<T>(json);
+            }
+            return (T)result;
+        }
+
+        internal static string ConfigToJson(object config)
+        {
+            string json = JsonConvert.SerializeObject(config);
+            return json;
+        }
+
         internal static T ConfigLoad<T>(string fileName)
         {
             object result = null;
@@ -106,14 +126,14 @@ namespace Framework
             else
             {
                 string json = File.ReadAllText(fileName);
-                result = JsonConvert.DeserializeObject<T>(json);
+                result = ConfigFromJson<T>(json);
             }
             return (T)result;
         }
 
         internal static void ConfigSave(object config, string fileName)
         {
-            string json = JsonConvert.SerializeObject(config);
+            string json = ConfigToJson(config);
             File.WriteAllText(fileName, json);
 
             Console.WriteLine(string.Format("Config saved to ({0})", fileName));
