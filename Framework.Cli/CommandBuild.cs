@@ -17,8 +17,8 @@ namespace Framework.Cli
         private void BuildClient()
         {
             string folderName = UtilFramework.FolderName + "Framework/Client/";
-            // UtilCli.Npm(folderName, "install --loglevel error");
-            // UtilCli.Npm(folderName, "run build:ssr"); // Build Universal to folder Framework/Client/dist/ // For ci stderror see also package.json: "webpack:server --progress --colors (removed); ng build --output-hashing none --no-progress (added); ng run --no-progress (added)
+            UtilCli.Npm(folderName, "install --loglevel error");
+            UtilCli.Npm(folderName, "run build:ssr"); // Build Universal to folder Framework/Client/dist/ // For ci stderror see also package.json: "webpack:server --progress --colors (removed); ng build --output-hashing none --no-progress (added); ng run --no-progress (added)
 
             string folderNameSource = UtilFramework.FolderName + "Framework/Client/dist/";
             string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/dist/";
