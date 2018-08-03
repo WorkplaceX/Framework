@@ -1,4 +1,5 @@
 ﻿ToDo
+-Ci config json.
 -Delete folder "Framework\Client\dist" on build.
 -Container component for tree structure.
 -Json post [Ok]

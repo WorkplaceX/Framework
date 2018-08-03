@@ -27,7 +27,7 @@ function Main
 	# Config
 	echo "### Build.sh (Config)"
     set +x # Prevent AzureGitUrl in log
-    dotnet run --no-build -- config azureGitUrl="$AzureGitUrl" # Set AzureGitUrl
+    dotnet run --no-build -- config json="$ClientCli.json" # Set AzureGitUrl
     set -x
 	ErrorCheck
 
