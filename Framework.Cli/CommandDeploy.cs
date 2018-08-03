@@ -23,7 +23,8 @@
             UtilCli.Start(folderNamePublish, "git", "config user.name \"Deploy\"");
             UtilCli.Start(folderNamePublish, "git", "remote add azure " + azureGitUrl);
             UtilCli.Start(folderNamePublish, "git", "fetch --all", isRedirectStdErr: true); // Another possibility is argument "-q" to do not write to stderr.
-            UtilCli.Start(folderNamePublish, "git", "add .");
+            UtilCli.Start(folderNamePublish, "git", "config core.autocrlf false"); // Prevent "LF will be replaced by CRLF" error in stderr.
+            UtilCli.Start(folderNamePublish, "git", "add ."); // Can throw "LF will be replaced by CRLF".
             UtilCli.Start(folderNamePublish, "git", "commit -m Deploy");
             UtilCli.Start(folderNamePublish, "git", "push azure master -f", isRedirectStdErr: true); // Do not write to stderr. Can be tested with "dotnet run -- deploy [AzureGitUrl] 2>Error.txt"
         }
