@@ -45,30 +45,42 @@ function Main
 
 function ErrorCheck
 {
-    # Check $lastexitcode and stderr
+    # Check $lastexitcode and stderr to exit
 	echo "### Build.ps1 (ErrorCheck)"
-	if ($lastexitcode -ne 0) { exit $lastexitcode }
-	If ((Get-Content $FileNameErrorText) -ne $Null) { exit 1 }
+	if ($lastexitcode -ne 0) 
+    { 
+    	echo "### Build.ps1 (ErrorCheck; LastExitCode=$($lastexitcode))"
+        exit $lastexitcode 
+    }
+
+	If ((Get-Content $FileNameErrorText) -ne $Null) 
+    { 
+    	echo "### Build.ps1 (ErrorCheck; ErrorText)"
+        exit 0 
+    }
 }
 
 function ErrorText
 {
-	echo "### Build.ps1 (ErrorText) - LastExitCode=$($lastexitcode)"
+	echo "### Build.ps1 (ErrorText; LastExitCode=$($lastexitcode))"
 
 	If ((Get-Content $FileNameErrorText) -ne $Null) # Not equal
 	{ 
-		echo "### Error (Begin)"
+		echo "### Build.ps1 (ErrorTextBegin)"
 		type $FileNameErrorText
-		echo "### Error (End)"
+		echo "### Build.ps1 (ErrorTextEnd)"
 		exit 1
 	}
 }
 
 Try
 {
+	echo "### Build.ps1 (Try)"
 	Main 2> $FileNameErrorText # Divert stderr to Error.txt
 }
 Finally
 {
+	echo "### Build.ps1 (Finally)"
 	ErrorText
 }
+echo "### Build.ps1 (LastExitCode=$($lastexitcode))"
