@@ -217,6 +217,12 @@ namespace Framework.Cli
                 }
                 Directory.Delete(folderName, true);
             }
+            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName));
+        }
+
+        internal static bool FolderNameExist(string folderName)
+        {
+            return Directory.Exists(folderName);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿namespace Framework.Cli
 {
     using System.Collections.Generic;
+    using System.IO;
 
     public class ConfigCli
     {
@@ -16,17 +17,40 @@
             }
         }
 
-        private static string FileNameDefault
+        /// <summary>
+        /// Init default file ConfigCli.json
+        /// </summary>
+        internal static void Init(AppCliBase appCli)
         {
-            get
+            if (!File.Exists(FileName))
             {
-                return UtilFramework.FolderName + "ConfigCliDefault.json";
+                ConfigCli configCli = new ConfigCli();
+                configCli.AzureGitUrl = "";
+                configCli.WebsiteList = new List<ConfigCliWebsite>();
+                appCli.InitConfigCli(configCli);
+                Save(configCli);
             }
         }
 
         internal static ConfigCli Load()
         {
-            return UtilFramework.ConfigLoad<ConfigCli>(FileName, FileNameDefault);
+            var result = UtilFramework.ConfigLoad<ConfigCli>(FileName);
+            if (result.WebsiteList == null)
+            {
+                result.WebsiteList = new List<ConfigCliWebsite>();
+            }
+            foreach (var website in result.WebsiteList)
+            {
+                if (string.IsNullOrEmpty(website.DomainName))
+                {
+                    website.DomainName = "default";
+                }
+                if (website.FolderNameNpmBuild == "")
+                {
+                    website.FolderNameNpmBuild = null;
+                }
+            }
+            return result;
         }
 
         internal static void Save(ConfigCli configCli)

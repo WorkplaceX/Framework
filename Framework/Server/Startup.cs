@@ -4,14 +4,18 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public static class Startup
     {
         public static void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            ConfigFramework.Init(env);
+
             if (UtilServer.IsIssServer == false)
             {
                 if (ConfigFramework.Load().IsServerSideRendering)
@@ -20,7 +24,7 @@
                 }
             }
 
-            if (env.IsDevelopment())
+            // if (env.IsDevelopment()) // TODO ConfigFramework
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -56,7 +60,7 @@
             return;
         }
 
-        private async Task ServerSideRendering(HttpContext context, string path)
+        private async Task ServerSideRendering(HttpContext context, string path, IHostingEnvironment env = null)
         {
             context.Response.ContentType = UtilServer.ContentType(path);
             string url;
@@ -70,7 +74,7 @@
                 // Running in Visual Studio
                 url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
             }
-            string isCustomIndexHtml = ConfigFramework.Load().IsCustomIndexHtml ? "true" : "false";
+            string isCustomIndexHtml = ConfigFramework.Load(env).IsCustomIndexHtml ? "true" : "false";
             url += "?IsCustomIndexHtml=" + isCustomIndexHtml;
             App app = new App(null);
             string json = UtilJson.Serialize(app);
@@ -85,6 +89,24 @@
             await context.Response.WriteAsync(htmlServerSideRendering);
         }
 
+        private static async Task<bool> ServeFrameworkFileWebsite(HttpContext context, string path, IHostingEnvironment env)
+        {
+            bool result = false;
+            var configFramework = ConfigFramework.Load(env);
+            var website = configFramework.WebsiteList.FirstOrDefault();
+            if (website != null)
+            {
+                string fileName = UtilServer.FolderNameContentRoot(env) + "Framework/Website/" + website.DomainName + path;
+                if (File.Exists(fileName))
+                {
+                    context.Response.ContentType = UtilServer.ContentType(fileName);
+                    await context.Response.SendFileAsync(fileName);
+                    result = true;
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// Returns true, if file found in "framework/dist/browser" folder.
         /// </summary>
@@ -95,21 +117,28 @@
             // index.html
             if (UtilServer.PathIsFileName(path) == false)
             {
-                path = "/index.html";
+                path += "/index.html";
+            }
+
+            // Website
+            bool result = await ServeFrameworkFileWebsite(context, path, Env);
+            if (result)
+            {
+                return true;
             }
 
             bool requestIsFileName = UtilServer.PathIsFileName(path);
 
-            if (path == "/index.html" && ConfigFramework.Load().IsServerSideRendering)
+            if (path == "/index.html" && ConfigFramework.Load(Env).IsServerSideRendering)
             {
-                await ServerSideRendering(context, path);
+                await ServerSideRendering(context, path, Env);
                 return true;
             }
             else
             {
                 if (requestIsFileName)
                 {
-                    if (path == "/index.html" && ConfigFramework.Load().IsCustomIndexHtml)
+                    if (path == "/index.html" && ConfigFramework.Load(Env).IsCustomIndexHtml)
                     {
                         string fileNameIndexHtml = UtilServer.FolderNameContentRoot(Env) + "Framework" + path;
                         context.Response.ContentType = UtilServer.ContentType(fileNameIndexHtml);

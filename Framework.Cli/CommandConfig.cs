@@ -101,6 +101,7 @@
 
         protected internal override void Execute()
         {
+            ConfigCli.Init(AppCli);
             ConfigCli configCli = ConfigCli.Load();
 
             // Command "json"

@@ -13,9 +13,9 @@
         /// <summary>
         /// Returns location of ASP.NET server wwwroot folder.
         /// </summary>
-        internal static string FolderNameContentRoot(IHostingEnvironment hostingEnvironment)
+        internal static string FolderNameContentRoot(IHostingEnvironment env)
         {
-            return new Uri(hostingEnvironment.ContentRootPath).AbsolutePath + "/";
+            return new Uri(env.ContentRootPath).AbsolutePath + "/";
         }
 
         /// <summary>
@@ -50,7 +50,7 @@
         {
             get
             {
-                string folderName = UtilFramework.FolderName + "Application.Server/";
+                string folderName = UtilFramework.FolderNameGet() + "Application.Server/";
                 bool result = Directory.Exists(folderName) == false;
                 return result;
             }
@@ -78,7 +78,7 @@
         }
 
         /// <summary>
-        /// Returns true, if request is a FileName.
+        /// Returns true, if request is a FileName. Otherwise request is a FolderName.
         /// </summary>
         internal static bool PathIsFileName(string path)
         {

@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Framework
 {
+    using Framework.Server;
     using Newtonsoft.Json;
     using System;
     using System.IO;
@@ -42,15 +43,28 @@ namespace Framework
         }
 
         /// <summary>
-        /// Gets FolderName. This is the root folder name.
+        /// Returns root folder name. Does not throw an exception, if running on IIS server.
+        /// </summary>
+        /// <returns></returns>
+        internal static string FolderNameGet()
+        {
+            Uri result = new Uri(typeof(UtilFramework).Assembly.CodeBase);
+            result = new Uri(result, "../../../../");
+            return result.AbsolutePath;
+        }
+
+        /// <summary>
+        /// Gets FolderName. This is the root folder name. Throws exception if running on IIS server. See also method: UtilServer.FolderNameContentRoot();
         /// </summary>
         public static string FolderName
         {
             get
             {
-                Uri result = new Uri(typeof(UtilFramework).Assembly.CodeBase);
-                result = new Uri(result, "../../../../");
-                return result.AbsolutePath;
+                if (UtilServer.IsIssServer)
+                {
+                    throw new Exception("Running on ISS server! Use method UtilServer.FolderNameContentRoot();"); // Diferent folder structure! Use method: UtilServer.FolderNameContentRoot();
+                }
+                return FolderNameGet();
             }
         }
 
@@ -117,19 +131,11 @@ namespace Framework
             return json;
         }
 
-        internal static T ConfigLoad<T>(string fileName, string fileNameDefault)
+        internal static T ConfigLoad<T>(string fileName)
         {
             object result = null;
-            if (!File.Exists(fileName))
-            {
-                string json = File.ReadAllText(fileNameDefault);
-                result = ConfigFromJson<T>(json);
-            }
-            else
-            {
-                string json = File.ReadAllText(fileName);
-                result = ConfigFromJson<T>(json);
-            }
+            string json = File.ReadAllText(fileName);
+            result = ConfigFromJson<T>(json);
             return (T)result;
         }
 

@@ -66,6 +66,14 @@
             new CommandDeploy(this);
         }
 
+        /// <summary>
+        /// Override this method to change default cli configuration.
+        /// </summary>
+        protected virtual internal void InitConfigCli(ConfigCli configCli)
+        {
+
+        }
+
         private void RegisterCommandInit()
         {
             foreach (CommandBase command in CommandList)
