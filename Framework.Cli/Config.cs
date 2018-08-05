@@ -6,7 +6,7 @@
     {
         public string AzureGitUrl { get; set; }
 
-        public List<ConfigCliWebsiteInclude> WebsiteIncludeList { get; set; }
+        public List<ConfigCliWebsite> WebsiteList { get; set; }
 
         private static string FileName
         {
@@ -30,7 +30,7 @@
     /// <summary>
     /// Include "external" website.
     /// </summary>
-    public class ConfigCliWebsiteInclude
+    public class ConfigCliWebsite
     {
         /// <summary>
         /// Gets or sets DomainName. For example (example.com) or empty for default.

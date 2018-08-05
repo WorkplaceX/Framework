@@ -110,9 +110,10 @@ namespace Framework
             return (T)result;
         }
 
-        internal static string ConfigToJson(object config)
+        internal static string ConfigToJson(object config, bool isIndented)
         {
-            string json = JsonConvert.SerializeObject(config);
+            JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore };
+            string json = JsonConvert.SerializeObject(config, isIndented? Formatting.Indented : Formatting.None, settings);
             return json;
         }
 
@@ -133,7 +134,7 @@ namespace Framework
 
         internal static void ConfigSave(object config, string fileName)
         {
-            string json = ConfigToJson(config);
+            string json = ConfigToJson(config, isIndented: true);
             File.WriteAllText(fileName, json);
 
             Console.WriteLine(string.Format("Config saved to ({0})", fileName));

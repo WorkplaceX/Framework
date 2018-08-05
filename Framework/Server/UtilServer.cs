@@ -62,6 +62,11 @@
         internal static void StartUniversalServer()
         {
             string folderName = UtilFramework.FolderName + "Application.Server/Framework/dist/";
+            string fileNameServer = folderName + "server.js";
+            if (!File.Exists(fileNameServer))
+            {
+                throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer));
+            }
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = folderName;
             info.FileName = "node.exe";
