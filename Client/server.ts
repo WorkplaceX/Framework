@@ -49,18 +49,12 @@ app.get('/api/*', (req, res) => {
 // All regular routes use the Universal engine
 app.get('*', (req, res) => {
   // res.send('Express is working on IISNode!');
-  var view = 'index';
-  if (req.url.includes('?IsIndexEmptyHtml=true')) {
-    view = '../../indexEmpty'
-  }
+  var view = 'indexEmpty';
   res.render(view, { req });
 });
 
 app.post('*', (req, res) => {
-  var view = 'index';
-  if (req.url.includes('?IsIndexEmptyHtml=true')) {
-    view = '../../indexEmpty'
-  }
+  var view = 'indexEmpty';
   res.render(view,     
     {
       req: req,

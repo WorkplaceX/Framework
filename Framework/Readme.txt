@@ -1,4 +1,5 @@
 ﻿ToDo
+-deploy can not be called twice. (remote azure already exists)
 -Ci config json.
 -Delete folder "Framework\Client\dist" on build.
 -Container component for tree structure.

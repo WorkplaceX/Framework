@@ -23,13 +23,15 @@ namespace Framework.Cli
             string folderNameSource = UtilFramework.FolderName + "Framework/Client/dist/";
             string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/dist/";
 
+            // Copy folder
             UtilCli.FolderDelete(folderNameDest);
             UtilFramework.Assert(!Directory.Exists(folderNameDest));
-
             UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
             UtilFramework.Assert(Directory.Exists(folderNameDest));
 
-            File.Delete(folderNameDest + "browser/3rdpartylicenses.txt"); // Prevent "dotnet : warning: LF will be replaced by CRLF" beeing written to stderr during deployment.
+            // indexEmpty.html
+            string fileName = folderNameDest + "browser/indexEmpty.html";
+            File.WriteAllText(fileName, "<data-app></data-app>");
         } 
 
         private static void BuildServer()
@@ -37,11 +39,9 @@ namespace Framework.Cli
             string folderName = UtilFramework.FolderName + "Application.Server/";
             string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
 
-            // UtilCli.DotNet(folderName, "build"); // Use publish instead to build.
-
             UtilCli.FolderNameDelete(folderNamePublish);
             UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
-            UtilCli.DotNet(folderName, "publish");
+            UtilCli.DotNet(folderName, "publish"); // Use publish instead to build.
             UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
 
             string fileNameSource = UtilFramework.FolderName + "ConfigFramework.json";
@@ -92,11 +92,17 @@ namespace Framework.Cli
                 {
                     throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
                 }
+
+                // Copy folder
                 UtilCli.FolderDelete(folderNameDest);
+                UtilFramework.Assert(!UtilCli.FolderNameExist(folderNameDest));
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
                 UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
+
                 Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainName));
             }
+
+            BuildWebsiteConfigFrameworkUpdate();
         }
 
         protected internal override void Execute()
@@ -104,7 +110,6 @@ namespace Framework.Cli
             // Init config
             ConfigCli.Init(AppCli);
             ConfigFramework.Init();
-            BuildWebsiteConfigFrameworkUpdate();
 
             // Build
             BuildWebsite();

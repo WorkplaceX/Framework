@@ -64,39 +64,37 @@
         /// Render first html request on server.
         /// </summary>
         /// <param name="isIndexEmpty">Use file indexEmpty.html</param>
-        private async Task ServerSideRendering(HttpContext context, string path, bool isIndexEmpty, IHostingEnvironment env = null)
+        private static async Task<string> ServerSideRendering(HttpContext context, string indexHtml)
         {
-            context.Response.ContentType = UtilServer.ContentType(path);
-            string url;
-            if (UtilServer.IsIssServer)
+            string result = indexHtml;
+            if (result.Contains("<data-app></data-app>")) // Needs server sie rendering
             {
-                // Running on IIS Server.
-                url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/dist/server.js";
-            }
-            else
-            {
-                // Running in Visual Studio
-                url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
-            }
-            string isIndexEmptyHtml = isIndexEmpty ? "true" : "false";
-            url += "?IsIndexEmptyHtml=" + isIndexEmptyHtml;
-            App app = new App(null);
-            string json = UtilJson.Serialize(app);
-            string htmlServerSideRendering = await UtilServer.WebPost(url, json);
+                string url;
+                if (UtilServer.IsIssServer)
+                {
+                    // Running on IIS Server.
+                    url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/dist/server.js";
+                }
+                else
+                {
+                    // Running in Visual Studio
+                    url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
+                }
+                App app = new App(null);
+                string json = UtilJson.Serialize(app);
+                string htmlServerSideRendering = await UtilServer.WebPost(url, json);
 
-            if (isIndexEmpty)
-            {
-                htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><title>Empty</title><style ng-transition=\"Application\"></style></head><body>", "");
+                htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><style ng-transition=\"Application\"></style></head><body>", "");
                 htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "</body></html>", "");
+
+                result = UtilFramework.Replace(result, "<data-app></data-app>", htmlServerSideRendering);
+
+                // Set jsonBrowser in html.
+                string scriptFind = "var jsonBrowser = {};";
+                string scriptReplace = "var jsonBrowser = " + json + ";";
+                result = UtilFramework.Replace(result, scriptFind, scriptReplace);
             }
-
-            // Set jsonBrowser in html.
-            string scriptFind = "var jsonBrowser = {};";
-            string scriptReplace = "var jsonBrowser = " + json + ";";
-            htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, scriptFind, scriptReplace);
-
-            context.Response.ContentType = UtilServer.ContentType(path);
-            await context.Response.WriteAsync(htmlServerSideRendering);
+            return result;
         }
 
         private static async Task<bool> ServeFrameworkFileWebsite(HttpContext context, string path, IHostingEnvironment env)
@@ -110,8 +108,18 @@
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
-                    await context.Response.SendFileAsync(fileName);
-                    result = true;
+                    if (fileName.EndsWith(".html") && ConfigFramework.Load(env).IsServerSideRendering)
+                    {
+                        string htmlIndex = File.ReadAllText(fileName);
+                        htmlIndex = await ServerSideRendering(context, htmlIndex);
+                        await context.Response.WriteAsync(htmlIndex);
+                        result = true;
+                    }
+                    else
+                    {
+                        await context.Response.SendFileAsync(fileName);
+                        result = true;
+                    }
                 }
             }
             return result;
@@ -137,25 +145,15 @@
                 return true;
             }
 
-            bool requestIsFileName = UtilServer.PathIsFileName(path);
-
-            if (path.EndsWith("/index.html") && ConfigFramework.Load(Env).IsServerSideRendering)
+            if (UtilServer.PathIsFileName(path))
             {
-                await ServerSideRendering(context, path, false, Env);
-                return true;
-            }
-            else
-            {
-                if (requestIsFileName)
+                // Serve fileName
+                string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
+                if (File.Exists(fileName))
                 {
-                    // Serve fileName
-                    string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
-                    if (File.Exists(fileName))
-                    {
-                        context.Response.ContentType = UtilServer.ContentType(fileName);
-                        await context.Response.SendFileAsync(fileName);
-                        return true;
-                    }
+                    context.Response.ContentType = UtilServer.ContentType(fileName);
+                    await context.Response.SendFileAsync(fileName);
+                    return true;
                 }
             }
 
