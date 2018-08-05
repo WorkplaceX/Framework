@@ -107,11 +107,11 @@ namespace Framework.Cli
             BuildWebsiteConfigFrameworkUpdate();
 
             // Build
+            BuildWebsite();
             UtilCli.VersionBuild(() => {
                 BuildClient();
                 BuildServer();
             });
-            BuildWebsite();
         }
     }
 }
