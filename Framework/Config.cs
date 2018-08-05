@@ -10,11 +10,6 @@
     {
         public bool IsServerSideRendering { get; set; }
 
-        /// <summary>
-        /// Gets or sets IsIndexHtml. If true, custom "Application.Server/Framework/index.html" file is used.
-        /// </summary>
-        public bool IsCustomIndexHtml { get; set; }
-
         public List<ConfigFrameworkWebsite> WebsiteList { get; set; }
 
         private static string FileName(IHostingEnvironment env)
@@ -42,7 +37,6 @@
             {
                 ConfigFramework configFramework = new ConfigFramework();
                 configFramework.IsServerSideRendering = true;
-                configFramework.IsCustomIndexHtml = true;
                 configFramework.WebsiteList = new List<ConfigFrameworkWebsite>();
                 Save(configFramework, env);
             }

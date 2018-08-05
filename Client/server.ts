@@ -50,16 +50,16 @@ app.get('/api/*', (req, res) => {
 app.get('*', (req, res) => {
   // res.send('Express is working on IISNode!');
   var view = 'index';
-  if (req.url.includes('?IsCustomIndexHtml=true')) {
-    view = '../../index'
+  if (req.url.includes('?IsIndexEmptyHtml=true')) {
+    view = '../../indexEmpty'
   }
   res.render(view, { req });
 });
 
 app.post('*', (req, res) => {
   var view = 'index';
-  if (req.url.includes('?IsCustomIndexHtml=true')) {
-    view = '../../index'
+  if (req.url.includes('?IsIndexEmptyHtml=true')) {
+    view = '../../indexEmpty'
   }
   res.render(view,     
     {

@@ -60,7 +60,11 @@
             return;
         }
 
-        private async Task ServerSideRendering(HttpContext context, string path, IHostingEnvironment env = null)
+        /// <summary>
+        /// Render first html request on server.
+        /// </summary>
+        /// <param name="isIndexEmpty">Use file indexEmpty.html</param>
+        private async Task ServerSideRendering(HttpContext context, string path, bool isIndexEmpty, IHostingEnvironment env = null)
         {
             context.Response.ContentType = UtilServer.ContentType(path);
             string url;
@@ -74,11 +78,17 @@
                 // Running in Visual Studio
                 url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
             }
-            string isCustomIndexHtml = ConfigFramework.Load(env).IsCustomIndexHtml ? "true" : "false";
-            url += "?IsCustomIndexHtml=" + isCustomIndexHtml;
+            string isIndexEmptyHtml = isIndexEmpty ? "true" : "false";
+            url += "?IsIndexEmptyHtml=" + isIndexEmptyHtml;
             App app = new App(null);
             string json = UtilJson.Serialize(app);
             string htmlServerSideRendering = await UtilServer.WebPost(url, json);
+
+            if (isIndexEmpty)
+            {
+                htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><title>Empty</title><style ng-transition=\"Application\"></style></head><body>", "");
+                htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "</body></html>", "");
+            }
 
             // Set jsonBrowser in html.
             string scriptFind = "var jsonBrowser = {};";
@@ -117,7 +127,7 @@
             // index.html
             if (UtilServer.PathIsFileName(path) == false)
             {
-                path += "/index.html";
+                path += "index.html";
             }
 
             // Website
@@ -129,32 +139,22 @@
 
             bool requestIsFileName = UtilServer.PathIsFileName(path);
 
-            if (path == "/index.html" && ConfigFramework.Load(Env).IsServerSideRendering)
+            if (path.EndsWith("/index.html") && ConfigFramework.Load(Env).IsServerSideRendering)
             {
-                await ServerSideRendering(context, path, Env);
+                await ServerSideRendering(context, path, false, Env);
                 return true;
             }
             else
             {
                 if (requestIsFileName)
                 {
-                    if (path == "/index.html" && ConfigFramework.Load(Env).IsCustomIndexHtml)
+                    // Serve fileName
+                    string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
+                    if (File.Exists(fileName))
                     {
-                        string fileNameIndexHtml = UtilServer.FolderNameContentRoot(Env) + "Framework" + path;
-                        context.Response.ContentType = UtilServer.ContentType(fileNameIndexHtml);
-                        await context.Response.SendFileAsync(fileNameIndexHtml);
+                        context.Response.ContentType = UtilServer.ContentType(fileName);
+                        await context.Response.SendFileAsync(fileName);
                         return true;
-                    }
-                    else
-                    {
-                        // Serve fileName
-                        string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
-                        if (File.Exists(fileName))
-                        {
-                            context.Response.ContentType = UtilServer.ContentType(fileName);
-                            await context.Response.SendFileAsync(fileName);
-                            return true;
-                        }
                     }
                 }
             }
