@@ -117,12 +117,13 @@ namespace Framework
             return json;
         }
 
-        internal static T ConfigLoad<T>(string fileName)
+        internal static T ConfigLoad<T>(string fileName, string fileNameDefault)
         {
             object result = null;
             if (!File.Exists(fileName))
             {
-                result = JsonConvert.DeserializeObject<T>("{}");
+                string json = File.ReadAllText(fileNameDefault);
+                result = ConfigFromJson<T>(json);
             }
             else
             {

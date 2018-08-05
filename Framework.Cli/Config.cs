@@ -16,9 +16,17 @@
             }
         }
 
+        private static string FileNameDefault
+        {
+            get
+            {
+                return UtilFramework.FolderName + "ConfigCliDefault.json";
+            }
+        }
+
         internal static ConfigCli Load()
         {
-            return UtilFramework.ConfigLoad<ConfigCli>(FileName);
+            return UtilFramework.ConfigLoad<ConfigCli>(FileName, FileNameDefault);
         }
 
         internal static void Save(ConfigCli configCli)

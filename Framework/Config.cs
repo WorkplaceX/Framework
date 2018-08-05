@@ -1,19 +1,12 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel;
-
-namespace Framework
+﻿namespace Framework
 {
     public class ConfigFramework
     {
-        [DefaultValue(true)]
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool IsServerSideRendering { get; set; }
 
         /// <summary>
         /// Gets or sets IsIndexHtml. If true, custom "Application.Server/Framework/index.html" file is used.
         /// </summary>
-        [DefaultValue(true)]
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool IsCustomIndexHtml { get; set; }
 
         private static string FileName
@@ -24,9 +17,17 @@ namespace Framework
             }
         }
 
+        private static string FileNameDefault
+        {
+            get
+            {
+                return UtilFramework.FolderName + "ConfigFrameworkDefault.json";
+            }
+        }
+
         internal static ConfigFramework Load()
         {
-            return UtilFramework.ConfigLoad<ConfigFramework>(FileName);
+            return UtilFramework.ConfigLoad<ConfigFramework>(FileName, FileNameDefault);
         }
 
         internal static void Save(ConfigFramework configFramework)
