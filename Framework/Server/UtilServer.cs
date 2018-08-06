@@ -13,7 +13,7 @@
     public class UtilServer
     {
         [ThreadStatic]
-        internal static IApplicationBuilder ApplicationBuilder;
+        internal static IApplicationBuilder App;
 
         internal static IHostingEnvironment Env
         {
@@ -27,9 +27,9 @@
                 }
                 else
                 {
-                    if (ApplicationBuilder != null)
+                    if (App != null)
                     {
-                        result = (IHostingEnvironment)ApplicationBuilder.ApplicationServices.GetService(typeof(IHostingEnvironment));
+                        result = (IHostingEnvironment)App.ApplicationServices.GetService(typeof(IHostingEnvironment));
                     }
                 }
                 return result;

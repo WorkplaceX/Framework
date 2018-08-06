@@ -4,17 +4,21 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
-    using System;
-    using System.Diagnostics;
+    using Microsoft.Extensions.DependencyInjection;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
 
     public static class Startup
     {
+        public static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Needed for IIS. Otherwise new HttpContextAccessor(); results in null reference exception.
+        }
+
         public static void Configure(IApplicationBuilder app)
         {
-            UtilServer.ApplicationBuilder = app;
+            UtilServer.App = app;
 
             ConfigFramework.Init();
 
@@ -55,7 +59,6 @@
             {
                 context.Response.StatusCode = 404; // Not found
             }
-
             return;
         }
 
