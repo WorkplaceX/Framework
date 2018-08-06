@@ -110,6 +110,20 @@ namespace Framework
             Assert(isAssert, "Assert!");
         }
 
+        /// <summary>
+        /// Returns underlying tpye, if any.
+        /// </summary>
+        internal static Type TypeUnderlying(Type type)
+        {
+            Type result = type;
+            Type typeUnderlying = Nullable.GetUnderlyingType(type);
+            if (typeUnderlying != null)
+            {
+                result = typeUnderlying;
+            }
+            return result;
+        }
+
         internal static T ConfigFromJson<T>(string json)
         {
             object result = null;

@@ -49,6 +49,8 @@
             string fileNameSource = UtilFramework.FolderName + "ConfigFramework.json";
             string fileNameDest = folderNamePublish + "ConfigFramework.json";
             UtilCli.FileCopy(fileNameSource, fileNameDest);
+
+            BuildServerConfigFrameworkUpdate();
         }
 
         /// <summary>
@@ -66,6 +68,21 @@
             {
                 configFramework.WebsiteList.Add(new ConfigFrameworkWebsite() { DomainName = webSite.DomainName });
             }
+
+            ConfigFramework.Save(configFramework);
+        }
+
+        /// <summary>
+        /// Copy from ConfigCli to ConfigFramework (ConnectionString).
+        /// </summary>
+        private static void BuildServerConfigFrameworkUpdate()
+        {
+            Console.WriteLine("Update ConfigFramework");
+            var configCli = ConfigCli.Load();
+            var configFramework = ConfigFramework.Load();
+
+            configFramework.ConnectionStringFramework = configCli.ConnectionStringFramework;
+            configFramework.ConnectionStringApplication = configCli.ConnectionStringFramework;
 
             ConfigFramework.Save(configFramework);
         }

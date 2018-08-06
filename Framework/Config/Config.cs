@@ -10,6 +10,23 @@
 
         public bool IsUseDeveloperExceptionPage { get; set; }
 
+        public string ConnectionStringFramework { get; set; }
+
+        public string ConnectionStringApplication { get; set; }
+
+        public static string ConnectionString(bool isFrameworkDb)
+        {
+            var configFramework = ConfigFramework.Load();
+            if (isFrameworkDb == false)
+            {
+                return configFramework.ConnectionStringApplication;
+            }
+            else
+            {
+                return configFramework.ConnectionStringFramework;
+            }
+        }
+
         public List<ConfigFrameworkWebsite> WebsiteList { get; set; }
 
         private static string FileName

@@ -12,6 +12,19 @@
 
         public string ConnectionStringApplication { get; set; }
 
+        public static string ConnectionString(bool isFrameworkDb)
+        {
+            var configCli = ConfigCli.Load();
+            if (isFrameworkDb == false)
+            {
+                return configCli.ConnectionStringApplication;
+            }
+            else
+            {
+                return configCli.ConnectionStringFramework;
+            }
+        }
+
         public List<ConfigCliWebsite> WebsiteList { get; set; }
 
         private static string FileName

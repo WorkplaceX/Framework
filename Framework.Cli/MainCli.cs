@@ -1,6 +1,7 @@
 ﻿namespace Framework.Cli.Command
 {
     using Framework.Cli.Config;
+    using Framework.Cli.Generate;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
@@ -62,6 +63,7 @@
         protected virtual void RegisterCommand()
         {
             new CommandConfig(this);
+            new CommandGenerate(this);
             new CommandBuild(this);
             new CommandStart(this);
             new CommandDeploy(this);
@@ -95,6 +97,17 @@
                 });
             }
             commandLineApplication.HelpOption("-h | --help"); // Command line interface help (to show commands)
+        }
+
+        /// <summary>
+        /// Overwrite this method to filter out only specific application tables and fields for which to generate code. For example only tables starting with "Explorer".
+        /// </summary>
+        /// <param name="list">Input list.</param>
+        /// <returns>Returns filtered output list.</returns>
+        protected virtual internal MetaSqlSchema[] GenerateFilter(MetaSqlSchema[] list)
+        {
+            // return list.Where(item => item.SchemaName == "dbo" && item.TableName.StartsWith("Explorer")).ToArray();
+            return list;
         }
 
         /// <summary>
