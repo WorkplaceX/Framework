@@ -16,16 +16,14 @@
         }
     }
 
-    public class App : ComponentJson
+    public class AppJson : ComponentJson
     {
-        public App() { }
+        public AppJson() { }
 
-        public App(ComponentJson owner) 
+        public AppJson(ComponentJson owner) 
             : base(owner)
         {
-            this.Name = "Application";
-            this.Version = UtilFramework.Version;
-            this.VersionBuild = UtilFramework.VersionBuild;
+
         }
 
         public string Name { get; set; }

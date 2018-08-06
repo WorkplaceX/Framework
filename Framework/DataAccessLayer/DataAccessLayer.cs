@@ -24,7 +24,7 @@
     /// <summary>
     /// Base class for every database cell.
     /// </summary>
-    public class Cell<TRow> : Cell
+    public class Cell<TRow> : Cell where TRow : Row
     {
         public new TRow Row
         {

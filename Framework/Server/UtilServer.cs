@@ -62,6 +62,7 @@
                 case ".ico": result = "image/x-icon"; break;
                 case ".jpg": result = "image/jpeg"; break;
                 case ".pdf": result = "application/pdf"; break;
+                case ".json": result = "application/json"; break;
                 default:
                     result = "text/plain"; break; // Type not found!
             }
@@ -101,6 +102,23 @@
             // info.Environment.Add("PORT", "4000"); // Does not work in connection with "info.UseShellExecute = true;". For default port see also: Submodule/Client/src/server.ts
             info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
             Process.Start(info);
+        }
+
+        /// <summary>
+        /// Used to get body of web post.
+        /// </summary>
+        internal static async Task<string> StreamToString(Stream stream)
+        {
+            string result;
+            using (var streamReader = new StreamReader(stream))
+            {
+                result = await streamReader.ReadToEndAsync();
+            }
+            if (result == "")
+            {
+                result = null;
+            }
+            return result;
         }
 
         /// <summary>
