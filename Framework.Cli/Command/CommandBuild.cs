@@ -1,8 +1,10 @@
-﻿using System;
-using System.IO;
-
-namespace Framework.Cli
+﻿namespace Framework.Cli
 {
+    using Framework.Cli.Config;
+    using Framework.Config;
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Cli build command.
     /// </summary>

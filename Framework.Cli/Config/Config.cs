@@ -1,4 +1,4 @@
-﻿namespace Framework.Cli
+﻿namespace Framework.Cli.Config
 {
     using System.Collections.Generic;
     using System.IO;

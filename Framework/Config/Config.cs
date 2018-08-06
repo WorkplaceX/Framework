@@ -1,8 +1,6 @@
-﻿namespace Framework
+﻿namespace Framework.Config
 {
     using Framework.Server;
-    using Microsoft.AspNetCore.Hosting;
-    using System;
     using System.Collections.Generic;
     using System.IO;
 
