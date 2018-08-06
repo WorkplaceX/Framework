@@ -10,41 +10,42 @@
     {
         public bool IsServerSideRendering { get; set; }
 
+        public bool IsUseDeveloperExceptionPage { get; set; }
+
         public List<ConfigFrameworkWebsite> WebsiteList { get; set; }
 
-        private static string FileName(IHostingEnvironment env)
+        private static string FileName
         {
-            if (UtilServer.IsIssServer == false)
+            get
             {
-                return UtilFramework.FolderName + "ConfigFramework.json";
-            }
-            else
-            {
-                if (env == null)
+                if (UtilServer.IsIssServer == false)
                 {
-                    throw new Exception("Env is null!");
+                    return UtilFramework.FolderName + "ConfigFramework.json";
                 }
-                return UtilServer.FolderNameContentRoot(env) + "ConfigFramework.json";
+                else
+                {
+                    return UtilServer.FolderNameContentRoot() + "ConfigFramework.json";
+                }
             }
         }
 
         /// <summary>
         /// Init default file ConfigFramework.json
         /// </summary>
-        internal static void Init(IHostingEnvironment env = null)
+        internal static void Init()
         {
-            if (!File.Exists(FileName(env)))
+            if (!File.Exists(FileName))
             {
                 ConfigFramework configFramework = new ConfigFramework();
                 configFramework.IsServerSideRendering = true;
                 configFramework.WebsiteList = new List<ConfigFrameworkWebsite>();
-                Save(configFramework, env);
+                Save(configFramework);
             }
         }
 
-        internal static ConfigFramework Load(IHostingEnvironment env = null)
+        internal static ConfigFramework Load()
         {
-            var result = UtilFramework.ConfigLoad<ConfigFramework>(FileName(env));
+            var result = UtilFramework.ConfigLoad<ConfigFramework>(FileName);
             if (result.WebsiteList == null)
             {
                 result.WebsiteList = new List<ConfigFrameworkWebsite>();
@@ -52,9 +53,9 @@
             return result;
         }
 
-        internal static void Save(ConfigFramework configFramework, IHostingEnvironment env = null)
+        internal static void Save(ConfigFramework configFramework)
         {
-            UtilFramework.ConfigSave(configFramework, FileName(env));
+            UtilFramework.ConfigSave(configFramework, FileName);
         }
     }
 

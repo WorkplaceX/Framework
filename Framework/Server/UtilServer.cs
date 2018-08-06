@@ -1,6 +1,8 @@
 ﻿namespace Framework.Server
 {
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -10,12 +12,36 @@
 
     public class UtilServer
     {
+        [ThreadStatic]
+        internal static IApplicationBuilder ApplicationBuilder;
+
+        internal static IHostingEnvironment Env
+        {
+            get
+            {
+                IHostingEnvironment result = null;
+                HttpContext context = new HttpContextAccessor().HttpContext; // Not available during startup.
+                if (context != null)
+                {
+                    result = (IHostingEnvironment)context.RequestServices.GetService(typeof(IHostingEnvironment));
+                }
+                else
+                {
+                    if (ApplicationBuilder != null)
+                    {
+                        result = (IHostingEnvironment)ApplicationBuilder.ApplicationServices.GetService(typeof(IHostingEnvironment));
+                    }
+                }
+                return result;
+            }
+        }
+
         /// <summary>
         /// Returns location of ASP.NET server wwwroot folder.
         /// </summary>
-        internal static string FolderNameContentRoot(IHostingEnvironment env)
+        internal static string FolderNameContentRoot()
         {
-            return new Uri(env.ContentRootPath).AbsolutePath + "/";
+            return new Uri(Env.ContentRootPath).AbsolutePath + "/";
         }
 
         /// <summary>

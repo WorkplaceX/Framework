@@ -12,9 +12,11 @@
 
     public static class Startup
     {
-        public static void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public static void Configure(IApplicationBuilder app)
         {
-            ConfigFramework.Init(env);
+            UtilServer.ApplicationBuilder = app;
+
+            ConfigFramework.Init();
 
             if (UtilServer.IsIssServer == false)
             {
@@ -24,7 +26,7 @@
                 }
             }
 
-            // if (env.IsDevelopment()) // TODO ConfigFramework
+            if (ConfigFramework.Load().IsUseDeveloperExceptionPage)
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -32,21 +34,18 @@
             app.UseDefaultFiles(); // Used for index.html
             app.UseStaticFiles(); // Enable access to files in folder wwwwroot.
 
-            app.Run(new StartupRun(app, env).Run);
+            app.Run(new StartupRun(app).Run);
         }
     }
 
     internal class StartupRun
     {
-        public StartupRun(IApplicationBuilder app, IHostingEnvironment env)
+        public StartupRun(IApplicationBuilder app)
         {
             this.App = app;
-            this.Env = env;
         }
 
         public readonly IApplicationBuilder App;
-
-        public readonly IHostingEnvironment Env;
 
         public async Task Run(HttpContext context)
         {
@@ -97,18 +96,18 @@
             return result;
         }
 
-        private static async Task<bool> ServeFrameworkFileWebsite(HttpContext context, string path, IHostingEnvironment env)
+        private static async Task<bool> ServeFrameworkFileWebsite(HttpContext context, string path)
         {
             bool result = false;
-            var configFramework = ConfigFramework.Load(env);
+            var configFramework = ConfigFramework.Load();
             var website = configFramework.WebsiteList.FirstOrDefault();
             if (website != null)
             {
-                string fileName = UtilServer.FolderNameContentRoot(env) + "Framework/Website/" + website.DomainName + path;
+                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + website.DomainName + path;
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
-                    if (fileName.EndsWith(".html") && ConfigFramework.Load(env).IsServerSideRendering)
+                    if (fileName.EndsWith(".html") && ConfigFramework.Load().IsServerSideRendering)
                     {
                         string htmlIndex = File.ReadAllText(fileName);
                         htmlIndex = await ServerSideRendering(context, htmlIndex);
@@ -139,7 +138,7 @@
             }
 
             // Website
-            bool result = await ServeFrameworkFileWebsite(context, path, Env);
+            bool result = await ServeFrameworkFileWebsite(context, path);
             if (result)
             {
                 return true;
@@ -148,7 +147,7 @@
             if (UtilServer.PathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot(Env) + "Framework/dist/browser" + path;
+                string fileName = UtilServer.FolderNameContentRoot() + "Framework/dist/browser" + path;
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
