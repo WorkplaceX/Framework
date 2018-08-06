@@ -1,4 +1,4 @@
-﻿namespace Framework.Cli
+﻿namespace Framework.Cli.Command
 {
     /// <summary>
     /// Cli start command.

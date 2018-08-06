@@ -1,5 +1,6 @@
 ﻿namespace Framework.Cli.Config
 {
+    using Framework.Cli.Command;
     using System.Collections.Generic;
     using System.IO;
 

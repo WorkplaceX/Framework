@@ -1,11 +1,10 @@
-﻿
-namespace Framework.Cli
+﻿namespace Framework.Cli
 {
+    using Framework.Cli.Command;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Runtime.InteropServices;
 
     internal static class UtilCli

@@ -1,4 +1,4 @@
-﻿namespace Framework.Cli
+﻿namespace Framework.Cli.Command
 {
     using Framework.Cli.Config;
     using Framework.Config;
