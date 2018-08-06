@@ -62,7 +62,6 @@
         /// <summary>
         /// Render first html request on server.
         /// </summary>
-        /// <param name="isIndexEmpty">Use file indexEmpty.html</param>
         private static async Task<string> ServerSideRendering(HttpContext context, string indexHtml)
         {
             string result = indexHtml;
