@@ -14,20 +14,26 @@
 
         }
 
-        private CommandArgument jsonArgument;
+        private CommandArgument argumentJson;
 
-        private CommandArgument azureGitUrlArgument;
+        private CommandArgument argumentAzureGitUrl;
 
-        private CommandArgument websiteArgument;
+        private CommandArgument argumentConnectionStringFramework;
+
+        private CommandArgument argumentConnectionStringApplication;
+
+        private CommandArgument argumentWebsite;
 
         protected internal override void Register(CommandLineApplication configuration)
         {
-            jsonArgument = configuration.Argument("json", "Get or set configuration");
-            azureGitUrlArgument = configuration.Argument("azureGitUrl", "Get or set Azure git url");
-            websiteArgument = configuration.Argument("website", "Add (include) a website in this repo.");
+            argumentJson = configuration.Argument("json", "Get or set ci server configuration.");
+            argumentAzureGitUrl = configuration.Argument("azureGitUrl", "Get or set Azure git url for deployment.");
+            argumentConnectionStringFramework = configuration.Argument("connectionStringFramework", "Get or set database ConnectionString for Framework.");
+            argumentConnectionStringApplication = configuration.Argument("connectionStringApplication", "Get or set database ConnectionString for Application.");
+            argumentWebsite = configuration.Argument("website", "Add (include) a website to ci build.");
         }
 
-        private void Website()
+        private void ArgumentWebsite()
         {
             // Input DomainName
             UtilFramework.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
@@ -99,15 +105,53 @@
             ConfigCli.Save(configCli);
         }
 
+        /// <summary>
+        /// Read or write config ConnectionStringFramework.
+        /// </summary>
+        private void ArgumentConnectionStringFramework()
+        {
+            ConfigCli configCli = ConfigCli.Load();
+            if (UtilCli.ArgumentValue(this, argumentConnectionStringFramework, out string connectionString))
+            {
+                // Write
+                configCli.ConnectionStringFramework = connectionString;
+                ConfigCli.Save(configCli);
+            }
+            else
+            {
+                // Read
+                Console.WriteLine(argumentConnectionStringFramework.Name + "=" + configCli.ConnectionStringFramework);
+            }
+        }
+
+        /// <summary>
+        /// Read or write config ConnectionStringApplication.
+        /// </summary>
+        private void ArgumentConnectionStringApplication()
+        {
+            ConfigCli configCli = ConfigCli.Load();
+            if (UtilCli.ArgumentValue(this, argumentConnectionStringApplication, out string connectionString))
+            {
+                // Write
+                configCli.ConnectionStringApplication = connectionString;
+                ConfigCli.Save(configCli);
+            }
+            else
+            {
+                // Read
+                Console.WriteLine(argumentConnectionStringApplication.Name + "=" + configCli.ConnectionStringApplication);
+            }
+        }
+
         protected internal override void Execute()
         {
             ConfigCli.Init(AppCli);
             ConfigCli configCli = ConfigCli.Load();
 
             // Command "json"
-            if (UtilCli.ArgumentValueIsExist(this, jsonArgument))
+            if (UtilCli.ArgumentValueIsExist(this, argumentJson))
             {
-                if (UtilCli.ArgumentValue(this, jsonArgument, out string json))
+                if (UtilCli.ArgumentValue(this, argumentJson, out string json))
                 {
                     // Write
                     try
@@ -116,16 +160,16 @@
                     }
                     catch (Exception exception)
                     {
-                        throw new Exception("ConfigCliJson invalid!", exception);
+                        throw new Exception("ConfigCli invalid!", exception);
                     }
                     ConfigCli.Save(configCli);
                 }
             }
 
             // Command "azureGitUrl"
-            if (UtilCli.ArgumentValueIsExist(this, azureGitUrlArgument))
+            if (UtilCli.ArgumentValueIsExist(this, argumentAzureGitUrl))
             {
-                if (UtilCli.ArgumentValue(this, azureGitUrlArgument, out string value))
+                if (UtilCli.ArgumentValue(this, argumentAzureGitUrl, out string value))
                 {
                     // Write
                     configCli.AzureGitUrl = value;
@@ -134,14 +178,26 @@
                 else
                 {
                     // Read
-                    Console.WriteLine(azureGitUrlArgument.Name + "=" + configCli.AzureGitUrl);
+                    Console.WriteLine(argumentAzureGitUrl.Name + "=" + configCli.AzureGitUrl);
                 }
             }
 
-            // Command "website"
-            if (UtilCli.ArgumentValueIsExist(this, websiteArgument))
+            // Command "connectionStringFramework
+            if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringFramework))
             {
-                Website();
+                ArgumentConnectionStringFramework();
+            }
+
+            // Command "connectionStringApplication
+            if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringApplication))
+            {
+                ArgumentConnectionStringApplication();
+            }
+
+            // Command "website"
+            if (UtilCli.ArgumentValueIsExist(this, argumentWebsite))
+            {
+                ArgumentWebsite();
             }
 
             // Read
@@ -151,7 +207,7 @@
                 UtilFramework.ConsoleWriteLineColor("Add environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
-                UtilFramework.ConsoleWriteLineColor("ConfigCliJson=", ConsoleColor.DarkGreen);
+                UtilFramework.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
                 UtilFramework.ConsoleWriteLineColor(string.Format("\"{0}\"", json), ConsoleColor.DarkGreen);
                 Console.WriteLine();
             }

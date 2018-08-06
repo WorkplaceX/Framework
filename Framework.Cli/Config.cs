@@ -7,6 +7,10 @@
     {
         public string AzureGitUrl { get; set; }
 
+        public string ConnectionStringFramework { get; set; }
+
+        public string ConnectionStringApplication { get; set; }
+
         public List<ConfigCliWebsite> WebsiteList { get; set; }
 
         private static string FileName
