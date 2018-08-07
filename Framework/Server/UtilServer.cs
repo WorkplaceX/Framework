@@ -45,6 +45,25 @@
         }
 
         /// <summary>
+        /// Returns request url.
+        /// </summary>
+        /// <param name="isServer">If true, it returns root url "http://localhost:49323/". If false, it returns "http://localhost:49323/config/data.txt".</param>
+        internal static string RequestUrl(bool isServer)
+        {
+            string result = null;
+            HttpContext httpContext = new HttpContextAccessor().HttpContext;
+            if (isServer)
+            {
+                result = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
+            }
+            else
+            {
+                result = string.Format("{0}://{1}{2}", httpContext.Request.Scheme, httpContext.Request.Host.Value, httpContext.Request.Path);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns html content type.
         /// </summary>
         internal static string ContentType(string fileName)

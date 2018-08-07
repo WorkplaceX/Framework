@@ -47,7 +47,13 @@
             {
                 result.AppJson = new AppJson();
             }
+
+            // Process
             result.Process();
+
+            // RequestUrl
+            result.AppJson.RequestUrl = UtilServer.RequestUrl(false);
+
             return result;
         }
 

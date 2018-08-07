@@ -13,6 +13,6 @@ export class AppComponent {
   }
 
   onClick(): void {
-    this.DataService.Json.Name += ".";
+    this.DataService.json.Name += ".";
   }
 }

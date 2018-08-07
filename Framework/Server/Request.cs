@@ -27,13 +27,35 @@
         /// </summary>
         public async Task Run(HttpContext context)
         {
-            bool result = await ServeFrameworkFile(context);
-
-            if (result == false)
+            // Path init
+            string path = context.Request.Path;
+            if (UtilServer.PathIsFileName(path) == false)
             {
-                context.Response.StatusCode = 404; // Not found
+                path += "index.html";
             }
-            return;
+
+            // GET Website
+            bool result = await Website(context, path, AppSelector);
+            if (result)
+            {
+                return;
+            }
+
+            // POST app.json
+            result = await Post(context, path, AppSelector);
+            if (result)
+            {
+                return;
+            }
+
+            // GET dist/browser/
+            result = await DistBrowser(context, path);
+            if (result)
+            {
+                return;
+            }
+
+            context.Response.StatusCode = 404; // Not found
         }
 
         /// <summary>
@@ -72,7 +94,7 @@
             return result;
         }
 
-        private static async Task<bool> ServeFrameworkFileWebsite(HttpContext context, string path, AppSelector appSelector)
+        private static async Task<bool> Website(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
             var configFramework = ConfigFramework.Load();
@@ -107,6 +129,12 @@
             {
                 var app = await appSelector.CreateApp(context);
                 context.Response.ContentType = UtilServer.ContentType(path);
+
+                // Access-Control-Allow-Origin
+                string url = app.AppJson.BrowserUrlServer();
+                url = url.Substring(0, url.Length - 1);
+                context.Response.Headers.Add("Access-Control-Allow-Origin", url);
+
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
                 await context.Response.WriteAsync(json);
                 result = true;
@@ -118,23 +146,8 @@
         /// <summary>
         /// Returns true, if file found in "framework/dist/browser" folder.
         /// </summary>
-        private async Task<bool> ServeFrameworkFile(HttpContext context)
+        private async Task<bool> DistBrowser(HttpContext context, string path)
         {
-            string path = context.Request.Path;
-
-            // index.html
-            if (UtilServer.PathIsFileName(path) == false)
-            {
-                path += "index.html";
-            }
-
-            // Website
-            bool result = await ServeFrameworkFileWebsite(context, path, AppSelector);
-            if (result)
-            {
-                return true;
-            }
-
             // Fallback dist/browser/
             if (UtilServer.PathIsFileName(path))
             {
