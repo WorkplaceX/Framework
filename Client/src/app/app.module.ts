@@ -2,11 +2,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 
-import { AppComponent } from './app.component';
+import { AppComponent, Button, Selector } from './app.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent, Button, Selector
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'Application' }),

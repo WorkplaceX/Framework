@@ -15,6 +15,8 @@ export class Json {
   RequestUrl: string;
 
   BrowserUrl: string;
+
+  List: any;
 }
 
 @Injectable({

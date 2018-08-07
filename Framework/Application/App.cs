@@ -1,6 +1,6 @@
 ﻿namespace Framework.Application
 {
-    using Framework.Component;
+    using Framework.ComponentJson;
     using Framework.Json;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;

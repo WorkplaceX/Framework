@@ -1,6 +1,7 @@
-﻿namespace Framework.Component
+﻿namespace Framework.ComponentJson
 {
     using System;
+    using System.Collections.Generic;
 
     public class ComponentJson
     {
@@ -14,7 +15,91 @@
         /// </summary>
         public ComponentJson(ComponentJson owner)
         {
+            Constructor(owner);
+        }
 
+        internal void Constructor(ComponentJson owner)
+        {
+            this.Type = GetType().Name;
+            if (owner != null)
+            {
+                if (owner.List == null)
+                {
+                    owner.List = new List<ComponentJson>();
+                }
+                int count = 0;
+                foreach (var item in owner.List)
+                {
+                    if (item.TrackBy.StartsWith(this.Type + "-"))
+                    {
+                        count += 1;
+                    }
+                }
+                this.TrackBy = this.Type + "-" + count.ToString();
+                owner.List.Add(this);
+            }
+        }
+
+        public string Type;
+
+        public string TrackBy;
+
+        public bool IsHide;
+
+        /// <summary>
+        /// Gets or sets custom html style classes for this component.
+        /// </summary>
+        public string CssClass;
+
+        /// <summary>
+        /// Gets json list.
+        /// </summary>
+        public List<ComponentJson> List = new List<ComponentJson>();
+
+        private void ListAll(List<ComponentJson> result)
+        {
+            result.AddRange(List);
+            foreach (var item in List)
+            {
+                item.ListAll(result);
+            }
+        }
+
+        public List<ComponentJson> ListAll()
+        {
+            List<ComponentJson> result = new List<ComponentJson>();
+            ListAll(result);
+            return result;
+        }
+
+        private void Owner(ComponentJson componentTop, ComponentJson componentSearch, ref ComponentJson result)
+        {
+            if (componentTop.List.Contains(componentSearch))
+            {
+                result = componentTop; // Owner
+            }
+            if (result == null)
+            {
+                foreach (var item in componentTop.List)
+                {
+                    item.Owner(item, componentSearch, ref result);
+                    if (result != null)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns owner of this json component.
+        /// </summary>
+        /// <param name="componentTop">Component to start search from top to down.</param>
+        public ComponentJson Owner(ComponentJson componentTop)
+        {
+            ComponentJson result = null;
+            Owner(componentTop, this, ref result);
+            return result;
         }
     }
 
@@ -58,4 +143,23 @@
             return result;
         }
     }
+
+    /// <summary>
+    /// Json Button. Rendered as html button element.
+    /// </summary>
+    public class Button : ComponentJson
+    {
+        public Button() : this(null) { }
+
+        public Button(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        public string Text;
+
+        public bool IsClick;
+    }
+
 }

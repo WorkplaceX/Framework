@@ -2,7 +2,7 @@ data-app {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 
-data-app > button {
+data-app > button, data-app * button { /* Child and descendent */
     font-family: inherit;
     font-size: inherit;
     padding: 0px;
@@ -11,7 +11,7 @@ data-app > button {
     color: #fff;
 }
 
-data-app > input {
+data-app > input, data-app * input {
     font-family: inherit;
     font-size: inherit;
     padding: 0px;
