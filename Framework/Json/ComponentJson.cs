@@ -44,8 +44,6 @@
 
         public string TrackBy;
 
-        public bool IsHide;
-
         /// <summary>
         /// Gets or sets custom html style classes for this component.
         /// </summary>
@@ -113,6 +111,11 @@
 
         }
 
+        /// <summary>
+        /// Gets or sets IsInit. If false, method App.Init(): is called.
+        /// </summary>
+        public bool IsInit;
+
         public string Name { get; set; }
 
         public string Version { get; set; }
@@ -162,4 +165,50 @@
         public bool IsClick;
     }
 
+    public class Grid : ComponentJson
+    {
+        public Grid() : this(null) { }
+
+        public Grid(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        public GridHeader Header;
+
+        public List<GridRow> RowList;
+    }
+
+    public class GridHeader
+    {
+        public List<GridColumn> ColumnList;
+    }
+
+    public class GridColumn
+    {
+        public string Text;
+
+        public string SearchText;
+
+        public bool IsClick;
+
+        public bool IsModify;
+    }
+
+    public class GridRow
+    {
+        public List<GridCell> CellList;
+
+        public bool IsClick;
+
+        public bool IsSelect;
+    }
+
+    public class GridCell
+    {
+        public string Text;
+
+        public bool IsModify;
+    }
 }

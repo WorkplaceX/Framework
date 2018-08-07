@@ -16,4 +16,13 @@ data-app > input, data-app * input {
     font-size: inherit;
     padding: 0px;
     border: none;
+    background: transparent;    
+}
+
+.gridRowIsSelect {
+    background-color: lightblue;
+}
+
+.girdCellIsModify {
+    background-color: orange;
 }

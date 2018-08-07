@@ -34,14 +34,15 @@ export class AppComponent {
 @Component({
   selector: '[data-Selector]',
   template: `
-  <div style="display:inline" data-Button *ngIf="json.Type=='Button' && !json.IsHide" [json]=json></div>
+  <div style="display:inline" data-Button *ngIf="json.Type=='Button'" [json]=json></div>
+  <div style="display:inline" data-Grid *ngIf="json.Type=='Grid'" [json]=json></div>
   `
 })
 export class Selector {
   @Input() json: any
 }
 
-/* Button */ // See also GridField for button in grid.
+/* Button */
 @Component({
   selector: '[data-Button]',
   template: `
@@ -60,4 +61,59 @@ export class Button {
     this.json.IsClick = true;
     this.dataService.update();
   } 
+}
+
+/* Grid */
+@Component({
+  selector: '[data-Grid]',
+  template: `
+  <table [ngClass]="json.CssClass">
+    <tr>
+      <th *ngFor="let item of json.Header.ColumnList; trackBy trackBy">
+        {{ item.Text }}
+      </th>
+    </tr>
+    <tr>
+      <th *ngFor="let item of json.Header.ColumnList; trackBy trackBy">
+        <input type="text" value="{{ item.SearchText }}">
+      </th>
+    </tr>
+    <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row)">
+      <td *ngFor="let cell of row.CellList; trackBy trackBy">
+        <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
+      </td>
+    </tr>
+  </table>
+  `
+})
+export class Grid {
+  constructor(dataService: DataService){
+    this.dataService = dataService;
+  }
+
+  @Input() json: any
+  dataService: DataService;
+
+  ngModelChange(cell) {
+    cell.IsModify = true;
+    this.dataService.update();
+  }
+
+  focus(row) {
+    if (!row.IsSelect) {
+      row.IsClick = true;
+      this.dataService.update();
+    }
+  }
+
+  clickRow(row) {
+    if (!row.IsSelect) {
+      row.IsClick = true;
+      this.dataService.update();
+    }
+  }
+
+  trackBy(index, item) {
+    return index; // or item.id
+  }  
 }

@@ -1,16 +1,17 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
-import { AppComponent, Button, Selector } from './app.component';
+import { AppComponent, Button, Selector, Grid } from './app.component';
 
 @NgModule({
   declarations: [
-    AppComponent, Button, Selector
+    AppComponent, Button, Selector, Grid
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'Application' }),
-    HttpClientModule,
+    HttpClientModule, FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -26,6 +26,14 @@
             }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }
 
+        /// <summary>
+        /// Called on first request.
+        /// </summary>
+        protected virtual internal void Init()
+        {
+
+        }
+
         protected virtual internal void Process()
         {
             AppJson.Version = UtilFramework.Version;
@@ -46,6 +54,16 @@
             else
             {
                 result.AppJson = new AppJson();
+            }
+
+            // Init
+            if (result.AppJson.IsInit == false)
+            {
+                string browserUrl = result.AppJson.BrowserUrl;
+                result.AppJson = new AppJson(); // Reset
+                result.AppJson.BrowserUrl = browserUrl;
+                result.AppJson.IsInit = true;
+                result.Init();
             }
 
             // Process
