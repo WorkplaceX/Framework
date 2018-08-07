@@ -33,7 +33,7 @@ export class DataService {
 
   public alertError: Subject<string> = new Subject<string>(); // Data service error.
 
-  public alertErrorList$: Observable<string[]> = this.alertError.pipe(bufferTime(2000, 1, 1));
+  public alertErrorList$: Observable<string[]>;
 
   public VersionBuild: string = "Build (local)";
 
@@ -50,6 +50,7 @@ export class DataService {
     } else {
       this.json = jsonBrowser;
       this.json.IsServerSideRendering = false;
+      this.alertErrorList$ = this.alertError.pipe(bufferTime(2000, 1, 1)); // No async during server side rendering!
       if (window.location.href.startsWith("http://localhost:4200/")) {
         this.json.RequestUrl = "http://localhost:56092/";
         this.update();
