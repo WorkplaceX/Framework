@@ -4,6 +4,9 @@ import { DataService } from '../data.service';
 @Component({
   selector: 'data-app', // Make html 5 valid for server side rendering // 'app-root'
   template: `
+  <div class="alertError" *ngIf="DataService.alertError != null" >{{ DataService.alertError }}</div>
+  <div class="alertInfo" *ngIf="DataService.alertInfo != null" >{{ DataService.alertInfo }}</div>
+
   <h1>Hello World2</h1>
   <button (click)="onClick()">Click</button> <br/>
   Name={{ DataService.json.Name }} <br/>

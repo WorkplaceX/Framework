@@ -12,6 +12,8 @@ export class Json {
 
   IsServerSideRendering: boolean;
 
+  RequestCount: number;
+
   RequestUrl: string;
 
   BrowserUrl: string;
@@ -25,7 +27,13 @@ export class Json {
 export class DataService {
   public json: Json;
 
+  public alertError: string; // Data service error.
+
+  public alertInfo: string; // Data service info.
+
   public VersionBuild: string = "Build (local)";
+
+  private isRequestPending: boolean = false; // Request is in prgress.
 
   constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any) { 
   if (jsonServerSideRendering != null) {
@@ -42,12 +50,31 @@ export class DataService {
   }
 
   update(): void {
-    this.json.BrowserUrl = window.location.href;
-    let requestUrl = new URL("/app.json", this.json.RequestUrl).href
-    this.httpClient.post(requestUrl, JSON.stringify(this.json))
-    .subscribe(body => {
-      this.json = <Json>body;
-      this.json.IsServerSideRendering = false;
-    });
+    // RequestCount
+    if (this.json.RequestCount == null) {
+      this.json.RequestCount = 0;
+    }
+    this.json.RequestCount += 1;
+    if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
+      this.isRequestPending = true;
+      this.json.BrowserUrl = window.location.href;
+      let requestUrl = new URL("/app.json", this.json.RequestUrl).href
+      this.httpClient.post(requestUrl, JSON.stringify(this.json))
+      .subscribe(body => {
+        let jsonResponse = <Json>body;
+        console.log(jsonResponse.RequestCount + " " + this.json.RequestCount);
+        if (jsonResponse.RequestCount == this.json.RequestCount) { // Only apply response if there is no newer request.
+          this.json = jsonResponse;
+          this.isRequestPending = false;
+        } else {
+          this.isRequestPending = false;
+          this.update(); // Process new request.
+        }
+        this.json.IsServerSideRendering = false;
+      }, error => {
+        console.log(error);
+        this.alertError = "Request failed!";
+      });
+    }
   }
 }

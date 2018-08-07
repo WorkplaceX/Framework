@@ -59,8 +59,10 @@
             // Init
             if (result.AppJson.IsInit == false)
             {
+                int requestCount = result.AppJson.RequestCount;
                 string browserUrl = result.AppJson.BrowserUrl;
                 result.AppJson = new AppJson(); // Reset
+                result.AppJson.RequestCount = requestCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.IsInit = true;
                 result.Init();

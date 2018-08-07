@@ -19,10 +19,19 @@ data-app > input, data-app * input {
     background: transparent;    
 }
 
-.gridRowIsSelect {
+data-app > .alertError {
+    background-color: red;
+    color: white;
+}
+
+data-app > .alertInfo {
     background-color: lightblue;
 }
 
-.girdCellIsModify {
+data-app * .gridRowIsSelect {
+    background-color: lightblue;
+}
+
+data-app * .girdCellIsModify {
     background-color: orange;
 }

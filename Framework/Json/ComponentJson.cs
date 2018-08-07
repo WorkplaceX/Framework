@@ -112,6 +112,11 @@
         }
 
         /// <summary>
+        /// Gets or sets RequestCount. Used by client. Do not send new request while old is not processed.
+        /// </summary>
+        public int RequestCount;
+
+        /// <summary>
         /// Gets or sets IsInit. If false, method App.Init(): is called.
         /// </summary>
         public bool IsInit;
