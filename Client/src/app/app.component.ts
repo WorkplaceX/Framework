@@ -4,8 +4,7 @@ import { DataService } from '../data.service';
 @Component({
   selector: 'data-app', // Make html 5 valid for server side rendering // 'app-root'
   template: `
-  <div class="alertError" *ngIf="DataService.alertError != null" >{{ DataService.alertError }}</div>
-  <div class="alertInfo" *ngIf="DataService.alertInfo != null" >{{ DataService.alertInfo }}</div>
+  <div class="alertError" *ngFor="let item of DataService.alertErrorList$ | async;">{{item}}8</div>
 
   <h1>Hello World2</h1>
   <button (click)="onClick()">Click</button> <br/>
@@ -21,11 +20,14 @@ import { DataService } from '../data.service';
 })
 export class AppComponent {
   constructor(public DataService: DataService){
-
   }
+
+  i = 0;
 
   onClick(): void {
     this.DataService.json.Name += ".";
+    this.i += 1;
+    this.DataService.alertError.next("Error" + this.i);
   }
 
   trackBy(index: any, item: any) {
@@ -90,12 +92,10 @@ export class Button {
   `
 })
 export class Grid {
-  constructor(dataService: DataService){
-    this.dataService = dataService;
+  constructor(private dataService: DataService){
   }
 
   @Input() json: any
-  dataService: DataService;
 
   ngModelChange(cell) {
     cell.IsModify = true;

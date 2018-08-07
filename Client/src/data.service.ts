@@ -1,6 +1,10 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { Observable, Subject } from 'rxjs';
+import { bufferTime } from 'rxjs/operators';
+// import { of, interval } from 'rxjs';
+
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
 export class Json {
@@ -25,19 +29,23 @@ export class Json {
   providedIn: 'root'
 })
 export class DataService {
-  public json: Json;
+  public json: Json = new Json();
 
-  public alertError: string; // Data service error.
+  public alertError: Subject<string> = new Subject<string>(); // Data service error.
 
-  public alertInfo: string; // Data service info.
+  public alertErrorList$: Observable<string[]> = this.alertError.pipe(bufferTime(2000, 1, 1));
 
   public VersionBuild: string = "Build (local)";
 
   private isRequestPending: boolean = false; // Request is in prgress.
 
   constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any) { 
-  if (jsonServerSideRendering != null) {
-      this.json = jsonServerSideRendering;
+    setTimeout(() => {
+      this.alertError.next("Init"); // Does not show on startup without setTimeout!
+    }, 0);
+
+    if (this.jsonServerSideRendering != null) {
+      this.json = this.jsonServerSideRendering;
       this.json.IsServerSideRendering = true;
     } else {
       this.json = jsonBrowser;
@@ -62,7 +70,6 @@ export class DataService {
       this.httpClient.post(requestUrl, JSON.stringify(this.json))
       .subscribe(body => {
         let jsonResponse = <Json>body;
-        console.log(jsonResponse.RequestCount + " " + this.json.RequestCount);
         if (jsonResponse.RequestCount == this.json.RequestCount) { // Only apply response if there is no newer request.
           this.json = jsonResponse;
           this.isRequestPending = false;
@@ -72,8 +79,8 @@ export class DataService {
         }
         this.json.IsServerSideRendering = false;
       }, error => {
-        console.log(error);
-        this.alertError = "Request failed!";
+        this.isRequestPending = false;
+        this.alertError.next("Request failed!");
       });
     }
   }
