@@ -1,17 +1,20 @@
 ﻿namespace Framework.ComponentJson
 {
+    using Framework.Application;
+    using Framework.Dal;
+    using Framework.Session;
     using System;
     using System.Collections.Generic;
 
     public class ComponentJson
     {
         /// <summary>
-        /// Deserialization constructor.
+        /// Constructor for json deserialization.
         /// </summary>
         public ComponentJson() { }
 
         /// <summary>
-        /// Programmatically constructor.
+        /// Constructor to programmatically create new object.
         /// </summary>
         public ComponentJson(ComponentJson owner)
         {
@@ -190,6 +193,16 @@
         {
 
         }
+
+        public void Load(App app, List<Row> rowList)
+        {
+            GridSession grid = new GridSession();
+            app.AppSession.GirdList.Add(grid);
+            grid.RowList = rowList;
+            this.Id = app.AppSession.GirdList.Count;
+        }
+
+        public int Id;
 
         public GridHeader Header;
 

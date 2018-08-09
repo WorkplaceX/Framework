@@ -2,6 +2,7 @@
 {
     using Framework.ComponentJson;
     using Framework.Json;
+    using Framework.Session;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
     using System;
@@ -14,6 +15,11 @@
         /// Gets or sets AppJson. This is the application root json component being transferred between server and client.
         /// </summary>
         public AppJson AppJson { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets AppSession. This is the application session state.
+        /// </summary>
+        internal AppSession AppSession { get; set; }
 
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
@@ -79,6 +85,7 @@
             {
                 result.AppJson = new AppJson();
             }
+            UtilSession.Deserialize(result);
 
             // Init
             if (result.AppJson.IsInit == false)

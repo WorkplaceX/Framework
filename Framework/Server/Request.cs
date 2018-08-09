@@ -3,6 +3,7 @@
     using Framework.Application;
     using Framework.Config;
     using Framework.Json;
+    using Framework.Session;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using System;
@@ -60,7 +61,7 @@
         }
 
         /// <summary>
-        /// Render first html request on server.
+        /// Render first html GET request.
         /// </summary>
         private static async Task<string> ServerSideRendering(HttpContext context, string indexHtml, AppSelector appSelector)
         {
@@ -79,7 +80,12 @@
                     url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
                 }
                 var app = await appSelector.CreateApp(context);
+                
+                // Serialize
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
+                UtilSession.Serialize(app);
+
+                // Server side render post.
                 string htmlServerSideRendering = await UtilServer.WebPost(url, json);
 
                 htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><style ng-transition=\"Application\"></style></head><body>", "");
@@ -95,6 +101,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Divert request to "Framework/Website/"
+        /// </summary>
         private static async Task<bool> Website(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
@@ -123,6 +132,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Handle client web POST /app.json
+        /// </summary>
         private static async Task<bool> Post(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
@@ -131,7 +143,10 @@
                 var app = await appSelector.CreateApp(context);
                 context.Response.ContentType = UtilServer.ContentType(path);
                 
+                // Serialize
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
+                UtilSession.Serialize(app);
+
                 await context.Response.WriteAsync(json);
                 result = true;
             }

@@ -38,7 +38,7 @@
         /// <param name="isRedirectStdErr">If true, do not write to stderr.</param>
         internal static void Start(string workingDirectory, string fileName, string arguments, bool isWait = true, bool isRedirectStdErr = false)
         {
-            string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string time = UtilFramework.DateTimeToString(DateTime.Now);
             UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process Begin (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.Green);
 
             ProcessStartInfo info = new ProcessStartInfo();

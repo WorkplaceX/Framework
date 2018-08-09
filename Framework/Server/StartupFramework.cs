@@ -21,7 +21,7 @@
             services.AddSession(options =>
             {
                 options.Cookie.Name = "FrameworkSession";
-                options.IdleTimeout = TimeSpan.FromSeconds(5);
+                options.IdleTimeout = TimeSpan.FromSeconds(60);
             });
             services.AddCors();
         }
