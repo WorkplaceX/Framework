@@ -133,24 +133,38 @@
             bool isFirst = true;
             foreach (var item in fieldNameList)
             {
-                if (isFirst)
+                try
                 {
-                    isFirst = false;
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        result.AppendLine();
+                    }
+                    string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
+                    if (item.IsPrimaryKey == false)
+                    {
+                        result.AppendLine(string.Format("        [SqlField(\"{0}\", typeof({1}))]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp));
+                    }
+                    else
+                    {
+                        result.AppendLine(string.Format("        [SqlField(\"{0}\", typeof({1}), {2})]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp, item.IsPrimaryKey.ToString().ToLower()));
+                    }
+                    result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.FieldNameCSharp));
                 }
-                else
+                catch (Exception exception)
                 {
-                    result.AppendLine();
+                    if (exception.Message == "Type unknown!")
+                    {
+                        UtilFramework.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.DarkRed);
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
-                string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
-                if (item.IsPrimaryKey == false)
-                {
-                    result.AppendLine(string.Format("        [SqlField(\"{0}\", typeof({1}))]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp));
-                }
-                else
-                {
-                    result.AppendLine(string.Format("        [SqlField(\"{0}\", typeof({1}), {2})]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp, item.IsPrimaryKey.ToString().ToLower()));
-                }
-                result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.FieldNameCSharp));
             }
         }
 
