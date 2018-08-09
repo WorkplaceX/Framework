@@ -36,7 +36,7 @@
                 }
                 result.AppendLine(string.Format("namespace Database.{0}", item.SchemaNameCSharp));
                 result.AppendLine("{");
-                result.AppendLine("    using Framework.DataAccessLayer;");
+                result.AppendLine("    using Framework.Dal;");
                 result.AppendLine("    using System;");
                 result.AppendLine();
                 TableNameClass(metaCSharp, item.SchemaName, result);

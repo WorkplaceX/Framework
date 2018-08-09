@@ -1,4 +1,4 @@
-﻿namespace Framework.DataAccessLayer
+﻿namespace Framework.Dal
 {
     using System;
 
