@@ -1,4 +1,4 @@
-﻿namespace Framework.ComponentJson
+﻿namespace Framework.Json
 {
     using Framework.Application;
     using Framework.Dal;

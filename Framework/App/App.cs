@@ -1,6 +1,5 @@
 ﻿namespace Framework.Application
 {
-    using Framework.ComponentJson;
     using Framework.Json;
     using Framework.Session;
     using Framework.Server;
@@ -85,7 +84,7 @@
             {
                 result.AppJson = new AppJson();
             }
-            UtilSession.Deserialize(result);
+            UtilSession.Deserialize(result); // Deserialize or init.
 
             // Init
             if (result.AppJson.IsInit == false)

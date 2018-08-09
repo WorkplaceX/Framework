@@ -1,4 +1,5 @@
 ﻿ToDo
+-https://github.com/Microsoft/sql-server-samples
 -deploy can not be called twice. (remote azure already exists)
 -Ci config json.
 -Delete folder "Framework\Client\dist" on build.
