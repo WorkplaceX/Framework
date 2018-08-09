@@ -129,6 +129,17 @@
 
         public bool IsServerSideRendering { get; set; }
 
+        public string Session { get; set; }
+
+        public string SessionApp { get; set; }
+
+        public string SessionState { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
+        /// </summary>
+        public bool IsReload { get; set; }
+
         /// <summary>
         /// Gets or sets RequestUrl. This value is set by the server. For example: http://localhost:49323/config/app.json
         /// </summary>

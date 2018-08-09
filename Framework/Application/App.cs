@@ -29,15 +29,39 @@
         /// <summary>
         /// Called on first request.
         /// </summary>
-        protected virtual internal void Init()
+        protected virtual void Init()
         {
 
         }
 
-        protected virtual internal void Process()
+        protected internal void InitInternal()
         {
+            Init();
+            UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
+        }
+
+        protected virtual void Process()
+        {
+
+        }
+
+        protected internal void ProcessInternal()
+        {
+            Process();
+
             AppJson.Version = UtilFramework.Version;
             AppJson.VersionBuild = UtilFramework.VersionBuild;
+            AppJson.Session = UtilServer.Session.Id;
+            if (string.IsNullOrEmpty(AppJson.SessionApp))
+            {
+                AppJson.SessionApp = UtilServer.Session.Id;
+            }
+            AppJson.SessionState = UtilServer.Session.GetString("Main");
+
+            if (UtilServer.Session.Id != AppJson.SessionApp) // Session expired!
+            {
+                AppJson.IsReload = true;
+            }
         }
     }
 
@@ -65,11 +89,11 @@
                 result.AppJson.RequestCount = requestCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.IsInit = true;
-                result.Init();
+                result.InitInternal();
             }
 
             // Process
-            result.Process();
+            result.ProcessInternal();
 
             // RequestUrl
             result.AppJson.RequestUrl = UtilServer.RequestUrl(false);

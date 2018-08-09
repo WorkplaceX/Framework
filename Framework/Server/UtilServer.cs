@@ -20,7 +20,7 @@
             get
             {
                 IHostingEnvironment result = null;
-                HttpContext context = new HttpContextAccessor().HttpContext; // Not available during startup.
+                HttpContext context = Context;
                 if (context != null)
                 {
                     result = (IHostingEnvironment)context.RequestServices.GetService(typeof(IHostingEnvironment));
@@ -33,6 +33,22 @@
                     }
                 }
                 return result;
+            }
+        }
+
+        internal static HttpContext Context
+        {
+            get
+            {
+                return new HttpContextAccessor().HttpContext; // Not available during startup.
+            }
+        }
+
+        internal static ISession Session
+        {
+            get
+            {
+                return Context.Session;
             }
         }
 
@@ -51,14 +67,14 @@
         internal static string RequestUrl(bool isServer)
         {
             string result = null;
-            HttpContext httpContext = new HttpContextAccessor().HttpContext;
+            HttpContext context = Context;
             if (isServer)
             {
-                result = string.Format("{0}://{1}/", httpContext.Request.Scheme, httpContext.Request.Host.Value);
+                result = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
             }
             else
             {
-                result = string.Format("{0}://{1}{2}", httpContext.Request.Scheme, httpContext.Request.Host.Value, httpContext.Request.Path);
+                result = string.Format("{0}://{1}{2}", context.Request.Scheme, context.Request.Host.Value, context.Request.Path);
             }
             return result;
         }

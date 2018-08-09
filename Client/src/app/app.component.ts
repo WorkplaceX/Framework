@@ -9,6 +9,9 @@ import { DataService } from '../data.service';
   <h1>Hello World2</h1>
   <button (click)="onClick()">Click</button> <br/>
   Name={{ DataService.json.Name }} <br/>
+  Session={{ DataService.json.Session }} <br/>
+  SessionApp={{ DataService.json.SessionApp }} <br/>
+  SessionState={{ DataService.json.SessionState }} <br/>
   <input type="text" placeholder="Enter email"><br/>
   IsServerSideRendering={{ DataService.json.IsServerSideRendering }} <br/>
   Version={{ DataService.json.Version }} {{ DataService.json.VersionBuild }} <br/>

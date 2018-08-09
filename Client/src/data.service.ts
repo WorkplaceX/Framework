@@ -16,11 +16,19 @@ export class Json {
 
   IsServerSideRendering: boolean;
 
+  Session: string;
+
+  SessionApp: string;
+
+  SessionState: string;
+
   RequestCount: number;
 
   RequestUrl: string;
 
   BrowserUrl: string;
+
+  IsReload: boolean;
 
   List: any;
 }
@@ -68,7 +76,10 @@ export class DataService {
       this.isRequestPending = true;
       this.json.BrowserUrl = window.location.href;
       let requestUrl = new URL("/app.json", this.json.RequestUrl).href
-      this.httpClient.post(requestUrl, JSON.stringify(this.json))
+      this.httpClient.request("POST", requestUrl, {
+        body: JSON.stringify(this.json),
+        withCredentials: true,
+      })
       .subscribe(body => {
         let jsonResponse = <Json>body;
         if (jsonResponse.RequestCount == this.json.RequestCount) { // Only apply response if there is no newer request.
@@ -79,6 +90,9 @@ export class DataService {
           this.update(); // Process new request.
         }
         this.json.IsServerSideRendering = false;
+        if (this.json.IsReload) {
+          location.reload(true);
+        }
       }, error => {
         this.isRequestPending = false;
         this.alertError.next("Request failed!");

@@ -253,7 +253,7 @@
             string fileNameClient = UtilFramework.FolderName + "Framework/Client/src/data.service.ts";
             string textClient = File.ReadAllText(fileNameClient);
 
-            string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2};)", UtilCli.GitCommit(), System.Environment.MachineName, DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm"));
+            string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2};)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()));
 
             string findServer = "return \"Build (local)\";"; // See also: method CommandBuild.BuildServer();
             string replaceServer = string.Format("return \"{0}\";", versionBuild);

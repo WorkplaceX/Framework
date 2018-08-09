@@ -130,12 +130,7 @@
             {
                 var app = await appSelector.CreateApp(context);
                 context.Response.ContentType = UtilServer.ContentType(path);
-
-                // Access-Control-Allow-Origin
-                string url = app.AppJson.BrowserUrlServer();
-                url = url.Substring(0, url.Length - 1);
-                context.Response.Headers.Add("Access-Control-Allow-Origin", url);
-
+                
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
                 await context.Response.WriteAsync(json);
                 result = true;

@@ -176,5 +176,10 @@ namespace Framework
             string result = text.Replace(find, replace);
             return result;
         }
+
+        internal static string DateTimeToString(DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
     }
 }
