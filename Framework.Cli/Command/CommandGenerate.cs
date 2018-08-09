@@ -5,7 +5,7 @@
 
     public class CommandGenerate : CommandBase
     {
-        public CommandGenerate(AppCliBase appCli)
+        public CommandGenerate(AppCli appCli)
             : base(appCli, "generate", "Generate CSharp code with database classes.")
         {
 

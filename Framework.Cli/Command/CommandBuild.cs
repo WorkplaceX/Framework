@@ -10,7 +10,7 @@
     /// </summary>
     public class CommandBuild : CommandBase
     {
-        public CommandBuild(AppCliBase appCli)
+        public CommandBuild(AppCli appCli)
             : base(appCli, "build", "Build client and server")
         {
 

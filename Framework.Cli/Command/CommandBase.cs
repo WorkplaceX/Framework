@@ -4,7 +4,7 @@
 
     public class CommandBase
     {
-        public CommandBase(AppCliBase appCli, string name, string description)
+        public CommandBase(AppCli appCli, string name, string description)
         {
             this.AppCli = appCli;
             this.AppCli.CommandList.Add(this);
@@ -12,7 +12,7 @@
             this.Description = description;
         }
 
-        public readonly AppCliBase AppCli;
+        public readonly AppCli AppCli;
 
         public readonly string Name;
 

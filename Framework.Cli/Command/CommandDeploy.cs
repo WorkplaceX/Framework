@@ -6,7 +6,7 @@
 
     public class CommandDeploy : CommandBase
     {
-        public CommandDeploy(AppCliBase appCli)
+        public CommandDeploy(AppCli appCli)
             : base(appCli, "deploy", "Deploy app to Azure git")
         {
 

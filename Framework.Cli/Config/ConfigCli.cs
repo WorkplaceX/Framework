@@ -38,7 +38,7 @@
         /// <summary>
         /// Init default file ConfigCli.json
         /// </summary>
-        internal static void Init(AppCliBase appCli)
+        internal static void Init(AppCli appCli)
         {
             if (!File.Exists(FileName))
             {

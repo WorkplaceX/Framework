@@ -8,7 +8,10 @@
     using Microsoft.Extensions.DependencyInjection;
     using System;
 
-    public static class Startup
+    /// <summary>
+    /// ASP.NET Core configuration.
+    /// </summary>
+    public static class StartupFramework
     {
         public static void ConfigureServices(IServiceCollection services)
         {

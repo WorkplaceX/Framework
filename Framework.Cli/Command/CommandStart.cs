@@ -5,7 +5,7 @@
     /// </summary>
     public class CommandStart : CommandBase
     {
-        public CommandStart(AppCliBase appCli)
+        public CommandStart(AppCli appCli)
             : base(appCli, "start", "Start server and open browser")
         {
 

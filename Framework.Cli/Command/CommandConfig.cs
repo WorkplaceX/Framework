@@ -9,7 +9,7 @@
 
     public class CommandConfig : CommandBase
     {
-        public CommandConfig(AppCliBase appCli)
+        public CommandConfig(AppCli appCli)
             : base(appCli, "config", "Read and write configuration")
         {
 

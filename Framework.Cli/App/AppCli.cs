@@ -10,12 +10,12 @@
     /// <summary>
     /// Command line interface application.
     /// </summary>
-    public class AppCliBase
+    public class AppCli
     {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public AppCliBase()
+        public AppCli()
         {
             this.commandLineApplication = new CommandLineApplication();
 

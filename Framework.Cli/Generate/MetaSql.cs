@@ -17,7 +17,7 @@
         /// Constructor runs Schema.sql.
         /// </summary>
         /// <param name="isFrameworkDb">For internal use only.</param>
-        public MetaSql(bool isFrameworkDb, AppCliBase appCli)
+        public MetaSql(bool isFrameworkDb, AppCli appCli)
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilGenerate.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
