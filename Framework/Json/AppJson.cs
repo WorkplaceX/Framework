@@ -5,6 +5,8 @@
     using Framework.Session;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
 
     public class ComponentJson
     {
@@ -194,12 +196,38 @@
 
         }
 
-        public void Load(App app, List<Row> rowList)
+        public void Load(App app, Type typeRow, List<Row> rowList)
         {
             GridSession grid = new GridSession();
             app.AppSession.GirdList.Add(grid);
             grid.RowList = rowList;
             this.Id = app.AppSession.GirdList.Count;
+            
+            // Header
+            this.Header = new GridHeader();
+            this.Header.ColumnList = new List<GridColumn>();
+            foreach (PropertyInfo propertyInfo in UtilDal.TypeRowToPropertyList(typeRow))
+            {
+                this.Header.ColumnList.Add(new GridColumn() { Text = propertyInfo.Name });
+            }
+
+            // Row
+            RowList = new List<GridRow>();
+            foreach (Row row in rowList)
+            {
+                GridRow gridRow = new GridRow();
+                RowList.Add(gridRow);
+                gridRow.CellList = new List<GridCell>();
+                foreach (PropertyInfo propertyInfo in UtilDal.TypeRowToPropertyList(typeRow))
+                {
+                    gridRow.CellList.Add(new GridCell() { Text = propertyInfo.GetValue(row)?.ToString() });
+                }
+            }
+        }
+
+        public void Load<TRow>(App app, List<TRow> rowList) where TRow : Row
+        {
+            Load(app, typeof(TRow), rowList.Cast<Row>().ToList());
         }
 
         public int Id;

@@ -1,8 +1,11 @@
 ﻿namespace Framework.Config
 {
+    using Framework.Dal;
     using Framework.Server;
+    using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Reflection;
 
     public class ConfigFramework
     {
@@ -25,6 +28,17 @@
             {
                 return configFramework.ConnectionStringFramework;
             }
+        }
+
+
+        /// <summary>
+        /// Returns ConnectionString for Application or Framework database.
+        /// </summary>
+        /// <param name="typeRow">Application or Framework data row.</param>
+        public static string ConnectionString(Type typeRow)
+        {
+            bool isFrameworkDb = typeRow.GetTypeInfo().Assembly == typeof(UtilDal).Assembly; // Type is declared in Framework assembly.
+            return ConnectionString(isFrameworkDb);
         }
 
         public List<ConfigFrameworkWebsite> WebsiteList { get; set; }
