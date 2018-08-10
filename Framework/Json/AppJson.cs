@@ -198,10 +198,14 @@
 
         public void Load(App app, Type typeRow, List<Row> rowList)
         {
-            GridSession grid = new GridSession();
-            app.AppSession.GirdList.Add(grid);
-            grid.RowList = rowList;
-            this.Id = app.AppSession.GirdList.Count;
+            GridSession gridSession = new GridSession();
+            app.AppSession.GridList.Add(gridSession);
+            gridSession.RowList.Clear();
+            foreach (var row in rowList)
+            {
+                gridSession.RowList.Add(new RowSession() { Row = row });
+            }
+            this.Id = app.AppSession.GridList.Count;
             
             // Header
             this.Header = new GridHeader();

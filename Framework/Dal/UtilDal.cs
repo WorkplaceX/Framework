@@ -106,5 +106,55 @@
         {
             return (IQueryable<TRow>)Query(typeof(TRow));
         }
+
+        /// <summary>
+        /// Copy data row. Source and dest need not to be of same type. Only cells available on
+        /// both records are copied. See also RowClone();
+        /// </summary>
+        internal static void RowCopy(Row rowSource, Row rowDest)
+        {
+            var propertyInfoDestList = UtilDal.TypeRowToPropertyList(rowDest.GetType());
+            foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
+            {
+                string columnName = propertyInfoDest.Name;
+                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(columnName);
+                if (propertyInfoSource != null)
+                {
+                    object value = propertyInfoSource.GetValue(rowSource);
+                    propertyInfoDest.SetValue(rowDest, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clone data row.
+        /// </summary>
+        internal static Row RowCopy(Row row)
+        {
+            Row result = (Row)UtilFramework.TypeToObject(row.GetType());
+            RowCopy(row, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Clone data row.
+        /// </summary>
+        internal static TRow RowCopy<TRow>(TRow row) where TRow : Row
+        {
+            return (TRow)RowCopy((Row)row);
+        }
+
+        /// <summary>
+        /// Update data record on database.
+        /// </summary>
+        public static void Update(Row row, Row rowNew)
+        {
+            UtilFramework.Assert(row.GetType() == rowNew.GetType());
+            row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
+            DbContext dbContext = DbContext(row.GetType());
+            var tracking = dbContext.Attach(row);
+            tracking.CurrentValues.SetValues(rowNew);
+            UtilFramework.Assert(dbContext.SaveChanges() == 1, "Update failed!");
+        }
     }
 }

@@ -28,7 +28,7 @@
             if (string.IsNullOrEmpty(json))
             {
                 appSession = new AppSession();
-                appSession.GirdList = new List<GridSession>();
+                appSession.GridList = new List<GridSession>();
             }
             else
             {

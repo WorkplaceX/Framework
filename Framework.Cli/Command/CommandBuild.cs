@@ -132,15 +132,15 @@
             ConfigCli.Init(AppCli);
             ConfigFramework.Init();
 
+            // Config
+            BuildConfigFramework();
+
             // Build
             BuildWebsite();
             UtilCli.VersionBuild(() => {
                 BuildClient();
                 BuildServer();
             });
-
-            // Config
-            BuildConfigFramework();
         }
     }
 }

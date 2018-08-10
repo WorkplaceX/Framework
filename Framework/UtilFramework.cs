@@ -181,5 +181,15 @@ namespace Framework
         {
             return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
         }
+
+        /// <summary>
+        /// Returns newly created instance of type with parameterless constructor.
+        /// </summary>
+        /// <param name="type">Type with parameterless constructor.</param>
+        /// <returns>Returns instance of type.</returns>
+        internal static object TypeToObject(Type type)
+        {
+            return Activator.CreateInstance(type);
+        }
     }
 }
