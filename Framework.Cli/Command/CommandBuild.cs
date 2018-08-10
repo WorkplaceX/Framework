@@ -54,25 +54,6 @@
         }
 
         /// <summary>
-        /// Copy from ConfigCli to ConfigFramework.
-        /// </summary>
-        private static void BuildWebsiteConfigFrameworkUpdate()
-        {
-            Console.WriteLine("Update ConfigFramework");
-            var configCli = ConfigCli.Load();
-            var configFramework = ConfigFramework.Load();
-
-            configFramework.WebsiteList.Clear();
-
-            foreach (var webSite in configCli.WebsiteList)
-            {
-                configFramework.WebsiteList.Add(new ConfigFrameworkWebsite() { DomainName = webSite.DomainName });
-            }
-
-            ConfigFramework.Save(configFramework);
-        }
-
-        /// <summary>
         /// Copy from ConfigCli to ConfigFramework (ConnectionString).
         /// </summary>
         private static void BuildServerConfigFrameworkUpdate()
@@ -120,8 +101,29 @@
 
                 Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainName));
             }
+        }
 
-            BuildWebsiteConfigFrameworkUpdate();
+        /// <summary>
+        /// Copy from ConfigCli to ConfigFramework.
+        /// </summary>
+        private static void BuildConfigFramework()
+        {
+            Console.WriteLine("Update ConfigFramework");
+            var configCli = ConfigCli.Load();
+            var configFramework = ConfigFramework.Load();
+
+            // ConnectionString
+            configFramework.ConnectionStringFramework = configCli.ConnectionStringFramework;
+            configFramework.ConnectionStringApplication = configCli.ConnectionStringApplication;
+
+            // Website
+            configFramework.WebsiteList.Clear();
+            foreach (var webSite in configCli.WebsiteList)
+            {
+                configFramework.WebsiteList.Add(new ConfigFrameworkWebsite() { DomainName = webSite.DomainName });
+            }
+
+            ConfigFramework.Save(configFramework);
         }
 
         protected internal override void Execute()
@@ -136,6 +138,9 @@
                 BuildClient();
                 BuildServer();
             });
+
+            // Config
+            BuildConfigFramework();
         }
     }
 }

@@ -16,7 +16,8 @@ data-app > input, data-app * input {
     font-size: inherit;
     padding: 0px;
     border: none;
-    background: transparent;    
+    background: transparent;
+    width: 100%
 }
 
 data-app > .alertError {
@@ -34,4 +35,18 @@ data-app * .gridRowIsSelect {
 
 data-app * .girdCellIsModify {
     background-color: orange;
+}
+
+/* Table */
+data-app > table, data-app * table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+data-app * th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+data-app * td {
 }
