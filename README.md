@@ -7,7 +7,7 @@ Framework to create database applications based on Angular 6 with server side re
 
 ## Getting started
 
-* Get started with: [Application](https://github.com/WorkplaceX/Application) (Empty application)
+* Get started with: [Application](https://github.com/WorkplaceX/Application) (Empty hello world application)
 * Documentation see: [Documentation](https://github.com/WorkplaceX/Framework/wiki) (wiki)
 * Project page: [WorkplaceX.com](http://workplacex.com)
 
