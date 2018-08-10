@@ -158,7 +158,7 @@
                 {
                     if (exception.Message == "Type unknown!")
                     {
-                        UtilFramework.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.DarkRed);
+                        UtilFramework.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.Yellow);
                     }
                     else
                     {

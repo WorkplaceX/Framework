@@ -1,5 +1,6 @@
 ﻿namespace Framework.Server
 {
+    using Framework.Application;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -10,12 +11,12 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class UtilServer
+    internal class UtilServer
     {
         [ThreadStatic]
-        internal static IApplicationBuilder App;
+        public static IApplicationBuilder ApplicationBuilder;
 
-        internal static IHostingEnvironment Env
+        public static IHostingEnvironment HostingEnvironment
         {
             get
             {
@@ -27,16 +28,16 @@
                 }
                 else
                 {
-                    if (App != null)
+                    if (ApplicationBuilder != null)
                     {
-                        result = (IHostingEnvironment)App.ApplicationServices.GetService(typeof(IHostingEnvironment));
+                        result = (IHostingEnvironment)ApplicationBuilder.ApplicationServices.GetService(typeof(IHostingEnvironment));
                     }
                 }
                 return result;
             }
         }
 
-        internal static HttpContext Context
+        public static HttpContext Context
         {
             get
             {
@@ -44,7 +45,7 @@
             }
         }
 
-        internal static ISession Session
+        public static ISession Session
         {
             get
             {
@@ -55,16 +56,16 @@
         /// <summary>
         /// Returns location of ASP.NET server wwwroot folder.
         /// </summary>
-        internal static string FolderNameContentRoot()
+        public static string FolderNameContentRoot()
         {
-            return new Uri(Env.ContentRootPath).AbsolutePath + "/";
+            return new Uri(HostingEnvironment.ContentRootPath).AbsolutePath + "/";
         }
 
         /// <summary>
         /// Returns request url.
         /// </summary>
         /// <param name="isServer">If true, it returns root url "http://localhost:49323/". If false, it returns "http://localhost:49323/config/data.txt".</param>
-        internal static string RequestUrl(bool isServer)
+        public static string RequestUrl(bool isServer)
         {
             string result = null;
             HttpContext context = Context;
@@ -82,7 +83,7 @@
         /// <summary>
         /// Returns html content type.
         /// </summary>
-        internal static string ContentType(string fileName)
+        public static string ContentType(string fileName)
         {
             // ContentType
             string fileNameExtension = Path.GetExtension(fileName);
@@ -108,7 +109,7 @@
         /// Returns true, if application runs on IIS server.
         /// </summary>
         /// <returns></returns>
-        internal static bool IsIssServer
+        public static bool IsIssServer
         {
             get
             {
@@ -121,7 +122,7 @@
         /// <summary>
         /// Start Universal server. Detects Visual Studio environment.
         /// </summary>
-        internal static void StartUniversalServer()
+        public static void StartUniversalServer()
         {
             string folderName = UtilFramework.FolderName + "Application.Server/Framework/dist/";
             string fileNameServer = folderName + "server.js";
@@ -142,7 +143,7 @@
         /// <summary>
         /// Used to get body of web post.
         /// </summary>
-        internal static async Task<string> StreamToString(Stream stream)
+        public static async Task<string> StreamToString(Stream stream)
         {
             string result;
             using (var streamReader = new StreamReader(stream))
@@ -159,7 +160,7 @@
         /// <summary>
         /// Returns true, if request is a FileName. Otherwise request is a FolderName.
         /// </summary>
-        internal static bool PathIsFileName(string path)
+        public static bool PathIsFileName(string path)
         {
             return !string.IsNullOrEmpty(Path.GetFileName(path));
         }
@@ -167,7 +168,7 @@
         /// <summary>
         /// Post to json url.
         /// </summary>
-        internal static async Task<string> WebPost(string url, string json)
+        public static async Task<string> WebPost(string url, string json)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -184,6 +185,29 @@
                 string result = await response.Content.ReadAsStringAsync();
                 return result;
             }
+        }
+
+        /// <summary>
+        /// Gets currently processed app.
+        /// </summary>
+        public static App App
+        {
+            get
+            {
+                InstanceService instanceService = (InstanceService)UtilServer.Context.RequestServices.GetService(typeof(InstanceService));
+                return instanceService.App;
+            }
+            set
+            {
+                InstanceService instanceService = (InstanceService)UtilServer.Context.RequestServices.GetService(typeof(InstanceService));
+                UtilFramework.Assert(instanceService.App == null);
+                instanceService.App = value;
+            }
+        }
+
+        public class InstanceService
+        {
+            public App App;
         }
     }
 }

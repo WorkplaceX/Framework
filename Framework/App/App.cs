@@ -31,17 +31,23 @@
             }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }
 
-        /// <summary>
-        /// Called on first request.
-        /// </summary>
         protected virtual void Init()
         {
 
         }
 
-        protected internal void InitInternal()
+        /// <summary>
+        /// Called on first request.
+        /// </summary>
+        protected virtual async Task InitAsync()
+        {
+            await Task.Run(() => { });
+        }
+
+        protected internal async Task InitInternalAsync()
         {
             Init();
+            await InitAsync();
             UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
         }
 
@@ -53,6 +59,8 @@
         protected internal void ProcessInternal()
         {
             Process();
+
+            UtilServer.App.AppSession.Process();
 
             AppJson.Version = UtilFramework.Version;
             AppJson.VersionBuild = UtilFramework.VersionBuild;
@@ -72,9 +80,10 @@
 
     public class AppSelector
     {
-        public async Task<App> CreateApp(HttpContext context)
+        public async Task<App> CreateAppAsync(HttpContext context)
         {
             var result = CreateApp();
+            UtilServer.App = result;
             string json = await UtilServer.StreamToString(context.Request.Body);
             if (json != null) // If post
             {
@@ -95,7 +104,7 @@
                 result.AppJson.RequestCount = requestCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.IsInit = true;
-                result.InitInternal();
+                await result.InitInternalAsync();
             }
 
             // Process

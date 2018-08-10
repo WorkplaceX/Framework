@@ -2,11 +2,14 @@
 {
     using Framework.Application;
     using Framework.Dal;
+    using Framework.Server;
     using Framework.Session;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     public class ComponentJson
     {
@@ -196,45 +199,26 @@
 
         }
 
-        public void Load(App app, Type typeRow, List<Row> rowList)
+        /// <summary>
+        /// Load data into session.
+        /// </summary>
+        /// <param name="typeRow">Used if rowList is empty to display columns.</param>
+        public void Load(List<Row> rowList, Type typeRow)
         {
-            GridSession gridSession = new GridSession();
-            app.AppSession.GridList.Add(gridSession);
-            gridSession.RowList.Clear();
-            foreach (var row in rowList)
-            {
-                gridSession.RowList.Add(new RowSession() { Row = row });
-            }
-            this.Id = app.AppSession.GridList.Count;
-            
-            // Header
-            this.Header = new GridHeader();
-            this.Header.ColumnList = new List<GridColumn>();
-            foreach (PropertyInfo propertyInfo in UtilDal.TypeRowToPropertyList(typeRow))
-            {
-                this.Header.ColumnList.Add(new GridColumn() { Text = propertyInfo.Name });
-            }
-
-            // Row
-            RowList = new List<GridRow>();
-            foreach (Row row in rowList)
-            {
-                GridRow gridRow = new GridRow();
-                RowList.Add(gridRow);
-                gridRow.CellList = new List<GridCell>();
-                foreach (PropertyInfo propertyInfo in UtilDal.TypeRowToPropertyList(typeRow))
-                {
-                    gridRow.CellList.Add(new GridCell() { Text = propertyInfo.GetValue(row)?.ToString() });
-                }
-            }
+            UtilServer.App.AppSession.GridLoad(this, rowList, typeRow);
         }
 
-        public void Load<TRow>(App app, List<TRow> rowList) where TRow : Row
+        public void Load<TRow>(List<TRow> rowList) where TRow : Row
         {
-            Load(app, typeof(TRow), rowList.Cast<Row>().ToList());
+            Load(rowList.Cast<Row>().ToList(), typeof(TRow));
         }
 
-        public int Id;
+        public async Task LoadAsync(IQueryable query)
+        {
+            await UtilServer.App.AppSession.GridLoadAsync(this, query);
+        }
+
+        public int? Id;
 
         public GridHeader Header;
 

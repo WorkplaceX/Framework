@@ -14,20 +14,20 @@
 
     internal class Request
     {
-        public Request(IApplicationBuilder app, AppSelector appSelector)
+        public Request(IApplicationBuilder applicationBuilder, AppSelector appSelector)
         {
-            this.App = app;
+            this.ApplicationBuilder = applicationBuilder;
             this.AppSelector = appSelector;
         }
 
-        public readonly IApplicationBuilder App;
+        public readonly IApplicationBuilder ApplicationBuilder;
 
         public readonly AppSelector AppSelector;
 
         /// <summary>
         /// Every client request goes through here.
         /// </summary>
-        public async Task Run(HttpContext context)
+        public async Task RunAsync(HttpContext context)
         {
             // Path init
             string path = context.Request.Path;
@@ -37,7 +37,7 @@
             }
 
             // GET Website
-            bool result = await Website(context, path, AppSelector);
+            bool result = await WebsiteAsync(context, path, AppSelector);
             if (result)
             {
                 return;
@@ -63,7 +63,7 @@
         /// <summary>
         /// Render first html GET request.
         /// </summary>
-        private static async Task<string> ServerSideRendering(HttpContext context, string indexHtml, AppSelector appSelector)
+        private static async Task<string> ServerSideRenderingAsync(HttpContext context, string indexHtml, AppSelector appSelector)
         {
             string result = indexHtml;
             if (result.Contains("<data-app></data-app>")) // Needs server sie rendering
@@ -79,7 +79,7 @@
                     // Running in Visual Studio
                     url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
                 }
-                var app = await appSelector.CreateApp(context);
+                var app = await appSelector.CreateAppAsync(context);
                 
                 // Serialize
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
@@ -104,7 +104,7 @@
         /// <summary>
         /// Divert request to "Framework/Website/"
         /// </summary>
-        private static async Task<bool> Website(HttpContext context, string path, AppSelector appSelector)
+        private static async Task<bool> WebsiteAsync(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
             var configFramework = ConfigFramework.Load();
@@ -118,7 +118,7 @@
                     if (fileName.EndsWith(".html") && ConfigFramework.Load().IsServerSideRendering)
                     {
                         string htmlIndex = File.ReadAllText(fileName);
-                        htmlIndex = await ServerSideRendering(context, htmlIndex, appSelector);
+                        htmlIndex = await ServerSideRenderingAsync(context, htmlIndex, appSelector);
                         await context.Response.WriteAsync(htmlIndex);
                         result = true;
                     }
@@ -140,7 +140,7 @@
             bool result = false;
             if (path == "/app.json")
             {
-                var app = await appSelector.CreateApp(context);
+                var app = await appSelector.CreateAppAsync(context);
                 context.Response.ContentType = UtilServer.ContentType(path);
                 
                 // Serialize
