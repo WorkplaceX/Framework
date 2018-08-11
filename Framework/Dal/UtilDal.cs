@@ -156,5 +156,21 @@
             tracking.CurrentValues.SetValues(rowNew);
             UtilFramework.Assert(dbContext.SaveChanges() == 1, "Update failed!");
         }
+
+        internal static string CellTextFromValue(Row row, PropertyInfo propertyInfo)
+        {
+            object value = propertyInfo.GetValue(row);
+            string result = value?.ToString();
+            return result;
+        }
+
+        /// <summary>
+        /// Parse user entered text and write it to row.
+        /// </summary>
+        internal static void CellTextToValue(Row row, PropertyInfo propertyInfo, string text)
+        {
+            object value = Convert.ChangeType(text, propertyInfo.PropertyType);
+            propertyInfo.SetValue(row, value);
+        }
     }
 }
