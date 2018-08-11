@@ -7,6 +7,7 @@
     using System;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     public static class UtilDal
     {
@@ -147,14 +148,15 @@
         /// <summary>
         /// Update data record on database.
         /// </summary>
-        public static void Update(Row row, Row rowNew)
+        public static async Task UpdateAsync(Row row, Row rowNew)
         {
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
             DbContext dbContext = DbContext(row.GetType());
             var tracking = dbContext.Attach(row);
             tracking.CurrentValues.SetValues(rowNew);
-            UtilFramework.Assert(dbContext.SaveChanges() == 1, "Update failed!");
+            int count = await dbContext.SaveChangesAsync();
+            UtilFramework.Assert(count == 1, "Update failed!");
         }
 
         internal static string CellTextFromValue(Row row, PropertyInfo propertyInfo)

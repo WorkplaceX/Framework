@@ -62,50 +62,50 @@
         /// </summary>
         public List<ComponentJson> List = new List<ComponentJson>();
 
-        private void ListAll(List<ComponentJson> result)
+        public string Name;
+    }
+
+    public static class ComponentJsonExtension
+    {
+        public static ComponentJson Owner(this ComponentJson component)
         {
-            result.AddRange(List);
-            foreach (var item in List)
+            ComponentJson result = UtilServer.App.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
+            return result;
+        }
+
+        private static void ListAll(ComponentJson component, List<ComponentJson> result)
+        {
+            result.AddRange(component.List);
+            foreach (var item in component.List)
             {
-                item.ListAll(result);
+                ListAll(item, result);
             }
         }
 
-        public List<ComponentJson> ListAll()
+        public static List<ComponentJson> ListAll(this ComponentJson component)
         {
             List<ComponentJson> result = new List<ComponentJson>();
-            ListAll(result);
+            ListAll(component, result);
             return result;
         }
 
-        private void Owner(ComponentJson componentTop, ComponentJson componentSearch, ref ComponentJson result)
+        public static T Create<T>(this ComponentJson owner, string name, Action<ComponentJson, string> create) where T : ComponentJson
         {
-            if (componentTop.List.Contains(componentSearch))
+            if (owner.ComponentByName(name) == null)
             {
-                result = componentTop; // Owner
+                create(owner, name);
             }
-            if (result == null)
-            {
-                foreach (var item in componentTop.List)
-                {
-                    item.Owner(item, componentSearch, ref result);
-                    if (result != null)
-                    {
-                        break;
-                    }
-                }
-            }
+            return owner.ComponentByName<T>(name);
         }
 
-        /// <summary>
-        /// Returns owner of this json component.
-        /// </summary>
-        /// <param name="componentTop">Component to start search from top to down.</param>
-        public ComponentJson Owner(ComponentJson componentTop)
+        public static ComponentJson ComponentByName(this ComponentJson owner, string name)
         {
-            ComponentJson result = null;
-            Owner(componentTop, this, ref result);
-            return result;
+            return owner.List.Where(item => item.Name == name).SingleOrDefault();
+        }
+
+        public static T ComponentByName<T>(this ComponentJson owner, string name) where T : ComponentJson
+        {
+            return (T)ComponentByName(owner, name);
         }
     }
 
@@ -128,8 +128,6 @@
         /// Gets or sets IsInit. If false, method App.Init(): is called.
         /// </summary>
         public bool IsInit;
-
-        public string Name { get; set; }
 
         public string Version { get; set; }
 
@@ -200,29 +198,36 @@
         }
 
         /// <summary>
-        /// Load data into session.
+        /// Load data into grid. Override method App.Query(); to define query. It's also called to reload data.
         /// </summary>
-        /// <param name="typeRow">Used if rowList is empty to display columns.</param>
-        public void Load(List<Row> rowList, Type typeRow)
+        public async Task LoadAsync()
         {
-            UtilServer.App.AppSession.GridLoad(this, rowList, typeRow);
-        }
-
-        public void Load<TRow>(List<TRow> rowList) where TRow : Row
-        {
-            Load(rowList.Cast<Row>().ToList(), typeof(TRow));
-        }
-
-        public async Task LoadAsync(IQueryable query)
-        {
-            await UtilServer.App.AppSession.GridLoadAsync(this, query);
+            await UtilServer.App.AppSession.GridLoadAsync(this);
         }
 
         public int? Id;
 
+        internal int GridIndex()
+        {
+            return (int)Id - 1;
+        }
+
         public GridHeader Header;
 
         public List<GridRow> RowList;
+
+        /// <summary>
+        /// Returns currently selected row.
+        /// </summary>
+        public Row Select()
+        {
+            Row result = null;
+            if (Id != null)
+            {
+                result = UtilServer.App.AppSession.GridSessionList[GridIndex()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
+            }
+            return result;
+        }
     }
 
     public class GridHeader

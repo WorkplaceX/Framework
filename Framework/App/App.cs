@@ -7,6 +7,7 @@
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using Framework.Dal;
 
     public class App
     {
@@ -31,11 +32,6 @@
             }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }
 
-        protected virtual void Init()
-        {
-
-        }
-
         /// <summary>
         /// Called on first request.
         /// </summary>
@@ -46,21 +42,20 @@
 
         protected internal async Task InitInternalAsync()
         {
-            Init();
             await InitAsync();
             UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
         }
 
-        protected virtual void Process()
+        protected virtual async Task ProcessAsync()
         {
-
+            await Task.Run(() => { });
         }
 
-        protected internal void ProcessInternal()
+        protected internal async Task ProcessInternalAsync()
         {
-            Process();
+            await ProcessAsync();
 
-            UtilServer.App.AppSession.Process();
+            await UtilServer.App.AppSession.ProcessAsync();
 
             AppJson.Version = UtilFramework.Version;
             AppJson.VersionBuild = UtilFramework.VersionBuild;
@@ -75,6 +70,16 @@
             {
                 AppJson.IsReload = true;
             }
+        }
+
+        protected virtual internal IQueryable GridLoadQuery(Grid grid)
+        {
+            return null;
+        }
+        
+        protected virtual internal async Task GridRowSelectChangeAsync(Grid grid)
+        {
+            await Task.Run(() => { });
         }
     }
 
@@ -108,7 +113,7 @@
             }
 
             // Process
-            result.ProcessInternal();
+            await result.ProcessInternalAsync();
 
             // RequestUrl
             result.AppJson.RequestUrl = UtilServer.RequestUrl(false);

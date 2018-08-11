@@ -1,4 +1,7 @@
-﻿ToDo
+﻿v2.1
+-Linq to shared memory queries. (services.AddSingleton)
+
+ToDo
 -Question: sealed class Grid because of OfType<Grid>(). However Page derived class is possible
 -ASP.NET Core 2.1
 -ProcessAsync
