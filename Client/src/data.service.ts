@@ -82,10 +82,12 @@ export class DataService {
       })
       .subscribe(body => {
         let jsonResponse = <Json>body;
-        if (jsonResponse.RequestCount == this.json.RequestCount) { // Only apply response if there is no newer request.
+        if (jsonResponse.RequestCount == this.json.RequestCount) { // Apply response if there is no newer request.
           this.json = jsonResponse;
           this.isRequestPending = false;
         } else {
+          // TODO Merge response with newer request
+          this.json = jsonResponse;
           this.isRequestPending = false;
           this.update(); // Process new request.
         }

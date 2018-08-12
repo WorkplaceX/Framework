@@ -120,9 +120,14 @@
         }
 
         /// <summary>
-        /// Gets or sets RequestCount. Used by client. Do not send new request while old is not processed.
+        /// Gets or sets RequestCount. Used by client. Does not send new request while old is still pending.
         /// </summary>
         public int RequestCount;
+
+        /// <summary>
+        /// Gets or sets RequestCount. Used by server to verify incoming request matches last response.
+        /// </summary>
+        public int ResponseCount { get; internal set; }
 
         /// <summary>
         /// Gets or sets IsInit. If false, method App.Init(): is called.
@@ -205,9 +210,9 @@
             await UtilServer.App.AppSession.GridLoadAsync(this);
         }
 
-        public int? Id;
+        public int? Id { get; internal set; }
 
-        internal int GridIndex()
+        internal int Index()
         {
             return (int)Id - 1;
         }
@@ -224,7 +229,7 @@
             Row result = null;
             if (Id != null)
             {
-                result = UtilServer.App.AppSession.GridSessionList[GridIndex()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
+                result = UtilServer.App.AppSession.GridSessionList[Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
             }
             return result;
         }
@@ -260,5 +265,7 @@
         public string Text;
 
         public bool IsModify;
+
+        public int MegreId;
     }
 }

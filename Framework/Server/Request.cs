@@ -37,7 +37,7 @@
             }
 
             // GET Website
-            bool result = await WebsiteAsync(context, path, AppSelector);
+            bool result = await WebsiteAsync(context, path, AppSelector); // With server side rendering.
             if (result)
             {
                 return;
@@ -79,7 +79,7 @@
                     // Running in Visual Studio
                     url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
                 }
-                var app = await appSelector.CreateAppAsync(context);
+                var app = await appSelector.CreateAppAsync(context);  // Process
                 
                 // Serialize
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
@@ -140,7 +140,7 @@
             bool result = false;
             if (path == "/app.json")
             {
-                var app = await appSelector.CreateAppAsync(context);
+                var app = await appSelector.CreateAppAsync(context); // Process
                 context.Response.ContentType = UtilServer.ContentType(path);
                 
                 // Serialize

@@ -98,7 +98,15 @@
             {
                 result.AppJson = new AppJson();
             }
-            UtilSession.Deserialize(result); // Deserialize or init.
+
+            UtilSession.Deserialize(result); // Deserialize session or init.
+
+            // User hit reload button in browser.
+            if (result.AppJson.ResponseCount == 0 && result.AppSession.ResponseCount > 0)
+            {
+                result.AppJson = new AppJson();
+                result.AppSession = new AppSession();
+            }
 
             // Init
             if (result.AppJson.IsInit == false)

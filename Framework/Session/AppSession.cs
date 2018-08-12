@@ -14,6 +14,8 @@
 
     internal class AppSession
     {
+        public int ResponseCount;
+
         public List<GridSession> GridSessionList = new List<GridSession>();
 
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
@@ -23,7 +25,7 @@
                 GridSessionList.Add(new GridSession());
                 grid.Id = GridSessionList.Count;
             }
-            int gridIndex = grid.GridIndex();
+            int gridIndex = grid.Index();
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.TypeRow = typeRow;
             gridSession.RowSessionList.Clear();
@@ -69,9 +71,8 @@
             {
                 if (grid.Id != null)
                 {
-                    GridSession gridSession = GridSessionList[grid.GridIndex()];
+                    GridSession gridSession = GridSessionList[grid.Index()];
                     PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(gridSession.TypeRow);
-
 
                     // Grid Header
                     grid.Header = new GridHeader();
@@ -98,6 +99,7 @@
                             gridRow.CellList.Add(gridCell);
                             gridCell.Text = cellSession.Text;
                             gridCell.IsModify = cellSession.IsModify;
+                            gridCell.MegreId = cellSession.MergeId;
                         }
                     }
                 }
@@ -113,7 +115,7 @@
             {
                 if (grid.Id != null)
                 {
-                    int gridIndex = grid.GridIndex();
+                    int gridIndex = grid.Index();
                     GridSession gridSession = GridSessionList[gridIndex];
                     PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(gridSession.TypeRow);
                     if (grid.RowList != null) // Process incoming grid. Has no rows rendered if new created.
@@ -137,6 +139,7 @@
                                     }
                                     UtilDal.CellTextToValue(rowSession.RowUpdate, propertyInfo, gridCell.Text); // Parse user entered text.
                                 }
+                                cellSession.MergeId = gridCell.MegreId;
                             }
                         }
                     }
@@ -173,7 +176,7 @@
         private async Task GridRowSelectFirst(Grid grid)
         {
             App app = UtilServer.App;
-            int gridIndex = grid.GridIndex();
+            int gridIndex = grid.Index();
             foreach (RowSession rowSession in GridSessionList[gridIndex].RowSessionList)
             {
                 rowSession.IsSelect = true;
@@ -189,7 +192,7 @@
             {
                 if (grid.Id != null)
                 {
-                    int gridIndex = grid.GridIndex();
+                    int gridIndex = grid.Index();
                     if (grid.RowList != null) // Process incoming grid. If created new it does not yet have rows rendered.
                     {
                         // Get IsClick
@@ -221,10 +224,17 @@
 
         public async Task ProcessAsync()
         {
+            App app = UtilServer.App;
+            UtilFramework.Assert(app.AppJson.ResponseCount == ResponseCount, "Request mismatch!");
+
             await ProcessGridSaveAsync();
             await ProcessGridRowSelect();
 
             GridRender();
+
+            // ResponseCount
+            ResponseCount += 1;
+            app.AppJson.ResponseCount = ResponseCount;
         }
     }
 
@@ -264,6 +274,8 @@
         public string Text;
 
         public bool IsModify;
+
+        public int MergeId;
 
         public string Error;
     }
