@@ -8,6 +8,7 @@ namespace Framework
     using Newtonsoft.Json;
     using System;
     using System.IO;
+    using System.Reflection;
 
     public class UtilFramework
     {
@@ -168,6 +169,15 @@ namespace Framework
                 value = null;
             }
             return value;
+        }
+
+        internal static bool IsSubclassOf(Type type, Type typeBase)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+            return type.GetTypeInfo().IsSubclassOf(typeBase) || type == typeBase;
         }
 
         internal static string Replace(string text, string find, string replace)

@@ -39,9 +39,9 @@
 
                 foreach (PropertyInfo propertyInfo in propertyInfoList)
                 {
-                    string text = UtilDal.CellTextFromValue(rowSession.Row, propertyInfo);
                     CellSession cellSession = new CellSession();
                     rowSession.CellSessionList.Add(cellSession);
+                    string text = UtilDal.CellTextFromValue(rowSession.Row, propertyInfo);
                     cellSession.Text = text;
                 }
             }

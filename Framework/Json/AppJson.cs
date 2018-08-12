@@ -276,6 +276,9 @@
 
         public bool IsModify;
 
+        /// <summary>
+        /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
+        /// </summary>
         public int MergeId;
     }
 }
