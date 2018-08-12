@@ -130,7 +130,7 @@
         public int ResponseCount { get; internal set; }
 
         /// <summary>
-        /// Gets or sets IsInit. If false, method App.Init(): is called.
+        /// Gets or sets IsInit. If false, app is not initialized. Method App.Init(): is called.
         /// </summary>
         public bool IsInit;
 
@@ -266,6 +266,6 @@
 
         public bool IsModify;
 
-        public int MegreId;
+        public int MergeId;
     }
 }

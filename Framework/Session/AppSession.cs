@@ -99,7 +99,7 @@
                             gridRow.CellList.Add(gridCell);
                             gridCell.Text = cellSession.Text;
                             gridCell.IsModify = cellSession.IsModify;
-                            gridCell.MegreId = cellSession.MergeId;
+                            gridCell.MergeId = cellSession.MergeId;
                         }
                     }
                 }
@@ -139,7 +139,7 @@
                                     }
                                     UtilDal.CellTextToValue(rowSession.RowUpdate, propertyInfo, gridCell.Text); // Parse user entered text.
                                 }
-                                cellSession.MergeId = gridCell.MegreId;
+                                cellSession.MergeId = gridCell.MergeId;
                             }
                         }
                     }
@@ -225,7 +225,6 @@
         public async Task ProcessAsync()
         {
             App app = UtilServer.App;
-            UtilFramework.Assert(app.AppJson.ResponseCount == ResponseCount, "Request mismatch!");
 
             await ProcessGridSaveAsync();
             await ProcessGridRowSelect();
@@ -233,7 +232,7 @@
             GridRender();
 
             // ResponseCount
-            ResponseCount += 1;
+            app.AppSession.ResponseCount += 1;
             app.AppJson.ResponseCount = ResponseCount;
         }
     }

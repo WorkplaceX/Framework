@@ -54,22 +54,8 @@
         protected internal async Task ProcessInternalAsync()
         {
             await ProcessAsync();
-
-            await UtilServer.App.AppSession.ProcessAsync();
-
-            AppJson.Version = UtilFramework.Version;
-            AppJson.VersionBuild = UtilFramework.VersionBuild;
-            AppJson.Session = UtilServer.Session.Id;
-            if (string.IsNullOrEmpty(AppJson.SessionApp))
-            {
-                AppJson.SessionApp = UtilServer.Session.Id;
-            }
             AppJson.SessionState = UtilServer.Session.GetString("Main");
-
-            if (UtilServer.Session.Id != AppJson.SessionApp) // Session expired!
-            {
-                AppJson.IsReload = true;
-            }
+            await UtilServer.App.AppSession.ProcessAsync();
         }
 
         protected virtual internal IQueryable GridLoadQuery(Grid grid)
@@ -98,35 +84,63 @@
             {
                 result.AppJson = new AppJson();
             }
+            int requestCountAssert = result.AppJson.RequestCount;
 
             UtilSession.Deserialize(result); // Deserialize session or init.
 
             // User hit reload button in browser.
-            if (result.AppJson.ResponseCount == 0 && result.AppSession.ResponseCount > 0)
-            {
-                result.AppJson = new AppJson();
-                result.AppSession = new AppSession();
-            }
+            bool isBrowserRefresh = (result.AppJson.ResponseCount == 0 && result.AppSession.ResponseCount > 0);
+
+            // User has app open in two browser tabs.
+            bool isBrowserTabSwitch = (result.AppJson.ResponseCount != result.AppSession.ResponseCount);
 
             // Init
-            if (result.AppJson.IsInit == false)
+            if (result.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch)
             {
                 int requestCount = result.AppJson.RequestCount;
+                int responseCount = result.AppSession.ResponseCount;
                 string browserUrl = result.AppJson.BrowserUrl;
                 result.AppJson = new AppJson(); // Reset
                 result.AppJson.RequestCount = requestCount;
+                result.AppJson.ResponseCount = responseCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.IsInit = true;
                 await result.InitInternalAsync();
             }
 
+            UtilFramework.Assert(result.AppJson.ResponseCount == result.AppSession.ResponseCount, "Request mismatch!");
+
             // Process
             await result.ProcessInternalAsync();
 
-            // RequestUrl
-            result.AppJson.RequestUrl = UtilServer.RequestUrl(false);
+            CreateApp(result); // Version tag
+
+            UtilFramework.Assert(result.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
             return result;
+        }
+
+        private void CreateApp(App app)
+        {
+            // Version
+            app.AppJson.Version = UtilFramework.Version;
+            app.AppJson.VersionBuild = UtilFramework.VersionBuild;
+
+            // Session
+            app.AppJson.Session = UtilServer.Session.Id;
+            if (string.IsNullOrEmpty(app.AppJson.SessionApp))
+            {
+                app.AppJson.SessionApp = UtilServer.Session.Id;
+            }
+
+            // IsReload
+            if (UtilServer.Session.Id != app.AppJson.SessionApp) // Session expired!
+            {
+                app.AppJson.IsReload = true;
+            }
+
+            // RequestUrl
+            app.AppJson.RequestUrl = UtilServer.RequestUrl(false);
         }
 
         /// <summary>

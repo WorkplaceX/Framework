@@ -15,7 +15,7 @@
         public static void Serialize(App app)
         {
             string json = JsonConvert.SerializeObject(app.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-            UtilServer.Session.SetString("Value", json);
+            UtilServer.Session.SetString("AppSession", json);
         }
 
         /// <summary>
@@ -23,7 +23,7 @@
         /// </summary>
         public static void Deserialize(App app)
         {
-            string json = UtilServer.Session.GetString("Value");
+            string json = UtilServer.Session.GetString("AppSession");
             AppSession appSession;
             if (string.IsNullOrEmpty(json))
             {

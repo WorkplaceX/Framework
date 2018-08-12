@@ -102,6 +102,17 @@ export class Grid {
 
   ngModelChange(cell) {
     cell.IsModify = true;
+
+    // Merge
+    if (cell.MergeId == null) {
+      this.dataService.mergeCount += 1;
+      cell.MergeId = this.dataService.mergeCount; // Make cell "merge ready".
+    }
+    if (this.dataService.isRequestPending == true) {
+      this.dataService.mergeBufferId = cell.MergeId;
+      this.dataService.mergeBufferText = cell.Text; // Buffer user input during pending request.
+    }
+
     this.dataService.update();
   }
 
