@@ -89,11 +89,21 @@
             return result;
         }
 
-        public static T Create<T>(this ComponentJson owner, string name, Action<ComponentJson, string> create) where T : ComponentJson
+        public static T CreateOrGet<T>(this ComponentJson owner, string name, Action<ComponentJson, string> create) where T : ComponentJson
         {
             if (owner.ComponentByName(name) == null)
             {
                 create(owner, name);
+            }
+            return owner.ComponentByName<T>(name);
+        }
+
+        public static T CreateOrGet<T>(this ComponentJson owner, string name) where T : ComponentJson
+        {
+            if (owner.ComponentByName(name) == null)
+            {
+                ComponentJson component = (ComponentJson)Activator.CreateInstance(typeof(T), owner);
+                component.Name = name;
             }
             return owner.ComponentByName<T>(name);
         }
@@ -106,6 +116,19 @@
         public static T ComponentByName<T>(this ComponentJson owner, string name) where T : ComponentJson
         {
             return (T)ComponentByName(owner, name);
+        }
+
+        /// <summary>
+        /// Returns currently selected row.
+        /// </summary>
+        public static Row RowSelected(this Grid grid)
+        {
+            Row result = null;
+            if (grid.Id != null) // Loaded
+            {
+                result = UtilServer.App.AppSession.GridSessionList[grid.Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
+            }
+            return result;
         }
     }
 
@@ -220,19 +243,6 @@
         public GridHeader Header;
 
         public List<GridRow> RowList;
-
-        /// <summary>
-        /// Returns currently selected row.
-        /// </summary>
-        public Row Select()
-        {
-            Row result = null;
-            if (Id != null)
-            {
-                result = UtilServer.App.AppSession.GridSessionList[Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
-            }
-            return result;
-        }
     }
 
     public class GridHeader
