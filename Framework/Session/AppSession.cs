@@ -18,6 +18,42 @@
 
         public List<GridSession> GridSessionList = new List<GridSession>();
 
+        /// <summary>
+        /// Load a single row.
+        /// </summary>
+        private void GridLoad(int gridIndex, int rowIndex, Row row, Type typeRow, ref PropertyInfo[] propertyInfoList)
+        {
+            if (propertyInfoList == null)
+            {
+                propertyInfoList = UtilDal.TypeRowToPropertyList(typeRow);
+            }
+
+            GridSession gridSession = GridSessionList[gridIndex];
+            RowSession rowSession = new RowSession();
+            gridSession.RowSessionList[rowIndex] = rowSession;
+            rowSession.Row = row;
+            foreach (PropertyInfo propertyInfo in propertyInfoList)
+            {
+                CellSession cellSession = new CellSession();
+                rowSession.CellSessionList.Add(cellSession);
+                string text = null;
+                if (rowSession.Row != null)
+                {
+                    text = UtilDal.CellTextFromValue(rowSession.Row, propertyInfo);
+                }
+                cellSession.Text = text;
+            }
+        }
+
+        private void GridLoadAddRowNew(int gridIndex)
+        {
+            GridSession gridSession = GridSessionList[gridIndex];
+            gridSession.RowSessionList.Add(new RowSession());
+            int rowIndex = gridSession.RowSessionList.Count - 1;
+            PropertyInfo[] propertyInfoList = null;
+            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, ref propertyInfoList);
+        }
+
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
         {
             if (grid.Id == null)
@@ -31,26 +67,15 @@
             gridSession.RowSessionList.Clear();
             PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(typeRow);
 
-            rowList.Add(null); // Insert row
-
-            foreach (var row in rowList)
+            for (int rowIndex = 0; rowIndex < rowList.Count; rowIndex++)
             {
                 RowSession rowSession = new RowSession();
                 gridSession.RowSessionList.Add(rowSession);
-                rowSession.Row = row;
-
-                foreach (PropertyInfo propertyInfo in propertyInfoList)
-                {
-                    CellSession cellSession = new CellSession();
-                    rowSession.CellSessionList.Add(cellSession);
-                    string text = null;
-                    if (rowSession.Row != null)
-                    {
-                        text = UtilDal.CellTextFromValue(rowSession.Row, propertyInfo);
-                    }
-                    cellSession.Text = text;
-                }
+                Row row = rowList[rowIndex];
+                GridLoad(gridIndex, rowIndex, row, typeRow, ref propertyInfoList);
             }
+
+            GridLoadAddRowNew(gridIndex); // Add one "new row" to end of grid.
         }
 
         private async Task GridLoadAsync(Grid grid, IQueryable query)
@@ -116,15 +141,6 @@
             }
         }
 
-        private void ProcessGridSaveCellClear(RowSession rowSession)
-        {
-            foreach (CellSession cellSession in rowSession.CellSessionList)
-            {
-                cellSession.IsModify = false;
-                cellSession.Error = null;
-            }
-        }
-
         private async Task ProcessGridSaveAsync()
         {
             AppInternal appInternal = UtilServer.AppInternal;
@@ -181,10 +197,13 @@
             }
 
             // Row Save
-            foreach (GridSession gridSession in GridSessionList)
+            for (int gridIndex = 0; gridIndex < GridSessionList.Count; gridIndex++)
             {
-                foreach (RowSession rowSession in gridSession.RowSessionList)
+                var gridSession = GridSessionList[gridIndex];
+                for (int rowIndex = 0; rowIndex < gridSession.RowSessionList.Count; rowIndex++)
                 {
+                    RowSession rowSession = gridSession.RowSessionList[rowIndex];
+
                     // Update
                     if (rowSession.RowUpdate != null)
                     {
@@ -192,7 +211,11 @@
                         {
                             await UtilDal.UpdateAsync(rowSession.Row, rowSession.RowUpdate);
                             rowSession.Row = rowSession.RowUpdate;
-                            ProcessGridSaveCellClear(rowSession);
+                            foreach (CellSession cellSession in rowSession.CellSessionList)
+                            {
+                                cellSession.IsModify = false;
+                                cellSession.Error = null;
+                            }
                         }
                         catch (Exception exception)
                         {
@@ -207,7 +230,13 @@
                         {
                             var rowNew = await UtilDal.InsertAsync(rowSession.RowInsert);
                             rowSession.Row = rowNew;
-                            ProcessGridSaveCellClear(rowSession);
+
+                            // Load new primary key into data grid.
+                            PropertyInfo[] propertyInfoList = null;
+                            GridLoad(gridIndex, rowIndex, rowNew, gridSession.TypeRow, ref propertyInfoList);
+
+                            // Add new "insert row" at end of data grid.
+                            GridLoadAddRowNew(gridIndex);
                         }
                         catch (Exception exception)
                         {
