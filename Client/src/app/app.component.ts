@@ -56,7 +56,6 @@ export class Selector {
 @Component({
   selector: '[data-Page]',
   template: `
-  X
   <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
   `
 })

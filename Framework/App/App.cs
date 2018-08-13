@@ -119,6 +119,10 @@
 
             // Process
             await result.ProcessInternalAsync();
+            foreach (Page page in result.AppJson.ListAll().OfType<Page>())
+            {
+                await page.ProcessAsync();
+            }
 
             CreateApp(result); // Version tag
 

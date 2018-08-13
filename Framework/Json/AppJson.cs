@@ -1,14 +1,11 @@
 ﻿namespace Framework.Json
 {
-    using Framework.Application;
     using Framework.Dal;
     using Framework.Server;
-    using Framework.Session;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
-    using System.Reflection;
     using System.Threading.Tasks;
 
     public class ComponentJson
@@ -89,33 +86,69 @@
             return result;
         }
 
-        public static T CreateOrGet<T>(this ComponentJson owner, string name, Action<ComponentJson, string> create) where T : ComponentJson
-        {
-            if (owner.ComponentByName(name) == null)
-            {
-                create(owner, name);
-            }
-            return owner.ComponentByName<T>(name);
-        }
-
-        public static T CreateOrGet<T>(this ComponentJson owner, string name) where T : ComponentJson
-        {
-            if (owner.ComponentByName(name) == null)
-            {
-                ComponentJson component = (ComponentJson)Activator.CreateInstance(typeof(T), owner);
-                component.Name = name;
-            }
-            return owner.ComponentByName<T>(name);
-        }
-
-        public static ComponentJson ComponentByName(this ComponentJson owner, string name)
+        public static ComponentJson Get(this ComponentJson owner, string name)
         {
             return owner.List.Where(item => item.Name == name).SingleOrDefault();
         }
 
-        public static T ComponentByName<T>(this ComponentJson owner, string name) where T : ComponentJson
+        public static T Get<T>(this ComponentJson owner, string name) where T : ComponentJson
         {
-            return (T)ComponentByName(owner, name);
+            return owner.Get(name) as T;
+        }
+
+        public static T Get<T>(this ComponentJson owner) where T : ComponentJson
+        {
+            return owner.Get<T>(typeof(T).Name);
+        }
+
+        public static T GetOrCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
+        {
+            if (owner.Get(name) == null)
+            {
+                T component = (T)Activator.CreateInstance(typeof(T), owner);
+                component.Name = name;
+                init?.Invoke(component);
+            }
+            return owner.Get<T>(name);
+        }
+
+        public static T GetOrCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
+        {
+            return GetOrCreate<T>(owner, typeof(T).Name, init);
+        }
+
+        public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, bool isVisibleRemove = true, Action<T> init = null) where T : Page
+        {
+            T result = null;
+            foreach (Page page in owner.List.OfType<Page>())
+            {
+                page.IsHide = true;
+            }
+            if (Get(owner, name) == null)
+            {
+                Page pageVisible = owner.List.OfType<Page>().Where(item => item.IsHide == false).SingleOrDefault();
+                pageVisible.Remove();
+                result = (T)Activator.CreateInstance(typeof(T), owner);
+                result.Name = name;
+                await result.InitAsync();
+                init?.Invoke(result);
+            }
+            result = Get<T>(owner, name);
+            if (result != null)
+            {
+                result.IsHide = false;
+            }
+            return result;
+        }
+
+        public static Task<T> PageShowAsync<T>(this ComponentJson owner, bool isVisibleRemove = true, Action<T> init = null) where T : Page
+        {
+            return PageShowAsync<T>(owner, typeof(T).Name, isVisibleRemove, init);
+        }
+
+        public static void Remove(this ComponentJson component)
+        {
+            component?.Owner().List.Remove(component);
         }
 
         /// <summary>
@@ -129,43 +162,6 @@
                 result = UtilServer.App.AppSession.GridSessionList[grid.Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
             }
             return result;
-        }
-
-        private static Page PageVisible(ComponentJson owner)
-        {
-            return owner.List.OfType<Page>().Where(item => item.IsHide == false).SingleOrDefault();
-        }
-
-        public static async Task<Page> PageShowAsync(this ComponentJson owner, Type typePage, bool isVisibleRemove = true)
-        {
-            Page pageVisible = PageVisible(owner);
-            if (pageVisible != null && isVisibleRemove)
-            {
-                owner.List.Remove(pageVisible);
-            }
-            var list = owner.List.OfType<Page>();
-            foreach (Page page in list)
-            {
-                page.IsHide = true;
-            }
-            Page result = owner.List.OfType<Page>().Where(item => item.GetType() == typePage).SingleOrDefault(); // Make sure there is only one page of type!
-            if (result == null)
-            {
-                result = (Page)Activator.CreateInstance(typePage, owner);
-                await result.InitAsync();
-            }
-            result.IsHide = false;
-            return result;
-        }
-
-        /// <summary>
-        /// Overload.
-        /// </summary>
-        public static Task<T> PageShowAsync<T>(this ComponentJson owner, bool isVisibleRemove = true) where T : Page
-        {
-            Page page = PageShowAsync(owner, typeof(T), isVisibleRemove).Result;
-            T result = (T)page;
-            return Task.FromResult(result);
         }
     }
 
@@ -361,6 +357,11 @@
         }
 
         protected virtual internal async Task ButtonClickAsync(Button button)
+        {
+            await Task.Run(() => { });
+        }
+
+        protected virtual internal async Task ProcessAsync()
         {
             await Task.Run(() => { });
         }
