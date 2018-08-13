@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Framework.Dal;
+    using Framework.App;
 
     public class App
     {
@@ -51,11 +52,12 @@
             await Task.Run(() => { });
         }
 
-        protected internal async Task ProcessInternalAsync()
+        internal async Task ProcessInternalAsync()
         {
-            await ProcessAsync();
             AppJson.SessionState = UtilServer.Session.GetString("Main");
-            await UtilServer.App.AppSession.ProcessAsync();
+            await UtilServer.App.AppSession.ProcessAsync(); // Grid
+            await UtilApp.ProcessAsync(); // Button
+            await ProcessAsync(); // Custom
         }
 
         protected virtual internal IQueryable GridLoadQuery(Grid grid)
@@ -64,6 +66,11 @@
         }
         
         protected virtual internal async Task GridRowSelectChangeAsync(Grid grid)
+        {
+            await Task.Run(() => { });
+        }
+
+        protected virtual internal async Task ButtonClickAsync(Button button)
         {
             await Task.Run(() => { });
         }

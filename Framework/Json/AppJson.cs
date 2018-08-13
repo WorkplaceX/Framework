@@ -130,6 +130,43 @@
             }
             return result;
         }
+
+        private static Page PageVisible(ComponentJson owner)
+        {
+            return owner.List.OfType<Page>().Where(item => item.IsHide == false).SingleOrDefault();
+        }
+
+        public static async Task<Page> PageShowAsync(this ComponentJson owner, Type typePage, bool isVisibleRemove = true)
+        {
+            Page pageVisible = PageVisible(owner);
+            if (pageVisible != null && isVisibleRemove)
+            {
+                owner.List.Remove(pageVisible);
+            }
+            var list = owner.List.OfType<Page>();
+            foreach (Page page in list)
+            {
+                page.IsHide = true;
+            }
+            Page result = owner.List.OfType<Page>().Where(item => item.GetType() == typePage).SingleOrDefault(); // Make sure there is only one page of type!
+            if (result == null)
+            {
+                result = (Page)Activator.CreateInstance(typePage, owner);
+                await result.InitAsync();
+            }
+            result.IsHide = false;
+            return result;
+        }
+
+        /// <summary>
+        /// Overload.
+        /// </summary>
+        public static Task<T> PageShowAsync<T>(this ComponentJson owner, bool isVisibleRemove = true) where T : Page
+        {
+            Page page = PageShowAsync(owner, typeof(T), isVisibleRemove).Result;
+            T result = (T)page;
+            return Task.FromResult(result);
+        }
     }
 
     public class AppJson : ComponentJson
@@ -280,5 +317,52 @@
         /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
         /// </summary>
         public int MergeId;
+    }
+
+    public class Html : ComponentJson
+    {
+        public Html() : this(null) { }
+
+        public Html(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        public string TextHtml;
+    }
+
+    public class Page : ComponentJson
+    {
+        public Page() : this(null)
+        {
+            Type = typeof(Page).Name;
+        }
+
+        public Page(ComponentJson owner)
+            : base(owner)
+        {
+            Type = typeof(Page).Name;
+        }
+
+        public bool IsHide;
+
+        /// <summary>
+        /// Gets or sets TypeCSharp. Used when default property Type has been changed. Allows inheritance.
+        /// </summary>
+        public string TypeCSharp;
+
+        /// <summary>
+        /// Called on first request.
+        /// </summary>
+        protected virtual internal async Task InitAsync()
+        {
+            await Task.Run(() => { });
+        }
+
+        protected virtual internal async Task ButtonClickAsync(Button button)
+        {
+            await Task.Run(() => { });
+        }
     }
 }

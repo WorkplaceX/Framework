@@ -42,12 +42,30 @@ export class AppComponent {
 @Component({
   selector: '[data-Selector]',
   template: `
-  <div style="display:inline" data-Button *ngIf="json.Type=='Button'" [json]=json></div>
-  <div style="display:inline" data-Grid *ngIf="json.Type=='Grid'" [json]=json></div>
+  <div data-Button *ngIf="json.Type=='Button'" [json]=json style="display:inline"></div>
+  <div data-Grid *ngIf="json.Type=='Grid'" [json]=json style="display:inline"></div>
+  <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json style="display:inline"></div>
   `
 })
 export class Selector {
   @Input() json: any
+}
+
+/* Page */
+@Component({
+  selector: '[data-Page]',
+  template: `
+  X
+  <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
+  `
+})
+export class Page {
+  @Input() json: any
+  dataService: DataService;
+
+  trackBy(index: any, item: any) {
+    return item.TrackBy;
+  }
 }
 
 /* Button */
