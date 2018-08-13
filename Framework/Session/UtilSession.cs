@@ -1,27 +1,25 @@
 ﻿namespace Framework.Session
 {
     using Framework.Application;
-    using Framework.Session;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
-    using System.Collections.Generic;
 
     internal static class UtilSession
     {
         /// <summary>
         /// Serialize session state.
         /// </summary>
-        public static void Serialize(App app)
+        public static void Serialize(AppInternal appInternal)
         {
-            string json = JsonConvert.SerializeObject(app.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+            string json = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
             UtilServer.Session.SetString("AppSession", json);
         }
 
         /// <summary>
         /// Deserialize session state.
         /// </summary>
-        public static void Deserialize(App app)
+        public static void Deserialize(AppInternal appInternal)
         {
             string json = UtilServer.Session.GetString("AppSession");
             AppSession appSession;
@@ -33,7 +31,7 @@
             {
                 appSession = JsonConvert.DeserializeObject<AppSession>(json, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
             }
-            app.AppSession = appSession;
+            appInternal.AppSession = appSession;
         }
     }
 }

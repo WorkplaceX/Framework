@@ -5,12 +5,10 @@
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Framework.Dal;
-    using Framework.App;
+    using System.Linq;
 
-    public class App
+    internal class AppInternal
     {
         /// <summary>
         /// Gets or sets AppJson. This is the application root json component being transferred between server and client.
@@ -22,55 +20,20 @@
         /// </summary>
         internal AppSession AppSession { get; set; }
 
-        /// <summary>
-        /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
-        /// </summary>
-        virtual internal Type[] TypeComponentInNamespaceList()
-        {
-            return (new Type[] {
-                GetType(), // Namespace of running application.
-                typeof(App), // Used for example for class Navigation.
-            }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
-        }
-
-        /// <summary>
-        /// Called on first request.
-        /// </summary>
-        protected virtual async Task InitAsync()
-        {
-            await Task.Run(() => { });
-        }
-
-        protected internal async Task InitInternalAsync()
-        {
-            await InitAsync();
-            UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
-        }
-
-        protected virtual async Task ProcessAsync()
-        {
-            await Task.Run(() => { });
-        }
-
-        internal async Task ProcessInternalAsync()
-        {
-            AppJson.SessionState = UtilServer.Session.GetString("Main");
-            await UtilServer.App.AppSession.ProcessAsync(); // Grid
-            await UtilApp.ProcessAsync(); // Button
-            await ProcessAsync(); // Custom
-        }
+        public Type[] TypeComponentInNamespaceList;
     }
 
     public class AppSelector
     {
-        public async Task<App> CreateAppAsync(HttpContext context)
+        internal async Task<AppInternal> CreateAppAndProcessAsync(HttpContext context)
         {
-            var result = CreateApp();
-            UtilServer.App = result;
+            var result = new AppInternal();
+            UtilServer.AppInternal = result;
+            result.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
             string json = await UtilServer.StreamToString(context.Request.Body);
             if (json != null) // If post
             {
-                result.AppJson = UtilJson.Deserialize<AppJson>(json, result.TypeComponentInNamespaceList());
+                result.AppJson = UtilJson.Deserialize<AppJson>(json, result.TypeComponentInNamespaceList);
             }
             else
             {
@@ -92,59 +55,73 @@
                 int requestCount = result.AppJson.RequestCount;
                 int responseCount = result.AppSession.ResponseCount;
                 string browserUrl = result.AppJson.BrowserUrl;
-                result.AppJson = new AppJson(); // Reset
+                result.AppJson = CreateAppJson(); // Reset
                 result.AppJson.RequestCount = requestCount;
                 result.AppJson.ResponseCount = responseCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.IsInit = true;
-                await result.InitInternalAsync();
+                await result.AppJson.InitInternalAsync();
             }
 
             UtilFramework.Assert(result.AppJson.ResponseCount == result.AppSession.ResponseCount, "Request mismatch!");
 
             // Process
-            await result.ProcessInternalAsync();
-            foreach (Page page in result.AppJson.ListAll().OfType<Page>())
-            {
-                await page.ProcessAsync();
-            }
+            await result.AppJson.ProcessInternalAsync();
 
-            CreateApp(result); // Version tag
+            VersionTag(result); // Version tag
 
             UtilFramework.Assert(result.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
             return result;
         }
 
-        private void CreateApp(App app)
+        private void VersionTag(AppInternal appInternal)
         {
             // Version
-            app.AppJson.Version = UtilFramework.Version;
-            app.AppJson.VersionBuild = UtilFramework.VersionBuild;
+            appInternal.AppJson.Version = UtilFramework.Version;
+            appInternal.AppJson.VersionBuild = UtilFramework.VersionBuild;
 
             // Session
-            app.AppJson.Session = UtilServer.Session.Id;
-            if (string.IsNullOrEmpty(app.AppJson.SessionApp))
+            appInternal.AppJson.Session = UtilServer.Session.Id;
+            if (string.IsNullOrEmpty(appInternal.AppJson.SessionApp))
             {
-                app.AppJson.SessionApp = UtilServer.Session.Id;
+                appInternal.AppJson.SessionApp = UtilServer.Session.Id;
             }
 
             // IsReload
-            if (UtilServer.Session.Id != app.AppJson.SessionApp) // Session expired!
+            if (UtilServer.Session.Id != appInternal.AppJson.SessionApp) // Session expired!
             {
-                app.AppJson.IsReload = true;
+                appInternal.AppJson.IsReload = true;
             }
 
             // RequestUrl
-            app.AppJson.RequestUrl = UtilServer.RequestUrl(false);
+            appInternal.AppJson.RequestUrl = UtilServer.RequestUrl(false);
+        }
+
+        private AppJson CreateAppJson()
+        {
+            Type type = TypeAppJson();
+            AppJson result = (AppJson)Activator.CreateInstance(type, null);
+            return result;
         }
 
         /// <summary>
-        /// Override this method define App.
+        /// Returns type of AppJson. Used for first html request.
         /// </summary>
-        protected virtual App CreateApp()
+        protected virtual Type TypeAppJson()
         {
-            return new App(); // DefaultApp
+            return typeof(AppJson);
+        }
+
+        /// <summary>
+        /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
+        /// </summary>
+        virtual internal Type[] TypeComponentInNamespaceList()
+        {
+            return (new Type[] {
+                GetType(), // Namespace of running application.
+                typeof(AppJson), // For example button.
+            }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }
     }
 }

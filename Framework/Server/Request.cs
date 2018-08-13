@@ -79,10 +79,10 @@
                     // Running in Visual Studio
                     url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
                 }
-                var app = await appSelector.CreateAppAsync(context);  // Process
+                var app = await appSelector.CreateAppAndProcessAsync(context);  // Process
                 
                 // Serialize
-                string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
+                string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList);
                 UtilSession.Serialize(app);
 
                 // Server side render post.
@@ -140,11 +140,11 @@
             bool result = false;
             if (path == "/app.json")
             {
-                var app = await appSelector.CreateAppAsync(context); // Process
+                var app = await appSelector.CreateAppAndProcessAsync(context); // Process
                 context.Response.ContentType = UtilServer.ContentType(path);
                 
                 // Serialize
-                string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList());
+                string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList);
                 UtilSession.Serialize(app);
 
                 await context.Response.WriteAsync(json);

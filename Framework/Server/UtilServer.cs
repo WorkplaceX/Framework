@@ -190,24 +190,24 @@
         /// <summary>
         /// Gets currently processed app.
         /// </summary>
-        public static App App
+        public static AppInternal AppInternal
         {
             get
             {
                 InstanceService instanceService = (InstanceService)UtilServer.Context.RequestServices.GetService(typeof(InstanceService));
-                return instanceService.App;
+                return instanceService.AppInternal;
             }
             set
             {
                 InstanceService instanceService = (InstanceService)UtilServer.Context.RequestServices.GetService(typeof(InstanceService));
-                UtilFramework.Assert(instanceService.App == null);
-                instanceService.App = value;
+                UtilFramework.Assert(instanceService.AppInternal == null);
+                instanceService.AppInternal = value;
             }
         }
 
         public class InstanceService
         {
-            public App App;
+            public AppInternal AppInternal;
         }
     }
 }

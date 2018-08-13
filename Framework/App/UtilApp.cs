@@ -9,7 +9,7 @@
     {
         public static async Task ProcessAsync()
         {
-            var app = UtilServer.App;
+            var app = UtilServer.AppInternal;
             foreach (Button button in app.AppJson.ListAll().OfType<Button>().Where(item => item.IsClick))
             {
                 await button.Owner<Page>().ButtonClickAsync(button);

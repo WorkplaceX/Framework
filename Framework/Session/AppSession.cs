@@ -70,8 +70,8 @@
         /// </summary>
         private void GridRender()
         {
-            App app = UtilServer.App;
-            foreach (Grid grid in app.AppJson.ListAll().OfType<Grid>())
+            AppInternal appInternal = UtilServer.AppInternal;
+            foreach (Grid grid in appInternal.AppJson.ListAll().OfType<Grid>())
             {
                 if (grid.Id != null)
                 {
@@ -112,10 +112,10 @@
 
         private async Task ProcessGridSaveAsync()
         {
-            App app = UtilServer.App;
+            AppInternal appInternal = UtilServer.AppInternal;
 
             // RowUpdate
-            foreach (var grid in app.AppJson.ListAll().OfType<Grid>())
+            foreach (var grid in appInternal.AppJson.ListAll().OfType<Grid>())
             {
                 if (grid.Id != null)
                 {
@@ -179,7 +179,7 @@
 
         private async Task GridRowSelectFirst(Grid grid)
         {
-            App app = UtilServer.App;
+            AppInternal appInternal = UtilServer.AppInternal;
             int gridIndex = grid.Index();
             foreach (RowSession rowSession in GridSessionList[gridIndex].RowSessionList)
             {
@@ -191,8 +191,8 @@
 
         private async Task ProcessGridRowSelect()
         {
-            App app = UtilServer.App;
-            foreach (var grid in app.AppJson.ListAll().OfType<Grid>())
+            AppInternal appInternal = UtilServer.AppInternal;
+            foreach (var grid in appInternal.AppJson.ListAll().OfType<Grid>())
             {
                 if (grid.Id != null)
                 {
@@ -228,7 +228,7 @@
 
         public async Task ProcessAsync()
         {
-            App app = UtilServer.App;
+            AppInternal appInternal = UtilServer.AppInternal;
 
             await ProcessGridSaveAsync();
             await ProcessGridRowSelect();
@@ -236,8 +236,8 @@
             GridRender();
 
             // ResponseCount
-            app.AppSession.ResponseCount += 1;
-            app.AppJson.ResponseCount = ResponseCount;
+            appInternal.AppSession.ResponseCount += 1;
+            appInternal.AppJson.ResponseCount = ResponseCount;
         }
     }
 

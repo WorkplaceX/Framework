@@ -1,7 +1,9 @@
 ﻿namespace Framework.Json
 {
+    using Framework.App;
     using Framework.Dal;
     using Framework.Server;
+    using Microsoft.AspNetCore.Http;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -66,7 +68,7 @@
     {
         public static ComponentJson Owner(this ComponentJson component)
         {
-            ComponentJson result = UtilServer.App.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
+            ComponentJson result = UtilServer.AppInternal.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
             return result;
         }
 
@@ -99,6 +101,7 @@
         public static List<ComponentJson> ListAll(this ComponentJson component)
         {
             List<ComponentJson> result = new List<ComponentJson>();
+            result.Add(component);
             ListAll(component, result);
             return result;
         }
@@ -176,13 +179,13 @@
             Row result = null;
             if (grid.Id != null) // Loaded
             {
-                result = UtilServer.App.AppSession.GridSessionList[grid.Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
+                result = UtilServer.AppInternal.AppSession.GridSessionList[grid.Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
             }
             return result;
         }
     }
 
-    public sealed class AppJson : ComponentJson
+    public class AppJson : Page
     {
         public AppJson() { }
 
@@ -190,6 +193,24 @@
             : base(owner)
         {
 
+        }
+
+        internal async Task InitInternalAsync()
+        {
+            await InitAsync();
+            UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
+        }
+
+        internal async Task ProcessInternalAsync()
+        {
+            SessionState = UtilServer.Session.GetString("Main");
+            await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid
+            await UtilApp.ProcessAsync(); // Button
+
+            foreach (Page page in UtilServer.AppInternal.AppJson.ListAll().OfType<Page>())
+            {
+                await page.ProcessAsync();
+            }
         }
 
         /// <summary>
@@ -280,7 +301,7 @@
         /// </summary>
         public async Task LoadAsync()
         {
-            await UtilServer.App.AppSession.GridLoadAsync(this);
+            await UtilServer.AppInternal.AppSession.GridLoadAsync(this);
         }
 
         public int? Id { get; internal set; }
