@@ -68,14 +68,14 @@
             // Process
             await result.AppJson.ProcessInternalAsync();
 
-            VersionTag(result); // Version tag
+            RenderVersion(result); // Version tag
 
             UtilFramework.Assert(result.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
             return result;
         }
 
-        private void VersionTag(AppInternal appInternal)
+        private void RenderVersion(AppInternal appInternal)
         {
             // Version
             appInternal.AppJson.Version = UtilFramework.Version;

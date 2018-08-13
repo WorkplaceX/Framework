@@ -236,7 +236,7 @@
                 await page.ProcessAsync();
             }
 
-            UtilServer.AppInternal.AppSession.Render(); // Grid render
+            UtilServer.AppInternal.AppSession.GridRender(); // Grid render
         }
 
         /// <summary>

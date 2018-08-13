@@ -29,8 +29,10 @@
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.TypeRow = typeRow;
             gridSession.RowSessionList.Clear();
-            gridSession.RowInserList.Clear();
             PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(typeRow);
+
+            rowList.Add(null); // Insert row
+
             foreach (var row in rowList)
             {
                 RowSession rowSession = new RowSession();
@@ -41,7 +43,11 @@
                 {
                     CellSession cellSession = new CellSession();
                     rowSession.CellSessionList.Add(cellSession);
-                    string text = UtilDal.CellTextFromValue(rowSession.Row, propertyInfo);
+                    string text = null;
+                    if (rowSession.Row != null)
+                    {
+                        text = UtilDal.CellTextFromValue(rowSession.Row, propertyInfo);
+                    }
                     cellSession.Text = text;
                 }
             }
@@ -59,7 +65,7 @@
             var query = grid.Owner<Page>().GridLoadQuery(grid);
             if (query == null)
             {
-                throw new Exception("No query defined! See also method Page.GridLoadQuery();");
+                throw new Exception("No query defined! See also method Page.GridLoadQuery(); or use method UtilDal.QueryEmpty();");
             }
             await GridLoadAsync(grid, query);
             await GridRowSelectFirst(grid);
@@ -68,7 +74,7 @@
         /// <summary>
         /// Refresh rows and cells of each data grid.
         /// </summary>
-        private void GridRender()
+        public void GridRender()
         {
             AppInternal appInternal = UtilServer.AppInternal;
             foreach (Grid grid in appInternal.AppJson.ListAll().OfType<Grid>())
@@ -110,6 +116,15 @@
             }
         }
 
+        private void ProcessGridSaveCellClear(RowSession rowSession)
+        {
+            foreach (CellSession cellSession in rowSession.CellSessionList)
+            {
+                cellSession.IsModify = false;
+                cellSession.Error = null;
+            }
+        }
+
         private async Task ProcessGridSaveAsync()
         {
             AppInternal appInternal = UtilServer.AppInternal;
@@ -137,11 +152,26 @@
                                     cellSession.IsModify = true;
                                     cellSession.Text = gridCell.Text;
                                     PropertyInfo propertyInfo = propertyInfoList[cellIndex];
-                                    if (rowSession.RowUpdate == null)
+                                    Row row;
+                                    if (rowSession.Row != null)
                                     {
-                                        rowSession.RowUpdate = UtilDal.RowCopy(rowSession.Row);
+                                        // Update
+                                        if (rowSession.RowUpdate == null)
+                                        {
+                                            rowSession.RowUpdate = UtilDal.RowCopy(rowSession.Row);
+                                        }
+                                        row = rowSession.RowUpdate;
                                     }
-                                    UtilDal.CellTextToValue(rowSession.RowUpdate, propertyInfo, gridCell.Text); // Parse user entered text.
+                                    else
+                                    {
+                                        // Insert
+                                        if (rowSession.RowInsert == null)
+                                        {
+                                            rowSession.RowInsert = (Row)Activator.CreateInstance(gridSession.TypeRow);
+                                        }
+                                        row = rowSession.RowInsert;
+                                    }
+                                    UtilDal.CellTextToValue(row, propertyInfo, gridCell.Text); // Parse user entered text.
                                 }
                                 cellSession.MergeId = gridCell.MergeId;
                             }
@@ -155,23 +185,35 @@
             {
                 foreach (RowSession rowSession in gridSession.RowSessionList)
                 {
+                    // Update
                     if (rowSession.RowUpdate != null)
                     {
                         try
                         {
                             await UtilDal.UpdateAsync(rowSession.Row, rowSession.RowUpdate);
                             rowSession.Row = rowSession.RowUpdate;
-                            rowSession.RowUpdate = null;
-                            foreach (CellSession cellSession in rowSession.CellSessionList)
-                            {
-                                cellSession.IsModify = false;
-                            }
+                            ProcessGridSaveCellClear(rowSession);
                         }
                         catch (Exception exception)
                         {
                             rowSession.Error = exception.Message;
                         }
                         rowSession.RowUpdate = null;
+                    }
+                    // Insert
+                    if (rowSession.RowInsert != null)
+                    {
+                        try
+                        {
+                            var rowNew = await UtilDal.InsertAsync(rowSession.RowInsert);
+                            rowSession.Row = rowNew;
+                            ProcessGridSaveCellClear(rowSession);
+                        }
+                        catch (Exception exception)
+                        {
+                            rowSession.Error = exception.Message;
+                        }
+                        rowSession.RowInsert = null;
                     }
                 }
             }
@@ -237,11 +279,6 @@
             appInternal.AppSession.ResponseCount += 1;
             appInternal.AppJson.ResponseCount = ResponseCount;
         }
-
-        public void Render()
-        {
-            GridRender();
-        }
     }
 
     internal class GridSession
@@ -249,8 +286,6 @@
         public Type TypeRow;
 
         public List<RowSession> RowSessionList = new List<RowSession>();
-
-        public List<Row> RowInserList = new List<Row>();
     }
 
     internal class RowSession
@@ -259,20 +294,13 @@
 
         public Row RowUpdate;
 
+        public Row RowInsert;
+
         public bool IsSelect;
 
         public string Error;
 
         public List<CellSession> CellSessionList = new List<CellSession>();
-    }
-
-    internal class RowSessionInsert
-    {
-        public Row Row;
-
-        public string Error;
-
-        public List<CellSession> CellList = new List<CellSession>();
     }
 
     internal class CellSession

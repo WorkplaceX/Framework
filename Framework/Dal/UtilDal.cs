@@ -109,6 +109,14 @@
         }
 
         /// <summary>
+        /// Returns empty query to clear data grid.
+        /// </summary>
+        public static IQueryable<TRow> QueryEmpty<TRow>() where TRow: Row
+        {
+            return Enumerable.Empty<TRow>().AsQueryable();
+        }
+
+        /// <summary>
         /// Copy data row. Source and dest need not to be of same type. Only cells available on
         /// both records are copied. See also RowClone();
         /// </summary>
@@ -168,6 +176,33 @@
             dbContext.Remove(row);
             int count = await dbContext.SaveChangesAsync();
             UtilFramework.Assert(count == 1, "Update failed!");
+        }
+
+        /// <summary>
+        /// Insert data record. Primary key needs to be 0! Returned new row contains new primary key.
+        /// </summary>
+        public static async Task<TRow> InsertAsync<TRow>(TRow row) where TRow : Row
+        {
+            Row rowCopy = UtilDal.RowCopy(row);
+            DbContext dbContext = DbContext(row.GetType());
+            dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
+            try
+            {
+                int count = await dbContext.SaveChangesAsync();
+                UtilFramework.Assert(count == 1, "Update failed!");
+                //
+                // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
+                // Cause: No autoincrement on Id column or no Id set by application
+                //
+                // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
+                // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
+            }
+            catch (Exception exception)
+            {
+                UtilDal.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
+                throw exception;
+            }
+            return row; // Return Row with new primary key.
         }
 
         internal static string CellTextFromValue(Row row, PropertyInfo propertyInfo)
