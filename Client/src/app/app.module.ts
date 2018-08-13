@@ -3,11 +3,11 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
-import { AppComponent, Button, Selector, Grid, Page } from './app.component';
+import { AppComponent, Button, Selector, Grid, Page, Html } from './app.component';
 
 @NgModule({
   declarations: [
-    AppComponent, Button, Selector, Grid, Page
+    AppComponent, Button, Selector, Grid, Page, Html
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'Application' }),

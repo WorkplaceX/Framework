@@ -45,6 +45,7 @@ export class AppComponent {
   <div data-Button *ngIf="json.Type=='Button'" [json]=json style="display:inline"></div>
   <div data-Grid *ngIf="json.Type=='Grid'" [json]=json style="display:inline"></div>
   <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json style="display:inline"></div>
+  <div data-Html *ngIf="json.Type=='Html'" [json]=json style="display:inline"></div>
   `
 })
 export class Selector {
@@ -66,6 +67,15 @@ export class Page {
   trackBy(index: any, item: any) {
     return item.TrackBy;
   }
+}
+
+/* Html */
+@Component({
+  selector: '[data-Html]',
+  template: `<div [ngClass]="json.CssClass" [innerHtml]="json.TextHtml" style="display:inline"></div>`
+})
+export class Html {
+  @Input() json: any
 }
 
 /* Button */
