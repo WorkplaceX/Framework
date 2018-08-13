@@ -56,7 +56,11 @@
 
         public async Task GridLoadAsync(Grid grid)
         {
-            var query = UtilServer.App.GridLoadQuery(grid);
+            var query = grid.Owner<Page>().GridLoadQuery(grid);
+            if (query == null)
+            {
+                throw new Exception("No query defined! See also method Page.GridLoadQuery();");
+            }
             await GridLoadAsync(grid, query);
             await GridRowSelectFirst(grid);
         }
@@ -180,7 +184,7 @@
             foreach (RowSession rowSession in GridSessionList[gridIndex].RowSessionList)
             {
                 rowSession.IsSelect = true;
-                await app.GridRowSelectChangeAsync(grid);
+                await grid.Owner<Page>().GridRowSelectChangeAsync(grid);
                 break;
             }
         }
@@ -215,7 +219,7 @@
                                 rowSession.IsSelect = false;
                             }
                             GridSessionList[gridIndex].RowSessionList[rowIndexIsClick].IsSelect = true;
-                            await app.GridRowSelectChangeAsync(grid);
+                            await grid.Owner<Page>().GridRowSelectChangeAsync(grid);
                         }
                     }
                 }

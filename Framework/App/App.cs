@@ -59,21 +59,6 @@
             await UtilApp.ProcessAsync(); // Button
             await ProcessAsync(); // Custom
         }
-
-        protected virtual internal IQueryable GridLoadQuery(Grid grid)
-        {
-            return null;
-        }
-        
-        protected virtual internal async Task GridRowSelectChangeAsync(Grid grid)
-        {
-            await Task.Run(() => { });
-        }
-
-        protected virtual internal async Task ButtonClickAsync(Button button)
-        {
-            await Task.Run(() => { });
-        }
     }
 
     public class AppSelector

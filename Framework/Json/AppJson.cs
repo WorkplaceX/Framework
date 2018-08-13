@@ -8,7 +8,7 @@
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
 
-    public class ComponentJson
+    public abstract class ComponentJson
     {
         /// <summary>
         /// Constructor for json deserialization.
@@ -69,6 +69,23 @@
             ComponentJson result = UtilServer.App.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
             return result;
         }
+
+        /// <summary>
+        /// Returns owner of type T. Searches in parent and grand parents.
+        /// </summary>
+        public static T Owner<T>(this ComponentJson component) where T : ComponentJson
+        {
+            do
+            {
+                component = Owner(component);
+                if (component is T)
+                {
+                    return (T)component;
+                }
+            } while (component != null);
+            return null;
+        }
+
 
         private static void ListAll(ComponentJson component, List<ComponentJson> result)
         {
@@ -165,7 +182,7 @@
         }
     }
 
-    public class AppJson : ComponentJson
+    public sealed class AppJson : ComponentJson
     {
         public AppJson() { }
 
@@ -233,7 +250,7 @@
     /// <summary>
     /// Json Button. Rendered as html button element.
     /// </summary>
-    public class Button : ComponentJson
+    public sealed class Button : ComponentJson
     {
         public Button() : this(null) { }
 
@@ -248,7 +265,7 @@
         public bool IsClick;
     }
 
-    public class Grid : ComponentJson
+    public sealed class Grid : ComponentJson
     {
         public Grid() : this(null) { }
 
@@ -278,12 +295,12 @@
         public List<GridRow> RowList;
     }
 
-    public class GridHeader
+    public sealed class GridHeader
     {
         public List<GridColumn> ColumnList;
     }
 
-    public class GridColumn
+    public sealed class GridColumn
     {
         public string Text;
 
@@ -294,7 +311,7 @@
         public bool IsModify;
     }
 
-    public class GridRow
+    public sealed class GridRow
     {
         public List<GridCell> CellList;
 
@@ -303,7 +320,7 @@
         public bool IsSelect;
     }
 
-    public class GridCell
+    public sealed class GridCell
     {
         public string Text;
 
@@ -315,7 +332,7 @@
         public int MergeId;
     }
 
-    public class Html : ComponentJson
+    public sealed class Html : ComponentJson
     {
         public Html() : this(null) { }
 
@@ -356,12 +373,22 @@
             await Task.Run(() => { });
         }
 
-        protected virtual internal async Task ButtonClickAsync(Button button)
+        protected virtual internal IQueryable GridLoadQuery(Grid grid)
+        {
+            return null;
+        }
+
+        protected virtual internal async Task GridRowSelectChangeAsync(Grid grid)
         {
             await Task.Run(() => { });
         }
 
         protected virtual internal async Task ProcessAsync()
+        {
+            await Task.Run(() => { });
+        }
+
+        protected virtual internal async Task ButtonClickAsync(Button button)
         {
             await Task.Run(() => { });
         }

@@ -10,14 +10,9 @@
         public static async Task ProcessAsync()
         {
             var app = UtilServer.App;
-            var pageList = app.AppJson.ListAll().OfType<Page>().ToList();
             foreach (Button button in app.AppJson.ListAll().OfType<Button>().Where(item => item.IsClick))
             {
-                await app.ButtonClickAsync(button);
-                foreach (Page page in pageList)
-                {
-                    await page.ButtonClickAsync(button);
-                }
+                await button.Owner<Page>().ButtonClickAsync(button);
                 button.IsClick = false;
             }
         }
