@@ -137,33 +137,57 @@
             return GetOrCreate<T>(owner, typeof(T).Name, init);
         }
 
-        public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, bool isVisibleRemove = true, Action<T> init = null) where T : Page
+        public enum PageShowEnum
+        {
+            /// <summary>
+            /// Add page to sibling pages.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Remove sibling pages.
+            /// </summary>
+            SiblingRemove = 1,
+
+            /// <summary>
+            /// Hide sibling pages and keep their state.
+            /// </summary>
+            SiblingHide = 2,
+        }
+
+        public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShow = PageShowEnum.None, Action<T> init = null) where T : Page
         {
             T result = null;
-            foreach (Page page in owner.List.OfType<Page>())
+            if (pageShow == PageShowEnum.SiblingHide)
             {
-                page.IsHide = true;
+                foreach (Page page in owner.List.OfType<Page>())
+                {
+                    page.IsHide = true; // Hide
+                }
             }
             if (Get(owner, name) == null)
             {
-                Page pageVisible = owner.List.OfType<Page>().Where(item => item.IsHide == false).SingleOrDefault();
-                pageVisible.Remove();
                 result = (T)Activator.CreateInstance(typeof(T), owner);
                 result.Name = name;
                 await result.InitAsync();
                 init?.Invoke(result);
             }
             result = Get<T>(owner, name);
-            if (result != null)
+            UtilFramework.Assert(result != null);
+            result.IsHide = false; // Show
+            if (pageShow == PageShowEnum.SiblingRemove)
             {
-                result.IsHide = false;
+                owner.List.OfType<Page>().ToList().ForEach(page =>
+                {
+                    if (page != result) { page.Remove(); }
+                });
             }
             return result;
         }
 
-        public static Task<T> PageShowAsync<T>(this ComponentJson owner, bool isVisibleRemove = true, Action<T> init = null) where T : Page
+        public static Task<T> PageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShow = PageShowEnum.None, Action<T> init = null) where T : Page
         {
-            return PageShowAsync<T>(owner, typeof(T).Name, isVisibleRemove, init);
+            return PageShowAsync<T>(owner, typeof(T).Name, pageShow, init);
         }
 
         public static void Remove(this ComponentJson component)
@@ -204,13 +228,15 @@
         internal async Task ProcessInternalAsync()
         {
             SessionState = UtilServer.Session.GetString("Main");
-            await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid
+            await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessAsync(); // Button
 
             foreach (Page page in UtilServer.AppInternal.AppJson.ListAll().OfType<Page>())
             {
                 await page.ProcessAsync();
             }
+
+            UtilServer.AppInternal.AppSession.Render(); // Grid render
         }
 
         /// <summary>
@@ -273,7 +299,7 @@
     /// </summary>
     public sealed class Button : ComponentJson
     {
-        public Button() : this(null) { }
+        public Button() { }
 
         public Button(ComponentJson owner)
             : base(owner)
@@ -288,7 +314,7 @@
 
     public sealed class Grid : ComponentJson
     {
-        public Grid() : this(null) { }
+        public Grid() { }
 
         public Grid(ComponentJson owner)
             : base(owner)
@@ -355,7 +381,7 @@
 
     public sealed class Html : ComponentJson
     {
-        public Html() : this(null) { }
+        public Html() { }
 
         public Html(ComponentJson owner)
             : base(owner)
@@ -368,11 +394,14 @@
 
     public class Page : ComponentJson
     {
-        public Page() : this(null)
+        public Page()
         {
             Type = typeof(Page).Name;
         }
 
+        /// <summary>
+        /// Constructor. Use method PageShowAsync(); to create new page.
+        /// </summary>
         public Page(ComponentJson owner)
             : base(owner)
         {

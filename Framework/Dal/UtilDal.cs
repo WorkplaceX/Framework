@@ -159,6 +159,17 @@
             UtilFramework.Assert(count == 1, "Update failed!");
         }
 
+        /// <summary>
+        /// Delete data record from database.
+        /// </summary>
+        public static async Task Delete(Row row)
+        {
+            DbContext dbContext = DbContext(row.GetType());
+            dbContext.Remove(row);
+            int count = await dbContext.SaveChangesAsync();
+            UtilFramework.Assert(count == 1, "Update failed!");
+        }
+
         internal static string CellTextFromValue(Row row, PropertyInfo propertyInfo)
         {
             object value = propertyInfo.GetValue(row);

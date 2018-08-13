@@ -233,11 +233,14 @@
             await ProcessGridSaveAsync();
             await ProcessGridRowSelect();
 
-            GridRender();
-
             // ResponseCount
             appInternal.AppSession.ResponseCount += 1;
             appInternal.AppJson.ResponseCount = ResponseCount;
+        }
+
+        public void Render()
+        {
+            GridRender();
         }
     }
 
