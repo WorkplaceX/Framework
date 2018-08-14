@@ -20,6 +20,9 @@
     {
         public int ResponseCount;
 
+        /// <summary>
+        /// Server side session state for each data grid.
+        /// </summary>
         public List<GridSession> GridSessionList = new List<GridSession>();
 
         /// <summary>

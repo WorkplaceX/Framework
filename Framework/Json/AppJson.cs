@@ -227,7 +227,6 @@
 
         internal async Task ProcessInternalAsync()
         {
-            SessionState = UtilServer.Session.GetString("Main");
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessAsync(); // Button
 
@@ -237,6 +236,8 @@
             }
 
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
+
+            SessionState = UtilServer.Session.GetString("Main") + "; Grid.Count=" + UtilServer.AppSession.GridSessionList.Count;
         }
 
         /// <summary>
@@ -264,6 +265,9 @@
 
         public string SessionApp { get; set; }
 
+        /// <summary>
+        /// Gets SessionState. Debug server side session state.
+        /// </summary>
         public string SessionState { get; set; }
 
         /// <summary>

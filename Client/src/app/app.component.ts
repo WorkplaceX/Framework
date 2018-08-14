@@ -145,14 +145,16 @@ export class Grid {
   }
 
   focus(row) {
-    if (!row.IsSelect) {
+    if (!row.IsSelect && !row.IsClick) {
+      console.log("F");
       row.IsClick = true;
       this.dataService.update();
     }
   }
 
   clickRow(row) {
-    if (!row.IsSelect) {
+    if (!row.IsSelect && !row.IsClick) {
+      console.log("C");
       row.IsClick = true;
       this.dataService.update();
     }

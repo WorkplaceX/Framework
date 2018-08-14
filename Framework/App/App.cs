@@ -56,8 +56,10 @@
                 int responseCount = result.AppSession.ResponseCount;
                 string browserUrl = result.AppJson.BrowserUrl;
                 result.AppJson = CreateAppJson(); // Reset
+                result.AppSession = new AppSession(); // Reset
                 result.AppJson.RequestCount = requestCount;
                 result.AppJson.ResponseCount = responseCount;
+                result.AppSession.ResponseCount = responseCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.IsInit = true;
                 await result.AppJson.InitInternalAsync();
