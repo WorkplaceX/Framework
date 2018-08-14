@@ -5,6 +5,7 @@
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -41,9 +42,12 @@
         {
             public int GridIndex;
 
-            public Grid Grid;
-
             public GridSession GridSession;
+
+            /// <summary>
+            /// Can be null if grid has been removed from json.
+            /// </summary>
+            public Grid Grid;
 
             public List<GridRowItem> GridRowList = new List<GridRowItem>();
         }
@@ -52,9 +56,15 @@
         {
             public int RowIndex;
 
-            public GridRow GridRow;
-
+            /// <summary>
+            /// Can be null if second loaded grid has less records.
+            /// </summary>
             public GridRowSession GridRowSession;
+
+            /// <summary>
+            /// Can be null if not yet rendered.
+            /// </summary>
+            public GridRow GridRow;
 
             public List<GridCellItem> GridCellList = new List<GridCellItem>();
         }
@@ -63,38 +73,83 @@
         {
             public int CellIndex;
 
-            public GridCell GridCell;
-
             public GridCellSession GridCellSession;
+
+            public GridCell GridCell;
+        }
+
+        /// <summary>
+        /// Returns (GridIndex, Grid).
+        /// </summary>
+        private static Dictionary<int, Grid> GridList(AppSession appSession)
+        {
+            var result = new Dictionary<int, Grid>();
+            foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
+            {
+                if (grid.Id != null) // Grid gets Id once it's loaded.
+                {
+                    int gridIndex = grid.Index();
+                    UtilFramework.Assert(gridIndex < appSession.GridSessionList.Count); // Grid needs entry in session
+                    result.Add(gridIndex, grid);
+                }
+            }
+            return result;
+        }
+
+        private static T TryGetValue<T>(this List<T> list, int index)
+        {
+            if (list.Count > index)
+            {
+                return list[index];
+            }
+            else
+            {
+                return default(T);
+            }
         }
 
         public static List<GridItem> GridItemList(AppSession appSession)
         {
-            List<GridItem> result = new List<GridItem>();
-            foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
+            var result = new List<GridItem>();
+            var gridList = GridList(appSession);
+            for (int gridIndex = 0; gridIndex < appSession.GridSessionList.Count; gridIndex++)
             {
-                if (grid.Id != null)
+                GridSession gridSession = appSession.GridSessionList[gridIndex];
+                GridItem gridItem = new GridItem();
+                result.Add(gridItem);
+
+                // Grid
+                gridItem.GridIndex = gridIndex;
+                gridItem.GridIndex = gridIndex;
+                gridItem.GridSession = appSession.GridSessionList[gridIndex];
+
+                gridList.TryGetValue(gridIndex, out Grid grid);
+                gridItem.Grid = grid;
+                int rowCount = Math.Max(appSession.GridSessionList.Count, (grid?.RowList?.Count).GetValueOrDefault());
+                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
                 {
-                    int gridIndex = grid.Index();
-                    GridSession gridSession = appSession.GridSessionList[gridIndex];
-                    if (grid.RowList != null) // Process incoming grid. If created new it does not yet have rows rendered.
+                    GridRowItem gridRowItem = new GridRowItem();
+                    gridItem.GridRowList.Add(gridRowItem);
+                    GridRowSession gridRowSession = gridSession.GridRowSessionList.TryGetValue(rowIndex);
+                    GridRow gridRow = grid?.RowList?.TryGetValue(rowIndex);
+
+                    // Row
+                    gridRowItem.RowIndex = rowIndex;
+                    gridRowItem.GridRowSession = gridRowSession;
+                    gridRowItem.GridRow = gridRow;
+
+                    int cellCount = Math.Max(gridRowSession == null ? 0 : gridRowSession.GridCellSessionList.Count, (gridRow?.CellList.Count).GetValueOrDefault());
+                    for (int cellIndex = 0; cellIndex < cellCount; cellIndex++)
                     {
-                        GridItem gridItem = new GridItem() { GridIndex = gridIndex, Grid = grid, GridSession = gridSession };
-                        result.Add(gridItem);
-                        for (int rowIndex = 0; rowIndex < grid.RowList.Count; rowIndex++)
-                        {
-                            GridRow gridRow = grid.RowList[rowIndex];
-                            GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
-                            GridRowItem gridRowItem = new GridRowItem() { RowIndex = rowIndex, GridRow = gridRow, GridRowSession = gridRowSession };
-                            gridItem.GridRowList.Add(gridRowItem);
-                            for (int cellIndex = 0; cellIndex < gridRow.CellList.Count; cellIndex++)
-                            {
-                                GridCell gridCell = gridRow.CellList[cellIndex];
-                                GridCellSession gridCellSession = gridRowSession.GridCellSessionList[cellIndex];
-                                GridCellItem gridCellItem = new GridCellItem() { CellIndex = cellIndex, GridCell = gridCell, GridCellSession = gridCellSession };
-                                gridRowItem.GridCellList.Add(gridCellItem);
-                            }
-                        }
+                        GridCellItem gridCellItem = new GridCellItem();
+                        gridRowItem.GridCellList.Add(gridCellItem);
+                        GridCellSession gridCellSession = gridRowSession?.GridCellSessionList.TryGetValue(cellIndex);
+                        GridCell gridCell = gridRow?.CellList?.TryGetValue(cellIndex);
+
+                        // Cell
+                        gridCellItem.CellIndex = cellIndex;
+                        gridCellItem.GridCellSession = gridCellSession;
+                        gridCellItem.GridCell = gridCell;
                     }
                 }
             }

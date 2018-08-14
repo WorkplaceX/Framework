@@ -344,6 +344,16 @@
         public GridHeader Header;
 
         public List<GridRow> RowList;
+
+        public Grid GridLookup()
+        {
+            if (List.Count == 0 || !(List[0] is Grid))
+            {
+                List.Clear();
+                new Grid(this);
+            }
+            return (Grid)List[0];
+        }
     }
 
     public sealed class GridHeader

@@ -273,7 +273,7 @@
                 {
                     foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                     {
-                        if (gridCellItem.GridCell.IsModify)
+                        if (gridCellItem.GridCell?.IsModify == true)
                         {
                             gridCellItem.GridCellSession.IsLookup = true;
                         }
@@ -290,7 +290,7 @@
                 int rowIndexIsClick = -1;
                 foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                 {
-                    if (gridRowItem.GridRow.IsClick)
+                    if (gridRowItem.GridRow?.IsClick == true)
                     {
                         rowIndexIsClick = gridRowItem.RowIndex;
                         break;
