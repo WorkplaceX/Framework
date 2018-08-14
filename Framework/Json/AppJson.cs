@@ -439,6 +439,11 @@
             await Task.Run(() => { });
         }
 
+        /// <summary>
+        /// Returns query to load data grid. Override this method to define sql query.
+        /// </summary>
+        /// <param name="grid">Grid to get query to load.</param>
+        /// <returns>If value null, grid has no header and rows. If value is method UtilDal.QueryEmpty(); grid has header but no rows.</returns>
         protected virtual internal IQueryable GridLoadQuery(Grid grid)
         {
             return null;
