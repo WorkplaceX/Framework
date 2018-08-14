@@ -5,7 +5,9 @@
     using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.EntityFrameworkCore.Metadata.Conventions;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Reflection;
     using System.Threading.Tasks;
 
@@ -154,10 +156,25 @@
         }
 
         /// <summary>
+        /// Select data from database.
+        /// </summary>
+        public static async Task<List<Row>> SelectAsync(IQueryable query)
+        {
+            UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));
+
+            var list = await query.ToDynamicListAsync();
+            List<Row> result = list.Cast<Row>().ToList();
+            return result;
+        }
+
+
+        /// <summary>
         /// Update data record on database.
         /// </summary>
         public static async Task UpdateAsync(Row row, Row rowNew)
         {
+            UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
+
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
             DbContext dbContext = DbContext(row.GetType());
@@ -183,6 +200,8 @@
         /// </summary>
         public static async Task<TRow> InsertAsync<TRow>(TRow row) where TRow : Row
         {
+            UtilFramework.LogDebug(string.Format("INSERT ({0})", row.GetType().Name));
+
             Row rowCopy = UtilDal.RowCopy(row);
             DbContext dbContext = DbContext(row.GetType());
             dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.

@@ -7,8 +7,10 @@ namespace Framework
     using Framework.Server;
     using Newtonsoft.Json;
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Reflection;
+    using System.Threading;
 
     public class UtilFramework
     {
@@ -187,9 +189,19 @@ namespace Framework
             return result;
         }
 
-        internal static string DateTimeToString(DateTime dateTime)
+        internal static string DateTimeToString(DateTime dateTime, bool isThousand = false)
         {
-            return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+            string format = "yyyy-MM-dd HH:mm:ss";
+            if (isThousand)
+            {
+                format += ".fff";
+            }
+            return dateTime.ToString(format);
+        }
+
+        internal static void LogDebug(string text)
+        {
+            Debug.WriteLine("### {0} {1}", UtilFramework.DateTimeToString(DateTime.Now, true), text);
         }
 
         /// <summary>

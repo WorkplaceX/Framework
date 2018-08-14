@@ -113,7 +113,7 @@ export class Button {
         <input type="text" value="{{ item.SearchText }}">
       </th>
     </tr>
-    <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row)">
+    <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row, $event)">
       <td *ngFor="let cell of row.CellList; trackBy trackBy">
         <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
         <div data-Grid *ngIf="cell.IsLookup && json.List?.length > 0" [json]="json.List[0]" class="gridLookup"></div>
@@ -152,7 +152,8 @@ export class Grid {
     }
   }
 
-  clickRow(row) {
+  clickRow(row, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     if (!row.IsSelect && !row.IsClick) {
       console.log("C");
       row.IsClick = true;

@@ -4,11 +4,9 @@
     using Framework.Dal;
     using Framework.Json;
     using Framework.Server;
-    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Dynamic.Core;
     using System.Reflection;
     using System.Threading.Tasks;
     using static Framework.Session.UtilSession;
@@ -92,8 +90,7 @@
             List<Row> rowList = null;
             if (query != null)
             {
-                var list = await query.ToDynamicListAsync();
-                rowList = list.Cast<Row>().ToList();
+                rowList = await UtilDal.SelectAsync(query);
             }
             GridLoad(grid, rowList, query?.ElementType);
         }
