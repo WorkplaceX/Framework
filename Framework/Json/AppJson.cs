@@ -203,7 +203,7 @@
             Row result = null;
             if (grid.Id != null) // Loaded
             {
-                result = UtilServer.AppInternal.AppSession.GridSessionList[grid.Index()].RowSessionList.Where(rowSession => rowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
+                result = UtilServer.AppInternal.AppSession.GridSessionList[grid.Index()].GridRowSessionList.Where(gridRowSession => gridRowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
             }
             return result;
         }
@@ -377,6 +377,8 @@
         /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
         /// </summary>
         public int MergeId;
+
+        public bool IsLookup;
     }
 
     public sealed class Html : ComponentJson

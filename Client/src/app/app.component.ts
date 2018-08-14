@@ -115,7 +115,8 @@ export class Button {
     </tr>
     <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row)">
       <td *ngFor="let cell of row.CellList; trackBy trackBy">
-      <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
+        <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
+        <div *ngIf="cell.IsLookup" class="gridLookup">Lookup</div>
       </td>
     </tr>
   </table>
