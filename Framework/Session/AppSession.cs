@@ -13,6 +13,9 @@
     using System.Threading.Tasks;
     using static Framework.Session.UtilSession;
 
+    /// <summary>
+    /// Application server side session state. Get it with property UtilServer.AppInternal.AppSession
+    /// </summary>
     internal class AppSession
     {
         public int ResponseCount;
@@ -102,8 +105,7 @@
         /// </summary>
         public void GridRender()
         {
-            AppInternal appInternal = UtilServer.AppInternal;
-            foreach (Grid grid in appInternal.AppJson.ListAll().OfType<Grid>())
+            foreach (Grid grid in UtilServer.AppJson.ListAll().OfType<Grid>())
             {
                 if (grid.Id != null)
                 {
@@ -145,10 +147,8 @@
 
         private async Task ProcessGridSaveAsync()
         {
-            AppInternal appInternal = UtilServer.AppInternal;
-
             // RowUpdate
-            foreach (var grid in appInternal.AppJson.ListAll().OfType<Grid>())
+            foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
             {
                 if (grid.Id != null)
                 {

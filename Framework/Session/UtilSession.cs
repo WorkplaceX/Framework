@@ -71,8 +71,7 @@
         public static List<GridItem> GridItemList(AppSession appSession)
         {
             List<GridItem> result = new List<GridItem>();
-            AppInternal appInternal = UtilServer.AppInternal;
-            foreach (var grid in appInternal.AppJson.ListAll().OfType<Grid>())
+            foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
             {
                 if (grid.Id != null)
                 {

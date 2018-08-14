@@ -68,34 +68,34 @@
             // Process
             await result.AppJson.ProcessInternalAsync();
 
-            RenderVersion(result); // Version tag
+            RenderVersion(result.AppJson); // Version tag
 
             UtilFramework.Assert(result.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
             return result;
         }
 
-        private void RenderVersion(AppInternal appInternal)
+        private void RenderVersion(AppJson appJson)
         {
             // Version
-            appInternal.AppJson.Version = UtilFramework.Version;
-            appInternal.AppJson.VersionBuild = UtilFramework.VersionBuild;
+            appJson.Version = UtilFramework.Version;
+            appJson.VersionBuild = UtilFramework.VersionBuild;
 
             // Session
-            appInternal.AppJson.Session = UtilServer.Session.Id;
-            if (string.IsNullOrEmpty(appInternal.AppJson.SessionApp))
+            appJson.Session = UtilServer.Session.Id;
+            if (string.IsNullOrEmpty(appJson.SessionApp))
             {
-                appInternal.AppJson.SessionApp = UtilServer.Session.Id;
+                appJson.SessionApp = UtilServer.Session.Id;
             }
 
             // IsReload
-            if (UtilServer.Session.Id != appInternal.AppJson.SessionApp) // Session expired!
+            if (UtilServer.Session.Id != appJson.SessionApp) // Session expired!
             {
-                appInternal.AppJson.IsReload = true;
+                appJson.IsReload = true;
             }
 
             // RequestUrl
-            appInternal.AppJson.RequestUrl = UtilServer.RequestUrl(false);
+            appJson.RequestUrl = UtilServer.RequestUrl(false);
         }
 
         private AppJson CreateAppJson()

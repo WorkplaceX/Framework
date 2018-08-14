@@ -68,7 +68,7 @@
     {
         public static ComponentJson Owner(this ComponentJson component)
         {
-            ComponentJson result = UtilServer.AppInternal.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
+            ComponentJson result = UtilServer.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
             return result;
         }
 
@@ -231,7 +231,7 @@
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessAsync(); // Button
 
-            foreach (Page page in UtilServer.AppInternal.AppJson.ListAll().OfType<Page>())
+            foreach (Page page in UtilServer.AppJson.ListAll().OfType<Page>())
             {
                 await page.ProcessAsync();
             }
