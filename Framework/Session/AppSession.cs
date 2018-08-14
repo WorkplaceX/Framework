@@ -112,14 +112,14 @@
         {
             foreach (Grid grid in UtilServer.AppJson.ListAll().OfType<Grid>())
             {
+                // Grid reset
+                grid.Header = new GridHeader();
+                grid.Header.ColumnList = new List<GridColumn>();
+                grid.RowList = new List<GridRow>();
+
                 if (grid.Id != null)
                 {
                     GridSession gridSession = GridSessionList[grid.Index()];
-
-                    // Grid reset
-                    grid.Header = new GridHeader();
-                    grid.Header.ColumnList = new List<GridColumn>();
-                    grid.RowList = new List<GridRow>();
 
                     if (gridSession.GridIsEmpty() == false) // Otherwise grid has no header columns
                     {

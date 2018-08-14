@@ -59,7 +59,7 @@
         /// <summary>
         /// Gets json list.
         /// </summary>
-        public List<ComponentJson> List = new List<ComponentJson>();
+        public List<ComponentJson> List = new List<ComponentJson>(); // Empty list is removed by json serializer.
 
         public string Name;
     }
