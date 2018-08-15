@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Framework
 {
     using Framework.Server;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Newtonsoft.Json;
     using System;
     using System.Diagnostics;
@@ -201,6 +202,7 @@ namespace Framework
 
         internal static void LogDebug(string text)
         {
+            TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging
             Debug.WriteLine("### {0} {1}", UtilFramework.DateTimeToString(DateTime.Now, true), text);
         }
 

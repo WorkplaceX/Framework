@@ -2,7 +2,6 @@
 {
     using Framework.Application;
     using Framework.Config;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -26,8 +25,6 @@
                 options.IdleTimeout = TimeSpan.FromSeconds(60);
             });
             services.AddCors();
-
-            TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging
         }
 
         public static void Configure(IApplicationBuilder applicationBuilder, AppSelector appSelector)
