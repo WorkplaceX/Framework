@@ -39,7 +39,7 @@
         private static void BuildServer()
         {
             string folderName = UtilFramework.FolderName + "Application.Server/";
-            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.0/publish/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.1/publish/";
 
             UtilCli.FolderNameDelete(folderNamePublish);
             UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
