@@ -3,6 +3,7 @@
     using Framework.App;
     using Framework.Dal;
     using Framework.Server;
+    using Framework.Session;
     using Microsoft.AspNetCore.Http;
     using System;
     using System.Collections.Generic;
@@ -379,6 +380,8 @@
         public bool IsClick;
 
         public bool IsSelect;
+
+        public GridRowEnum RowEnum;
     }
 
     public sealed class GridCell

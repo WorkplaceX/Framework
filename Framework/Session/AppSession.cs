@@ -24,20 +24,21 @@
         public List<GridSession> GridSessionList = new List<GridSession>();
 
         /// <summary>
-        /// Load a single row.
+        /// Load a single row and create its cells.
         /// </summary>
-        private void GridLoad(int gridIndex, int rowIndex, Row row, Type typeRow, ref PropertyInfo[] propertyInfoList)
+        private void GridLoad(int gridIndex, int rowIndex, Row row, Type typeRow, GridRowEnum gridRowEnum, ref PropertyInfo[] propertyInfoListCache)
         {
-            if (propertyInfoList == null)
+            if (propertyInfoListCache == null)
             {
-                propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
+                propertyInfoListCache = UtilDal.TypeRowToPropertyInfoList(typeRow);
             }
 
             GridSession gridSession = GridSessionList[gridIndex];
             GridRowSession gridRowSession = new GridRowSession();
             gridSession.GridRowSessionList[rowIndex] = gridRowSession;
             gridRowSession.Row = row;
-            foreach (PropertyInfo propertyInfo in propertyInfoList)
+            gridRowSession.GridRowEnum = gridRowEnum;
+            foreach (PropertyInfo propertyInfo in propertyInfoListCache)
             {
                 GridCellSession gridCellSession = new GridCellSession();
                 gridRowSession.GridCellSessionList.Add(gridCellSession);
@@ -50,13 +51,21 @@
             }
         }
 
+        private void GridLoadAddFilter(int gridIndex)
+        {
+            GridSession gridSession = GridSessionList[gridIndex];
+            gridSession.GridRowSessionList.Insert(0, new GridRowSession());
+            PropertyInfo[] propertyInfoList = null;
+            GridLoad(gridIndex, 0, null, gridSession.TypeRow, GridRowEnum.Filter, ref propertyInfoList);
+        }
+
         private void GridLoadAddRowNew(int gridIndex)
         {
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.GridRowSessionList.Add(new GridRowSession());
             int rowIndex = gridSession.GridRowSessionList.Count - 1;
             PropertyInfo[] propertyInfoList = null;
-            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, ref propertyInfoList);
+            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref propertyInfoList);
         }
 
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
@@ -79,8 +88,9 @@
                     GridRowSession gridRowSession = new GridRowSession();
                     gridSession.GridRowSessionList.Add(gridRowSession);
                     Row row = rowList[rowIndex];
-                    GridLoad(gridIndex, rowIndex, row, typeRow, ref propertyInfoList);
+                    GridLoad(gridIndex, rowIndex, row, typeRow, GridRowEnum.Index, ref propertyInfoList);
                 }
+                GridLoadAddFilter(gridIndex); // Add "filter row".
                 GridLoadAddRowNew(gridIndex); // Add one "new row" to end of grid.
             }
         }
@@ -128,6 +138,7 @@
                         if (gridRowItem.GridRowSession != null)
                         {
                             GridRow gridRow = new GridRow();
+                            gridRow.RowEnum = gridRowItem.GridRowSession.GridRowEnum;
                             gridItem.Grid.RowList.Add(gridRow);
                             gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
                             gridRow.CellList = new List<GridCell>();
@@ -244,7 +255,7 @@
 
                             // Load new primary key into data grid.
                             PropertyInfo[] propertyInfoList = null;
-                            GridLoad(gridIndex, rowIndex, rowNew, gridSession.TypeRow, ref propertyInfoList);
+                            GridLoad(gridIndex, rowIndex, rowNew, gridSession.TypeRow, GridRowEnum.Index, ref propertyInfoList);
 
                             // Add new "insert row" at end of data grid.
                             GridLoadAddRowNew(gridIndex);
@@ -369,6 +380,17 @@
         public string Error;
 
         public List<GridCellSession> GridCellSessionList = new List<GridCellSession>();
+
+        public GridRowEnum GridRowEnum;
+    }
+
+    public enum GridRowEnum
+    {
+        None = 0,
+        Filter = 1,
+        Index = 2,
+        New = 3,
+        Total = 4
     }
 
     internal class GridCellSession
