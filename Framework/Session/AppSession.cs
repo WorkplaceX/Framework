@@ -30,7 +30,7 @@
         {
             if (propertyInfoList == null)
             {
-                propertyInfoList = UtilDal.TypeRowToPropertyList(typeRow);
+                propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
             }
 
             GridSession gridSession = GridSessionList[gridIndex];
@@ -73,7 +73,7 @@
 
             if (rowList != null)
             {
-                PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(typeRow);
+                PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
                 for (int rowIndex = 0; rowIndex < rowList.Count; rowIndex++)
                 {
                     GridRowSession gridRowSession = new GridRowSession();
@@ -120,7 +120,7 @@
 
                     if (gridSession.GridIsEmpty() == false) // Otherwise grid has no header columns
                     {
-                        PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(gridSession.TypeRow);
+                        PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(gridSession.TypeRow);
 
                         // Grid Header
                         foreach (PropertyInfo propertyInfo in propertyInfoList)
@@ -164,7 +164,7 @@
                     GridSession gridSession = GridSessionList[gridIndex];
                     if (gridSession.GridIsEmpty() == false)
                     {
-                        PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyList(gridSession.TypeRow);
+                        PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(gridSession.TypeRow);
                         if (grid.RowList != null) // Process incoming grid. Has no rows rendered if new created.
                         {
                             for (int rowIndex = 0; rowIndex < grid.RowList?.Count; rowIndex++)

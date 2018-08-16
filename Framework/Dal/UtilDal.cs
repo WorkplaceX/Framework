@@ -17,7 +17,7 @@
 
     public static class UtilDal
     {
-        internal static PropertyInfo[] TypeRowToPropertyList(Type typeRow)
+        internal static PropertyInfo[] TypeRowToPropertyInfoList(Type typeRow)
         {
             return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         }
@@ -37,7 +37,7 @@
             var entity = builder.Entity(typeRow);
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
             entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName); // By default EF maps sql table name to class name.
-            PropertyInfo[] propertyInfoList = TypeRowToPropertyList(typeRow);
+            PropertyInfo[] propertyInfoList = TypeRowToPropertyInfoList(typeRow);
             bool isPrimaryKey = false; // Sql view 
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
@@ -113,7 +113,7 @@
         /// </summary>
         internal static void RowCopy(Row rowSource, Row rowDest)
         {
-            var propertyInfoDestList = UtilDal.TypeRowToPropertyList(rowDest.GetType());
+            var propertyInfoDestList = UtilDal.TypeRowToPropertyInfoList(rowDest.GetType());
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
             {
                 string columnName = propertyInfoDest.Name;
