@@ -1,6 +1,7 @@
 ﻿namespace Framework.Session
 {
     using Framework.Application;
+    using Framework.Dal;
     using Framework.Json;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     internal static class UtilSession
     {
@@ -49,7 +51,16 @@
             /// </summary>
             public Grid Grid;
 
+            public List<GridColumnItem> GridColumnItemList = new List<GridColumnItem>();
+
             public List<GridRowItem> GridRowList = new List<GridRowItem>();
+        }
+
+        public class GridColumnItem
+        {
+            public int CellIndex;
+
+            public PropertyInfo PropertyInfo;
         }
 
         public class GridRowItem
@@ -76,6 +87,8 @@
             public GridCellSession GridCellSession;
 
             public GridCell GridCell;
+
+            public PropertyInfo PropertyInfo;
         }
 
         /// <summary>
@@ -118,14 +131,27 @@
                 GridItem gridItem = new GridItem();
                 result.Add(gridItem);
 
-                // Grid
+                // Set Grid
                 gridItem.GridIndex = gridIndex;
                 gridItem.GridIndex = gridIndex;
                 gridItem.GridSession = appSession.GridSessionList[gridIndex];
 
                 gridList.TryGetValue(gridIndex, out Grid grid);
                 gridItem.Grid = grid;
-                int rowCount = Math.Max(appSession.GridSessionList.Count, (grid?.RowList?.Count).GetValueOrDefault());
+
+                var propertyInfoList = UtilDal.TypeRowToPropertyInfoList(gridItem.GridSession.TypeRow);
+                gridItem.GridColumnItemList = new List<GridColumnItem>();
+                for (int cellIndex = 0; cellIndex < propertyInfoList.Length; cellIndex++)
+                {
+                    GridColumnItem gridColumnItem = new GridColumnItem();
+                    gridItem.GridColumnItemList.Add(gridColumnItem);
+
+                    // Set Column
+                    gridColumnItem.CellIndex = cellIndex;
+                    gridColumnItem.PropertyInfo = propertyInfoList[cellIndex];
+                }
+
+                int rowCount = Math.Max(gridSession.GridRowSessionList.Count, (grid?.RowList?.Count).GetValueOrDefault());
                 for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
                 {
                     GridRowItem gridRowItem = new GridRowItem();
@@ -133,7 +159,7 @@
                     GridRowSession gridRowSession = gridSession.GridRowSessionList.TryGetValue(rowIndex);
                     GridRow gridRow = grid?.RowList?.TryGetValue(rowIndex);
 
-                    // Row
+                    // Set Row
                     gridRowItem.RowIndex = rowIndex;
                     gridRowItem.GridRowSession = gridRowSession;
                     gridRowItem.GridRow = gridRow;
@@ -146,10 +172,14 @@
                         GridCellSession gridCellSession = gridRowSession?.GridCellSessionList.TryGetValue(cellIndex);
                         GridCell gridCell = gridRow?.CellList?.TryGetValue(cellIndex);
 
-                        // Cell
+                        // Set Cell
                         gridCellItem.CellIndex = cellIndex;
                         gridCellItem.GridCellSession = gridCellSession;
                         gridCellItem.GridCell = gridCell;
+                        if (gridCellSession != null)
+                        {
+                            gridCellItem.PropertyInfo = propertyInfoList[cellIndex];
+                        }
                     }
                 }
             }

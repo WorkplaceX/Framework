@@ -107,45 +107,43 @@
         /// </summary>
         public void GridRender()
         {
-            foreach (Grid grid in UtilServer.AppJson.ListAll().OfType<Grid>())
+            foreach (GridItem gridItem in UtilSession.GridItemList(this))
             {
-                // Grid reset
-                grid.Header = new GridHeader();
-                grid.Header.ColumnList = new List<GridColumn>();
-                grid.RowList = new List<GridRow>();
+                // Grid Reset
+                gridItem.Grid.Header = new GridHeader();
+                gridItem.Grid.Header.ColumnList = new List<GridColumn>();
+                gridItem.Grid.RowList = new List<GridRow>();
 
-                if (grid.Id != null)
+                if (gridItem.Grid?.Id != null && gridItem.GridSession.GridIsEmpty() == false) // Otherwise grid is not loaded or has no header columns.
                 {
-                    GridSession gridSession = GridSessionList[grid.Index()];
-
-                    if (gridSession.GridIsEmpty() == false) // Otherwise grid has no header columns
+                    // Grid Header
+                    foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                     {
-                        PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(gridSession.TypeRow);
+                        gridItem.Grid.Header.ColumnList.Add(new GridColumn() { Text = gridColumnItem.PropertyInfo.Name });
+                    }
 
-                        // Grid Header
-                        foreach (PropertyInfo propertyInfo in propertyInfoList)
-                        {
-                            grid.Header.ColumnList.Add(new GridColumn() { Text = propertyInfo.Name });
-                        }
-
-                        // Grid Row, Cell
-                        foreach (GridRowSession gridRowSession in gridSession.GridRowSessionList)
+                    // Grid Row
+                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                    {
+                        if (gridRowItem.GridRowSession != null)
                         {
                             GridRow gridRow = new GridRow();
-                            grid.RowList.Add(gridRow);
-                            gridRow.IsSelect = gridRowSession.IsSelect;
+                            gridItem.Grid.RowList.Add(gridRow);
+                            gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
                             gridRow.CellList = new List<GridCell>();
-                            for (int cellIndex = 0; cellIndex < propertyInfoList.Length; cellIndex++)
-                            {
-                                PropertyInfo propertyInfo = propertyInfoList[cellIndex];
-                                GridCellSession gridCellSession = gridRowSession.GridCellSessionList[cellIndex];
 
-                                GridCell gridCell = new GridCell();
-                                gridRow.CellList.Add(gridCell);
-                                gridCell.Text = gridCellSession.Text;
-                                gridCell.IsModify = gridCellSession.IsModify;
-                                gridCell.MergeId = gridCellSession.MergeId;
-                                gridCell.IsLookup = gridCellSession.IsLookup;
+                            // Grid Cell
+                            foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                            {
+                                if (gridCellItem.GridCellSession != null)
+                                {
+                                    GridCell gridCell = new GridCell();
+                                    gridRow.CellList.Add(gridCell);
+                                    gridCell.Text = gridCellItem.GridCellSession.Text;
+                                    gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
+                                    gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
+                                    gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
+                                }
                             }
                         }
                     }
@@ -310,9 +308,19 @@
                 {
                     foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                     {
-                        gridRowItem.GridRowSession.IsSelect = false;
+                        if (gridRowItem.GridRowSession != null) // Outgoing grid might have less rows
+                        {
+                            gridRowItem.GridRowSession.IsSelect = false;
+                        }
                     }
-                    gridItem.GridRowList[rowIndexIsClick].GridRowSession.IsSelect = true;
+                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                    {
+                        if (gridRowItem.GridRowSession != null && gridRowItem.RowIndex == rowIndexIsClick) 
+                        {
+                            gridRowItem.GridRowSession.IsSelect = true;
+                            break;
+                        }
+                    }
                     await gridItem.Grid.Owner<Page>().GridRowSelectChangeAsync(gridItem.Grid);
                 }
             }
