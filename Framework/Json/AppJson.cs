@@ -365,12 +365,6 @@
     public sealed class GridColumn
     {
         public string Text;
-
-        public string SearchText;
-
-        public bool IsClick;
-
-        public bool IsModify;
     }
 
     public sealed class GridRow

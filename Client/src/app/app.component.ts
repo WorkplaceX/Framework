@@ -108,11 +108,6 @@ export class Button {
         {{ item.Text }}
       </th>
     </tr>
-    <tr>
-      <th *ngFor="let item of json.Header.ColumnList; trackBy trackBy">
-        <input type="text" value="{{ item.SearchText }}">
-      </th>
-    </tr>
     <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row, $event)">
       <td *ngFor="let cell of row.CellList; trackBy trackBy">
         <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
