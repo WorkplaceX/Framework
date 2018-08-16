@@ -10,6 +10,7 @@
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
+    using static Framework.Session.UtilSession;
 
     public abstract class ComponentJson
     {
@@ -228,7 +229,7 @@
 
         internal async Task ProcessInternalAsync()
         {
-            await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
+            await UtilServer.AppInternal.AppSession. ProcessAsync(); // Grid process
             await UtilApp.ProcessAsync(); // Button
 
             foreach (Page page in UtilServer.AppJson.ListAll().OfType<Page>())
@@ -346,6 +347,23 @@
 
         public List<GridRow> RowList;
 
+        public int? LookupGridIndex;
+
+        public int? LookupRowIndex;
+
+        public int? CellIndex;
+
+        /// <summary>
+        /// Returns true, if grid is a Lookup grid.
+        /// </summary>
+        internal bool IsLookupOpen()
+        {
+            return LookupGridIndex != null;
+        }
+
+        /// <summary>
+        /// Returns Lookup for this grid.
+        /// </summary>
         public Grid GridLookup()
         {
             if (List.Count == 0 || !(List[0] is Grid))
@@ -354,6 +372,40 @@
                 new Grid(this);
             }
             return (Grid)List[0];
+        }
+
+        /// <summary>
+        /// Opens Lookup for this grid.
+        /// </summary>
+        internal void GridLookupOpen(GridItem gridItem, GridRowItem gridRowItem, GridCellItem gridCellItem)
+        {
+            UtilFramework.Assert(UtilSession.GridToIndex(this) == gridItem.GridIndex);
+
+            int gridIndex = UtilSession.GridToIndex(this);
+            int rowIndex = gridRowItem.RowIndex;
+            int cellIndex = gridCellItem.CellIndex;
+
+            Grid lookup = GridLookup();
+            lookup.LookupGridIndex = gridIndex;
+            lookup.LookupRowIndex = rowIndex;
+            lookup.CellIndex = cellIndex;
+
+            GridLookupClose(gridItem);
+            gridCellItem.GridCellSession.IsLookup = true;
+        }
+
+        /// <summary>
+        /// Closes Lookup of this grid.
+        /// </summary>
+        internal void GridLookupClose(GridItem gridItem)
+        {
+            foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+            {
+                foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                {
+                    gridCellItem.GridCellSession.IsLookup = false;
+                }
+            }
         }
     }
 
@@ -441,12 +493,22 @@
         /// </summary>
         /// <param name="grid">Grid to get query to load.</param>
         /// <returns>If value null, grid has no header and rows. If value is method UtilDal.QueryEmpty(); grid has header but no rows.</returns>
-        protected virtual internal IQueryable GridLoadQuery(Grid grid)
+        protected virtual internal IQueryable GridQuery(Grid grid)
         {
             return null;
         }
 
-        protected virtual internal async Task GridRowSelectChangeAsync(Grid grid)
+        protected virtual internal async Task GridSelectedAsync(Grid grid)
+        {
+            await Task.Run(() => { });
+        }
+
+        protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
+        {
+            return null;
+        }
+
+        protected virtual internal async Task GridLookupSelectedAsync(Grid grid, Row row, string fieldName, Grid gridLookup, Row rowLookup)
         {
             await Task.Run(() => { });
         }

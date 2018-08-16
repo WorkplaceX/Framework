@@ -89,6 +89,14 @@
             public GridCell GridCell;
 
             public PropertyInfo PropertyInfo;
+
+            public string FieldName
+            {
+                get
+                {
+                    return PropertyInfo.Name;
+                }
+            }
         }
 
         /// <summary>
@@ -121,8 +129,13 @@
             }
         }
 
-        public static List<GridItem> GridItemList(AppSession appSession)
+        /// <summary>
+        /// Merges incoming data grid (json) and outgoing grid (session) into one data structure.
+        /// </summary>
+        public static List<GridItem> GridItemList()
         {
+            AppSession appSession = UtilServer.AppSession;
+
             var result = new List<GridItem>();
             var gridList = GridList(appSession);
             for (int gridIndex = 0; gridIndex < appSession.GridSessionList.Count; gridIndex++)
@@ -184,6 +197,67 @@
                 }
             }
             return result;
+        }
+
+        public static int GridToIndex(Grid grid)
+        {
+            return (int)grid.Id - 1;
+        }
+
+        public static Grid GridFromIndex(int gridIndex)
+        {
+            return UtilServer.AppJson.ListAll().OfType<Grid>().Where(item => item.Id == gridIndex + 1).Single();
+        }
+
+        public static int GridRowToIndex(Grid grid, Row row)
+        {
+            int result = -1;
+
+            AppSession appSession = UtilServer.AppSession;
+            int gridIndex = GridToIndex(grid);
+
+            for (int rowIndex = 0; rowIndex < appSession.GridSessionList[gridIndex].GridRowSessionList.Count; rowIndex++)
+            {
+                GridRowSession gridRowSession = appSession.GridSessionList[gridIndex].GridRowSessionList[rowIndex];
+                if (gridRowSession.Row == row)
+                {
+                    result = gridIndex;
+                    break;
+                }
+            }
+
+            UtilFramework.Assert(result != -1, "Grid not found!");
+            return result;
+        }
+
+        public static Row GridRowFromIndex(int gridIndex, int rowIndex)
+        {
+            AppSession appSession = UtilServer.AppSession;
+            return appSession.GridSessionList[gridIndex].GridRowSessionList[rowIndex].Row;
+        }
+
+        public static int GridFieldNameToCellIndex(Grid grid, string fieldName)
+        {
+            int result = -1;
+            AppSession appSession = UtilServer.AppSession;
+            int gridIndex = GridToIndex(grid);
+            for (int cellIndex = 0; cellIndex < appSession.GridSessionList[gridIndex].FieldNameList.Count; cellIndex++)
+            {
+                string fieldNameItem = appSession.GridSessionList[gridIndex].FieldNameList[cellIndex];
+                if (fieldNameItem == fieldName)
+                {
+                    result = cellIndex;
+                }
+            }
+
+            UtilFramework.Assert(result != -1, "FieldName not found!");
+            return result;
+        }
+
+        public static string GridFieldNameFromCellIndex(int gridIndex, int cellIndex)
+        {
+            AppSession appSession = UtilServer.AppSession;
+            return appSession.GridSessionList[gridIndex].FieldNameList[cellIndex];
         }
     }
 }

@@ -54,9 +54,10 @@
         private void GridLoadAddFilter(int gridIndex)
         {
             GridSession gridSession = GridSessionList[gridIndex];
-            gridSession.GridRowSessionList.Insert(0, new GridRowSession());
+            gridSession.GridRowSessionList.Add(new GridRowSession());
+            int rowIndex = gridSession.GridRowSessionList.Count - 1;
             PropertyInfo[] propertyInfoList = null;
-            GridLoad(gridIndex, 0, null, gridSession.TypeRow, GridRowEnum.Filter, ref propertyInfoList);
+            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.Filter, ref propertyInfoList);
         }
 
         private void GridLoadAddRowNew(int gridIndex)
@@ -75,14 +76,21 @@
                 GridSessionList.Add(new GridSession());
                 grid.Id = GridSessionList.Count;
             }
+
+            PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
+
             int gridIndex = grid.Index();
             GridSession gridSession = GridSessionList[gridIndex];
-            gridSession.TypeRow = typeRow;
             gridSession.GridRowSessionList.Clear();
+            gridSession.FieldNameList.Clear();
+            gridSession.TypeRow = typeRow;
+            foreach (PropertyInfo propertyInfo in propertyInfoList)
+            {
+                gridSession.FieldNameList.Add(propertyInfo.Name);
+            }
 
             if (rowList != null)
             {
-                PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
                 for (int rowIndex = 0; rowIndex < rowList.Count; rowIndex++)
                 {
                     GridRowSession gridRowSession = new GridRowSession();
@@ -107,7 +115,7 @@
 
         public async Task GridLoadAsync(Grid grid)
         {
-            var query = grid.Owner<Page>().GridLoadQuery(grid);
+            var query = grid.Owner<Page>().GridQuery(grid);
             await GridLoadAsync(grid, query);
             await GridRowSelectFirst(grid);
         }
@@ -117,7 +125,7 @@
         /// </summary>
         public void GridRender()
         {
-            foreach (GridItem gridItem in UtilSession.GridItemList(this))
+            foreach (GridItem gridItem in UtilSession.GridItemList())
             {
                 // Grid Reset
                 gridItem.Grid.Header = new GridHeader();
@@ -277,14 +285,14 @@
             foreach (GridRowSession gridRowSession in GridSessionList[gridIndex].GridRowSessionList)
             {
                 gridRowSession.IsSelect = true;
-                await grid.Owner<Page>().GridRowSelectChangeAsync(grid);
+                await grid.Owner<Page>().GridSelectedAsync(grid);
                 break;
             }
         }
 
-        private void ProcessGridIsLookup()
+        private async Task ProcessGridLookupOpen()
         {
-            foreach (GridItem gridItem in UtilSession.GridItemList(this))
+            foreach (GridItem gridItem in UtilSession.GridItemList())
             {
                 foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                 {
@@ -293,6 +301,10 @@
                         if (gridCellItem.GridCell?.IsModify == true)
                         {
                             gridCellItem.GridCellSession.IsLookup = true;
+                            var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
+                            await GridLoadAsync(gridItem.Grid.GridLookup(), query);
+                            gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
+                            return;
                         }
                     }
                 }
@@ -301,7 +313,7 @@
 
         private async Task ProcessGridRowSelect()
         {
-            foreach (GridItem gridItem in UtilSession.GridItemList(this))
+            foreach (GridItem gridItem in UtilSession.GridItemList())
             {
                 // Get IsClick
                 int rowIndexIsClick = -1;
@@ -332,7 +344,7 @@
                             break;
                         }
                     }
-                    await gridItem.Grid.Owner<Page>().GridRowSelectChangeAsync(gridItem.Grid);
+                    await gridItem.Grid.Owner<Page>().GridSelectedAsync(gridItem.Grid);
                 }
             }
         }
@@ -343,7 +355,7 @@
 
             await ProcessGridSaveAsync();
             await ProcessGridRowSelect();
-            ProcessGridIsLookup();
+            await ProcessGridLookupOpen();
 
             // ResponseCount
             appInternal.AppSession.ResponseCount += 1;
@@ -363,6 +375,8 @@
         {
             return TypeRow == null;
         }
+
+        public List<string> FieldNameList = new List<string>();
 
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
     }
