@@ -127,6 +127,28 @@
         }
 
         /// <summary>
+        /// Returns true, if rows are identical.
+        /// </summary>
+        internal static bool RowEqual(Row rowA, Row rowB)
+        {
+            UtilFramework.Assert(rowA.GetType() == rowB.GetType());
+
+            bool result = true;
+            var propertyInfoList = UtilDal.TypeRowToPropertyInfoList(rowA.GetType());
+            foreach (PropertyInfo propertyInfo in propertyInfoList)
+            {
+                object valueA = propertyInfo.GetValue(rowA);
+                object valueB = propertyInfo.GetValue(rowB);
+                if (object.Equals(valueA, valueB) == false)
+                {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Clone data row.
         /// </summary>
         internal static Row RowCopy(Row row)
@@ -165,12 +187,15 @@
             UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
 
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
-            row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
-            DbContext dbContext = DbContext(row.GetType());
-            var tracking = dbContext.Attach(row);
-            tracking.CurrentValues.SetValues(rowNew);
-            int count = await dbContext.SaveChangesAsync();
-            UtilFramework.Assert(count == 1, "Update failed!");
+            if (UtilDal.RowEqual(row, rowNew) == false)
+            {
+                row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
+                DbContext dbContext = DbContext(row.GetType());
+                var tracking = dbContext.Attach(row);
+                tracking.CurrentValues.SetValues(rowNew);
+                int count = await dbContext.SaveChangesAsync();
+                UtilFramework.Assert(count == 1, "Update failed!");
+            }
         }
 
         /// <summary>

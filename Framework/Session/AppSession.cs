@@ -71,15 +71,15 @@
 
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
         {
-            if (grid.Id == null)
+            if (grid.Index  == null)
             {
                 GridSessionList.Add(new GridSession());
-                grid.Id = GridSessionList.Count;
+                grid.Index = GridSessionList.Count - 1;
             }
 
             PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
 
-            int gridIndex = grid.Index();
+            int gridIndex = UtilSession.GridToIndex(grid);
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.GridRowSessionList.Clear();
             gridSession.FieldNameList.Clear();
@@ -91,14 +91,13 @@
 
             if (rowList != null)
             {
-                for (int rowIndex = 0; rowIndex < rowList.Count; rowIndex++)
+                GridLoadAddFilter(gridIndex); // Add "filter row".
+                foreach (Row row in rowList)
                 {
                     GridRowSession gridRowSession = new GridRowSession();
                     gridSession.GridRowSessionList.Add(gridRowSession);
-                    Row row = rowList[rowIndex];
-                    GridLoad(gridIndex, rowIndex, row, typeRow, GridRowEnum.Index, ref propertyInfoList);
+                    GridLoad(gridIndex, gridSession.GridRowSessionList.Count - 1, row, typeRow, GridRowEnum.Index, ref propertyInfoList);
                 }
-                GridLoadAddFilter(gridIndex); // Add "filter row".
                 GridLoadAddRowNew(gridIndex); // Add one "new row" to end of grid.
             }
         }
@@ -117,7 +116,7 @@
         {
             var query = grid.Owner<Page>().GridQuery(grid);
             await GridLoadAsync(grid, query);
-            await GridRowSelectFirst(grid);
+            await GridRowSelectFirstAsync(grid);
         }
 
         /// <summary>
@@ -132,7 +131,7 @@
                 gridItem.Grid.Header.ColumnList = new List<GridColumn>();
                 gridItem.Grid.RowList = new List<GridRow>();
 
-                if (gridItem.Grid?.Id != null && gridItem.GridSession.GridIsEmpty() == false) // Otherwise grid is not loaded or has no header columns.
+                if (gridItem.Grid?.Index != null && gridItem.GridSession.GridIsEmpty() == false) // Otherwise grid is not loaded or has no header columns.
                 {
                     // Grid Header
                     foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
@@ -175,9 +174,9 @@
             // RowUpdate
             foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
             {
-                if (grid.Id != null)
+                if (grid.Index != null)
                 {
-                    int gridIndex = grid.Index();
+                    int gridIndex = UtilSession.GridToIndex(grid);
                     GridSession gridSession = GridSessionList[gridIndex];
                     if (gridSession.GridIsEmpty() == false)
                     {
@@ -278,19 +277,22 @@
             }
         }
 
-        private async Task GridRowSelectFirst(Grid grid)
+        /// <summary>
+        /// If no row in data grid is selected, select first row.
+        /// </summary>
+        private async Task GridRowSelectFirstAsync(Grid grid)
         {
             AppInternal appInternal = UtilServer.AppInternal;
-            int gridIndex = grid.Index();
+            int gridIndex = UtilSession.GridToIndex(grid);
             foreach (GridRowSession gridRowSession in GridSessionList[gridIndex].GridRowSessionList)
             {
                 gridRowSession.IsSelect = true;
-                await grid.Owner<Page>().GridSelectedAsync(grid);
+                await grid.Owner<Page>().GridRowSelectedAsync(grid);
                 break;
             }
         }
 
-        private async Task ProcessGridLookupOpen()
+        private async Task ProcessGridLookupOpenAsync()
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
@@ -311,7 +313,32 @@
             }
         }
 
-        private async Task ProcessGridRowSelect()
+        private void ProcessGridLookupRowIsClick()
+        {
+            foreach (GridItem gridItemLookup in UtilSession.GridItemList())
+            {
+                if (gridItemLookup.Grid?.GridLookupIsOpen() == true)
+                {
+                    foreach (GridRowItem gridRowItemLookup in gridItemLookup.GridRowList)
+                    {
+                        if (gridRowItemLookup.GridRow.IsClick)
+                        {
+                            int gridIndex = (int)gridItemLookup.Grid.LookupRowIndex;
+                            Grid grid = UtilSession.GridFromIndex(gridIndex);
+                            Row row = UtilSession.GridRowFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex);
+                            string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupCellIndex);
+                            string text = gridItemLookup.Grid.Owner<Page>().GridLookupSelected(grid, row, fieldName, gridRowItemLookup.GridRowSession.Row);
+
+                            GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex);
+                            gridCell.Text = text;
+                            gridCell.IsModify = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task ProcessGridRowIsClick()
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
@@ -344,7 +371,7 @@
                             break;
                         }
                     }
-                    await gridItem.Grid.Owner<Page>().GridSelectedAsync(gridItem.Grid);
+                    await gridItem.Grid.Owner<Page>().GridRowSelectedAsync(gridItem.Grid);
                 }
             }
         }
@@ -353,9 +380,10 @@
         {
             AppInternal appInternal = UtilServer.AppInternal;
 
+            ProcessGridLookupRowIsClick();
             await ProcessGridSaveAsync();
-            await ProcessGridRowSelect();
-            await ProcessGridLookupOpen();
+            await ProcessGridRowIsClick(); // Load for example detail grids.
+            await ProcessGridLookupOpenAsync(); // Load lookup data grid.
 
             // ResponseCount
             appInternal.AppSession.ResponseCount += 1;

@@ -107,9 +107,9 @@
             var result = new Dictionary<int, Grid>();
             foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
             {
-                if (grid.Id != null) // Grid gets Id once it's loaded.
+                if (grid.Index != null) // Grid gets Id once it's loaded.
                 {
-                    int gridIndex = grid.Index();
+                    int gridIndex = UtilSession.GridToIndex(grid);
                     UtilFramework.Assert(gridIndex < appSession.GridSessionList.Count); // Grid needs entry in session
                     result.Add(gridIndex, grid);
                 }
@@ -201,12 +201,12 @@
 
         public static int GridToIndex(Grid grid)
         {
-            return (int)grid.Id - 1;
+            return (int)grid.Index;
         }
 
         public static Grid GridFromIndex(int gridIndex)
         {
-            return UtilServer.AppJson.ListAll().OfType<Grid>().Where(item => item.Id == gridIndex + 1).Single();
+            return UtilServer.AppJson.ListAll().OfType<Grid>().Where(item => item.Index == gridIndex).Single();
         }
 
         public static int GridRowToIndex(Grid grid, Row row)
@@ -258,6 +258,12 @@
         {
             AppSession appSession = UtilServer.AppSession;
             return appSession.GridSessionList[gridIndex].FieldNameList[cellIndex];
+        }
+
+        public static GridCell GridCellFromIndex(int gridIndex, int rowIndex, int cellIndex)
+        {
+            Grid grid = GridFromIndex(gridIndex);
+            return grid.RowList[rowIndex].CellList[cellIndex];
         }
     }
 }

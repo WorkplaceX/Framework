@@ -203,9 +203,10 @@
         public static Row RowSelected(this Grid grid)
         {
             Row result = null;
-            if (grid.Id != null) // Loaded
+            if (grid.Index != null) // Loaded
             {
-                result = UtilServer.AppInternal.AppSession.GridSessionList[grid.Index()].GridRowSessionList.Where(gridRowSession => gridRowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
+                int gridIndex = UtilSession.GridToIndex(grid);
+                result = UtilServer.AppInternal.AppSession.GridSessionList[gridIndex].GridRowSessionList.Where(gridRowSession => gridRowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
             }
             return result;
         }
@@ -229,7 +230,7 @@
 
         internal async Task ProcessInternalAsync()
         {
-            await UtilServer.AppInternal.AppSession. ProcessAsync(); // Grid process
+            await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessAsync(); // Button
 
             foreach (Page page in UtilServer.AppJson.ListAll().OfType<Page>())
@@ -336,35 +337,33 @@
             await UtilServer.AppInternal.AppSession.GridLoadAsync(this);
         }
 
-        public int? Id { get; internal set; }
-
-        internal int Index()
-        {
-            return (int)Id - 1;
-        }
+        public int? Index { get; internal set; }
 
         public GridHeader Header;
 
         public List<GridRow> RowList;
 
+        /// <summary>
+        /// Gets or sets LookupGridIndex. If not null, this Lookup is a lookup of data grid LookupGridIndex.
+        /// </summary>
         public int? LookupGridIndex;
 
         public int? LookupRowIndex;
 
-        public int? CellIndex;
+        public int? LookupCellIndex;
 
         /// <summary>
         /// Returns true, if grid is a Lookup grid.
         /// </summary>
-        internal bool IsLookupOpen()
+        internal bool GridLookupIsOpen()
         {
-            return LookupGridIndex != null;
+            return LookupGridIndex != null && this.Owner() is Grid;
         }
 
         /// <summary>
-        /// Returns Lookup for this grid.
+        /// Returns Lookup window for this data grid.
         /// </summary>
-        public Grid GridLookup()
+        internal Grid GridLookup()
         {
             if (List.Count == 0 || !(List[0] is Grid))
             {
@@ -388,7 +387,7 @@
             Grid lookup = GridLookup();
             lookup.LookupGridIndex = gridIndex;
             lookup.LookupRowIndex = rowIndex;
-            lookup.CellIndex = cellIndex;
+            lookup.LookupCellIndex = cellIndex;
 
             GridLookupClose(gridItem);
             gridCellItem.GridCellSession.IsLookup = true;
@@ -441,6 +440,9 @@
         /// </summary>
         public int MergeId;
 
+        /// <summary>
+        /// Gets or sets IsLookup. If true, field shows an open Lookup window.
+        /// </summary>
         public bool IsLookup;
     }
 
@@ -498,7 +500,7 @@
             return null;
         }
 
-        protected virtual internal async Task GridSelectedAsync(Grid grid)
+        protected virtual internal async Task GridRowSelectedAsync(Grid grid)
         {
             await Task.Run(() => { });
         }
@@ -508,9 +510,18 @@
             return null;
         }
 
-        protected virtual internal async Task GridLookupSelectedAsync(Grid grid, Row row, string fieldName, Grid gridLookup, Row rowLookup)
+        /// <summary>
+        /// Override this method to extract text from lookup grid for further processing. 
+        /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
+        /// </summary>
+        /// <param name="grid">Grid on which lookup has been selected.</param>
+        /// <param name="row">Row on which lookup has been selected.</param>
+        /// <param name="fieldName">Cell on which lookup has been selected</param>
+        /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
+        /// <returns>Returns text like entered by user for further processing.</returns>
+        protected virtual internal string GridLookupSelected(Grid grid, Row row, string fieldName, Row rowLookupSelected)
         {
-            await Task.Run(() => { });
+            return null;
         }
 
         protected virtual internal async Task ProcessAsync()
