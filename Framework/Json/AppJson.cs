@@ -396,13 +396,20 @@
         /// <summary>
         /// Closes Lookup of this grid.
         /// </summary>
-        internal void GridLookupClose(GridItem gridItem)
+        internal void GridLookupClose(GridItem gridItem, bool isForce = false)
         {
             foreach (GridRowItem gridRowItem in gridItem.GridRowList)
             {
                 foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                 {
-                    gridCellItem.GridCellSession.IsLookup = false;
+                    if (gridCellItem.GridCellSession.IsLookup)
+                    {
+                        gridCellItem.GridCellSession.IsLookup = false;
+                        if (isForce)
+                        {
+                            gridCellItem.GridCellSession.IsLookupCloseForce = true;
+                        }
+                    }
                 }
             }
         }

@@ -160,7 +160,17 @@
                                     gridCell.Text = gridCellItem.GridCellSession.Text;
                                     gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
                                     gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
+
+                                    // Lookup open, close
+                                    if (gridCellItem.GridCellSession.IsLookup == true)
+                                    {
+                                        if (gridCellItem.GridCellSession.IsLookupCloseForce == true)
+                                        {
+                                            gridCellItem.GridCellSession.IsLookup = false;
+                                        }
+                                    }
                                     gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
+                                    gridCellItem.GridCellSession.IsLookupCloseForce = false;
                                 }
                             }
                         }
@@ -234,7 +244,7 @@
                     GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
 
                     // Update
-                    if (gridRowSession.RowUpdate != null)
+                    if (gridRowSession.GridRowEnum == GridRowEnum.Index && gridRowSession.RowUpdate != null)
                     {
                         try
                         {
@@ -253,7 +263,7 @@
                         gridRowSession.RowUpdate = null;
                     }
                     // Insert
-                    if (gridRowSession.RowInsert != null)
+                    if (gridRowSession.GridRowEnum == GridRowEnum.New && gridRowSession.RowInsert != null)
                     {
                         try
                         {
@@ -304,8 +314,11 @@
                         {
                             gridCellItem.GridCellSession.IsLookup = true;
                             var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
-                            await GridLoadAsync(gridItem.Grid.GridLookup(), query);
-                            gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
+                            if (query != null)
+                            {
+                                await GridLoadAsync(gridItem.Grid.GridLookup(), query);
+                                gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
+                            }
                             return;
                         }
                     }
@@ -315,7 +328,8 @@
 
         private void ProcessGridLookupRowIsClick()
         {
-            foreach (GridItem gridItemLookup in UtilSession.GridItemList())
+            var gridItemList = UtilSession.GridItemList();
+            foreach (GridItem gridItemLookup in gridItemList)
             {
                 if (gridItemLookup.Grid?.GridLookupIsOpen() == true)
                 {
@@ -323,7 +337,7 @@
                     {
                         if (gridRowItemLookup.GridRow.IsClick)
                         {
-                            int gridIndex = (int)gridItemLookup.Grid.LookupRowIndex;
+                            int gridIndex = (int)gridItemLookup.Grid.LookupGridIndex;
                             Grid grid = UtilSession.GridFromIndex(gridIndex);
                             Row row = UtilSession.GridRowFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex);
                             string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupCellIndex);
@@ -332,6 +346,8 @@
                             GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex);
                             gridCell.Text = text;
                             gridCell.IsModify = true;
+                            gridItemLookup.Grid.GridLookupClose(gridItemList[gridIndex], true);
+                            return;
                         }
                     }
                 }
@@ -442,6 +458,11 @@
         public bool IsModify;
 
         public bool IsLookup;
+
+        /// <summary>
+        /// Gets pr sets IsLookupCloseForce. Enforce lookup closing even if set to open later in the process.
+        /// </summary>
+        public bool IsLookupCloseForce;
 
         public int MergeId;
 
