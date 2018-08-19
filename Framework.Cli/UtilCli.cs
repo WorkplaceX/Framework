@@ -136,7 +136,7 @@
         }
 
         /// <summary>
-        /// Returns true, if argument is used.
+        /// Returns true, if argument is used in command line.
         /// </summary>
         internal static bool ArgumentValueIsExist(CommandBase command, CommandArgument commandArgument)
         {

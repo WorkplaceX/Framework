@@ -19,6 +19,8 @@
 
         private CommandArgument argumentAzureGitUrl;
 
+        private CommandArgument argumentConnectionString;
+
         private CommandArgument argumentConnectionStringFramework;
 
         private CommandArgument argumentConnectionStringApplication;
@@ -29,6 +31,7 @@
         {
             argumentJson = configuration.Argument("json", "Get or set ci server configuration.");
             argumentAzureGitUrl = configuration.Argument("azureGitUrl", "Get or set Azure git url for deployment.");
+            argumentConnectionString = configuration.Argument("connectionString", "Set same database ConnectionString for Framework and Application.");
             argumentConnectionStringFramework = configuration.Argument("connectionStringFramework", "Get or set database ConnectionString for Framework.");
             argumentConnectionStringApplication = configuration.Argument("connectionStringApplication", "Get or set database ConnectionString for Application.");
             argumentWebsite = configuration.Argument("website", "Add (include) a website to ci build.");
@@ -104,6 +107,21 @@
             configCli.WebsiteList.Add(website);
 
             ConfigCli.Save(configCli);
+        }
+
+        /// <summary>
+        /// Write config ConnectionStringFramework and ConnectionStringApplication.
+        /// </summary>
+        private void ArgumentConnectionString()
+        {
+            ConfigCli configCli = ConfigCli.Load();
+            if (UtilCli.ArgumentValue(this, argumentConnectionString, out string connectionString))
+            {
+                // Write
+                configCli.ConnectionStringFramework = connectionString;
+                configCli.ConnectionStringApplication = connectionString;
+                ConfigCli.Save(configCli);
+            }
         }
 
         /// <summary>
@@ -183,13 +201,19 @@
                 }
             }
 
-            // Command "connectionStringFramework
+            // Command "connectionString"
+            if (UtilCli.ArgumentValueIsExist(this, argumentConnectionString))
+            {
+                ArgumentConnectionString();
+            }
+
+            // Command "connectionStringFramework"
             if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringFramework))
             {
                 ArgumentConnectionStringFramework();
             }
 
-            // Command "connectionStringApplication
+            // Command "connectionStringApplication"
             if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringApplication))
             {
                 ArgumentConnectionStringApplication();
@@ -205,7 +229,7 @@
             {
                 configCli = ConfigCli.Load();
                 Console.WriteLine();
-                UtilFramework.ConsoleWriteLineColor("Add environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
+                UtilFramework.ConsoleWriteLineColor("Add following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
                 UtilFramework.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
