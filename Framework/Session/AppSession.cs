@@ -37,7 +37,7 @@
             GridRowSession gridRowSession = new GridRowSession();
             gridSession.GridRowSessionList[rowIndex] = gridRowSession;
             gridRowSession.Row = row;
-            gridRowSession.GridRowEnum = gridRowEnum;
+            gridRowSession.RowEnum = gridRowEnum;
             foreach (PropertyInfo propertyInfo in propertyInfoListCache)
             {
                 GridCellSession gridCellSession = new GridCellSession();
@@ -145,7 +145,7 @@
                         if (gridRowItem.GridRowSession != null)
                         {
                             GridRow gridRow = new GridRow();
-                            gridRow.RowEnum = gridRowItem.GridRowSession.GridRowEnum;
+                            gridRow.RowEnum = gridRowItem.GridRowSession.RowEnum;
                             gridItem.Grid.RowList.Add(gridRow);
                             gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
                             gridRow.CellList = new List<GridCell>();
@@ -244,7 +244,7 @@
                     GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
 
                     // Update
-                    if (gridRowSession.GridRowEnum == GridRowEnum.Index && gridRowSession.RowUpdate != null)
+                    if (gridRowSession.RowEnum == GridRowEnum.Index && gridRowSession.RowUpdate != null)
                     {
                         try
                         {
@@ -263,7 +263,7 @@
                         gridRowSession.RowUpdate = null;
                     }
                     // Insert
-                    if (gridRowSession.GridRowEnum == GridRowEnum.New && gridRowSession.RowInsert != null)
+                    if (gridRowSession.RowEnum == GridRowEnum.New && gridRowSession.RowInsert != null)
                     {
                         try
                         {
@@ -439,7 +439,7 @@
 
         public List<GridCellSession> GridCellSessionList = new List<GridCellSession>();
 
-        public GridRowEnum GridRowEnum;
+        public GridRowEnum RowEnum;
     }
 
     public enum GridRowEnum

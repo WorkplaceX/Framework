@@ -104,17 +104,58 @@ export class Button {
   template: `
   <table [ngClass]="json.CssClass">
     <tr>
-      <th *ngFor="let item of json.Header.ColumnList; trackBy trackBy">
-        {{ item.Text }}
+      <th *ngFor="let column of json.Header.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);">
+        <div style="display:flex;">
+          <div style="flex:1; overflow:hidden;">
+            <i class="fas fa-caret-up colorWhite"></i>
+            {{ column.Text }}
+          </div>
+          <div style="padding-left:2px;">
+            <i *ngIf="column.IsClickSort" class="fas fa-spinner fa-spin colorWhite"></i>
+            <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(column, $event);"></i>
+          </div>
+        </div>
       </th>
     </tr>
     <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row, $event)">
-      <td *ngFor="let cell of row.CellList; trackBy trackBy">
-        <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
+      <td *ngFor="let cell of row.CellList; trackBy trackBy" [ngClass]="{'gridRowFilter':row.RowEnum==1}">
+        <div style="display:flex;">
+
+          <div style="display:inline-block; padding-right:2px;">
+            <svg width="1em" height="1em" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+              viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+              <circle style="fill:#D80027;" cx="256" cy="256" r="256"/>
+              <polygon style="fill:#F0F0F0;" points="389.565,211.479 300.522,211.479 300.522,122.435 211.478,122.435 211.478,211.479 
+              122.435,211.479 122.435,300.522 211.478,300.522 211.478,389.565 300.522,389.565 300.522,300.522 389.565,300.522 "/>
+           </svg>
+          </div>
+
+          <div style="flex:1; overflow:hidden;">
+            <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
+          </div>
+          <div style="padding-left:2px">
+            <i *ngIf="cell.IsModify" class="fas fa-spinner fa-spin colorBlack"></i>
+            <i class="fas fa-arrow-up" style="color:green"></i>
+            <i class="fas fa-lock colorBlack"></i>
+            <i *ngIf="row.RowEnum==1" class="fas fa-search colorBlack" title="Search"></i>
+            <i *ngIf="row.RowEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
+          </div>
+        </div>
         <div data-Grid *ngIf="cell.IsLookup && json.List?.length > 0" [json]="json.List[0]" class="gridLookup"></div>
       </td>
     </tr>
   </table>
+
+  <div class="colorBlue">
+    <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up" (click)="clickGrid(1, $event);"></i>
+    <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down" (click)="clickGrid(2, $event);"></i>
+    &nbsp;&nbsp;
+    <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left" (click)="clickGrid(3, $event);"></i>
+    <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right" (click)="clickGrid(4, $event);"></i>
+    &nbsp;&nbsp;
+    <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(5, $event);"></i>
+    <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(6, $event);"></i>
+  </div>
   `
 })
 export class Grid {
@@ -141,7 +182,6 @@ export class Grid {
 
   focus(row) {
     if (!row.IsSelect && !row.IsClick) {
-      console.log("F");
       row.IsClick = true;
       this.dataService.update();
     }
@@ -155,6 +195,25 @@ export class Grid {
       this.dataService.update();
     }
   }
+  
+  clickSort(column, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    column.IsClickSort = true;
+    this.dataService.update();
+  }
+
+  clickConfig(column, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    column.IsClickConfig = true;
+    this.dataService.update();
+  }
+
+  clickGrid(isClickEnum, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    this.json.IsClickEnum = isClickEnum;
+    this.dataService.update();
+  }
+
 
   trackBy(index, item) {
     return index; // or item.id

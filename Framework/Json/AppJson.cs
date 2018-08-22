@@ -157,10 +157,10 @@
             SiblingHide = 2,
         }
 
-        public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShow = PageShowEnum.None, Action<T> init = null) where T : Page
+        public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
             T result = null;
-            if (pageShow == PageShowEnum.SiblingHide)
+            if (pageShowEnum == PageShowEnum.SiblingHide)
             {
                 foreach (Page page in owner.List.OfType<Page>())
                 {
@@ -177,7 +177,7 @@
             result = Get<T>(owner, name);
             UtilFramework.Assert(result != null);
             result.IsHide = false; // Show
-            if (pageShow == PageShowEnum.SiblingRemove)
+            if (pageShowEnum == PageShowEnum.SiblingRemove)
             {
                 owner.List.OfType<Page>().ToList().ForEach(page =>
                 {
@@ -187,9 +187,9 @@
             return result;
         }
 
-        public static Task<T> PageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShow = PageShowEnum.None, Action<T> init = null) where T : Page
+        public static Task<T> PageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
-            return PageShowAsync<T>(owner, typeof(T).Name, pageShow, init);
+            return PageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
         }
 
         public static void Remove(this ComponentJson component)
@@ -343,6 +343,8 @@
 
         public List<GridRow> RowList;
 
+        public GridIsClickEnum IsClickEnum;
+
         /// <summary>
         /// Gets or sets LookupGridIndex. If not null, this Lookup is a lookup of data grid LookupGridIndex.
         /// </summary>
@@ -415,6 +417,17 @@
         }
     }
 
+    public enum GridIsClickEnum
+    {
+        None = 0,
+        PageUp = 1,
+        PageDown = 2,
+        PageLeft = 3,
+        PageRight = 4,
+        Reload = 5,
+        Config = 6,
+    }
+
     public sealed class GridHeader
     {
         public List<GridColumn> ColumnList;
@@ -423,6 +436,10 @@
     public sealed class GridColumn
     {
         public string Text;
+
+        public bool IsClickSort;
+
+        public bool IsClickConfig;
     }
 
     public sealed class GridRow
