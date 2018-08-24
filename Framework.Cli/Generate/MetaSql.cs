@@ -54,7 +54,9 @@
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(ConfigCli.ConnectionString(IsFrameworkDb));
+            string connectionString = ConfigCli.ConnectionString(IsFrameworkDb);
+            UtilFramework.Assert(string.IsNullOrEmpty(connectionString) == false, "ConnectionString is null!");
+            optionsBuilder.UseSqlServer(connectionString);
         }
 
         public DbSet<MetaSqlSchema> Schema { get; set; }

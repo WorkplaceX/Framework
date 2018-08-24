@@ -229,7 +229,7 @@
             {
                 configCli = ConfigCli.Load();
                 Console.WriteLine();
-                UtilFramework.ConsoleWriteLineColor("Add following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
+                UtilFramework.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
                 UtilFramework.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
