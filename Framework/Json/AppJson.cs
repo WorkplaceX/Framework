@@ -339,7 +339,7 @@
 
         public int? Index { get; internal set; }
 
-        public GridHeader Header;
+        public List<GridColumn> ColumnList;
 
         public List<GridRow> RowList;
 
@@ -426,11 +426,6 @@
         PageRight = 4,
         Reload = 5,
         Config = 6,
-    }
-
-    public sealed class GridHeader
-    {
-        public List<GridColumn> ColumnList;
     }
 
     public sealed class GridColumn

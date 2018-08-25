@@ -104,7 +104,7 @@ export class Button {
   template: `
   <table [ngClass]="json.CssClass">
     <tr>
-      <th *ngFor="let column of json.Header.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);">
+      <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);">
         <div style="display:flex;">
           <div style="flex:1; overflow:hidden;">
             <i class="fas fa-caret-up colorWhite"></i>

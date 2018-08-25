@@ -6,6 +6,7 @@
     using Framework.Server;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -122,6 +123,8 @@
                 rowList = await UtilDal.SelectAsync(query);
             }
             GridLoad(grid, rowList, query?.ElementType);
+
+            GridSessionList[UtilSession.GridToIndex(grid)].OffsetColumn = 0;
         }
 
         public async Task GridLoadAsync(Grid grid)
@@ -139,16 +142,19 @@
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
                 // Grid Reset
-                gridItem.Grid.Header = new GridHeader();
-                gridItem.Grid.Header.ColumnList = new List<GridColumn>();
+                gridItem.Grid.ColumnList = new List<GridColumn>();
                 gridItem.Grid.RowList = new List<GridRow>();
+                gridItem.Grid.IsClickEnum = GridIsClickEnum.None;
 
                 if (gridItem.Grid?.Index != null && gridItem.GridSession.GridIsEmpty() == false) // Otherwise grid is not loaded or has no header columns.
                 {
                     // Grid Header
                     foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                     {
-                        gridItem.Grid.Header.ColumnList.Add(new GridColumn() { Text = gridColumnItem.PropertyInfo.Name });
+                        if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
+                        {
+                            gridItem.Grid.ColumnList.Add(new GridColumn() { Text = gridColumnItem.PropertyInfo.Name });
+                        }
                     }
 
                     // Grid Row
@@ -167,25 +173,61 @@
                             {
                                 if (gridCellItem.GridCellSession != null)
                                 {
-                                    GridCell gridCell = new GridCell();
-                                    gridRow.CellList.Add(gridCell);
-                                    gridCell.Text = gridCellItem.GridCellSession.Text;
-                                    gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
-                                    gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
-
-                                    // Lookup open, close
-                                    if (gridCellItem.GridCellSession.IsLookup == true)
+                                    if (gridItem.GridSession.IsRange(gridCellItem.CellIndex))
                                     {
-                                        if (gridCellItem.GridCellSession.IsLookupCloseForce == true)
+                                        GridCell gridCell = new GridCell();
+                                        gridRow.CellList.Add(gridCell);
+                                        gridCell.Text = gridCellItem.GridCellSession.Text;
+                                        gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
+                                        gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
+
+                                        // Lookup open, close
+                                        if (gridCellItem.GridCellSession.IsLookup == true)
                                         {
-                                            gridCellItem.GridCellSession.IsLookup = false;
+                                            if (gridCellItem.GridCellSession.IsLookupCloseForce == true)
+                                            {
+                                                gridCellItem.GridCellSession.IsLookup = false;
+                                            }
                                         }
+                                        gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
+                                        gridCellItem.GridCellSession.IsLookupCloseForce = false;
                                     }
-                                    gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
-                                    gridCellItem.GridCellSession.IsLookupCloseForce = false;
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        private async Task ProcessGridIsClickAsync()
+        {
+            foreach (GridItem gridItem in UtilSession.GridItemList())
+            {
+                if (gridItem.GridSession.GridIsEmpty() == false)
+                {
+                    // PageLeft
+                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageLeft)
+                    {
+                        gridItem.GridSession.OffsetColumn -= 1;
+                        if (gridItem.GridSession.OffsetColumn < 0)
+                        {
+                            gridItem.GridSession.OffsetColumn = 0;
+                        }
+                    }
+                    // PageRight
+                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageRight)
+                    {
+                        gridItem.GridSession.OffsetColumn += 1;
+                        if (gridItem.GridSession.OffsetColumn > (gridItem.GridSession.FieldNameList.Count - gridItem.GridSession.ColumnCountMax))
+                        {
+                            gridItem.GridSession.OffsetColumn = gridItem.GridSession.FieldNameList.Count - gridItem.GridSession.ColumnCountMax;
+                            if (gridItem.GridSession.OffsetColumn < 0)
+                            {
+                                gridItem.GridSession.OffsetColumn = 0;
+                            }
+                        }
+                        Debug.WriteLine("Offset=" + gridItem.GridSession.OffsetColumn);
                     }
                 }
             }
@@ -421,6 +463,7 @@
             await ProcessGridSaveAsync();
             await ProcessGridRowIsClick(); // Load for example detail grids.
             await ProcessGridLookupOpenAsync(); // Load lookup data grid.
+            await ProcessGridIsClickAsync();
 
             // ResponseCount
             appInternal.AppSession.ResponseCount += 1;
@@ -444,6 +487,19 @@
         public List<string> FieldNameList = new List<string>();
 
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
+
+        public int RowCountMax = 10;
+
+        public int ColumnCountMax = 5;
+
+        public int OffsetRow = 0;
+
+        public int OffsetColumn = 0;
+
+        public bool IsRange(int index)
+        {
+            return index >= OffsetColumn && index <= OffsetColumn + (ColumnCountMax - 1);
+        }
     }
 
     internal class GridRowSession
