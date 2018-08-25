@@ -51,6 +51,9 @@
             }
         }
 
+        /// <summary>
+        /// Add data filter row. That's where the user enters the filter (search) text.
+        /// </summary>
         private void GridLoadAddFilter(int gridIndex)
         {
             GridSession gridSession = GridSessionList[gridIndex];
@@ -60,6 +63,9 @@
             GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.Filter, ref propertyInfoList);
         }
 
+        /// <summary>
+        /// Add empty data row. Thats where the user enters a new record.
+        /// </summary>
         private void GridLoadAddRowNew(int gridIndex)
         {
             GridSession gridSession = GridSessionList[gridIndex];
@@ -69,6 +75,9 @@
             GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref propertyInfoList);
         }
 
+        /// <summary>
+        /// Copy data grid cell values to AppSession.
+        /// </summary>
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
         {
             if (grid.Index  == null)
@@ -102,6 +111,9 @@
             }
         }
 
+        /// <summary>
+        /// Select data from database.
+        /// </summary>
         private async Task GridLoadAsync(Grid grid, IQueryable query)
         {
             List<Row> rowList = null;
@@ -179,6 +191,9 @@
             }
         }
 
+        /// <summary>
+        /// Update and insert data into database.
+        /// </summary>
         private async Task ProcessGridSaveAsync()
         {
             // RowUpdate
@@ -296,9 +311,12 @@
             int gridIndex = UtilSession.GridToIndex(grid);
             foreach (GridRowSession gridRowSession in GridSessionList[gridIndex].GridRowSessionList)
             {
-                gridRowSession.IsSelect = true;
-                await grid.Owner<Page>().GridRowSelectedAsync(grid);
-                break;
+                if (gridRowSession.RowEnum == GridRowEnum.Index) // By default only select data rows. 
+                {
+                    gridRowSession.IsSelect = true;
+                    await grid.Owner<Page>().GridRowSelectedAsync(grid);
+                    break;
+                }
             }
         }
 
@@ -364,8 +382,11 @@
                 {
                     if (gridRowItem.GridRow?.IsClick == true)
                     {
-                        rowIndexIsClick = gridRowItem.RowIndex;
-                        break;
+                        if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index) // Do not select filter or new data row.
+                        {
+                            rowIndexIsClick = gridRowItem.RowIndex;
+                            break;
+                        }
                     }
                 }
 
@@ -445,9 +466,25 @@
     public enum GridRowEnum
     {
         None = 0,
+
+        /// <summary>
+        /// Filter row where user enters search text.
+        /// </summary>
         Filter = 1,
+
+        /// <summary>
+        /// Data row loaded from database.
+        /// </summary>
         Index = 2,
+
+        /// <summary>
+        /// Data row not yet inserted into database.
+        /// </summary>
         New = 3,
+
+        /// <summary>
+        /// Data row at the end of the grid showing total.
+        /// </summary>
         Total = 4
     }
 
