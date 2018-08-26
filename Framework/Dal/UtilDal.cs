@@ -178,13 +178,23 @@
             return result;
         }
 
-        internal static IQueryable SelectOrderBy(IQueryable query, string fieldName, bool isSort)
+        internal static IQueryable QueryOrderBy(IQueryable query, string fieldName, bool isSort)
         {
             if (isSort == true)
             {
                 fieldName += " DESC";
             }
             return query.OrderBy(fieldName);
+        }
+
+        internal static IQueryable QuerySkipTake(IQueryable query, int skip, int take)
+        {
+            if (skip != 0)
+            {
+                query = query.Skip(skip);
+            }
+            query = query.Take(take);
+            return query;
         }
 
         /// <summary>

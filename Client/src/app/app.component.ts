@@ -154,8 +154,8 @@ export class Button {
     <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left" (click)="clickGrid(3, $event);"></i>
     <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right" (click)="clickGrid(4, $event);"></i>
     &nbsp;&nbsp;
-    <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(5, $event);"></i>
-    <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(6, $event);"></i>
+    <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
+    <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
   </div>
   `
 })

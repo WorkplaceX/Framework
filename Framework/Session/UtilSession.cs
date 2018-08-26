@@ -222,6 +222,18 @@
             return appSession.GridSessionList[gridIndex];
         }
 
+        public static GridSession GridSessionFromGrid(Grid grid)
+        {
+            int gridIndex = GridToIndex(grid);
+            return GridSessionFromIndex(gridIndex);
+        }
+
+        public static Grid GridSessionToGrid(GridSession gridSession)
+        {
+            int gridIndex = GridSessionToIndex(gridSession);
+            return GridFromIndex(gridIndex);
+        }
+
         public static int GridSessionToIndex(GridSession gridSession)
         {
             AppSession appSession = UtilServer.AppSession;

@@ -75,16 +75,21 @@
             GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref propertyInfoList);
         }
 
+        private void GridLoadSessionCreate(Grid grid)
+        {
+            if (grid.Index == null)
+            {
+                GridSessionList.Add(new GridSession());
+                grid.Index = GridSessionList.Count - 1;
+            }
+        }
+
         /// <summary>
         /// Copy data grid cell values to AppSession.
         /// </summary>
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
         {
-            if (grid.Index  == null)
-            {
-                GridSessionList.Add(new GridSession());
-                grid.Index = GridSessionList.Count - 1;
-            }
+            GridLoadSessionCreate(grid);
 
             PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
 
@@ -118,14 +123,19 @@
             List<Row> rowList = null;
             if (query != null)
             {
-                if (grid.Index != null)
+                GridLoadSessionCreate(grid);
+                GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+
+                // Sort
+                GridColumnSession gridColumnSessionSort = gridSession.GridColumnSessionList.Where(item => item.IsSort != null).SingleOrDefault();
+                if (gridColumnSessionSort != null)
                 {
-                    GridColumnSession gridColumnSessionSort = UtilSession.GridSessionFromIndex((int)grid.Index).GridColumnSessionList.Where(item => item.IsSort != null).SingleOrDefault();
-                    if (gridColumnSessionSort != null)
-                    {
-                        query = UtilDal.SelectOrderBy(query, gridColumnSessionSort.FieldName, (bool)gridColumnSessionSort.IsSort);
-                    }
+                    query = UtilDal.QueryOrderBy(query, gridColumnSessionSort.FieldName, (bool)gridColumnSessionSort.IsSort);
                 }
+
+                // Skip, Take
+                query = UtilDal.QuerySkipTake(query, gridSession.OffsetRow, gridSession.RowCountMax);
+
                 rowList = await UtilDal.SelectAsync(query);
             }
             GridLoad(grid, rowList, query?.ElementType);
@@ -213,7 +223,7 @@
         /// Process GridIsClickEnum.
         /// </summary>
         /// <returns></returns>
-        private async Task ProcessGridIsClickAsync()
+        private async Task ProcessGridIsClickEnumAsync()
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
@@ -240,6 +250,33 @@
                                 gridItem.GridSession.OffsetColumn = 0;
                             }
                         }
+                    }
+                    // PageUp
+                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageUp)
+                    {
+                        gridItem.GridSession.OffsetRow -= gridItem.GridSession.RowCountMax;
+                        if (gridItem.GridSession.OffsetRow < 0)
+                        {
+                            gridItem.GridSession.OffsetRow = 0;
+                        }
+                        await GridLoadAsync(gridItem.Grid);
+                    }
+                    // PageDown
+                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageDown)
+                    {
+                        int rowCount = gridItem.GridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Index).Count();
+                        if (rowCount == gridItem.GridSession.RowCountMax) // Page down further on full grid only.
+                        {
+                            gridItem.GridSession.OffsetRow += gridItem.GridSession.RowCountMax;
+                            await GridLoadAsync(gridItem.Grid);
+                        }
+                    }
+                    // Reload
+                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.Reload)
+                    {
+                        gridItem.GridSession.OffsetRow = 0;
+                        gridItem.GridSession.OffsetColumn = 0;
+                        await GridLoadAsync(gridItem.Grid);
                     }
                 }
             }
@@ -498,7 +535,7 @@
             await ProcessGridSaveAsync();
             await ProcessGridRowIsClick(); // Load for example detail grids.
             await ProcessGridLookupOpenAsync(); // Load lookup data grid.
-            await ProcessGridIsClickAsync();
+            await ProcessGridIsClickEnumAsync();
 
             // ResponseCount
             appInternal.AppSession.ResponseCount += 1;
@@ -523,7 +560,7 @@
 
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
 
-        public int RowCountMax = 10;
+        public int RowCountMax = 4;
 
         public int ColumnCountMax = 5;
 

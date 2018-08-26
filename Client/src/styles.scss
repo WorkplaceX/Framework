@@ -69,7 +69,7 @@ data-app * .colorBlack {
 data-app > table, data-app * table {
     table-layout: fixed;
     border-spacing: 1px;
-    // border-collapse: collapse;
+    border-collapse: separate;
     width: 100%;
 }
 
