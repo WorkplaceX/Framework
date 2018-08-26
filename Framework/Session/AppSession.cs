@@ -380,11 +380,12 @@
                         {
                             int gridIndex = (int)gridItemLookup.Grid.LookupGridIndex;
                             Grid grid = UtilSession.GridFromIndex(gridIndex);
+                            GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
                             Row row = UtilSession.GridRowFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex);
                             string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupCellIndex);
                             string text = gridItemLookup.Grid.Owner<Page>().GridLookupSelected(grid, row, fieldName, gridRowItemLookup.GridRowSession.Row);
 
-                            GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex);
+                            GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex - gridSession.OffsetColumn);
                             gridCell.Text = text;
                             gridCell.IsModify = true;
                             gridItemLookup.Grid.GridLookupClose(gridItemList[gridIndex], true);

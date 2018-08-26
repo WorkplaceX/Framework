@@ -119,7 +119,7 @@
 
         private static T TryGetValue<T>(this List<T> list, int index)
         {
-            if (list.Count > index)
+            if (list.Count > index && index >= 0)
             {
                 return list[index];
             }
@@ -177,13 +177,14 @@
                     gridRowItem.GridRowSession = gridRowSession;
                     gridRowItem.GridRow = gridRow;
 
-                    int cellCount = Math.Max(gridRowSession == null ? 0 : gridRowSession.GridCellSessionList.Count, (gridRow?.CellList.Count).GetValueOrDefault());
+                    int offsetColumn = gridItem.GridSession.OffsetColumn;
+                    int cellCount = Math.Max(gridRowSession == null ? 0 : gridRowSession.GridCellSessionList.Count, (gridRow?.CellList.Count).GetValueOrDefault() + offsetColumn);
                     for (int cellIndex = 0; cellIndex < cellCount; cellIndex++)
                     {
                         GridCellItem gridCellItem = new GridCellItem();
                         gridRowItem.GridCellList.Add(gridCellItem);
                         GridCellSession gridCellSession = gridRowSession?.GridCellSessionList.TryGetValue(cellIndex);
-                        GridCell gridCell = gridRow?.CellList?.TryGetValue(cellIndex);
+                        GridCell gridCell = gridRow?.CellList?.TryGetValue(cellIndex - offsetColumn);
 
                         // Set Cell
                         gridCellItem.CellIndex = cellIndex;
@@ -207,6 +208,18 @@
         public static Grid GridFromIndex(int gridIndex)
         {
             return UtilServer.AppJson.ListAll().OfType<Grid>().Where(item => item.Index == gridIndex).Single();
+        }
+
+        public static GridSession GridSessionFromIndex(int gridIndex)
+        {
+            AppSession appSession = UtilServer.AppSession;
+            return appSession.GridSessionList[gridIndex];
+        }
+
+        public static int GridSessionToIndex(GridSession gridSession)
+        {
+            AppSession appSession = UtilServer.AppSession;
+            return appSession.GridSessionList.IndexOf(gridSession);
         }
 
         public static int GridRowToIndex(Grid grid, Row row)
