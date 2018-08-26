@@ -6,7 +6,6 @@
     using Framework.Server;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -227,7 +226,6 @@
                                 gridItem.GridSession.OffsetColumn = 0;
                             }
                         }
-                        Debug.WriteLine("Offset=" + gridItem.GridSession.OffsetColumn);
                     }
                 }
             }
@@ -238,76 +236,59 @@
         /// </summary>
         private async Task ProcessGridSaveAsync()
         {
-            // RowUpdate
-            foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
+            // Parse user entered text
+            foreach (GridItem gridItem in UtilSession.GridItemList())
             {
-                if (grid.Index != null)
+                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                 {
-                    int gridIndex = UtilSession.GridToIndex(grid);
-                    GridSession gridSession = GridSessionList[gridIndex];
-                    if (gridSession.GridIsEmpty() == false)
+                    foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                     {
-                        PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(gridSession.TypeRow);
-                        if (grid.RowList != null) // Process incoming grid. Has no rows rendered if new created.
+                        if (gridCellItem.GridCell != null)
                         {
-                            for (int rowIndex = 0; rowIndex < grid.RowList?.Count; rowIndex++)
+                            if (gridCellItem.GridCell.IsModify)
                             {
-                                GridRow gridRow = grid.RowList[rowIndex];
-                                GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
-                                for (int cellIndex = 0; cellIndex < grid.RowList[rowIndex].CellList.Count; cellIndex++)
+                                gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
+                                gridCellItem.GridCellSession.Text = gridCellItem.GridCell.Text; // Set back to null, once successfully saved.
+                                Row row = null;
+                                if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index)
                                 {
-                                    GridCell gridCell = gridRow.CellList[cellIndex];
-                                    GridCellSession gridCellSession = gridRowSession.GridCellSessionList[cellIndex];
-                                    if (gridCell.IsModify)
+                                    // Parse Update
+                                    if (gridRowItem.GridRowSession.RowUpdate == null)
                                     {
-                                        gridCellSession.IsModify = true;
-                                        gridCellSession.Text = gridCell.Text;
-                                        PropertyInfo propertyInfo = propertyInfoList[cellIndex];
-                                        Row row;
-                                        if (gridRowSession.Row != null)
-                                        {
-                                            // Update
-                                            if (gridRowSession.RowUpdate == null)
-                                            {
-                                                gridRowSession.RowUpdate = UtilDal.RowCopy(gridRowSession.Row);
-                                            }
-                                            row = gridRowSession.RowUpdate;
-                                        }
-                                        else
-                                        {
-                                            // Insert
-                                            if (gridRowSession.RowInsert == null)
-                                            {
-                                                gridRowSession.RowInsert = (Row)Activator.CreateInstance(gridSession.TypeRow);
-                                            }
-                                            row = gridRowSession.RowInsert;
-                                        }
-                                        UtilDal.CellTextToValue(row, propertyInfo, gridCell.Text); // Parse user entered text.
+                                        gridRowItem.GridRowSession.RowUpdate = UtilDal.RowCopy(gridRowItem.GridRowSession.Row);
                                     }
-                                    gridCellSession.MergeId = gridCell.MergeId;
+                                    row = gridRowItem.GridRowSession.RowUpdate;
                                 }
+                                if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)
+                                {
+                                    // Parse Insert
+                                    if (gridRowItem.GridRowSession.RowInsert == null)
+                                    {
+                                        gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(gridItem.GridSession.TypeRow);
+                                    }
+                                    row = gridRowItem.GridRowSession.RowInsert;
+                                }
+                                UtilDal.CellTextToValue(row, gridCellItem.PropertyInfo, gridCellItem.GridCellSession.Text); // Parse user entered text.
                             }
+                            gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
                         }
                     }
                 }
             }
 
-            // Row Save
-            for (int gridIndex = 0; gridIndex < GridSessionList.Count; gridIndex++)
+            // Save row to database
+            foreach (GridItem gridItem in UtilSession.GridItemList())
             {
-                var gridSession = GridSessionList[gridIndex];
-                for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
+                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                 {
-                    GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
-
-                    // Update
-                    if (gridRowSession.RowEnum == GridRowEnum.Index && gridRowSession.RowUpdate != null)
+                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index && gridRowItem.GridRowSession.RowUpdate != null)
                     {
+                        // Update to database
                         try
                         {
-                            await UtilDal.UpdateAsync(gridRowSession.Row, gridRowSession.RowUpdate);
-                            gridRowSession.Row = gridRowSession.RowUpdate;
-                            foreach (GridCellSession gridCellSession in gridRowSession.GridCellSessionList)
+                            await UtilDal.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate);
+                            gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowUpdate;
+                            foreach (GridCellSession gridCellSession in gridRowItem.GridRowSession.GridCellSessionList)
                             {
                                 gridCellSession.IsModify = false;
                                 gridCellSession.Error = null;
@@ -315,30 +296,30 @@
                         }
                         catch (Exception exception)
                         {
-                            gridRowSession.Error = exception.Message;
+                            gridRowItem.GridRowSession.Error = exception.Message;
                         }
-                        gridRowSession.RowUpdate = null;
+                        gridRowItem.GridRowSession.RowUpdate = null;
                     }
-                    // Insert
-                    if (gridRowSession.RowEnum == GridRowEnum.New && gridRowSession.RowInsert != null)
+                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New && gridRowItem.GridRowSession.RowInsert != null)
                     {
+                        // Insert to database
                         try
                         {
-                            var rowNew = await UtilDal.InsertAsync(gridRowSession.RowInsert);
-                            gridRowSession.Row = rowNew;
+                            var rowNew = await UtilDal.InsertAsync(gridRowItem.GridRowSession.RowInsert);
+                            gridRowItem.GridRowSession.Row = rowNew;
 
                             // Load new primary key into data grid.
                             PropertyInfo[] propertyInfoList = null;
-                            GridLoad(gridIndex, rowIndex, rowNew, gridSession.TypeRow, GridRowEnum.Index, ref propertyInfoList);
+                            GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, rowNew, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref propertyInfoList);
 
                             // Add new "insert row" at end of data grid.
-                            GridLoadAddRowNew(gridIndex);
+                            GridLoadAddRowNew(gridItem.GridIndex);
                         }
                         catch (Exception exception)
                         {
-                            gridRowSession.Error = exception.Message;
+                            gridRowItem.GridRowSession.Error = exception.Message;
                         }
-                        gridRowSession.RowInsert = null;
+                        gridRowItem.GridRowSession.RowInsert = null;
                     }
                 }
             }
