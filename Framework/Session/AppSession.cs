@@ -118,6 +118,14 @@
             List<Row> rowList = null;
             if (query != null)
             {
+                if (grid.Index != null)
+                {
+                    GridColumnSession gridColumnSessionSort = UtilSession.GridSessionFromIndex((int)grid.Index).GridColumnSessionList.Where(item => item.IsSort != null).SingleOrDefault();
+                    if (gridColumnSessionSort != null)
+                    {
+                        query = UtilDal.SelectOrderBy(query, gridColumnSessionSort.FieldName, (bool)gridColumnSessionSort.IsSort);
+                    }
+                }
                 rowList = await UtilDal.SelectAsync(query);
             }
             GridLoad(grid, rowList, query?.ElementType);
@@ -373,14 +381,19 @@
             }
         }
 
-        private void ProcessGridIsSortClick()
+        private async Task ProcessGridIsSortClickAsync()
         {
+            List<GridItem> gridItemListReload = new List<GridItem>();
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
                 foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                 {
                     if (gridColumnItem.GridColumn?.IsClickSort == true)
                     {
+                        if (!gridItemListReload.Contains(gridItem))
+                        {
+                            gridItemListReload.Add(gridItem);
+                        }
                         bool? isSort = gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort;
                         if (isSort == null)
                         {
@@ -397,6 +410,12 @@
                         gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
                     }
                 }
+            }
+
+            // Grid reload from database
+            foreach (GridItem gridItem in gridItemListReload)
+            {
+                await GridLoadAsync(gridItem.Grid);
             }
         }
 
@@ -474,7 +493,7 @@
         {
             AppInternal appInternal = UtilServer.AppInternal;
 
-            ProcessGridIsSortClick();
+            await ProcessGridIsSortClickAsync();
             ProcessGridLookupRowIsClick();
             await ProcessGridSaveAsync();
             await ProcessGridRowIsClick(); // Load for example detail grids.

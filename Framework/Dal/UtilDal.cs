@@ -116,8 +116,8 @@
             var propertyInfoDestList = UtilDal.TypeRowToPropertyInfoList(rowDest.GetType());
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
             {
-                string columnName = propertyInfoDest.Name;
-                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(columnName);
+                string fieldName = propertyInfoDest.Name;
+                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldName);
                 if (propertyInfoSource != null)
                 {
                     object value = propertyInfoSource.GetValue(rowSource);
@@ -178,6 +178,14 @@
             return result;
         }
 
+        internal static IQueryable SelectOrderBy(IQueryable query, string fieldName, bool isSort)
+        {
+            if (isSort == true)
+            {
+                fieldName += " DESC";
+            }
+            return query.OrderBy(fieldName);
+        }
 
         /// <summary>
         /// Update data record on database.
