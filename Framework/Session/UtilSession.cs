@@ -260,9 +260,9 @@
             int result = -1;
             AppSession appSession = UtilServer.AppSession;
             int gridIndex = GridToIndex(grid);
-            for (int cellIndex = 0; cellIndex < appSession.GridSessionList[gridIndex].FieldNameList.Count; cellIndex++)
+            for (int cellIndex = 0; cellIndex < appSession.GridSessionList[gridIndex].GridColumnSessionList.Count; cellIndex++)
             {
-                string fieldNameItem = appSession.GridSessionList[gridIndex].FieldNameList[cellIndex];
+                string fieldNameItem = appSession.GridSessionList[gridIndex].GridColumnSessionList[cellIndex].FieldName;
                 if (fieldNameItem == fieldName)
                 {
                     result = cellIndex;
@@ -276,7 +276,7 @@
         public static string GridFieldNameFromCellIndex(int gridIndex, int cellIndex)
         {
             AppSession appSession = UtilServer.AppSession;
-            return appSession.GridSessionList[gridIndex].FieldNameList[cellIndex];
+            return appSession.GridSessionList[gridIndex].GridColumnSessionList[cellIndex].FieldName;
         }
 
         public static GridCell GridCellFromIndex(int gridIndex, int rowIndex, int cellIndex)

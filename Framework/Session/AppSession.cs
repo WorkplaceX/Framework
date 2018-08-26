@@ -91,11 +91,9 @@
             int gridIndex = UtilSession.GridToIndex(grid);
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.GridRowSessionList.Clear();
-            gridSession.FieldNameList.Clear();
             gridSession.TypeRow = typeRow;
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
-                gridSession.FieldNameList.Add(propertyInfo.Name);
                 gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
             }
 
@@ -226,9 +224,9 @@
                     if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageRight)
                     {
                         gridItem.GridSession.OffsetColumn += 1;
-                        if (gridItem.GridSession.OffsetColumn > (gridItem.GridSession.FieldNameList.Count - gridItem.GridSession.ColumnCountMax))
+                        if (gridItem.GridSession.OffsetColumn > (gridItem.GridSession.GridColumnSessionList.Count - gridItem.GridSession.ColumnCountMax))
                         {
-                            gridItem.GridSession.OffsetColumn = gridItem.GridSession.FieldNameList.Count - gridItem.GridSession.ColumnCountMax;
+                            gridItem.GridSession.OffsetColumn = gridItem.GridSession.GridColumnSessionList.Count - gridItem.GridSession.ColumnCountMax;
                             if (gridItem.GridSession.OffsetColumn < 0)
                             {
                                 gridItem.GridSession.OffsetColumn = 0;
@@ -501,8 +499,6 @@
         {
             return TypeRow == null;
         }
-
-        public List<string> FieldNameList = new List<string>();
 
         public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
 
