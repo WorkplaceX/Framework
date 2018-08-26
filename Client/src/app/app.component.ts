@@ -105,9 +105,10 @@ export class Button {
   <table [ngClass]="json.CssClass">
     <tr>
       <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);">
-        <div style="display:flex;">
+        <div style="display:flex; white-space:nowrap;">
           <div style="flex:1; overflow:hidden;">
-            <i class="fas fa-caret-up colorWhite"></i>
+            <i *ngIf="column.IsSort==false" class="fas fa-caret-up colorWhite"></i>
+            <i *ngIf="column.IsSort==true" class="fas fa-caret-down colorWhite"></i>
             {{ column.Text }}
           </div>
           <div style="padding-left:2px;">

@@ -60,6 +60,10 @@
         {
             public int CellIndex;
 
+            public GridColumnSession GridColumnSession;
+
+            public GridColumn GridColumn;
+
             public PropertyInfo PropertyInfo;
         }
 
@@ -161,6 +165,8 @@
 
                     // Set Column
                     gridColumnItem.CellIndex = cellIndex;
+                    gridColumnItem.GridColumnSession = gridSession.GridColumnSessionList[cellIndex];
+                    gridColumnItem.GridColumn = grid?.ColumnList?.TryGetValue(cellIndex - gridSession.OffsetColumn);
                     gridColumnItem.PropertyInfo = propertyInfoList[cellIndex];
                 }
 

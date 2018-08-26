@@ -432,6 +432,11 @@
     {
         public string Text;
 
+        /// <summary>
+        /// Gets or sets IsSort. If false, ascending. If true descending.
+        /// </summary>
+        public bool? IsSort;
+
         public bool IsClickSort;
 
         public bool IsClickConfig;

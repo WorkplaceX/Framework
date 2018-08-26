@@ -96,6 +96,7 @@
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
                 gridSession.FieldNameList.Add(propertyInfo.Name);
+                gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
             }
 
             if (rowList != null)
@@ -152,7 +153,10 @@
                     {
                         if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
                         {
-                            gridItem.Grid.ColumnList.Add(new GridColumn() { Text = gridColumnItem.PropertyInfo.Name });
+                            GridColumn gridColumn = new GridColumn();
+                            gridColumn.Text = gridColumnItem.PropertyInfo.Name;
+                            gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
+                            gridItem.Grid.ColumnList.Add(gridColumn);
                         }
                     }
 
@@ -199,6 +203,10 @@
             }
         }
 
+        /// <summary>
+        /// Process GridIsClickEnum.
+        /// </summary>
+        /// <returns></returns>
         private async Task ProcessGridIsClickAsync()
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
@@ -367,6 +375,33 @@
             }
         }
 
+        private void ProcessGridIsSortClick()
+        {
+            foreach (GridItem gridItem in UtilSession.GridItemList())
+            {
+                foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                {
+                    if (gridColumnItem.GridColumn?.IsClickSort == true)
+                    {
+                        bool? isSort = gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort;
+                        if (isSort == null)
+                        {
+                            isSort = false;
+                        }
+                        else
+                        {
+                            isSort = !isSort;
+                        }
+                        foreach (GridColumnSession gridColumnSession in gridItem.GridSession.GridColumnSessionList)
+                        {
+                            gridColumnSession.IsSort = null;
+                        }
+                        gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
+                    }
+                }
+            }
+        }
+
         private void ProcessGridLookupRowIsClick()
         {
             var gridItemList = UtilSession.GridItemList();
@@ -441,6 +476,7 @@
         {
             AppInternal appInternal = UtilServer.AppInternal;
 
+            ProcessGridIsSortClick();
             ProcessGridLookupRowIsClick();
             await ProcessGridSaveAsync();
             await ProcessGridRowIsClick(); // Load for example detail grids.
@@ -468,6 +504,8 @@
 
         public List<string> FieldNameList = new List<string>();
 
+        public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
+
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
 
         public int RowCountMax = 10;
@@ -482,6 +520,13 @@
         {
             return index >= OffsetColumn && index <= OffsetColumn + (ColumnCountMax - 1);
         }
+    }
+
+    internal class GridColumnSession
+    {
+        public string FieldName;
+
+        public bool? IsSort;
     }
 
     internal class GridRowSession
