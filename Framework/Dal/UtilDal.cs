@@ -178,6 +178,29 @@
             return result;
         }
 
+        internal static IQueryable QueryFilter(IQueryable query, string fieldName, object filterValue, FilterOperator filterOperator)
+        {
+            string predicate = fieldName;
+            switch (filterOperator)
+            {
+                case FilterOperator.Equal:
+                    predicate += " = @0";
+                    break;
+                case FilterOperator.Smaller:
+                    predicate += " <= @0";
+                    break;
+                case FilterOperator.Greater:
+                    predicate += " >= @0";
+                    break;
+                case FilterOperator.Like:
+                    predicate += ".Contains(@0)";
+                    break;
+                default:
+                    throw new Exception("Enum unknown!");
+            }
+            return query.Where(predicate, filterValue);
+        }
+
         /// <summary>
         /// Sql orderby.
         /// </summary>
@@ -269,13 +292,33 @@
             return result;
         }
 
+        internal static object CellTextToValue(string text, PropertyInfo propertyInfo)
+        {
+            object result = null;
+            if (!string.IsNullOrEmpty(text))
+            {
+                Type type = UtilFramework.TypeUnderlying(propertyInfo.PropertyType);
+                result = Convert.ChangeType(text, type);
+            }
+            return result;
+        }
+
         /// <summary>
         /// Parse user entered text and write it to row.
         /// </summary>
-        internal static void CellTextToValue(Row row, PropertyInfo propertyInfo, string text)
+        internal static void CellTextToValue(string text, PropertyInfo propertyInfo, Row row)
         {
-            object value = Convert.ChangeType(text, propertyInfo.PropertyType);
+            object value = CellTextToValue(text, propertyInfo);
             propertyInfo.SetValue(row, value);
         }
+    }
+
+    internal enum FilterOperator
+    {
+        None = 0,
+        Equal = 1,
+        Smaller = 2,
+        Greater = 3,
+        Like = 4
     }
 }

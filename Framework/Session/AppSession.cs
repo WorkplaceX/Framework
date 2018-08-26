@@ -96,20 +96,29 @@
 
             int gridIndex = UtilSession.GridToIndex(grid);
             GridSession gridSession = GridSessionList[gridIndex];
+
+            // Reset GridRowSessionList but keep filter row.
+            var filterRow = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).SingleOrDefault();
             gridSession.GridRowSessionList.Clear();
+            if (filterRow != null)
+            {
+                gridSession.GridRowSessionList.Add(filterRow);
+            }
+
             if (gridSession.TypeRow != typeRow)
             {
                 gridSession.TypeRow = typeRow;
                 gridSession.GridColumnSessionList.Clear();
+                gridSession.GridRowSessionList.Clear();
                 foreach (PropertyInfo propertyInfo in propertyInfoList)
                 {
                     gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
                 }
+                GridLoadAddFilter(gridIndex); // Add "filter row".
             }
 
             if (rowList != null)
             {
-                GridLoadAddFilter(gridIndex); // Add "filter row".
                 foreach (Row row in rowList)
                 {
                     GridRowSession gridRowSession = new GridRowSession();
@@ -131,6 +140,22 @@
                 GridLoadSessionCreate(grid);
                 GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
 
+                // Filter
+                GridRowSession gridRowSessionFilter = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).FirstOrDefault();
+                if (gridRowSessionFilter != null)
+                {
+                    for (int index = 0; index < gridSession.GridColumnSessionList.Count; index++)
+                    {
+                        string fieldName = gridSession.GridColumnSessionList[index].FieldName;
+                        object filterValue = gridRowSessionFilter.GridCellSessionList[index].FilterValue;
+                        FilterOperator filterOperator = gridRowSessionFilter.GridCellSessionList[index].FilterOperator;
+                        if (filterValue != null)
+                        {
+                            query = UtilDal.QueryFilter(query, fieldName, filterValue, filterOperator);
+                        }
+                    }
+                }
+
                 // Sort
                 GridColumnSession gridColumnSessionSort = gridSession.GridColumnSessionList.Where(item => item.IsSort != null).SingleOrDefault();
                 if (gridColumnSessionSort != null)
@@ -144,8 +169,6 @@
                 rowList = await UtilDal.SelectAsync(query);
             }
             GridLoad(grid, rowList, query?.ElementType);
-
-            GridSessionList[UtilSession.GridToIndex(grid)].OffsetColumn = 0;
         }
 
         public async Task GridLoadAsync(Grid grid)
@@ -303,8 +326,6 @@
                         {
                             if (gridCellItem.GridCell.IsModify)
                             {
-                                gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
-                                gridCellItem.GridCellSession.Text = gridCellItem.GridCell.Text; // Set back to null, once successfully saved.
                                 Row row = null;
                                 if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index)
                                 {
@@ -324,7 +345,12 @@
                                     }
                                     row = gridRowItem.GridRowSession.RowInsert;
                                 }
-                                UtilDal.CellTextToValue(row, gridCellItem.PropertyInfo, gridCellItem.GridCellSession.Text); // Parse user entered text.
+                                if (row != null)
+                                {
+                                    gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
+                                    gridCellItem.GridCellSession.Text = gridCellItem.GridCell.Text; // Set back to database selected value, once successfully saved.
+                                    UtilDal.CellTextToValue(gridCellItem.GridCellSession.Text, gridCellItem.PropertyInfo, row); // Parse user entered text.
+                                }
                             }
                             gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
                         }
@@ -423,18 +449,67 @@
             }
         }
 
+        private async Task ProcessGridFilterAsync()
+        {
+            List<GridItem> gridItemReloadList = new List<GridItem>();
+            foreach (GridItem gridItem in UtilSession.GridItemList())
+            {
+                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                {
+                    foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                    {
+                        if (gridCellItem.GridCell != null)
+                        {
+                            if (gridCellItem.GridCell.IsModify)
+                            {
+                                gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully parsed.
+                                gridCellItem.GridCellSession.Text = gridCellItem.GridCell.Text;
+                                if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
+                                {
+                                    try
+                                    {
+                                        gridCellItem.GridCellSession.FilterValue = UtilDal.CellTextToValue(gridCellItem.GridCellSession.Text, gridCellItem.PropertyInfo);
+                                        gridCellItem.GridCellSession.FilterOperator = FilterOperator.Equal;
+                                        if (gridCellItem.PropertyInfo.PropertyType == typeof(string))
+                                        {
+                                            gridCellItem.GridCellSession.FilterOperator = FilterOperator.Like;
+                                        }
+                                        gridCellItem.GridCellSession.IsModify = false;
+                                        if (!gridItemReloadList.Contains(gridItem))
+                                        {
+                                            gridItemReloadList.Add(gridItem);
+                                        }
+                                    }
+                                    catch (Exception exception)
+                                    {
+                                        gridCellItem.GridCellSession.Error = exception.ToString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Grid reload from database
+            foreach (GridItem gridItem in gridItemReloadList)
+            {
+                await GridLoadAsync(gridItem.Grid);
+            }
+        }
+
         private async Task ProcessGridIsSortClickAsync()
         {
-            List<GridItem> gridItemListReload = new List<GridItem>();
+            List<GridItem> gridItemReloadList = new List<GridItem>();
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
                 foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                 {
                     if (gridColumnItem.GridColumn?.IsClickSort == true)
                     {
-                        if (!gridItemListReload.Contains(gridItem))
+                        if (!gridItemReloadList.Contains(gridItem))
                         {
-                            gridItemListReload.Add(gridItem);
+                            gridItemReloadList.Add(gridItem);
                         }
                         bool? isSort = gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort;
                         if (isSort == null)
@@ -456,7 +531,7 @@
             }
 
             // Grid reload from database
-            foreach (GridItem gridItem in gridItemListReload)
+            foreach (GridItem gridItem in gridItemReloadList)
             {
                 await GridLoadAsync(gridItem.Grid);
             }
@@ -536,6 +611,7 @@
         {
             AppInternal appInternal = UtilServer.AppInternal;
 
+            await ProcessGridFilterAsync();
             await ProcessGridIsSortClickAsync();
             ProcessGridLookupRowIsClick();
             await ProcessGridSaveAsync();
@@ -641,6 +717,10 @@
         /// Gets pr sets IsLookupCloseForce. Enforce lookup closing even if set to open later in the process.
         /// </summary>
         public bool IsLookupCloseForce;
+
+        public object FilterValue;
+
+        public FilterOperator FilterOperator;
 
         public int MergeId;
 
