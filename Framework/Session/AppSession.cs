@@ -89,6 +89,7 @@
         /// </summary>
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
         {
+            UtilSession.GridReset(grid);
             GridLoadSessionCreate(grid);
 
             PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
@@ -96,10 +97,14 @@
             int gridIndex = UtilSession.GridToIndex(grid);
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.GridRowSessionList.Clear();
-            gridSession.TypeRow = typeRow;
-            foreach (PropertyInfo propertyInfo in propertyInfoList)
+            if (gridSession.TypeRow != typeRow)
             {
-                gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
+                gridSession.TypeRow = typeRow;
+                gridSession.GridColumnSessionList.Clear();
+                foreach (PropertyInfo propertyInfo in propertyInfoList)
+                {
+                    gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
+                }
             }
 
             if (rowList != null)
@@ -445,6 +450,7 @@
                             gridColumnSession.IsSort = null;
                         }
                         gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
+                        gridItem.GridSession.OffsetRow = 0; // Reset paging.
                     }
                 }
             }

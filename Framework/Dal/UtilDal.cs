@@ -178,6 +178,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Sql orderby.
+        /// </summary>
         internal static IQueryable QueryOrderBy(IQueryable query, string fieldName, bool isSort)
         {
             if (isSort == true)
@@ -187,6 +190,9 @@
             return query.OrderBy(fieldName);
         }
 
+        /// <summary>
+        /// Sql paging.
+        /// </summary>
         internal static IQueryable QuerySkipTake(IQueryable query, int skip, int take)
         {
             if (skip != 0)

@@ -134,7 +134,8 @@
         }
 
         /// <summary>
-        /// Merges incoming data grid (json) and outgoing grid (session) into one data structure.
+        /// Returns incoming data grid (json) and outgoing grid (session) as one data structure.
+        /// Incoming data grid (json) has lower priority. It gets reset once new data has been loaded into grid (session).
         /// </summary>
         public static List<GridItem> GridItemList()
         {
@@ -170,8 +171,7 @@
                     gridColumnItem.PropertyInfo = propertyInfoList[cellIndex];
                 }
 
-                int rowCount = Math.Max(gridSession.GridRowSessionList.Count, (grid?.RowList?.Count).GetValueOrDefault());
-                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+                for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
                 {
                     GridRowItem gridRowItem = new GridRowItem();
                     gridItem.GridRowList.Add(gridRowItem);
@@ -295,6 +295,20 @@
         {
             Grid grid = GridFromIndex(gridIndex);
             return grid.RowList[rowIndex].CellList[cellIndex];
+        }
+
+        /// <summary>
+        /// Reject incoming data grid.
+        /// </summary>
+        public static void GridReset(Grid grid)
+        {
+            grid.ColumnList = null;
+            grid.RowList = null;
+            grid.IsClickEnum = GridIsClickEnum.None;
+            grid.List.Clear();
+            grid.LookupCellIndex = null;
+            grid.LookupGridIndex = null;
+            grid.LookupRowIndex = null;
         }
     }
 }
