@@ -185,13 +185,13 @@
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
-                // Grid Reset
-                gridItem.Grid.ColumnList = new List<GridColumn>();
-                gridItem.Grid.RowList = new List<GridRow>();
-                gridItem.Grid.IsClickEnum = GridIsClickEnum.None;
-
-                if (gridItem.Grid?.Index != null && gridItem.GridSession.GridIsEmpty() == false) // Otherwise grid is not loaded or has no header columns.
+                if (gridItem.Grid != null)
                 {
+                    // Grid Reset
+                    gridItem.Grid.ColumnList = new List<GridColumn>();
+                    gridItem.Grid.RowList = new List<GridRow>();
+                    gridItem.Grid.IsClickEnum = GridIsClickEnum.None;
+
                     // Grid Header
                     foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                     {
@@ -255,7 +255,7 @@
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
-                if (gridItem.GridSession.GridIsEmpty() == false)
+                if (gridItem.Grid != null)
                 {
                     // PageLeft
                     if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageLeft)
@@ -628,15 +628,6 @@
     internal class GridSession
     {
         public Type TypeRow;
-
-        /// <summary>
-        /// Returns true, if grid has no header and rows.
-        /// </summary>
-        /// <returns></returns>
-        public bool GridIsEmpty()
-        {
-            return TypeRow == null;
-        }
 
         public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
 
