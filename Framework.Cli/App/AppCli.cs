@@ -67,6 +67,7 @@
             new CommandBuild(this);
             new CommandStart(this);
             new CommandDeploy(this);
+            new CommandDeployDb(this);
         }
 
         /// <summary>

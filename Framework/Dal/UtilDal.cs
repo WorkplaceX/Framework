@@ -10,6 +10,7 @@
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
     using System;
     using System.Collections.Generic;
+    using System.Data.SqlClient;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Reflection;
@@ -85,6 +86,22 @@
             DbContext result = new DbContext(options.Options);
 
             return result;
+        }
+
+        internal static async Task ExecuteAsync(string sql, bool isFrameworkDb)
+        {
+            string connectionString = ConfigFramework.ConnectionString(isFrameworkDb);
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                sqlConnection.Open();
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
+                await sqlCommand.ExecuteNonQueryAsync();
+            }
+        }
+
+        internal static async Task ExecuteAsync(string sql)
+        {
+            await ExecuteAsync(sql, false);
         }
 
         public static IQueryable Query(Type typeRow)
@@ -175,6 +192,13 @@
 
             var list = await query.ToDynamicListAsync();
             List<Row> result = list.Cast<Row>().ToList();
+            return result;
+        }
+
+        public static async Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
+        {
+            var list = await SelectAsync((IQueryable)query);
+            List<TRow> result = list.Cast<TRow>().ToList();
             return result;
         }
 

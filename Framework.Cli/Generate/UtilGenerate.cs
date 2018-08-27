@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Reflection;
     using System.Text;
 
@@ -11,16 +10,6 @@
     /// </summary>
     internal class UtilGenerate
     {
-        public static string FileLoad(string fileName)
-        {
-            return File.ReadAllText(fileName);
-        }
-
-        public static void FileSave(string fileName, string text)
-        {
-            File.WriteAllText(fileName, text);
-        }
-
         /// <summary>
         /// Filter out special characters. Allow only characters and numbers.
         /// </summary>

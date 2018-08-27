@@ -249,9 +249,9 @@
         {
             // Read UtilFramework.cs
             string fileNameServer = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
-            string textServer = File.ReadAllText(fileNameServer);
+            string textServer = UtilFramework.FileLoad(fileNameServer);
             string fileNameClient = UtilFramework.FolderName + "Framework/Client/src/data.service.ts";
-            string textClient = File.ReadAllText(fileNameClient);
+            string textClient = UtilFramework.FileLoad(fileNameClient);
 
             string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2};)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()));
 

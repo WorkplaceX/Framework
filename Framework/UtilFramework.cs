@@ -8,8 +8,10 @@ namespace Framework
     using Microsoft.ApplicationInsights.Extensibility;
     using Newtonsoft.Json;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Threading;
 
@@ -152,7 +154,7 @@ namespace Framework
         internal static T ConfigLoad<T>(string fileName)
         {
             object result = null;
-            string json = File.ReadAllText(fileName);
+            string json = UtilFramework.FileLoad(fileName);
             result = ConfigFromJson<T>(json);
             return (T)result;
         }
@@ -214,6 +216,29 @@ namespace Framework
         internal static object TypeToObject(Type type)
         {
             return Activator.CreateInstance(type);
+        }
+
+        internal static string FileLoad(string fileName)
+        {
+            return File.ReadAllText(fileName);
+        }
+
+        internal static void FileSave(string fileName, string text)
+        {
+            lock (typeof(object))
+            {
+                File.WriteAllText(fileName, text);
+            }
+        }
+
+        internal static List<string> FileNameList(string folderName, string searchPattern)
+        {
+            return Directory.GetFiles(folderName, searchPattern, SearchOption.AllDirectories).ToList();
+        }
+
+        internal static List<string> FileNameList(string folderName)
+        {
+            return FileNameList(folderName, "*.*");
         }
     }
 }

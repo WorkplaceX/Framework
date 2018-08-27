@@ -117,7 +117,7 @@
                     context.Response.ContentType = UtilServer.ContentType(fileName);
                     if (fileName.EndsWith(".html") && ConfigFramework.Load().IsServerSideRendering)
                     {
-                        string htmlIndex = File.ReadAllText(fileName);
+                        string htmlIndex = UtilFramework.FileLoad(fileName);
                         htmlIndex = await ServerSideRenderingAsync(context, htmlIndex, appSelector);
                         await context.Response.WriteAsync(htmlIndex);
                         result = true;

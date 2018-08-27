@@ -1,8 +1,6 @@
 ﻿namespace Framework.Cli.Command
 {
     using Framework.Cli.Config;
-    using System;
-    using System.IO;
 
     public class CommandDeploy : CommandBase
     {

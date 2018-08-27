@@ -19,11 +19,11 @@
             new CSharpGenerate(metaCSharp).Run(out cSharp);
             if (isFrameworkDb == false)
             {
-                UtilGenerate.FileSave(UtilFramework.FolderName + "Application.Database/Generate.cs", cSharp);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Generate.cs", cSharp);
             }
             else
             {
-                UtilGenerate.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/Generate.cs", cSharp);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/Generate.cs", cSharp);
             }
         }
     }

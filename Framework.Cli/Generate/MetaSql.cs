@@ -20,7 +20,7 @@
         public MetaSql(bool isFrameworkDb, AppCli appCli)
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
-            string sql = UtilGenerate.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
+            string sql = UtilFramework.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
             this.List = dbContext.Schema.FromSql(sql).ToArray();
             //
             // For Application filter out "dbo.Framework" tables.
