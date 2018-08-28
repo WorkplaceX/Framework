@@ -90,12 +90,17 @@
 
         internal static async Task ExecuteAsync(string sql, bool isFrameworkDb)
         {
+            var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
+
             string connectionString = ConfigFramework.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
-                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
-                await sqlCommand.ExecuteNonQueryAsync();
+                foreach (string sqlItem in sqlList)
+                {
+                    SqlCommand sqlCommand = new SqlCommand(sqlItem, sqlConnection);
+                    await sqlCommand.ExecuteNonQueryAsync();
+                }
             }
         }
 
