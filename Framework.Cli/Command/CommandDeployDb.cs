@@ -37,7 +37,7 @@
                 if (rowList.Select(item => item.FileName.ToLower()).Contains(fileName.ToLower()) == false)
                 {
                     string sql = UtilFramework.FileLoad(UtilFramework.FolderName + fileName);
-                    UtilDal.ExecuteAsync(sql, isFrameworkDb).Wait();
+                    UtilDal.ExecuteAsync(sql, null, isFrameworkDb).Wait();
                     FrameworkScript row = new FrameworkScript() { FileName = fileName, Date = DateTime.UtcNow };
                     UtilDal.InsertAsync(row).Wait();
                 }
@@ -46,22 +46,16 @@
 
         private void Meta()
         {
-            List<FrameworkTable> tableList = new List<FrameworkTable>();
+            List<FrameworkTable> rowList = new List<FrameworkTable>();
             foreach (Type typeRow in AppCli.TypeRowList())
             {
                 FrameworkTable table = new FrameworkTable();
-                tableList.Add(table);
-                string tableNameSql = null;
-                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-                if (tableAttribute != null && (tableAttribute.SqlSchemaName != null || tableAttribute.SqlTableName != null))
-                {
-                    tableNameSql = string.Format("'[{0}].[{1}]'", tableAttribute.SqlSchemaName, tableAttribute.SqlTableName);
-                }
-
-                table.TableNameCSharp = UtilDal.TypeRowToTableNameCSharp(typeRow);
-                table.TableNameSql = tableNameSql;
+                rowList.Add(table);
+                table.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                table.TableNameSql = UtilDalType.TypeRowToTableName(typeRow);
                 table.IsExist = true;
             }
+            UtilDalUpsert.UpsertAsync(rowList, nameof(FrameworkTable.TableNameCSharp)).Wait();
         }
 
         protected internal override void Execute()

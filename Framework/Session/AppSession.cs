@@ -30,7 +30,7 @@
         {
             if (propertyInfoListCache == null)
             {
-                propertyInfoListCache = UtilDal.TypeRowToPropertyInfoList(typeRow);
+                propertyInfoListCache = UtilDalType.TypeRowToPropertyInfoList(typeRow);
             }
 
             GridSession gridSession = GridSessionList[gridIndex];
@@ -92,7 +92,7 @@
             UtilSession.GridReset(grid);
             GridLoadSessionCreate(grid);
 
-            PropertyInfo[] propertyInfoList = UtilDal.TypeRowToPropertyInfoList(typeRow);
+            PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
 
             int gridIndex = UtilSession.GridToIndex(grid);
             GridSession gridSession = GridSessionList[gridIndex];

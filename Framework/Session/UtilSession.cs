@@ -157,7 +157,7 @@
                 gridList.TryGetValue(gridIndex, out Grid grid);
                 gridItem.Grid = grid;
 
-                var propertyInfoList = UtilDal.TypeRowToPropertyInfoList(gridItem.GridSession.TypeRow);
+                var propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(gridItem.GridSession.TypeRow);
                 gridItem.GridColumnItemList = new List<GridColumnItem>();
                 for (int cellIndex = 0; cellIndex < propertyInfoList.Length; cellIndex++)
                 {

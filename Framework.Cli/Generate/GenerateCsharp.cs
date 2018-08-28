@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using static Framework.Dal.UtilDalType;
 
     /// <summary>
     /// Generate CSharp code.
@@ -154,16 +155,9 @@
                     }
                     result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.FieldNameCSharp));
                 }
-                catch (Exception exception)
+                catch (ExceptionTypeUnknown)
                 {
-                    if (exception.Message == "Type unknown!")
-                    {
-                        UtilFramework.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.Yellow);
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    UtilFramework.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.Yellow);
                 }
             }
         }

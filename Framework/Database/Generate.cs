@@ -5,102 +5,59 @@ namespace Database.dbo
     using Framework.Dal;
     using System;
 
-    [SqlTable("dbo", "FrameworkColumn")]
-    public class FrameworkColumn : Row
+    [SqlTable("dbo", "FrameworkConfigField")]
+    public class FrameworkConfigField : Row
     {
-        [SqlField("Id", typeof(FrameworkColumn_Id), true)]
+        [SqlField("Id", typeof(FrameworkConfigField_Id), true)]
         public int Id { get; set; }
 
-        [SqlField("TableId", typeof(FrameworkColumn_TableId))]
-        public int TableId { get; set; }
-
-        [SqlField("ColumnNameCSharp", typeof(FrameworkColumn_ColumnNameCSharp))]
-        public string ColumnNameCSharp { get; set; }
-
-        [SqlField("ColumnNameSql", typeof(FrameworkColumn_ColumnNameSql))]
-        public string ColumnNameSql { get; set; }
-
-        [SqlField("IsExist", typeof(FrameworkColumn_IsExist))]
-        public bool IsExist { get; set; }
-    }
-
-    public class FrameworkColumn_Id : Cell<FrameworkColumn> { }
-
-    public class FrameworkColumn_TableId : Cell<FrameworkColumn> { }
-
-    public class FrameworkColumn_ColumnNameCSharp : Cell<FrameworkColumn> { }
-
-    public class FrameworkColumn_ColumnNameSql : Cell<FrameworkColumn> { }
-
-    public class FrameworkColumn_IsExist : Cell<FrameworkColumn> { }
-
-    [SqlTable("dbo", "FrameworkColumnBuiltIn")]
-    public class FrameworkColumnBuiltIn : Row
-    {
-        [SqlField("Id", typeof(FrameworkColumnBuiltIn_Id))]
-        public int Id { get; set; }
-
-        [SqlField("Name", typeof(FrameworkColumnBuiltIn_Name))]
-        public string Name { get; set; }
-    }
-
-    public class FrameworkColumnBuiltIn_Id : Cell<FrameworkColumnBuiltIn> { }
-
-    public class FrameworkColumnBuiltIn_Name : Cell<FrameworkColumnBuiltIn> { }
-
-    [SqlTable("dbo", "FrameworkConfigColumn")]
-    public class FrameworkConfigColumn : Row
-    {
-        [SqlField("Id", typeof(FrameworkConfigColumn_Id), true)]
-        public int Id { get; set; }
-
-        [SqlField("IsBuiltIn", typeof(FrameworkConfigColumn_IsBuiltIn))]
+        [SqlField("IsBuiltIn", typeof(FrameworkConfigField_IsBuiltIn))]
         public bool IsBuiltIn { get; set; }
 
-        [SqlField("ConfigName", typeof(FrameworkConfigColumn_ConfigName))]
+        [SqlField("ConfigName", typeof(FrameworkConfigField_ConfigName))]
         public string ConfigName { get; set; }
 
-        [SqlField("TypeName", typeof(FrameworkConfigColumn_TypeName))]
+        [SqlField("TypeName", typeof(FrameworkConfigField_TypeName))]
         public string TypeName { get; set; }
 
-        [SqlField("FieldName", typeof(FrameworkConfigColumn_FieldName))]
+        [SqlField("FieldName", typeof(FrameworkConfigField_FieldName))]
         public string FieldName { get; set; }
 
-        [SqlField("Text", typeof(FrameworkConfigColumn_Text))]
+        [SqlField("Text", typeof(FrameworkConfigField_Text))]
         public string Text { get; set; }
 
-        [SqlField("Description", typeof(FrameworkConfigColumn_Description))]
+        [SqlField("Description", typeof(FrameworkConfigField_Description))]
         public string Description { get; set; }
 
-        [SqlField("IsVisible", typeof(FrameworkConfigColumn_IsVisible))]
+        [SqlField("IsVisible", typeof(FrameworkConfigField_IsVisible))]
         public bool IsVisible { get; set; }
 
-        [SqlField("IsReadOnly", typeof(FrameworkConfigColumn_IsReadOnly))]
+        [SqlField("IsReadOnly", typeof(FrameworkConfigField_IsReadOnly))]
         public bool IsReadOnly { get; set; }
 
-        [SqlField("Sort", typeof(FrameworkConfigColumn_Sort))]
+        [SqlField("Sort", typeof(FrameworkConfigField_Sort))]
         public double? Sort { get; set; }
     }
 
-    public class FrameworkConfigColumn_Id : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_Id : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_IsBuiltIn : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_IsBuiltIn : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_ConfigName : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_ConfigName : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_TypeName : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_TypeName : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_FieldName : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_FieldName : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_Text : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_Text : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_Description : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_Description : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_IsVisible : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_IsVisible : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_IsReadOnly : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_IsReadOnly : Cell<FrameworkConfigField> { }
 
-    public class FrameworkConfigColumn_Sort : Cell<FrameworkConfigColumn> { }
+    public class FrameworkConfigField_Sort : Cell<FrameworkConfigField> { }
 
     [SqlTable("dbo", "FrameworkConfigGrid")]
     public class FrameworkConfigGrid : Row
@@ -135,6 +92,49 @@ namespace Database.dbo
     public class FrameworkConfigGrid_RowCountMax : Cell<FrameworkConfigGrid> { }
 
     public class FrameworkConfigGrid_IsInsert : Cell<FrameworkConfigGrid> { }
+
+    [SqlTable("dbo", "FrameworkField")]
+    public class FrameworkField : Row
+    {
+        [SqlField("Id", typeof(FrameworkField_Id), true)]
+        public int Id { get; set; }
+
+        [SqlField("TableId", typeof(FrameworkField_TableId))]
+        public int TableId { get; set; }
+
+        [SqlField("FieldNameCSharp", typeof(FrameworkField_FieldNameCSharp))]
+        public string FieldNameCSharp { get; set; }
+
+        [SqlField("FieldNameSql", typeof(FrameworkField_FieldNameSql))]
+        public string FieldNameSql { get; set; }
+
+        [SqlField("IsExist", typeof(FrameworkField_IsExist))]
+        public bool IsExist { get; set; }
+    }
+
+    public class FrameworkField_Id : Cell<FrameworkField> { }
+
+    public class FrameworkField_TableId : Cell<FrameworkField> { }
+
+    public class FrameworkField_FieldNameCSharp : Cell<FrameworkField> { }
+
+    public class FrameworkField_FieldNameSql : Cell<FrameworkField> { }
+
+    public class FrameworkField_IsExist : Cell<FrameworkField> { }
+
+    [SqlTable("dbo", "FrameworkFieldBuiltIn")]
+    public class FrameworkFieldBuiltIn : Row
+    {
+        [SqlField("Id", typeof(FrameworkFieldBuiltIn_Id))]
+        public int Id { get; set; }
+
+        [SqlField("Name", typeof(FrameworkFieldBuiltIn_Name))]
+        public string Name { get; set; }
+    }
+
+    public class FrameworkFieldBuiltIn_Id : Cell<FrameworkFieldBuiltIn> { }
+
+    public class FrameworkFieldBuiltIn_Name : Cell<FrameworkFieldBuiltIn> { }
 
     [SqlTable("dbo", "FrameworkScript")]
     public class FrameworkScript : Row

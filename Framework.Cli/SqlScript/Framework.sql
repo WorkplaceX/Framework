@@ -15,27 +15,27 @@ FROM
 	FrameworkTable
 GO
 
-CREATE TABLE FrameworkColumn /* Used for configuration. Contains all in source code defined columns. Also calculated fields. */
+CREATE TABLE FrameworkField /* Used for configuration. Contains all in source code defined columns. Also calculated fields. */
 (
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL ,
-	ColumnNameCSharp NVARCHAR(256) NOT NULL,
-	ColumnNameSql NVARCHAR(256), -- Can be null for calculated columns.
+	FieldNameCSharp NVARCHAR(256) NOT NULL,
+	FieldNameSql NVARCHAR(256), -- Can be null for calculated columns.
 	IsExist BIT NOT NULL
-	INDEX IX_FrameworkColumn UNIQUE (TableId, ColumnNameCSharp)
+	INDEX IX_FrameworkField UNIQUE (TableId, FieldNameCSharp)
 )
 
 GO
-CREATE VIEW FrameworkColumnBuiltIn AS
+CREATE VIEW FrameworkFieldBuiltIn AS
 SELECT
 	Id,
 	CONCAT(
 		'Table=',
-		(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkColumn.TableId), '; ',
-		'Column=',
-		FrameworkColumn.ColumnNameCSharp, ';') AS Name
+		(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkField.TableId), '; ',
+		'Field=',
+		FrameworkField.FieldNameCSharp, ';') AS Name
 FROM
-	FrameworkColumn FrameworkColumn
+	FrameworkField FrameworkField
 GO
 
 CREATE TABLE FrameworkConfigGrid
@@ -49,7 +49,7 @@ CREATE TABLE FrameworkConfigGrid
 	INDEX IX_FrameworkConfigGrid UNIQUE (ConfigName, TypeName)
 )
 
-CREATE TABLE FrameworkConfigColumn
+CREATE TABLE FrameworkConfigField
 (
 	Id INT PRIMARY KEY IDENTITY,
 	IsBuiltIn BIT NOT NULL,
@@ -61,5 +61,5 @@ CREATE TABLE FrameworkConfigColumn
 	IsVisible BIT NOT NULL,
 	IsReadOnly BIT NOT NULL,
 	Sort FLOAT,
-	INDEX IX_FrameworkConfigColumn UNIQUE (ConfigName, TypeName, FieldName)
+	INDEX IX_FrameworkConfigField UNIQUE (ConfigName, TypeName, FieldName)
 )
