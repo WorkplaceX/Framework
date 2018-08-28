@@ -1,11 +1,14 @@
 ﻿namespace Framework.Cli.Command
 {
+    using Database.dbo;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
+    using Framework.Dal;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Reflection;
 
     /// <summary>
     /// Command line interface application.
@@ -15,12 +18,55 @@
         /// <summary>
         /// Constructor.
         /// </summary>
-        public AppCli()
+        public AppCli(Assembly assemblyDatabase, Assembly assemblyApp)
         {
+            this.AssemblyDatabase = assemblyDatabase;
+            this.AssemblyApp = assemblyApp;
+
             this.commandLineApplication = new CommandLineApplication();
 
             RegisterCommand();
             RegisterCommandInit();
+        }
+
+        /// <summary>
+        /// Gets AssemblyDatabase. This assembly hosts from database generated rows.
+        /// </summary>
+        public readonly Assembly AssemblyDatabase;
+
+        /// <summary>
+        /// Gets AssemblyApp. This assembly hosts business logic.
+        /// </summary>
+        public readonly Assembly AssemblyApp;
+
+        internal Assembly AssemblyFramework
+        {
+            get
+            {
+                return typeof(FrameworkScript).Assembly;
+            }
+        }
+
+        /// <summary>
+        /// Returns rows defined in framework and database assembly.
+        /// </summary>
+        internal List<Type> TypeRowList()
+        {
+            List<Type> result = new List<Type>();
+            List<Assembly> assemblyList = new List<Assembly>();
+            assemblyList.Add(AssemblyFramework);
+            assemblyList.Add(AssemblyDatabase);
+            foreach (Assembly assembly in assemblyList)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.IsSubclassOf(typeof(Row)))
+                    {
+                        result.Add(type);
+                    }
+                }
+            }
+            return result;
         }
 
         private readonly CommandLineApplication commandLineApplication;

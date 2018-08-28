@@ -340,6 +340,19 @@
             object value = CellTextToValue(text, propertyInfo);
             propertyInfo.SetValue(row, value);
         }
+
+        /// <summary>
+        /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
+        /// </summary>
+        internal static string TypeRowToTableNameCSharp(Type typeRow)
+        {
+            string result = null;
+            UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
+            result = UtilFramework.TypeToName(typeRow);
+            UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "Database.Calculated".
+            result = result.Substring("Database.".Length); // Remove "Database" namespace.
+            return result;
+        }
     }
 
     internal enum FilterOperator

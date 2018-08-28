@@ -240,5 +240,13 @@ namespace Framework
         {
             return FileNameList(folderName, "*.*");
         }
+
+        /// <summary>
+        /// Returns for example: "Database.dbo.FrameworkScript"
+        /// </summary>
+        internal static string TypeToName(Type type)
+        {
+            return type.FullName;
+        }
     }
 }

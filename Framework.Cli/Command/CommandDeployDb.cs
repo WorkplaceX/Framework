@@ -6,6 +6,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     public class CommandDeployDb : CommandBase
     {
@@ -43,6 +44,26 @@
             }
         }
 
+        private void Meta()
+        {
+            List<FrameworkTable> tableList = new List<FrameworkTable>();
+            foreach (Type typeRow in AppCli.TypeRowList())
+            {
+                FrameworkTable table = new FrameworkTable();
+                tableList.Add(table);
+                string tableNameSql = null;
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                if (tableAttribute != null && (tableAttribute.SqlSchemaName != null || tableAttribute.SqlTableName != null))
+                {
+                    tableNameSql = string.Format("'[{0}].[{1}]'", tableAttribute.SqlSchemaName, tableAttribute.SqlTableName);
+                }
+
+                table.TableNameCSharp = UtilDal.TypeRowToTableNameCSharp(typeRow);
+                table.TableNameSql = tableNameSql;
+                table.IsExist = true;
+            }
+        }
+
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
@@ -62,6 +83,8 @@
 
             SqlScriptExecute(folderNameSqlScriptFramework, true);
             SqlScriptExecute(folderNameSqlScriptApplication, false);
+
+            Meta();
         }
     }
 }
