@@ -1,5 +1,6 @@
 ﻿namespace Framework.Cli.Generate
 {
+    using Framework.Dal;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -46,13 +47,15 @@
             foreach (MetaSqlSchema field in fieldList)
             {
                 string fieldNameCSharp = UtilGenerate.NameCSharp(field.FieldName, nameExceptList);
+                FrameworkTypeEnum frameworkTypeEnum = UtilDalType.SqlTypeToFrameworkTypeEnum(field.SqlType);
                 List.Add(new MetaCSharpSchema()
                 {
                     Schema = field,
                     SchemaNameCSharp = schemaNameCSharp,
                     TableNameCSharp = tableNameCSharp,
                     FieldNameCSharp = fieldNameCSharp,
-                    IsPrimaryKey = field.IsPrimaryKey
+                    IsPrimaryKey = field.IsPrimaryKey,
+                    FrameworkTypeEnum = frameworkTypeEnum,
                 });
             }
         }
@@ -71,5 +74,7 @@
         public string FieldNameCSharp { get; set; }
 
         public bool IsPrimaryKey { get; set; }
+
+        public FrameworkTypeEnum FrameworkTypeEnum { get; set; }
     }
 }

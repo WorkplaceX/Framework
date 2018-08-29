@@ -478,6 +478,33 @@
         }
     }
 
+    public enum FrameworkTypeEnum
+    {
+        None = 0,
+        Int = 1,
+        Smallint = 2,
+        Tinyint = 3,
+        Bigint = 4,
+        Uniqueidentifier = 5,
+        Datetime = 6,
+        Datetime2 = 7,
+        Date = 8,
+        Char = 9,
+        Nvarcahr = 10,
+        Varchar = 11,
+        Text = 12,
+        Ntext = 13,
+        Bit = 14,
+        Money = 15,
+        Decimal = 16,
+        Real = 17,
+        Float = 18,
+        Varbinary = 19,
+        Sqlvariant = 20,
+        Image = 21,
+        Numeric = 22,
+    }
+
     internal static class UtilDalType
     {
         /// <summary>
@@ -526,73 +553,77 @@
             return result;
         }
 
-        public class ExceptionTypeUnknown : Exception
-        {
-            public ExceptionTypeUnknown() 
-                : base("Type unknown!")
-            {
-
-            }
-        }
-
         public static Type SqlTypeToType(int sqlType)
         {
-            Type type = SqlTypeList().Where(item => item.Value.SqlType == sqlType).SingleOrDefault().Value?.Type;
-            if (type == null)
-            {
-                throw new ExceptionTypeUnknown();
-            }
+            Type type = FrameworkTypeList().Where(item => item.Value.SqlType == sqlType).SingleOrDefault().Value?.Type;
             return type;
         }
 
-        [ThreadStatic]
-        private static Dictionary<int, SqlTypeBase> sqlTypeList;
+        public static FrameworkTypeEnum SqlTypeToFrameworkTypeEnum(int sqlType)
+        {
+            var result = FrameworkTypeList().Where(item => item.Value.SqlType == sqlType).SingleOrDefault().Value?.FrameworkTypeEnum;
+            if (result == null)
+            {
+                return FrameworkTypeEnum.None;
+            }
+            else
+            {
+                return (FrameworkTypeEnum)result;
+            }
+        }
 
-        public static Dictionary<int, SqlTypeBase> SqlTypeList()
+        [ThreadStatic]
+        private static Dictionary<FrameworkTypeEnum, FrameworkType> frameworkTypeList;
+
+        private static Dictionary<FrameworkTypeEnum, FrameworkType> FrameworkTypeList()
         {
             // See also: https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-data-type-mappings
             // See also: SELECT * FROM sys.types
             // See also: https://docs.microsoft.com/en-us/sql/t-sql/data-types/data-type-conversion-database-engine
 
-            if (sqlTypeList == null)
+            if (frameworkTypeList == null)
             {
-                Dictionary<int, SqlTypeBase> result = new Dictionary<int, SqlTypeBase>();
-                result.Add(01, new SqlTypeInt());
-                result.Add(02, new SqlTypeSmallint());
-                result.Add(03, new SqlTypeTinyint());
-                result.Add(04, new SqlTypeBigint());
-                result.Add(05, new SqlTypeUniqueidentifier());
-                result.Add(06, new SqlTypeDatetime());
-                result.Add(07, new SqlTypeDatetime2());
-                result.Add(08, new SqlTypeDate());
-                result.Add(09, new SqlTypeChar());
-                result.Add(10, new SqlTypeNvarcahr());
-                result.Add(11, new SqlTypeVarchar());
-                result.Add(12, new SqlTypeText());
-                result.Add(13, new SqlTypeNtext());
-                result.Add(14, new SqlTypeBit());
-                result.Add(15, new SqlTypeMoney());
-                result.Add(16, new SqlTypeDecimal());
-                result.Add(17, new SqlTypeReal());
-                result.Add(18, new SqlTypeFloat());
-                result.Add(19, new SqlTypeVarbinary());
-                result.Add(20, new SqlTypeSqlvariant());
-                result.Add(21, new SqlTypeImage());
-                result.Add(22, new SqlTypeNumeric());
-                sqlTypeList = result;
+                Dictionary<FrameworkTypeEnum, FrameworkType> result = new Dictionary<FrameworkTypeEnum, FrameworkType>();
+                FrameworkType frameworkType;
+                frameworkType = new FrameworkTypeInt(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeSmallint(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeTinyint(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeBigint(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeUniqueidentifier(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeDatetime(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeDatetime2(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeDate(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeChar(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeNvarcahr(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeVarchar(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeText(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeNtext(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeBit(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeMoney(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeDecimal(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeReal(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeFloat(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeVarbinary(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new SqlTypeSqlvariant(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeImage(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeNumeric(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkTypeList = result;
             }
-            return sqlTypeList;
+            return frameworkTypeList;
         }
 
-        internal class SqlTypeBase
+        internal class FrameworkType
         {
-            public SqlTypeBase(string sqlTypeName, int sqlType, Type type, DbType dbType)
+            public FrameworkType(FrameworkTypeEnum frameworkTypeEnum, string sqlTypeName, int sqlType, Type type, DbType dbType)
             {
+                this.FrameworkTypeEnum = frameworkTypeEnum;
                 this.SqlTypeName = sqlTypeName;
                 this.SqlType = sqlType;
                 this.Type = type;
                 this.DbType = dbType;
             }
+
+            public readonly FrameworkTypeEnum FrameworkTypeEnum;
 
             public readonly string SqlTypeName;
 
@@ -620,199 +651,199 @@
             }
         }
 
-        public class SqlTypeInt : SqlTypeBase
+        public class FrameworkTypeInt : FrameworkType
         {
-            public SqlTypeInt()
-                : base("int", 56, typeof(Int32), DbType.Int32)
+            public FrameworkTypeInt()
+                : base(FrameworkTypeEnum.Int, "int", 56, typeof(Int32), DbType.Int32)
             {
 
             }
         }
 
-        public class SqlTypeSmallint : SqlTypeBase
+        public class FrameworkTypeSmallint : FrameworkType
         {
-            public SqlTypeSmallint()
-                : base("smallint", 52, typeof(Int16), DbType.Int16)
+            public FrameworkTypeSmallint()
+                : base(FrameworkTypeEnum.Smallint, "smallint", 52, typeof(Int16), DbType.Int16)
             {
 
             }
         }
 
-        public class SqlTypeTinyint : SqlTypeBase
+        public class FrameworkTypeTinyint : FrameworkType
         {
-            public SqlTypeTinyint()
-                : base("tinyint", 48, typeof(byte), DbType.Byte)
+            public FrameworkTypeTinyint()
+                : base(FrameworkTypeEnum.Tinyint, "tinyint", 48, typeof(byte), DbType.Byte)
             {
 
             }
         }
 
-        public class SqlTypeBigint : SqlTypeBase
+        public class FrameworkTypeBigint : FrameworkType
         {
-            public SqlTypeBigint()
-                : base("bigint", 127, typeof(Int64), DbType.Int64)
+            public FrameworkTypeBigint()
+                : base(FrameworkTypeEnum.Bigint, "bigint", 127, typeof(Int64), DbType.Int64)
             {
 
             }
         }
 
-        public class SqlTypeUniqueidentifier : SqlTypeBase
+        public class FrameworkTypeUniqueidentifier : FrameworkType
         {
-            public SqlTypeUniqueidentifier()
-                : base("uniqueidentifier", 36, typeof(Guid), DbType.Guid)
+            public FrameworkTypeUniqueidentifier()
+                : base(FrameworkTypeEnum.Uniqueidentifier, "uniqueidentifier", 36, typeof(Guid), DbType.Guid)
             {
 
             }
         }
 
-        public class SqlTypeDatetime : SqlTypeBase
+        public class FrameworkTypeDatetime : FrameworkType
         {
-            public SqlTypeDatetime()
-                : base("datetime", 61, typeof(DateTime), DbType.DateTime)
+            public FrameworkTypeDatetime()
+                : base(FrameworkTypeEnum.Datetime, "datetime", 61, typeof(DateTime), DbType.DateTime)
             {
 
             }
         }
 
-        public class SqlTypeDatetime2 : SqlTypeBase
+        public class FrameworkTypeDatetime2 : FrameworkType
         {
-            public SqlTypeDatetime2()
-                : base("datetime2", 42, typeof(DateTime), DbType.DateTime2)
+            public FrameworkTypeDatetime2()
+                : base(FrameworkTypeEnum.Datetime2, "datetime2", 42, typeof(DateTime), DbType.DateTime2)
             {
 
             }
         }
 
-        public class SqlTypeDate : SqlTypeBase
+        public class FrameworkTypeDate : FrameworkType
         {
-            public SqlTypeDate()
-                : base("date", 40, typeof(DateTime), DbType.Date)
+            public FrameworkTypeDate()
+                : base(FrameworkTypeEnum.Date, "date", 40, typeof(DateTime), DbType.Date)
             {
 
             }
         }
 
-        public class SqlTypeChar : SqlTypeBase
+        public class FrameworkTypeChar : FrameworkType
         {
-            public SqlTypeChar()
-                : base("char", 175, typeof(string), DbType.String)
+            public FrameworkTypeChar()
+                : base(FrameworkTypeEnum.Char, "char", 175, typeof(string), DbType.String)
             {
 
             }
         }
 
-        public class SqlTypeNvarcahr : SqlTypeBase
+        public class FrameworkTypeNvarcahr : FrameworkType
         {
-            public SqlTypeNvarcahr()
-                : base("nvarcahr", 231, typeof(string), DbType.String)
+            public FrameworkTypeNvarcahr()
+                : base(FrameworkTypeEnum.Nvarcahr, "nvarcahr", 231, typeof(string), DbType.String)
             {
 
             }
         }
 
-        public class SqlTypeVarchar : SqlTypeBase
+        public class FrameworkTypeVarchar : FrameworkType
         {
-            public SqlTypeVarchar()
-                : base("varchar", 167, typeof(string), DbType.String)
+            public FrameworkTypeVarchar()
+                : base(FrameworkTypeEnum.Varchar, "varchar", 167, typeof(string), DbType.String)
             {
 
             }
         }
 
-        public class SqlTypeText : SqlTypeBase // See also: https://stackoverflow.com/questions/564755/sql-server-text-type-vs-varchar-data-type
+        public class FrameworkTypeText : FrameworkType // See also: https://stackoverflow.com/questions/564755/sql-server-text-type-vs-varchar-data-type
         {
-            public SqlTypeText()
-                : base("text", 35, typeof(string), DbType.String)
+            public FrameworkTypeText()
+                : base(FrameworkTypeEnum.Text, "text", 35, typeof(string), DbType.String)
             {
 
             }
         }
 
-        public class SqlTypeNtext : SqlTypeBase
+        public class FrameworkTypeNtext : FrameworkType
         {
-            public SqlTypeNtext()
-                : base("ntext", 99, typeof(string), DbType.String)
+            public FrameworkTypeNtext()
+                : base(FrameworkTypeEnum.Ntext, "ntext", 99, typeof(string), DbType.String)
             {
 
             }
         }
 
-        public class SqlTypeBit : SqlTypeBase
+        public class FrameworkTypeBit : FrameworkType
         {
-            public SqlTypeBit()
-                : base("bit", 104, typeof(bool), DbType.Boolean)
+            public FrameworkTypeBit()
+                : base(FrameworkTypeEnum.Bit, "bit", 104, typeof(bool), DbType.Boolean)
             {
 
             }
         }
 
-        public class SqlTypeMoney : SqlTypeBase
+        public class FrameworkTypeMoney : FrameworkType
         {
-            public SqlTypeMoney()
-                : base("money", 60, typeof(decimal), DbType.Decimal)
+            public FrameworkTypeMoney()
+                : base(FrameworkTypeEnum.Money, "money", 60, typeof(decimal), DbType.Decimal)
             {
 
             }
         }
 
-        public class SqlTypeDecimal : SqlTypeBase
+        public class FrameworkTypeDecimal : FrameworkType
         {
-            public SqlTypeDecimal()
-                : base("decimal", 106, typeof(decimal), DbType.Decimal)
+            public FrameworkTypeDecimal()
+                : base(FrameworkTypeEnum.Decimal, "decimal", 106, typeof(decimal), DbType.Decimal)
             {
 
             }
         }
 
-        public class SqlTypeReal : SqlTypeBase
+        public class FrameworkTypeReal : FrameworkType
         {
-            public SqlTypeReal()
-                : base("real", 59, typeof(Single), DbType.Single)
+            public FrameworkTypeReal()
+                : base(FrameworkTypeEnum.Real, "real", 59, typeof(Single), DbType.Single)
             {
 
             }
         }
 
-        public class SqlTypeFloat : SqlTypeBase
+        public class FrameworkTypeFloat : FrameworkType
         {
-            public SqlTypeFloat()
-                : base("float", 62, typeof(double), DbType.Double)
+            public FrameworkTypeFloat()
+                : base(FrameworkTypeEnum.Float, "float", 62, typeof(double), DbType.Double)
             {
 
             }
         }
 
-        public class SqlTypeVarbinary : SqlTypeBase
+        public class FrameworkTypeVarbinary : FrameworkType
         {
-            public SqlTypeVarbinary()
-                : base("varbinary", 165, typeof(byte[]), DbType.Binary) // DbType.Binary?
+            public FrameworkTypeVarbinary()
+                : base(FrameworkTypeEnum.Varbinary, "varbinary", 165, typeof(byte[]), DbType.Binary) // DbType.Binary?
             {
 
             }
         }
 
-        public class SqlTypeSqlvariant : SqlTypeBase
+        public class SqlTypeSqlvariant : FrameworkType
         {
             public SqlTypeSqlvariant()
-                : base("sql_variant", 98, typeof(object), DbType.Object)
+                : base(FrameworkTypeEnum.Sqlvariant, "sql_variant", 98, typeof(object), DbType.Object)
             {
 
             }
         }
 
-        public class SqlTypeImage : SqlTypeBase
+        public class FrameworkTypeImage : FrameworkType
         {
-            public SqlTypeImage()
-                : base("image", 34, typeof(byte[]), DbType.Binary) // DbType.Binary?
+            public FrameworkTypeImage()
+                : base(FrameworkTypeEnum.Image, "image", 34, typeof(byte[]), DbType.Binary) // DbType.Binary?
             {
 
             }
         }
 
-        public class SqlTypeNumeric : SqlTypeBase
+        public class FrameworkTypeNumeric : FrameworkType
         {
-            public SqlTypeNumeric()
-                : base("numeric", 108, typeof(decimal), DbType.Decimal)
+            public FrameworkTypeNumeric()
+                : base(FrameworkTypeEnum.Numeric, "numeric", 108, typeof(decimal), DbType.Decimal)
             {
 
             }

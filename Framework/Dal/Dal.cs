@@ -56,15 +56,16 @@
     /// </summary>
     public class SqlFieldAttribute : Attribute
     {
-        public SqlFieldAttribute(string sqlFieldName, Type typeCell, bool isPrimaryKey)
+        public SqlFieldAttribute(string sqlFieldName, Type typeCell, bool isPrimaryKey, FrameworkTypeEnum frameworkTypeEnum = 0)
         {
             this.SqlFieldName = sqlFieldName;
             this.IsPrimaryKey = isPrimaryKey;
             this.TypeCell = typeCell;
+            this.FrameworkTypeEnum = frameworkTypeEnum;
         }
 
-        public SqlFieldAttribute(string sqlFieldName, Type typeCell)
-            : this(sqlFieldName, typeCell, false)
+        public SqlFieldAttribute(string sqlFieldName, Type typeCell, FrameworkTypeEnum frameworkTypeEnum = 0)
+            : this(sqlFieldName, typeCell, false, frameworkTypeEnum)
         {
 
         }
@@ -77,5 +78,10 @@
         public readonly bool IsPrimaryKey;
 
         public readonly Type TypeCell;
+
+        /// <summary>
+        /// Gets FrameworkTypeId. See also class FrameworkType.
+        /// </summary>
+        public readonly FrameworkTypeEnum FrameworkTypeEnum;
     }
 }
