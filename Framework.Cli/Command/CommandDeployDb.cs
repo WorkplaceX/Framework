@@ -37,7 +37,7 @@
                 if (rowList.Select(item => item.FileName.ToLower()).Contains(fileName.ToLower()) == false)
                 {
                     string sql = UtilFramework.FileLoad(UtilFramework.FolderName + fileName);
-                    UtilDal.ExecuteAsync(sql, null, isFrameworkDb).Wait();
+                    UtilDal.ExecuteNonQueryAsync(sql, null, isFrameworkDb).Wait();
                     FrameworkScript row = new FrameworkScript() { FileName = fileName, Date = DateTime.UtcNow };
                     UtilDal.InsertAsync(row).Wait();
                 }
@@ -73,7 +73,7 @@
             // SqlInit
             string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/Sql/Init.sql";
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
-            UtilDal.ExecuteAsync(sqlInit).Wait();
+            UtilDal.ExecuteNonQueryAsync(sqlInit).Wait();
 
             SqlScriptExecute(folderNameSqlScriptFramework, true);
             SqlScriptExecute(folderNameSqlScriptApplication, false);

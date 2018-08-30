@@ -17,6 +17,7 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
+    using static Framework.Dal.UtilDalType;
 
     public static class UtilDal
     {
@@ -85,24 +86,75 @@
             return result;
         }
 
-        internal static string ExecuteParameterAdd(Type typeValue, object value, List<SqlParameter> paramList, bool isUseParam = true)
+        private static string ExecuteParamAddPrivate(FrameworkTypeEnum frameworkTypeEnum, string paramName, object value, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
         {
+            FrameworkType frameworkType = UtilDalType.FrameworkTypeEnumToFrameworkType(frameworkTypeEnum);
+
+            // ParamName
+            if (paramName == null)
+            {
+                paramName = $"@P{ paramList.Count }";
+            }
+            UtilFramework.Assert(paramName.StartsWith("@"), "Parameter does not start with @!");
+            UtilFramework.Assert(paramList.Where(item => item.SqlParameter.ParameterName == paramName).Count() == 0, string.Format("ParamName already exists! ({0})", paramName));
+
+            // Value
             if (value != null)
             {
-                UtilFramework.Assert(value.GetType() == typeValue);
+                UtilFramework.Assert(value.GetType() == frameworkType.ValueType);
             }
-            if (isUseParam)
+            if (value is string && (string)value == "")
             {
-
+                value = null;
             }
-            else
+            if (value == null)
             {
-
+                value = DBNull.Value;
             }
-            return null;
+
+            SqlParameter parameter = new SqlParameter(paramName, frameworkType.DbType) { Value = value };
+            paramList.Add((frameworkTypeEnum, parameter));
+
+            return paramName;
         }
 
-        internal static async Task ExecuteAsync(string sql, List<SqlParameter> paramList, bool isFrameworkDb)
+        /// <summary>
+        /// Adds sql param.
+        /// </summary>
+        internal static void ExecuteParamAdd(FrameworkTypeEnum frameworkTypeEnum, string paramName, object value, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
+        {
+            ExecuteParamAddPrivate(frameworkTypeEnum, paramName, value, paramList);
+        }
+
+        /// <summary>
+        /// Adds sql param and returns new paramName. For example "@P0".
+        /// </summary>
+        internal static string ExecuteParamAdd(FrameworkTypeEnum frameworkTypeEnum, object value, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
+        {
+            return ExecuteParamAddPrivate(frameworkTypeEnum, null, value, paramList);
+        }
+
+        /// <summary>
+        /// Replaces sql params with text params and returns full sql for debugging.
+        /// </summary>
+        internal static string ExecuteParamDebug(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
+        {
+            paramList = paramList.OrderByDescending(item => item.SqlParameter.ParameterName).ToList(); // Replace first @P100, then @P10
+            foreach (var param in paramList)
+            {
+                FrameworkType frameworkType = UtilDalType.FrameworkTypeEnumToFrameworkType(param.FrameworkTypeEnum);
+                string find = param.SqlParameter.ParameterName;
+                string replace = frameworkType.ValueToSqlParameterDebug(param.SqlParameter.Value);
+                sql = UtilFramework.Replace(sql, find, replace);
+            }
+            return sql;
+        }
+
+        /// <summary>
+        /// Execute sql statement.
+        /// </summary>
+        /// <param name="sql">Sql can have "GO" batch seperator.</param>
+        internal static async Task ExecuteNonQueryAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb)
         {
             var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -115,16 +167,116 @@
                     SqlCommand sqlCommand = new SqlCommand(sqlItem, sqlConnection);
                     if (paramList?.Count > 0)
                     {
-                        sqlCommand.Parameters.AddRange(paramList.ToArray());
+                        sqlCommand.Parameters.AddRange(paramList.Select(item => item.SqlParameter).ToArray());
                     }
                     await sqlCommand.ExecuteNonQueryAsync();
                 }
             }
         }
 
-        internal static async Task ExecuteAsync(string sql, List<SqlParameter> paramList = null)
+        /// <summary>
+        /// Execute sql statement.
+        /// </summary>
+        /// <param name="paramList">See also method ExecuteParamAdd();</param>
+        internal static async Task ExecuteNonQueryAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList = null)
         {
-            await ExecuteAsync(sql, paramList, false);
+            await ExecuteNonQueryAsync(sql, paramList, false);
+        }
+
+        /// <summary>
+        /// Returns multiple result sets from stored procedure or select.
+        /// </summary>
+        /// <param name="sql">For example: "SELECT 1 AS A SELECT 2 AS B"; or with parameter: "SELECT @P0 AS A";</param>
+        /// <param name="paramList">See also method ExecuteParamAdd();</param>
+        /// <returns>Returns (ResultSet, Row, ColumnName, Value) value list.</returns>
+        internal static async Task<List<List<Dictionary<string, object>>>> ExecuteReaderMultipleAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb = false)
+        {
+            List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
+            string connectionString = ConfigFramework.ConnectionString(isFrameworkDb);
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                sqlConnection.Open();
+                SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection);
+                if (paramList?.Count > 0)
+                {
+                    sqlCommand.Parameters.AddRange(paramList.Select(item => item.SqlParameter).ToArray());
+                }
+                using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync())
+                {
+                    while (sqlDataReader.HasRows)
+                    {
+                        var rowList = new List<Dictionary<string, object>>();
+                        result.Add(rowList);
+                        while (sqlDataReader.Read())
+                        {
+                            var row = new Dictionary<string, object>();
+                            rowList.Add(row);
+                            for (int i = 0; i < sqlDataReader.FieldCount; i++)
+                            {
+                                string columnName = sqlDataReader.GetName(i);
+                                object value = sqlDataReader.GetValue(i);
+                                if (value == DBNull.Value)
+                                {
+                                    value = null;
+                                }
+                                row.Add(columnName, value);
+                            }
+                        }
+                        sqlDataReader.NextResult();
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Execute sql statement.
+        /// </summary>
+        internal static async Task<List<TRow>> ExecuteReaderAsync<TRow>(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb = false) where TRow : Row
+        {
+            var valueList = await ExecuteReaderMultipleAsync(sql, paramList, isFrameworkDb);
+            return ExecuteReaderMultipleResultCopy<TRow>(valueList, 0);
+        }
+
+        /// <summary>
+        /// Convert one sql multiple result set to typed row list.
+        /// </summary>
+        /// <param name="valueList">Result of method ExecuteReaderAsync();</param>
+        /// <param name="resultSetIndex">Sql multiple result set index.</param>
+        /// <param name="typeRow">Type of row to copy to. Copy one multiple result set.</param>
+        /// <returns>List of typed rows.</returns>
+        internal static List<object> ExecuteReaderMultipleResultCopy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
+        {
+            List<object> result = new List<object>();
+            PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
+            foreach (Dictionary<string, object> row in valueList[resultSetIndex])
+            {
+                Row rowResult = UtilDal.RowCreate(typeRow);
+                foreach (string columnName in row.Keys)
+                {
+                    object value = row[columnName];
+                    PropertyInfo propertyInfo = propertyInfoList.Where(item => item.Name == columnName).FirstOrDefault();
+                    if (propertyInfo != null)
+                    {
+                        propertyInfo.SetValue(rowResult, value);
+                    }
+                }
+                result.Add(rowResult);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Convert sql multiple result set to one typed row list.
+        /// </summary>
+        /// <typeparam name="T">Type of row to copy to. Copy one multiple result set.</typeparam>
+        /// <param name="valueList">Result of method Execute(); multiple result set.</param>
+        /// <param name="resultSetIndex">Sql multiple result set index.</param>
+        /// <returns>Type of row to copy to. Copy one multiple result set.</returns>
+        internal static List<T> ExecuteReaderMultipleResultCopy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
+        {
+            List<object> result = ExecuteReaderMultipleResultCopy(valueList, resultSetIndex, typeof(T));
+            return result.Cast<T>().ToList();
         }
 
         public static IQueryable Query(Type typeRow)
@@ -196,6 +348,14 @@
             Row result = (Row)UtilFramework.TypeToObject(row.GetType());
             RowCopy(row, result);
             return result;
+        }
+
+        /// <summary>
+        /// Returns new data row.
+        /// </summary>
+        public static Row RowCreate(Type typeRow)
+        {
+            return (Row)UtilFramework.TypeToObject(typeRow);
         }
 
         /// <summary>
@@ -390,28 +550,29 @@
             return result;
         }
 
-        private static string UpsertSelect(Type typeRow, List<Row> rowList, List<SqlParameter> paramList)
+        private static string UpsertSelect(Type typeRow, List<Row> rowList, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
         {
-            StringBuilder result = new StringBuilder();
-            var fieldNameList = UtilDalType.TypeRowToSqlFieldNameList(typeRow);
+            StringBuilder sqlSelect = new StringBuilder();
+            var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
 
             // Row
             bool isFirstRow = true;
             foreach (Row row in rowList)
             {
+                UtilFramework.Assert(row.GetType() == typeRow);
                 if (isFirstRow)
                 {
                     isFirstRow = false;
                 }
                 else
                 {
-                    result.Append(" UNION ALL\r\n");
+                    sqlSelect.Append(" UNION ALL\r\n");
                 }
-                result.Append("(SELECT");
 
                 // Field
+                sqlSelect.Append("(SELECT ");
                 bool isFirstField = true;
-                foreach (var fieldName in fieldNameList)
+                foreach (var field in fieldList)
                 {
                     if (isFirstField)
                     {
@@ -419,15 +580,15 @@
                     }
                     else
                     {
-                        result.Append(", ");
+                        sqlSelect.Append(", ");
                     }
-                    result.Append($"@P{ paramList.Count }");
-                    result.Append(" AS " + fieldName.SqlFieldName);
-
+                    object value = field.PropertyInfo.GetValue(row);
+                    string paramName = UtilDal.ExecuteParamAdd(field.FrameworkTypeEnum, value, paramList);
+                    sqlSelect.Append(string.Format("{0} AS {1}", paramName, field.SqlFieldName));
                 }
-                result.Append(")");
+                sqlSelect.Append(")");
             }
-            return result.ToString();
+            return sqlSelect.ToString();
         }
 
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string fieldNameIsExist)
@@ -459,11 +620,10 @@
 	                VALUES (Source.Text, Source.Path, Source.ApplicationTypeId, Source.IsActive);
                 ";
 
-                foreach (Row row in rowList)
-                {
-                    UtilFramework.Assert(row.GetType() == typeRow);
-
-                }
+                var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
+                string sqlSelect = UpsertSelect(typeRow, rowList, paramList);
+                string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList);
+                var result = await UtilDal.ExecuteReaderMultipleAsync(sqlSelect, paramList);
             }
         }
 
@@ -536,26 +696,28 @@
             return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         }
 
-        internal static List<(PropertyInfo PropertyInfo, string SqlFieldName)> TypeRowToSqlFieldNameList(Type typeRow)
+        internal static List<(PropertyInfo PropertyInfo, string SqlFieldName, FrameworkTypeEnum FrameworkTypeEnum)> TypeRowToFieldList(Type typeRow)
         {
-            var result = new List<(PropertyInfo PropertyInfo, string SqlFieldName)>();
+            var result = new List<(PropertyInfo PropertyInfo, string SqlFieldName, FrameworkTypeEnum FrameworkTypeEnum)>();
             var propertyInfoList = TypeRowToPropertyInfoList(typeRow);
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
                 SqlFieldAttribute fieldAttribute = (SqlFieldAttribute)propertyInfo.GetCustomAttribute(typeof(SqlFieldAttribute));
                 string sqlFieldName = null;
+                FrameworkTypeEnum frameworkTypeEnum = FrameworkTypeEnum.None;
                 if (fieldAttribute != null)
                 {
                     sqlFieldName = fieldAttribute.SqlFieldName;
+                    frameworkTypeEnum = fieldAttribute.FrameworkTypeEnum;
                 }
-                result.Add((propertyInfo, sqlFieldName));
+                result.Add((propertyInfo, sqlFieldName, frameworkTypeEnum));
             }
             return result;
         }
 
         public static Type SqlTypeToType(int sqlType)
         {
-            Type type = FrameworkTypeList().Where(item => item.Value.SqlType == sqlType).SingleOrDefault().Value?.Type;
+            Type type = FrameworkTypeList().Where(item => item.Value.SqlType == sqlType).Single().Value.ValueType;
             return type;
         }
 
@@ -570,6 +732,11 @@
             {
                 return (FrameworkTypeEnum)result;
             }
+        }
+
+        public static FrameworkType FrameworkTypeEnumToFrameworkType(FrameworkTypeEnum frameworkTypeEnum)
+        {
+            return FrameworkTypeList().Where(item => item.Value.FrameworkTypeEnum == frameworkTypeEnum).Single().Value;
         }
 
         [ThreadStatic]
@@ -614,13 +781,14 @@
 
         internal class FrameworkType
         {
-            public FrameworkType(FrameworkTypeEnum frameworkTypeEnum, string sqlTypeName, int sqlType, Type type, DbType dbType)
+            public FrameworkType(FrameworkTypeEnum frameworkTypeEnum, string sqlTypeName, int sqlType, Type valueType, DbType dbType, bool isNumber)
             {
                 this.FrameworkTypeEnum = frameworkTypeEnum;
                 this.SqlTypeName = sqlTypeName;
                 this.SqlType = sqlType;
-                this.Type = type;
+                this.ValueType = valueType;
                 this.DbType = dbType;
+                this.IsNumber = isNumber;
             }
 
             public readonly FrameworkTypeEnum FrameworkTypeEnum;
@@ -629,9 +797,11 @@
 
             public readonly int SqlType;
 
-            public readonly Type Type;
+            public readonly Type ValueType;
 
             public readonly DbType DbType;
+
+            public readonly bool IsNumber;
 
             protected virtual string TextFromValue(object value)
             {
@@ -644,8 +814,26 @@
                 object result = null;
                 if (!string.IsNullOrEmpty(text))
                 {
-                    Type type = UtilFramework.TypeUnderlying(Type);
+                    Type type = UtilFramework.TypeUnderlying(ValueType);
                     result = Convert.ChangeType(text, type);
+                }
+                return result;
+            }
+
+            protected virtual internal string ValueToSqlParameterDebug(object value)
+            {
+                string result = null;
+                if (value != null)
+                {
+                    result = value.ToString();
+                }
+                if (IsNumber == false)
+                {
+                    result = "'" + result + "'";
+                }
+                if (value == null)
+                {
+                    result = "NULL";
                 }
                 return result;
             }
@@ -654,7 +842,7 @@
         public class FrameworkTypeInt : FrameworkType
         {
             public FrameworkTypeInt()
-                : base(FrameworkTypeEnum.Int, "int", 56, typeof(Int32), DbType.Int32)
+                : base(FrameworkTypeEnum.Int, "int", 56, typeof(Int32), DbType.Int32, true)
             {
 
             }
@@ -663,7 +851,7 @@
         public class FrameworkTypeSmallint : FrameworkType
         {
             public FrameworkTypeSmallint()
-                : base(FrameworkTypeEnum.Smallint, "smallint", 52, typeof(Int16), DbType.Int16)
+                : base(FrameworkTypeEnum.Smallint, "smallint", 52, typeof(Int16), DbType.Int16, true)
             {
 
             }
@@ -672,7 +860,7 @@
         public class FrameworkTypeTinyint : FrameworkType
         {
             public FrameworkTypeTinyint()
-                : base(FrameworkTypeEnum.Tinyint, "tinyint", 48, typeof(byte), DbType.Byte)
+                : base(FrameworkTypeEnum.Tinyint, "tinyint", 48, typeof(byte), DbType.Byte, true)
             {
 
             }
@@ -681,7 +869,7 @@
         public class FrameworkTypeBigint : FrameworkType
         {
             public FrameworkTypeBigint()
-                : base(FrameworkTypeEnum.Bigint, "bigint", 127, typeof(Int64), DbType.Int64)
+                : base(FrameworkTypeEnum.Bigint, "bigint", 127, typeof(Int64), DbType.Int64, true)
             {
 
             }
@@ -690,7 +878,7 @@
         public class FrameworkTypeUniqueidentifier : FrameworkType
         {
             public FrameworkTypeUniqueidentifier()
-                : base(FrameworkTypeEnum.Uniqueidentifier, "uniqueidentifier", 36, typeof(Guid), DbType.Guid)
+                : base(FrameworkTypeEnum.Uniqueidentifier, "uniqueidentifier", 36, typeof(Guid), DbType.Guid, false)
             {
 
             }
@@ -699,7 +887,7 @@
         public class FrameworkTypeDatetime : FrameworkType
         {
             public FrameworkTypeDatetime()
-                : base(FrameworkTypeEnum.Datetime, "datetime", 61, typeof(DateTime), DbType.DateTime)
+                : base(FrameworkTypeEnum.Datetime, "datetime", 61, typeof(DateTime), DbType.DateTime, false)
             {
 
             }
@@ -708,7 +896,7 @@
         public class FrameworkTypeDatetime2 : FrameworkType
         {
             public FrameworkTypeDatetime2()
-                : base(FrameworkTypeEnum.Datetime2, "datetime2", 42, typeof(DateTime), DbType.DateTime2)
+                : base(FrameworkTypeEnum.Datetime2, "datetime2", 42, typeof(DateTime), DbType.DateTime2, false)
             {
 
             }
@@ -717,7 +905,7 @@
         public class FrameworkTypeDate : FrameworkType
         {
             public FrameworkTypeDate()
-                : base(FrameworkTypeEnum.Date, "date", 40, typeof(DateTime), DbType.Date)
+                : base(FrameworkTypeEnum.Date, "date", 40, typeof(DateTime), DbType.Date, false)
             {
 
             }
@@ -726,7 +914,7 @@
         public class FrameworkTypeChar : FrameworkType
         {
             public FrameworkTypeChar()
-                : base(FrameworkTypeEnum.Char, "char", 175, typeof(string), DbType.String)
+                : base(FrameworkTypeEnum.Char, "char", 175, typeof(string), DbType.String, false)
             {
 
             }
@@ -735,7 +923,7 @@
         public class FrameworkTypeNvarcahr : FrameworkType
         {
             public FrameworkTypeNvarcahr()
-                : base(FrameworkTypeEnum.Nvarcahr, "nvarcahr", 231, typeof(string), DbType.String)
+                : base(FrameworkTypeEnum.Nvarcahr, "nvarcahr", 231, typeof(string), DbType.String, false)
             {
 
             }
@@ -744,7 +932,7 @@
         public class FrameworkTypeVarchar : FrameworkType
         {
             public FrameworkTypeVarchar()
-                : base(FrameworkTypeEnum.Varchar, "varchar", 167, typeof(string), DbType.String)
+                : base(FrameworkTypeEnum.Varchar, "varchar", 167, typeof(string), DbType.String, false)
             {
 
             }
@@ -753,7 +941,7 @@
         public class FrameworkTypeText : FrameworkType // See also: https://stackoverflow.com/questions/564755/sql-server-text-type-vs-varchar-data-type
         {
             public FrameworkTypeText()
-                : base(FrameworkTypeEnum.Text, "text", 35, typeof(string), DbType.String)
+                : base(FrameworkTypeEnum.Text, "text", 35, typeof(string), DbType.String, false)
             {
 
             }
@@ -762,7 +950,7 @@
         public class FrameworkTypeNtext : FrameworkType
         {
             public FrameworkTypeNtext()
-                : base(FrameworkTypeEnum.Ntext, "ntext", 99, typeof(string), DbType.String)
+                : base(FrameworkTypeEnum.Ntext, "ntext", 99, typeof(string), DbType.String, false)
             {
 
             }
@@ -771,16 +959,34 @@
         public class FrameworkTypeBit : FrameworkType
         {
             public FrameworkTypeBit()
-                : base(FrameworkTypeEnum.Bit, "bit", 104, typeof(bool), DbType.Boolean)
+                : base(FrameworkTypeEnum.Bit, "bit", 104, typeof(bool), DbType.Boolean, false)
             {
 
+            }
+
+            protected internal override string ValueToSqlParameterDebug(object value)
+            {
+                string result = null;
+                if (value != null)
+                {
+                    UtilFramework.Assert(value.GetType() == ValueType);
+                    if ((bool)value == false)
+                    {
+                        result = "0";
+                    }
+                    else
+                    {
+                        result = "1";
+                    }
+                }
+                return result;
             }
         }
 
         public class FrameworkTypeMoney : FrameworkType
         {
             public FrameworkTypeMoney()
-                : base(FrameworkTypeEnum.Money, "money", 60, typeof(decimal), DbType.Decimal)
+                : base(FrameworkTypeEnum.Money, "money", 60, typeof(decimal), DbType.Decimal, true)
             {
 
             }
@@ -789,7 +995,7 @@
         public class FrameworkTypeDecimal : FrameworkType
         {
             public FrameworkTypeDecimal()
-                : base(FrameworkTypeEnum.Decimal, "decimal", 106, typeof(decimal), DbType.Decimal)
+                : base(FrameworkTypeEnum.Decimal, "decimal", 106, typeof(decimal), DbType.Decimal, true)
             {
 
             }
@@ -798,7 +1004,7 @@
         public class FrameworkTypeReal : FrameworkType
         {
             public FrameworkTypeReal()
-                : base(FrameworkTypeEnum.Real, "real", 59, typeof(Single), DbType.Single)
+                : base(FrameworkTypeEnum.Real, "real", 59, typeof(Single), DbType.Single, true)
             {
 
             }
@@ -807,7 +1013,7 @@
         public class FrameworkTypeFloat : FrameworkType
         {
             public FrameworkTypeFloat()
-                : base(FrameworkTypeEnum.Float, "float", 62, typeof(double), DbType.Double)
+                : base(FrameworkTypeEnum.Float, "float", 62, typeof(double), DbType.Double, true)
             {
 
             }
@@ -816,7 +1022,7 @@
         public class FrameworkTypeVarbinary : FrameworkType
         {
             public FrameworkTypeVarbinary()
-                : base(FrameworkTypeEnum.Varbinary, "varbinary", 165, typeof(byte[]), DbType.Binary) // DbType.Binary?
+                : base(FrameworkTypeEnum.Varbinary, "varbinary", 165, typeof(byte[]), DbType.Binary, false) // DbType.Binary?
             {
 
             }
@@ -825,7 +1031,7 @@
         public class SqlTypeSqlvariant : FrameworkType
         {
             public SqlTypeSqlvariant()
-                : base(FrameworkTypeEnum.Sqlvariant, "sql_variant", 98, typeof(object), DbType.Object)
+                : base(FrameworkTypeEnum.Sqlvariant, "sql_variant", 98, typeof(object), DbType.Object, false)
             {
 
             }
@@ -834,7 +1040,7 @@
         public class FrameworkTypeImage : FrameworkType
         {
             public FrameworkTypeImage()
-                : base(FrameworkTypeEnum.Image, "image", 34, typeof(byte[]), DbType.Binary) // DbType.Binary?
+                : base(FrameworkTypeEnum.Image, "image", 34, typeof(byte[]), DbType.Binary, false) // DbType.Binary?
             {
 
             }
@@ -843,7 +1049,7 @@
         public class FrameworkTypeNumeric : FrameworkType
         {
             public FrameworkTypeNumeric()
-                : base(FrameworkTypeEnum.Numeric, "numeric", 108, typeof(decimal), DbType.Decimal)
+                : base(FrameworkTypeEnum.Numeric, "numeric", 108, typeof(decimal), DbType.Decimal, true)
             {
 
             }

@@ -8,34 +8,34 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkConfigField")]
     public class FrameworkConfigField : Row
     {
-        [SqlField("Id", typeof(FrameworkConfigField_Id), true)]
+        [SqlField("Id", typeof(FrameworkConfigField_Id), true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("IsBuiltIn", typeof(FrameworkConfigField_IsBuiltIn))]
+        [SqlField("IsBuiltIn", typeof(FrameworkConfigField_IsBuiltIn), FrameworkTypeEnum.Bit)]
         public bool IsBuiltIn { get; set; }
 
-        [SqlField("ConfigName", typeof(FrameworkConfigField_ConfigName))]
+        [SqlField("ConfigName", typeof(FrameworkConfigField_ConfigName), FrameworkTypeEnum.Nvarcahr)]
         public string ConfigName { get; set; }
 
-        [SqlField("TypeName", typeof(FrameworkConfigField_TypeName))]
+        [SqlField("TypeName", typeof(FrameworkConfigField_TypeName), FrameworkTypeEnum.Nvarcahr)]
         public string TypeName { get; set; }
 
-        [SqlField("FieldName", typeof(FrameworkConfigField_FieldName))]
+        [SqlField("FieldName", typeof(FrameworkConfigField_FieldName), FrameworkTypeEnum.Nvarcahr)]
         public string FieldName { get; set; }
 
-        [SqlField("Text", typeof(FrameworkConfigField_Text))]
+        [SqlField("Text", typeof(FrameworkConfigField_Text), FrameworkTypeEnum.Nvarcahr)]
         public string Text { get; set; }
 
-        [SqlField("Description", typeof(FrameworkConfigField_Description))]
+        [SqlField("Description", typeof(FrameworkConfigField_Description), FrameworkTypeEnum.Nvarcahr)]
         public string Description { get; set; }
 
-        [SqlField("IsVisible", typeof(FrameworkConfigField_IsVisible))]
+        [SqlField("IsVisible", typeof(FrameworkConfigField_IsVisible), FrameworkTypeEnum.Bit)]
         public bool IsVisible { get; set; }
 
-        [SqlField("IsReadOnly", typeof(FrameworkConfigField_IsReadOnly))]
+        [SqlField("IsReadOnly", typeof(FrameworkConfigField_IsReadOnly), FrameworkTypeEnum.Bit)]
         public bool IsReadOnly { get; set; }
 
-        [SqlField("Sort", typeof(FrameworkConfigField_Sort))]
+        [SqlField("Sort", typeof(FrameworkConfigField_Sort), FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
     }
 
@@ -62,22 +62,22 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkConfigGrid")]
     public class FrameworkConfigGrid : Row
     {
-        [SqlField("Id", typeof(FrameworkConfigGrid_Id), true)]
+        [SqlField("Id", typeof(FrameworkConfigGrid_Id), true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("IsBuiltIn", typeof(FrameworkConfigGrid_IsBuiltIn))]
+        [SqlField("IsBuiltIn", typeof(FrameworkConfigGrid_IsBuiltIn), FrameworkTypeEnum.Bit)]
         public bool IsBuiltIn { get; set; }
 
-        [SqlField("ConfigName", typeof(FrameworkConfigGrid_ConfigName))]
+        [SqlField("ConfigName", typeof(FrameworkConfigGrid_ConfigName), FrameworkTypeEnum.Nvarcahr)]
         public string ConfigName { get; set; }
 
-        [SqlField("TypeName", typeof(FrameworkConfigGrid_TypeName))]
+        [SqlField("TypeName", typeof(FrameworkConfigGrid_TypeName), FrameworkTypeEnum.Nvarcahr)]
         public string TypeName { get; set; }
 
-        [SqlField("RowCountMax", typeof(FrameworkConfigGrid_RowCountMax))]
+        [SqlField("RowCountMax", typeof(FrameworkConfigGrid_RowCountMax), FrameworkTypeEnum.Int)]
         public int? RowCountMax { get; set; }
 
-        [SqlField("IsInsert", typeof(FrameworkConfigGrid_IsInsert))]
+        [SqlField("IsInsert", typeof(FrameworkConfigGrid_IsInsert), FrameworkTypeEnum.Bit)]
         public bool? IsInsert { get; set; }
     }
 
@@ -96,19 +96,19 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkField")]
     public class FrameworkField : Row
     {
-        [SqlField("Id", typeof(FrameworkField_Id), true)]
+        [SqlField("Id", typeof(FrameworkField_Id), true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("TableId", typeof(FrameworkField_TableId))]
+        [SqlField("TableId", typeof(FrameworkField_TableId), FrameworkTypeEnum.Int)]
         public int TableId { get; set; }
 
-        [SqlField("FieldNameCSharp", typeof(FrameworkField_FieldNameCSharp))]
+        [SqlField("FieldNameCSharp", typeof(FrameworkField_FieldNameCSharp), FrameworkTypeEnum.Nvarcahr)]
         public string FieldNameCSharp { get; set; }
 
-        [SqlField("FieldNameSql", typeof(FrameworkField_FieldNameSql))]
+        [SqlField("FieldNameSql", typeof(FrameworkField_FieldNameSql), FrameworkTypeEnum.Nvarcahr)]
         public string FieldNameSql { get; set; }
 
-        [SqlField("IsExist", typeof(FrameworkField_IsExist))]
+        [SqlField("IsExist", typeof(FrameworkField_IsExist), FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }
     }
 
@@ -125,10 +125,10 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkFieldBuiltIn")]
     public class FrameworkFieldBuiltIn : Row
     {
-        [SqlField("Id", typeof(FrameworkFieldBuiltIn_Id))]
+        [SqlField("Id", typeof(FrameworkFieldBuiltIn_Id), FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("Name", typeof(FrameworkFieldBuiltIn_Name))]
+        [SqlField("Name", typeof(FrameworkFieldBuiltIn_Name), FrameworkTypeEnum.Nvarcahr)]
         public string Name { get; set; }
     }
 
@@ -139,13 +139,13 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkScript")]
     public class FrameworkScript : Row
     {
-        [SqlField("Id", typeof(FrameworkScript_Id), true)]
+        [SqlField("Id", typeof(FrameworkScript_Id), true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("FileName", typeof(FrameworkScript_FileName))]
+        [SqlField("FileName", typeof(FrameworkScript_FileName), FrameworkTypeEnum.Nvarcahr)]
         public string FileName { get; set; }
 
-        [SqlField("Date", typeof(FrameworkScript_Date))]
+        [SqlField("Date", typeof(FrameworkScript_Date), FrameworkTypeEnum.Datetime2)]
         public DateTime? Date { get; set; }
     }
 
@@ -158,16 +158,16 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkTable")]
     public class FrameworkTable : Row
     {
-        [SqlField("Id", typeof(FrameworkTable_Id), true)]
+        [SqlField("Id", typeof(FrameworkTable_Id), true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("TableNameCSharp", typeof(FrameworkTable_TableNameCSharp))]
+        [SqlField("TableNameCSharp", typeof(FrameworkTable_TableNameCSharp), FrameworkTypeEnum.Nvarcahr)]
         public string TableNameCSharp { get; set; }
 
-        [SqlField("TableNameSql", typeof(FrameworkTable_TableNameSql))]
+        [SqlField("TableNameSql", typeof(FrameworkTable_TableNameSql), FrameworkTypeEnum.Nvarcahr)]
         public string TableNameSql { get; set; }
 
-        [SqlField("IsExist", typeof(FrameworkTable_IsExist))]
+        [SqlField("IsExist", typeof(FrameworkTable_IsExist), FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }
     }
 
@@ -182,10 +182,10 @@ namespace Database.dbo
     [SqlTable("dbo", "FrameworkTableBuiltIn")]
     public class FrameworkTableBuiltIn : Row
     {
-        [SqlField("Id", typeof(FrameworkTableBuiltIn_Id))]
+        [SqlField("Id", typeof(FrameworkTableBuiltIn_Id), FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("Name", typeof(FrameworkTableBuiltIn_Name))]
+        [SqlField("Name", typeof(FrameworkTableBuiltIn_Name), FrameworkTypeEnum.Nvarcahr)]
         public string Name { get; set; }
     }
 
