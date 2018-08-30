@@ -189,7 +189,7 @@
         /// <param name="sql">For example: "SELECT 1 AS A SELECT 2 AS B"; or with parameter: "SELECT @P0 AS A";</param>
         /// <param name="paramList">See also method ExecuteParamAdd();</param>
         /// <returns>Returns (ResultSet, Row, ColumnName, Value) value list.</returns>
-        internal static async Task<List<List<Dictionary<string, object>>>> ExecuteReaderMultipleAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb = false)
+        internal static async Task<List<List<Dictionary<string, object>>>> ExecuteReaderMultipleAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList = null, bool isFrameworkDb = false)
         {
             List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
             string connectionString = ConfigFramework.ConnectionString(isFrameworkDb);
@@ -232,6 +232,15 @@
         /// <summary>
         /// Execute sql statement.
         /// </summary>
+        internal static async Task<List<Row>> ExecuteReaderAsync(Type typeRow, string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList = null, bool isFrameworkDb = false)
+        {
+            var valueList = await ExecuteReaderMultipleAsync(sql, paramList, isFrameworkDb);
+            return ExecuteReaderMultipleResultCopy(typeRow, valueList, 0);
+        }
+
+        /// <summary>
+        /// Execute sql statement.
+        /// </summary>
         internal static async Task<List<TRow>> ExecuteReaderAsync<TRow>(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb = false) where TRow : Row
         {
             var valueList = await ExecuteReaderMultipleAsync(sql, paramList, isFrameworkDb);
@@ -245,9 +254,9 @@
         /// <param name="resultSetIndex">Sql multiple result set index.</param>
         /// <param name="typeRow">Type of row to copy to. Copy one multiple result set.</param>
         /// <returns>List of typed rows.</returns>
-        internal static List<object> ExecuteReaderMultipleResultCopy(List<List<Dictionary<string, object>>> valueList, int resultSetIndex, Type typeRow)
+        internal static List<Row> ExecuteReaderMultipleResultCopy(Type typeRow, List<List<Dictionary<string, object>>> valueList, int resultSetIndex)
         {
-            List<object> result = new List<object>();
+            List<Row> result = new List<Row>();
             PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
             foreach (Dictionary<string, object> row in valueList[resultSetIndex])
             {
@@ -275,7 +284,7 @@
         /// <returns>Type of row to copy to. Copy one multiple result set.</returns>
         internal static List<T> ExecuteReaderMultipleResultCopy<T>(List<List<Dictionary<string, object>>> valueList, int resultSetIndex) where T : Row
         {
-            List<object> result = ExecuteReaderMultipleResultCopy(valueList, resultSetIndex, typeof(T));
+            List<Row> result = ExecuteReaderMultipleResultCopy(typeof(T), valueList, resultSetIndex);
             return result.Cast<T>().ToList();
         }
 
@@ -531,7 +540,7 @@
 
     internal class UtilDalUpsert
     {
-        private static string UpsertFieldNameListToCsv(string[] fieldNameList, string prefix)
+        private static string UpsertFieldNameToCsvList(string[] fieldNameList, string prefix)
         {
             string result = null;
             bool isFirst = true;
@@ -546,6 +555,25 @@
                     result += ", ";
                 }
                 result += prefix + fieldName;
+            }
+            return result;
+        }
+
+        private static string UpsertFieldNameToAssignList(string[] fieldNameList, string prefixTarget, string prefixSource)
+        {
+            string result = null;
+            bool isFirst = true;
+            foreach (string fieldName in fieldNameList)
+            {
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    result += ", ";
+                }
+                result += prefixTarget + fieldName + " = " + prefixSource + fieldName;
             }
             return result;
         }
@@ -593,38 +621,43 @@
 
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string fieldNameIsExist)
         {
-            string connectionString = ConfigFramework.ConnectionString(typeRow);
             string tableName = UtilDalType.TypeRowToTableName(typeRow);
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                if (fieldNameIsExist != null)
-                {
-                    string sql = string.Format("UPDATE {0} SET {1}=1", tableName, fieldNameIsExist);
-                    SqlCommand sqlCommand = new SqlCommand(sql, connection);
-                    await sqlCommand.ExecuteNonQueryAsync();
-                }
+            var sqlFieldNameList = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.IsPrimaryKey == false).Select(item => item.SqlFieldName).ToArray();
 
-                string sqlUpsert = @"
-                MERGE INTO FrameworkApplication AS Target
-                USING ({0}) AS Source
-	                ON NOT EXISTS(
-                        SELECT (Source.Path)
-                        EXCEPT
-                        SELECT (Target.Path))
-                WHEN MATCHED THEN
-	                UPDATE SET 
-                        Target.Text = Source.Text, Target.Path = Source.Path, Target.ApplicationTypeId = Source.ApplicationTypeId, Target.IsActive = Source.IsActive
-                WHEN NOT MATCHED BY TARGET THEN
-	                INSERT (Text, Path, ApplicationTypeId, IsActive)
-	                VALUES (Source.Text, Source.Path, Source.ApplicationTypeId, Source.IsActive);
-                ";
+            string fieldNameKeySourceList = UpsertFieldNameToCsvList(fieldNameKeyList, "Source.");
+            string fieldNameKeyTargetList = UpsertFieldNameToCsvList(fieldNameKeyList, "Target.");
+            string fieldNameAssignList = UpsertFieldNameToAssignList(sqlFieldNameList, "Target.", "Source.");
+            string fieldNameInsertList = UpsertFieldNameToCsvList(sqlFieldNameList, null);
+            string fieldNameValueList = UpsertFieldNameToCsvList(sqlFieldNameList, "Source.");
 
-                var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
-                string sqlSelect = UpsertSelect(typeRow, rowList, paramList);
-                string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList);
-                var result = await UtilDal.ExecuteReaderMultipleAsync(sqlSelect, paramList);
-            }
+            var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
+            string sqlSelect = UpsertSelect(typeRow, rowList, paramList);
+            // string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList);
+            // var resultDebug = await UtilDal.ExecuteReaderAsync(typeRow, sqlDebug);
+
+            string sqlUpsert = @"
+            MERGE INTO {0} AS Target
+            USING ({1}) AS Source
+	        ON NOT EXISTS(
+                SELECT ({2})
+                EXCEPT
+                SELECT ({3}))
+            WHEN MATCHED THEN
+	            UPDATE SET 
+                    {4}
+            WHEN NOT MATCHED BY TARGET THEN
+	            INSERT ({5})
+	            VALUES ({6});
+            ";
+            sqlUpsert = string.Format(sqlUpsert, tableName, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
+            // string sqlDebug = UtilDal.ExecuteParamDebug(sqlUpsert, paramList);
+
+            // IsExists
+            string sqlIsExist = string.Format("UPDATE {0} SET {1}=1", tableName, fieldNameIsExist);
+            await UtilDal.ExecuteNonQueryAsync(sqlIsExist);
+
+            // Upsert
+            await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList);
         }
 
         internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string fieldNameIsExist = "IsExist") where TRow : Row
@@ -696,21 +729,23 @@
             return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         }
 
-        internal static List<(PropertyInfo PropertyInfo, string SqlFieldName, FrameworkTypeEnum FrameworkTypeEnum)> TypeRowToFieldList(Type typeRow)
+        internal static List<(PropertyInfo PropertyInfo, string SqlFieldName, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)> TypeRowToFieldList(Type typeRow)
         {
-            var result = new List<(PropertyInfo PropertyInfo, string SqlFieldName, FrameworkTypeEnum FrameworkTypeEnum)>();
+            var result = new List<(PropertyInfo PropertyInfo, string SqlFieldName, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)>();
             var propertyInfoList = TypeRowToPropertyInfoList(typeRow);
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
                 SqlFieldAttribute fieldAttribute = (SqlFieldAttribute)propertyInfo.GetCustomAttribute(typeof(SqlFieldAttribute));
                 string sqlFieldName = null;
                 FrameworkTypeEnum frameworkTypeEnum = FrameworkTypeEnum.None;
+                bool isPrimaryKey = false;
                 if (fieldAttribute != null)
                 {
                     sqlFieldName = fieldAttribute.SqlFieldName;
                     frameworkTypeEnum = fieldAttribute.FrameworkTypeEnum;
+                    isPrimaryKey = fieldAttribute.IsPrimaryKey;
                 }
-                result.Add((propertyInfo, sqlFieldName, frameworkTypeEnum));
+                result.Add((propertyInfo, sqlFieldName, isPrimaryKey, frameworkTypeEnum));
             }
             return result;
         }
@@ -972,11 +1007,11 @@
                     UtilFramework.Assert(value.GetType() == ValueType);
                     if ((bool)value == false)
                     {
-                        result = "0";
+                        result = "CAST(0 AS BIT)";
                     }
                     else
                     {
-                        result = "1";
+                        result = "CAST(1 AS BIT)";
                     }
                 }
                 return result;
