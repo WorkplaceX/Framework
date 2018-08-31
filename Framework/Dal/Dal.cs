@@ -56,24 +56,24 @@
     /// </summary>
     public class SqlFieldAttribute : Attribute
     {
-        public SqlFieldAttribute(string sqlFieldName, Type typeCell, bool isPrimaryKey, FrameworkTypeEnum frameworkTypeEnum)
+        public SqlFieldAttribute(string fieldNameSql, Type typeCell, bool isPrimaryKey, FrameworkTypeEnum frameworkTypeEnum)
         {
-            this.SqlFieldName = sqlFieldName;
+            this.FieldNameSql = fieldNameSql;
             this.IsPrimaryKey = isPrimaryKey;
             this.TypeCell = typeCell;
             this.FrameworkTypeEnum = frameworkTypeEnum;
         }
 
-        public SqlFieldAttribute(string sqlFieldName, Type typeCell, FrameworkTypeEnum frameworkTypeEnum)
-            : this(sqlFieldName, typeCell, false, frameworkTypeEnum)
+        public SqlFieldAttribute(string fieldNameSql, Type typeCell, FrameworkTypeEnum frameworkTypeEnum)
+            : this(fieldNameSql, typeCell, false, frameworkTypeEnum)
         {
 
         }
 
         /// <summary>
-        /// Gets or sets SqlFieldName. If null, it's a calculated field.
+        /// Gets or sets FieldNameSql. If null, it's a calculated field.
         /// </summary>
-        public readonly string SqlFieldName;
+        public readonly string FieldNameSql;
 
         public readonly bool IsPrimaryKey;
 

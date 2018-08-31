@@ -41,7 +41,7 @@
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
                 SqlFieldAttribute columnAttribute = (SqlFieldAttribute)propertyInfo.GetCustomAttribute(typeof(SqlFieldAttribute));
-                if (columnAttribute == null || columnAttribute.SqlFieldName == null) // Calculated column. Do not include it in sql select.
+                if (columnAttribute == null || columnAttribute.FieldNameSql == null) // Calculated column. Do not include it in sql select.
                 {
                     entity.Ignore(propertyInfo.Name);
                 }
@@ -52,7 +52,7 @@
                         isPrimaryKey = true;
                         entity.HasKey(propertyInfo.Name); // Prevent null exception if primary key name is not "Id".
                     }
-                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.SqlFieldName);
+                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.FieldNameSql);
                     CoreTypeMapping coreTypeMapping = typeMappingSource.FindMapping(propertyInfo.PropertyType);
                     UtilFramework.Assert(coreTypeMapping != null);
                     entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasAnnotation(CoreAnnotationNames.TypeMapping, coreTypeMapping);
@@ -612,7 +612,7 @@
                     }
                     object value = field.PropertyInfo.GetValue(row);
                     string paramName = UtilDal.ExecuteParamAdd(field.FrameworkTypeEnum, value, paramList);
-                    sqlSelect.Append(string.Format("{0} AS {1}", paramName, field.SqlFieldName));
+                    sqlSelect.Append(string.Format("{0} AS {1}", paramName, field.FieldNameSql));
                 }
                 sqlSelect.Append(")");
             }
@@ -621,14 +621,14 @@
 
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string fieldNameIsExist)
         {
-            string tableName = UtilDalType.TypeRowToTableName(typeRow);
-            var sqlFieldNameList = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.IsPrimaryKey == false).Select(item => item.SqlFieldName).ToArray();
+            string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
+            var fieldNameSqlList = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.IsPrimaryKey == false).Select(item => item.FieldNameSql).ToArray();
 
             string fieldNameKeySourceList = UpsertFieldNameToCsvList(fieldNameKeyList, "Source.");
             string fieldNameKeyTargetList = UpsertFieldNameToCsvList(fieldNameKeyList, "Target.");
-            string fieldNameAssignList = UpsertFieldNameToAssignList(sqlFieldNameList, "Target.", "Source.");
-            string fieldNameInsertList = UpsertFieldNameToCsvList(sqlFieldNameList, null);
-            string fieldNameValueList = UpsertFieldNameToCsvList(sqlFieldNameList, "Source.");
+            string fieldNameAssignList = UpsertFieldNameToAssignList(fieldNameSqlList, "Target.", "Source.");
+            string fieldNameInsertList = UpsertFieldNameToCsvList(fieldNameSqlList, null);
+            string fieldNameValueList = UpsertFieldNameToCsvList(fieldNameSqlList, "Source.");
 
             var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
             string sqlSelect = UpsertSelect(typeRow, rowList, paramList);
@@ -658,6 +658,79 @@
 
             // Upsert
             await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList);
+        }
+
+        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string fieldNameIsExist = "IsExist") where TRow : Row
+        {
+            await UpsertAsync(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, fieldNameIsExist);
+        }
+
+        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string fieldNameKey, string fieldNameIsExist = "IsExist") where TRow : Row
+        {
+            await UpsertAsync(rowList, new string[] { fieldNameKey }, fieldNameIsExist);
+        }
+    }
+
+    internal class UtilDalUpsertBuiltIn
+    {
+        private static bool IsBuiltIn(string fieldName)
+        {
+            bool result = false;
+            string last = null;
+            if (fieldName.Length > 2)
+            {
+                last = fieldName.Substring(fieldName.Length - "Id".Length - 1, 1);
+            }
+            // if (fieldName.EndsWith("Id") && fieldName.Length > 2 && ((char)fieldName.Substring(fieldName.Length - "Id".Length - 1, 1)).[0].is )
+            return result;
+        }
+
+        private static string UpsertSelect(Type typeRow, List<Row> rowList, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
+        {
+            StringBuilder sqlSelect = new StringBuilder();
+            var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+
+            // Row
+            bool isFirstRow = true;
+            foreach (Row row in rowList)
+            {
+                UtilFramework.Assert(row.GetType() == typeRow);
+                if (isFirstRow)
+                {
+                    isFirstRow = false;
+                }
+                else
+                {
+                    sqlSelect.Append(" UNION ALL\r\n");
+                }
+
+                // Field
+                sqlSelect.Append("(SELECT ");
+                bool isFirstField = true;
+                foreach (var field in fieldList)
+                {
+                    if (isFirstField)
+                    {
+                        isFirstField = false;
+                    }
+                    else
+                    {
+                        sqlSelect.Append(", ");
+                    }
+                    object value = field.PropertyInfo.GetValue(row);
+                    string paramName = UtilDal.ExecuteParamAdd(field.FrameworkTypeEnum, value, paramList);
+                    sqlSelect.Append(string.Format("{0} AS {1}", paramName, field.FieldNameSql));
+                }
+                sqlSelect.Append(")");
+            }
+            return sqlSelect.ToString();
+        }
+
+        internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string fieldNameIsExist)
+        {
+            var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
+            string sql = UpsertSelect(typeRow, rowList, paramList);
+            await UtilDalUpsert.UpsertAsync(typeRow, rowList.Cast<Row>().ToList(), fieldNameKeyList, fieldNameIsExist);
         }
 
         internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string fieldNameIsExist = "IsExist") where TRow : Row
@@ -713,7 +786,7 @@
             return result;
         }
 
-        internal static string TypeRowToTableName(Type typeRow)
+        internal static string TypeRowToTableNameSql(Type typeRow)
         {
             string result = null;
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
@@ -729,23 +802,23 @@
             return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         }
 
-        internal static List<(PropertyInfo PropertyInfo, string SqlFieldName, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)> TypeRowToFieldList(Type typeRow)
+        internal static List<(PropertyInfo PropertyInfo, string FieldNameSql, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)> TypeRowToFieldList(Type typeRow)
         {
-            var result = new List<(PropertyInfo PropertyInfo, string SqlFieldName, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)>();
+            var result = new List<(PropertyInfo PropertyInfo, string FieldNameSql, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)>();
             var propertyInfoList = TypeRowToPropertyInfoList(typeRow);
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
                 SqlFieldAttribute fieldAttribute = (SqlFieldAttribute)propertyInfo.GetCustomAttribute(typeof(SqlFieldAttribute));
-                string sqlFieldName = null;
+                string fieldNameSql = null;
                 FrameworkTypeEnum frameworkTypeEnum = FrameworkTypeEnum.None;
                 bool isPrimaryKey = false;
                 if (fieldAttribute != null)
                 {
-                    sqlFieldName = fieldAttribute.SqlFieldName;
+                    fieldNameSql = fieldAttribute.FieldNameSql;
                     frameworkTypeEnum = fieldAttribute.FrameworkTypeEnum;
                     isPrimaryKey = fieldAttribute.IsPrimaryKey;
                 }
-                result.Add((propertyInfo, sqlFieldName, isPrimaryKey, frameworkTypeEnum));
+                result.Add((propertyInfo, fieldNameSql, isPrimaryKey, frameworkTypeEnum));
             }
             return result;
         }

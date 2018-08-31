@@ -44,18 +44,52 @@
             }
         }
 
+        public class FrameworkFieldBuiltIn : FrameworkField
+        {
+            public FrameworkFieldBuiltIn()
+            {
+
+            }
+
+            public string TableIdName { get; set; }
+        }
+
         private void Meta()
         {
-            List<FrameworkTable> rowList = new List<FrameworkTable>();
-            foreach (Type typeRow in AppCli.TypeRowList())
+            // Table
             {
-                FrameworkTable table = new FrameworkTable();
-                rowList.Add(table);
-                table.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                table.TableNameSql = UtilDalType.TypeRowToTableName(typeRow);
-                table.IsExist = true;
+                List<FrameworkTable> rowList = new List<FrameworkTable>();
+                foreach (Type typeRow in AppCli.TypeRowList())
+                {
+                    FrameworkTable table = new FrameworkTable();
+                    rowList.Add(table);
+                    table.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    table.TableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
+                    table.IsExist = true;
+                }
+                UtilDalUpsert.UpsertAsync(rowList, nameof(FrameworkTable.TableNameCSharp)).Wait();
             }
-            UtilDalUpsert.UpsertAsync(rowList, nameof(FrameworkTable.TableNameCSharp)).Wait();
+
+            // Field
+            {
+                List<FrameworkFieldBuiltIn> rowList = new List<FrameworkFieldBuiltIn>();
+                foreach (Type typeRow in AppCli.TypeRowList())
+                {
+                    string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
+                    var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+                    foreach (var field in fieldList)
+                    {
+                        FrameworkFieldBuiltIn fieldBuiltIn = new FrameworkFieldBuiltIn();
+                        rowList.Add(fieldBuiltIn);
+
+                        fieldBuiltIn.TableIdName = tableName;
+                        fieldBuiltIn.FieldNameCSharp = field.PropertyInfo.Name;
+                        fieldBuiltIn.FieldNameSql = field.FieldNameSql;
+                        fieldBuiltIn.IsExist = true;
+                    }
+                }
+                // UtilDalUpsertBuiltIn.UpsertAsync<FrameworkFieldBuiltIn>(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }).Wait();
+            }
         }
 
         protected internal override void Execute()
