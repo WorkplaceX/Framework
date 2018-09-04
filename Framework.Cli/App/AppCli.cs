@@ -48,23 +48,17 @@
         }
 
         /// <summary>
-        /// Returns rows defined in framework and database assembly.
+        /// Returns Framework, Database, Application assembly when running in cli mode.
         /// </summary>
-        internal List<Type> TypeRowList()
+        /// <param name="isIncludeApp">If true, App assembly (with derived custom logic) is included.</param>
+        public List<Assembly> AssemblyList(bool isIncludeApp)
         {
-            List<Type> result = new List<Type>();
-            List<Assembly> assemblyList = new List<Assembly>();
-            assemblyList.Add(AssemblyFramework);
-            assemblyList.Add(AssemblyDatabase);
-            foreach (Assembly assembly in assemblyList)
+            List<Assembly> result = new List<Assembly>();
+            result.Add(AssemblyFramework);
+            result.Add(AssemblyDatabase);
+            if (isIncludeApp)
             {
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (type.IsSubclassOf(typeof(Row)))
-                    {
-                        result.Add(type);
-                    }
-                }
+                result.Add(AssemblyApp);
             }
             return result;
         }

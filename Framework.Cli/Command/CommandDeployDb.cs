@@ -56,10 +56,11 @@
 
         private void Meta()
         {
+            List<Type> typeRowList = UtilDalType.TypeRowList(AppCli.AssemblyList(false));
             // Table
             {
                 List<FrameworkTable> rowList = new List<FrameworkTable>();
-                foreach (Type typeRow in AppCli.TypeRowList())
+                foreach (Type typeRow in typeRowList)
                 {
                     FrameworkTable table = new FrameworkTable();
                     rowList.Add(table);
@@ -73,7 +74,7 @@
             // Field
             {
                 List<FrameworkFieldBuiltIn> rowList = new List<FrameworkFieldBuiltIn>();
-                foreach (Type typeRow in AppCli.TypeRowList())
+                foreach (Type typeRow in typeRowList)
                 {
                     string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
                     var fieldList = UtilDalType.TypeRowToFieldList(typeRow);

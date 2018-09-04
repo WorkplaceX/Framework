@@ -40,15 +40,15 @@
     /// </summary>
     public class SqlTableAttribute : Attribute
     {
-        public SqlTableAttribute(string sqlSchemaName, string sqlTableName)
+        public SqlTableAttribute(string schemaNameSql, string tableNameSql)
         {
-            this.SqlSchemaName = sqlSchemaName;
-            this.SqlTableName = sqlTableName;
+            this.SchemaNameSql = schemaNameSql;
+            this.TableNameSql = tableNameSql;
         }
 
-        public readonly string SqlSchemaName;
+        public readonly string SchemaNameSql;
 
-        public readonly string SqlTableName;
+        public readonly string TableNameSql;
     }
 
     /// <summary>

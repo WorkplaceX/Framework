@@ -35,7 +35,7 @@
             // Build model
             var entity = builder.Entity(typeRow);
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-            entity.ToTable(tableAttribute.SqlTableName, tableAttribute.SqlSchemaName); // By default EF maps sql table name to class name.
+            entity.ToTable(tableAttribute.TableNameSql, tableAttribute.SchemaNameSql); // By default EF maps sql table name to class name.
             PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
             bool isPrimaryKey = false; // Sql view 
             foreach (PropertyInfo propertyInfo in propertyInfoList)
@@ -673,15 +673,34 @@
 
     internal class UtilDalUpsertBuiltIn
     {
-        private static bool IsBuiltIn(string fieldName)
+        /// <summary>
+        /// Returns true, if fieldNameSql ends with "Id" and typeRow contains an other field ending with "IdName".
+        /// </summary>
+        private static bool FieldNameSqlIsBuiltIn(Type typeRow, string fieldNameSql, out Type typeRowReference, Dictionary<Type, string> tableNameSqlList)
         {
             bool result = false;
-            string last = null;
-            if (fieldName.Length > 2)
+            typeRowReference = null;
+            string thirdLastChar = ""; // Character before "Id".
+            if (fieldNameSql.Length > 2)
             {
-                last = fieldName.Substring(fieldName.Length - "Id".Length - 1, 1);
+                thirdLastChar = fieldNameSql.Substring(fieldNameSql.Length - "Id".Length - 1, 1);
             }
-            // if (fieldName.EndsWith("Id") && fieldName.Length > 2 && ((char)fieldName.Substring(fieldName.Length - "Id".Length - 1, 1)).[0].is )
+            bool thirdLastCharIsLower = thirdLastChar == thirdLastChar.ToLower();
+            if (fieldNameSql.EndsWith("Id") && thirdLastCharIsLower) // BuiltIn naming convention.
+            {
+                var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+                string fieldNameSqlBuiltIn = fieldNameSql + "Name"; // BuiltIn naming convention.
+                if (fieldList.Select(item => item.FieldNameSql).Contains(fieldNameSqlBuiltIn))
+                {
+                    string tableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
+                    string tableNameSqlBuiltIn = tableNameSql + "BuiltIn"; // BuiltIn naming convention.
+                    var tableReference = tableNameSqlList.Where(item => item.Value == tableNameSqlBuiltIn).SingleOrDefault();
+                    if (tableReference.Value != null)
+                    {
+                        typeRowReference = tableReference.Key;
+                    }
+                }
+            }
             return result;
         }
 
@@ -774,6 +793,26 @@
     internal static class UtilDalType
     {
         /// <summary>
+        /// Returns rows defined in framework and database assembly.
+        /// </summary>
+        /// <param name="assemblyList">Use method AppCli.AssemblyList(); when running in cli mode or method UtilServer.AssemblyList(); when running in web mode.</param>
+        internal static List<Type> TypeRowList(List<Assembly> assemblyList)
+        {
+            List<Type> result = new List<Type>();
+            foreach (Assembly assembly in assemblyList)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.IsSubclassOf(typeof(Row)))
+                    {
+                        result.Add(type);
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
         /// </summary>
         internal static string TypeRowToTableNameCSharp(Type typeRow)
@@ -786,13 +825,28 @@
             return result;
         }
 
+        /// <summary>
+        /// Returns (TypeRow, TableNameSql) list.
+        /// </summary>
+        internal static Dictionary<Type, string> TableNameSqlList(List<Assembly> assemblyList)
+        {
+            Dictionary<Type, string> result = new Dictionary<Type, string>();
+            List<Type> typeRowList = TypeRowList(assemblyList);
+            foreach (Type typeRow in typeRowList)
+            {
+                string tableNameSql = TypeRowToTableNameSql(typeRow);
+                result.Add(typeRow, tableNameSql);
+            }
+            return result;
+        }
+
         internal static string TypeRowToTableNameSql(Type typeRow)
         {
             string result = null;
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-            if (tableAttribute != null && (tableAttribute.SqlSchemaName != null || tableAttribute.SqlTableName != null))
+            if (tableAttribute != null && (tableAttribute.SchemaNameSql != null || tableAttribute.TableNameSql != null))
             {
-                result = string.Format("[{0}].[{1}]", tableAttribute.SqlSchemaName, tableAttribute.SqlTableName);
+                result = string.Format("[{0}].[{1}]", tableAttribute.SchemaNameSql, tableAttribute.TableNameSql);
             }
             return result;
         }
