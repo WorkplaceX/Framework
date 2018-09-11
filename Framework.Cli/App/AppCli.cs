@@ -51,7 +51,7 @@
         /// Returns Framework, Database, Application assembly when running in cli mode.
         /// </summary>
         /// <param name="isIncludeApp">If true, App assembly (with derived custom logic) is included.</param>
-        public List<Assembly> AssemblyList(bool isIncludeApp)
+        public List<Assembly> AssemblyList(bool isIncludeApp = false)
         {
             List<Assembly> result = new List<Assembly>();
             result.Add(AssemblyFramework);

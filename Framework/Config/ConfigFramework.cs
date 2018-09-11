@@ -74,6 +74,10 @@
 
         internal static ConfigFramework Load()
         {
+            if (!File.Exists(FileName))
+            {
+                throw new Exception(string.Format("File not fount! Try to run cli build command first ({0})", FileName));
+            }
             var result = UtilFramework.ConfigLoad<ConfigFramework>(FileName);
             if (result.WebsiteList == null)
             {

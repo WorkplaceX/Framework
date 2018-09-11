@@ -46,11 +46,7 @@
 
         public class FrameworkFieldBuiltIn : FrameworkField
         {
-            public FrameworkFieldBuiltIn()
-            {
-
-            }
-
+            [SqlField("TableIdName", null, FrameworkTypeEnum.Nvarcahr)]
             public string TableIdName { get; set; }
         }
 
@@ -68,6 +64,7 @@
                     table.TableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
                     table.IsExist = true;
                 }
+                UtilDalUpsert.UpsertIsExistAsync<FrameworkTable>().Wait();
                 UtilDalUpsert.UpsertAsync(rowList, nameof(FrameworkTable.TableNameCSharp)).Wait();
             }
 
@@ -76,20 +73,21 @@
                 List<FrameworkFieldBuiltIn> rowList = new List<FrameworkFieldBuiltIn>();
                 foreach (Type typeRow in typeRowList)
                 {
-                    string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                     var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
                     foreach (var field in fieldList)
                     {
                         FrameworkFieldBuiltIn fieldBuiltIn = new FrameworkFieldBuiltIn();
                         rowList.Add(fieldBuiltIn);
 
-                        fieldBuiltIn.TableIdName = tableName;
+                        fieldBuiltIn.TableIdName = tableNameCSharp;
                         fieldBuiltIn.FieldNameCSharp = field.PropertyInfo.Name;
                         fieldBuiltIn.FieldNameSql = field.FieldNameSql;
                         fieldBuiltIn.IsExist = true;
                     }
                 }
-                // UtilDalUpsertBuiltIn.UpsertAsync<FrameworkFieldBuiltIn>(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }).Wait();
+                UtilDalUpsert.UpsertIsExistAsync<FrameworkFieldBuiltIn>().Wait();
+                UtilDalUpsertBuiltIn.UpsertAsync<FrameworkFieldBuiltIn>(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, "Framework", AppCli.AssemblyList()).Wait();
             }
         }
 

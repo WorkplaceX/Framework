@@ -248,5 +248,19 @@ namespace Framework
         {
             return type.FullName;
         }
+
+        internal static List<List<T>> Split<T>(List<T> list, int countMax)
+        {
+            List<List<T>> result = new List<List<T>>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i % countMax == 0)
+                {
+                    result.Add(new List<T>());
+                }
+                result[result.Count - 1].Add(list[i]);
+            }
+            return result;
+        }
     }
 }
