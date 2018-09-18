@@ -65,33 +65,47 @@ namespace Database.dbo
         [SqlField("Id", typeof(FrameworkConfigGrid_Id), true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("IsBuiltIn", typeof(FrameworkConfigGrid_IsBuiltIn), FrameworkTypeEnum.Bit)]
-        public bool IsBuiltIn { get; set; }
+        [SqlField("TableId", typeof(FrameworkConfigGrid_TableId), FrameworkTypeEnum.Int)]
+        public int TableId { get; set; }
 
         [SqlField("ConfigName", typeof(FrameworkConfigGrid_ConfigName), FrameworkTypeEnum.Nvarcahr)]
         public string ConfigName { get; set; }
 
-        [SqlField("TypeName", typeof(FrameworkConfigGrid_TypeName), FrameworkTypeEnum.Nvarcahr)]
-        public string TypeName { get; set; }
-
         [SqlField("RowCountMax", typeof(FrameworkConfigGrid_RowCountMax), FrameworkTypeEnum.Int)]
         public int? RowCountMax { get; set; }
 
-        [SqlField("IsInsert", typeof(FrameworkConfigGrid_IsInsert), FrameworkTypeEnum.Bit)]
-        public bool? IsInsert { get; set; }
+        [SqlField("IsAllowInsert", typeof(FrameworkConfigGrid_IsAllowInsert), FrameworkTypeEnum.Bit)]
+        public bool? IsAllowInsert { get; set; }
+
+        [SqlField("IsExist", typeof(FrameworkConfigGrid_IsExist), FrameworkTypeEnum.Bit)]
+        public bool IsExist { get; set; }
     }
 
     public class FrameworkConfigGrid_Id : Cell<FrameworkConfigGrid> { }
 
-    public class FrameworkConfigGrid_IsBuiltIn : Cell<FrameworkConfigGrid> { }
+    public class FrameworkConfigGrid_TableId : Cell<FrameworkConfigGrid> { }
 
     public class FrameworkConfigGrid_ConfigName : Cell<FrameworkConfigGrid> { }
 
-    public class FrameworkConfigGrid_TypeName : Cell<FrameworkConfigGrid> { }
-
     public class FrameworkConfigGrid_RowCountMax : Cell<FrameworkConfigGrid> { }
 
-    public class FrameworkConfigGrid_IsInsert : Cell<FrameworkConfigGrid> { }
+    public class FrameworkConfigGrid_IsAllowInsert : Cell<FrameworkConfigGrid> { }
+
+    public class FrameworkConfigGrid_IsExist : Cell<FrameworkConfigGrid> { }
+
+    [SqlTable("dbo", "FrameworkConfigGridBuiltIn")]
+    public class FrameworkConfigGridBuiltIn : Row
+    {
+        [SqlField("Id", typeof(FrameworkConfigGridBuiltIn_Id), FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("Name", typeof(FrameworkConfigGridBuiltIn_Name), FrameworkTypeEnum.Nvarcahr)]
+        public string Name { get; set; }
+    }
+
+    public class FrameworkConfigGridBuiltIn_Id : Cell<FrameworkConfigGridBuiltIn> { }
+
+    public class FrameworkConfigGridBuiltIn_Name : Cell<FrameworkConfigGridBuiltIn> { }
 
     [SqlTable("dbo", "FrameworkField")]
     public class FrameworkField : Row
