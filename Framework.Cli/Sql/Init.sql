@@ -1,5 +1,5 @@
 ﻿IF NOT EXISTS(SELECT * FROM sys.tables WHERE name = 'FrameworkScript')
-CREATE TABLE FrameworkScript
+CREATE TABLE FrameworkScript /* Contains list of all executed sql script files in "SqlScript/" folders. */
 (
 	Id INT PRIMARY KEY IDENTITY,
 	FileName NVARCHAR(256) NOT NULL UNIQUE, -- For example "Framework/Framework.Cli/SqlScript/Config.sql"

@@ -26,7 +26,8 @@ CREATE TABLE FrameworkField /* Used for configuration. Contains all in source co
 )
 
 GO
-CREATE VIEW FrameworkFieldBuiltIn AS
+CREATE VIEW FrameworkFieldBuiltIn
+AS
 SELECT
 	Id,
 	CONCAT(
@@ -41,13 +42,22 @@ GO
 CREATE TABLE FrameworkConfigGrid
 (
 	Id INT PRIMARY KEY IDENTITY,
-	IsBuiltIn BIT NOT NULL,
+	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL ,
 	ConfigName NVARCHAR(256) NOT NULL,
-	TypeName NVARCHAR(256),
 	RowCountMax INT,
-	IsInsert BIT,
-	INDEX IX_FrameworkConfigGrid UNIQUE (ConfigName, TypeName)
+	IsAllowInsert BIT,
+	IsExist BIT NOT NULL
+	INDEX IX_FrameworkConfigGrid UNIQUE (TableId, ConfigName)
 )
+
+GO
+CREATE VIEW FrameworkConfigGridBuiltIn
+AS
+	SELECT FrameworkConfigGrid.Id,
+	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkConfigGrid.TableId), '; ', FrameworkConfigGrid.ConfigName) AS Name
+FROM
+	FrameworkConfigGrid FrameworkConfigGrid
+GO
 
 CREATE TABLE FrameworkConfigField
 (
