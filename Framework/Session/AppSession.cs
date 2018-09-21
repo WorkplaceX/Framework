@@ -1,5 +1,6 @@
 ﻿namespace Framework.Session
 {
+    using Database.dbo;
     using Framework.Application;
     using Framework.Dal;
     using Framework.Json;
@@ -130,15 +131,40 @@
         }
 
         /// <summary>
+        /// Load FrameworkConfigGrid tp GridSession.
+        /// </summary>
+        private async Task GridLoadConfigAsync(Grid grid, IQueryable<FrameworkConfigGrid> configGridQuery)
+        {
+            var configGridList = await UtilDal.SelectAsync(configGridQuery);
+            UtilFramework.Assert(configGridList.Count == 0 || configGridList.Count == 1);
+            var frameworkConfigGrid = configGridList.SingleOrDefault();
+            if (frameworkConfigGrid != null)
+            {
+                GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+                if (frameworkConfigGrid.RowCountMax.HasValue)
+                {
+                    gridSession.RowCountMax = frameworkConfigGrid.RowCountMax.Value;
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Select data from database.
         /// </summary>
-        private async Task GridLoadAsync(Grid grid, IQueryable query)
+        private async Task GridLoadAsync(Grid grid, IQueryable query, IQueryable<FrameworkConfigGrid> configGridQuery)
         {
             List<Row> rowList = null;
             if (query != null)
             {
                 GridLoadSessionCreate(grid);
                 GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+
+                // Config
+                if (configGridQuery != null)
+                {
+                    await GridLoadConfigAsync(grid, configGridQuery);
+                }
 
                 // Filter
                 GridRowSession gridRowSessionFilter = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).FirstOrDefault();
@@ -174,7 +200,8 @@
         public async Task GridLoadAsync(Grid grid)
         {
             var query = grid.Owner<Page>().GridQuery(grid);
-            await GridLoadAsync(grid, query);
+            grid.Owner<Page>().GridConfig(out var configGridQuery);
+            await GridLoadAsync(grid, query, configGridQuery);
             await GridRowSelectFirstAsync(grid);
         }
 
@@ -439,7 +466,8 @@
                             var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
                             if (query != null)
                             {
-                                await GridLoadAsync(gridItem.Grid.GridLookup(), query);
+                                gridItem.Grid.Owner<Page>().GridLookupConfig(out var configGridQuery);
+                                await GridLoadAsync(gridItem.Grid.GridLookup(), query, configGridQuery);
                                 gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
                             }
                             return;

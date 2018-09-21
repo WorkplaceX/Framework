@@ -1,5 +1,6 @@
 ﻿namespace Framework.Json
 {
+    using Database.dbo;
     using Framework.App;
     using Framework.Dal;
     using Framework.Server;
@@ -524,6 +525,15 @@
             return null;
         }
 
+        protected virtual internal void GridConfig(out IQueryable<FrameworkConfigGrid> configGridQuery)
+        {
+            configGridQuery = null;
+
+            // Example:
+            // FrameworkConfigGrid configGrid = new FrameworkConfigGrid() { RowCountMax = 5 };
+            // configGridQuery = new List<FrameworkConfigGrid>() { configGrid }.AsQueryable();
+        }
+
         protected virtual internal async Task GridRowSelectedAsync(Grid grid)
         {
             await Task.Run(() => { });
@@ -532,6 +542,15 @@
         protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
         {
             return null;
+        }
+
+        protected virtual internal void GridLookupConfig(out IQueryable<FrameworkConfigGrid> configGridQuery)
+        {
+            configGridQuery = null;
+
+            // Example:
+            // FrameworkConfigGrid configGrid = new FrameworkConfigGrid() { RowCountMax = 5 };
+            // configGridQuery = new List<FrameworkConfigGrid>() { configGrid }.AsQueryable();
         }
 
         /// <summary>
