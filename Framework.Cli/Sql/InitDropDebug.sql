@@ -1,4 +1,4 @@
-﻿/* For debug only! Resets DEV database */
+﻿/* For debug only! Reset DEV database */
 
 /* Framework */
 DROP TABLE FrameworkConfigField

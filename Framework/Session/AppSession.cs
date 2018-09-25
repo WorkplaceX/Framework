@@ -200,7 +200,7 @@
         public async Task GridLoadAsync(Grid grid)
         {
             var query = grid.Owner<Page>().GridQuery(grid);
-            grid.Owner<Page>().GridConfig(out var configGridQuery);
+            grid.Owner<Page>().GridQueryConfig(out var configGridQuery);
             await GridLoadAsync(grid, query, configGridQuery);
             await GridRowSelectFirstAsync(grid);
         }
@@ -466,7 +466,7 @@
                             var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
                             if (query != null)
                             {
-                                gridItem.Grid.Owner<Page>().GridLookupConfig(out var configGridQuery);
+                                gridItem.Grid.Owner<Page>().GridLookupQueryConfig(out var configGridQuery);
                                 await GridLoadAsync(gridItem.Grid.GridLookup(), query, configGridQuery);
                                 gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
                             }
