@@ -1,6 +1,7 @@
 ﻿/* For debug only! Reset DEV database */
 
 /* Framework */
+DROP VIEW FrameworkConfigFieldBuiltIn
 DROP TABLE FrameworkConfigField
 DROP VIEW FrameworkConfigGridBuiltIn
 DROP TABLE FrameworkConfigGrid

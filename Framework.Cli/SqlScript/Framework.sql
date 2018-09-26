@@ -62,14 +62,23 @@ GO
 CREATE TABLE FrameworkConfigField
 (
 	Id INT PRIMARY KEY IDENTITY,
-	IsBuiltIn BIT NOT NULL,
-	ConfigName NVARCHAR(256) NOT NULL,
-	TypeName NVARCHAR(256) NOT NULL,
-	FieldName NVARCHAR(256) NOT NULL,
+	ConfigGridId INT FOREIGN KEY REFERENCES FrameworkConfigGrid(Id) NOT NULL,
+	FieldId INT FOREIGN KEY REFERENCES FrameworkField(Id) NOT NULL,
 	Text NVARCHAR(256), -- Column header text.
 	Description NVARCHAR(256), -- Column header description.
 	IsVisible BIT NOT NULL,
 	IsReadOnly BIT NOT NULL,
 	Sort FLOAT,
-	INDEX IX_FrameworkConfigField UNIQUE (ConfigName, TypeName, FieldName)
+	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId)
 )
+
+GO
+CREATE VIEW FrameworkConfigFieldBuiltIn
+AS
+	SELECT FrameworkConfigField.Id,
+	CONCAT((
+	SELECT ConfigGridBuiltIn.Name FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = FrameworkConfigField.ConfigGridId), (
+	SELECT FieldBuiltIn.Name FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = FrameworkConfigField.FieldId)) AS Name
+FROM
+	FrameworkConfigField FrameworkConfigField
+GO
