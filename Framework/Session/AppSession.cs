@@ -133,7 +133,7 @@
         /// <summary>
         /// Load FrameworkConfigGrid tp GridSession.
         /// </summary>
-        private async Task GridLoadConfigAsync(Grid grid, IQueryable<FrameworkConfigGrid> configGridQuery)
+        private async Task GridLoadConfigAsync(Grid grid, Type typeRow, IQueryable<FrameworkConfigGridBuiltIn> configGridQuery)
         {
             var configGridList = await UtilDal.SelectAsync(configGridQuery);
             UtilFramework.Assert(configGridList.Count == 0 || configGridList.Count == 1);
@@ -141,6 +141,11 @@
             if (frameworkConfigGrid != null)
             {
                 GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                if (frameworkConfigGrid.TableNameCSharp != null)
+                {
+                    UtilFramework.Assert(tableNameCSharp == frameworkConfigGrid.TableNameCSharp); // TableNameCSharp. See also file Framework.sql
+                }
                 if (frameworkConfigGrid.RowCountMax.HasValue)
                 {
                     gridSession.RowCountMax = frameworkConfigGrid.RowCountMax.Value;
@@ -152,7 +157,7 @@
         /// <summary>
         /// Select data from database.
         /// </summary>
-        private async Task GridLoadAsync(Grid grid, IQueryable query, IQueryable<FrameworkConfigGrid> configGridQuery)
+        private async Task GridLoadAsync(Grid grid, IQueryable query, IQueryable<FrameworkConfigGridBuiltIn> configGridQuery)
         {
             List<Row> rowList = null;
             if (query != null)
@@ -163,7 +168,7 @@
                 // Config
                 if (configGridQuery != null)
                 {
-                    await GridLoadConfigAsync(grid, configGridQuery);
+                    await GridLoadConfigAsync(grid, query.ElementType, configGridQuery);
                 }
 
                 // Filter
@@ -200,7 +205,9 @@
         public async Task GridLoadAsync(Grid grid)
         {
             var query = grid.Owner<Page>().GridQuery(grid);
-            grid.Owner<Page>().GridQueryConfig(out var configGridQuery);
+            IQueryable<FrameworkConfigGridBuiltIn> configGridQuery = null;
+            IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery = null;
+            grid.Owner<Page>().GridQueryConfig(grid, ref configGridQuery, ref configFieldQuery);
             await GridLoadAsync(grid, query, configGridQuery);
             await GridRowSelectFirstAsync(grid);
         }
@@ -466,7 +473,9 @@
                             var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
                             if (query != null)
                             {
-                                gridItem.Grid.Owner<Page>().GridLookupQueryConfig(out var configGridQuery);
+                                IQueryable<FrameworkConfigGridBuiltIn> configGridQuery = null;
+                                IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery = null;
+                                gridItem.Grid.Owner<Page>().GridLookupQueryConfig(gridItem.Grid, ref configGridQuery, ref configFieldQuery);
                                 await GridLoadAsync(gridItem.Grid.GridLookup(), query, configGridQuery);
                                 gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
                             }

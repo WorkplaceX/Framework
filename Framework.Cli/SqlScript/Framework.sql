@@ -30,11 +30,8 @@ CREATE VIEW FrameworkFieldBuiltIn
 AS
 SELECT
 	Id,
-	CONCAT(
-		'Table=',
-		(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkField.TableId), '; ',
-		'Field=',
-		FrameworkField.FieldNameCSharp, ';') AS Name
+	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkField.TableId), '; ',
+	FrameworkField.FieldNameCSharp) AS Name
 FROM
 	FrameworkField FrameworkField
 GO
@@ -53,10 +50,18 @@ CREATE TABLE FrameworkConfigGrid
 GO
 CREATE VIEW FrameworkConfigGridBuiltIn
 AS
-	SELECT FrameworkConfigGrid.Id,
-	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkConfigGrid.TableId), '; ', FrameworkConfigGrid.ConfigName) AS Name
+SELECT 
+	ConfigGrid.Id,
+	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId), '; ', ConfigGrid.ConfigName) AS IdName,
+	ConfigGrid.TableId,
+	(SELECT TableBuiltIn.Name FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS TableIdName,
+	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
+	ConfigGrid.ConfigName,
+	ConfigGrid.RowCountMax,
+	ConfigGrid.IsAllowInsert,
+	ConfigGrid.IsExist
 FROM
-	FrameworkConfigGrid FrameworkConfigGrid
+	FrameworkConfigGrid ConfigGrid
 GO
 
 CREATE TABLE FrameworkConfigField
@@ -75,10 +80,18 @@ CREATE TABLE FrameworkConfigField
 GO
 CREATE VIEW FrameworkConfigFieldBuiltIn
 AS
-	SELECT FrameworkConfigField.Id,
-	CONCAT((
-	SELECT ConfigGridBuiltIn.Name FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = FrameworkConfigField.ConfigGridId), (
-	SELECT FieldBuiltIn.Name FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = FrameworkConfigField.FieldId)) AS Name
+SELECT 
+    ConfigField.Id,
+	ConfigField.ConfigGridId,
+	(SELECT ConfigGridBuiltIn.IdName FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = ConfigField.ConfigGridId) AS ConfigGridIdName,
+	ConfigField.FieldId,
+	(SELECT FieldBuiltIn.Name FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = ConfigField.FieldId) AS FieldIdName,
+	(SELECT Field.FieldNameCSharp FROM FrameworkField Field WHERE Field.Id = ConfigField.FieldId) AS FieldNameCSharp,
+	ConfigField.Text,
+	ConfigField.Description,
+	ConfigField.IsVisible,
+	ConfigField.IsReadOnly,
+	ConfigField.Sort
 FROM
-	FrameworkConfigField FrameworkConfigField
+	FrameworkConfigField ConfigField
 GO
