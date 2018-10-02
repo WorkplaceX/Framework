@@ -29,11 +29,15 @@ GO
 CREATE VIEW FrameworkFieldBuiltIn
 AS
 SELECT
-	Id,
-	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkField.TableId), '; ',
-	FrameworkField.FieldNameCSharp) AS IdName
+	Field.Id,
+	Field.TableId,
+	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = Field.TableId), '; ',
+	Field.FieldNameCSharp) AS IdName,
+	Field.FieldNameCSharp,
+	Field.FieldNameSql,
+	Field.IsExist
 FROM
-	FrameworkField FrameworkField
+	FrameworkField Field
 GO
 
 CREATE TABLE FrameworkConfigGrid

@@ -226,13 +226,33 @@ namespace Database.dbo
         [SqlField("Id", typeof(FrameworkFieldBuiltIn_Id), FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("Name", typeof(FrameworkFieldBuiltIn_Name), FrameworkTypeEnum.Nvarcahr)]
-        public string Name { get; set; }
+        [SqlField("TableId", typeof(FrameworkFieldBuiltIn_TableId), FrameworkTypeEnum.Int)]
+        public int TableId { get; set; }
+
+        [SqlField("IdName", typeof(FrameworkFieldBuiltIn_IdName), FrameworkTypeEnum.Nvarcahr)]
+        public string IdName { get; set; }
+
+        [SqlField("FieldNameCSharp", typeof(FrameworkFieldBuiltIn_FieldNameCSharp), FrameworkTypeEnum.Nvarcahr)]
+        public string FieldNameCSharp { get; set; }
+
+        [SqlField("FieldNameSql", typeof(FrameworkFieldBuiltIn_FieldNameSql), FrameworkTypeEnum.Nvarcahr)]
+        public string FieldNameSql { get; set; }
+
+        [SqlField("IsExist", typeof(FrameworkFieldBuiltIn_IsExist), FrameworkTypeEnum.Bit)]
+        public bool IsExist { get; set; }
     }
 
     public class FrameworkFieldBuiltIn_Id : Cell<FrameworkFieldBuiltIn> { }
 
-    public class FrameworkFieldBuiltIn_Name : Cell<FrameworkFieldBuiltIn> { }
+    public class FrameworkFieldBuiltIn_TableId : Cell<FrameworkFieldBuiltIn> { }
+
+    public class FrameworkFieldBuiltIn_IdName : Cell<FrameworkFieldBuiltIn> { }
+
+    public class FrameworkFieldBuiltIn_FieldNameCSharp : Cell<FrameworkFieldBuiltIn> { }
+
+    public class FrameworkFieldBuiltIn_FieldNameSql : Cell<FrameworkFieldBuiltIn> { }
+
+    public class FrameworkFieldBuiltIn_IsExist : Cell<FrameworkFieldBuiltIn> { }
 
     [SqlTable("dbo", "FrameworkScript")]
     public class FrameworkScript : Row
@@ -283,11 +303,11 @@ namespace Database.dbo
         [SqlField("Id", typeof(FrameworkTableBuiltIn_Id), FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
-        [SqlField("Name", typeof(FrameworkTableBuiltIn_Name), FrameworkTypeEnum.Nvarcahr)]
-        public string Name { get; set; }
+        [SqlField("IdName", typeof(FrameworkTableBuiltIn_IdName), FrameworkTypeEnum.Nvarcahr)]
+        public string IdName { get; set; }
     }
 
     public class FrameworkTableBuiltIn_Id : Cell<FrameworkTableBuiltIn> { }
 
-    public class FrameworkTableBuiltIn_Name : Cell<FrameworkTableBuiltIn> { }
+    public class FrameworkTableBuiltIn_IdName : Cell<FrameworkTableBuiltIn> { }
 }
