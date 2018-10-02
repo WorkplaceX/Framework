@@ -40,7 +40,7 @@ CREATE TABLE FrameworkConfigGrid
 (
 	Id INT PRIMARY KEY IDENTITY,
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL ,
-	ConfigName NVARCHAR(256) NOT NULL,
+	ConfigName NVARCHAR(256),
 	RowCountMax INT,
 	IsAllowInsert BIT,
 	IsExist BIT NOT NULL
