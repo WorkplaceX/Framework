@@ -816,7 +816,7 @@
                             if (fieldBuiltIn.IsIdName)
                             {
                                 string tableNameSql = UtilDalType.TypeRowToTableNameCSharp(fieldBuiltIn.TypeRowReference);
-                                string sqlBuiltIn = string.Format("(SELECT BuiltIn.Id FROM {0} BuiltIn WHERE BuiltIn.Name = {1}) AS {2}", tableNameSql, paramName, fieldBuiltIn.FieldNameIdSql);
+                                string sqlBuiltIn = string.Format("(SELECT BuiltIn.Id FROM {0} BuiltIn WHERE BuiltIn.IdName = {1}) AS {2}", tableNameSql, paramName, fieldBuiltIn.FieldNameIdSql);
                                 sqlSelect.Append(sqlBuiltIn);
                             }
                         }

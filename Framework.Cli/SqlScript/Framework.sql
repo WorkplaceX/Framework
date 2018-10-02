@@ -10,7 +10,7 @@ GO
 CREATE VIEW FrameworkTableBuiltIn AS
 SELECT
 	Id,
-	TableNameCSharp AS Name
+	TableNameCSharp AS IdName
 FROM
 	FrameworkTable
 GO
@@ -31,7 +31,7 @@ AS
 SELECT
 	Id,
 	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = FrameworkField.TableId), '; ',
-	FrameworkField.FieldNameCSharp) AS Name
+	FrameworkField.FieldNameCSharp) AS IdName
 FROM
 	FrameworkField FrameworkField
 GO
@@ -54,7 +54,7 @@ SELECT
 	ConfigGrid.Id,
 	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId), '; ', ConfigGrid.ConfigName) AS IdName,
 	ConfigGrid.TableId,
-	(SELECT TableBuiltIn.Name FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS TableIdName,
+	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS TableIdName,
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
 	ConfigGrid.ConfigName,
 	ConfigGrid.RowCountMax,
@@ -85,7 +85,7 @@ SELECT
 	ConfigField.ConfigGridId,
 	(SELECT ConfigGridBuiltIn.IdName FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = ConfigField.ConfigGridId) AS ConfigGridIdName,
 	ConfigField.FieldId,
-	(SELECT FieldBuiltIn.Name FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = ConfigField.FieldId) AS FieldIdName,
+	(SELECT FieldBuiltIn.IdName FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = ConfigField.FieldId) AS FieldIdName,
 	(SELECT Field.FieldNameCSharp FROM FrameworkField Field WHERE Field.Id = ConfigField.FieldId) AS FieldNameCSharp,
 	ConfigField.Text,
 	ConfigField.Description,
