@@ -30,9 +30,9 @@ CREATE VIEW FrameworkFieldBuiltIn
 AS
 SELECT
 	Field.Id,
+	CONCAT((SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = Field.TableId), '; ', Field.FieldNameCSharp) AS IdName,
 	Field.TableId,
-	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = Field.TableId), '; ',
-	Field.FieldNameCSharp) AS IdName,
+	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = Field.TableId) AS TableIdName,
 	Field.FieldNameCSharp,
 	Field.FieldNameSql,
 	Field.IsExist

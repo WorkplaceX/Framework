@@ -733,7 +733,7 @@
                 string fieldNameSql = fieldBuiltIn.Field.FieldNameSql;
 
                 string lastChar = ""; // Character before "IdName".
-                if (fieldNameSql.Length > 2)
+                if (fieldNameSql.Length > "IdName".Length)
                 {
                     lastChar = fieldNameSql.Substring(fieldNameSql.Length - "IdName".Length - 1, 1);
                 }
@@ -750,7 +750,7 @@
                         if (tableReference.Value != null)
                         {
                             List<string> propertyNameList = UtilDalType.TypeRowToPropertyInfoList(tableReference.Key).Select(item => item.Name).ToList();
-                            if (propertyNameList.Contains("Id") && propertyNameList.Contains("Name")) // BuiltIn naming convention.
+                            if (propertyNameList.Contains("Id") && propertyNameList.Contains("IdName")) // BuiltIn naming convention.
                             {
                                 fieldBuiltIn.IsIdName = true;
                                 fieldBuiltIn.TypeRowReference = tableReference.Key;
