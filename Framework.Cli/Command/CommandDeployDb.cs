@@ -44,12 +44,6 @@
             }
         }
 
-        public class FrameworkFieldBuiltIn : FrameworkField
-        {
-            [SqlField("TableIdName", null, FrameworkTypeEnum.Nvarcahr)]
-            public string TableIdName { get; set; }
-        }
-
         private void Meta()
         {
             List<Type> typeRowList = UtilDalType.TypeRowList(AppCli.AssemblyList(false));

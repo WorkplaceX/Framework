@@ -226,11 +226,14 @@ namespace Database.dbo
         [SqlField("Id", typeof(FrameworkFieldBuiltIn_Id), FrameworkTypeEnum.Int)]
         public int Id { get; set; }
 
+        [SqlField("IdName", typeof(FrameworkFieldBuiltIn_IdName), FrameworkTypeEnum.Nvarcahr)]
+        public string IdName { get; set; }
+
         [SqlField("TableId", typeof(FrameworkFieldBuiltIn_TableId), FrameworkTypeEnum.Int)]
         public int TableId { get; set; }
 
-        [SqlField("IdName", typeof(FrameworkFieldBuiltIn_IdName), FrameworkTypeEnum.Nvarcahr)]
-        public string IdName { get; set; }
+        [SqlField("TableIdName", typeof(FrameworkFieldBuiltIn_TableIdName), FrameworkTypeEnum.Nvarcahr)]
+        public string TableIdName { get; set; }
 
         [SqlField("FieldNameCSharp", typeof(FrameworkFieldBuiltIn_FieldNameCSharp), FrameworkTypeEnum.Nvarcahr)]
         public string FieldNameCSharp { get; set; }
@@ -244,9 +247,11 @@ namespace Database.dbo
 
     public class FrameworkFieldBuiltIn_Id : Cell<FrameworkFieldBuiltIn> { }
 
+    public class FrameworkFieldBuiltIn_IdName : Cell<FrameworkFieldBuiltIn> { }
+
     public class FrameworkFieldBuiltIn_TableId : Cell<FrameworkFieldBuiltIn> { }
 
-    public class FrameworkFieldBuiltIn_IdName : Cell<FrameworkFieldBuiltIn> { }
+    public class FrameworkFieldBuiltIn_TableIdName : Cell<FrameworkFieldBuiltIn> { }
 
     public class FrameworkFieldBuiltIn_FieldNameCSharp : Cell<FrameworkFieldBuiltIn> { }
 

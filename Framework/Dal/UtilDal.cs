@@ -693,12 +693,17 @@
             public (PropertyInfo PropertyInfo, string FieldNameSql, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum) Field;
 
             /// <summary>
-            /// Gets or sets IsIdName. True if, for example "TableIdName".
+            /// Gets or sets IsKey. True, if "Id" or "IdName".
+            /// </summary>
+            public bool IsKey;
+
+            /// <summary>
+            /// Gets or sets IsIdName. True, if for example "TableIdName".
             /// </summary>
             public bool IsIdName;
 
             /// <summary>
-            /// Gets or sets "IsId". True if, for example "TableId".
+            /// Gets or sets "IsId". True, if for example "TableId".
             /// </summary>
             public bool IsId;
 
@@ -732,12 +737,14 @@
             {
                 string fieldNameSql = fieldBuiltIn.Field.FieldNameSql;
 
+                fieldBuiltIn.IsKey = fieldNameSql == "Id" || fieldNameSql == "IdName";
+
                 string lastChar = ""; // Character before "IdName".
                 if (fieldNameSql.Length > "IdName".Length)
                 {
                     lastChar = fieldNameSql.Substring(fieldNameSql.Length - "IdName".Length - 1, 1);
                 }
-                bool lastCharIsLower = lastChar == lastChar.ToLower();
+                bool lastCharIsLower = lastChar == lastChar.ToLower() && lastChar.Length == 1;
                 if (fieldNameSql.EndsWith("IdName") && lastCharIsLower) // BuiltIn naming convention.
                 {
                     string fieldNameIdSql = fieldNameSql.Substring(0, fieldNameSql.Length - "Name".Length); // BuiltIn naming convention.
@@ -793,7 +800,7 @@
                 bool isFirstField = true;
                 foreach (var fieldBuiltIn in fieldBuiltInList)
                 {
-                    bool isField = (fieldBuiltIn.IsId == false && fieldBuiltIn.IsIdName == false) || fieldBuiltIn.IsIdName;
+                    bool isField = (fieldBuiltIn.IsId == false && fieldBuiltIn.IsIdName == false && fieldBuiltIn.IsKey == false) || fieldBuiltIn.IsIdName;
                     if (isField)
                     {
                         if (isFirstField)
@@ -835,7 +842,8 @@
                 string sqlSelect = UpsertSelect(typeRow, rowListSplit, fieldNameSqlPrefix, paramList, assemblyList);
                 // string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList); sqlSelect = sqlDebug;
                 string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
-                var fieldNameSqlList = FieldBuiltInList(typeRow, fieldNameSqlPrefix, assemblyList).Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false).Select(item => item.Field.FieldNameSql).ToArray();
+
+                var fieldNameSqlList = FieldBuiltInList(typeRow, fieldNameSqlPrefix, assemblyList).Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false && item.IsKey == false).Select(item => item.Field.FieldNameSql).ToArray();
 
                 string fieldNameKeySourceList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameKeyList, "Source.");
                 string fieldNameKeyTargetList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameKeyList, "Target.");
