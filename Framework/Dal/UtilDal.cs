@@ -752,7 +752,7 @@
                     {
                         UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
                         string tableNameSqlBuiltIn = fieldNameSqlPrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
-                        tableNameSqlBuiltIn = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSqlBuiltIn);
+                        tableNameSqlBuiltIn = UtilDalType.TableNameSql(schemaNameSql, tableNameSqlBuiltIn);
                         var tableReference = tableNameSqlList.Where(item => item.Value == tableNameSqlBuiltIn).SingleOrDefault();
                         if (tableReference.Value != null)
                         {
@@ -834,6 +834,14 @@
             return sqlSelect.ToString();
         }
 
+        /// <summary>
+        /// Sql merge into for BuiltIn.
+        /// </summary>
+        /// <param name="typeRow">Type of rowList (can be empty).</param>
+        /// <param name="rowList">Records to update.</param>
+        /// <param name="fieldNameKeyList">Key fields for record identification.</param>
+        /// <param name="fieldNameSqlPrefix">For example "Framework".</param>
+        /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string fieldNameSqlPrefix, List<Assembly> assemblyList)
         {
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
@@ -841,7 +849,14 @@
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
                 string sqlSelect = UpsertSelect(typeRow, rowListSplit, fieldNameSqlPrefix, paramList, assemblyList);
                 // string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList); sqlSelect = sqlDebug;
-                string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
+
+                // Update underlying sql table if sql view ends with "BuiltIn".
+                UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
+                if (tableNameSql.EndsWith("BuiltIn"))
+                {
+                    tableNameSql = tableNameSql.Substring(0, tableNameSql.Length - "BuiltIn".Length);
+                }
+                tableNameSql = UtilDalType.TableNameSql(schemaNameSql, tableNameSql);
 
                 var fieldNameSqlList = FieldBuiltInList(typeRow, fieldNameSqlPrefix, assemblyList).Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false && item.IsKey == false).Select(item => item.Field.FieldNameSql).ToArray();
 
@@ -865,7 +880,7 @@
 	                INSERT ({5})
 	                VALUES ({6});
                 ";
-                sqlUpsert = string.Format(sqlUpsert, tableName, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
+                sqlUpsert = string.Format(sqlUpsert, tableNameSql, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
                 // string sqlDebug = UtilDal.ExecuteParamDebug(sqlUpsert, paramList);
 
                 // Upsert
@@ -961,27 +976,27 @@
             return result;
         }
 
-        internal static string TypeRowToTableNameSql(Type typeRow)
+        internal static void TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql)
         {
-            string result = null;
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-            if (tableAttribute != null && (tableAttribute.SchemaNameSql != null || tableAttribute.TableNameSql != null))
-            {
-                result = string.Format("[{0}].[{1}]", tableAttribute.SchemaNameSql, tableAttribute.TableNameSql);
-            }
+            schemaNameSql = tableAttribute.SchemaNameSql;
+            tableNameSql = tableAttribute.TableNameSql;
+        }
+
+        /// <summary>
+        /// Returns sql table name with schema name.
+        /// </summary>
+        internal static string TableNameSql(string schemaNameSql, string tableNameSql)
+        {
+            string result = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSql);
             return result;
         }
 
-        internal static void TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql)
+        internal static string TypeRowToTableNameSql(Type typeRow)
         {
-            schemaNameSql = null;
-            tableNameSql = null;
-            SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-            if (tableAttribute != null && (tableAttribute.SchemaNameSql != null || tableAttribute.TableNameSql != null))
-            {
-                schemaNameSql = tableAttribute.SchemaNameSql;
-                tableNameSql = tableAttribute.TableNameSql;
-            }
+            TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
+            string result = TableNameSql(schemaNameSql, tableNameSql);
+            return result;
         }
 
         internal static PropertyInfo[] TypeRowToPropertyInfoList(Type typeRow)

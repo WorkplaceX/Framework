@@ -79,6 +79,7 @@
                         fieldBuiltIn.FieldNameSql = field.FieldNameSql;
                         fieldBuiltIn.IsExist = true;
                     }
+                    // break;
                 }
                 UtilDalUpsert.UpsertIsExistAsync<FrameworkFieldBuiltIn>().Wait();
                 UtilDalUpsertBuiltIn.UpsertAsync<FrameworkFieldBuiltIn>(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, "Framework", AppCli.AssemblyList()).Wait();
