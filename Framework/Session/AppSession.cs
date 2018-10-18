@@ -86,17 +86,41 @@
         }
 
         /// <summary>
+        /// Load column definitions into session state.
+        /// </summary>
+        private void GridLoadColumn(Grid grid, Type typeRow)
+        {
+            GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+
+            if (gridSession.TypeRow != typeRow)
+            {
+                if (typeRow == null)
+                {
+                    gridSession.GridColumnSessionList.Clear();
+                }
+                else
+                {
+                    PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
+                    foreach (PropertyInfo propertyInfo in propertyInfoList)
+                    {
+                        gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Copy data grid cell values to AppSession.
         /// </summary>
         private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
         {
             UtilSession.GridReset(grid);
-            GridLoadSessionCreate(grid);
 
             PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
 
+            GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
             int gridIndex = UtilSession.GridToIndex(grid);
-            GridSession gridSession = GridSessionList[gridIndex];
+
 
             // Reset GridRowSessionList but keep filter row.
             var filterRow = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).SingleOrDefault();
@@ -109,12 +133,7 @@
             if (gridSession.TypeRow != typeRow)
             {
                 gridSession.TypeRow = typeRow;
-                gridSession.GridColumnSessionList.Clear();
                 gridSession.GridRowSessionList.Clear();
-                foreach (PropertyInfo propertyInfo in propertyInfoList)
-                {
-                    gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
-                }
                 GridLoadAddFilter(gridIndex); // Add "filter row".
             }
 
@@ -131,45 +150,76 @@
         }
 
         /// <summary>
-        /// Load FrameworkConfigGrid tp GridSession.
+        /// Load FrameworkConfigGrid to GridSession.
         /// </summary>
         private async Task GridLoadConfigAsync(Grid grid, Type typeRow, IQueryable<FrameworkConfigGridBuiltIn> configGridQuery)
         {
-            var configGridList = await UtilDal.SelectAsync(configGridQuery);
-            UtilFramework.Assert(configGridList.Count == 0 || configGridList.Count == 1);
-            var frameworkConfigGrid = configGridList.SingleOrDefault();
-            if (frameworkConfigGrid != null)
+            GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+            if (typeRow == null || configGridQuery == null)
             {
-                GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
-                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                if (frameworkConfigGrid.TableNameCSharp != null)
+                gridSession.RowCountMaxConfig = null; // Reset
+            }
+            else
+            {
+                var configGridList = await UtilDal.SelectAsync(configGridQuery);
+                UtilFramework.Assert(configGridList.Count == 0 || configGridList.Count == 1);
+                var frameworkConfigGrid = configGridList.SingleOrDefault();
+                if (frameworkConfigGrid != null)
                 {
-                    UtilFramework.Assert(tableNameCSharp == frameworkConfigGrid.TableNameCSharp); // TableNameCSharp. See also file Framework.sql
-                }
-                if (frameworkConfigGrid.RowCountMax.HasValue)
-                {
-                    gridSession.RowCountMax = frameworkConfigGrid.RowCountMax.Value;
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    if (frameworkConfigGrid.TableNameCSharp != null)
+                    {
+                        UtilFramework.Assert(tableNameCSharp == frameworkConfigGrid.TableNameCSharp); // TableNameCSharp. See also file Framework.sql
+                    }
+                    if (frameworkConfigGrid.RowCountMax.HasValue)
+                    {
+                        gridSession.RowCountMaxConfig = frameworkConfigGrid.RowCountMax.Value;
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Load FrameworkConfigField to GridSession.
+        /// </summary>
+        private async Task GridLoadConfigAsync(Grid grid, Type typeRow, IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery)
+        {
+            GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+            if (typeRow == null || configFieldQuery == null)
+            {
+                foreach (var columnSession in gridSession.GridColumnSessionList)
+                {
+                    columnSession.TextConfig = null; // Reset
+                }
+            }
+            else
+            {
+                var configFieldList = await UtilDal.SelectAsync(configFieldQuery);
+                // (FieldName, FrameworkConfigFieldBuiltIn)
+                Dictionary<string, FrameworkConfigFieldBuiltIn> fieldList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
+                foreach (var frameworkConfigFieldBuiltIn in configFieldList)
+                {
+                    fieldList.Add(frameworkConfigFieldBuiltIn.FieldNameCSharp, frameworkConfigFieldBuiltIn);
+                }
+                foreach (var columnSession in gridSession.GridColumnSessionList)
+                {
+                    if (fieldList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
+                    {
+                        columnSession.TextConfig = frameworkConfigFieldBuiltIn.Text;
+                    }
+                }
+            }
+        }
 
         /// <summary>
-        /// Select data from database.
+        /// Select data from database and write to session.
         /// </summary>
-        private async Task GridLoadAsync(Grid grid, IQueryable query, IQueryable<FrameworkConfigGridBuiltIn> configGridQuery)
+        private async Task GridLoadRowAsync(Grid grid, IQueryable query)
         {
             List<Row> rowList = null;
             if (query != null)
             {
-                GridLoadSessionCreate(grid);
                 GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
-
-                // Config
-                if (configGridQuery != null)
-                {
-                    await GridLoadConfigAsync(grid, query.ElementType, configGridQuery);
-                }
 
                 // Filter
                 GridRowSession gridRowSessionFilter = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).FirstOrDefault();
@@ -195,20 +245,48 @@
                 }
 
                 // Skip, Take
-                query = UtilDal.QuerySkipTake(query, gridSession.OffsetRow, gridSession.RowCountMax);
+                query = UtilDal.QuerySkipTake(query, gridSession.OffsetRow, gridSession.RowCountMaxGet());
 
                 rowList = await UtilDal.SelectAsync(query);
             }
             GridLoad(grid, rowList, query?.ElementType);
         }
 
+        /// <summary>
+        /// Load first grid config, then field config and data rows in parallel.
+        /// </summary>
+        private async Task GridLoadAsync(Grid grid, IQueryable query)
+        {
+            GridLoadSessionCreate(grid);
+            GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
+            Type typeRow = query?.ElementType;
+
+            // Load column definition into session state.
+            GridLoadColumn(grid, typeRow);
+
+            // Config get
+            Task fieldConfigLoad = Task.FromResult(0);
+            IQueryable<FrameworkConfigGridBuiltIn> configGridQuery = null;
+            IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery = null;
+            if (gridSession.TypeRow != typeRow)
+            {
+                grid.Owner<Page>().GridQueryConfig(grid, ref configGridQuery, ref configFieldQuery);
+                // Load config into session state.
+                await GridLoadConfigAsync(grid, typeRow, configGridQuery);
+                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, configFieldQuery);
+            }
+
+            // Select rows and load data into session state.
+            var rowLoad = GridLoadRowAsync(grid, query); // Load grid.
+
+            await Task.WhenAll(fieldConfigLoad, rowLoad); // Load field config and row in parallel. Grid config needs to be loaded before because of RowCountMaxConfig dependency.
+        }
+
         public async Task GridLoadAsync(Grid grid)
         {
             var query = grid.Owner<Page>().GridQuery(grid);
-            IQueryable<FrameworkConfigGridBuiltIn> configGridQuery = null;
-            IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery = null;
-            grid.Owner<Page>().GridQueryConfig(grid, ref configGridQuery, ref configFieldQuery);
-            await GridLoadAsync(grid, query, configGridQuery);
+
+            await GridLoadAsync(grid, query);
             await GridRowSelectFirstAsync(grid);
         }
 
@@ -232,7 +310,7 @@
                         if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
                         {
                             GridColumn gridColumn = new GridColumn();
-                            gridColumn.Text = gridColumnItem.PropertyInfo.Name;
+                            gridColumn.Text = gridColumnItem.GridColumnSession.TextGet();
                             gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
                             gridItem.Grid.ColumnList.Add(gridColumn);
                         }
@@ -473,10 +551,7 @@
                             var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
                             if (query != null)
                             {
-                                IQueryable<FrameworkConfigGridBuiltIn> configGridQuery = null;
-                                IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery = null;
-                                gridItem.Grid.Owner<Page>().GridLookupQueryConfig(gridItem.Grid, ref configGridQuery, ref configFieldQuery);
-                                await GridLoadAsync(gridItem.Grid.GridLookup(), query, configGridQuery);
+                                await GridLoadAsync(gridItem.Grid.GridLookup(), query); // Load lookup.
                                 gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
                             }
                             return;
@@ -662,15 +737,28 @@
         }
     }
 
+    /// <summary>
+    /// Stores server side grid session data.
+    /// </summary>
     internal class GridSession
     {
+        /// <summary>
+        /// TypeRow of loaded data grid.
+        /// </summary>
         public Type TypeRow;
 
         public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
 
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
 
-        public int RowCountMax = 4;
+        public int RowCountMax = 4; // Default value. See also property RowCountMaxConfig.
+
+        public int? RowCountMaxConfig;
+
+        public int RowCountMaxGet()
+        {
+            return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : RowCountMax;
+        }
 
         public int ColumnCountMax = 5;
 
@@ -686,7 +774,23 @@
 
     internal class GridColumnSession
     {
+        /// <summary>
+        /// FieldName CSharp.
+        /// </summary>
         public string FieldName;
+
+        /// <summary>
+        /// Session state for column header.
+        /// </summary>
+        public string TextConfig;
+
+        /// <summary>
+        /// Returns column header.
+        /// </summary>
+        public string TextGet()
+        {
+            return TextConfig != null ? TextConfig : FieldName;
+        }
 
         public bool? IsSort;
     }
