@@ -525,10 +525,23 @@
             return null;
         }
 
-        protected virtual internal void GridQueryConfig(Grid grid, ref IQueryable<FrameworkConfigGridBuiltIn> configGridQuery, ref IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery)
+        public class Config
+        {
+            /// <summary>
+            /// Gets or sets ConfigGridQuery. Should return one record.
+            /// </summary>
+            public IQueryable<FrameworkConfigGridBuiltIn> ConfigGridQuery { get; set; }
+
+            /// <summary>
+            /// Gets or sets ConfigFieldQuery.
+            /// </summary>
+            public IQueryable<FrameworkConfigFieldBuiltIn> ConfigFieldQuery { get; set; }
+        }
+
+        protected virtual internal void GridQueryConfig(Grid grid, Config configQuery)
         {
             // Example:
-            // configGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+            // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         protected virtual internal async Task GridRowSelectedAsync(Grid grid)
@@ -541,10 +554,10 @@
             return null;
         }
 
-        protected virtual internal void GridLookupQueryConfig(Grid grid, ref IQueryable<FrameworkConfigGridBuiltIn> configGridQuery, ref IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery)
+        protected virtual internal void GridLookupQueryConfig(Grid grid, Config config)
         {
             // Example:
-            // configGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+            // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         /// <summary>

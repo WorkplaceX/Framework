@@ -266,14 +266,13 @@
 
             // Config get
             Task fieldConfigLoad = Task.FromResult(0);
-            IQueryable<FrameworkConfigGridBuiltIn> configGridQuery = null;
-            IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery = null;
             if (gridSession.TypeRow != typeRow)
             {
-                grid.Owner<Page>().GridQueryConfig(grid, ref configGridQuery, ref configFieldQuery);
+                Page.Config config = new Page.Config();
+                grid.Owner<Page>().GridQueryConfig(grid, config);
                 // Load config into session state.
-                await GridLoadConfigAsync(grid, typeRow, configGridQuery);
-                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, configFieldQuery);
+                await GridLoadConfigAsync(grid, typeRow, config.ConfigGridQuery);
+                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, config.ConfigFieldQuery);
             }
 
             // Select rows and load data into session state.
