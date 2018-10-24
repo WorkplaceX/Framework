@@ -194,11 +194,16 @@
             }
             else
             {
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                 var configFieldList = await UtilDal.SelectAsync(configFieldQuery);
                 // (FieldName, FrameworkConfigFieldBuiltIn)
                 Dictionary<string, FrameworkConfigFieldBuiltIn> fieldList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
                 foreach (var frameworkConfigFieldBuiltIn in configFieldList)
                 {
+                    if (frameworkConfigFieldBuiltIn.TableNameCSharp != null) // If set, it needs to be correct.
+                    {
+                        UtilFramework.Assert(frameworkConfigFieldBuiltIn.TableNameCSharp == tableNameCSharp, string.Format("TableNameCSharp wrong! ({0}; {1})", tableNameCSharp, frameworkConfigFieldBuiltIn.TableNameCSharp));
+                    }
                     fieldList.Add(frameworkConfigFieldBuiltIn.FieldNameCSharp, frameworkConfigFieldBuiltIn);
                 }
                 foreach (var columnSession in gridSession.GridColumnSessionList)

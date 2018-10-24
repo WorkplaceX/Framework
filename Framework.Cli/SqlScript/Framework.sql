@@ -85,12 +85,17 @@ GO
 CREATE VIEW FrameworkConfigFieldBuiltIn
 AS
 SELECT 
+	/* Id */
     ConfigField.Id,
 	ConfigField.ConfigGridId,
 	(SELECT ConfigGridBuiltIn.IdName FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = ConfigField.ConfigGridId) AS ConfigGridIdName,
 	ConfigField.FieldId,
 	(SELECT FieldBuiltIn.IdName FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = ConfigField.FieldId) AS FieldIdName,
+	/* Extension */
+	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkConfigGrid Grid, FrameworkTable FrameworkTable WHERE Grid.Id = ConfigField.ConfigGridId AND FrameworkTable.Id = Grid.TableId) AS TableNameCSharp,
+	(SELECT Grid.ConfigName FROM FrameworkConfigGrid Grid WHERE Grid.Id = ConfigField.ConfigGridId) AS ConfigName,
 	(SELECT Field.FieldNameCSharp FROM FrameworkField Field WHERE Field.Id = ConfigField.FieldId) AS FieldNameCSharp,
+	/* Data */
 	ConfigField.Text,
 	ConfigField.Description,
 	ConfigField.IsVisible,

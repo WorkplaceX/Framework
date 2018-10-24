@@ -67,6 +67,12 @@ namespace Database.dbo
         [SqlField("FieldIdName", typeof(FrameworkConfigFieldBuiltIn_FieldIdName), FrameworkTypeEnum.Nvarcahr)]
         public string FieldIdName { get; set; }
 
+        [SqlField("TableNameCSharp", typeof(FrameworkConfigFieldBuiltIn_TableNameCSharp), FrameworkTypeEnum.Nvarcahr)]
+        public string TableNameCSharp { get; set; }
+
+        [SqlField("ConfigName", typeof(FrameworkConfigFieldBuiltIn_ConfigName), FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigName { get; set; }
+
         [SqlField("FieldNameCSharp", typeof(FrameworkConfigFieldBuiltIn_FieldNameCSharp), FrameworkTypeEnum.Nvarcahr)]
         public string FieldNameCSharp { get; set; }
 
@@ -95,6 +101,10 @@ namespace Database.dbo
     public class FrameworkConfigFieldBuiltIn_FieldId : Cell<FrameworkConfigFieldBuiltIn> { }
 
     public class FrameworkConfigFieldBuiltIn_FieldIdName : Cell<FrameworkConfigFieldBuiltIn> { }
+
+    public class FrameworkConfigFieldBuiltIn_TableNameCSharp : Cell<FrameworkConfigFieldBuiltIn> { }
+
+    public class FrameworkConfigFieldBuiltIn_ConfigName : Cell<FrameworkConfigFieldBuiltIn> { }
 
     public class FrameworkConfigFieldBuiltIn_FieldNameCSharp : Cell<FrameworkConfigFieldBuiltIn> { }
 
