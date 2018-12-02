@@ -91,7 +91,7 @@
                 {
                     Console.ForegroundColor = color;
                 }
-                Console.WriteLine("Version={0};", UtilFramework.Version);
+                Console.WriteLine("Framework {0};", UtilFramework.Version);
 
                 commandLineApplication.Execute("-h"); // Show list of available commands.
             }

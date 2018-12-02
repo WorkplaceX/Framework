@@ -532,6 +532,16 @@
             /// </summary>
             public IQueryable<FrameworkConfigGridBuiltIn> ConfigGridQuery { get; set; }
 
+            /*
+
+            // Other additional possible implementations:
+            
+            public Task<FrameworkConfigGridBuiltIn> ConfigGridQueryTask { get; set; }
+
+            public FrameworkConfigGridBuiltIn ConfigGrid { get; set; }
+
+            */
+
             /// <summary>
             /// Gets or sets ConfigFieldQuery.
             /// </summary>
