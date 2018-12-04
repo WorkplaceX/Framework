@@ -37,7 +37,7 @@
         /// <param name="typeRow">Application or Framework data row.</param>
         public static string ConnectionString(Type typeRow)
         {
-            bool isFrameworkDb = typeRow.GetTypeInfo().Assembly == typeof(UtilDal).Assembly; // Type is declared in Framework assembly.
+            bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             return ConnectionString(isFrameworkDb);
         }
 

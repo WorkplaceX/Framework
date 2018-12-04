@@ -44,6 +44,9 @@
             }
         }
 
+        /// <summary>
+        /// Populate sql tables FrameworkTable, FrameworkField with assembly rowType.
+        /// </summary>
         private void Meta()
         {
             List<Type> typeRowList = UtilDalType.TypeRowList(AppCli.AssemblyList(false));
@@ -97,10 +100,10 @@
             // SqlInit
             string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/Sql/Init.sql";
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
-            UtilDal.ExecuteNonQueryAsync(sqlInit).Wait();
+            UtilDal.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
-            SqlScriptExecute(folderNameSqlScriptFramework, true); // Uses ConnectionString in ConfigFramework.json
-            SqlScriptExecute(folderNameSqlScriptApplication, false);
+            SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigFramework.json
+            SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);
 
             Meta();
         }

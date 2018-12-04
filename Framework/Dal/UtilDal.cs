@@ -175,15 +175,6 @@
         }
 
         /// <summary>
-        /// Execute sql statement.
-        /// </summary>
-        /// <param name="paramList">See also method ExecuteParamAdd();</param>
-        internal static async Task ExecuteNonQueryAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList = null)
-        {
-            await ExecuteNonQueryAsync(sql, paramList, false);
-        }
-
-        /// <summary>
         /// Returns multiple result sets from stored procedure or select.
         /// </summary>
         /// <param name="sql">For example: "SELECT 1 AS A SELECT 2 AS B"; or with parameter: "SELECT @P0 AS A";</param>
@@ -622,6 +613,7 @@
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList)
         {
             string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
+            bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             var fieldNameSqlList = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.IsPrimaryKey == false).Select(item => item.FieldNameSql).ToArray();
 
             string fieldNameKeySourceList = UpsertFieldNameToCsvList(fieldNameKeyList, "Source.");
@@ -653,7 +645,7 @@
             // string sqlDebug = UtilDal.ExecuteParamDebug(sqlUpsert, paramList);
 
             // Upsert
-            await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList);
+            await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
         }
 
         internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList) where TRow : Row
@@ -672,9 +664,10 @@
         internal static async Task UpsertIsExistAsync(Type typeRow, string fieldNameIsExist = "IsExist")
         {
             string tableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
+            bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             // IsExists
             string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT)", tableNameSql, fieldNameIsExist);
-            await UtilDal.ExecuteNonQueryAsync(sqlIsExist);
+            await UtilDal.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
         }
 
         internal static async Task UpsertIsExistAsync<TRow>(string fieldNameIsExist = "IsExist") where TRow : Row
@@ -844,6 +837,8 @@
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string fieldNameSqlPrefix, List<Assembly> assemblyList)
         {
+            bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
+
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
@@ -884,7 +879,7 @@
                 // string sqlDebug = UtilDal.ExecuteParamDebug(sqlUpsert, paramList);
 
                 // Upsert
-                await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList);
+                await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
             }
         }
 
@@ -928,6 +923,14 @@
 
     internal static class UtilDalType
     {
+        /// <summary>
+        /// Returns true if typeRow is declared if Framework assembly.
+        /// </summary>
+        internal static bool TypeRowIsFrameworkDb(Type typeRow)
+        {
+            return typeRow.GetTypeInfo().Assembly == typeof(UtilDal).Assembly; // Type is declared in Framework assembly.
+        }
+
         /// <summary>
         /// Returns rows defined in framework and database assembly.
         /// </summary>
