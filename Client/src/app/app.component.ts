@@ -4,9 +4,9 @@ import { DataService } from '../data.service';
 @Component({
   selector: 'data-app', // Make html 5 valid for server side rendering // 'app-root'
   template: `
+  <!-- /* Debug */
   <div class="alertError" *ngFor="let item of DataService.alertErrorList$ | async;">{{item}}8</div>
-
-  <h1>Hello World2</h1>
+  <h1>Hello World</h1>
   <button (click)="onClick()">Click</button> <br/>
   Name={{ DataService.json.Name }} <br/>
   Session={{ DataService.json.Session }} <br/>
@@ -16,6 +16,7 @@ import { DataService } from '../data.service';
   IsServerSideRendering={{ DataService.json.IsServerSideRendering }} <br/>
   Version={{ DataService.json.Version }} {{ DataService.json.VersionBuild }} <br/>
   VersionBuild.Client = {{ DataService.VersionBuild }}
+  -->
   <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of DataService.json.List; trackBy trackBy"></div>  
   `,
   styleUrls: ['./app.component.scss'],
@@ -122,6 +123,7 @@ export class Button {
       <td *ngFor="let cell of row.CellList; trackBy trackBy" [ngClass]="{'gridRowFilter':row.RowEnum==1}">
         <div style="display:flex;">
 
+          <!-- /* Red plus sign at begin of field */
           <div style="display:inline-block; padding-right:2px;">
             <svg width="1em" height="1em" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
               viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
@@ -130,6 +132,7 @@ export class Button {
               122.435,211.479 122.435,300.522 211.478,300.522 211.478,389.565 300.522,389.565 300.522,300.522 389.565,300.522 "/>
            </svg>
           </div>
+          -->
 
           <div style="flex:1; overflow:hidden;">
             <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
@@ -137,7 +140,9 @@ export class Button {
           <div style="padding-left:2px">
             <i *ngIf="cell.IsModify" class="fas fa-spinner fa-spin colorBlack"></i>
             <i class="fas fa-arrow-up" style="color:green"></i>
+            <!-- /* Lock sign */
             <i class="fas fa-lock colorBlack"></i>
+            -->
             <i *ngIf="row.RowEnum==1" class="fas fa-search colorBlack" title="Search"></i>
             <i *ngIf="row.RowEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
           </div>
