@@ -17,7 +17,7 @@
 
         private CommandArgument argumentJson;
 
-        private CommandArgument argumentAzureGitUrl;
+        private CommandArgument argumentDeployAzureGitUrl;
 
         private CommandArgument argumentConnectionString;
 
@@ -30,7 +30,7 @@
         protected internal override void Register(CommandLineApplication configuration)
         {
             argumentJson = configuration.Argument("json", "Get or set ci server configuration.");
-            argumentAzureGitUrl = configuration.Argument("azureGitUrl", "Get or set Azure git url for deployment.");
+            argumentDeployAzureGitUrl = configuration.Argument("deployAzureGitUrl", "Get or set Azure git url for deployment.");
             argumentConnectionString = configuration.Argument("connectionString", "Set same database ConnectionString for Framework and Application.");
             argumentConnectionStringFramework = configuration.Argument("connectionStringFramework", "Get or set database ConnectionString for Framework.");
             argumentConnectionStringApplication = configuration.Argument("connectionStringApplication", "Get or set database ConnectionString for Application.");
@@ -50,7 +50,7 @@
             }
 
             // Input FolderName
-            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Website/'. In this folder ci will call npm install; npm build;");
+            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Website/'. In this folder ci calls npm install; npm build;");
             Console.Write(">");
             string folderNameNpmBuild = Console.ReadLine();
             if (folderNameNpmBuild.StartsWith("/") || folderNameNpmBuild.StartsWith(@"\"))
@@ -70,7 +70,7 @@
             }
 
             // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Website/dist/'. Content of this folder will be copied to 'Application.Server/Framework/Website/{DomainName}'");
+            Console.WriteLine("Enter dist folder name. For example 'Website/dist/'. Content of this folder is copied to 'Application.Server/Framework/Website/{DomainName}'");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
             if (folderNameDist.StartsWith("/") || folderNameDist.StartsWith(@"\"))
@@ -185,19 +185,19 @@
                 }
             }
 
-            // Command "azureGitUrl"
-            if (UtilCli.ArgumentValueIsExist(this, argumentAzureGitUrl))
+            // Command "deployAzureGitUrl"
+            if (UtilCli.ArgumentValueIsExist(this, argumentDeployAzureGitUrl))
             {
-                if (UtilCli.ArgumentValue(this, argumentAzureGitUrl, out string value))
+                if (UtilCli.ArgumentValue(this, argumentDeployAzureGitUrl, out string value))
                 {
                     // Write
-                    configCli.AzureGitUrl = value;
+                    configCli.DeployAzureGitUrl = value;
                     ConfigCli.Save(configCli);
                 }
                 else
                 {
                     // Read
-                    Console.WriteLine(argumentAzureGitUrl.Name + "=" + configCli.AzureGitUrl);
+                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + configCli.DeployAzureGitUrl);
                 }
             }
 

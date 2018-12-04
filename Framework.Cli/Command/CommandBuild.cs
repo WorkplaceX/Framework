@@ -126,14 +126,19 @@
             ConfigFramework.Save(configFramework);
         }
 
-        protected internal override void Execute()
+        internal static void InitConfigFramework(AppCli appCli)
         {
             // Init config
-            ConfigCli.Init(AppCli);
+            ConfigCli.Init(appCli);
             ConfigFramework.Init();
 
             // Config
             BuildConfigFramework();
+        }
+
+        protected internal override void Execute()
+        {
+            InitConfigFramework(AppCli);
 
             // Build
             BuildWebsite();

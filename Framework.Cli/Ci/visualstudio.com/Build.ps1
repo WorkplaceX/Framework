@@ -25,7 +25,7 @@ function Main
 	echo "### Build.ps1 (Config)"
 	cd $FolderName
 	cd Application.Cli
-    dotnet run --no-build -- config json="$ConfigCli" # Set AzureGitUrl
+    dotnet run --no-build -- config json="$ConfigCli" # Set DeployAzureGitUrl
 	ErrorCheck
 
 	# Build

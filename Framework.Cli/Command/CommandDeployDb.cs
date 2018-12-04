@@ -88,11 +88,7 @@
 
         protected internal override void Execute()
         {
-            ConfigCli configCli = ConfigCli.Load();
-
-            // ConnectionString
-            string connectionStringFramework = configCli.ConnectionStringFramework;
-            string connectionStringApplication = configCli.ConnectionStringApplication;
+            CommandBuild.InitConfigFramework(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigFramework.json
 
             // FolderNameSqlScript
             string folderNameSqlScriptFramework = UtilFramework.FolderName + "Framework/Framework.Cli/SqlScript/";
@@ -103,7 +99,7 @@
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
             UtilDal.ExecuteNonQueryAsync(sqlInit).Wait();
 
-            SqlScriptExecute(folderNameSqlScriptFramework, true);
+            SqlScriptExecute(folderNameSqlScriptFramework, true); // Uses ConnectionString in ConfigFramework.json
             SqlScriptExecute(folderNameSqlScriptApplication, false);
 
             Meta();

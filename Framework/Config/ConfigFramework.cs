@@ -43,6 +43,9 @@
 
         public List<ConfigFrameworkWebsite> WebsiteList { get; set; }
 
+        /// <summary>
+        /// Gets ConfigFramework.json. Created und updated by CommandBuild. See also publish folder.
+        /// </summary>
         private static string FileName
         {
             get

@@ -146,7 +146,7 @@ namespace Framework
 
         internal static string ConfigToJson(object config, bool isIndented)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore };
+            JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Include };
             string json = JsonConvert.SerializeObject(config, isIndented? Formatting.Indented : Formatting.None, settings);
             return json;
         }

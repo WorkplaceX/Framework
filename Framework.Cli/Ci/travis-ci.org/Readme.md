@@ -3,7 +3,7 @@ File needs to be copied from here into application root folder. That's where tra
 
 ## Config Azure Git Url
 Deployment to Azure goes via Git Url. In travis settings parameter needs to be in quotation marks. Example:
-* AzureGitUrl = "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
+* DeployAzureGitUrl = "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
 
 On Azure portal go to
 * Properties (To get git url)
