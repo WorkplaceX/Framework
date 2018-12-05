@@ -61,7 +61,7 @@
 
             if (isPrimaryKey == false)
             {
-                entity.HasKey(propertyInfoList.First().Name); // Prevent null exception if name of first field (of view) is not "Id".
+                entity.HasKey(propertyInfoList.First().Name); // Prevent null exception if name of first field (of view) is not "Id". See also QueryTrackingBehavior.NoTracking;
             }
 
             var model = builder.Model;
@@ -82,6 +82,7 @@
             options.UseSqlServer(connectionString); // See also: ConfigFramework.json // (Data Source=localhost; Initial Catalog=Application; Integrated Security=True;)
             options.UseModel(DbContextModel(typeRow));
             DbContext result = new DbContext(options.Options);
+            result.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking; // Needed for views if "Id" has same value multiple times. See also: https://docs.microsoft.com/en-us/ef/core/querying/tracking
 
             return result;
         }
@@ -1117,13 +1118,19 @@
 
             public readonly bool IsNumber;
 
-            protected virtual string TextFromValue(object value)
+            /// <summary>
+            /// Convert database value to front end cell test.
+            /// </summary>
+            protected virtual string CellTextFromValue(object value)
             {
                 string result = value?.ToString();
                 return result;
             }
 
-            protected virtual object TextToValue(string text)
+            /// <summary>
+            /// Parse user entered text to database value.
+            /// </summary>
+            protected virtual object CellTextToValue(string text)
             {
                 object result = null;
                 if (!string.IsNullOrEmpty(text))

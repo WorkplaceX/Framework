@@ -398,7 +398,7 @@
                     // PageUp
                     if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageUp)
                     {
-                        gridItem.GridSession.OffsetRow -= gridItem.GridSession.RowCountMax;
+                        gridItem.GridSession.OffsetRow -= gridItem.GridSession.RowCountMaxGet();
                         if (gridItem.GridSession.OffsetRow < 0)
                         {
                             gridItem.GridSession.OffsetRow = 0;
@@ -409,9 +409,9 @@
                     if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageDown)
                     {
                         int rowCount = gridItem.GridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Index).Count();
-                        if (rowCount == gridItem.GridSession.RowCountMax) // Page down further on full grid only.
+                        if (rowCount == gridItem.GridSession.RowCountMaxGet()) // Page down further on full grid only.
                         {
-                            gridItem.GridSession.OffsetRow += gridItem.GridSession.RowCountMax;
+                            gridItem.GridSession.OffsetRow += gridItem.GridSession.RowCountMaxGet();
                             await GridLoadAsync(gridItem.Grid);
                         }
                     }
@@ -434,6 +434,7 @@
             // Parse user entered text
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
+                Type typeRow = gridItem.GridSession.TypeRow;
                 foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                 {
                     foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
@@ -457,7 +458,7 @@
                                     // Parse Insert
                                     if (gridRowItem.GridRowSession.RowInsert == null)
                                     {
-                                        gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(gridItem.GridSession.TypeRow);
+                                        gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(typeRow);
                                     }
                                     row = gridRowItem.GridRowSession.RowInsert;
                                 }
@@ -755,13 +756,11 @@
 
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
 
-        public int RowCountMax = 4; // Default value. See also property RowCountMaxConfig.
-
         public int? RowCountMaxConfig;
 
         public int RowCountMaxGet()
         {
-            return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : RowCountMax;
+            return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : 4; // Default value if no config.
         }
 
         public int ColumnCountMax = 5;

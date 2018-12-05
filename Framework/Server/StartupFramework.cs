@@ -15,6 +15,7 @@
     {
         public static void ConfigureServices(IServiceCollection services)
         {
+            // Dependency Injection DI. See also https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Needed for IIS. Otherwise new HttpContextAccessor(); results in null reference exception.
             services.AddScoped<UtilServer.InstanceService, UtilServer.InstanceService>(); // Singleton per request.
             
