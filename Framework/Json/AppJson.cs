@@ -124,6 +124,10 @@
             return owner.Get<T>(typeof(T).Name);
         }
 
+        /// <summary>
+        /// Returns ComponentJson or creates new if not yet exists.
+        /// </summary>
+        /// <param name="init">Callback method if ComponentJson has been created new. For example to init text.</param>
         public static T GetOrCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
         {
             if (owner.Get(name) == null)

@@ -2,6 +2,7 @@
 {
     using Framework.Config;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -15,6 +16,18 @@
 
     public static class UtilDal
     {
+        /// <summary>
+        /// DbContext caches Model by default by DbContext type. Framework needs
+        /// a Model by DbContextInternal.TypeRow.
+        /// </summary>
+        internal class ModelCacheKeyFactory : IModelCacheKeyFactory
+        {
+            public object Create(DbContext context)
+            {
+                return ((DbContextInternal)context).TypeRow;
+            }
+        }
+
         /// <summary>
         /// DbContext for one TypeRow.
         /// </summary>
@@ -47,11 +60,11 @@
 
                 optionsBuilder.UseSqlServer(ConnectionString);
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                optionsBuilder.ReplaceService<IModelCacheKeyFactory, ModelCacheKeyFactory>();
             }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
-
                 // Entity model
                 var entityBuilder = modelBuilder.Entity(TypeRow);
                 SqlTableAttribute tableAttribute = (SqlTableAttribute)TypeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
