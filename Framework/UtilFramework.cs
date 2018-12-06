@@ -209,6 +209,9 @@ namespace Framework
             return dateTime.ToString(format);
         }
 
+        /// <summary>
+        /// See log in Visual Studio Output window.
+        /// </summary>
         internal static void LogDebug(string text)
         {
             TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging

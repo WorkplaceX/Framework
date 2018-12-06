@@ -603,6 +603,7 @@
                                     }
                                 }
                             }
+                            gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
                         }
                     }
                 }

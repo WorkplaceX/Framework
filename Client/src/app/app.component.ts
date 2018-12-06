@@ -196,7 +196,6 @@ export class Grid {
   clickRow(row, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     if (!row.IsSelect && !row.IsClick) {
-      console.log("C");
       row.IsClick = true;
       this.dataService.update();
     }
