@@ -27,7 +27,7 @@
         private static IMutableModel DbContextModel(Type typeRow)
         {
             // EF Core 2.1
-            var typeMappingSource = new SqlServerTypeMappingSource(new TypeMappingSourceDependencies(new ValueConverterSelector(new ValueConverterSelectorDependencies())), new RelationalTypeMappingSourceDependencies());
+            // var typeMappingSource = new SqlServerTypeMappingSource(new TypeMappingSourceDependencies(new ValueConverterSelector(new ValueConverterSelectorDependencies())), new RelationalTypeMappingSourceDependencies());
 
             var conventionSet = SqlServerConventionSetBuilder.Build();
             var builder = new ModelBuilder(conventionSet);
@@ -52,10 +52,16 @@
                         isPrimaryKey = true;
                         entity.HasKey(propertyInfo.Name); // Prevent null exception if primary key name is not "Id".
                     }
-                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.FieldNameSql);
-                    CoreTypeMapping coreTypeMapping = typeMappingSource.FindMapping(propertyInfo.PropertyType);
-                    UtilFramework.Assert(coreTypeMapping != null);
-                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasAnnotation(CoreAnnotationNames.TypeMapping, coreTypeMapping);
+                    var x = entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.FieldNameSql);
+                    //CoreTypeMapping coreTypeMapping = typeMappingSource.FindMapping(propertyInfo.PropertyType);
+                    if (propertyInfo.PropertyType == typeof(DateTime))
+                    {
+                        entity.Property(propertyInfo.Name).HasColumnType("datetime2");
+                        //var t = entity.Property(propertyInfo.PropertyType, propertyInfo.Name).Metadata.SqlServer().ColumnType; //.HasColumnType("nvarchar(max)");
+                        //coreTypeMapping = new Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDateTimeTypeMapping("datetime", DbType.DateTime);
+                    }
+                    //UtilFramework.Assert(coreTypeMapping != null);
+                    //entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasAnnotation(CoreAnnotationNames.TypeMapping, coreTypeMapping);
                 }
             }
 
@@ -500,13 +506,14 @@
             return result;
         }
 
-        internal static object CellTextToValue(string text, PropertyInfo propertyInfo)
+        internal static object CellTextToValue(Type typeRow, string text, PropertyInfo propertyInfo)
         {
             object result = null;
-            if (!string.IsNullOrEmpty(text))
+            if (text != null)
             {
-                Type type = UtilFramework.TypeUnderlying(propertyInfo.PropertyType);
-                result = Convert.ChangeType(text, type);
+                var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+                FrameworkTypeEnum frameworkTypeEnum = fieldList.Where(item => item.PropertyInfo == propertyInfo).Single().FrameworkTypeEnum;
+                result = UtilDalType.FrameworkTypeEnumToFrameworkType(frameworkTypeEnum).CellTextToValue(text);
             }
             return result;
         }
@@ -514,9 +521,9 @@
         /// <summary>
         /// Parse user entered text and write it to row.
         /// </summary>
-        internal static void CellTextToValue(string text, PropertyInfo propertyInfo, Row row)
+        internal static void CellTextToValue(Type typeRow, string text, PropertyInfo propertyInfo, Row row)
         {
-            object value = CellTextToValue(text, propertyInfo);
+            object value = CellTextToValue(typeRow, text, propertyInfo);
             propertyInfo.SetValue(row, value);
         }
     }
@@ -895,6 +902,9 @@
         }
     }
 
+    /// <summary>
+    /// Framework type system.
+    /// </summary>
     public enum FrameworkTypeEnum
     {
         None = 0,
@@ -1130,10 +1140,10 @@
             /// <summary>
             /// Parse user entered text to database value.
             /// </summary>
-            protected virtual object CellTextToValue(string text)
+            protected virtual internal object CellTextToValue(string text)
             {
                 object result = null;
-                if (!string.IsNullOrEmpty(text))
+                if (text != null)
                 {
                     Type type = UtilFramework.TypeUnderlying(ValueType);
                     result = Convert.ChangeType(text, type);
@@ -1211,6 +1221,16 @@
                 : base(FrameworkTypeEnum.Datetime, "datetime", 61, typeof(DateTime), DbType.DateTime, false)
             {
 
+            }
+
+            protected internal override object CellTextToValue(string text)
+            {
+                object result = null;
+                if (text != null)
+                {
+                    result = DateTime.ParseExact(text, "d.M.yyyy", null);
+                }
+                return result;
             }
         }
 

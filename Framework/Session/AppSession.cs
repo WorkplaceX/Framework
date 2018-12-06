@@ -434,7 +434,6 @@
             // Parse user entered text
             foreach (GridItem gridItem in UtilSession.GridItemList())
             {
-                Type typeRow = gridItem.GridSession.TypeRow;
                 foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                 {
                     foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
@@ -458,15 +457,15 @@
                                     // Parse Insert
                                     if (gridRowItem.GridRowSession.RowInsert == null)
                                     {
-                                        gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(typeRow);
+                                        gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(gridItem.GridSession.TypeRow);
                                     }
                                     row = gridRowItem.GridRowSession.RowInsert;
                                 }
                                 if (row != null)
                                 {
                                     gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
-                                    gridCellItem.GridCellSession.Text = gridCellItem.GridCell.Text; // Set back to database selected value, once successfully saved.
-                                    UtilDal.CellTextToValue(gridCellItem.GridCellSession.Text, gridCellItem.PropertyInfo, row); // Parse user entered text.
+                                    gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet(); // Set back to database selected value, once successfully saved.
+                                    UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.PropertyInfo, row); // Parse user entered text.
                                 }
                             }
                             gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
@@ -553,7 +552,7 @@
                         if (gridCellItem.GridCell?.IsModify == true)
                         {
                             gridCellItem.GridCellSession.IsLookup = true;
-                            var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.Text);
+                            var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.TextGet());
                             if (query != null)
                             {
                                 await GridLoadAsync(gridItem.Grid.GridLookup(), query); // Load lookup.
@@ -580,12 +579,12 @@
                             if (gridCellItem.GridCell.IsModify)
                             {
                                 gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully parsed.
-                                gridCellItem.GridCellSession.Text = gridCellItem.GridCell.Text;
+                                gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet();
                                 if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
                                 {
                                     try
                                     {
-                                        gridCellItem.GridCellSession.FilterValue = UtilDal.CellTextToValue(gridCellItem.GridCellSession.Text, gridCellItem.PropertyInfo);
+                                        gridCellItem.GridCellSession.FilterValue = UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.PropertyInfo);
                                         gridCellItem.GridCellSession.FilterOperator = FilterOperator.Equal;
                                         if (gridCellItem.PropertyInfo.PropertyType == typeof(string))
                                         {

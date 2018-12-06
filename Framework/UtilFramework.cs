@@ -167,13 +167,20 @@ namespace Framework
             Console.WriteLine(string.Format("Config saved to ({0})", fileName));
         }
 
-        internal static string StringNull(string value)
+        /// <summary>
+        /// Returns null if value is empty string.
+        /// </summary>
+        internal static T StringNull<T>(T value)
         {
-            if (value == "")
+            T result = value;
+            if (value is string)
             {
-                value = null;
+                if (((string)(object)value) == "")
+                {
+                    result = default(T);
+                }
             }
-            return value;
+            return result;
         }
 
         internal static bool IsSubclassOf(Type type, Type typeBase)

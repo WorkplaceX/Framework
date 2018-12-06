@@ -456,7 +456,15 @@
 
     public sealed class GridCell
     {
+        /// <summary>
+        /// Gets or sets json text. When coming from client Text can be null or ""!
+        /// </summary>
         public string Text;
+
+        public string TextGet()
+        {
+            return UtilFramework.StringNull(Text);
+        }
 
         public bool IsModify;
 
