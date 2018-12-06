@@ -27,7 +27,7 @@
         private static IMutableModel DbContextModel(Type typeRow)
         {
             // EF Core 2.1
-            // var typeMappingSource = new SqlServerTypeMappingSource(new TypeMappingSourceDependencies(new ValueConverterSelector(new ValueConverterSelectorDependencies())), new RelationalTypeMappingSourceDependencies());
+            var typeMappingSource = new SqlServerTypeMappingSource(new TypeMappingSourceDependencies(new ValueConverterSelector(new ValueConverterSelectorDependencies())), new RelationalTypeMappingSourceDependencies());
 
             var conventionSet = SqlServerConventionSetBuilder.Build();
             var builder = new ModelBuilder(conventionSet);
@@ -52,16 +52,10 @@
                         isPrimaryKey = true;
                         entity.HasKey(propertyInfo.Name); // Prevent null exception if primary key name is not "Id".
                     }
-                    var x = entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.FieldNameSql);
-                    //CoreTypeMapping coreTypeMapping = typeMappingSource.FindMapping(propertyInfo.PropertyType);
-                    if (propertyInfo.PropertyType == typeof(DateTime))
-                    {
-                        entity.Property(propertyInfo.Name).HasColumnType("datetime2");
-                        //var t = entity.Property(propertyInfo.PropertyType, propertyInfo.Name).Metadata.SqlServer().ColumnType; //.HasColumnType("nvarchar(max)");
-                        //coreTypeMapping = new Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDateTimeTypeMapping("datetime", DbType.DateTime);
-                    }
-                    //UtilFramework.Assert(coreTypeMapping != null);
-                    //entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasAnnotation(CoreAnnotationNames.TypeMapping, coreTypeMapping);
+                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasColumnName(columnAttribute.FieldNameSql);
+                    CoreTypeMapping coreTypeMapping = typeMappingSource.FindMapping(propertyInfo.PropertyType);
+                    UtilFramework.Assert(coreTypeMapping != null);
+                    entity.Property(propertyInfo.PropertyType, propertyInfo.Name).HasAnnotation(CoreAnnotationNames.TypeMapping, coreTypeMapping);
                 }
             }
 
