@@ -717,7 +717,7 @@
             /// <summary>
             /// Gets or sets Field. See also method UtilDalType.TypeRowToFieldList();
             /// </summary>
-            public (PropertyInfo PropertyInfo, string FieldNameSql, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum) Field;
+            public Field Field;
 
             /// <summary>
             /// Gets or sets IsKey. True, if "Id" or "IdName".
@@ -1047,12 +1047,36 @@
             return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         }
 
+        internal class Field
+        {
+            public Field(PropertyInfo propertyInfo, string fieldNameSql, bool isPrimaryKey, FrameworkTypeEnum frameworkTypeEnum)
+            {
+                this.PropertyInfo = propertyInfo;
+                this.FieldNameSql = fieldNameSql;
+                this.IsPrimaryKey = isPrimaryKey;
+                this.FrameworkTypeEnum = frameworkTypeEnum;
+            }
+
+            public readonly PropertyInfo PropertyInfo;
+
+            public readonly string FieldNameSql;
+
+            public readonly bool IsPrimaryKey;
+
+            public readonly FrameworkTypeEnum FrameworkTypeEnum;
+
+            public FrameworkType FrameworkType()
+            {
+                return UtilDalType.FrameworkTypeEnumToFrameworkType(FrameworkTypeEnum);
+            }
+        }
+
         /// <summary>
         /// See also method FrameworkTypeEnumToFrameworkType();
         /// </summary>
-        internal static List<(PropertyInfo PropertyInfo, string FieldNameSql, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)> TypeRowToFieldList(Type typeRow)
+        internal static List<Field> TypeRowToFieldList(Type typeRow)
         {
-            var result = new List<(PropertyInfo PropertyInfo, string FieldNameSql, bool IsPrimaryKey, FrameworkTypeEnum FrameworkTypeEnum)>();
+            var result = new List<Field>();
             var propertyInfoList = TypeRowToPropertyInfoList(typeRow);
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
@@ -1066,7 +1090,7 @@
                     frameworkTypeEnum = fieldAttribute.FrameworkTypeEnum;
                     isPrimaryKey = fieldAttribute.IsPrimaryKey;
                 }
-                result.Add((propertyInfo, fieldNameSql, isPrimaryKey, frameworkTypeEnum));
+                result.Add(new Field(propertyInfo, fieldNameSql, isPrimaryKey, frameworkTypeEnum));
             }
             return result;
         }
