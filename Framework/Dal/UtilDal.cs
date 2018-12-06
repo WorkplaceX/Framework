@@ -1135,300 +1135,300 @@
             }
             return frameworkTypeList;
         }
+    }
 
-        internal class FrameworkType
+    internal class FrameworkType
+    {
+        public FrameworkType(FrameworkTypeEnum frameworkTypeEnum, string sqlTypeName, int sqlType, Type valueType, DbType dbType, bool isNumber)
         {
-            public FrameworkType(FrameworkTypeEnum frameworkTypeEnum, string sqlTypeName, int sqlType, Type valueType, DbType dbType, bool isNumber)
+            this.FrameworkTypeEnum = frameworkTypeEnum;
+            this.SqlTypeName = sqlTypeName;
+            this.SqlType = sqlType;
+            this.ValueType = valueType;
+            this.DbType = dbType;
+            this.IsNumber = isNumber;
+        }
+
+        public readonly FrameworkTypeEnum FrameworkTypeEnum;
+
+        /// <summary>
+        /// Gets or sets SqlTypeName. For example: "int", "datetime", "datetime".
+        /// </summary>
+        public readonly string SqlTypeName;
+
+        public readonly int SqlType;
+
+        public readonly Type ValueType;
+
+        public readonly DbType DbType;
+
+        public readonly bool IsNumber;
+
+        /// <summary>
+        /// Convert database value to front end cell test.
+        /// </summary>
+        protected virtual string CellTextFromValue(object value)
+        {
+            string result = value?.ToString();
+            return result;
+        }
+
+        /// <summary>
+        /// Parse user entered text to database value.
+        /// </summary>
+        protected virtual internal object CellTextToValue(string text)
+        {
+            object result = null;
+            if (text != null)
             {
-                this.FrameworkTypeEnum = frameworkTypeEnum;
-                this.SqlTypeName = sqlTypeName;
-                this.SqlType = sqlType;
-                this.ValueType = valueType;
-                this.DbType = dbType;
-                this.IsNumber = isNumber;
+                Type type = UtilFramework.TypeUnderlying(ValueType);
+                result = Convert.ChangeType(text, type);
             }
+            return result;
+        }
 
-            public readonly FrameworkTypeEnum FrameworkTypeEnum;
-
-            /// <summary>
-            /// Gets or sets SqlTypeName. For example: "int", "datetime", "datetime".
-            /// </summary>
-            public readonly string SqlTypeName;
-
-            public readonly int SqlType;
-
-            public readonly Type ValueType;
-
-            public readonly DbType DbType;
-
-            public readonly bool IsNumber;
-
-            /// <summary>
-            /// Convert database value to front end cell test.
-            /// </summary>
-            protected virtual string CellTextFromValue(object value)
+        protected virtual internal string ValueToSqlParameterDebug(object value)
+        {
+            string result = null;
+            if (value != null)
             {
-                string result = value?.ToString();
-                return result;
+                result = value.ToString();
             }
-
-            /// <summary>
-            /// Parse user entered text to database value.
-            /// </summary>
-            protected virtual internal object CellTextToValue(string text)
+            if (IsNumber == false)
             {
-                object result = null;
-                if (text != null)
+                result = "'" + result + "'";
+            }
+            if (value == null)
+            {
+                result = "NULL";
+            }
+            return result;
+        }
+    }
+
+    internal class FrameworkTypeInt : FrameworkType
+    {
+        public FrameworkTypeInt()
+            : base(FrameworkTypeEnum.Int, "int", 56, typeof(Int32), DbType.Int32, true)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeSmallint : FrameworkType
+    {
+        public FrameworkTypeSmallint()
+            : base(FrameworkTypeEnum.Smallint, "smallint", 52, typeof(Int16), DbType.Int16, true)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeTinyint : FrameworkType
+    {
+        public FrameworkTypeTinyint()
+            : base(FrameworkTypeEnum.Tinyint, "tinyint", 48, typeof(byte), DbType.Byte, true)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeBigint : FrameworkType
+    {
+        public FrameworkTypeBigint()
+            : base(FrameworkTypeEnum.Bigint, "bigint", 127, typeof(Int64), DbType.Int64, true)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeUniqueidentifier : FrameworkType
+    {
+        public FrameworkTypeUniqueidentifier()
+            : base(FrameworkTypeEnum.Uniqueidentifier, "uniqueidentifier", 36, typeof(Guid), DbType.Guid, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeDatetime : FrameworkType
+    {
+        public FrameworkTypeDatetime()
+            : base(FrameworkTypeEnum.Datetime, "datetime", 61, typeof(DateTime), DbType.DateTime, false)
+        {
+
+        }
+
+        protected internal override object CellTextToValue(string text)
+        {
+            object result = null;
+            if (text != null)
+            {
+                result = DateTime.ParseExact(text, "d.M.yyyy", null); // Parse for example: "1.1.2000".
+            }
+            return result;
+        }
+    }
+
+    internal class FrameworkTypeDatetime2 : FrameworkType
+    {
+        public FrameworkTypeDatetime2()
+            : base(FrameworkTypeEnum.Datetime2, "datetime2", 42, typeof(DateTime), DbType.DateTime2, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeDate : FrameworkType
+    {
+        public FrameworkTypeDate()
+            : base(FrameworkTypeEnum.Date, "date", 40, typeof(DateTime), DbType.Date, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeChar : FrameworkType
+    {
+        public FrameworkTypeChar()
+            : base(FrameworkTypeEnum.Char, "char", 175, typeof(string), DbType.String, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeNvarcahr : FrameworkType
+    {
+        public FrameworkTypeNvarcahr()
+            : base(FrameworkTypeEnum.Nvarcahr, "nvarcahr", 231, typeof(string), DbType.String, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeVarchar : FrameworkType
+    {
+        public FrameworkTypeVarchar()
+            : base(FrameworkTypeEnum.Varchar, "varchar", 167, typeof(string), DbType.String, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeText : FrameworkType // See also: https://stackoverflow.com/questions/564755/sql-server-text-type-vs-varchar-data-type
+    {
+        public FrameworkTypeText()
+            : base(FrameworkTypeEnum.Text, "text", 35, typeof(string), DbType.String, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeNtext : FrameworkType
+    {
+        public FrameworkTypeNtext()
+            : base(FrameworkTypeEnum.Ntext, "ntext", 99, typeof(string), DbType.String, false)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeBit : FrameworkType
+    {
+        public FrameworkTypeBit()
+            : base(FrameworkTypeEnum.Bit, "bit", 104, typeof(bool), DbType.Boolean, false)
+        {
+
+        }
+
+        protected internal override string ValueToSqlParameterDebug(object value)
+        {
+            string result = null;
+            if (value != null)
+            {
+                UtilFramework.Assert(value.GetType() == ValueType);
+                if ((bool)value == false)
                 {
-                    Type type = UtilFramework.TypeUnderlying(ValueType);
-                    result = Convert.ChangeType(text, type);
+                    result = "CAST(0 AS BIT)";
                 }
-                return result;
-            }
-
-            protected virtual internal string ValueToSqlParameterDebug(object value)
-            {
-                string result = null;
-                if (value != null)
+                else
                 {
-                    result = value.ToString();
+                    result = "CAST(1 AS BIT)";
                 }
-                if (IsNumber == false)
-                {
-                    result = "'" + result + "'";
-                }
-                if (value == null)
-                {
-                    result = "NULL";
-                }
-                return result;
             }
+            return result;
         }
+    }
 
-        public class FrameworkTypeInt : FrameworkType
+    internal class FrameworkTypeMoney : FrameworkType
+    {
+        public FrameworkTypeMoney()
+            : base(FrameworkTypeEnum.Money, "money", 60, typeof(decimal), DbType.Decimal, true)
         {
-            public FrameworkTypeInt()
-                : base(FrameworkTypeEnum.Int, "int", 56, typeof(Int32), DbType.Int32, true)
-            {
 
-            }
         }
+    }
 
-        public class FrameworkTypeSmallint : FrameworkType
+    internal class FrameworkTypeDecimal : FrameworkType
+    {
+        public FrameworkTypeDecimal()
+            : base(FrameworkTypeEnum.Decimal, "decimal", 106, typeof(decimal), DbType.Decimal, true)
         {
-            public FrameworkTypeSmallint()
-                : base(FrameworkTypeEnum.Smallint, "smallint", 52, typeof(Int16), DbType.Int16, true)
-            {
 
-            }
         }
+    }
 
-        public class FrameworkTypeTinyint : FrameworkType
+    internal class FrameworkTypeReal : FrameworkType
+    {
+        public FrameworkTypeReal()
+            : base(FrameworkTypeEnum.Real, "real", 59, typeof(Single), DbType.Single, true)
         {
-            public FrameworkTypeTinyint()
-                : base(FrameworkTypeEnum.Tinyint, "tinyint", 48, typeof(byte), DbType.Byte, true)
-            {
 
-            }
         }
+    }
 
-        public class FrameworkTypeBigint : FrameworkType
+    internal class FrameworkTypeFloat : FrameworkType
+    {
+        public FrameworkTypeFloat()
+            : base(FrameworkTypeEnum.Float, "float", 62, typeof(double), DbType.Double, true)
         {
-            public FrameworkTypeBigint()
-                : base(FrameworkTypeEnum.Bigint, "bigint", 127, typeof(Int64), DbType.Int64, true)
-            {
 
-            }
         }
+    }
 
-        public class FrameworkTypeUniqueidentifier : FrameworkType
+    internal class FrameworkTypeVarbinary : FrameworkType
+    {
+        public FrameworkTypeVarbinary()
+            : base(FrameworkTypeEnum.Varbinary, "varbinary", 165, typeof(byte[]), DbType.Binary, false) // DbType.Binary?
         {
-            public FrameworkTypeUniqueidentifier()
-                : base(FrameworkTypeEnum.Uniqueidentifier, "uniqueidentifier", 36, typeof(Guid), DbType.Guid, false)
-            {
 
-            }
         }
+    }
 
-        public class FrameworkTypeDatetime : FrameworkType
+    internal class SqlTypeSqlvariant : FrameworkType
+    {
+        public SqlTypeSqlvariant()
+            : base(FrameworkTypeEnum.Sqlvariant, "sql_variant", 98, typeof(object), DbType.Object, false)
         {
-            public FrameworkTypeDatetime()
-                : base(FrameworkTypeEnum.Datetime, "datetime", 61, typeof(DateTime), DbType.DateTime, false)
-            {
 
-            }
-
-            protected internal override object CellTextToValue(string text)
-            {
-                object result = null;
-                if (text != null)
-                {
-                    result = DateTime.ParseExact(text, "d.M.yyyy", null); // Parse for example: "1.1.2000".
-                }
-                return result;
-            }
         }
+    }
 
-        public class FrameworkTypeDatetime2 : FrameworkType
+    internal class FrameworkTypeImage : FrameworkType
+    {
+        public FrameworkTypeImage()
+            : base(FrameworkTypeEnum.Image, "image", 34, typeof(byte[]), DbType.Binary, false) // DbType.Binary?
         {
-            public FrameworkTypeDatetime2()
-                : base(FrameworkTypeEnum.Datetime2, "datetime2", 42, typeof(DateTime), DbType.DateTime2, false)
-            {
 
-            }
         }
+    }
 
-        public class FrameworkTypeDate : FrameworkType
+    internal class FrameworkTypeNumeric : FrameworkType
+    {
+        public FrameworkTypeNumeric()
+            : base(FrameworkTypeEnum.Numeric, "numeric", 108, typeof(decimal), DbType.Decimal, true)
         {
-            public FrameworkTypeDate()
-                : base(FrameworkTypeEnum.Date, "date", 40, typeof(DateTime), DbType.Date, false)
-            {
 
-            }
-        }
-
-        public class FrameworkTypeChar : FrameworkType
-        {
-            public FrameworkTypeChar()
-                : base(FrameworkTypeEnum.Char, "char", 175, typeof(string), DbType.String, false)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeNvarcahr : FrameworkType
-        {
-            public FrameworkTypeNvarcahr()
-                : base(FrameworkTypeEnum.Nvarcahr, "nvarcahr", 231, typeof(string), DbType.String, false)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeVarchar : FrameworkType
-        {
-            public FrameworkTypeVarchar()
-                : base(FrameworkTypeEnum.Varchar, "varchar", 167, typeof(string), DbType.String, false)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeText : FrameworkType // See also: https://stackoverflow.com/questions/564755/sql-server-text-type-vs-varchar-data-type
-        {
-            public FrameworkTypeText()
-                : base(FrameworkTypeEnum.Text, "text", 35, typeof(string), DbType.String, false)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeNtext : FrameworkType
-        {
-            public FrameworkTypeNtext()
-                : base(FrameworkTypeEnum.Ntext, "ntext", 99, typeof(string), DbType.String, false)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeBit : FrameworkType
-        {
-            public FrameworkTypeBit()
-                : base(FrameworkTypeEnum.Bit, "bit", 104, typeof(bool), DbType.Boolean, false)
-            {
-
-            }
-
-            protected internal override string ValueToSqlParameterDebug(object value)
-            {
-                string result = null;
-                if (value != null)
-                {
-                    UtilFramework.Assert(value.GetType() == ValueType);
-                    if ((bool)value == false)
-                    {
-                        result = "CAST(0 AS BIT)";
-                    }
-                    else
-                    {
-                        result = "CAST(1 AS BIT)";
-                    }
-                }
-                return result;
-            }
-        }
-
-        public class FrameworkTypeMoney : FrameworkType
-        {
-            public FrameworkTypeMoney()
-                : base(FrameworkTypeEnum.Money, "money", 60, typeof(decimal), DbType.Decimal, true)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeDecimal : FrameworkType
-        {
-            public FrameworkTypeDecimal()
-                : base(FrameworkTypeEnum.Decimal, "decimal", 106, typeof(decimal), DbType.Decimal, true)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeReal : FrameworkType
-        {
-            public FrameworkTypeReal()
-                : base(FrameworkTypeEnum.Real, "real", 59, typeof(Single), DbType.Single, true)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeFloat : FrameworkType
-        {
-            public FrameworkTypeFloat()
-                : base(FrameworkTypeEnum.Float, "float", 62, typeof(double), DbType.Double, true)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeVarbinary : FrameworkType
-        {
-            public FrameworkTypeVarbinary()
-                : base(FrameworkTypeEnum.Varbinary, "varbinary", 165, typeof(byte[]), DbType.Binary, false) // DbType.Binary?
-            {
-
-            }
-        }
-
-        public class SqlTypeSqlvariant : FrameworkType
-        {
-            public SqlTypeSqlvariant()
-                : base(FrameworkTypeEnum.Sqlvariant, "sql_variant", 98, typeof(object), DbType.Object, false)
-            {
-
-            }
-        }
-
-        public class FrameworkTypeImage : FrameworkType
-        {
-            public FrameworkTypeImage()
-                : base(FrameworkTypeEnum.Image, "image", 34, typeof(byte[]), DbType.Binary, false) // DbType.Binary?
-            {
-
-            }
-        }
-
-        public class FrameworkTypeNumeric : FrameworkType
-        {
-            public FrameworkTypeNumeric()
-                : base(FrameworkTypeEnum.Numeric, "numeric", 108, typeof(decimal), DbType.Decimal, true)
-            {
-
-            }
         }
     }
 }
