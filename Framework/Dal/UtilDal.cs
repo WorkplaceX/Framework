@@ -1259,6 +1259,16 @@
 
         }
 
+        protected override string CellTextFromValue(object value)
+        {
+            string result = null;
+            if (value != null)
+            {
+                result = ((DateTime)value).ToString("dd.MM.yyyy");
+            }
+            return result;
+        }
+
         protected internal override object CellTextToValue(string text)
         {
             object result = null;
