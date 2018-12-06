@@ -10,6 +10,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using static Framework.Dal.UtilDalType;
     using static Framework.Session.UtilSession;
 
     /// <summary>
@@ -27,11 +28,11 @@
         /// <summary>
         /// Load a single row and create its cells.
         /// </summary>
-        private void GridLoad(int gridIndex, int rowIndex, Row row, Type typeRow, GridRowEnum gridRowEnum, ref PropertyInfo[] propertyInfoListCache)
+        private void GridLoad(int gridIndex, int rowIndex, Row row, Type typeRow, GridRowEnum gridRowEnum, ref List<Field> fieldListCache)
         {
-            if (propertyInfoListCache == null)
+            if (fieldListCache == null)
             {
-                propertyInfoListCache = UtilDalType.TypeRowToPropertyInfoList(typeRow);
+                fieldListCache = UtilDalType.TypeRowToFieldList(typeRow);
             }
 
             GridSession gridSession = GridSessionList[gridIndex];
@@ -39,14 +40,14 @@
             gridSession.GridRowSessionList[rowIndex] = gridRowSession;
             gridRowSession.Row = row;
             gridRowSession.RowEnum = gridRowEnum;
-            foreach (PropertyInfo propertyInfo in propertyInfoListCache)
+            foreach (Field field in fieldListCache)
             {
                 GridCellSession gridCellSession = new GridCellSession();
                 gridRowSession.GridCellSessionList.Add(gridCellSession);
                 string text = null;
                 if (gridRowSession.Row != null)
                 {
-                    text = UtilDal.CellTextFromValue(gridRowSession.Row, propertyInfo);
+                    text = UtilDal.CellTextFromValue(gridRowSession.Row, field);
                 }
                 gridCellSession.Text = text;
             }
@@ -60,8 +61,8 @@
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.GridRowSessionList.Add(new GridRowSession());
             int rowIndex = gridSession.GridRowSessionList.Count - 1;
-            PropertyInfo[] propertyInfoList = null;
-            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.Filter, ref propertyInfoList);
+            List<Field> fieldList = null;
+            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.Filter, ref fieldList);
         }
 
         /// <summary>
@@ -72,8 +73,8 @@
             GridSession gridSession = GridSessionList[gridIndex];
             gridSession.GridRowSessionList.Add(new GridRowSession());
             int rowIndex = gridSession.GridRowSessionList.Count - 1;
-            PropertyInfo[] propertyInfoList = null;
-            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref propertyInfoList);
+            List<Field> fieldList = null;
+            GridLoad(gridIndex, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref fieldList);
         }
 
         private void GridLoadSessionCreate(Grid grid)
@@ -116,7 +117,7 @@
         {
             UtilSession.GridReset(grid);
 
-            PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
+            List<Field> fieldList = UtilDalType.TypeRowToFieldList(typeRow);
 
             GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
             int gridIndex = UtilSession.GridToIndex(grid);
@@ -143,7 +144,7 @@
                 {
                     GridRowSession gridRowSession = new GridRowSession();
                     gridSession.GridRowSessionList.Add(gridRowSession);
-                    GridLoad(gridIndex, gridSession.GridRowSessionList.Count - 1, row, typeRow, GridRowEnum.Index, ref propertyInfoList);
+                    GridLoad(gridIndex, gridSession.GridRowSessionList.Count - 1, row, typeRow, GridRowEnum.Index, ref fieldList);
                 }
                 GridLoadAddRowNew(gridIndex); // Add one "new row" to end of grid.
             }
@@ -507,8 +508,8 @@
                             gridRowItem.GridRowSession.Row = rowNew;
 
                             // Load new primary key into data grid.
-                            PropertyInfo[] propertyInfoList = null;
-                            GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, rowNew, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref propertyInfoList);
+                            List<Field> fieldList = null;
+                            GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, rowNew, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
 
                             // Add new "insert row" at end of data grid.
                             GridLoadAddRowNew(gridItem.GridIndex);

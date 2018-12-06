@@ -525,22 +525,19 @@
             }
         }
 
-        internal static string CellTextFromValue(Row row, PropertyInfo propertyInfo)
+        internal static string CellTextFromValue(Row row, Field field)
         {
-            object value = propertyInfo.GetValue(row);
-            string result = value?.ToString();
+            object value = field.PropertyInfo.GetValue(row);
+            string result = field.FrameworkType().CellTextFromValue(value);
             return result;
         }
 
         internal static object CellTextToValue(Type typeRow, string text, PropertyInfo propertyInfo)
         {
             object result = null;
-            if (text != null)
-            {
-                var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
-                FrameworkTypeEnum frameworkTypeEnum = fieldList.Where(item => item.PropertyInfo == propertyInfo).Single().FrameworkTypeEnum;
-                result = UtilDalType.FrameworkTypeEnumToFrameworkType(frameworkTypeEnum).CellTextToValue(text);
-            }
+            var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+            FrameworkTypeEnum frameworkTypeEnum = fieldList.Where(item => item.PropertyInfo == propertyInfo).Single().FrameworkTypeEnum;
+            result = UtilDalType.FrameworkTypeEnumToFrameworkType(frameworkTypeEnum).CellTextToValue(text);
             return result;
         }
 
@@ -1191,7 +1188,7 @@
         /// <summary>
         /// Convert database value to front end cell test.
         /// </summary>
-        protected virtual string CellTextFromValue(object value)
+        protected virtual internal string CellTextFromValue(object value)
         {
             string result = value?.ToString();
             return result;
@@ -1283,7 +1280,7 @@
 
         }
 
-        protected override string CellTextFromValue(object value)
+        protected internal override string CellTextFromValue(object value)
         {
             string result = null;
             if (value != null)
