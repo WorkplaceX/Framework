@@ -979,6 +979,20 @@
         }
 
         /// <summary>
+        /// Returns true if typeRow has database table.
+        /// </summary>
+        internal static bool TypeRowIsTableName(Type typeRow)
+        {
+            bool result = false;
+            SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+            if (tableAttribute != null && (tableAttribute.SchemaNameSql != null || tableAttribute.TableNameSql != null))
+            {
+                result = true;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns rows defined in "Database" namespace in assemblies.
         /// </summary>
         /// <param name="assemblyList">Use method AppCli.AssemblyList(); when running in cli mode or method UtilServer.AssemblyList(); when running in web mode.</param>
@@ -1039,21 +1053,11 @@
             return result;
         }
 
-        internal static void TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql, bool isThrowException = true)
+        internal static void TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql)
         {
-            schemaNameSql = null;
-            tableNameSql = null;
-
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-            if (tableAttribute != null)
-            {
-                schemaNameSql = tableAttribute.SchemaNameSql;
-                tableNameSql = tableAttribute.TableNameSql;
-            }
-            if (isThrowException && (tableAttribute == null || tableNameSql == null))
-            {
-                throw new Exception("Row class does not define SqlTableAttribute and TableNameSql!");
-            }
+            schemaNameSql = tableAttribute.SchemaNameSql;
+            tableNameSql = tableAttribute.TableNameSql;
         }
 
         /// <summary>
@@ -1061,17 +1065,16 @@
         /// </summary>
         internal static string TableNameSql(string schemaNameSql, string tableNameSql)
         {
-            string result = null;
-            if (schemaNameSql != null || tableNameSql != null)
-            {
-                result = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSql);
-            }
+            string result = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSql);
             return result;
         }
 
-        internal static string TypeRowToTableNameSql(Type typeRow, bool isThrowException = true)
+        /// <summary>
+        /// See also method TypeRowIsTableName();
+        /// </summary>
+        internal static string TypeRowToTableNameSql(Type typeRow)
         {
-            TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql, isThrowException);
+            TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
             string result = TableNameSql(schemaNameSql, tableNameSql);
             return result;
         }
