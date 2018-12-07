@@ -49,7 +49,7 @@
         /// </summary>
         private void Meta()
         {
-            List<Type> typeRowList = UtilDalType.TypeRowList(AppCli.AssemblyList(false));
+            List<Type> typeRowList = UtilDalType.TypeRowList(AppCli.AssemblyList(isIncludeApp: true));
             // Table
             {
                 List<FrameworkTable> rowList = new List<FrameworkTable>();
@@ -58,7 +58,7 @@
                     FrameworkTable table = new FrameworkTable();
                     rowList.Add(table);
                     table.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    table.TableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
+                    table.TableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow, isThrowException: false);
                     table.IsExist = true;
                 }
                 UtilDalUpsert.UpsertIsExistAsync<FrameworkTable>().Wait();

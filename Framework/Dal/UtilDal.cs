@@ -979,27 +979,40 @@
         }
 
         /// <summary>
-        /// Returns rows defined in framework and database assembly.
+        /// Returns rows defined in "Database" namespace in assemblies.
         /// </summary>
         /// <param name="assemblyList">Use method AppCli.AssemblyList(); when running in cli mode or method UtilServer.AssemblyList(); when running in web mode.</param>
         internal static List<Type> TypeRowList(List<Assembly> assemblyList)
         {
-            List<Type> result = new List<Type>();
+            Dictionary<string, Type> result = new Dictionary<string, Type>();
             foreach (Assembly assembly in assemblyList)
             {
                 foreach (Type type in assembly.GetTypes())
                 {
                     if (type.IsSubclassOf(typeof(Row)))
                     {
-                        result.Add(type);
+                        if (UtilFramework.TypeToName(type).StartsWith("Database."))
+                        {
+                            string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
+                            if (result.ContainsKey(tableNameCSharp))
+                            {
+                                throw new Exception(string.Format("TableNameCSharp exists already in different assembly! ({0})", tableNameCSharp));
+
+                            }
+                            result.Add(tableNameCSharp, type);
+                        }
+                        else
+                        {
+                            throw new Exception(string.Format("Row class not defined in Database namespace! ({0})", UtilFramework.TypeToName(type)));
+                        }
                     }
                 }
             }
-            return result;
+            return result.Values.ToList();
         }
 
         /// <summary>
-        /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace.
+        /// Returns row type as string. For example: "dbo.User". Omits "Database" namespace prefix.
         /// </summary>
         internal static string TypeRowToTableNameCSharp(Type typeRow)
         {
@@ -1026,11 +1039,21 @@
             return result;
         }
 
-        internal static void TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql)
+        internal static void TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql, bool isThrowException = true)
         {
+            schemaNameSql = null;
+            tableNameSql = null;
+
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-            schemaNameSql = tableAttribute.SchemaNameSql;
-            tableNameSql = tableAttribute.TableNameSql;
+            if (tableAttribute != null)
+            {
+                schemaNameSql = tableAttribute.SchemaNameSql;
+                tableNameSql = tableAttribute.TableNameSql;
+            }
+            if (isThrowException && (tableAttribute == null || tableNameSql == null))
+            {
+                throw new Exception("Row class does not define SqlTableAttribute and TableNameSql!");
+            }
         }
 
         /// <summary>
@@ -1038,13 +1061,17 @@
         /// </summary>
         internal static string TableNameSql(string schemaNameSql, string tableNameSql)
         {
-            string result = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSql);
+            string result = null;
+            if (schemaNameSql != null || tableNameSql != null)
+            {
+                result = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSql);
+            }
             return result;
         }
 
-        internal static string TypeRowToTableNameSql(Type typeRow)
+        internal static string TypeRowToTableNameSql(Type typeRow, bool isThrowException = true)
         {
-            TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
+            TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql, isThrowException);
             string result = TableNameSql(schemaNameSql, tableNameSql);
             return result;
         }
