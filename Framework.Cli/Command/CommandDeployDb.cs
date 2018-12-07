@@ -58,7 +58,7 @@
                     FrameworkTable table = new FrameworkTable();
                     rowList.Add(table);
                     table.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    if (UtilDalType.TypeRowIsTableName(typeRow))
+                    if (UtilDalType.TypeRowIsTableNameSql(typeRow))
                     {
                         table.TableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
                     }

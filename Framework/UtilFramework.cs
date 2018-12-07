@@ -117,7 +117,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Returns underlying tpye, if any.
+        /// Returns underlying tpye, if any. For example "type = typeof(int?)" returns "typeof(int)".
         /// </summary>
         internal static Type TypeUnderlying(Type type)
         {

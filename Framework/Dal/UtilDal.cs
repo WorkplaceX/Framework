@@ -88,7 +88,7 @@
                         }
                         var propertyBuilder = entityBuilder.Property(field.PropertyInfo.PropertyType, field.PropertyInfo.Name);
                         propertyBuilder.HasColumnName(field.FieldNameSql);
-                        if (UtilDalType.FrameworkTypeEnumToFrameworkType(field.FrameworkTypeEnum).SqlTypeName == "datetime")
+                        if (UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum).SqlTypeName == "datetime")
                         {
                             // Prevent "Conversion failed when converting date and/or time from character string." exception for 
                             // sql field type "datetime" for dynamic linq where function. See also method QueryFilter();
@@ -116,12 +116,17 @@
                 throw new Exception("ConnectionString is null! (See also file: ConfigFramework.json)");
             }
 
+            if (UtilDalType.TypeRowIsTableNameSql(typeRow) == false)
+            {
+                throw new Exception("TypeRow does not have TableNameSql!");
+            }
+
             return new DbContextInternal(connectionString, typeRow);
         }
 
         private static string ExecuteParamAddPrivate(FrameworkTypeEnum frameworkTypeEnum, string paramName, object value, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
         {
-            FrameworkType frameworkType = UtilDalType.FrameworkTypeEnumToFrameworkType(frameworkTypeEnum);
+            FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(frameworkTypeEnum);
 
             // ParamName
             if (paramName == null)
@@ -175,7 +180,7 @@
             paramList = paramList.OrderByDescending(item => item.SqlParameter.ParameterName).ToList(); // Replace first @P100, then @P10
             foreach (var param in paramList)
             {
-                FrameworkType frameworkType = UtilDalType.FrameworkTypeEnumToFrameworkType(param.FrameworkTypeEnum);
+                FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(param.FrameworkTypeEnum);
                 string find = param.SqlParameter.ParameterName;
                 string replace = frameworkType.ValueToSqlParameterDebug(param.SqlParameter.Value);
                 sql = UtilFramework.Replace(sql, find, replace);
@@ -497,24 +502,27 @@
         {
             UtilFramework.LogDebug(string.Format("INSERT ({0})", row.GetType().Name));
 
-            Row rowCopy = UtilDal.RowCopy(row);
-            DbContext dbContext = DbContextInternalCreate(row.GetType());
-            dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
-            try
+            if (UtilDalType.TypeRowIsTableNameSql(row.GetType()))
             {
-                int count = await dbContext.SaveChangesAsync();
-                UtilFramework.Assert(count == 1, "Update failed!");
-                //
-                // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
-                // Cause: No autoincrement on Id column or no Id set by application
-                //
-                // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
-                // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
-            }
-            catch (Exception exception)
-            {
-                UtilDal.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
-                throw exception;
+                Row rowCopy = UtilDal.RowCopy(row);
+                DbContext dbContext = DbContextInternalCreate(row.GetType());
+                dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
+                try
+                {
+                    int count = await dbContext.SaveChangesAsync();
+                    UtilFramework.Assert(count == 1, "Update failed!");
+                    //
+                    // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
+                    // Cause: No autoincrement on Id column or no Id set by application
+                    //
+                    // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
+                    // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
+                }
+                catch (Exception exception)
+                {
+                    UtilDal.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
+                    throw exception;
+                }
             }
             return row; // Return Row with new primary key.
         }
@@ -529,15 +537,21 @@
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             if (UtilDal.RowEqual(row, rowNew) == false)
             {
-                row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
-                DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
-                var tracking = dbContext.Attach(row);
-                tracking.CurrentValues.SetValues(rowNew);
-                int count = await dbContext.SaveChangesAsync();
-                UtilFramework.Assert(count == 1, "Update failed!");
+                if (UtilDalType.TypeRowIsTableNameSql(row.GetType()))
+                {
+                    row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
+                    DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
+                    var tracking = dbContext.Attach(row);
+                    tracking.CurrentValues.SetValues(rowNew);
+                    int count = await dbContext.SaveChangesAsync();
+                    UtilFramework.Assert(count == 1, "Update failed!");
+                }
             }
         }
 
+        /// <summary>
+        /// Convert database value to text.
+        /// </summary>
         internal static string CellTextFromValue(Row row, Field field)
         {
             object value = field.PropertyInfo.GetValue(row);
@@ -545,22 +559,22 @@
             return result;
         }
 
-        internal static object CellTextToValue(Type typeRow, string text, PropertyInfo propertyInfo)
+        /// <summary>
+        /// Parse user entered cell and filter text.
+        /// </summary>
+        internal static object CellTextToValue(Type typeRow, string text, Field field)
         {
-            object result = null;
-            var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
-            FrameworkTypeEnum frameworkTypeEnum = fieldList.Where(item => item.PropertyInfo == propertyInfo).Single().FrameworkTypeEnum;
-            result = UtilDalType.FrameworkTypeEnumToFrameworkType(frameworkTypeEnum).CellTextToValue(text);
+            object result = field.FrameworkType().CellTextToValue(text);
             return result;
         }
 
         /// <summary>
-        /// Parse user entered text and write it to row.
+        /// Parse user entered cell text and write it to row.
         /// </summary>
-        internal static void CellTextToValue(Type typeRow, string text, PropertyInfo propertyInfo, Row row)
+        internal static void CellTextToValue(Type typeRow, string text, Field field, Row row)
         {
-            object value = CellTextToValue(typeRow, text, propertyInfo);
-            propertyInfo.SetValue(row, value);
+            object value = CellTextToValue(typeRow, text, field);
+            field.PropertyInfo.SetValue(row, value);
         }
     }
 
@@ -981,7 +995,7 @@
         /// <summary>
         /// Returns true if typeRow has database table.
         /// </summary>
-        internal static bool TypeRowIsTableName(Type typeRow)
+        internal static bool TypeRowIsTableNameSql(Type typeRow)
         {
             bool result = false;
             SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
@@ -1070,7 +1084,7 @@
         }
 
         /// <summary>
-        /// See also method TypeRowIsTableName();
+        /// See also method TypeRowIsTableNameSql();
         /// </summary>
         internal static string TypeRowToTableNameSql(Type typeRow)
         {
@@ -1107,7 +1121,11 @@
 
             public FrameworkType FrameworkType()
             {
-                return UtilDalType.FrameworkTypeEnumToFrameworkType(FrameworkTypeEnum);
+                if (FrameworkTypeEnum == FrameworkTypeEnum.None)
+                {
+                    return UtilDalType.FrameworkTypeFromValueType(PropertyInfo.PropertyType);
+                }
+                return UtilDalType.FrameworkTypeFromEnum(FrameworkTypeEnum);
             }
         }
 
@@ -1154,10 +1172,48 @@
             }
         }
 
-        public static FrameworkType FrameworkTypeEnumToFrameworkType(FrameworkTypeEnum frameworkTypeEnum)
+        public static FrameworkType FrameworkTypeFromEnum(FrameworkTypeEnum frameworkTypeEnum)
         {
             UtilFramework.Assert(frameworkTypeEnum != FrameworkTypeEnum.None, "FrameworkTypeEnum not defined!");
             return FrameworkTypeList().Where(item => item.Value.FrameworkTypeEnum == frameworkTypeEnum).Single().Value;
+        }
+
+        public static FrameworkType FrameworkTypeFromValueType(Type valueType)
+        {
+            valueType = UtilFramework.TypeUnderlying(valueType); // int? to int.
+            if (valueType == typeof(int))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Int);
+            }
+            if (valueType == typeof(Guid))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Uniqueidentifier);
+            }
+            if (valueType == typeof(DateTime))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Datetime);
+            }
+            if (valueType == typeof(char))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Char);
+            }
+            if (valueType == typeof(string))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Nvarcahr);
+            }
+            if (valueType == typeof(bool))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Bit);
+            }
+            if (valueType == typeof(decimal))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Decimal);
+            }
+            if (valueType == typeof(float))
+            {
+                return FrameworkTypeFromEnum(FrameworkTypeEnum.Float);
+            }
+            throw new Exception("Type not found!");
         }
 
         [ThreadStatic]
