@@ -39,11 +39,14 @@
             }
         }
 
+        /// <summary>
+        /// Gets Context of web request.
+        /// </summary>
         public static HttpContext Context
         {
             get
             {
-                return new HttpContextAccessor().HttpContext; // Not available during startup.
+                return new HttpContextAccessor().HttpContext; // Not available during startup. See also: method ConfigureServices();
             }
         }
 

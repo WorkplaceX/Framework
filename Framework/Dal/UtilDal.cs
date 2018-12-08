@@ -1,9 +1,11 @@
 ﻿namespace Framework.Dal
 {
     using Framework.Config;
+    using Framework.Dal.Memory;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.SqlClient;
@@ -16,6 +18,34 @@
 
     public static class UtilDal
     {
+        /// <summary>
+        /// Returns memory where rows are stored.
+        /// </summary>
+        public static IList MemoryRowList(Type typeRow, ScopeEnum scopeEnum = ScopeEnum.MemorySingleton)
+        {
+            switch (scopeEnum)
+            {
+                case ScopeEnum.MemorySingleton:
+                    return Memory.MemoryInternal.Instance.RowListGet(typeRow);
+                default:
+                    throw new Exception("Scope not supported!");
+            }
+        }
+
+        /// <summary>
+        /// Returns linq to memory query.
+        /// </summary>
+        public static List<TRow> MemoryRowList<TRow>(ScopeEnum scopeEnum = ScopeEnum.MemorySingleton) where TRow : Row
+        {
+            switch (scopeEnum)
+            {
+                case ScopeEnum.MemorySingleton:
+                    return (List<TRow>)MemoryRowList(typeof(TRow));
+                default:
+                    throw new Exception("Scope not supported!");
+            }
+        }
+
         /// <summary>
         /// DbContext caches Model by default by DbContext type. Framework needs
         /// a Model by DbContextInternal.TypeRow.
@@ -118,7 +148,7 @@
 
             if (UtilDalType.TypeRowIsTableNameSql(typeRow) == false)
             {
-                throw new Exception("TypeRow does not have TableNameSql!");
+                throw new Exception("TypeRow does not have TableNameSql definition!");
             }
 
             return new DbContextInternal(connectionString, typeRow);
@@ -317,18 +347,32 @@
             return result.Cast<T>().ToList();
         }
 
-        public static IQueryable Query(Type typeRow)
+        /// <summary>
+        /// Returns linq to database query.
+        /// </summary>
+        public static IQueryable Query(Type typeRow, ScopeEnum scopeEnum = ScopeEnum.Database)
         {
-            return DbContextInternalCreate(typeRow).Query;
-        }
-
-        public static IQueryable<TRow> Query<TRow>() where TRow : Row
-        {
-            return (IQueryable<TRow>)Query(typeof(TRow));
+            switch (scopeEnum)
+            {
+                case ScopeEnum.Database:
+                    return DbContextInternalCreate(typeRow).Query;
+                case ScopeEnum.MemorySingleton:
+                    return MemoryInternal.Instance.RowListGet(typeRow).AsQueryable();
+                default:
+                    throw new Exception("Scope not supported!");
+            }
         }
 
         /// <summary>
-        /// Returns empty query to clear data grid.
+        /// Returns linq to database query.
+        /// </summary>
+        public static IQueryable<TRow> Query<TRow>(ScopeEnum scopeEnum = ScopeEnum.Database) where TRow : Row
+        {
+            return (IQueryable<TRow>)Query(typeof(TRow), scopeEnum);
+        }
+
+        /// <summary>
+        /// Returns empty query to clear data grid and keep column definition.
         /// </summary>
         public static IQueryable<TRow> QueryEmpty<TRow>() where TRow: Row
         {
@@ -498,31 +542,43 @@
         /// <summary>
         /// Insert data record. Primary key needs to be 0! Returned new row contains new primary key.
         /// </summary>
-        public static async Task<TRow> InsertAsync<TRow>(TRow row) where TRow : Row
+        public static async Task<TRow> InsertAsync<TRow>(TRow row, ScopeEnum scopeEnum = ScopeEnum.Database) where TRow : Row
         {
             UtilFramework.LogDebug(string.Format("INSERT ({0})", row.GetType().Name));
 
-            if (UtilDalType.TypeRowIsTableNameSql(row.GetType()))
+            switch (scopeEnum)
             {
-                Row rowCopy = UtilDal.RowCopy(row);
-                DbContext dbContext = DbContextInternalCreate(row.GetType());
-                dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
-                try
-                {
-                    int count = await dbContext.SaveChangesAsync();
-                    UtilFramework.Assert(count == 1, "Update failed!");
-                    //
-                    // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
-                    // Cause: No autoincrement on Id column or no Id set by application
-                    //
-                    // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
-                    // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
-                }
-                catch (Exception exception)
-                {
-                    UtilDal.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
-                    throw exception;
-                }
+                case ScopeEnum.Database:
+                    {
+                        Row rowCopy = UtilDal.RowCopy(row);
+                        DbContext dbContext = DbContextInternalCreate(row.GetType());
+                        dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
+                        try
+                        {
+                            int count = await dbContext.SaveChangesAsync();
+                            UtilFramework.Assert(count == 1, "Update failed!");
+                            //
+                            // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
+                            // Cause: No autoincrement on Id column or no Id set by application
+                            //
+                            // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
+                            // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
+                        }
+                        catch (Exception exception)
+                        {
+                            UtilDal.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
+                            throw exception;
+                        }
+                        break;
+                    }
+                case ScopeEnum.MemorySingleton:
+                    {
+                        var rowList = UtilDal.MemoryRowList(row.GetType(), scopeEnum);
+                        rowList.Add(row);
+                        break;
+                    }
+                default:
+                    throw new Exception("Scope not supported!");
             }
             return row; // Return Row with new primary key.
         }
@@ -530,21 +586,52 @@
         /// <summary>
         /// Update data record on database.
         /// </summary>
-        public static async Task UpdateAsync(Row row, Row rowNew)
+        public static async Task UpdateAsync(Row row, Row rowNew, ScopeEnum scopeEnum = ScopeEnum.Database)
         {
             UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
 
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             if (UtilDal.RowEqual(row, rowNew) == false)
             {
-                if (UtilDalType.TypeRowIsTableNameSql(row.GetType()))
+                switch (scopeEnum)
                 {
-                    row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
-                    DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
-                    var tracking = dbContext.Attach(row);
-                    tracking.CurrentValues.SetValues(rowNew);
-                    int count = await dbContext.SaveChangesAsync();
-                    UtilFramework.Assert(count == 1, "Update failed!");
+                    case ScopeEnum.Database:
+                        {
+                            row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
+                            DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
+                            var tracking = dbContext.Attach(row);
+                            tracking.CurrentValues.SetValues(rowNew);
+                            int count = await dbContext.SaveChangesAsync();
+                            UtilFramework.Assert(count == 1, "Update failed!");
+                            break;
+                        }
+                    case ScopeEnum.MemorySingleton:
+                        {
+                            var rowList = UtilDal.MemoryRowList(row.GetType(), scopeEnum);
+                            PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(row.GetType()).First(); // Assume first field is primary key.
+                            object idNew = propertyInfo.GetValue(row);
+                            int updateCount = 0;
+                            foreach (Row rowMemory in rowList.Cast<Row>())
+                            {
+                                object id = propertyInfo.GetValue(rowMemory);
+                                if (object.Equals(id, idNew))
+                                {
+                                    UtilDal.RowCopy(rowNew, rowMemory);
+                                    updateCount += 1;
+                                }
+                            }
+                            if (updateCount == 0)
+                            {
+                                throw new Exception("Memory row could not be updated!");
+                            }
+                            if (updateCount > 1)
+                            {
+                                throw new Exception("More than one memory row updated!");
+                            }
+                            break;
+                        }
+                    default:
+                        throw new Exception("Scope not supported!");
                 }
             }
         }

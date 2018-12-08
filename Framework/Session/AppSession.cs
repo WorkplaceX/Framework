@@ -3,10 +3,12 @@
     using Database.dbo;
     using Framework.Application;
     using Framework.Dal;
+    using Framework.Dal.Memory;
     using Framework.Json;
     using Framework.Server;
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -113,7 +115,7 @@
         /// <summary>
         /// Copy data grid cell values to AppSession.
         /// </summary>
-        private void GridLoad(Grid grid, List<Row> rowList, Type typeRow)
+        private void GridLoad(Grid grid, List<Row> rowList, Type typeRow, ScopeEnum scopeEnum)
         {
             UtilSession.GridReset(grid);
 
@@ -134,6 +136,7 @@
             if (gridSession.TypeRow != typeRow)
             {
                 gridSession.TypeRow = typeRow;
+                gridSession.ScopeEnum = scopeEnum;
                 gridSession.GridRowSessionList.Clear();
                 GridLoadAddFilter(gridIndex); // Add "filter row".
             }
@@ -255,7 +258,8 @@
 
                 rowList = await UtilDal.SelectAsync(query);
             }
-            GridLoad(grid, rowList, query?.ElementType);
+            ScopeEnum scopeEnum = MemoryInternal.ScopeEnum(query);
+            GridLoad(grid, rowList, query?.ElementType, scopeEnum);
         }
 
         /// <summary>
@@ -485,7 +489,7 @@
                         // Update to database
                         try
                         {
-                            await UtilDal.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate);
+                            await UtilDal.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.ScopeEnum);
                             gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowUpdate;
                             foreach (GridCellSession gridCellSession in gridRowItem.GridRowSession.GridCellSessionList)
                             {
@@ -504,7 +508,7 @@
                         // Insert to database
                         try
                         {
-                            var rowNew = await UtilDal.InsertAsync(gridRowItem.GridRowSession.RowInsert);
+                            var rowNew = await UtilDal.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.ScopeEnum);
                             gridRowItem.GridRowSession.Row = rowNew;
 
                             // Load new primary key into data grid.
@@ -752,6 +756,11 @@
         /// TypeRow of loaded data grid.
         /// </summary>
         public Type TypeRow;
+
+        /// <summary>
+        /// Determines where to write data back. To database or memory.
+        /// </summary>
+        public ScopeEnum ScopeEnum;
 
         public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
 

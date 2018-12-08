@@ -1,12 +1,10 @@
 ﻿namespace Framework.Cli.Command
 {
     using Database.dbo;
-    using Framework.Cli.Config;
     using Framework.Dal;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
 
     public class CommandDeployDb : CommandBase
     {
