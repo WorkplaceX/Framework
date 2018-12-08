@@ -116,7 +116,12 @@
 
         public static T Get<T>(this ComponentJson owner, string name) where T : ComponentJson
         {
-            return owner.Get(name) as T;
+            ComponentJson result = owner.Get(name);
+            if (result != null && !(result is T))
+            {
+                throw new Exception(string.Format("Component wrong type! (Name={0})", name));
+            }
+            return (T)owner.Get(name);
         }
 
         public static T Get<T>(this ComponentJson owner) where T : ComponentJson
@@ -322,6 +327,22 @@
         public string Text;
 
         public bool IsClick;
+    }
+
+    /// <summary>
+    /// See also: https://getbootstrap.com/docs/4.1/components/navbar/
+    /// </summary>
+    public sealed class BootstrapNavbar : ComponentJson
+    {
+        public BootstrapNavbar() { }
+
+        public BootstrapNavbar(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        public string BrandHtml;
     }
 
     public sealed class Grid : ComponentJson
