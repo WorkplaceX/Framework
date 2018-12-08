@@ -9,9 +9,13 @@
     using Framework.Dal;
     using System.Collections.Generic;
     using static Framework.Session.UtilSession;
+    using System;
 
     internal static class UtilApp
     {
+        /// <summary>
+        /// Process button click.
+        /// </summary>
         public static async Task ProcessButtonAsync()
         {
             var app = UtilServer.AppInternal;
@@ -23,9 +27,9 @@
         }
 
         /// <summary>
-        /// Divert navbar click to data grid row click.
+        /// Process navbar button click.
         /// </summary>
-        public static void ProcessBootstrapNavbar()
+        public static async Task ProcessBootstrapNavbarAsync()
         {
             var app = UtilServer.AppInternal;
             foreach (BootstrapNavbar navbar in app.AppJson.ListAll().OfType<BootstrapNavbar>())
@@ -39,17 +43,30 @@
                             button.IsClick = false;
                             if (navbar.GridIndex != null)
                             {
-                                GridItem gridItem = UtilSession.GridItemList().Where(item => item.GridIndex == navbar.GridIndex).SingleOrDefault();
-                                if (gridItem != null)
+                                GridItem gridItem = UtilSession.GridItemList().Where(item => item.GridIndex == navbar.GridIndex).First();
+
+                                // Set IsSelect
+                                // See also method ProcessGridRowIsClick();
+                                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                                 {
-                                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                                    if (gridRowItem.GridRowSession != null) // Outgoing grid might have less rows
                                     {
-                                        if (gridRowItem.RowIndex == button.RowIndex)
-                                        {
-                                            gridRowItem.GridRow.IsClick = true; // Divert navbar click to data grid row click.
-                                        }
+                                        gridRowItem.GridRowSession.IsSelect = false;
                                     }
                                 }
+                                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                                {
+                                    if (gridRowItem.GridRowSession != null && gridRowItem.RowIndex == button.RowIndex)
+                                    {
+                                        gridRowItem.GridRowSession.IsSelect = true;
+                                        break;
+                                    }
+                                }
+                                if (gridItem.Grid == null)
+                                {
+                                    throw new Exception("Grid has been removed! Use property Grid.IsHide instead.");
+                                }
+                                await gridItem.Grid.Owner<Page>().GridRowSelectedAsync(gridItem.Grid);
                             }
                         }
                     }

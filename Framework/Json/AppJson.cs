@@ -243,8 +243,8 @@
 
         internal async Task ProcessInternalAsync()
         {
-            UtilApp.ProcessBootstrapNavbar();
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
+            await UtilApp.ProcessBootstrapNavbarAsync();
             await UtilApp.ProcessButtonAsync(); // Button
 
             foreach (Page page in UtilServer.AppJson.ListAll().OfType<Page>())
@@ -349,6 +349,9 @@
 
         public string BrandTextHtml;
 
+        /// <summary>
+        /// Gets or sets GridIndex. Row should have a field "Text".
+        /// </summary>
         public int? GridIndex;
 
         public List<BootstrapNavbarButton> ButtonList;
@@ -398,6 +401,11 @@
         /// Gets Index. This is the grid session index. See also class GridSession.
         /// </summary>
         public int? Index { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets IsHide. If true, grid data (ColumnList and RowList) are not beeing transfered to client and back. See also method GridRender();
+        /// </summary>
+        public bool IsHide;
 
         public List<GridColumn> ColumnList;
 
@@ -567,6 +575,9 @@
             Type = typeof(Page).Name;
         }
 
+        /// <summary>
+        /// Gets or sets IsHide. If true, component and children are still being transferred to client and back to keep state.
+        /// </summary>
         public bool IsHide;
 
         /// <summary>

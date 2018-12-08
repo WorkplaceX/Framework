@@ -313,52 +313,55 @@
                     gridItem.Grid.RowList = new List<GridRow>();
                     gridItem.Grid.IsClickEnum = GridIsClickEnum.None;
 
-                    // Grid Header
-                    foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                    if (gridItem.Grid.IsHide == false)
                     {
-                        if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
+                        // Grid Header
+                        foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                         {
-                            GridColumn gridColumn = new GridColumn();
-                            gridColumn.Text = gridColumnItem.GridColumnSession.TextGet();
-                            gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
-                            gridItem.Grid.ColumnList.Add(gridColumn);
-                        }
-                    }
-
-                    // Grid Row
-                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
-                    {
-                        if (gridRowItem.GridRowSession != null)
-                        {
-                            GridRow gridRow = new GridRow();
-                            gridRow.RowEnum = gridRowItem.GridRowSession.RowEnum;
-                            gridItem.Grid.RowList.Add(gridRow);
-                            gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
-                            gridRow.CellList = new List<GridCell>();
-
-                            // Grid Cell
-                            foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                            if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
                             {
-                                if (gridCellItem.GridCellSession != null)
-                                {
-                                    if (gridItem.GridSession.IsRange(gridCellItem.CellIndex))
-                                    {
-                                        GridCell gridCell = new GridCell();
-                                        gridRow.CellList.Add(gridCell);
-                                        gridCell.Text = gridCellItem.GridCellSession.Text;
-                                        gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
-                                        gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
+                                GridColumn gridColumn = new GridColumn();
+                                gridColumn.Text = gridColumnItem.GridColumnSession.TextGet();
+                                gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
+                                gridItem.Grid.ColumnList.Add(gridColumn);
+                            }
+                        }
 
-                                        // Lookup open, close
-                                        if (gridCellItem.GridCellSession.IsLookup == true)
+                        // Grid Row
+                        foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                        {
+                            if (gridRowItem.GridRowSession != null)
+                            {
+                                GridRow gridRow = new GridRow();
+                                gridRow.RowEnum = gridRowItem.GridRowSession.RowEnum;
+                                gridItem.Grid.RowList.Add(gridRow);
+                                gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
+                                gridRow.CellList = new List<GridCell>();
+
+                                // Grid Cell
+                                foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                                {
+                                    if (gridCellItem.GridCellSession != null)
+                                    {
+                                        if (gridItem.GridSession.IsRange(gridCellItem.CellIndex))
                                         {
-                                            if (gridCellItem.GridCellSession.IsLookupCloseForce == true)
+                                            GridCell gridCell = new GridCell();
+                                            gridRow.CellList.Add(gridCell);
+                                            gridCell.Text = gridCellItem.GridCellSession.Text;
+                                            gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
+                                            gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
+
+                                            // Lookup open, close
+                                            if (gridCellItem.GridCellSession.IsLookup == true)
                                             {
-                                                gridCellItem.GridCellSession.IsLookup = false;
+                                                if (gridCellItem.GridCellSession.IsLookupCloseForce == true)
+                                                {
+                                                    gridCellItem.GridCellSession.IsLookup = false;
+                                                }
                                             }
+                                            gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
+                                            gridCellItem.GridCellSession.IsLookupCloseForce = false;
                                         }
-                                        gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
-                                        gridCellItem.GridCellSession.IsLookupCloseForce = false;
                                     }
                                 }
                             }
@@ -729,6 +732,9 @@
             }
         }
 
+        /// <summary>
+        /// Process incoming data grid.
+        /// </summary>
         public async Task ProcessAsync()
         {
             AppInternal appInternal = UtilServer.AppInternal;
