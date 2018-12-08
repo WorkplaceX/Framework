@@ -243,6 +243,7 @@
 
         internal async Task ProcessInternalAsync()
         {
+            UtilApp.ProcessBootstrapNavbar();
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessButtonAsync(); // Button
 
@@ -363,9 +364,16 @@
 
         }
 
+        /// <summary>
+        /// RowIndex needs to be stored because unlike in the data grid sequence of buttons is different because filter row is omitted.
+        /// </summary>
+        public int RowIndex;
+
         public string TextHtml;
 
         public bool IsActive;
+
+        public bool IsClick;
     }
 
     public sealed class Grid : ComponentJson
