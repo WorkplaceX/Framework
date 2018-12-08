@@ -762,8 +762,14 @@
         /// </summary>
         public ScopeEnum ScopeEnum;
 
+        /// <summary>
+        /// Grid columns in server side session state.
+        /// </summary>
         public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
 
+        /// <summary>
+        /// Grid rows in server side session state.
+        /// </summary>
         public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
 
         public int? RowCountMaxConfig;

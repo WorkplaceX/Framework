@@ -43,6 +43,9 @@
 
         public class GridItem
         {
+            /// <summary>
+            /// Grid session index.
+            /// </summary>
             public int GridIndex;
 
             public GridSession GridSession;

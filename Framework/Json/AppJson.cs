@@ -167,6 +167,9 @@
             SiblingHide = 2,
         }
 
+        /// <summary>
+        /// Shows page or creates new one if it does not yet exist. Similar to method GetOrCreate(); but additionally invokes page init async.
+        /// </summary>
         public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
             T result = null;
@@ -241,7 +244,7 @@
         internal async Task ProcessInternalAsync()
         {
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
-            await UtilApp.ProcessAsync(); // Button
+            await UtilApp.ProcessButtonAsync(); // Button
 
             foreach (Page page in UtilServer.AppJson.ListAll().OfType<Page>())
             {
@@ -249,6 +252,7 @@
             }
 
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
+            UtilApp.BootstrapNavbarRender();
 
             SessionState = UtilServer.Session.GetString("Main") + "; Grid.Count=" + UtilServer.AppSession.GridSessionList.Count;
         }
@@ -342,7 +346,26 @@
 
         }
 
-        public string BrandHtml;
+        public string BrandTextHtml;
+
+        public int? GridIndex;
+
+        public List<BootstrapNavbarButton> ButtonList;
+    }
+
+    public sealed class BootstrapNavbarButton : ComponentJson
+    {
+        public BootstrapNavbarButton() { }
+
+        public BootstrapNavbarButton(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        public string TextHtml;
+
+        public bool IsActive;
     }
 
     public sealed class Grid : ComponentJson
@@ -363,6 +386,9 @@
             await UtilServer.AppInternal.AppSession.GridLoadAsync(this);
         }
 
+        /// <summary>
+        /// Gets Index. This is the grid session index. See also class GridSession.
+        /// </summary>
         public int? Index { get; internal set; }
 
         public List<GridColumn> ColumnList;
