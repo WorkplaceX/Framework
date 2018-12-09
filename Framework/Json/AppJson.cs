@@ -335,6 +335,20 @@
     }
 
     /// <summary>
+    /// Json Div. Rendered as html div element.
+    /// </summary>
+    public sealed class Div : ComponentJson
+    {
+        public Div() { }
+
+        public Div(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+    }
+
+    /// <summary>
     /// See also: https://getbootstrap.com/docs/4.1/components/navbar/
     /// </summary>
     public sealed class BootstrapNavbar : ComponentJson

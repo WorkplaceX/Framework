@@ -44,6 +44,7 @@ export class AppComponent {
   selector: '[data-Selector]',
   template: `
   <div data-Button *ngIf="json.Type=='Button'" [json]=json style="display:inline"></div>
+  <div data-Div *ngIf="json.Type=='Div'" [json]=json [ngClass]="json.CssClass"></div>
   <div data-BootstrapNavbar *ngIf="json.Type=='BootstrapNavbar'" [json]=json style="display:inline"></div>
   <div data-Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json style="display:inline"></div>
   <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json style="display:inline"></div>
@@ -98,6 +99,22 @@ export class Button {
     this.json.IsClick = true;
     this.dataService.update();
   } 
+}
+
+/* Div */
+@Component({
+  selector: '[data-Div]',
+  template: `
+  <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
+  `
+})
+export class Div {
+  @Input() json: any
+  dataService: DataService;
+
+  trackBy(index: any, item: any) {
+    return item.TrackBy;
+  }
 }
 
 /* Grid */
