@@ -404,6 +404,8 @@
 
         /// <summary>
         /// Gets or sets IsHide. If true, grid data (ColumnList and RowList) are not beeing transfered to client and back. See also method GridRender();
+        /// But owner page and its method Page.GridRowSelectedAsync(); can still found and called for example by method ProcessBootstrapNavbarAsync();
+        /// To hide other components use extension method Remove();
         /// </summary>
         public bool IsHide;
 
@@ -577,6 +579,7 @@
 
         /// <summary>
         /// Gets or sets IsHide. If true, component and children are still being transferred to client and back to keep state.
+        /// To hide other components use extension method Remove();
         /// </summary>
         public bool IsHide;
 

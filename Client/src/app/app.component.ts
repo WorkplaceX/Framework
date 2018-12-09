@@ -45,7 +45,7 @@ export class AppComponent {
   template: `
   <div data-Button *ngIf="json.Type=='Button'" [json]=json style="display:inline"></div>
   <div data-BootstrapNavbar *ngIf="json.Type=='BootstrapNavbar'" [json]=json style="display:inline"></div>
-  <div data-Grid *ngIf="json.Type=='Grid'" [json]=json style="display:inline"></div>
+  <div data-Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json style="display:inline"></div>
   <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json style="display:inline"></div>
   <div data-Html *ngIf="json.Type=='Html'" [json]=json style="display:inline"></div>
   `
@@ -153,7 +153,7 @@ export class Button {
     </tr>
   </table>
 
-  <div class="colorBlue">
+  <div class="colorBlue" [ngClass]="json.CssClass">
     <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up" (click)="clickGrid(1, $event);"></i>
     <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down" (click)="clickGrid(2, $event);"></i>
     &nbsp;&nbsp;
