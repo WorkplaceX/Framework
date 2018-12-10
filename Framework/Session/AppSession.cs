@@ -782,7 +782,7 @@
 
         public int RowCountMaxGet()
         {
-            return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : 4; // Default value if no config.
+            return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : 10; // Default value if no config.
         }
 
         public int ColumnCountMax = 5;
