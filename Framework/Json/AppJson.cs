@@ -129,6 +129,24 @@
             return owner.Get<T>(typeof(T).Name);
         }
 
+        public static T Create<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
+        {
+            if (owner.Get(name) != null)
+            {
+                throw new Exception("Component with same name already exists!");
+            }
+            T component = (T)Activator.CreateInstance(typeof(T), owner);
+            component.Name = name;
+            init?.Invoke(component);
+
+            return owner.Get<T>(name);
+        }
+
+        public static T Create<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
+        {
+            return Create<T>(owner, typeof(T).Name, init);
+        }
+
         /// <summary>
         /// Returns ComponentJson or creates new if not yet exists.
         /// </summary>
