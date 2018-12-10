@@ -111,7 +111,12 @@
 
         public static ComponentJson Get(this ComponentJson owner, string name)
         {
-            return owner.List.Where(item => item.Name == name).SingleOrDefault();
+            var resultList = owner.List.Where(item => item.Name == name).ToArray();
+            if (resultList.Count() > 1)
+            {
+                throw new Exception(string.Format("Component with same name exists more than once! ({0})", name));
+            }
+            return resultList.SingleOrDefault();
         }
 
         public static T Get<T>(this ComponentJson owner, string name) where T : ComponentJson
@@ -129,17 +134,16 @@
             return owner.Get<T>(typeof(T).Name);
         }
 
+        /// <summary>
+        /// Returns new ComponentJson.
+        /// </summary>
         public static T Create<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
         {
-            if (owner.Get(name) != null)
-            {
-                throw new Exception("Component with same name already exists!");
-            }
             T component = (T)Activator.CreateInstance(typeof(T), owner);
             component.Name = name;
             init?.Invoke(component);
 
-            return owner.Get<T>(name);
+            return component; // owner.Get<T>(name); // Do not check whether component with same name exists multiple times.
         }
 
         public static T Create<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
