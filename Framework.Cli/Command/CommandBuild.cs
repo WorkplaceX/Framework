@@ -31,6 +31,9 @@
             UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
             UtilFramework.Assert(Directory.Exists(folderNameDest));
 
+            // Copy styles.css to frameworkStyle.css
+            UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Output file name styles.css can not be changed in angular.json!
+
             // indexEmpty.html
             string fileName = folderNameDest + "browser/indexEmpty.html";
             File.WriteAllText(fileName, "<data-app></data-app>");

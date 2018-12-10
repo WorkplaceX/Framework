@@ -372,6 +372,7 @@
 
     /// <summary>
     /// See also: https://getbootstrap.com/docs/4.1/components/navbar/
+    /// Change background color with style "background-color: red !important".
     /// </summary>
     public sealed class BootstrapNavbar : ComponentJson
     {

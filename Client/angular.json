@@ -28,7 +28,7 @@
               "src/framework"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/frameworkStyle.scss"
             ],
             "scripts": []
           },
