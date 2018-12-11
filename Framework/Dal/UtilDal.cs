@@ -1372,7 +1372,7 @@
         public readonly bool IsNumber;
 
         /// <summary>
-        /// Convert database value to front end cell test.
+        /// Convert database value to front end cell text.
         /// </summary>
         protected virtual internal string CellTextFromValue(object value)
         {

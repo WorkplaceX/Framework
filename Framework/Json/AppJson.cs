@@ -714,5 +714,13 @@
         {
             await Task.Run(() => { });
         }
+
+        /// <summary>
+        /// Convert database value to front end cell text.
+        /// </summary>
+        protected virtual internal void CellTextFromValue(Grid grid, Row row, string fieldName, ref string text)
+        {
+
+        }
     }
 }

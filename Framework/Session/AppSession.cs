@@ -42,6 +42,8 @@
             gridSession.GridRowSessionList[rowIndex] = gridRowSession;
             gridRowSession.Row = row;
             gridRowSession.RowEnum = gridRowEnum;
+            Grid grid = UtilSession.GridFromIndex(gridIndex);
+            Page page = grid.Owner<Page>();
             foreach (Field field in fieldListCache)
             {
                 GridCellSession gridCellSession = new GridCellSession();
@@ -50,6 +52,7 @@
                 if (gridRowSession.Row != null)
                 {
                     text = UtilDal.CellTextFromValue(gridRowSession.Row, field); // Convert database value to cell text.
+                    page.CellTextFromValue(grid, gridRowSession.Row, field.PropertyInfo.Name, ref text);
                 }
                 gridCellSession.Text = text;
             }
