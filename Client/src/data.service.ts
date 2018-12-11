@@ -68,6 +68,10 @@ export class DataService {
       if (window.location.href.startsWith("http://localhost:4200/")) {
         this.json.RequestUrl = "http://localhost:56092/";
         this.update();
+      } 
+      if (window != null) { // Running on client.
+        this.json.RequestUrl = window.location.href;
+        this.update();
       }
     }
   }

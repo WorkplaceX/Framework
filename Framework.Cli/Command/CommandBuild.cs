@@ -2,6 +2,7 @@
 {
     using Framework.Cli.Config;
     using Framework.Config;
+    using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.IO;
 
@@ -14,6 +15,13 @@
             : base(appCli, "build", "Build client and server")
         {
 
+        }
+
+        private CommandOption optionClientOnly;
+
+        protected internal override void Register(CommandLineApplication configuration)
+        {
+            optionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
         }
 
         private static void BuildClient()
@@ -130,7 +138,10 @@
             BuildWebsite();
             UtilCli.VersionBuild(() => {
                 BuildClient();
-                BuildServer();
+                if (!(optionClientOnly.Value() == "on"))
+                {
+                    BuildServer();
+                }
             });
         }
     }

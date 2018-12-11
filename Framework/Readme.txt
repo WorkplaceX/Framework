@@ -1,4 +1,7 @@
-﻿v2.1
+﻿ToDo
+-Activator.CreateInstance replace with linq activator performance https://stackoverflow.com/questions/4432026/activator-createinstance-performance-alternative
+
+v2.1
 -Linq to shared memory queries. (services.AddSingleton)
 
 ToDo
