@@ -34,8 +34,6 @@
         {
             UtilServer.ApplicationBuilder = applicationBuilder;
 
-            ConfigFramework.Init();
-
             if (UtilServer.IsIssServer == false)
             {
                 if (ConfigFramework.Load().IsServerSideRendering)
