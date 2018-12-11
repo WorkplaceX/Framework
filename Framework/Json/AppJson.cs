@@ -672,6 +672,9 @@
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
+        /// <summary>
+        /// Method called when data row has been selected. Get selected row with grid.RowSelected();
+        /// </summary>
         protected virtual internal async Task GridRowSelectedAsync(Grid grid)
         {
             await Task.Run(() => { });
