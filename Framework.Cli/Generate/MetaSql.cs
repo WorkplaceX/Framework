@@ -21,7 +21,7 @@
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilFramework.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
-            this.List = dbContext.Schema.FromSql(sql).ToArray();
+            this.List = dbContext.Schema.FromSql(sql).ToArray(); // Schema changes can cause timeout. Run sql command sp_updatestats on master database.
             //
             // For Application filter out "dbo.Framework" tables.
             if (isFrameworkDb == false)
@@ -57,6 +57,7 @@
             string connectionString = ConfigCli.ConnectionString(IsFrameworkDb);
             UtilFramework.Assert(string.IsNullOrEmpty(connectionString) == false, "ConnectionString is null!");
             optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
         public DbSet<MetaSqlSchema> Schema { get; set; }
@@ -67,9 +68,7 @@
     /// </summary>
     public class MetaSqlSchema
     {
-        [Key]
-        public Guid IdView { get; set; }
-
+        [Key] // Prevent exception "requires a primary key to be defined". For sql view set first column to primary. See also optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         public string SchemaName { get; set; }
 
         public string TableName { get; set; }

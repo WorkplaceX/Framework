@@ -639,10 +639,14 @@
         /// <summary>
         /// Convert database value to text.
         /// </summary>
-        internal static string CellTextFromValue(Row row, Field field)
+        internal static string CellTextFromValue(Row row, Field field, out object value)
         {
-            object value = field.PropertyInfo.GetValue(row);
-            string result = field.FrameworkType().CellTextFromValue(value);
+            string result = null;
+            value = field.PropertyInfo.GetValue(row);
+            if (value != null)
+            {
+                result = field.FrameworkType().CellTextFromValue(value);
+            }
             return result;
         }
 
@@ -1054,19 +1058,21 @@
         Datetime2 = 7,
         Date = 8,
         Char = 9,
+        NChar = 23,
         Nvarcahr = 10,
         Varchar = 11,
         Text = 12,
         Ntext = 13,
         Bit = 14,
         Money = 15,
+        Smallmoney = 24,
         Decimal = 16,
         Real = 17,
         Float = 18,
         Varbinary = 19,
         Sqlvariant = 20,
         Image = 21,
-        Numeric = 22,
+        Numeric = 22, // 24
     }
 
     internal static class UtilDalType
@@ -1325,12 +1331,14 @@
                 frameworkType = new FrameworkTypeDatetime2(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeDate(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeChar(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeNChar(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeNvarcahr(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeVarchar(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeText(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeNtext(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeBit(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeMoney(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
+                frameworkType = new FrameworkTypeSmallmoney(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeDecimal(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeReal(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
                 frameworkType = new FrameworkTypeFloat(); result.Add(frameworkType.FrameworkTypeEnum, frameworkType);
@@ -1374,9 +1382,11 @@
         /// <summary>
         /// Convert database value to front end cell text.
         /// </summary>
+        /// <param name="value">Value is never null when this method is called.</param>
+        /// <returns>Returns text to display in cell.</returns>
         protected virtual internal string CellTextFromValue(object value)
         {
-            string result = value?.ToString();
+            string result = value.ToString();
             return result;
         }
 
@@ -1514,6 +1524,15 @@
         }
     }
 
+    internal class FrameworkTypeNChar : FrameworkType
+    {
+        public FrameworkTypeNChar()
+            : base(FrameworkTypeEnum.NChar, "nchar", 239, typeof(string), DbType.StringFixedLength, false)
+        {
+
+        }
+    }
+
     internal class FrameworkTypeNvarcahr : FrameworkType
     {
         public FrameworkTypeNvarcahr()
@@ -1575,12 +1594,34 @@
             }
             return result;
         }
+
+        protected internal override object CellTextToValue(string text)
+        {
+            if (text.ToLower() == "false")
+            {
+                return false;
+            }
+            if (text.ToLower() == "true")
+            {
+                return true;
+            }
+            return base.CellTextToValue(text);
+        }
     }
 
     internal class FrameworkTypeMoney : FrameworkType
     {
         public FrameworkTypeMoney()
             : base(FrameworkTypeEnum.Money, "money", 60, typeof(decimal), DbType.Decimal, true)
+        {
+
+        }
+    }
+
+    internal class FrameworkTypeSmallmoney : FrameworkType
+    {
+        public FrameworkTypeSmallmoney()
+            : base(FrameworkTypeEnum.Smallmoney, "smallmoney", 122, typeof(decimal), DbType.Decimal, true)
         {
 
         }

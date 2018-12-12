@@ -51,8 +51,11 @@
                 string text = null;
                 if (gridRowSession.Row != null)
                 {
-                    text = UtilDal.CellTextFromValue(gridRowSession.Row, field); // Convert database value to cell text.
-                    page.CellTextFromValue(grid, gridRowSession.Row, field.PropertyInfo.Name, ref text);
+                    text = UtilDal.CellTextFromValue(gridRowSession.Row, field, out object value); // Convert database value to cell text.
+                    if (value != null)
+                    {
+                        page.CellTextFromValue(grid, gridRowSession.Row, field.PropertyInfo.Name, ref text);
+                    }
                 }
                 gridCellSession.Text = text;
             }
@@ -595,7 +598,20 @@
                                 {
                                     try
                                     {
-                                        gridCellItem.GridCellSession.FilterValue = UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.Field); // Parse user entered filter text.
+                                        Grid grid = gridItem.Grid;
+                                        Page page = grid.Owner<Page>();
+                                        object filterValue = null;
+                                        if (gridCellItem.GridCellSession.Text != null)
+                                        {
+                                            // Grid custom parse.
+                                            // filterValue = Grid.CellTextToValue();
+                                        }
+                                        if (filterValue == null)
+                                        {
+                                            // Framework default parse.
+                                            filterValue = UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.Field); // Parse user entered filter text.
+                                        }
+                                        gridCellItem.GridCellSession.FilterValue = filterValue;
                                         gridCellItem.GridCellSession.FilterOperator = FilterOperator.Equal;
                                         if (gridCellItem.Field.PropertyInfo.PropertyType == typeof(string))
                                         {

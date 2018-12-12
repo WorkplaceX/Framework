@@ -1,5 +1,4 @@
 ﻿SELECT
-	NEWID() AS IdView, -- For EF
 	TableList.SchemaName,
 	TableList.TableName,
 	ColumnList.name AS FieldName,
