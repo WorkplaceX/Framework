@@ -10,6 +10,3 @@ DROP TABLE FrameworkField
 DROP VIEW FrameworkTableBuiltIn
 DROP TABLE FrameworkTable
 DROP TABLE FrameworkScript
-
-/* Application */
-DROP TABLE HelloWorld

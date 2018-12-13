@@ -1,8 +1,24 @@
 ﻿ToDo
+-Load Grid with null query no error
+-Remove not used grids from AppSession
+-Show session size on AppJson
+-Component Version
+-Cli show node version, npm version
+-Build version UtilFramework.VersionBuild recover after build failure
+-Search password in logs
+-App root (<data-app>) two times in index.html
+-Use string instead of removing property (Warning! Type not supported by framework.)
+-Rename Generate.cs to Database.cs
+-ComponentJson sealed classes internal constructor.
+-Nuget package for Framework and FrameworkCli. And npm for Framework/Client
+-Rename GridCell.Text to GridCell.T
+-Visual Code support with workspace and run
+-Parse index.html for Snippet and inject with Snippet json component
+-Angular template url to html file in Application folder. New component Custom1
 -Activator.CreateInstance replace with linq activator performance https://stackoverflow.com/questions/4432026/activator-createinstance-performance-alternative
 
 v2.1
--Linq to shared memory queries. (services.AddSingleton)
+-Linq to shared memory queries. (services.AddSingleton) [Ok]
 
 ToDo
 -Question: sealed class Grid because of OfType<Grid>(). However Page derived class is possible

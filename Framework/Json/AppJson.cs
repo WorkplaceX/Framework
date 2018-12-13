@@ -716,11 +716,26 @@
         }
 
         /// <summary>
-        /// Convert database value to front end cell text.
+        /// Convert database value to front end cell text. Called only if value is not null.
         /// </summary>
-        protected virtual internal void CellTextFromValue(Grid grid, Row row, string fieldName, ref string text)
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
+        protected virtual internal string CellTextFromValue(Grid grid, Row row, string fieldName)
         {
+            return null;
+        }
 
+        /// <summary>
+        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for UOM)
+        /// </summary>
+        /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
+        protected virtual internal void CellTextToValue(Grid grid, Row row, string fieldName, string text, out bool isHandled)
+        {
+            isHandled = false;
+        }
+
+        protected virtual internal void CellTextToValueFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
+        {
+            isHandled = false;
         }
     }
 }

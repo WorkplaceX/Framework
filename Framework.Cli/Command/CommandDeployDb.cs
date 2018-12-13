@@ -34,7 +34,9 @@
             {
                 if (rowList.Select(item => item.FileName.ToLower()).Contains(fileName.ToLower()) == false)
                 {
-                    string sql = UtilFramework.FileLoad(UtilFramework.FolderName + fileName);
+                    string fileNameFull = UtilFramework.FolderName + fileName;
+                    Console.WriteLine(string.Format("Execute {0}", fileNameFull));
+                    string sql = UtilFramework.FileLoad(fileNameFull);
                     UtilDal.ExecuteNonQueryAsync(sql, null, isFrameworkDb).Wait();
                     FrameworkScript row = new FrameworkScript() { FileName = fileName, Date = DateTime.UtcNow };
                     UtilDal.InsertAsync(row).Wait();
@@ -105,6 +107,8 @@
 
             SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigFramework.json
             SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);
+
+            Console.WriteLine("DeployDb successful!");
 
             Meta();
         }

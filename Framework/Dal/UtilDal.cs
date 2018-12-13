@@ -2,6 +2,8 @@
 {
     using Framework.Config;
     using Framework.Dal.Memory;
+    using Framework.Json;
+    using Framework.Session;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using System;
@@ -639,21 +641,30 @@
         /// <summary>
         /// Convert database value to text.
         /// </summary>
-        internal static string CellTextFromValue(Row row, Field field, out object value)
+        internal static void CellTextFromValue(Page page, Grid grid, GridRowSession gridRowSession, Field field, GridCellSession gridCellSession, Row row)
         {
-            string result = null;
-            value = field.PropertyInfo.GetValue(row);
-            if (value != null)
+            string text = null;
+            if (gridRowSession.Row != null)
             {
-                result = field.FrameworkType().CellTextFromValue(value);
+                object value = field.PropertyInfo.GetValue(row);
+                if (value != null)
+                {
+                    text = page.CellTextFromValue(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = UtilFramework.StringNull(text);
+                    if (text == null)
+                    {
+                        text = field.FrameworkType().CellTextFromValue(value);
+                    }
+                }
             }
-            return result;
+            gridCellSession.Text = text;
+
         }
 
         /// <summary>
         /// Parse user entered cell and filter text.
         /// </summary>
-        internal static object CellTextToValue(Type typeRow, string text, Field field)
+        private static object CellTextToValue(Field field, string text)
         {
             object result = field.FrameworkType().CellTextToValue(text);
             return result;
@@ -664,12 +675,26 @@
         /// </summary>
         internal static void CellTextToValue(Type typeRow, string text, Field field, Row row)
         {
-            object value = CellTextToValue(typeRow, text, field);
+            object value = CellTextToValue(field, text);
             field.PropertyInfo.SetValue(row, value);
+        }
+
+        /// <summary>
+        /// Default parse user entered filter text.
+        /// </summary>
+        internal static void CellTextToValueFilter(Field field, string text, Filter filter)
+        {
+            filter.FilterList[field.PropertyInfo.Name].FilterValue = CellTextToValue(field, text);
+            // filter.FilterList[field.PropertyInfo.Name].Text = text; // No autocomplete
+            filter.FilterList[field.PropertyInfo.Name].FilterOperator = FilterOperator.Equal;
+            if (field.PropertyInfo.PropertyType == typeof(string))
+            {
+                filter.FilterList[field.PropertyInfo.Name].FilterOperator = FilterOperator.Like;
+            }
         }
     }
 
-    internal enum FilterOperator
+    public enum FilterOperator
     {
         None = 0,
         Equal = 1,

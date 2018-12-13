@@ -102,7 +102,7 @@
         /// </summary>
         private static void BuildConfigFramework()
         {
-            Console.WriteLine("Update ConfigFramework");
+            Console.WriteLine("Copy values from ConfigCli to ConfigFramework");
             var configCli = ConfigCli.Load();
             var configFramework = ConfigFramework.Load();
 

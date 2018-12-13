@@ -48,16 +48,7 @@
             {
                 GridCellSession gridCellSession = new GridCellSession();
                 gridRowSession.GridCellSessionList.Add(gridCellSession);
-                string text = null;
-                if (gridRowSession.Row != null)
-                {
-                    text = UtilDal.CellTextFromValue(gridRowSession.Row, field, out object value); // Convert database value to cell text.
-                    if (value != null)
-                    {
-                        page.CellTextFromValue(grid, gridRowSession.Row, field.PropertyInfo.Name, ref text);
-                    }
-                }
-                gridCellSession.Text = text;
+                UtilDal.CellTextFromValue(page, grid, gridRowSession, field, gridCellSession, row);
             }
         }
 
@@ -440,6 +431,20 @@
             }
         }
 
+        private static void ProcessGridSaveCellTextToValue(Page page, Grid grid, GridRowItem gridRowItem, Row row, string fieldNameExclude)
+        {
+            foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+            {
+                if (gridCellItem.GridCell != null)
+                {
+                    if (gridCellItem.FieldName != fieldNameExclude)
+                    {
+                        UtilDal.CellTextFromValue(page, grid, gridRowItem.GridRowSession, gridCellItem.Field, gridCellItem.GridCellSession, row);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Update and insert data into database.
         /// </summary>
@@ -479,7 +484,21 @@
                                 {
                                     gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
                                     gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet(); // Set back to database selected value, once successfully saved.
-                                    UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.Field, row); // Parse user entered cell text.
+                                    Grid grid = gridItem.Grid;
+                                    Page page = grid.Owner<Page>();
+                                    object valueBefore = gridCellItem.Field.PropertyInfo.GetValue(row);
+                                    page.CellTextToValue(grid, row, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, out bool isHandled); // Custom parse user entered cell text.
+                                    if (!isHandled)
+                                    {
+                                        UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.Field, row); // Default parse user entered cell text.
+                                    }
+                                    object valueAfter = gridCellItem.Field.PropertyInfo.GetValue(row);
+                                    string fieldNameExclude = null;
+                                    if (object.Equals(valueBefore, valueAfter))
+                                    {
+                                        fieldNameExclude = gridCellItem.FieldName; // If method CellTextToValue(); did not change underlying value do not call method CellTextToValue(); for this field. Prevent for example autocomplete if user entered "2." to "2" for decimal value.
+                                    }
+                                    ProcessGridSaveCellTextToValue(page, grid, gridRowItem, row, fieldNameExclude);
                                 }
                             }
                             gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
@@ -600,22 +619,25 @@
                                     {
                                         Grid grid = gridItem.Grid;
                                         Page page = grid.Owner<Page>();
-                                        object filterValue = null;
                                         if (gridCellItem.GridCellSession.Text != null)
                                         {
-                                            // Grid custom parse.
-                                            // filterValue = Grid.CellTextToValue();
+                                            Filter filter = new Filter();
+                                            filter.Load(gridRowItem);
+                                            page.CellTextToValueFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out bool isHandled); // Custom parse user entered filter text.
+                                            if (isHandled)
+                                            {
+                                                filter.Save(gridRowItem);
+                                            }
+                                            else
+                                            {
+                                                UtilDal.CellTextToValueFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter); // Default parse user entered filter text.
+                                                filter.Save(gridRowItem);
+                                            }
                                         }
-                                        if (filterValue == null)
+                                        else
                                         {
-                                            // Framework default parse.
-                                            filterValue = UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.Field); // Parse user entered filter text.
-                                        }
-                                        gridCellItem.GridCellSession.FilterValue = filterValue;
-                                        gridCellItem.GridCellSession.FilterOperator = FilterOperator.Equal;
-                                        if (gridCellItem.Field.PropertyInfo.PropertyType == typeof(string))
-                                        {
-                                            gridCellItem.GridCellSession.FilterOperator = FilterOperator.Like;
+                                            gridCellItem.GridCellSession.FilterValue = null;
+                                            gridCellItem.GridCellSession.FilterOperator = FilterOperator.None;
                                         }
                                         gridCellItem.GridCellSession.IsModify = false;
                                         if (!gridItemReloadList.Contains(gridItem))
@@ -770,6 +792,77 @@
             appInternal.AppSession.ResponseCount += 1;
             appInternal.AppJson.ResponseCount = ResponseCount;
         }
+    }
+
+    public class Filter
+    {
+        /// <summary>
+        /// (FieldName, FilterItem).
+        /// </summary>
+        private Dictionary<string, FilterItem> filterList = new Dictionary<string, FilterItem>();
+
+        /// <summary>
+        /// Gets FilterList (FieldName, FilterItem).
+        /// </summary>
+        public IReadOnlyDictionary<string, FilterItem> FilterList
+        {
+            get
+            {
+                return filterList;
+            }
+        }
+
+        /// <summary>
+        /// Load session into filter.
+        /// </summary>
+        internal void Load(GridRowItem gridRowItem)
+        {
+            filterList.Clear();
+            foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+            {
+                FilterItem filterItem = new FilterItem()
+                {
+                    Text = gridCellItem.GridCellSession.Text,
+                    FilterValue = gridCellItem.GridCellSession.FilterValue,
+                    FilterOperator = gridCellItem.GridCellSession.FilterOperator
+                };
+                filterList.Add(gridCellItem.FieldName, filterItem);
+            }
+        }
+
+        /// <summary>
+        /// Save filter to session.
+        /// </summary>
+        internal void Save(GridRowItem gridRowItem)
+        {
+            foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+            {
+                FilterItem filterItem = filterList[gridCellItem.FieldName];
+                if (filterItem.FilterValue != null)
+                {
+                    UtilFramework.Assert(filterItem.FilterValue.GetType() == UtilFramework.TypeUnderlying(gridCellItem.Field.PropertyInfo.PropertyType), "FilterValue wrong type!");
+                }
+                if (object.Equals(gridCellItem.GridCellSession.FilterValue, filterItem.FilterValue) == false || gridCellItem.GridCellSession.FilterOperator != filterItem.FilterOperator)
+                {
+                    // Autocomplete only if underlying value or operator changed.
+                    gridCellItem.GridCellSession.Text = filterItem.Text;
+                }
+                gridCellItem.GridCellSession.FilterValue = filterItem.FilterValue;
+                gridCellItem.GridCellSession.FilterOperator = filterItem.FilterOperator;
+            }
+        }
+    }
+
+    public class FilterItem
+    {
+        /// <summary>
+        /// Set filter text for autocmplete.
+        /// </summary>
+        public string Text;
+
+        public object FilterValue;
+
+        public FilterOperator FilterOperator;
     }
 
     /// <summary>
