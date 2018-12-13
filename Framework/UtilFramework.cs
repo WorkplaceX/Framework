@@ -168,16 +168,32 @@ namespace Framework
         }
 
         /// <summary>
-        /// Returns null if value is empty string.
+        /// Returns null if value is empty string. Use for incoming interfaces.
         /// </summary>
         internal static T StringNull<T>(T value)
         {
             T result = value;
-            if (value is string)
+            if (typeof(T) == typeof(string))
             {
                 if (((string)(object)value) == "")
                 {
-                    result = default(T);
+                    result = (T)(object)null;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns empty if value is null string. Use to get string length.
+        /// </summary>
+        internal static T StringEmpty<T>(T value)
+        {
+            T result = value;
+            if (typeof(T) == typeof(string))
+            {
+                if (((string)(object)value) == null)
+                {
+                    result = (T)(object)"";
                 }
             }
             return result;
@@ -190,6 +206,14 @@ namespace Framework
                 return false;
             }
             return type.GetTypeInfo().IsSubclassOf(typeBase) || type == typeBase;
+        }
+
+        /// <summary>
+        /// Returns true for example for type "int?"
+        /// </summary>
+        internal static bool IsNullable(Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null;
         }
 
         internal static string Replace(string text, string find, string replace)

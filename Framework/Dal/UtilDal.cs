@@ -17,6 +17,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using static Framework.Dal.UtilDalType;
+    using static Framework.Session.UtilSession;
 
     public static class UtilDal
     {
@@ -664,33 +665,66 @@
         /// <summary>
         /// Parse user entered cell and filter text.
         /// </summary>
-        private static object CellTextToValue(Field field, string text)
+        private static object CellTextParse(Field field, string text)
         {
-            object result = field.FrameworkType().CellTextToValue(text);
+            object result = field.FrameworkType().CellTextParse(text);
             return result;
         }
 
         /// <summary>
         /// Parse user entered cell text and write it to row.
         /// </summary>
-        internal static void CellTextToValue(Type typeRow, string text, Field field, Row row)
+        internal static void CellTextParse(Field field, string text, Row row, out string errorParse)
         {
-            object value = CellTextToValue(field, text);
-            field.PropertyInfo.SetValue(row, value);
+            errorParse = null;
+            try
+            {
+                object value = CellTextParse(field, text);
+                bool isPrevent = false;
+                bool isNullable = UtilFramework.IsNullable(field.PropertyInfo.PropertyType); // Do not write value to row if type is not nullable but text is null.
+                isPrevent = (text == null) && !isNullable;
+                if (!isPrevent)
+                {
+                    field.PropertyInfo.SetValue(row, value);
+                }
+            }
+            catch (Exception exception)
+            {
+                errorParse = exception.Message;
+            }
         }
 
         /// <summary>
         /// Default parse user entered filter text.
         /// </summary>
-        internal static void CellTextToValueFilter(Field field, string text, Filter filter)
+        internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse)
         {
-            filter.FilterList[field.PropertyInfo.Name].FilterValue = CellTextToValue(field, text);
-            // filter.FilterList[field.PropertyInfo.Name].Text = text; // No autocomplete
-            filter.FilterList[field.PropertyInfo.Name].FilterOperator = FilterOperator.Equal;
-            if (field.PropertyInfo.PropertyType == typeof(string))
+            errorParse = null;
+            try
             {
-                filter.FilterList[field.PropertyInfo.Name].FilterOperator = FilterOperator.Like;
+                object filterValue = CellTextParse(field, text);
+                FilterOperator filterOperator = FilterOperator.Equal;
+                if (field.PropertyInfo.PropertyType == typeof(string))
+                {
+                    filterOperator = FilterOperator.Like;
+                }
+                filter.SetValue(field.PropertyInfo.Name, filterValue, filterOperator);
             }
+            catch (Exception exception)
+            {
+                errorParse = exception.Message;
+            }
+        }
+
+        /// <summary>
+        /// Returns true, if no delete key has been pressed and cell has no error.
+        /// </summary>
+        internal static bool CellTextParseIsAutocomplete(GridCellItem gridCellItem)
+        {
+            bool isDelete = UtilFramework.StringEmpty(gridCellItem.GridCellSession.TextOld).Length > UtilFramework.StringEmpty(gridCellItem.GridCellSession.Text).Length;
+            bool isError = gridCellItem.GridCellSession.ErrorParse != null;
+
+            return !isDelete && !isError;
         }
     }
 
@@ -1416,9 +1450,9 @@
         }
 
         /// <summary>
-        /// Parse user entered text to database value.
+        /// Parse user entered text to database value. Text can be null.
         /// </summary>
-        protected virtual internal object CellTextToValue(string text)
+        protected virtual internal object CellTextParse(string text)
         {
             object result = null;
             if (text != null)
@@ -1511,7 +1545,7 @@
             return result;
         }
 
-        protected internal override object CellTextToValue(string text)
+        protected internal override object CellTextParse(string text)
         {
             object result = null;
             if (text != null)
@@ -1620,17 +1654,17 @@
             return result;
         }
 
-        protected internal override object CellTextToValue(string text)
+        protected internal override object CellTextParse(string text)
         {
-            if (text.ToLower() == "false")
+            if (text?.ToLower() == "false")
             {
                 return false;
             }
-            if (text.ToLower() == "true")
+            if (text?.ToLower() == "true")
             {
                 return true;
             }
-            return base.CellTextToValue(text);
+            return base.CellTextParse(text);
         }
     }
 

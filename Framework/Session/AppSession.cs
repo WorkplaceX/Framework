@@ -345,6 +345,7 @@
                                             GridCell gridCell = new GridCell();
                                             gridRow.CellList.Add(gridCell);
                                             gridCell.Text = gridCellItem.GridCellSession.Text;
+                                            gridCell.ErrorParse = gridCellItem.GridCellSession.ErrorParse;
                                             gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
                                             gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
 
@@ -431,7 +432,7 @@
             }
         }
 
-        private static void ProcessGridSaveCellTextToValue(Page page, Grid grid, GridRowItem gridRowItem, Row row, string fieldNameExclude)
+        private static void ProcessGridSaveCellTextParse(Page page, Grid grid, GridRowItem gridRowItem, Row row, string fieldNameExclude)
         {
             foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
             {
@@ -487,18 +488,37 @@
                                     Grid grid = gridItem.Grid;
                                     Page page = grid.Owner<Page>();
                                     object valueBefore = gridCellItem.Field.PropertyInfo.GetValue(row);
-                                    page.CellTextToValue(grid, row, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, out bool isHandled); // Custom parse user entered cell text.
+                                    bool isHandled = false;
+                                    gridCellItem.GridCellSession.ErrorParse = null;
+                                    string text = gridCellItem.GridCellSession.Text;
+                                    if (text != null)
+                                    {
+                                        try
+                                        {
+                                            page.CellTextParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
+                                            isHandled = true;
+                                        }
+                                        catch (Exception exception)
+                                        {
+                                            gridCellItem.GridCellSession.ErrorParse = exception.Message;
+                                        }
+                                    }
                                     if (!isHandled)
                                     {
-                                        UtilDal.CellTextToValue(gridItem.GridSession.TypeRow, gridCellItem.GridCellSession.Text, gridCellItem.Field, row); // Default parse user entered cell text.
+                                        UtilDal.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out string errorParse); // Default parse user entered cell text.
+                                        gridCellItem.GridCellSession.ErrorParse = errorParse;
                                     }
                                     object valueAfter = gridCellItem.Field.PropertyInfo.GetValue(row);
+
+                                    // Autocomplete
+                                    bool isAutocomplete = UtilDal.CellTextParseIsAutocomplete(gridCellItem);
                                     string fieldNameExclude = null;
-                                    if (object.Equals(valueBefore, valueAfter))
+                                    if (!isAutocomplete)
                                     {
-                                        fieldNameExclude = gridCellItem.FieldName; // If method CellTextToValue(); did not change underlying value do not call method CellTextToValue(); for this field. Prevent for example autocomplete if user entered "2." to "2" for decimal value.
+                                        // If method CellTextParse(); did not change underlying value do not call method CellTextFromValue(); for this field. Prevent for example autocomplete if user entered "2." to "2" for decimal value.
+                                        fieldNameExclude = gridCellItem.FieldName; 
                                     }
-                                    ProcessGridSaveCellTextToValue(page, grid, gridRowItem, row, fieldNameExclude);
+                                    ProcessGridSaveCellTextParse(page, grid, gridRowItem, row, fieldNameExclude);
                                 }
                             }
                             gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
@@ -522,6 +542,7 @@
                             foreach (GridCellSession gridCellSession in gridRowItem.GridRowSession.GridCellSessionList)
                             {
                                 gridCellSession.IsModify = false;
+                                gridCellSession.TextOld = null;
                                 gridCellSession.Error = null;
                             }
                         }
@@ -612,6 +633,7 @@
                             if (gridCellItem.GridCell.IsModify)
                             {
                                 gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully parsed.
+                                gridCellItem.GridCellSession.TextOld = UtilFramework.StringNull(gridCellItem.GridCellSession.Text);
                                 gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet();
                                 if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
                                 {
@@ -623,14 +645,25 @@
                                         {
                                             Filter filter = new Filter();
                                             filter.Load(gridRowItem);
-                                            page.CellTextToValueFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out bool isHandled); // Custom parse user entered filter text.
+                                            gridCellItem.GridCellSession.ErrorParse = null;
+                                            bool isHandled = false;
+                                            try
+                                            {
+                                                page.CellTextParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
+                                                isHandled = true;
+                                            }
+                                            catch (Exception exception)
+                                            {
+                                                gridCellItem.GridCellSession.ErrorParse = exception.Message;
+                                            }
                                             if (isHandled)
                                             {
                                                 filter.Save(gridRowItem);
                                             }
                                             else
                                             {
-                                                UtilDal.CellTextToValueFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter); // Default parse user entered filter text.
+                                                UtilDal.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out string errorParse); // Default parse user entered filter text.
+                                                gridCellItem.GridCellSession.ErrorParse = errorParse;
                                                 filter.Save(gridRowItem);
                                             }
                                         }
@@ -640,6 +673,7 @@
                                             gridCellItem.GridCellSession.FilterOperator = FilterOperator.None;
                                         }
                                         gridCellItem.GridCellSession.IsModify = false;
+                                        gridCellItem.GridCellSession.TextOld = null;
                                         if (!gridItemReloadList.Contains(gridItem))
                                         {
                                             gridItemReloadList.Add(gridItem);
@@ -794,6 +828,9 @@
         }
     }
 
+    /// <summary>
+    /// Grid filter row.
+    /// </summary>
     public class Filter
     {
         /// <summary>
@@ -802,14 +839,23 @@
         private Dictionary<string, FilterItem> filterList = new Dictionary<string, FilterItem>();
 
         /// <summary>
-        /// Gets FilterList (FieldName, FilterItem).
+        /// Set filter value.
         /// </summary>
-        public IReadOnlyDictionary<string, FilterItem> FilterList
+        public void SetValue(string fieldName, object filterValue, FilterOperator filterOperator)
         {
-            get
-            {
-                return filterList;
-            }
+            filterList[fieldName].FilterValue = filterValue;
+            filterList[fieldName].FilterOperator = filterOperator;
+        }
+
+        /// <summary>
+        /// Set filter value with autocomplete text.
+        /// </summary>
+        /// <param name="text">Autocomplete text.</param>
+        public void SetValue(string fieldName, object filterValue, FilterOperator filterOperator, string text)
+        {
+            filterList[fieldName].FilterValue = filterValue;
+            filterList[fieldName].FilterOperator = filterOperator;
+            filterList[fieldName].Text = text;
         }
 
         /// <summary>
@@ -842,9 +888,12 @@
                 {
                     UtilFramework.Assert(filterItem.FilterValue.GetType() == UtilFramework.TypeUnderlying(gridCellItem.Field.PropertyInfo.PropertyType), "FilterValue wrong type!");
                 }
-                if (object.Equals(gridCellItem.GridCellSession.FilterValue, filterItem.FilterValue) == false || gridCellItem.GridCellSession.FilterOperator != filterItem.FilterOperator)
+
+                // Autocomplete
+                bool isAutocomplete = UtilDal.CellTextParseIsAutocomplete(gridCellItem);
+                if (isAutocomplete)
                 {
-                    // Autocomplete only if underlying value or operator changed.
+                    // Autocomplete only not delete key pressed and no error.
                     gridCellItem.GridCellSession.Text = filterItem.Text;
                 }
                 gridCellItem.GridCellSession.FilterValue = filterItem.FilterValue;
@@ -853,7 +902,7 @@
         }
     }
 
-    public class FilterItem
+    internal class FilterItem
     {
         /// <summary>
         /// Set filter text for autocmplete.
@@ -977,6 +1026,10 @@
     internal class GridCellSession
     {
         public string Text;
+
+        public string TextOld;
+
+        public string ErrorParse;
 
         public bool IsModify;
 

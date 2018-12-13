@@ -567,6 +567,8 @@
         /// </summary>
         public string Text;
 
+        public string ErrorParse;
+
         public string TextGet()
         {
             return UtilFramework.StringNull(Text);
@@ -727,13 +729,14 @@
         /// <summary>
         /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for UOM)
         /// </summary>
+        /// <param name="row">Write user parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
-        protected virtual internal void CellTextToValue(Grid grid, Row row, string fieldName, string text, out bool isHandled)
+        protected virtual internal void CellTextParse(Grid grid, string fieldName, string text, Row row, out bool isHandled)
         {
             isHandled = false;
         }
 
-        protected virtual internal void CellTextToValueFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
+        protected virtual internal void CellTextParseFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
         {
             isHandled = false;
         }
