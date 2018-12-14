@@ -1,4 +1,5 @@
 ﻿ToDo
+-SSL
 -Load Grid with null query no error
 -Remove not used grids from AppSession
 -Show session size on AppJson
