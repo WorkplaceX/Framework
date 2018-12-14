@@ -7,7 +7,12 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item" *ngFor="let button of json.ButtonList; trackBy trackBy" [ngClass]="{'active':button.IsActive}" (click)="click(button)">
+          <div style="display:flex;">
             <a class="nav-link"  style="cursor: pointer" [innerHtml]="button.TextHtml"></a>
+            <div style="padding-left:2px;" class="nav-link" >
+              <i *ngIf="button.IsClick" class="fas fa-spinner fa-spin colorWhite"></i>
+            </div>
+          </div>
         </li> 
       </ul>
       <!--

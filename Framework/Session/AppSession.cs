@@ -496,11 +496,11 @@
                                         try
                                         {
                                             page.CellTextParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
-                                            isHandled = true;
                                         }
                                         catch (Exception exception)
                                         {
                                             gridCellItem.GridCellSession.ErrorParse = exception.Message;
+                                            isHandled = true;
                                         }
                                     }
                                     if (!isHandled)
@@ -650,11 +650,11 @@
                                             try
                                             {
                                                 page.CellTextParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
-                                                isHandled = true;
                                             }
                                             catch (Exception exception)
                                             {
                                                 gridCellItem.GridCellSession.ErrorParse = exception.Message;
+                                                isHandled = true;
                                             }
                                             if (isHandled)
                                             {

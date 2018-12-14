@@ -122,8 +122,9 @@ export class Div {
   selector: '[data-Grid]',
   template: `
   <table [ngClass]="json.CssClass">
+    <!-- Header -->
     <tr>
-      <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);">
+      <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);" >
         <div style="display:flex; white-space:nowrap;">
           <div style="flex:1; overflow:hidden;">
             <i *ngIf="column.IsSort==false" class="fas fa-caret-up colorWhite"></i>
@@ -137,8 +138,10 @@ export class Div {
         </div>
       </th>
     </tr>
+
+    <!-- Row -->
     <tr *ngFor="let row of json.RowList; trackBy trackBy" [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row, $event)">
-      <td *ngFor="let cell of row.CellList; trackBy trackBy" [ngClass]="{'gridRowFilter':row.RowEnum==1}">
+      <td *ngFor="let cell of row.CellList; trackBy trackBy" [ngClass]="{'gridRow':row.RowEnum==2||row.RowEnum==3, 'gridRowFilter':row.RowEnum==1}">
         <div style="display:flex;">
 
           <!-- /* Red plus sign at begin of field */
@@ -153,11 +156,11 @@ export class Div {
           -->
 
           <div style="flex:1; overflow:hidden;">
-            <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)" [ngClass]="{'girdCellIsModify':cell.IsModify}">
+            <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
           </div>
           <div style="padding-left:2px">
+            <i *ngIf="cell.ErrorParse!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorParse }}"></i>
             <i *ngIf="cell.IsModify" class="fas fa-spinner fa-spin colorBlack"></i>
-            <i class="fas fa-arrow-up" style="color:green"></i>
             <!-- /* Lock sign */
             <i class="fas fa-lock colorBlack"></i>
             -->
