@@ -663,7 +663,7 @@
         }
 
         /// <summary>
-        /// Parse user entered cell and filter text.
+        /// Parse user entered cell and filter text. Text can be null.
         /// </summary>
         private static object CellTextParse(Field field, string text)
         {
@@ -672,48 +672,34 @@
         }
 
         /// <summary>
-        /// Parse user entered cell text and write it to row.
+        /// Parse user entered cell text and write it to row. Text can be null.
         /// </summary>
         internal static void CellTextParse(Field field, string text, Row row, out string errorParse)
         {
             errorParse = null;
-            try
+            object value = CellTextParse(field, text);
+            bool isPrevent = false;
+            bool isNullable = UtilFramework.IsNullable(field.PropertyInfo.PropertyType); // Do not write value to row if type is not nullable but text is null.
+            isPrevent = (text == null) && !isNullable;
+            if (!isPrevent)
             {
-                object value = CellTextParse(field, text);
-                bool isPrevent = false;
-                bool isNullable = UtilFramework.IsNullable(field.PropertyInfo.PropertyType); // Do not write value to row if type is not nullable but text is null.
-                isPrevent = (text == null) && !isNullable;
-                if (!isPrevent)
-                {
-                    field.PropertyInfo.SetValue(row, value);
-                }
-            }
-            catch (Exception exception)
-            {
-                errorParse = exception.Message;
+                field.PropertyInfo.SetValue(row, value);
             }
         }
 
         /// <summary>
-        /// Default parse user entered filter text.
+        /// Default parse user entered filter text. Text can be null.
         /// </summary>
         internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse)
         {
             errorParse = null;
-            try
+            object filterValue = CellTextParse(field, text);
+            FilterOperator filterOperator = FilterOperator.Equal;
+            if (field.PropertyInfo.PropertyType == typeof(string))
             {
-                object filterValue = CellTextParse(field, text);
-                FilterOperator filterOperator = FilterOperator.Equal;
-                if (field.PropertyInfo.PropertyType == typeof(string))
-                {
-                    filterOperator = FilterOperator.Like;
-                }
-                filter.SetValue(field.PropertyInfo.Name, filterValue, filterOperator);
+                filterOperator = FilterOperator.Like;
             }
-            catch (Exception exception)
-            {
-                errorParse = exception.Message;
-            }
+            filter.SetValue(field.PropertyInfo.Name, filterValue, filterOperator);
         }
 
         /// <summary>

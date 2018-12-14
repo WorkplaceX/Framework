@@ -7,7 +7,6 @@ import { DataService } from '../data.service';
   <!-- /* Debug */
   <div class="alertError" *ngFor="let item of DataService.alertErrorList$ | async;">{{item}}8</div>
   <h1>Hello World</h1>
-  <button (click)="onClick()">Click</button> <br/>
   Name={{ DataService.json.Name }} <br/>
   Session={{ DataService.json.Session }} <br/>
   SessionApp={{ DataService.json.SessionApp }} <br/>
@@ -24,14 +23,6 @@ import { DataService } from '../data.service';
 })
 export class AppComponent {
   constructor(public DataService: DataService){
-  }
-
-  i = 0;
-
-  onClick(): void {
-    this.DataService.json.Name += ".";
-    this.i += 1;
-    this.DataService.alertError.next("Error" + this.i);
   }
 
   trackBy(index: any, item: any) {
@@ -59,6 +50,8 @@ export class Selector {
 @Component({
   selector: '[data-Page]',
   template: `
+  <div *ngIf="json.AlertEnum>0" class="alert" [ngClass]="{'alert-primary':json.AlertEnum==1,'alert-success':json.AlertEnum==2,'alert-warning':json.AlertEnum==3,'alert-danger':json.AlertEnum==4}"  role="alert" [innerHtml]="json.AlertTextHtml">
+  </div>  
   <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
   `
 })

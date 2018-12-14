@@ -491,24 +491,29 @@
                                     bool isHandled = false;
                                     gridCellItem.GridCellSession.ErrorParse = null;
                                     string text = gridCellItem.GridCellSession.Text;
-                                    if (text != null)
+                                    string errorParse = null;
+                                    try
                                     {
-                                        try
+                                        if (!UtilFramework.IsNullable(gridCellItem.Field.PropertyInfo.PropertyType) && text == null)
+                                        {
+                                            throw new Exception("Value can not be null!");
+                                        }
+                                        if (text != null)
                                         {
                                             page.CellTextParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
                                         }
-                                        catch (Exception exception)
+                                        if (!isHandled)
                                         {
-                                            gridCellItem.GridCellSession.ErrorParse = exception.Message;
-                                            isHandled = true;
+                                            UtilDal.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out errorParse); // Default parse user entered cell text.
+                                            gridCellItem.GridCellSession.ErrorParse = errorParse;
                                         }
+
                                     }
-                                    if (!isHandled)
+                                    catch (Exception exception)
                                     {
-                                        UtilDal.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out string errorParse); // Default parse user entered cell text.
-                                        gridCellItem.GridCellSession.ErrorParse = errorParse;
+                                        errorParse = exception.Message;
                                     }
-                                    object valueAfter = gridCellItem.Field.PropertyInfo.GetValue(row);
+                                    gridCellItem.GridCellSession.ErrorParse = errorParse;
 
                                     // Autocomplete
                                     bool isAutocomplete = UtilDal.CellTextParseIsAutocomplete(gridCellItem);
@@ -641,39 +646,30 @@
                                     {
                                         Grid grid = gridItem.Grid;
                                         Page page = grid.Owner<Page>();
-                                        if (gridCellItem.GridCellSession.Text != null)
+                                        Filter filter = new Filter();
+                                        filter.Load(gridRowItem);
+                                        gridCellItem.GridCellSession.ErrorParse = null;
+                                        string errorParse = null;
+                                        try
                                         {
-                                            Filter filter = new Filter();
-                                            filter.Load(gridRowItem);
-                                            gridCellItem.GridCellSession.ErrorParse = null;
                                             bool isHandled = false;
-                                            try
+                                            if (gridCellItem.GridCellSession.Text != null)
                                             {
                                                 page.CellTextParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
                                             }
-                                            catch (Exception exception)
+                                            if (isHandled == false)
                                             {
-                                                gridCellItem.GridCellSession.ErrorParse = exception.Message;
-                                                isHandled = true;
+                                                UtilDal.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
                                             }
-                                            if (isHandled)
-                                            {
-                                                filter.Save(gridRowItem);
-                                            }
-                                            else
-                                            {
-                                                UtilDal.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out string errorParse); // Default parse user entered filter text.
-                                                gridCellItem.GridCellSession.ErrorParse = errorParse;
-                                                filter.Save(gridRowItem);
-                                            }
+                                            filter.Save(gridRowItem);
                                         }
-                                        else
+                                        catch (Exception exception)
                                         {
-                                            gridCellItem.GridCellSession.FilterValue = null;
-                                            gridCellItem.GridCellSession.FilterOperator = FilterOperator.None;
+                                            errorParse = exception.Message;
                                         }
                                         gridCellItem.GridCellSession.IsModify = false;
                                         gridCellItem.GridCellSession.TextOld = null;
+                                        gridCellItem.GridCellSession.ErrorParse = errorParse;
                                         if (!gridItemReloadList.Contains(gridItem))
                                         {
                                             gridItemReloadList.Add(gridItem);

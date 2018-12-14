@@ -251,7 +251,7 @@
     {
         public AppJson() { }
 
-        public AppJson(ComponentJson owner) 
+        public AppJson(ComponentJson owner)
             : base(owner)
         {
 
@@ -283,7 +283,7 @@
         /// <summary>
         /// Gets or sets RequestCount. Used by client. Does not send new request while old is still pending.
         /// </summary>
-        public int RequestCount;
+        public int RequestCount { get; internal set; }
 
         /// <summary>
         /// Gets or sets RequestCount. Used by server to verify incoming request matches last response.
@@ -308,17 +308,17 @@
         /// <summary>
         /// Gets SessionState. Debug server side session state.
         /// </summary>
-        public string SessionState { get; set; }
+        public string SessionState { get; internal set; }
 
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
         /// </summary>
-        public bool IsReload { get; set; }
+        public bool IsReload { get; internal set; }
 
         /// <summary>
-        /// Gets or sets RequestUrl. This value is set by the server. For example: http://localhost:49323/config/app.json
+        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/config/app.json
         /// </summary>
-        public string RequestUrl;
+        public string RequestUrl { get; internal set; }
 
         /// <summary>
         /// Gets or sets BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.
@@ -336,6 +336,19 @@
             string result = string.Format("{0}://{1}/", uri.Scheme, uri.Authority);
             return result;
         }
+    }
+
+    public enum AlertEnum
+    {
+        None = 0,
+
+        Info = 1,
+
+        Success = 1,
+
+        Warning = 2,
+
+        Error = 3
     }
 
     /// <summary>
@@ -617,6 +630,28 @@
         }
 
         /// <summary>
+        /// Gets AlertTextHtml.
+        /// </summary>
+        public string AlertTextHtml { get; set; }
+
+        /// <summary>
+        /// Gets AlertEnum.
+        /// </summary>
+        public AlertEnum AlertEnum { get; set; }
+
+        /// <summary>
+        /// Set alert message.
+        /// </summary>
+        public void AlertSet(string alertTextHtml, AlertEnum alertEnum)
+        {
+            if (alertEnum >= AlertEnum)
+            {
+                AlertTextHtml = alertTextHtml;
+                AlertEnum = alertEnum;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets IsHide. If true, component and children are still being transferred to client and back to keep state.
         /// To hide other components use extension method Remove();
         /// </summary>
@@ -736,6 +771,9 @@
             isHandled = false;
         }
 
+        /// <summary>
+        /// Parse user entered cell filter text. Called only if text is not null.
+        /// </summary>
         protected virtual internal void CellTextParseFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
         {
             isHandled = false;
