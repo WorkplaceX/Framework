@@ -321,6 +321,11 @@
         public string RequestUrl { get; internal set; }
 
         /// <summary>
+        /// Gets EmbeddedUrl. This value can be set by the client if running embedded in another website.
+        /// </summary>
+        public string EmbeddedUrl { get; internal set; }
+
+        /// <summary>
         /// Gets or sets BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.
         /// For example:  http://localhost:49323/config/data.txt
         /// </summary>

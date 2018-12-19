@@ -55,12 +55,14 @@
                 int requestCount = result.AppJson.RequestCount;
                 int responseCount = result.AppSession.ResponseCount;
                 string browserUrl = result.AppJson.BrowserUrl;
+                string embeddedUrl = result.AppJson.EmbeddedUrl;
                 result.AppJson = CreateAppJson(); // Reset
                 result.AppSession = new AppSession(); // Reset
                 result.AppJson.RequestCount = requestCount;
                 result.AppJson.ResponseCount = responseCount;
                 result.AppSession.ResponseCount = responseCount;
                 result.AppJson.BrowserUrl = browserUrl;
+                result.AppJson.EmbeddedUrl = embeddedUrl;
                 result.AppJson.IsInit = true;
                 await result.AppJson.InitInternalAsync();
             }

@@ -26,6 +26,8 @@ export class Json {
 
   RequestUrl: string;
 
+  EmbeddedUrl: string;
+
   BrowserUrl: string;
 
   IsReload: boolean;
@@ -65,7 +67,7 @@ export class DataService {
       this.json = jsonBrowser;
       this.json.IsServerSideRendering = false;
       this.alertErrorList$ = this.alertError.pipe(bufferTime(2000, 1, 1)); // No async during server side rendering!
-      if (window.location.href.startsWith("http://localhost:4200/")) {
+      if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Client\
         this.json.RequestUrl = "http://localhost:56092/";
         this.update();
       } 
@@ -103,7 +105,12 @@ export class DataService {
     if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
       this.isRequestPending = true;
       this.json.BrowserUrl = window.location.href;
-      let requestUrl = new URL("/app.json", this.json.RequestUrl).href
+      let requestUrl;
+      if (this.json.EmbeddedUrl != null) {
+        requestUrl = new URL("/app.json", this.json.EmbeddedUrl).href 
+      } else {
+        requestUrl = new URL("/app.json", this.json.RequestUrl).href 
+      }
 
       console.log("POST", this.json.RequestUrl, requestUrl);
       this.httpClient.request("POST", requestUrl, {
