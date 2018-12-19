@@ -50,7 +50,7 @@
             applicationBuilder.UseDefaultFiles(); // Used for index.html
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
-            applicationBuilder.UseCors(config => config.AllowAnyOrigin().AllowCredentials()); // Access-Control-Allow-Origin. Client POST uses withCredentials to pass cookies!
+            applicationBuilder.UseCors(config => config.WithOrigins("http://demo.workplacex.org").AllowCredentials()); // Access-Control-Allow-Origin. Client POST uses withCredentials to pass cookies!
 
             applicationBuilder.Run(new Request(applicationBuilder, appSelector).RunAsync);
         }
