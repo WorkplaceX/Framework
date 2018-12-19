@@ -112,7 +112,6 @@ export class DataService {
         requestUrl = new URL("/app.json", this.json.RequestUrl).href 
       }
 
-      console.log("POST", this.json.RequestUrl, requestUrl);
       this.httpClient.request("POST", requestUrl, {
         body: JSON.stringify(this.json),
         withCredentials: true,

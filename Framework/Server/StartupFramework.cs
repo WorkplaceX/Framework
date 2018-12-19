@@ -27,7 +27,6 @@
                 options.Cookie.Name = "FrameworkSession";
                 options.IdleTimeout = TimeSpan.FromSeconds(60);
             });
-            services.AddCors();
         }
 
         public static void Configure(IApplicationBuilder applicationBuilder, AppSelector appSelector)
@@ -50,7 +49,6 @@
             applicationBuilder.UseDefaultFiles(); // Used for index.html
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
-            applicationBuilder.UseCors(config => config.WithOrigins("http://demo.workplacex.org").AllowCredentials()); // Access-Control-Allow-Origin. Client POST uses withCredentials to pass cookies!
 
             applicationBuilder.Run(new Request(applicationBuilder, appSelector).RunAsync);
         }

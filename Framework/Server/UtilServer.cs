@@ -15,6 +15,16 @@
 
     internal class UtilServer
     {
+        public static void Cors()
+        {
+            string origin = Context.Request.Headers["Origin"];
+            if (origin != null)
+            {
+                Context.Response.Headers.Add("Access-Control-Allow-Origin", origin); // Prevent browser error: blocked by CORS policy.
+                Context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+            }
+        }
+
         [ThreadStatic]
         public static IApplicationBuilder ApplicationBuilder;
 

@@ -31,6 +31,8 @@
         {
             // await Task.Delay(500); // Simulate slow network.
 
+            UtilServer.Cors();
+
             // Path init
             string path = context.Request.Path;
             if (UtilServer.PathIsFileName(path) == false)
