@@ -37,7 +37,7 @@
             }
             else
             {
-                result.AppJson = new AppJson();
+                result.AppJson = CreateAppJson();
             }
             int requestCountAssert = result.AppJson.RequestCount;
 
@@ -63,6 +63,7 @@
                 result.AppSession.ResponseCount = responseCount;
                 result.AppJson.BrowserUrl = browserUrl;
                 result.AppJson.EmbeddedUrl = embeddedUrl;
+                result.AppJson.RequestUrl = UtilServer.RequestUrl();
                 result.AppJson.IsInit = true;
                 await result.AppJson.InitInternalAsync();
             }
@@ -97,9 +98,6 @@
             {
                 appJson.IsReload = true;
             }
-
-            // RequestUrl
-            appJson.RequestUrl = UtilServer.RequestUrl(false);
         }
 
         private AppJson CreateAppJson()

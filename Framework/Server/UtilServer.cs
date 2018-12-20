@@ -77,21 +77,14 @@
         }
 
         /// <summary>
-        /// Returns request url.
+        /// Returns client request url. For example: "http://localhost:49323/".
         /// </summary>
-        /// <param name="isServer">If true, it returns root url "http://localhost:49323/". If false, it returns "http://localhost:49323/config/data.txt".</param>
-        public static string RequestUrl(bool isServer)
+        public static string RequestUrl()
         {
             string result = null;
             HttpContext context = Context;
-            if (isServer)
-            {
-                result = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
-            }
-            else
-            {
-                result = string.Format("{0}://{1}{2}", context.Request.Scheme, context.Request.Host.Value, context.Request.Path);
-            }
+            result = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
+            // result = string.Format("{0}://{1}{2}", context.Request.Scheme, context.Request.Host.Value, context.Request.Path); // Returns also path. For example: "http://localhost:49323/config/data.txt"
             return result;
         }
 

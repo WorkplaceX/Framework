@@ -316,7 +316,7 @@
         public bool IsReload { get; internal set; }
 
         /// <summary>
-        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/config/app.json
+        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method: UtilServer.RequestUrl();
         /// </summary>
         public string RequestUrl { get; internal set; }
 
@@ -324,6 +324,21 @@
         /// Gets EmbeddedUrl. This value can be set by the client if running embedded in another website.
         /// </summary>
         public string EmbeddedUrl { get; internal set; }
+
+        /// <summary>
+        /// Returns true if app runs embedded in another web page. In this case make sure to have absolute paths for example to images.
+        /// </summary>
+        /// <param name="requestUrl">If running in embedded mode use returned requestUrl to form absolute path.</param>
+        public bool IsEmbedded(out string requestUrl)
+        {
+            requestUrl = null;
+            bool result = UtilFramework.StringNull(EmbeddedUrl) != null;
+            if (result)
+            {
+                requestUrl = RequestUrl;
+            }
+            return result;
+        }
 
         /// <summary>
         /// Gets or sets BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.
