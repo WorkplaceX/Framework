@@ -34,6 +34,7 @@
             if (json != null) // If post
             {
                 result.AppJson = UtilJson.Deserialize<AppJson>(json, result.TypeComponentInNamespaceList);
+                result.AppJson.IsSessionExpired = false;
             }
             else
             {
@@ -49,8 +50,11 @@
             // User has app open in two browser tabs.
             bool isBrowserTabSwitch = (result.AppJson.ResponseCount != result.AppSession.ResponseCount);
 
+            // Session expired
+            bool isSessionExpired = (result.AppSession.ResponseCount == 0 && result.AppJson.RequestCount > 0);
+
             // Init
-            if (result.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch)
+            if (result.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch || isSessionExpired)
             {
                 int requestCount = result.AppJson.RequestCount;
                 int responseCount = result.AppSession.ResponseCount;
@@ -65,6 +69,7 @@
                 result.AppJson.EmbeddedUrl = embeddedUrl;
                 result.AppJson.RequestUrl = UtilServer.RequestUrl();
                 result.AppJson.IsInit = true;
+                result.AppJson.IsSessionExpired = isSessionExpired;
                 await result.AppJson.InitInternalAsync();
             }
 

@@ -50,8 +50,6 @@ export class Selector {
 @Component({
   selector: '[data-Page]',
   template: `
-  <div *ngIf="json.AlertEnum>0" class="alert" [ngClass]="{'alert-primary':json.AlertEnum==1,'alert-success':json.AlertEnum==2,'alert-warning':json.AlertEnum==3,'alert-danger':json.AlertEnum==4}"  role="alert" [innerHtml]="json.AlertTextHtml">
-  </div>  
   <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
   `
 })

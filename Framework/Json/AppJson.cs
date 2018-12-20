@@ -227,9 +227,50 @@
             return PageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
         }
 
+        /// <summary>
+        /// Remove this component.
+        /// </summary>
         public static void Remove(this ComponentJson component)
         {
             component?.Owner().List.Remove(component);
+        }
+
+        /// <summary>
+        /// Returns index of this component.
+        /// </summary>
+        public static int Index(this ComponentJson component)
+        {
+            return component.Owner().List.IndexOf(component);
+        }
+
+        /// <summary>
+        /// Remove child component if exists.
+        /// </summary>
+        public static void RemoveItem(this ComponentJson component, string name)
+        {
+            var item = component.Get(name);
+            if (item != null)
+            {
+                item.Remove();
+            }
+        }
+
+        /// <summary>
+        /// Remove child component if exists.
+        /// </summary>
+        public static void RemoveItem<T>(this ComponentJson component) where T : ComponentJson
+        {
+            component.RemoveItem(typeof(T).Name);
+        }
+
+        /// <summary>
+        /// Move this component to index position.
+        /// </summary>
+        public static void Move(this ComponentJson component, int index)
+        {
+            var list = component?.Owner().List;
+            list.Remove(component);
+            list.Insert(index, component);
         }
 
         /// <summary>
@@ -295,6 +336,11 @@
         /// </summary>
         public bool IsInit;
 
+        /// <summary>
+        /// Gets IsSessionExpired. If true, session expired and application has been recycled.
+        /// </summary>
+        public bool IsSessionExpired { get; internal set; }
+
         public string Version { get; set; }
 
         public string VersionBuild { get; set; }
@@ -356,19 +402,6 @@
             string result = string.Format("{0}://{1}/", uri.Scheme, uri.Authority);
             return result;
         }
-    }
-
-    public enum AlertEnum
-    {
-        None = 0,
-
-        Info = 1,
-
-        Success = 1,
-
-        Warning = 2,
-
-        Error = 3
     }
 
     /// <summary>
@@ -447,6 +480,53 @@
         public bool IsActive;
 
         public bool IsClick;
+    }
+
+    public enum BootstrapAlertEnum
+    {
+        None = 0,
+
+        Info = 1,
+
+        Success = 2,
+
+        Warning = 3,
+
+        Error = 4
+    }
+
+    public static class BootstrapExtension
+    {
+        /// <summary>
+        /// Show bootstrap alert (on per page).
+        /// </summary>
+        public static Html BootstrapAlert(this Page page, string name, string textHtml, BootstrapAlertEnum alertEnum, int index = 0)
+        {
+            string htmlTextAlert = "<div class='alert {{CssClass}}' role='alert'>{{TextHtml}}</div>";
+            string cssClass = null;
+            switch (alertEnum)
+            {
+                case BootstrapAlertEnum.Info:
+                    cssClass = "alert-info";
+                    break;
+                case BootstrapAlertEnum.Success:
+                    cssClass = "alert-success";
+                    break;
+                case BootstrapAlertEnum.Warning:
+                    cssClass = "alert-warning";
+                    break;
+                case BootstrapAlertEnum.Error:
+                    cssClass = "alert-danger";
+                    break;
+                default:
+                    break;
+            }
+            htmlTextAlert = htmlTextAlert.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
+            Html result = page.GetOrCreate<Html>(name);
+            result.TextHtml = htmlTextAlert;
+            result.Move(index);
+            return result;
+        }
     }
 
     public sealed class Grid : ComponentJson
@@ -650,28 +730,6 @@
         }
 
         /// <summary>
-        /// Gets AlertTextHtml.
-        /// </summary>
-        public string AlertTextHtml { get; set; }
-
-        /// <summary>
-        /// Gets AlertEnum.
-        /// </summary>
-        public AlertEnum AlertEnum { get; set; }
-
-        /// <summary>
-        /// Set alert message.
-        /// </summary>
-        public void AlertSet(string alertTextHtml, AlertEnum alertEnum)
-        {
-            if (alertEnum >= AlertEnum)
-            {
-                AlertTextHtml = alertTextHtml;
-                AlertEnum = alertEnum;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets IsHide. If true, component and children are still being transferred to client and back to keep state.
         /// To hide other components use extension method Remove();
         /// </summary>
@@ -683,11 +741,11 @@
         public string TypeCSharp;
 
         /// <summary>
-        /// Called on first request.
+        /// Called once a lifetime when page is created.
         /// </summary>
-        protected virtual internal async Task InitAsync()
+        protected virtual internal Task InitAsync()
         {
-            await Task.Run(() => { });
+            return Task.FromResult(0);
         }
 
         /// <summary>
@@ -732,9 +790,9 @@
         /// <summary>
         /// Method called when data row has been selected. Get selected row with grid.RowSelected();
         /// </summary>
-        protected virtual internal async Task GridRowSelectedAsync(Grid grid)
+        protected virtual internal Task GridRowSelectedAsync(Grid grid)
         {
-            await Task.Run(() => { });
+            return Task.FromResult(0);
         }
 
         protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
@@ -762,14 +820,17 @@
             return null;
         }
 
-        protected virtual internal async Task ProcessAsync()
+        /// <summary>
+        /// Override this method to implement custom process at the end of the process chain. Called once every request.
+        /// </summary>
+        protected virtual internal Task ProcessAsync()
         {
-            await Task.Run(() => { });
+            return Task.FromResult(0);
         }
 
-        protected virtual internal async Task ButtonClickAsync(Button button)
+        protected virtual internal Task ButtonClickAsync(Button button)
         {
-            await Task.Run(() => { });
+            return Task.FromResult(0);
         }
 
         /// <summary>
