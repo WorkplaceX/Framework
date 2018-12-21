@@ -1,4 +1,4 @@
-﻿namespace Framework.Dal.Memory
+﻿namespace Framework.Dal.DatabaseMemory
 {
     using Framework.Server;
     using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -10,32 +10,9 @@
     using System.Linq.Expressions;
     using System.Reflection;
 
-    /// <summary>
-    /// Linq to database or linq to memory.
-    /// </summary>
-    public enum ScopeEnum
-    {
-        None = 0,
-
-        /// <summary>
-        /// Linq to database.
-        /// </summary>
-        Database = 1,
-
-        /// <summary>
-        /// Linq to memory shared by multiple requests (singleton scope).
-        /// </summary>
-        MemorySingleton = 2,
-
-        /// <summary>
-        /// Linq to memory (request scope).
-        /// </summary>
-        MemoryRequest = 3
-    }
-
     internal interface IListRow : IList
     {
-        MemoryInternal Memory { get; }
+        DatabaseMemoryInternal DatabaseMemory { get; }
     }
 
     /// <summary>
@@ -43,26 +20,26 @@
     /// </summary>
     internal class ListRow<T> : List<T>, IListRow
     {
-        public ListRow(MemoryInternal memory)
+        public ListRow(DatabaseMemoryInternal databaseMemory)
         {
-            this.memory = memory;
+            this.databaseMemory = databaseMemory;
         }
 
-        private readonly MemoryInternal memory;
+        private readonly DatabaseMemoryInternal databaseMemory;
 
-        public MemoryInternal Memory
+        public DatabaseMemoryInternal DatabaseMemory
         {
             get
             {
-                return memory;
+                return databaseMemory;
             }
         }
     }
 
     /// <summary>
-    /// Memory stores row classes.
+    /// Database memory stores row objects in memory.
     /// </summary>
-    internal class MemoryInternal
+    internal class DatabaseMemoryInternal
     {
         /// <summary>
         /// (TypeRow, List<Row>). Memory row store.
@@ -94,26 +71,26 @@
         /// <summary>
         /// Returns singleton scope memory instance.
         /// </summary>
-        public static MemoryInternal Instance
+        public static DatabaseMemoryInternal Instance
         {
             get
             {
-                return (MemoryInternal)UtilServer.Context.RequestServices.GetService(typeof(MemoryInternal)); // See also method ConfigureServices();
+                return (DatabaseMemoryInternal)UtilServer.Context.RequestServices.GetService(typeof(DatabaseMemoryInternal)); // See also method ConfigureServices();
             }
         }
 
         /// <summary>
         /// Determines based on the query origin where to write back data (to database or memory).
         /// </summary>
-        public static ScopeEnum ScopeEnum(IQueryable query)
+        public static DatabaseEnum DatabaseEnum(IQueryable query)
         {
             var expressionVisitorScope = new ExpressionVisitorScope();
             expressionVisitorScope.Visit(query.Expression);
 
-            ScopeEnum result = Memory.ScopeEnum.None;
-            if (expressionVisitorScope.ScopeEnumList.Count == 1)
+            DatabaseEnum result = Framework.Dal.DatabaseEnum.None;
+            if (expressionVisitorScope.DatabaseEnumList.Count == 1)
             {
-                return expressionVisitorScope.ScopeEnumList.Single();
+                return expressionVisitorScope.DatabaseEnumList.Single();
             }
             return result;
         }
@@ -129,7 +106,7 @@
             // Database
             if (node.Type.IsGenericType && node.Type.GetGenericTypeDefinition() == typeof(EntityQueryable<>))
             {
-                ScopeEnumList.Add(ScopeEnum.Database);
+                DatabaseEnumList.Add(DatabaseEnum.Database);
             }
 
             // MemorySingleton
@@ -138,10 +115,10 @@
                 var enumerable = node.Value.GetType().GetField("_enumerable", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(node.Value);
                 if (enumerable is IListRow)
                 {
-                    MemoryInternal memory = ((IListRow)enumerable).Memory;
-                    if (memory == MemoryInternal.Instance)
+                    DatabaseMemoryInternal databaseMemory = ((IListRow)enumerable).DatabaseMemory;
+                    if (databaseMemory == DatabaseMemoryInternal.Instance)
                     {
-                        ScopeEnumList.Add(ScopeEnum.MemorySingleton);
+                        DatabaseEnumList.Add(DatabaseEnum.MemorySingleton);
                     }
                 }
             }
@@ -150,8 +127,8 @@
         }
 
         /// <summary>
-        /// Gets ScopeEnumList. Detected scope origins by ExpressionVisitor.
+        /// Gets DatabaseEnumList. Detected scope origins by ExpressionVisitor.
         /// </summary>
-        public HashSet<ScopeEnum> ScopeEnumList = new HashSet<ScopeEnum>();
+        public HashSet<DatabaseEnum> DatabaseEnumList = new HashSet<DatabaseEnum>();
     }
 }

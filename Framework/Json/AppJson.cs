@@ -3,7 +3,6 @@
     using Database.dbo;
     using Framework.App;
     using Framework.Dal;
-    using Framework.Dal.Memory;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -766,7 +765,7 @@
         /// <param name="row">Data row to update.</param>
         /// <param name="rowNew">New data row to save to database.</param>
         /// <returns>Returns true, if save was handled.</returns>
-        protected virtual internal Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, ScopeEnum scopeEnum)
+        protected virtual internal Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }

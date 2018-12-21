@@ -2,7 +2,7 @@
 {
     using Framework.Application;
     using Framework.Config;
-    using Framework.Dal.Memory;
+    using Framework.Dal.DatabaseMemory;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -19,7 +19,7 @@
             // Dependency Injection DI. See also https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Needed for IIS. Otherwise new HttpContextAccessor(); results in null reference exception.
             services.AddScoped<UtilServer.InstanceService, UtilServer.InstanceService>(); // Singleton per request.
-            services.AddSingleton<MemoryInternal>();
+            services.AddSingleton<DatabaseMemoryInternal>();
 
             services.AddDistributedMemoryCache();
             services.AddSession(options =>

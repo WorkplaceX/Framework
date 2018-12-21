@@ -1,7 +1,7 @@
 ﻿namespace Framework.Dal
 {
     using Framework.Config;
-    using Framework.Dal.Memory;
+    using Framework.Dal.DatabaseMemory;
     using Framework.Json;
     using Framework.Session;
     using Microsoft.EntityFrameworkCore;
@@ -19,17 +19,40 @@
     using static Framework.Dal.UtilDalType;
     using static Framework.Session.UtilSession;
 
+    /// <summary>
+    /// Linq to database or linq to memory.
+    /// </summary>
+    public enum DatabaseEnum
+    {
+        None = 0,
+
+        /// <summary>
+        /// Linq to database.
+        /// </summary>
+        Database = 1,
+
+        /// <summary>
+        /// Linq to memory shared by multiple requests (singleton scope).
+        /// </summary>
+        MemorySingleton = 2,
+
+        /// <summary>
+        /// Linq to memory (request scope).
+        /// </summary>
+        MemoryRequest = 3
+    }
+
     public static class UtilDal
     {
         /// <summary>
         /// Returns memory where rows are stored.
         /// </summary>
-        public static IList MemoryRowList(Type typeRow, ScopeEnum scopeEnum = ScopeEnum.MemorySingleton)
+        public static IList MemoryRowList(Type typeRow, DatabaseEnum databaseEnum = DatabaseEnum.MemorySingleton)
         {
-            switch (scopeEnum)
+            switch (databaseEnum)
             {
-                case ScopeEnum.MemorySingleton:
-                    return Memory.MemoryInternal.Instance.RowListGet(typeRow);
+                case DatabaseEnum.MemorySingleton:
+                    return DatabaseMemory.DatabaseMemoryInternal.Instance.RowListGet(typeRow);
                 default:
                     throw new Exception("Scope not supported!");
             }
@@ -38,11 +61,11 @@
         /// <summary>
         /// Returns linq to memory query.
         /// </summary>
-        public static List<TRow> MemoryRowList<TRow>(ScopeEnum scopeEnum = ScopeEnum.MemorySingleton) where TRow : Row
+        public static List<TRow> MemoryRowList<TRow>(DatabaseEnum databaseEnum = DatabaseEnum.MemorySingleton) where TRow : Row
         {
-            switch (scopeEnum)
+            switch (databaseEnum)
             {
-                case ScopeEnum.MemorySingleton:
+                case DatabaseEnum.MemorySingleton:
                     return (List<TRow>)MemoryRowList(typeof(TRow));
                 default:
                     throw new Exception("Scope not supported!");
@@ -353,14 +376,14 @@
         /// <summary>
         /// Returns linq to database query.
         /// </summary>
-        public static IQueryable Query(Type typeRow, ScopeEnum scopeEnum = ScopeEnum.Database)
+        public static IQueryable Query(Type typeRow, DatabaseEnum databaseEnum = DatabaseEnum.Database)
         {
-            switch (scopeEnum)
+            switch (databaseEnum)
             {
-                case ScopeEnum.Database:
+                case DatabaseEnum.Database:
                     return DbContextInternalCreate(typeRow).Query;
-                case ScopeEnum.MemorySingleton:
-                    return MemoryInternal.Instance.RowListGet(typeRow).AsQueryable();
+                case DatabaseEnum.MemorySingleton:
+                    return DatabaseMemoryInternal.Instance.RowListGet(typeRow).AsQueryable();
                 default:
                     throw new Exception("Scope not supported!");
             }
@@ -369,9 +392,9 @@
         /// <summary>
         /// Returns linq to database query.
         /// </summary>
-        public static IQueryable<TRow> Query<TRow>(ScopeEnum scopeEnum = ScopeEnum.Database) where TRow : Row
+        public static IQueryable<TRow> Query<TRow>(DatabaseEnum databaseEnum = DatabaseEnum.Database) where TRow : Row
         {
-            return (IQueryable<TRow>)Query(typeof(TRow), scopeEnum);
+            return (IQueryable<TRow>)Query(typeof(TRow), databaseEnum);
         }
 
         /// <summary>
@@ -546,13 +569,13 @@
         /// <summary>
         /// Insert data record. Primary key needs to be 0! Returned new row contains new primary key.
         /// </summary>
-        public static async Task<TRow> InsertAsync<TRow>(TRow row, ScopeEnum scopeEnum = ScopeEnum.Database) where TRow : Row
+        public static async Task<TRow> InsertAsync<TRow>(TRow row, DatabaseEnum databaseEnum = DatabaseEnum.Database) where TRow : Row
         {
             UtilFramework.LogDebug(string.Format("INSERT ({0})", row.GetType().Name));
 
-            switch (scopeEnum)
+            switch (databaseEnum)
             {
-                case ScopeEnum.Database:
+                case DatabaseEnum.Database:
                     {
                         Row rowCopy = UtilDal.RowCopy(row);
                         DbContext dbContext = DbContextInternalCreate(row.GetType());
@@ -575,9 +598,9 @@
                         }
                         break;
                     }
-                case ScopeEnum.MemorySingleton:
+                case DatabaseEnum.MemorySingleton:
                     {
-                        var rowList = UtilDal.MemoryRowList(row.GetType(), scopeEnum);
+                        var rowList = UtilDal.MemoryRowList(row.GetType(), databaseEnum);
                         rowList.Add(row);
                         break;
                     }
@@ -590,16 +613,16 @@
         /// <summary>
         /// Update data record on database.
         /// </summary>
-        public static async Task UpdateAsync(Row row, Row rowNew, ScopeEnum scopeEnum = ScopeEnum.Database)
+        public static async Task UpdateAsync(Row row, Row rowNew, DatabaseEnum databaseEnum = DatabaseEnum.Database)
         {
             UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
 
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
             // if (UtilDal.RowEqual(row, rowNew) == false) // See also: EntityState.Modified
             {
-                switch (scopeEnum)
+                switch (databaseEnum)
                 {
-                    case ScopeEnum.Database:
+                    case DatabaseEnum.Database:
                         {
                             row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
                             DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
@@ -610,9 +633,9 @@
                             UtilFramework.Assert(count == 1, "Update failed!");
                             break;
                         }
-                    case ScopeEnum.MemorySingleton:
+                    case DatabaseEnum.MemorySingleton:
                         {
-                            var rowList = UtilDal.MemoryRowList(row.GetType(), scopeEnum);
+                            var rowList = UtilDal.MemoryRowList(row.GetType(), databaseEnum);
                             PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(row.GetType()).First(); // Assume first field is primary key.
                             object idNew = propertyInfo.GetValue(row);
                             int updateCount = 0;
