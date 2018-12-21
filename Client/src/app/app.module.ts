@@ -3,8 +3,9 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
-import { AppComponent, Button, Div, Selector, Grid, Page, Html } from './app.component';
+import { AppComponent, Button, Div, Selector, Page, Html } from './app.component';
 import { BootstrapNavbar } from './bootstrapNavbar/bootstrapNavbar.component';
+import { Grid } from './grid/grid.component';
 
 @NgModule({
   declarations: [

@@ -671,6 +671,8 @@
         public bool IsSelect;
 
         public GridRowEnum RowEnum;
+
+        public string ErrorSave;
     }
 
     public sealed class GridCell

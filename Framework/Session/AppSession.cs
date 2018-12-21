@@ -122,7 +122,6 @@
             GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
             int gridIndex = UtilSession.GridToIndex(grid);
 
-
             // Reset GridRowSessionList but keep filter row.
             var filterRow = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).SingleOrDefault();
             gridSession.GridRowSessionList.Clear();
@@ -332,6 +331,7 @@
                             {
                                 GridRow gridRow = new GridRow();
                                 gridRow.RowEnum = gridRowItem.GridRowSession.RowEnum;
+                                gridRow.ErrorSave = gridRowItem.GridRowSession.ErrorSave;
                                 gridItem.Grid.RowList.Add(gridRow);
                                 gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
                                 gridRow.CellList = new List<GridCell>();
