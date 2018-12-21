@@ -121,8 +121,8 @@
                 result.AppendLine("    {");
                 FieldNameProperty(metaCSharp, schemaName, item.TableName, result);
                 result.AppendLine("    }");
-                result.AppendLine();
-                FieldNameClass(metaCSharp, schemaName, item.TableName, result);
+                // result.AppendLine();
+                // FieldNameClass(metaCSharp, schemaName, item.TableName, result);
             }
         }
 
@@ -152,11 +152,11 @@
                     string typeCSharp = UtilGenerate.SqlTypeToCSharpType(item.Schema.SqlType, item.Schema.IsNullable);
                     if (item.IsPrimaryKey == false)
                     {
-                        result.AppendLine(string.Format("        [SqlField(\"{0}\", typeof({1}), {2})]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp, nameof(FrameworkTypeEnum) + "." + item.FrameworkTypeEnum.ToString()));
+                        result.AppendLine(string.Format("        [SqlField(\"{0}\", {2})]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp, nameof(FrameworkTypeEnum) + "." + item.FrameworkTypeEnum.ToString()));
                     }
                     else
                     {
-                        result.AppendLine(string.Format("        [SqlField(\"{0}\", typeof({1}), {2}, {3})]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp, item.IsPrimaryKey.ToString().ToLower(), nameof(FrameworkTypeEnum) + "." + item.FrameworkTypeEnum.ToString()));
+                        result.AppendLine(string.Format("        [SqlField(\"{0}\", {2}, {3})]", item.Schema.FieldName, item.TableNameCSharp + "_" + item.FieldNameCSharp, item.IsPrimaryKey.ToString().ToLower(), nameof(FrameworkTypeEnum) + "." + item.FrameworkTypeEnum.ToString()));
                     }
                     result.AppendLine(string.Format("        public " + typeCSharp + " {0} {{ get; set; }}", item.FieldNameCSharp));
                 }
