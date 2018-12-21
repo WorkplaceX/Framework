@@ -680,6 +680,8 @@
         /// </summary>
         public string Text;
 
+        public string Placeholder;
+
         public string ErrorParse;
 
         public string TextGet()

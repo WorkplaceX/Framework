@@ -147,7 +147,7 @@ export class Div {
           -->
 
           <div style="flex:1; overflow:hidden;">
-            <input type="text" [(ngModel)]="cell.Text" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
+            <input type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
           </div>
           <div style="padding-left:2px">
             <i *ngIf="cell.ErrorParse!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorParse }}"></i>

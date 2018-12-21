@@ -346,6 +346,14 @@
                                             GridCell gridCell = new GridCell();
                                             gridRow.CellList.Add(gridCell);
                                             gridCell.Text = gridCellItem.GridCellSession.Text;
+                                            if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
+                                            {
+                                                gridCell.Placeholder = "Search";
+                                            }
+                                            if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)
+                                            {
+                                                gridCell.Placeholder = "New";
+                                            }
                                             gridCell.ErrorParse = gridCellItem.GridCellSession.ErrorParse;
                                             gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
                                             gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
