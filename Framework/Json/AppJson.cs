@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.App;
     using Framework.Dal;
+    using Framework.Dal.Memory;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -52,7 +53,7 @@
 
         public string Type;
 
-        public string TrackBy;
+        public string TrackBy { get; internal set; }
 
         /// <summary>
         /// Gets or sets custom html style classes for this component.
@@ -69,7 +70,7 @@
 
     public static class ComponentJsonExtension
     {
-        public static ComponentJson Owner(this ComponentJson component)
+        public static ComponentJson ComponentOwner(this ComponentJson component)
         {
             ComponentJson result = UtilServer.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
             return result;
@@ -78,11 +79,11 @@
         /// <summary>
         /// Returns owner of type T. Searches in parent and grand parents.
         /// </summary>
-        public static T Owner<T>(this ComponentJson component) where T : ComponentJson
+        public static T ComponentOwner<T>(this ComponentJson component) where T : ComponentJson
         {
             do
             {
-                component = Owner(component);
+                component = ComponentOwner(component);
                 if (component is T)
                 {
                     return (T)component;
@@ -109,7 +110,7 @@
             return result;
         }
 
-        public static ComponentJson Get(this ComponentJson owner, string name)
+        public static ComponentJson ComponentGet(this ComponentJson owner, string name)
         {
             var resultList = owner.List.Where(item => item.Name == name).ToArray();
             if (resultList.Count() > 1)
@@ -119,25 +120,25 @@
             return resultList.SingleOrDefault();
         }
 
-        public static T Get<T>(this ComponentJson owner, string name) where T : ComponentJson
+        public static T ComponentGet<T>(this ComponentJson owner, string name) where T : ComponentJson
         {
-            ComponentJson result = owner.Get(name);
+            ComponentJson result = owner.ComponentGet(name);
             if (result != null && !(result is T))
             {
                 throw new Exception(string.Format("Component wrong type! (Name={0})", name));
             }
-            return (T)owner.Get(name);
+            return (T)owner.ComponentGet(name);
         }
 
-        public static T Get<T>(this ComponentJson owner) where T : ComponentJson
+        public static T ComponentGet<T>(this ComponentJson owner) where T : ComponentJson
         {
-            return owner.Get<T>(typeof(T).Name);
+            return owner.ComponentGet<T>(typeof(T).Name);
         }
 
         /// <summary>
         /// Returns new ComponentJson.
         /// </summary>
-        public static T Create<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
+        public static T ComponentCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
         {
             T component = (T)Activator.CreateInstance(typeof(T), owner);
             component.Name = name;
@@ -146,29 +147,29 @@
             return component; // owner.Get<T>(name); // Do not check whether component with same name exists multiple times.
         }
 
-        public static T Create<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
+        public static T ComponentCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
         {
-            return Create<T>(owner, typeof(T).Name, init);
+            return ComponentCreate<T>(owner, typeof(T).Name, init);
         }
 
         /// <summary>
         /// Returns ComponentJson or creates new if not yet exists.
         /// </summary>
         /// <param name="init">Callback method if ComponentJson has been created new. For example to init text.</param>
-        public static T GetOrCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
+        public static T ComponentGetOrCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
         {
-            if (owner.Get(name) == null)
+            if (owner.ComponentGet(name) == null)
             {
                 T component = (T)Activator.CreateInstance(typeof(T), owner);
                 component.Name = name;
                 init?.Invoke(component);
             }
-            return owner.Get<T>(name);
+            return owner.ComponentGet<T>(name);
         }
 
-        public static T GetOrCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
+        public static T ComponentGetOrCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
         {
-            return GetOrCreate<T>(owner, typeof(T).Name, init);
+            return ComponentGetOrCreate<T>(owner, typeof(T).Name, init);
         }
 
         public enum PageShowEnum
@@ -202,21 +203,21 @@
                     page.IsHide = true; // Hide
                 }
             }
-            if (Get(owner, name) == null)
+            if (ComponentGet(owner, name) == null)
             {
                 result = (T)Activator.CreateInstance(typeof(T), owner);
                 result.Name = name;
                 await result.InitAsync();
                 init?.Invoke(result);
             }
-            result = Get<T>(owner, name);
+            result = ComponentGet<T>(owner, name);
             UtilFramework.Assert(result != null);
             result.IsHide = false; // Show
             if (pageShowEnum == PageShowEnum.SiblingRemove)
             {
                 owner.List.OfType<Page>().ToList().ForEach(page =>
                 {
-                    if (page != result) { page.Remove(); }
+                    if (page != result) { page.ComponentRemove(); }
                 });
             }
             return result;
@@ -230,45 +231,45 @@
         /// <summary>
         /// Remove this component.
         /// </summary>
-        public static void Remove(this ComponentJson component)
+        public static void ComponentRemove(this ComponentJson component)
         {
-            component?.Owner().List.Remove(component);
+            component?.ComponentOwner().List.Remove(component);
         }
 
         /// <summary>
         /// Returns index of this component.
         /// </summary>
-        public static int Index(this ComponentJson component)
+        public static int ComponentIndex(this ComponentJson component)
         {
-            return component.Owner().List.IndexOf(component);
+            return component.ComponentOwner().List.IndexOf(component);
         }
 
         /// <summary>
         /// Remove child component if exists.
         /// </summary>
-        public static void RemoveItem(this ComponentJson component, string name)
+        public static void ComponentRemoveItem(this ComponentJson component, string name)
         {
-            var item = component.Get(name);
+            var item = component.ComponentGet(name);
             if (item != null)
             {
-                item.Remove();
+                item.ComponentRemove();
             }
         }
 
         /// <summary>
         /// Remove child component if exists.
         /// </summary>
-        public static void RemoveItem<T>(this ComponentJson component) where T : ComponentJson
+        public static void ComponentRemoveItem<T>(this ComponentJson component) where T : ComponentJson
         {
-            component.RemoveItem(typeof(T).Name);
+            component.ComponentRemoveItem(typeof(T).Name);
         }
 
         /// <summary>
         /// Move this component to index position.
         /// </summary>
-        public static void Move(this ComponentJson component, int index)
+        public static void ComponentMove(this ComponentJson component, int index)
         {
-            var list = component?.Owner().List;
+            var list = component?.ComponentOwner().List;
             list.Remove(component);
             list.Insert(index, component);
         }
@@ -522,9 +523,9 @@
                     break;
             }
             htmlTextAlert = htmlTextAlert.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
-            Html result = page.GetOrCreate<Html>(name);
+            Html result = page.ComponentGetOrCreate<Html>(name);
             result.TextHtml = htmlTextAlert;
-            result.Move(index);
+            result.ComponentMove(index);
             return result;
         }
     }
@@ -579,7 +580,7 @@
         /// </summary>
         internal bool GridLookupIsOpen()
         {
-            return LookupGridIndex != null && this.Owner() is Grid;
+            return LookupGridIndex != null && this.ComponentOwner() is Grid;
         }
 
         /// <summary>
@@ -758,6 +759,18 @@
             return null;
         }
 
+        /// <summary>
+        /// Override this method for custom grid save implementation. Return isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to update.</param>
+        /// <param name="row">Data row to update.</param>
+        /// <param name="rowNew">New data row to save to database.</param>
+        /// <returns>Returns true, if save was handled.</returns>
+        protected virtual internal Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, ScopeEnum scopeEnum)
+        {
+            return Task.FromResult(false);
+        }
+
         public class Config
         {
             /// <summary>
@@ -837,7 +850,7 @@
         /// Convert database value to front end cell text. Called only if value is not null.
         /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
-        protected virtual internal string CellTextFromValue(Grid grid, Row row, string fieldName)
+        protected virtual internal string CellText(Grid grid, Row row, string fieldName)
         {
             return null;
         }

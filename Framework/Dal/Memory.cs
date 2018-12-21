@@ -11,7 +11,7 @@
     using System.Reflection;
 
     /// <summary>
-    /// Linq to database ot linq to memory.
+    /// Linq to database or linq to memory.
     /// </summary>
     public enum ScopeEnum
     {

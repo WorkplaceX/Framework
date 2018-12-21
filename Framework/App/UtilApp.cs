@@ -21,7 +21,7 @@
             var app = UtilServer.AppInternal;
             foreach (Button button in app.AppJson.ListAll().OfType<Button>().Where(item => item.IsClick))
             {
-                await button.Owner<Page>().ButtonClickAsync(button);
+                await button.ComponentOwner<Page>().ButtonClickAsync(button);
                 button.IsClick = false;
             }
         }
@@ -66,7 +66,7 @@
                                 {
                                     throw new Exception("Grid has been removed! Use property Grid.IsHide instead.");
                                 }
-                                await gridItem.Grid.Owner<Page>().GridRowSelectedAsync(gridItem.Grid);
+                                await gridItem.Grid.ComponentOwner<Page>().GridRowSelectedAsync(gridItem.Grid);
                             }
                         }
                     }

@@ -384,21 +384,40 @@
 
         /// <summary>
         /// Copy data row. Source and dest need not to be of same type. Only cells available on
-        /// both records are copied. See also RowClone();
+        /// both records are copied.
         /// </summary>
-        internal static void RowCopy(Row rowSource, Row rowDest)
+        public static void RowCopy(Row rowSource, Row rowDest, string fieldNameSourcePrefix = null)
         {
             var propertyInfoDestList = UtilDalType.TypeRowToPropertyInfoList(rowDest.GetType());
             foreach (PropertyInfo propertyInfoDest in propertyInfoDestList)
             {
-                string fieldName = propertyInfoDest.Name;
-                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldName);
+                string fieldNameDest = propertyInfoDest.Name;
+                string fieldNameSource = fieldNameSourcePrefix + fieldNameDest;
+                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldNameSource);
                 if (propertyInfoSource != null)
                 {
                     object value = propertyInfoSource.GetValue(rowSource);
                     propertyInfoDest.SetValue(rowDest, value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Clone data row.
+        /// </summary>
+        public static Row RowCopy(Row row)
+        {
+            Row result = (Row)UtilFramework.TypeToObject(row.GetType());
+            RowCopy(row, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Clone data row.
+        /// </summary>
+        public static TRow RowCopy<TRow>(TRow row) where TRow : Row
+        {
+            return (TRow)RowCopy((Row)row);
         }
 
         /// <summary>
@@ -424,29 +443,11 @@
         }
 
         /// <summary>
-        /// Clone data row.
-        /// </summary>
-        internal static Row RowCopy(Row row)
-        {
-            Row result = (Row)UtilFramework.TypeToObject(row.GetType());
-            RowCopy(row, result);
-            return result;
-        }
-
-        /// <summary>
         /// Returns new data row.
         /// </summary>
         public static Row RowCreate(Type typeRow)
         {
             return (Row)UtilFramework.TypeToObject(typeRow);
-        }
-
-        /// <summary>
-        /// Clone data row.
-        /// </summary>
-        internal static TRow RowCopy<TRow>(TRow row) where TRow : Row
-        {
-            return (TRow)RowCopy((Row)row);
         }
 
         /// <summary>
@@ -594,7 +595,7 @@
             UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
 
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
-            if (UtilDal.RowEqual(row, rowNew) == false)
+            // if (UtilDal.RowEqual(row, rowNew) == false) // See also: EntityState.Modified
             {
                 switch (scopeEnum)
                 {
@@ -604,6 +605,7 @@
                             DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
                             var tracking = dbContext.Attach(row);
                             tracking.CurrentValues.SetValues(rowNew);
+                            tracking.State = EntityState.Modified; // Update also if row and rowNew are equal.
                             int count = await dbContext.SaveChangesAsync();
                             UtilFramework.Assert(count == 1, "Update failed!");
                             break;
@@ -650,7 +652,7 @@
                 object value = field.PropertyInfo.GetValue(row);
                 if (value != null)
                 {
-                    text = page.CellTextFromValue(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = page.CellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
                     text = UtilFramework.StringNull(text);
                     if (text == null)
                     {
@@ -659,7 +661,6 @@
                 }
             }
             gridCellSession.Text = text;
-
         }
 
         /// <summary>

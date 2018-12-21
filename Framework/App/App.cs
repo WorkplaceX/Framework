@@ -51,7 +51,7 @@
             bool isBrowserTabSwitch = (result.AppJson.ResponseCount != result.AppSession.ResponseCount);
 
             // Session expired
-            bool isSessionExpired = (result.AppSession.ResponseCount == 0 && result.AppJson.RequestCount > 0);
+            bool isSessionExpired = (result.AppSession.ResponseCount == 0 && result.AppJson.ResponseCount > 0);
 
             // Init
             if (result.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch || isSessionExpired)

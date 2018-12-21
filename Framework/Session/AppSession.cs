@@ -28,7 +28,7 @@
         public List<GridSession> GridSessionList = new List<GridSession>();
 
         /// <summary>
-        /// Load a single row and create its cells.
+        /// Load a single row into session and create its cells.
         /// </summary>
         private void GridLoad(int gridIndex, int rowIndex, Row row, Type typeRow, GridRowEnum gridRowEnum, ref List<Field> fieldListCache)
         {
@@ -39,11 +39,12 @@
 
             GridSession gridSession = GridSessionList[gridIndex];
             GridRowSession gridRowSession = new GridRowSession();
+            gridRowSession.IsSelect = gridSession.GridRowSessionList[rowIndex].IsSelect;
             gridSession.GridRowSessionList[rowIndex] = gridRowSession;
             gridRowSession.Row = row;
             gridRowSession.RowEnum = gridRowEnum;
             Grid grid = UtilSession.GridFromIndex(gridIndex);
-            Page page = grid.Owner<Page>();
+            Page page = grid.ComponentOwner<Page>();
             foreach (Field field in fieldListCache)
             {
                 GridCellSession gridCellSession = new GridCellSession();
@@ -276,7 +277,7 @@
             if (gridSession.TypeRow != typeRow)
             {
                 Page.Config config = new Page.Config();
-                grid.Owner<Page>().GridQueryConfig(grid, config);
+                grid.ComponentOwner<Page>().GridQueryConfig(grid, config);
                 // Load config into session state.
                 await GridLoadConfigAsync(grid, typeRow, config.ConfigGridQuery);
                 fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, config.ConfigFieldQuery);
@@ -290,7 +291,7 @@
 
         public async Task GridLoadAsync(Grid grid)
         {
-            var query = grid.Owner<Page>().GridQuery(grid);
+            var query = grid.ComponentOwner<Page>().GridQuery(grid);
 
             await GridLoadAsync(grid, query);
             await GridRowSelectFirstAsync(grid);
@@ -486,7 +487,7 @@
                                     gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
                                     gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet(); // Set back to database selected value, once successfully saved.
                                     Grid grid = gridItem.Grid;
-                                    Page page = grid.Owner<Page>();
+                                    Page page = grid.ComponentOwner<Page>();
                                     object valueBefore = gridCellItem.Field.PropertyInfo.GetValue(row);
                                     bool isHandled = false;
                                     gridCellItem.GridCellSession.ErrorParse = null;
@@ -512,6 +513,8 @@
                                     catch (Exception exception)
                                     {
                                         errorParse = exception.Message;
+                                        gridRowItem.GridRowSession.RowUpdate = null;
+                                        gridRowItem.GridRowSession.RowInsert = null;
                                     }
                                     gridCellItem.GridCellSession.ErrorParse = errorParse;
 
@@ -542,7 +545,17 @@
                         // Update to database
                         try
                         {
-                            await UtilDal.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.ScopeEnum);
+                            bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridUpdateAsync(gridItem.Grid, gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.ScopeEnum);
+                            if (!isHandled)
+                            {
+                                await UtilDal.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.ScopeEnum); // Default database record update
+                            }
+                            else
+                            {
+                                // Custom database record update might also have changed other fields like new primary key or UOM.
+                                List<Field> fieldList = null;
+                                GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
+                            }
                             gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowUpdate;
                             foreach (GridCellSession gridCellSession in gridRowItem.GridRowSession.GridCellSessionList)
                             {
@@ -553,7 +566,7 @@
                         }
                         catch (Exception exception)
                         {
-                            gridRowItem.GridRowSession.Error = exception.Message;
+                            gridRowItem.GridRowSession.ErrorSave = exception.Message;
                         }
                         gridRowItem.GridRowSession.RowUpdate = null;
                     }
@@ -574,7 +587,7 @@
                         }
                         catch (Exception exception)
                         {
-                            gridRowItem.GridRowSession.Error = exception.Message;
+                            gridRowItem.GridRowSession.ErrorSave = exception.Message;
                         }
                         gridRowItem.GridRowSession.RowInsert = null;
                     }
@@ -594,7 +607,7 @@
                 if (gridRowSession.RowEnum == GridRowEnum.Index) // By default only select data rows. 
                 {
                     gridRowSession.IsSelect = true;
-                    await grid.Owner<Page>().GridRowSelectedAsync(grid);
+                    await grid.ComponentOwner<Page>().GridRowSelectedAsync(grid);
                     break;
                 }
             }
@@ -611,7 +624,7 @@
                         if (gridCellItem.GridCell?.IsModify == true)
                         {
                             gridCellItem.GridCellSession.IsLookup = true;
-                            var query = gridItem.Grid.Owner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.TextGet());
+                            var query = gridItem.Grid.ComponentOwner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.TextGet());
                             if (query != null)
                             {
                                 await GridLoadAsync(gridItem.Grid.GridLookup(), query); // Load lookup.
@@ -645,7 +658,7 @@
                                     try
                                     {
                                         Grid grid = gridItem.Grid;
-                                        Page page = grid.Owner<Page>();
+                                        Page page = grid.ComponentOwner<Page>();
                                         Filter filter = new Filter();
                                         filter.Load(gridRowItem);
                                         gridCellItem.GridCellSession.ErrorParse = null;
@@ -749,7 +762,7 @@
                             GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
                             Row row = UtilSession.GridRowFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex);
                             string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupCellIndex);
-                            string text = gridItemLookup.Grid.Owner<Page>().GridLookupSelected(grid, row, fieldName, gridRowItemLookup.GridRowSession.Row);
+                            string text = gridItemLookup.Grid.ComponentOwner<Page>().GridLookupSelected(grid, row, fieldName, gridRowItemLookup.GridRowSession.Row);
 
                             GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex - gridSession.OffsetColumn);
                             gridCell.Text = text;
@@ -798,7 +811,7 @@
                             break;
                         }
                     }
-                    await gridItem.Grid.Owner<Page>().GridRowSelectedAsync(gridItem.Grid);
+                    await gridItem.Grid.ComponentOwner<Page>().GridRowSelectedAsync(gridItem.Grid);
                 }
             }
         }
@@ -987,7 +1000,7 @@
 
         public bool IsSelect;
 
-        public string Error;
+        public string ErrorSave;
 
         public List<GridCellSession> GridCellSessionList = new List<GridCellSession>();
 
