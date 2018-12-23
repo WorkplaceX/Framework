@@ -37,7 +37,7 @@
                     string fileNameFull = UtilFramework.FolderName + fileName;
                     Console.WriteLine(string.Format("Execute {0}", fileNameFull));
                     string sql = UtilFramework.FileLoad(fileNameFull);
-                    UtilDal.ExecuteNonQueryAsync(sql, null, isFrameworkDb).Wait();
+                    UtilDal.ExecuteNonQueryAsync(sql, null, isFrameworkDb, commandTimeout: 0).Wait();
                     FrameworkScript row = new FrameworkScript() { FileName = fileName, Date = DateTime.UtcNow };
                     UtilDal.InsertAsync(row).Wait();
                 }

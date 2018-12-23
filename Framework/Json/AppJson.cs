@@ -67,6 +67,9 @@
         public string Name;
     }
 
+    /// <summary>
+    /// Extension methods to manage json component tree.
+    /// </summary>
     public static class ComponentJsonExtension
     {
         public static ComponentJson ComponentOwner(this ComponentJson component)
@@ -190,7 +193,7 @@
         }
 
         /// <summary>
-        /// Shows page or creates new one if it does not yet exist. Similar to method GetOrCreate(); but additionally invokes page init async.
+        /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
         /// </summary>
         public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
@@ -529,6 +532,9 @@
         }
     }
 
+    /// <summary>
+    /// Represents the position of a data grid in the json component tree.
+    /// </summary>
     public sealed class Grid : ComponentJson
     {
         public Grid() { }
@@ -850,7 +856,7 @@
         }
 
         /// <summary>
-        /// Convert database value to front end cell text. Called only if value is not null.
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
         /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
         protected virtual internal string CellText(Grid grid, Row row, string fieldName)

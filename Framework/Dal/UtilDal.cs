@@ -42,6 +42,9 @@
         MemoryRequest = 3
     }
 
+    /// <summary>
+    /// Data access layer functions.
+    /// </summary>
     public static class UtilDal
     {
         /// <summary>
@@ -248,7 +251,7 @@
         /// Execute sql statement.
         /// </summary>
         /// <param name="sql">Sql can have "GO" batch seperator.</param>
-        internal static async Task ExecuteNonQueryAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb)
+        internal static async Task ExecuteNonQueryAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb, int? commandTimeout = null)
         {
             var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -259,6 +262,10 @@
                 foreach (string sqlItem in sqlList)
                 {
                     SqlCommand sqlCommand = new SqlCommand(sqlItem, sqlConnection);
+                    if (commandTimeout.HasValue)
+                    {
+                        sqlCommand.CommandTimeout = commandTimeout.Value;
+                    }
                     if (paramList?.Count > 0)
                     {
                         sqlCommand.Parameters.AddRange(paramList.Select(item => item.SqlParameter).ToArray());
