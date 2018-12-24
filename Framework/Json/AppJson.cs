@@ -700,16 +700,6 @@
         public bool IsModify;
 
         /// <summary>
-        /// Gets or sets IsReadOnly. If true, user can not edit text in the cell.
-        /// </summary>
-        public bool IsReadOnly;
-
-        /// <summary>
-        /// Gets or sets IsPassword. If true, user can not read text in the cell.
-        /// </summary>
-        public bool IsPassword;
-
-        /// <summary>
         /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
         /// </summary>
         public int MergeId;
@@ -718,6 +708,36 @@
         /// Gets or sets IsLookup. If true, field shows an open Lookup window.
         /// </summary>
         public bool IsLookup;
+
+        /// <summary>
+        /// Gets or sets TextIsHtml. If true, text is rendered as html.
+        /// </summary>
+        public bool TextIsHtml;
+
+        /// <summary>
+        /// Gets or sets TextIsHtmlEdit. If true, text is rendered as html and additionally input text box is shown to edit html. Applies only if TextIsHtml is true.
+        /// </summary>
+        public bool TextIsHtmlEdit;
+
+        /// <summary>
+        /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
+        /// </summary>
+        public string HtmlLeft;
+
+        /// <summary>
+        /// Gets or sets HtmlRight. Use for example to render an indicator icon on the right hand side in the cell. 
+        /// </summary>
+        public string HtmlRight;
+
+        /// <summary>
+        /// Gets or sets IsReadOnly. If true, user can not edit text.
+        /// </summary>
+        public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets IsPassword. If true, user can not read text.
+        /// </summary>
+        public bool IsPassword;
     }
 
     public sealed class Html : ComponentJson
@@ -865,10 +885,11 @@
             return Task.FromResult(0);
         }
 
-        public class GridCellTextArg
+        /// <summary>
+        /// Provides additional annotation information for a data grid cell.
+        /// </summary>
+        public class GridCellTextHtmlResult
         {
-            public string Text;
-
             /// <summary>
             /// Gets or sets TextIsHtml. If true, text is rendered as html.
             /// </summary>
@@ -907,6 +928,19 @@
         protected virtual internal string CellText(Grid grid, Row row, string fieldName)
         {
             return null;
+        }
+
+        /// <summary>
+        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
+        /// </summary>
+        /// <param name="grid">Data grid on this page.</param>
+        /// <param name="fieldName">Data grid column name.</param>
+        /// <param name="gridRowEnum">Data grid row type.</param>
+        /// <param name="row">Data grid row if applicable for row type.</param>
+        /// <param name="result">Returns data grid cell annotation.</param>
+        protected virtual internal void GridCellTextHtml(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellTextHtmlResult result)
+        {
+
         }
 
         /// <summary>

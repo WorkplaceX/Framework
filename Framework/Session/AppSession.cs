@@ -305,6 +305,8 @@
             {
                 if (gridItem.Grid != null)
                 {
+                    Page page = gridItem.Grid.ComponentOwner<Page>();
+
                     // Grid Reset
                     gridItem.Grid.ColumnList = new List<GridColumn>();
                     gridItem.Grid.RowList = new List<GridRow>();
@@ -346,6 +348,17 @@
                                             GridCell gridCell = new GridCell();
                                             gridRow.CellList.Add(gridCell);
                                             gridCell.Text = gridCellItem.GridCellSession.Text;
+                                            
+                                            // GridCellTextHtml
+                                            Page.GridCellTextHtmlResult result = new Page.GridCellTextHtmlResult();
+                                            page.GridCellTextHtml(gridItem.Grid, gridCellItem.FieldName, gridRowItem.GridRowSession.RowEnum, gridRowItem.GridRowSession.Row, result);
+                                            gridCell.TextIsHtml = result.TextIsHtml;
+                                            gridCell.TextIsHtmlEdit = result.TextIsHtmlEdit;
+                                            gridCell.HtmlLeft = result.HtmlLeft;
+                                            gridCell.HtmlRight = result.HtmlRight;
+                                            gridCell.IsReadOnly = result.IsReadOnly;
+                                            gridCell.IsPassword = result.IsPassword;
+
                                             if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
                                             {
                                                 gridCell.Placeholder = "Search";
