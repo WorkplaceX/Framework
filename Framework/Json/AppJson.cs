@@ -700,6 +700,16 @@
         public bool IsModify;
 
         /// <summary>
+        /// Gets or sets IsReadOnly. If true, user can not edit text in the cell.
+        /// </summary>
+        public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets IsPassword. If true, user can not read text in the cell.
+        /// </summary>
+        public bool IsPassword;
+
+        /// <summary>
         /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
         /// </summary>
         public int MergeId;
@@ -853,6 +863,41 @@
         protected virtual internal Task ButtonClickAsync(Button button)
         {
             return Task.FromResult(0);
+        }
+
+        public class GridCellTextArg
+        {
+            public string Text;
+
+            /// <summary>
+            /// Gets or sets TextIsHtml. If true, text is rendered as html.
+            /// </summary>
+            public bool TextIsHtml;
+
+            /// <summary>
+            /// Gets or sets TextIsHtmlEdit. If true, text is rendered as html and additionally input text box is shown to edit html. Applies only if TextIsHtml is true.
+            /// </summary>
+            public bool TextIsHtmlEdit;
+
+            /// <summary>
+            /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
+            /// </summary>
+            public string HtmlLeft;
+
+            /// <summary>
+            /// Gets or sets HtmlRight. Use for example to render an indicator icon on the right hand side in the cell. 
+            /// </summary>
+            public string HtmlRight;
+
+            /// <summary>
+            /// Gets or sets IsReadOnly. If true, user can not edit text.
+            /// </summary>
+            public bool IsReadOnly;
+
+            /// <summary>
+            /// Gets or sets IsPassword. If true, user can not read text.
+            /// </summary>
+            public bool IsPassword;
         }
 
         /// <summary>
