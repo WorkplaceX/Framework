@@ -213,6 +213,10 @@ namespace Framework
         /// </summary>
         internal static bool IsNullable(Type type)
         {
+            if (type == typeof(string))
+            {
+                return true;
+            }
             return Nullable.GetUnderlyingType(type) != null;
         }
 

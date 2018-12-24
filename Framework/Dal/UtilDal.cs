@@ -682,7 +682,7 @@
                 object value = field.PropertyInfo.GetValue(row);
                 if (value != null)
                 {
-                    text = page.CellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
                     text = UtilFramework.StringNull(text);
                     if (text == null)
                     {

@@ -275,11 +275,11 @@
             Task fieldConfigLoad = Task.FromResult(0);
             if (gridSession.TypeRow != typeRow)
             {
-                Page.Config config = new Page.Config();
-                grid.ComponentOwner<Page>().GridQueryConfig(grid, config);
+                Page.ConfigResult configResult = new Page.ConfigResult();
+                grid.ComponentOwner<Page>().GridQueryConfig(grid, configResult);
                 // Load config into session state.
-                await GridLoadConfigAsync(grid, typeRow, config.ConfigGridQuery);
-                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, config.ConfigFieldQuery);
+                await GridLoadConfigAsync(grid, typeRow, configResult.ConfigGridQuery);
+                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, configResult.ConfigFieldQuery);
             }
 
             // Select rows and load data into session state.
@@ -350,8 +350,8 @@
                                             gridCell.Text = gridCellItem.GridCellSession.Text;
                                             
                                             // GridCellTextHtml
-                                            Page.GridCellTextHtmlResult result = new Page.GridCellTextHtmlResult();
-                                            page.GridCellTextHtml(gridItem.Grid, gridCellItem.FieldName, gridRowItem.GridRowSession.RowEnum, gridRowItem.GridRowSession.Row, result);
+                                            Page.GridCellAnnotationResult result = new Page.GridCellAnnotationResult();
+                                            page.GridCellAnnotation(gridItem.Grid, gridCellItem.FieldName, gridRowItem.GridRowSession.RowEnum, gridRowItem.GridRowSession.Row, result);
                                             gridCell.TextIsHtml = result.TextIsHtml;
                                             gridCell.TextIsHtmlEdit = result.TextIsHtmlEdit;
                                             gridCell.HtmlLeft = result.HtmlLeft;
@@ -522,7 +522,7 @@
                                         }
                                         if (text != null)
                                         {
-                                            page.CellTextParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
+                                            page.GridCellParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
                                         }
                                         if (!isHandled)
                                         {
@@ -689,7 +689,7 @@
                                             bool isHandled = false;
                                             if (gridCellItem.GridCellSession.Text != null)
                                             {
-                                                page.CellTextParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
+                                                page.GridCellParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
                                             }
                                             if (isHandled == false)
                                             {

@@ -74,7 +74,7 @@
     {
         public static ComponentJson ComponentOwner(this ComponentJson component)
         {
-            ComponentJson result = UtilServer.AppJson.ListAll().Where(item => item.List.Contains(component)).Single();
+            ComponentJson result = UtilServer.AppJson.ComponentListAll().Where(item => item.List.Contains(component)).Single();
             return result;
         }
 
@@ -95,20 +95,20 @@
         }
 
 
-        private static void ListAll(ComponentJson component, List<ComponentJson> result)
+        private static void ComponentListAll(ComponentJson component, List<ComponentJson> result)
         {
             result.AddRange(component.List);
             foreach (var item in component.List)
             {
-                ListAll(item, result);
+                ComponentListAll(item, result);
             }
         }
 
-        public static List<ComponentJson> ListAll(this ComponentJson component)
+        public static List<ComponentJson> ComponentListAll(this ComponentJson component)
         {
             List<ComponentJson> result = new List<ComponentJson>();
             result.Add(component);
-            ListAll(component, result);
+            ComponentListAll(component, result);
             return result;
         }
 
@@ -195,7 +195,7 @@
         /// <summary>
         /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
         /// </summary>
-        public static async Task<T> PageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
+        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
             T result = null;
             if (pageShowEnum == PageShowEnum.SiblingHide)
@@ -225,9 +225,9 @@
             return result;
         }
 
-        public static Task<T> PageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
+        public static Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
-            return PageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
+            return ComponentPageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
         }
 
         /// <summary>
@@ -279,7 +279,7 @@
         /// <summary>
         /// Returns currently selected row.
         /// </summary>
-        public static Row RowSelected(this Grid grid)
+        public static Row GridRowSelected(this Grid grid)
         {
             Row result = null;
             if (grid.Index != null) // Loaded
@@ -313,7 +313,7 @@
             await UtilApp.ProcessBootstrapNavbarAsync();
             await UtilApp.ProcessButtonAsync(); // Button
 
-            foreach (Page page in UtilServer.AppJson.ListAll().OfType<Page>())
+            foreach (Page page in UtilServer.AppJson.ComponentListAll().OfType<Page>())
             {
                 await page.ProcessAsync();
             }
@@ -810,7 +810,7 @@
             return Task.FromResult(false);
         }
 
-        public class Config
+        public class ConfigResult
         {
             /// <summary>
             /// Gets or sets ConfigGridQuery. Should return one record.
@@ -833,26 +833,29 @@
             public IQueryable<FrameworkConfigFieldBuiltIn> ConfigFieldQuery { get; set; }
         }
 
-        protected virtual internal void GridQueryConfig(Grid grid, Config configQuery)
+        protected virtual internal void GridQueryConfig(Grid grid, ConfigResult result)
         {
             // Example:
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         /// <summary>
-        /// Method called when data row has been selected. Get selected row with grid.RowSelected();
+        /// Override this method for custom implementation. Method is called when data row has been selected. Get selected row with grid.GridRowSelected(); and reload for example a detail data grid.
         /// </summary>
         protected virtual internal Task GridRowSelectedAsync(Grid grid)
         {
             return Task.FromResult(0);
         }
 
+        /// <summary>
+        /// Override this method to return a linq query for the lookup data grid.
+        /// </summary>
         protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
         {
             return null;
         }
 
-        protected virtual internal void GridLookupQueryConfig(Grid grid, Config config)
+        protected virtual internal void GridLookupQueryConfig(Grid grid, ConfigResult config)
         {
             // Example:
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
@@ -888,7 +891,7 @@
         /// <summary>
         /// Provides additional annotation information for a data grid cell.
         /// </summary>
-        public class GridCellTextHtmlResult
+        public class GridCellAnnotationResult
         {
             /// <summary>
             /// Gets or sets TextIsHtml. If true, text is rendered as html.
@@ -925,7 +928,7 @@
         /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
         /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
-        protected virtual internal string CellText(Grid grid, Row row, string fieldName)
+        protected virtual internal string GridCellText(Grid grid, Row row, string fieldName)
         {
             return null;
         }
@@ -938,7 +941,7 @@
         /// <param name="gridRowEnum">Data grid row type.</param>
         /// <param name="row">Data grid row if applicable for row type.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual internal void GridCellTextHtml(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellTextHtmlResult result)
+        protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
         {
 
         }
@@ -948,7 +951,7 @@
         /// </summary>
         /// <param name="row">Write user parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
-        protected virtual internal void CellTextParse(Grid grid, string fieldName, string text, Row row, out bool isHandled)
+        protected virtual internal void GridCellParse(Grid grid, string fieldName, string text, Row row, out bool isHandled)
         {
             isHandled = false;
         }
@@ -956,7 +959,7 @@
         /// <summary>
         /// Parse user entered cell filter text. Called only if text is not null.
         /// </summary>
-        protected virtual internal void CellTextParseFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
+        protected virtual internal void GridCellParseFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
         {
             isHandled = false;
         }

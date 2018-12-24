@@ -113,7 +113,7 @@
         private static Dictionary<int, Grid> GridList(AppSession appSession)
         {
             var result = new Dictionary<int, Grid>();
-            foreach (var grid in UtilServer.AppJson.ListAll().OfType<Grid>())
+            foreach (var grid in UtilServer.AppJson.ComponentListAll().OfType<Grid>())
             {
                 if (grid.Index != null) // Grid gets Id once it's loaded.
                 {
@@ -217,7 +217,7 @@
 
         public static Grid GridFromIndex(int gridIndex)
         {
-            return UtilServer.AppJson.ListAll().OfType<Grid>().Where(item => item.Index == gridIndex).Single();
+            return UtilServer.AppJson.ComponentListAll().OfType<Grid>().Where(item => item.Index == gridIndex).Single();
         }
 
         public static GridSession GridSessionFromIndex(int gridIndex)

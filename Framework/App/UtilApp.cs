@@ -19,7 +19,7 @@
         public static async Task ProcessButtonAsync()
         {
             var app = UtilServer.AppInternal;
-            foreach (Button button in app.AppJson.ListAll().OfType<Button>().Where(item => item.IsClick))
+            foreach (Button button in app.AppJson.ComponentListAll().OfType<Button>().Where(item => item.IsClick))
             {
                 await button.ComponentOwner<Page>().ButtonClickAsync(button);
                 button.IsClick = false;
@@ -32,7 +32,7 @@
         public static async Task ProcessBootstrapNavbarAsync()
         {
             var app = UtilServer.AppInternal;
-            foreach (BootstrapNavbar navbar in app.AppJson.ListAll().OfType<BootstrapNavbar>())
+            foreach (BootstrapNavbar navbar in app.AppJson.ComponentListAll().OfType<BootstrapNavbar>())
             {
                 if (navbar.ButtonList != null)
                 {
@@ -77,7 +77,7 @@
         public static void BootstrapNavbarRender()
         {
             var app = UtilServer.AppInternal;
-            foreach (BootstrapNavbar navbar in app.AppJson.ListAll().OfType<BootstrapNavbar>())
+            foreach (BootstrapNavbar navbar in app.AppJson.ComponentListAll().OfType<BootstrapNavbar>())
             {
                 navbar.ButtonList = new List<BootstrapNavbarButton>();
                 if (navbar.GridIndex != null)
