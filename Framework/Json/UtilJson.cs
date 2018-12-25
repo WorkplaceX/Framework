@@ -8,7 +8,7 @@
     using System.Linq;
     using System.Reflection;
 
-    public class JsonException : Exception
+    internal class JsonException : Exception
     {
         public JsonException(string message)
             : base(message)
@@ -17,7 +17,7 @@
         }
     }
 
-    public static class UtilJson
+    internal static class UtilJson
     {
         private class UtilValue
         {
