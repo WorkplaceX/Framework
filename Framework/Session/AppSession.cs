@@ -352,10 +352,10 @@
                                             // GridCellTextHtml
                                             Page.GridCellAnnotationResult result = new Page.GridCellAnnotationResult();
                                             page.GridCellAnnotation(gridItem.Grid, gridCellItem.FieldName, gridRowItem.GridRowSession.RowEnum, gridRowItem.GridRowSession.Row, result);
-                                            gridCell.TextIsHtml = result.TextIsHtml;
-                                            gridCell.TextIsHtmlEdit = result.TextIsHtmlEdit;
-                                            gridCell.HtmlLeft = result.HtmlLeft;
-                                            gridCell.HtmlRight = result.HtmlRight;
+                                            gridCell.Html = UtilFramework.StringNull(result.Html);
+                                            gridCell.HtmlIsEdit = result.HtmlIsEdit;
+                                            gridCell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
+                                            gridCell.HtmlRight = UtilFramework.StringNull(result.HtmlRight);
                                             gridCell.IsReadOnly = result.IsReadOnly;
                                             gridCell.IsPassword = result.IsPassword;
 

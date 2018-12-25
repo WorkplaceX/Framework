@@ -22,19 +22,18 @@
       <td *ngFor="let cell of row.CellList; trackBy trackBy" [ngClass]="{'gridRow':row.RowEnum==2||row.RowEnum==3, 'gridRowFilter':row.RowEnum==1}">
         <div style="display:flex; align-items: stretch; overflow: hidden;">
 
-          <div style="display: flex; align-items: center; margin-right: 2px;">
+          <div *ngIf="cell.HtmlLeft" style="display: flex; align-items: center; margin-right: 2px;">
             <div [innerHTML]="cell.HtmlLeft"></div>
           </div>
 
           <div style="display:flex; flex-grow:1; flex-direction: column;">
-            <input *ngIf="!cell.IsPassword && (!cell.TextIsHtml || cell.TextIsHtmlEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
-            <input *ngIf="cell.IsPassword && (!cell.TextIsHtml || cell.TextIsHtmlEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
-            <div *ngIf="cell.TextIsHtml" style="flex-grow:1; display: flex; align-items: center;" [innerHTML]="cell.Text"></div>
-            <div *ngIf="cell.TextIsHtml && cell.Text==null">&nbsp;</div>
+            <input *ngIf="!cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
+            <input *ngIf="cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusin)=focus(row) (ngModelChange)="ngModelChange(cell)">
+            <div *ngIf="cell.Html" style="flex-grow:1; display: flex; align-items: center;" [innerHTML]="cell.Html"></div>
           </div>
 
           <div style="display: flex; align-items: center; margin-left:2px;">
-            <div [innerHTML]="cell.HtmlRight"></div>
+            <div *ngIf="cell.HtmlRight" [innerHTML]="cell.HtmlRight"></div>
             <i *ngIf="cell.IsReadOnly" class="fas fa-lock colorBlack"></i>
             <i *ngIf="cell.ErrorParse!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorParse }}"></i>
             <i *ngIf="cell.IsModify" class="fas fa-spinner fa-spin colorBlack"></i>

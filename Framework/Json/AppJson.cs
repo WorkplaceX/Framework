@@ -712,14 +712,14 @@
         public bool IsLookup;
 
         /// <summary>
-        /// Gets or sets TextIsHtml. If true, text is rendered as html.
+        /// Gets or sets Html. Use for example to transform plain text into a hyper link.
         /// </summary>
-        public bool TextIsHtml;
+        public string Html;
 
         /// <summary>
-        /// Gets or sets TextIsHtmlEdit. If true, text is rendered as html and additionally input text box is shown to edit html. Applies only if TextIsHtml is true.
+        /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
         /// </summary>
-        public bool TextIsHtmlEdit;
+        public bool HtmlIsEdit;
 
         /// <summary>
         /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
@@ -896,14 +896,14 @@
         public class GridCellAnnotationResult
         {
             /// <summary>
-            /// Gets or sets TextIsHtml. If true, text is rendered as html.
+            /// Gets or sets Html. Use for example to transform plain text into a hyper link. For empty html set "&nbsp;" to keep the layout consistent with none empty html fields.
             /// </summary>
-            public bool TextIsHtml;
+            public string Html;
 
             /// <summary>
-            /// Gets or sets TextIsHtmlEdit. If true, text is rendered as html and additionally input text box is shown to edit html. Applies only if TextIsHtml is true.
+            /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
             /// </summary>
-            public bool TextIsHtmlEdit;
+            public bool HtmlIsEdit;
 
             /// <summary>
             /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.

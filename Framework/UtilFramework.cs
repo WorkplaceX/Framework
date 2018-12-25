@@ -168,7 +168,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Returns null if value is empty string. Use for incoming interfaces.
+        /// Returns null if value is empty string. Use for incoming and outgoing interfaces.
         /// </summary>
         internal static T StringNull<T>(T value)
         {
