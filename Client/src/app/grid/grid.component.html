@@ -1,4 +1,4 @@
-<table [ngClass]="json.CssClass">
+<table [ngClass]="json.CssClass" style="height:100%">
   <!-- Header -->
   <tr>
     <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);" >
@@ -20,7 +20,7 @@
   <ng-container *ngFor="let row of json.RowList; trackBy trackBy">
     <tr [ngClass]="{'gridRowIsSelect':row.IsSelect}" (click)="clickRow(row, $event)">
       <td *ngFor="let cell of row.CellList; trackBy trackBy" [ngClass]="{'gridRow':row.RowEnum==2||row.RowEnum==3, 'gridRowFilter':row.RowEnum==1}">
-        <div style="display:flex; align-items: stretch; overflow: hidden;">
+        <div style="display:flex; align-items: stretch; overflow: hidden; height:100%">
 
           <div *ngIf="cell.HtmlLeft" style="display: flex; align-items: center; margin-right: 2px;">
             <div [innerHTML]="cell.HtmlLeft"></div>
