@@ -176,10 +176,12 @@
 
         public enum PageShowEnum
         {
+            None = 0,
+
             /// <summary>
             /// Add page to sibling pages.
             /// </summary>
-            None = 0,
+            Default = 1,
 
             /// <summary>
             /// Remove sibling pages.
@@ -195,7 +197,7 @@
         /// <summary>
         /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
         /// </summary>
-        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
+        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.Default, Action<T> init = null) where T : Page
         {
             T result = null;
             if (pageShowEnum == PageShowEnum.SiblingHide)
