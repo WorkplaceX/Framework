@@ -358,6 +358,7 @@
                                             gridCell.HtmlRight = UtilFramework.StringNull(result.HtmlRight);
                                             gridCell.IsReadOnly = result.IsReadOnly;
                                             gridCell.IsPassword = result.IsPassword;
+                                            gridCell.Align = result.Align;
 
                                             if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
                                             {

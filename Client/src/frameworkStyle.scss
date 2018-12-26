@@ -26,6 +26,22 @@ data-app > input, data-app * input {
     width: 100%
 }
 
+data-app * .textAlignCenter {
+    text-align: center;
+}
+
+data-app * .textAlignRight {
+    text-align: right;
+}
+
+data-app * .alignSelfCenter {
+    align-self: center;
+}
+
+data-app * .alignSelfFlexEnd {
+    align-self: flex-end;
+}
+
 data-app * .errorSave {
     background-color: $colorRed;
     color: $colorWhite;

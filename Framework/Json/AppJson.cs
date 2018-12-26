@@ -11,6 +11,7 @@
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
+    using static Framework.Json.Page;
     using static Framework.Session.UtilSession;
 
     public abstract class ComponentJson
@@ -740,6 +741,11 @@
         /// Gets or sets IsPassword. If true, user can not read text.
         /// </summary>
         public bool IsPassword;
+
+        /// <summary>
+        /// Gets or sets Align. Defines text allign of centent in the data grid cell.
+        /// </summary>
+        public AlignEnum Align;
     }
 
     public sealed class Html : ComponentJson
@@ -890,6 +896,29 @@
             return Task.FromResult(0);
         }
 
+        public enum AlignEnum
+        {
+            /// <summary>
+            /// None.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Align text left.
+            /// </summary>
+            Left = 1,
+
+            /// <summary>
+            /// Align data grid cell text in center .
+            /// </summary>
+            Center = 2,
+
+            /// <summary>
+            /// Align data grid cell text right.
+            /// </summary>
+            Right = 3,
+        }
+
         /// <summary>
         /// Provides additional annotation information for a data grid cell.
         /// </summary>
@@ -924,6 +953,11 @@
             /// Gets or sets IsPassword. If true, user can not read text.
             /// </summary>
             public bool IsPassword;
+
+            /// <summary>
+            /// Gets or sets Align. Defines text allign of centent in the data grid cell.
+            /// </summary>
+            public AlignEnum Align;
         }
 
         /// <summary>
