@@ -7,8 +7,6 @@
     using System;
     using System.Threading.Tasks;
     using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
 
     internal class AppInternal
     {
@@ -23,30 +21,6 @@
         internal AppSession AppSession { get; set; }
 
         public Type[] TypeComponentInNamespaceList;
-    }
-
-    public class UtilApplication
-    {
-        /// <summary>
-        /// Returns value and field name of expression: "() => (row as MyRow).MyField".
-        /// </summary>
-        /// <param name="property">For example "() => (row as MyRow).MyField".</param>
-        /// <param name="fieldName">Returns field name of "MyField".</param>
-        /// <param name="result">Returns value of "MyField". Does a null check.</param>
-        public static void PropertyValueGet<T>(Expression<Func<T>> property, out string fieldName, out T result)
-        {
-            // Note: "() => (row as MyRow)?.MyField" can not be compiled. Gives the error: "An expression tree lambda may not contain a null propagating operator."
-            result = default(T);
-            var memberExpression = (MemberExpression)property.Body;
-            var propertyInfo = (PropertyInfo)memberExpression.Member;
-            fieldName = propertyInfo.Name;
-            var typeAs = (UnaryExpression)memberExpression.Expression;
-            var row = Expression.Lambda(typeAs).Compile().DynamicInvoke(); // Eval "as" function.
-            if (row != null) 
-            {
-                result = property.Compile().Invoke();
-            }
-        }
     }
 
     public class AppSelector

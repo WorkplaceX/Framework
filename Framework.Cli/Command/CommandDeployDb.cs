@@ -45,7 +45,7 @@
         }
 
         /// <summary>
-        /// Populate sql tables FrameworkTable, FrameworkField with assembly rowType.
+        /// Populate sql tables FrameworkTable, FrameworkField with assembly typeRow.
         /// </summary>
         private void Meta()
         {
