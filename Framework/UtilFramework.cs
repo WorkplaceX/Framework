@@ -15,7 +15,7 @@ namespace Framework
     using System.Reflection;
     using System.Threading;
 
-    public class UtilFramework
+    internal class UtilFramework
     {
         public static string Version
         {

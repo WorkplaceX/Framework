@@ -7,7 +7,7 @@
     using System.IO;
     using System.Reflection;
 
-    public class ConfigFramework
+    internal class ConfigFramework
     {
         public bool IsServerSideRendering { get; set; }
 
@@ -95,7 +95,7 @@
         }
     }
 
-    public class ConfigFrameworkWebsite
+    internal class ConfigFrameworkWebsite
     {
         public string DomainName { get; set; }
     }
