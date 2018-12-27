@@ -57,8 +57,8 @@
             UtilCli.DotNet(folderName, "publish"); // Use publish instead to build.
             UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
 
-            string fileNameSource = UtilFramework.FolderName + "ConfigFramework.json";
-            string fileNameDest = folderNamePublish + "ConfigFramework.json";
+            string fileNameSource = UtilFramework.FolderName + "ConfigWebServer.json";
+            string fileNameDest = folderNamePublish + "ConfigWebServer.json";
             UtilCli.FileCopy(fileNameSource, fileNameDest);
         }
 
@@ -98,41 +98,41 @@
         }
 
         /// <summary>
-        /// Copy from ConfigCli to ConfigFramework.
+        /// Copy from ConfigCli to ConfigWebServer.
         /// </summary>
-        private static void BuildConfigFramework()
+        private static void BuildConfigWebServer()
         {
-            Console.WriteLine("Copy values from ConfigCli to ConfigFramework");
+            Console.WriteLine("Copy values from ConfigCli to ConfigWebServer");
             var configCli = ConfigCli.Load();
-            var configFramework = ConfigFramework.Load();
+            var configWebServer = ConfigWebServer.Load();
 
             // ConnectionString
-            configFramework.ConnectionStringFramework = configCli.ConnectionStringFramework;
-            configFramework.ConnectionStringApplication = configCli.ConnectionStringApplication;
+            configWebServer.ConnectionStringFramework = configCli.ConnectionStringFramework;
+            configWebServer.ConnectionStringApplication = configCli.ConnectionStringApplication;
 
             // Website
-            configFramework.WebsiteList.Clear();
+            configWebServer.WebsiteList.Clear();
             foreach (var webSite in configCli.WebsiteList)
             {
-                configFramework.WebsiteList.Add(new ConfigFrameworkWebsite() { DomainName = webSite.DomainName });
+                configWebServer.WebsiteList.Add(new ConfigWebServerWebsite() { DomainName = webSite.DomainName });
             }
 
-            ConfigFramework.Save(configFramework);
+            ConfigWebServer.Save(configWebServer);
         }
 
-        internal static void InitConfigFramework(AppCli appCli)
+        internal static void InitConfigWebServer(AppCli appCli)
         {
             // Init config
             ConfigCli.Init(appCli);
-            ConfigFramework.Init();
+            ConfigWebServer.Init();
 
             // Config
-            BuildConfigFramework();
+            BuildConfigWebServer();
         }
 
         protected internal override void Execute()
         {
-            InitConfigFramework(AppCli);
+            InitConfigWebServer(AppCli);
 
             // Build
             BuildWebsite();

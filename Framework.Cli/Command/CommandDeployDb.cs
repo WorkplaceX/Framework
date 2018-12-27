@@ -94,7 +94,7 @@
 
         protected internal override void Execute()
         {
-            CommandBuild.InitConfigFramework(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigFramework.json
+            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json
 
             // FolderNameSqlScript
             string folderNameSqlScriptFramework = UtilFramework.FolderName + "Framework/Framework.Cli/SqlScript/";
@@ -105,7 +105,7 @@
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
             UtilDal.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
-            SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigFramework.json
+            SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
             SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);
 
             Console.WriteLine("DeployDb successful!");

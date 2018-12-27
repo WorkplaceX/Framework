@@ -169,10 +169,10 @@
         /// </summary>
         internal static DbContextInternal DbContextInternalCreate(Type typeRow)
         {
-            string connectionString = ConfigFramework.ConnectionString(typeRow);
+            string connectionString = ConfigWebServer.ConnectionString(typeRow);
             if (connectionString == null)
             {
-                throw new Exception("ConnectionString is null! (See also file: ConfigFramework.json)");
+                throw new Exception("ConnectionString is null! (See also file: ConfigWebServer.json)");
             }
 
             if (UtilDalType.TypeRowIsTableNameSql(typeRow) == false)
@@ -255,7 +255,7 @@
         {
             var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-            string connectionString = ConfigFramework.ConnectionString(isFrameworkDb);
+            string connectionString = ConfigWebServer.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
@@ -284,7 +284,7 @@
         internal static async Task<List<List<Dictionary<string, object>>>> ExecuteReaderMultipleAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList = null, bool isFrameworkDb = false)
         {
             List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
-            string connectionString = ConfigFramework.ConnectionString(isFrameworkDb);
+            string connectionString = ConfigWebServer.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();

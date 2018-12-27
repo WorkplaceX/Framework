@@ -4,6 +4,9 @@
     using System.Collections.Generic;
     using System.IO;
 
+    /// <summary>
+    /// Configuration used by all cli commands.
+    /// </summary>
     public class ConfigCli
     {
         /// <summary>
@@ -53,7 +56,7 @@
                 appCli.InitConfigCli(configCli);
                 Save(configCli);
 
-                CommandBuild.InitConfigFramework(appCli);
+                CommandBuild.InitConfigWebServer(appCli);
             }
         }
 

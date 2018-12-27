@@ -109,15 +109,15 @@
         private static async Task<bool> WebsiteAsync(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
-            var configFramework = ConfigFramework.Load();
-            var website = configFramework.WebsiteList.FirstOrDefault();
+            var configWebServer = ConfigWebServer.Load();
+            var website = configWebServer.WebsiteList.FirstOrDefault();
             if (website != null)
             {
                 string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + website.DomainName + path;
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
-                    if (fileName.EndsWith(".html") && ConfigFramework.Load().IsServerSideRendering)
+                    if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering)
                     {
                         string htmlIndex = UtilFramework.FileLoad(fileName);
                         htmlIndex = await ServerSideRenderingAsync(context, htmlIndex, appSelector);
