@@ -45,7 +45,7 @@
         }
 
         /// <summary>
-        /// Init default file ConfigCli.json
+        /// Init default file ConfigCli.json and ConfigWebServer.json
         /// </summary>
         internal static void Init(AppCli appCli)
         {

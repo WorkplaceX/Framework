@@ -860,7 +860,7 @@
         /// </summary>
         protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
         {
-            return null;
+            return null; // No lookup data grid.
         }
 
         protected virtual internal void GridLookupQueryConfig(Grid grid, ConfigResult config)

@@ -110,7 +110,7 @@
         }
 
         /// <summary>
-        /// Write config ConnectionStringFramework and ConnectionStringApplication.
+        /// Write config ConnectionStringFramework and ConnectionStringApplication to ConfigCli.json and ConfigWebServer.json.
         /// </summary>
         private void ArgumentConnectionString()
         {
@@ -121,6 +121,9 @@
                 configCli.ConnectionStringFramework = connectionString;
                 configCli.ConnectionStringApplication = connectionString;
                 ConfigCli.Save(configCli);
+
+                // Copy values to ConfigWebServer.json
+                CommandBuild.InitConfigWebServer(AppCli); // Update ConfigWebServer.json 
             }
         }
 
