@@ -266,10 +266,15 @@
             string textNewClient = UtilFramework.Replace(textClient, findClient, replaceClient);
             File.WriteAllText(fileNameClient, textNewClient);
 
-            build();
-
-            File.WriteAllText(fileNameServer, textServer); // Back to original text.
-            File.WriteAllText(fileNameClient, textClient); // Back to original text.
+            try
+            {
+                build();
+            }
+            finally
+            {
+                File.WriteAllText(fileNameServer, textServer); // Back to original text.
+                File.WriteAllText(fileNameClient, textClient); // Back to original text.
+            }
         }
     }
 }
