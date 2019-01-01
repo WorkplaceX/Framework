@@ -2,8 +2,8 @@
 {
     using Database.dbo;
     using Framework.Application;
-    using Framework.Dal;
-    using Framework.Dal.DatabaseMemory;
+    using Framework.DataAccessLayer;
+    using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
     using Framework.Server;
     using System;
@@ -12,7 +12,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using static Framework.Dal.UtilDalType;
+    using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Session.UtilSession;
 
     /// <summary>
@@ -49,7 +49,7 @@
             {
                 GridCellSession gridCellSession = new GridCellSession();
                 gridRowSession.GridCellSessionList.Add(gridCellSession);
-                UtilDal.CellTextFromValue(page, grid, gridRowSession, field, gridCellSession, row);
+                Data.CellTextFromValue(page, grid, gridRowSession, field, gridCellSession, row);
             }
         }
 
@@ -162,7 +162,7 @@
             }
             else
             {
-                var configGridList = await UtilDal.SelectAsync(configGridQuery);
+                var configGridList = await Data.SelectAsync(configGridQuery);
                 UtilFramework.Assert(configGridList.Count == 0 || configGridList.Count == 1);
                 var frameworkConfigGrid = configGridList.SingleOrDefault();
                 if (frameworkConfigGrid != null)
@@ -196,7 +196,7 @@
             else
             {
                 string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                var configFieldList = await UtilDal.SelectAsync(configFieldQuery);
+                var configFieldList = await Data.SelectAsync(configFieldQuery);
                 // (FieldName, FrameworkConfigFieldBuiltIn)
                 Dictionary<string, FrameworkConfigFieldBuiltIn> fieldList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
                 foreach (var frameworkConfigFieldBuiltIn in configFieldList)
@@ -238,7 +238,7 @@
                         FilterOperator filterOperator = gridRowSessionFilter.GridCellSessionList[index].FilterOperator;
                         if (filterValue != null)
                         {
-                            query = UtilDal.QueryFilter(query, fieldName, filterValue, filterOperator);
+                            query = Data.QueryFilter(query, fieldName, filterValue, filterOperator);
                         }
                     }
                 }
@@ -247,13 +247,13 @@
                 GridColumnSession gridColumnSessionSort = gridSession.GridColumnSessionList.Where(item => item.IsSort != null).SingleOrDefault();
                 if (gridColumnSessionSort != null)
                 {
-                    query = UtilDal.QueryOrderBy(query, gridColumnSessionSort.FieldName, (bool)gridColumnSessionSort.IsSort);
+                    query = Data.QueryOrderBy(query, gridColumnSessionSort.FieldName, (bool)gridColumnSessionSort.IsSort);
                 }
 
                 // Skip, Take
-                query = UtilDal.QuerySkipTake(query, gridSession.OffsetRow, gridSession.RowCountMaxGet());
+                query = Data.QuerySkipTake(query, gridSession.OffsetRow, gridSession.RowCountMaxGet());
 
-                rowList = await UtilDal.SelectAsync(query);
+                rowList = await Data.SelectAsync(query);
             }
             DatabaseEnum databaseEnum = DatabaseMemoryInternal.DatabaseEnum(query);
             GridLoad(grid, rowList, query?.ElementType, databaseEnum);
@@ -463,7 +463,7 @@
                 {
                     if (gridCellItem.FieldName != fieldNameExclude)
                     {
-                        UtilDal.CellTextFromValue(page, grid, gridRowItem.GridRowSession, gridCellItem.Field, gridCellItem.GridCellSession, row);
+                        Data.CellTextFromValue(page, grid, gridRowItem.GridRowSession, gridCellItem.Field, gridCellItem.GridCellSession, row);
                     }
                 }
             }
@@ -491,7 +491,7 @@
                                     // Parse Update
                                     if (gridRowItem.GridRowSession.RowUpdate == null)
                                     {
-                                        gridRowItem.GridRowSession.RowUpdate = UtilDal.RowCopy(gridRowItem.GridRowSession.Row);
+                                        gridRowItem.GridRowSession.RowUpdate = Data.RowCopy(gridRowItem.GridRowSession.Row);
                                     }
                                     row = gridRowItem.GridRowSession.RowUpdate;
                                 }
@@ -527,7 +527,7 @@
                                         }
                                         if (!isHandled)
                                         {
-                                            UtilDal.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out errorParse); // Default parse user entered cell text.
+                                            Data.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out errorParse); // Default parse user entered cell text.
                                             gridCellItem.GridCellSession.ErrorParse = errorParse;
                                         }
 
@@ -541,7 +541,7 @@
                                     gridCellItem.GridCellSession.ErrorParse = errorParse;
 
                                     // Autocomplete
-                                    bool isAutocomplete = UtilDal.CellTextParseIsAutocomplete(gridCellItem);
+                                    bool isAutocomplete = Data.CellTextParseIsAutocomplete(gridCellItem);
                                     string fieldNameExclude = null;
                                     if (!isAutocomplete)
                                     {
@@ -570,7 +570,7 @@
                             bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridUpdateAsync(gridItem.Grid, gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum);
                             if (!isHandled)
                             {
-                                await UtilDal.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum); // Default database record update
+                                await Data.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum); // Default database record update
                             }
                             else
                             {
@@ -597,7 +597,7 @@
                         // Insert to database
                         try
                         {
-                            var rowNew = await UtilDal.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
+                            var rowNew = await Data.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
                             gridRowItem.GridRowSession.Row = rowNew;
 
                             // Load new primary key into data grid.
@@ -694,7 +694,7 @@
                                             }
                                             if (isHandled == false)
                                             {
-                                                UtilDal.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
+                                                Data.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
                                             }
                                             filter.Save(gridRowItem);
                                         }
@@ -921,7 +921,7 @@
                 }
 
                 // Autocomplete
-                bool isAutocomplete = UtilDal.CellTextParseIsAutocomplete(gridCellItem);
+                bool isAutocomplete = Data.CellTextParseIsAutocomplete(gridCellItem);
                 if (isAutocomplete)
                 {
                     // Autocomplete only not delete key pressed and no error.

@@ -1,4 +1,4 @@
-﻿namespace Framework.Dal.DatabaseMemory
+﻿namespace Framework.DataAccessLayer.DatabaseMemory
 {
     using Framework.Server;
     using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -87,7 +87,7 @@
             var expressionVisitorScope = new ExpressionVisitorScope();
             expressionVisitorScope.Visit(query.Expression);
 
-            DatabaseEnum result = Framework.Dal.DatabaseEnum.None;
+            DatabaseEnum result = Framework.DataAccessLayer.DatabaseEnum.None;
             if (expressionVisitorScope.DatabaseEnumList.Count == 1)
             {
                 return expressionVisitorScope.DatabaseEnumList.Single();

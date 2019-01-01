@@ -1,7 +1,7 @@
 ﻿namespace Framework.Session
 {
     using Framework.Application;
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using Framework.Json;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
@@ -10,7 +10,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using static Framework.Dal.UtilDalType;
+    using static Framework.DataAccessLayer.UtilDalType;
 
     internal static class UtilSession
     {

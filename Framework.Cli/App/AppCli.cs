@@ -3,7 +3,7 @@
     using Database.dbo;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;

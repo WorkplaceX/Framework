@@ -2,7 +2,7 @@
 
 namespace Database.dbo
 {
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using System;
 
     [SqlTable("dbo", "FrameworkConfigField")]

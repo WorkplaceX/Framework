@@ -1,7 +1,7 @@
 ﻿namespace Framework.Cli.Command
 {
     using Database.dbo;
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -17,7 +17,7 @@
         private void SqlScriptExecute(string folderName, bool isFrameworkDb)
         {
             // SELECT FrameworkScript
-            var task = UtilDal.SelectAsync(UtilDal.Query<FrameworkScript>());
+            var task = Data.SelectAsync(Data.Query<FrameworkScript>());
             task.Wait();
             var rowList = task.Result;
 
@@ -37,9 +37,9 @@
                     string fileNameFull = UtilFramework.FolderName + fileName;
                     Console.WriteLine(string.Format("Execute {0}", fileNameFull));
                     string sql = UtilFramework.FileLoad(fileNameFull);
-                    UtilDal.ExecuteNonQueryAsync(sql, null, isFrameworkDb, commandTimeout: 0).Wait();
+                    Data.ExecuteNonQueryAsync(sql, null, isFrameworkDb, commandTimeout: 0).Wait();
                     FrameworkScript row = new FrameworkScript() { FileName = fileName, Date = DateTime.UtcNow };
-                    UtilDal.InsertAsync(row).Wait();
+                    Data.InsertAsync(row).Wait();
                 }
             }
         }
@@ -103,7 +103,7 @@
             // SqlInit
             string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/Sql/Init.sql";
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
-            UtilDal.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
+            Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
             SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
             SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);

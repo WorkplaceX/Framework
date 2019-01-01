@@ -1,6 +1,6 @@
 ﻿namespace Framework.Cli.Generate
 {
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Reflection;

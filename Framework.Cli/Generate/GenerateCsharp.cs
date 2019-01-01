@@ -1,11 +1,11 @@
 ﻿namespace Framework.Cli.Generate
 {
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using static Framework.Dal.UtilDalType;
+    using static Framework.DataAccessLayer.UtilDalType;
 
     /// <summary>
     /// Generate CSharp code.
@@ -38,7 +38,7 @@
                 }
                 result.AppendLine(string.Format("namespace Database.{0}", item.SchemaNameCSharp));
                 result.AppendLine("{");
-                result.AppendLine("    using Framework.Dal;");
+                result.AppendLine("    using Framework.DataAccessLayer;");
                 result.AppendLine("    using System;");
                 result.AppendLine();
                 TableNameClass(metaCSharp, item.SchemaName, result);

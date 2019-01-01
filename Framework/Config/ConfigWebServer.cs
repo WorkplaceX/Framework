@@ -1,6 +1,6 @@
 ﻿namespace Framework.Config
 {
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using Framework.Server;
     using System;
     using System.Collections.Generic;

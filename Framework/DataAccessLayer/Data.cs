@@ -1,7 +1,7 @@
-﻿namespace Framework.Dal
+﻿namespace Framework.DataAccessLayer
 {
     using Framework.Config;
-    using Framework.Dal.DatabaseMemory;
+    using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
     using Framework.Session;
     using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,7 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
-    using static Framework.Dal.UtilDalType;
+    using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Session.UtilSession;
 
     /// <summary>
@@ -45,7 +45,7 @@
     /// <summary>
     /// Data access layer functions.
     /// </summary>
-    public static class UtilDal
+    public static class Data // public static class UtilDal
     {
         /// <summary>
         /// Returns memory where rows are stored.
@@ -57,7 +57,7 @@
                 case DatabaseEnum.MemorySingleton:
                     return DatabaseMemory.DatabaseMemoryInternal.Instance.RowListGet(typeRow);
                 default:
-                    throw new Exception("Scope not supported!");
+                    throw new Exception("DatabaseEnum not supported!");
             }
         }
 
@@ -352,7 +352,7 @@
             PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
             foreach (Dictionary<string, object> row in valueList[resultSetIndex])
             {
-                Row rowResult = UtilDal.RowCreate(typeRow);
+                Row rowResult = Data.RowCreate(typeRow);
                 foreach (string columnName in row.Keys)
                 {
                     object value = row[columnName];
@@ -584,7 +584,7 @@
             {
                 case DatabaseEnum.Database:
                     {
-                        Row rowCopy = UtilDal.RowCopy(row);
+                        Row rowCopy = Data.RowCopy(row);
                         DbContext dbContext = DbContextInternalCreate(row.GetType());
                         dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
                         try
@@ -600,14 +600,14 @@
                         }
                         catch (Exception exception)
                         {
-                            UtilDal.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
+                            Data.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
                             throw exception;
                         }
                         break;
                     }
                 case DatabaseEnum.MemorySingleton:
                     {
-                        var rowList = UtilDal.MemoryRowList(row.GetType(), databaseEnum);
+                        var rowList = Data.MemoryRowList(row.GetType(), databaseEnum);
                         rowList.Add(row);
                         break;
                     }
@@ -625,14 +625,14 @@
             UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
 
             UtilFramework.Assert(row.GetType() == rowNew.GetType());
-            // if (UtilDal.RowEqual(row, rowNew) == false) // See also: EntityState.Modified
+            // if (Data.RowEqual(row, rowNew) == false) // See also: EntityState.Modified
             {
                 switch (databaseEnum)
                 {
                     case DatabaseEnum.Database:
                         {
-                            row = UtilDal.RowCopy(row); // Prevent modifications on SetValues(rowNew);
-                            DbContext dbContext = UtilDal.DbContextInternalCreate(row.GetType());
+                            row = Data.RowCopy(row); // Prevent modifications on SetValues(rowNew);
+                            DbContext dbContext = Data.DbContextInternalCreate(row.GetType());
                             var tracking = dbContext.Attach(row);
                             tracking.CurrentValues.SetValues(rowNew);
                             tracking.State = EntityState.Modified; // Update also if row and rowNew are equal.
@@ -642,7 +642,7 @@
                         }
                     case DatabaseEnum.MemorySingleton:
                         {
-                            var rowList = UtilDal.MemoryRowList(row.GetType(), databaseEnum);
+                            var rowList = Data.MemoryRowList(row.GetType(), databaseEnum);
                             PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(row.GetType()).First(); // Assume first field is primary key.
                             object idNew = propertyInfo.GetValue(row);
                             int updateCount = 0;
@@ -651,7 +651,7 @@
                                 object id = propertyInfo.GetValue(rowMemory);
                                 if (object.Equals(id, idNew))
                                 {
-                                    UtilDal.RowCopy(rowNew, rowMemory);
+                                    Data.RowCopy(rowNew, rowMemory);
                                     updateCount += 1;
                                 }
                             }
@@ -827,7 +827,7 @@
                         sqlSelect.Append(", ");
                     }
                     object value = field.PropertyInfo.GetValue(row);
-                    string paramName = UtilDal.ExecuteParamAdd(field.FrameworkTypeEnum, value, paramList);
+                    string paramName = Data.ExecuteParamAdd(field.FrameworkTypeEnum, value, paramList);
                     sqlSelect.Append(string.Format("{0} AS {1}", paramName, field.FieldNameSql));
                 }
                 sqlSelect.Append(")");
@@ -849,8 +849,8 @@
 
             var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
             string sqlSelect = UpsertSelect(typeRow, rowList, paramList);
-            // string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList);
-            // var resultDebug = await UtilDal.ExecuteReaderAsync(typeRow, sqlDebug);
+            // string sqlDebug = Data.ExecuteParamDebug(sqlSelect, paramList);
+            // var resultDebug = await Data.ExecuteReaderAsync(typeRow, sqlDebug);
 
             string sqlUpsert = @"
             MERGE INTO {0} AS Target
@@ -867,10 +867,10 @@
 	            VALUES ({6});
             ";
             sqlUpsert = string.Format(sqlUpsert, tableName, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
-            // string sqlDebug = UtilDal.ExecuteParamDebug(sqlUpsert, paramList);
+            // string sqlDebug = Data.ExecuteParamDebug(sqlUpsert, paramList);
 
             // Upsert
-            await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
+            await Data.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
         }
 
         internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList) where TRow : Row
@@ -892,7 +892,7 @@
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             // IsExists
             string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT)", tableNameSql, fieldNameIsExist);
-            await UtilDal.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
+            await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
         }
 
         internal static async Task UpsertIsExistAsync<TRow>(string fieldNameIsExist = "IsExist") where TRow : Row
@@ -1031,7 +1031,7 @@
                         }
                         string fieldNameSql = fieldBuiltIn.Field.FieldNameSql;
                         object value = fieldBuiltIn.Field.PropertyInfo.GetValue(row);
-                        string paramName = UtilDal.ExecuteParamAdd(fieldBuiltIn.Field.FrameworkTypeEnum, value, paramList);
+                        string paramName = Data.ExecuteParamAdd(fieldBuiltIn.Field.FrameworkTypeEnum, value, paramList);
                         if (fieldBuiltIn.IsId == false && fieldBuiltIn.IsIdName == false)
                         {
                             sqlSelect.Append(string.Format("{0} AS {1}", paramName, fieldBuiltIn.Field.FieldNameSql));
@@ -1068,7 +1068,7 @@
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
                 string sqlSelect = UpsertSelect(typeRow, rowListSplit, fieldNameSqlPrefix, paramList, assemblyList);
-                // string sqlDebug = UtilDal.ExecuteParamDebug(sqlSelect, paramList); sqlSelect = sqlDebug;
+                // string sqlDebug = Data.ExecuteParamDebug(sqlSelect, paramList); sqlSelect = sqlDebug;
 
                 // Update underlying sql table if sql view ends with "BuiltIn".
                 UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
@@ -1101,10 +1101,10 @@
 	                VALUES ({6});
                 ";
                 sqlUpsert = string.Format(sqlUpsert, tableNameSql, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
-                // string sqlDebug = UtilDal.ExecuteParamDebug(sqlUpsert, paramList);
+                // string sqlDebug = Data.ExecuteParamDebug(sqlUpsert, paramList);
 
                 // Upsert
-                await UtilDal.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
+                await Data.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
             }
         }
 
@@ -1158,7 +1158,7 @@
         /// </summary>
         internal static bool TypeRowIsFrameworkDb(Type typeRow)
         {
-            return typeRow.GetTypeInfo().Assembly == typeof(UtilDal).Assembly; // Type is declared in Framework assembly.
+            return typeRow.GetTypeInfo().Assembly == typeof(Data).Assembly; // Type is declared in Framework assembly.
         }
 
         /// <summary>

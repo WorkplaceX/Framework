@@ -2,7 +2,7 @@
 {
     using Database.dbo;
     using Framework.App;
-    using Framework.Dal;
+    using Framework.DataAccessLayer;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -800,7 +800,7 @@
         /// Returns query to load data grid. Override this method to define sql query.
         /// </summary>
         /// <param name="grid">Grid to get query to load.</param>
-        /// <returns>If value null, grid has no header and rows. If value is method UtilDal.QueryEmpty(); grid has header but no rows.</returns>
+        /// <returns>If value null, grid has no header and rows. If value is method Data.QueryEmpty(); grid has header but no rows.</returns>
         protected virtual internal IQueryable GridQuery(Grid grid)
         {
             return null;
