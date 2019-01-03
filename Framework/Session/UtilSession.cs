@@ -271,6 +271,12 @@
             return appSession.GridSessionList[gridIndex].GridRowSessionList[rowIndex].Row;
         }
 
+        public static GridRowSession GridRowSessionFromIndex(int gridIndex, int rowIndex)
+        {
+            AppSession appSession = UtilServer.AppSession;
+            return appSession.GridSessionList[gridIndex].GridRowSessionList[rowIndex];
+        }
+
         public static int GridFieldNameToCellIndex(Grid grid, string fieldName)
         {
             int result = -1;

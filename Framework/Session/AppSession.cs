@@ -782,9 +782,9 @@
                             int gridIndex = (int)gridItemLookup.Grid.LookupGridIndex;
                             Grid grid = UtilSession.GridFromIndex(gridIndex);
                             GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
-                            Row row = UtilSession.GridRowFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex);
+                            GridRowEnum gridRowEnum = UtilSession.GridRowSessionFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex).RowEnum;
                             string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupCellIndex);
-                            string text = gridItemLookup.Grid.ComponentOwner<Page>().GridLookupSelected(grid, row, fieldName, gridRowItemLookup.GridRowSession.Row);
+                            string text = gridItemLookup.Grid.ComponentOwner<Page>().GridLookupRowSelected(grid, fieldName, gridRowEnum, gridRowItemLookup.GridRowSession.Row);
 
                             GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex - gridSession.OffsetColumn);
                             gridCell.Text = text;

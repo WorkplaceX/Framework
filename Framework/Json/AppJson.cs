@@ -874,11 +874,11 @@
         /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
         /// </summary>
         /// <param name="grid">Grid on which lookup has been selected.</param>
-        /// <param name="row">Row on which lookup has been selected.</param>
         /// <param name="fieldName">Cell on which lookup has been selected</param>
+        /// <param name="gridRowEnum">Row type on which lookup has been selected (for example filter row).</param>
         /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
         /// <returns>Returns text like entered by user for further processing.</returns>
-        protected virtual internal string GridLookupSelected(Grid grid, Row row, string fieldName, Row rowLookupSelected)
+        protected virtual internal string GridLookupRowSelected(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row rowLookupSelected)
         {
             return null;
         }
