@@ -65,9 +65,10 @@
 
         private static void BuildWebsiteNpm(ConfigCliWebsite config)
         {
-            if (UtilFramework.StringNull(config.FolderNameNpmBuild) != null)
+            string folderNameNpmBuild = UtilFramework.FolderNameParse(config.FolderNameNpmBuild);
+            if (UtilFramework.StringNull(folderNameNpmBuild) != null)
             {
-                string folderName = UtilFramework.FolderName + config.FolderNameNpmBuild;
+                string folderName = UtilFramework.FolderName + folderNameNpmBuild;
                 UtilCli.Npm(folderName, "install --loglevel error --no-save"); // Prevent changin package-lock.json. See also:  https://github.com/npm/npm/issues/20934
                 UtilCli.Npm(folderName, "run build");
             }
@@ -81,8 +82,14 @@
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 BuildWebsiteNpm(website);
 
-                string folderNameSource = UtilFramework.FolderName + website.FolderNameDist;
-                string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Website/" + website.FolderNameServer + "/";
+                string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServer);
+                UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
+
+                string folderNameDist = UtilFramework.FolderNameParse(website.FolderNameDist);
+                UtilFramework.Assert(folderNameDist != null, "FolderNameDist can not be null!");
+
+                string folderNameSource = UtilFramework.FolderName + folderNameDist;
+                string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Website/" + folderNameServer;
                 if (!UtilCli.FolderNameExist(folderNameSource))
                 {
                     throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));

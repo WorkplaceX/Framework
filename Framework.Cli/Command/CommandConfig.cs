@@ -37,25 +37,6 @@
             argumentWebsite = configuration.Argument("website", "Add (include) a website to ci build.");
         }
 
-        private static string FolderNameParse(string folderName)
-        {
-            if (UtilFramework.StringNull(folderName) == null)
-            {
-                return null;
-            }
-            folderName = UtilFramework.StringEmpty(folderName);
-            folderName = folderName.Replace(@"\", "/");
-            if (folderName.StartsWith("/"))
-            {
-                folderName = folderName.Substring(1);
-            }
-            if (!folderName.EndsWith("/"))
-            {
-                folderName += "/";
-            }
-            return folderName;
-        }
-
         private void ArgumentWebsite()
         {
             // Input FolderNameServer
@@ -63,7 +44,7 @@
             Console.WriteLine("Enter FolderNameServer. For example: 'example.com':");
             Console.Write(">");
             string folderNameServer = Console.ReadLine();
-            folderNameServer = FolderNameParse(folderNameServer);
+            folderNameServer = UtilFramework.FolderNameParse(folderNameServer);
 
             // Input DomainName
             Console.WriteLine("Enter domain name. For example: 'example.com' or empty for default website:");
@@ -83,7 +64,7 @@
             Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Website/'. In this folder ci calls npm install; npm build;");
             Console.Write(">");
             string folderNameNpmBuild = Console.ReadLine();
-            folderNameNpmBuild = FolderNameParse(folderNameNpmBuild);
+            folderNameNpmBuild = UtilFramework.FolderNameParse(folderNameNpmBuild);
 
             string folderNameNpmBuildCheck = UtilFramework.FolderName + folderNameNpmBuild;
             if (!Directory.Exists(folderNameNpmBuildCheck))
@@ -95,7 +76,7 @@
             Console.WriteLine("Enter dist folder name. For example 'Website/dist/'. Content of this folder is copied to 'Application.Server/Framework/Website/{FolderNameServer}'");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
-            folderNameDist = FolderNameParse(folderNameDist);
+            folderNameDist = UtilFramework.FolderNameParse(folderNameDist);
             string folderNameDistCheck = UtilFramework.FolderName + folderNameDist;
             if (!Directory.Exists(folderNameDistCheck))
             {

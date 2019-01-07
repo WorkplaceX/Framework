@@ -74,6 +74,25 @@ namespace Framework
             }
         }
 
+        public static string FolderNameParse(string folderName)
+        {
+            if (UtilFramework.StringNull(folderName) == null)
+            {
+                return null;
+            }
+            folderName = UtilFramework.StringEmpty(folderName);
+            folderName = folderName.Replace(@"\", "/");
+            if (folderName.StartsWith("/"))
+            {
+                folderName = folderName.Substring(1);
+            }
+            if (!folderName.EndsWith("/"))
+            {
+                folderName += "/";
+            }
+            return folderName;
+        }
+
         /// <summary>
         /// Write to console in color.
         /// </summary>
