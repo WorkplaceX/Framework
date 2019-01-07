@@ -69,13 +69,9 @@
             }
             foreach (var website in result.WebsiteList)
             {
-                if (string.IsNullOrEmpty(website.DomainName))
+                if (website.DomainNameList == null)
                 {
-                    website.DomainName = "default";
-                }
-                if (website.FolderNameNpmBuild == "")
-                {
-                    website.FolderNameNpmBuild = null;
+                    website.DomainNameList = new List<string>();
                 }
             }
             return result;
@@ -93,22 +89,49 @@
     public class ConfigCliWebsite
     {
         /// <summary>
-        /// Gets or sets DomainName. For example (example.com) or empty for default.
+        /// Gets or sets FolderNameServer. Folder relative to "Application.Server/Framework/Website/".
         /// </summary>
-        public string DomainName { get; set; }
+        public string FolderNameServer { get; set; }
 
         /// <summary>
-        /// Gets or sets DomainNameRedirect. Redirect domain. Empty if no redirect.
+        /// Gets or sets DomainNameList. For example (example.com) or empty for default website.
         /// </summary>
-        public string DomainNameRedirect { get; set; }
+        public List<string> DomainNameList { get; set; }
+
+        public string DomainNameListToString()
+        {
+            string result = null;
+            bool isFirst = true;
+            if (DomainNameList != null)
+            {
+                foreach (string domainName in DomainNameList)
+                {
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        result += "; ";
+                    }
+                    result += domainName;
+                }
+            }
+            return result;
+        }
 
         /// <summary>
-        /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". Empty if Git is used.
+        /// Gets or sets AppTypeName. Needs to derrive from AppJson.
+        /// </summary>
+        public string AppTypeName;
+
+        /// <summary>
+        /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". 
         /// </summary>
         public string FolderNameNpmBuild { get; set; }
 
         /// <summary>
-        /// Gets or sets FolderNameDist. Content of this folder will be copied to Application.Server/Framework/WebsiteInclude/{DomainName}/. Empty if Git is used.
+        /// Gets or sets FolderNameDist. Content of this folder will be copied to "Application.Server/Framework/Website/{FolderNameServer}".
         /// </summary>
         public string FolderNameDist { get; set; }
 
@@ -134,15 +157,5 @@
         /// Gets or sets GitPassword. For example if git repo is not a public repo.
         /// </summary>
         public string GitPassword { get; set; }
-
-        /// <summary>
-        /// Gets or sets GitFolderNameNpmBuild. In this folder the following commands will be executed: "npm install", "npm build".
-        /// </summary>
-        public string GitFolderNameNpmBuild { get; set; }
-
-        /// <summary>
-        /// Gets or sets GitFolderNameDist. Content of this folder will be copied to Application.Server/Framework/WebsiteInclude/{DomainName}/
-        /// </summary>
-        public string GitFolderNameDist { get; set; }
     }
 }

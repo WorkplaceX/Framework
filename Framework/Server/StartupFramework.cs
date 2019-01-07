@@ -29,7 +29,7 @@
             });
         }
 
-        public static void Configure(IApplicationBuilder applicationBuilder, AppSelector appSelector)
+        public static void Configure(IApplicationBuilder applicationBuilder)
         {
             UtilServer.ApplicationBuilder = applicationBuilder;
 
@@ -50,7 +50,7 @@
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
 
-            applicationBuilder.Run(new Request(applicationBuilder, appSelector).RunAsync);
+            applicationBuilder.Run(new Request(applicationBuilder, new AppSelector()).RunAsync);
         }
     }
 }

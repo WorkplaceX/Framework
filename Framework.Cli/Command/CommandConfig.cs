@@ -37,32 +37,54 @@
             argumentWebsite = configuration.Argument("website", "Add (include) a website to ci build.");
         }
 
+        private static string FolderNameParse(string folderName)
+        {
+            if (UtilFramework.StringNull(folderName) == null)
+            {
+                return null;
+            }
+            folderName = UtilFramework.StringEmpty(folderName);
+            folderName = folderName.Replace(@"\", "/");
+            if (folderName.StartsWith("/"))
+            {
+                folderName = folderName.Substring(1);
+            }
+            if (!folderName.EndsWith("/"))
+            {
+                folderName += "/";
+            }
+            return folderName;
+        }
+
         private void ArgumentWebsite()
         {
-            // Input DomainName
+            // Input FolderNameServer
             UtilFramework.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
-            Console.WriteLine("Enter domain name. For example: 'example.com' or empty for 'default':");
+            Console.WriteLine("Enter FolderNameServer. For example: 'example.com':");
+            Console.Write(">");
+            string folderNameServer = Console.ReadLine();
+            folderNameServer = FolderNameParse(folderNameServer);
+
+            // Input DomainName
+            Console.WriteLine("Enter domain name. For example: 'example.com' or empty for default website:");
             Console.Write(">");
             string domainName = Console.ReadLine();
-            if (domainName == "")
+
+            // Input AppTypeName
+            Console.WriteLine("Enter AppTypeName. For example: 'Application.AppMain, Application':");
+            Console.Write(">");
+            string appTypeName = Console.ReadLine();
+            if (Type.GetType(appTypeName) == null)
             {
-                domainName = "default";
+                UtilFramework.ConsoleWriteLineColor(string.Format("Type not found! ({0})", appTypeName), ConsoleColor.Red);
             }
 
             // Input FolderName
             Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Website/'. In this folder ci calls npm install; npm build;");
             Console.Write(">");
             string folderNameNpmBuild = Console.ReadLine();
-            if (folderNameNpmBuild.StartsWith("/") || folderNameNpmBuild.StartsWith(@"\"))
-            {
-                folderNameNpmBuild = folderNameNpmBuild.Substring(1);
-            }
-            if (folderNameNpmBuild.EndsWith("/") || folderNameNpmBuild.EndsWith(@"\"))
-            {
-                folderNameNpmBuild = folderNameNpmBuild.Substring(0, folderNameNpmBuild.Length - 1);
-            }
-            folderNameNpmBuild = folderNameNpmBuild.Replace(@"\", "/");
-            folderNameNpmBuild += "/";
+            folderNameNpmBuild = FolderNameParse(folderNameNpmBuild);
+
             string folderNameNpmBuildCheck = UtilFramework.FolderName + folderNameNpmBuild;
             if (!Directory.Exists(folderNameNpmBuildCheck))
             {
@@ -70,19 +92,10 @@
             }
 
             // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Website/dist/'. Content of this folder is copied to 'Application.Server/Framework/Website/{DomainName}'");
+            Console.WriteLine("Enter dist folder name. For example 'Website/dist/'. Content of this folder is copied to 'Application.Server/Framework/Website/{FolderNameServer}'");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
-            if (folderNameDist.StartsWith("/") || folderNameDist.StartsWith(@"\"))
-            {
-                folderNameDist = folderNameDist.Substring(1);
-            }
-            if (folderNameDist.EndsWith("/") || folderNameDist.EndsWith(@"\"))
-            {
-                folderNameDist = folderNameDist.Substring(0, folderNameDist.Length - 1);
-            }
-            folderNameDist = folderNameDist.Replace(@"\", "/");
-            folderNameDist += "/";
+            folderNameDist = FolderNameParse(folderNameDist);
             string folderNameDistCheck = UtilFramework.FolderName + folderNameDist;
             if (!Directory.Exists(folderNameDistCheck))
             {
@@ -91,7 +104,9 @@
 
             // Add Website
             ConfigCliWebsite website = new ConfigCliWebsite();
-            website.DomainName = domainName;
+            website.FolderNameServer = folderNameServer;
+            website.DomainNameList = new List<string>() { domainName };
+            website.AppTypeName = appTypeName;
             website.FolderNameNpmBuild = folderNameNpmBuild;
             website.FolderNameDist = folderNameDist;
             ConfigCli configCli = ConfigCli.Load();
@@ -99,7 +114,7 @@
             {
                 configCli.WebsiteList = new List<ConfigCliWebsite>();
             }
-            ConfigCliWebsite websiteFind = configCli.WebsiteList.Where(item => item.DomainName.ToLower() == domainName).SingleOrDefault();
+            ConfigCliWebsite websiteFind = configCli.WebsiteList.Where(item => item.FolderNameServer.ToLower() == folderNameServer.ToLower()).SingleOrDefault();
             if (websiteFind != null)
             {
                 configCli.WebsiteList.Remove(websiteFind);

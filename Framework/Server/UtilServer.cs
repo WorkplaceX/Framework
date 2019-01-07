@@ -89,6 +89,14 @@
         }
 
         /// <summary>
+        /// Returns client request domain name. For example "localhost". Does not include http, https or port.
+        /// </summary>
+        public static string RequestDomainName()
+        {
+            return Context.Request.Host.Host;
+        }
+
+        /// <summary>
         /// Returns html content type.
         /// </summary>
         public static string ContentType(string fileName)

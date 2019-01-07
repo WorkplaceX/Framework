@@ -5,6 +5,7 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.IO;
+    using System.Linq;
 
     /// <summary>
     /// Cli build command.
@@ -64,7 +65,7 @@
 
         private static void BuildWebsiteNpm(ConfigCliWebsite config)
         {
-            if (config.FolderNameNpmBuild != null)
+            if (UtilFramework.StringNull(config.FolderNameNpmBuild) != null)
             {
                 string folderName = UtilFramework.FolderName + config.FolderNameNpmBuild;
                 UtilCli.Npm(folderName, "install --loglevel error --no-save"); // Prevent changin package-lock.json. See also:  https://github.com/npm/npm/issues/20934
@@ -77,11 +78,11 @@
             var configCli = ConfigCli.Load();
             foreach (var website in configCli.WebsiteList)
             {
-                Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainName));
+                Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 BuildWebsiteNpm(website);
 
                 string folderNameSource = UtilFramework.FolderName + website.FolderNameDist;
-                string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Website/" + website.DomainName + "/";
+                string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Website/" + website.FolderNameServer + "/";
                 if (!UtilCli.FolderNameExist(folderNameSource))
                 {
                     throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
@@ -93,7 +94,7 @@
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
                 UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
 
-                Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainName));
+                Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
             }
         }
 
@@ -114,7 +115,10 @@
             configWebServer.WebsiteList.Clear();
             foreach (var webSite in configCli.WebsiteList)
             {
-                configWebServer.WebsiteList.Add(new ConfigWebServerWebsite() { DomainName = webSite.DomainName });
+                configWebServer.WebsiteList.Add(new ConfigWebServerWebsite() {
+                    FolderNameServer = webSite.FolderNameServer,
+                    AppTypeName = webSite.AppTypeName,
+                    DomainNameList = webSite.DomainNameList.Select(item => item).ToList() });
             }
 
             ConfigWebServer.Save(configWebServer);

@@ -7,6 +7,7 @@
     using System;
     using System.Threading.Tasks;
     using System.Linq;
+    using Framework.Config;
 
     internal class AppInternal
     {
@@ -23,7 +24,7 @@
         public Type[] TypeComponentInNamespaceList;
     }
 
-    public class AppSelector
+    internal class AppSelector
     {
         internal async Task<AppInternal> CreateAppAndProcessAsync(HttpContext context)
         {
@@ -117,16 +118,53 @@
         /// </summary>
         protected virtual Type TypeAppJson()
         {
-            return typeof(AppJson);
+            string requestDomainName = UtilServer.RequestDomainName();
+            var config = ConfigWebServer.Load();
+            string appTypeName = null; 
+            foreach (var website in config.WebsiteList)
+            {
+                foreach (string domainName in website.DomainNameList)
+                {
+                    if (domainName == requestDomainName)
+                    {
+                        appTypeName = website.AppTypeName;
+                        break;
+                    }
+                }
+                if (appTypeName != null)
+                {
+                    break;
+                }
+            }
+            if (appTypeName == null)
+            {
+                appTypeName = config.WebsiteList.Where(item => item.DomainNameList.Count == 0).Select(item => item.AppTypeName).SingleOrDefault();
+            }
+            if (appTypeName == null)
+            {
+                throw new Exception("AppTypeName not defined! See also file: ConfigWebServer.json");
+            }
+            Type result = Type.GetType(appTypeName);
+            if (result == null)
+            {
+                throw new Exception(string.Format("Type not found! See also file: ConfigWebServer.json ({0})", appTypeName));
+            }
+            return result;
         }
+
+        private Type typeAppJson;
 
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
         /// </summary>
         virtual internal Type[] TypeComponentInNamespaceList()
         {
+            if (typeAppJson == null)
+            {
+                typeAppJson = TypeAppJson();
+            }
             return (new Type[] {
-                GetType(), // Namespace of running application.
+                typeAppJson, // Namespace of running application.
                 typeof(AppJson), // For example button.
             }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }

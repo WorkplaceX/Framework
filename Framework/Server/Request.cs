@@ -113,7 +113,7 @@
             var website = configWebServer.WebsiteList.FirstOrDefault();
             if (website != null)
             {
-                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + website.DomainName + path;
+                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + website.FolderNameServer + path;
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

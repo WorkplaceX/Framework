@@ -102,6 +102,13 @@
             {
                 result.WebsiteList = new List<ConfigWebServerWebsite>();
             }
+            foreach (var website in result.WebsiteList)
+            {
+                if (website.DomainNameList == null)
+                {
+                    website.DomainNameList = new List<string>();
+                }
+            }
             return result;
         }
 
@@ -113,6 +120,19 @@
 
     internal class ConfigWebServerWebsite
     {
-        public string DomainName { get; set; }
+        /// <summary>
+        /// Gets or sets FolderNameServer. Folder relative to "Application.Server/Framework/Website/".
+        /// </summary>
+        public string FolderNameServer;
+
+        /// <summary>
+        /// Gets or sets AppTypeName. Needs to derrive from AppJson.
+        /// </summary>
+        public string AppTypeName;
+
+        /// <summary>
+        /// Gets or sets DomainNameList. For example (example.com) or empty for default website.
+        /// </summary>
+        public List<string> DomainNameList { get; set; }
     }
 }
