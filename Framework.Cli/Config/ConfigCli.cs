@@ -10,14 +10,18 @@
     public class ConfigCli
     {
         /// <summary>
-        /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
+        /// Gets or sets ConnectionStringFramework. Can be different from ConnectionStringApplication, if framework relevant tables are stored on another database.
         /// </summary>
-        public string DeployAzureGitUrl { get; set; }
-
         public string ConnectionStringFramework { get; set; }
 
+        /// <summary>
+        /// Gets or sets ConnectionStringApplication. Database containing business data.
+        /// </summary>
         public string ConnectionStringApplication { get; set; }
 
+        /// <summary>
+        /// Returns ConnectionString of application or framework.
+        /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
         {
             var configCli = ConfigCli.Load();
@@ -31,7 +35,15 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets WebsiteList. Multiple domain names can be served by one ASP.NET Core instance.
+        /// </summary>
         public List<ConfigCliWebsite> WebsiteList { get; set; }
+
+        /// <summary>
+        /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
+        /// </summary>
+        public string DeployAzureGitUrl { get; set; }
 
         /// <summary>
         /// Gets ConfigCli.json. Used by CommandBuild. Created with default values if file does not exist.
@@ -121,7 +133,7 @@
         }
 
         /// <summary>
-        /// Gets or sets AppTypeName. Needs to derrive from AppJson.
+        /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application" or "Application.AppMain, Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null".
         /// </summary>
         public string AppTypeName;
 
