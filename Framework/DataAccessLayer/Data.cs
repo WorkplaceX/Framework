@@ -586,7 +586,7 @@
                     {
                         Row rowCopy = Data.RowCopy(row);
                         DbContext dbContext = DbContextInternalCreate(row.GetType());
-                        dbContext.Add(row); // Throws NullReferenceException if no primary key is defined.
+                        dbContext.Add(row); // Throws NullReferenceException if no primary key is defined. // EF sets auto increment field to 2147482647.
                         try
                         {
                             int count = await dbContext.SaveChangesAsync();
@@ -600,7 +600,7 @@
                         }
                         catch (Exception exception)
                         {
-                            Data.RowCopy(rowCopy, row); // In case of exception, EF might change for example auto increment id to -2147482647. Reverse it back.
+                            Data.RowCopy(rowCopy, row); // In case of exception, auto increment id stays -2147482647. Reverse it back.
                             throw exception;
                         }
                         break;
@@ -676,9 +676,9 @@
         /// </summary>
         internal static void CellTextFromValue(Page page, Grid grid, GridRowSession gridRowSession, Field field, GridCellSession gridCellSession, Row row)
         {
-            string text = null;
             if (gridRowSession.Row != null)
             {
+                string text = null;
                 object value = field.PropertyInfo.GetValue(row);
                 if (value != null)
                 {
@@ -689,8 +689,8 @@
                         text = field.FrameworkType().CellTextFromValue(value);
                     }
                 }
+                gridCellSession.Text = text;
             }
-            gridCellSession.Text = text;
         }
 
         /// <summary>

@@ -135,6 +135,21 @@ namespace Framework
             Assert(isAssert, "Assert!");
         }
 
+        internal static string ExceptionToString(Exception exception)
+        {
+            string result = null;
+            while (exception != null)
+            {
+                if (result != null)
+                {
+                    result += "; ";
+                }
+                result += exception.Message;
+                exception = exception.InnerException;
+            }
+            return result;
+        }
+
         /// <summary>
         /// Returns underlying tpye, if any. For example "type = typeof(int?)" returns "typeof(int)".
         /// </summary>

@@ -534,7 +534,7 @@
                                     }
                                     catch (Exception exception)
                                     {
-                                        errorParse = exception.Message;
+                                        errorParse = UtilFramework.ExceptionToString(exception);
                                         gridRowItem.GridRowSession.RowUpdate = null;
                                         gridRowItem.GridRowSession.RowInsert = null;
                                     }
@@ -583,12 +583,12 @@
                             {
                                 gridCellSession.IsModify = false;
                                 gridCellSession.TextOld = null;
-                                gridCellSession.Error = null;
+                                gridCellSession.ErrorParse = null;
                             }
                         }
                         catch (Exception exception)
                         {
-                            gridRowItem.GridRowSession.ErrorSave = exception.Message;
+                            gridRowItem.GridRowSession.ErrorSave = UtilFramework.ExceptionToString(exception);
                         }
                         gridRowItem.GridRowSession.RowUpdate = null;
                     }
@@ -609,7 +609,7 @@
                         }
                         catch (Exception exception)
                         {
-                            gridRowItem.GridRowSession.ErrorSave = exception.Message;
+                            gridRowItem.GridRowSession.ErrorSave = UtilFramework.ExceptionToString(exception);
                         }
                         gridRowItem.GridRowSession.RowInsert = null;
                     }
@@ -677,42 +677,35 @@
                                 gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet();
                                 if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
                                 {
+                                    Grid grid = gridItem.Grid;
+                                    Page page = grid.ComponentOwner<Page>();
+                                    Filter filter = new Filter();
+                                    filter.Load(gridRowItem);
+                                    gridCellItem.GridCellSession.ErrorParse = null;
+                                    string errorParse = null;
                                     try
                                     {
-                                        Grid grid = gridItem.Grid;
-                                        Page page = grid.ComponentOwner<Page>();
-                                        Filter filter = new Filter();
-                                        filter.Load(gridRowItem);
-                                        gridCellItem.GridCellSession.ErrorParse = null;
-                                        string errorParse = null;
-                                        try
+                                        bool isHandled = false;
+                                        if (gridCellItem.GridCellSession.Text != null)
                                         {
-                                            bool isHandled = false;
-                                            if (gridCellItem.GridCellSession.Text != null)
-                                            {
-                                                page.GridCellParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
-                                            }
-                                            if (isHandled == false)
-                                            {
-                                                Data.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
-                                            }
-                                            filter.Save(gridRowItem);
+                                            page.GridCellParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
                                         }
-                                        catch (Exception exception)
+                                        if (isHandled == false)
                                         {
-                                            errorParse = exception.Message;
+                                            Data.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
                                         }
-                                        gridCellItem.GridCellSession.IsModify = false;
-                                        gridCellItem.GridCellSession.TextOld = null;
-                                        gridCellItem.GridCellSession.ErrorParse = errorParse;
-                                        if (!gridItemReloadList.Contains(gridItem))
-                                        {
-                                            gridItemReloadList.Add(gridItem);
-                                        }
+                                        filter.Save(gridRowItem);
                                     }
                                     catch (Exception exception)
                                     {
-                                        gridCellItem.GridCellSession.Error = exception.ToString();
+                                        errorParse = exception.Message;
+                                    }
+                                    gridCellItem.GridCellSession.IsModify = false;
+                                    gridCellItem.GridCellSession.TextOld = null;
+                                    gridCellItem.GridCellSession.ErrorParse = errorParse;
+                                    if (!gridItemReloadList.Contains(gridItem))
+                                    {
+                                        gridItemReloadList.Add(gridItem);
                                     }
                                 }
                             }
@@ -1076,7 +1069,5 @@
         public FilterOperator FilterOperator;
 
         public int MergeId;
-
-        public string Error;
     }
 }
