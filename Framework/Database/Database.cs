@@ -76,6 +76,58 @@ namespace Database.dbo
         public double? Sort { get; set; }
     }
 
+    [SqlTable("dbo", "FrameworkConfigFieldDisplay")]
+    public class FrameworkConfigFieldDisplay : Row
+    {
+        [SqlField("ConfigGridId", FrameworkTypeEnum.Int)]
+        public int ConfigGridId { get; set; }
+
+        [SqlField("ConfigGridTableId", FrameworkTypeEnum.Int)]
+        public int ConfigGridTableId { get; set; }
+
+        [SqlField("ConfigGridTableIdName", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigGridTableIdName { get; set; }
+
+        [SqlField("ConfigGridTableNameCSharp", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigGridTableNameCSharp { get; set; }
+
+        [SqlField("ConfigGridConfigName", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigGridConfigName { get; set; }
+
+        [SqlField("ConfigGridIsExist", FrameworkTypeEnum.Bit)]
+        public bool ConfigGridIsExist { get; set; }
+
+        [SqlField("FieldId", FrameworkTypeEnum.Int)]
+        public int FieldId { get; set; }
+
+        [SqlField("FieldTableId", FrameworkTypeEnum.Int)]
+        public int FieldTableId { get; set; }
+
+        [SqlField("FieldFieldNameCSharp", FrameworkTypeEnum.Nvarcahr)]
+        public string FieldFieldNameCSharp { get; set; }
+
+        [SqlField("FieldFieldNameSql", FrameworkTypeEnum.Nvarcahr)]
+        public string FieldFieldNameSql { get; set; }
+
+        [SqlField("FieldIsExist", FrameworkTypeEnum.Bit)]
+        public bool FieldIsExist { get; set; }
+
+        [SqlField("ConfigFieldText", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigFieldText { get; set; }
+
+        [SqlField("ConfigFieldDescription", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigFieldDescription { get; set; }
+
+        [SqlField("ConfigFieldIsVisible", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigFieldIsVisible { get; set; }
+
+        [SqlField("ConfigFieldIsReadOnly", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigFieldIsReadOnly { get; set; }
+
+        [SqlField("ConfigFieldSort", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigFieldSort { get; set; }
+    }
+
     [SqlTable("dbo", "FrameworkConfigGrid")]
     public class FrameworkConfigGrid : Row
     {

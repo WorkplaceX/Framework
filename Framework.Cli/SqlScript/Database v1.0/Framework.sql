@@ -58,8 +58,8 @@ SELECT
 	ConfigGrid.Id,
 	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId), '; ', ConfigGrid.ConfigName) AS IdName,
 	ConfigGrid.TableId,
-	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
 	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS TableIdName,
+	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
 	ConfigGrid.ConfigName,
 	ConfigGrid.RowCountMax,
 	ConfigGrid.IsAllowInsert,
@@ -103,4 +103,30 @@ SELECT
 	ConfigField.Sort
 FROM
 	FrameworkConfigField ConfigField
+GO
+
+GO
+CREATE VIEW FrameworkConfigFieldDisplay AS
+SELECT 
+	ConfigGrid.Id AS ConfigGridId,
+	ConfigGrid.TableId AS ConfigGridTableId,
+	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS ConfigGridTableIdName,
+	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS ConfigGridTableNameCSharp,
+	ConfigGrid.ConfigName AS ConfigGridConfigName,
+	ConfigGrid.IsExist AS ConfigGridIsExist,
+	Field.Id AS FieldId,
+	Field.TableId AS FieldTableId,
+	Field.FieldNameCSharp AS FieldFieldNameCSharp,
+	Field.FieldNameSql AS FieldFieldNameSql,
+	Field.IsExist AS FieldIsExist,
+	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldText,
+	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldDescription,
+	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldIsVisible,
+	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldIsReadOnly,
+	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldSort
+FROM
+	FrameworkConfigGrid ConfigGrid,
+	FrameworkField Field
+WHERE
+	Field.TableId = ConfigGrid.TableId
 GO
