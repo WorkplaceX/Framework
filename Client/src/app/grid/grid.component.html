@@ -36,7 +36,7 @@
             <div *ngIf="cell.HtmlRight" [innerHTML]="cell.HtmlRight"></div>
             <i *ngIf="cell.IsReadOnly" class="fas fa-lock colorBlack"></i>
             <i *ngIf="cell.ErrorParse!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorParse }}"></i>
-            <i *ngIf="cell.IsModify" class="fas fa-spinner fa-spin colorBlack"></i>
+            <i *ngIf="cell.IsClick" class="fas fa-spinner fa-spin colorBlack"></i>
             <i *ngIf="row.RowEnum==1" class="fas fa-search colorBlack" title="Search"></i>
             <i *ngIf="row.RowEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
           </div>

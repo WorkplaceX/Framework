@@ -84,6 +84,7 @@ export class DataService {
       if (json.MergeId == this.mergeBufferId) {
         json.Text = this.mergeBufferText;
         json.IsModify = true;
+        json.IsClick = true; // Show spinner
         this.mergeBufferId = null;
         this.mergeBufferText = null;
       }

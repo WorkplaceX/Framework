@@ -574,9 +574,9 @@
         }
 
         /// <summary>
-        /// Insert data record. Primary key needs to be 0! Returned new row contains new primary key.
+        /// Insert data record. Primary key needs to be 0! Row contains new primary key after insert.
         /// </summary>
-        public static async Task<TRow> InsertAsync<TRow>(TRow row, DatabaseEnum databaseEnum = DatabaseEnum.Database) where TRow : Row
+        public static async Task InsertAsync<TRow>(TRow row, DatabaseEnum databaseEnum = DatabaseEnum.Database) where TRow : Row
         {
             UtilFramework.LogDebug(string.Format("INSERT ({0})", row.GetType().Name));
 
@@ -589,7 +589,7 @@
                         dbContext.Add(row); // Throws NullReferenceException if no primary key is defined. // EF sets auto increment field to 2147482647.
                         try
                         {
-                            int count = await dbContext.SaveChangesAsync();
+                            int count = await dbContext.SaveChangesAsync(); // Override method GridInsertAsync(); for sql view.
                             UtilFramework.Assert(count == 1, "Update failed!");
                             //
                             // Exception: Database operation expected to affect 1 row(s) but actually affected 0 row(s). 
@@ -614,7 +614,6 @@
                 default:
                     throw new Exception("Scope not supported!");
             }
-            return row; // Return Row with new primary key.
         }
 
         /// <summary>
@@ -636,7 +635,7 @@
                             var tracking = dbContext.Attach(row);
                             tracking.CurrentValues.SetValues(rowNew);
                             tracking.State = EntityState.Modified; // Update also if row and rowNew are equal.
-                            int count = await dbContext.SaveChangesAsync();
+                            int count = await dbContext.SaveChangesAsync(); // Override method GridUpdateAsync(); for sql view.
                             UtilFramework.Assert(count == 1, "Update failed!");
                             break;
                         }
@@ -669,6 +668,14 @@
                         throw new Exception("Scope not supported!");
                 }
             }
+        }
+
+        /// <summary>
+        /// Update data record on database.
+        /// </summary>
+        public static Task UpdateAsync(Row row, DatabaseEnum databaseEnum = DatabaseEnum.Database)
+        {
+            return UpdateAsync(row, row, databaseEnum);
         }
 
         /// <summary>

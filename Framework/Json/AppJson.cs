@@ -14,6 +14,9 @@
     using static Framework.Json.Page;
     using static Framework.Session.UtilSession;
 
+    /// <summary>
+    /// Json component tree. Store session state in field or property.
+    /// </summary>
     public abstract class ComponentJson
     {
         /// <summary>
@@ -702,6 +705,8 @@
 
         public bool IsModify;
 
+        public bool IsClick; // Show spinner
+
         /// <summary>
         /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
         /// </summary>
@@ -809,11 +814,22 @@
         /// <summary>
         /// Override this method for custom grid save implementation. Return isHandled.
         /// </summary>
-        /// <param name="grid">Data grid to update.</param>
+        /// <param name="grid">Data grid to save.</param>
         /// <param name="row">Data row to update.</param>
         /// <param name="rowNew">New data row to save to database.</param>
-        /// <returns>Returns true, if save was handled.</returns>
+        /// <returns>Returns true, if custom save was handled.</returns>
         protected virtual internal Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// Override this method for custom grid save implementation. Returns isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to save.</param>
+        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual internal Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }
@@ -848,7 +864,7 @@
         }
 
         /// <summary>
-        /// Override this method for custom implementation. Method is called when data row has been selected. Get selected row with grid.GridRowSelected(); and reload for example a detail data grid.
+        /// Override this method for custom implementation. Method is called when data row has been selected. Get selected row with method grid.GridRowSelected(); and reload for example a detail data grid.
         /// </summary>
         protected virtual internal Task GridRowSelectedAsync(Grid grid)
         {

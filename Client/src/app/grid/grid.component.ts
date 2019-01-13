@@ -14,6 +14,7 @@ export class Grid {
 
   ngModelChange(cell) {
     cell.IsModify = true;
+    cell.IsClick = true; // Show spinner
 
     // Merge
     if (cell.MergeId == null) {

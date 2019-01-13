@@ -517,9 +517,12 @@
                                     string errorParse = null;
                                     try
                                     {
-                                        if (!UtilFramework.IsNullable(gridCellItem.Field.PropertyInfo.PropertyType) && text == null)
+                                        if (text == null && !UtilFramework.IsNullable(gridCellItem.Field.PropertyInfo.PropertyType))
                                         {
-                                            throw new Exception("Value can not be null!");
+                                            if (!(gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)) // Not nullable value in cell can be set back to null in new row.
+                                            {
+                                                throw new Exception("Value can not be null!");
+                                            }
                                         }
                                         if (text != null)
                                         {
@@ -597,12 +600,16 @@
                         // Insert to database
                         try
                         {
-                            var rowNew = await Data.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
-                            gridRowItem.GridRowSession.Row = rowNew;
+                            bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridInsertAsync(gridItem.Grid, gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
+                            if (!isHandled)
+                            {
+                                await Data.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
+                            }
+                            gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowInsert;
 
-                            // Load new primary key into data grid.
+                            // Load new primary key from session into data grid.
                             List<Field> fieldList = null;
-                            GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, rowNew, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
+                            GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.Row, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
 
                             // Add new "insert row" at end of data grid.
                             GridLoadAddRowNew(gridItem.GridIndex);
@@ -1056,6 +1063,8 @@
         public string ErrorParse;
 
         public bool IsModify;
+
+        public bool IsClick; // Show spinner. Used on client only!
 
         public bool IsLookup;
 
