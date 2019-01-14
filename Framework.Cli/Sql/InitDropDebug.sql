@@ -2,6 +2,7 @@
 
 /* Framework */
 DROP VIEW FrameworkConfigFieldDisplay
+DROP VIEW FrameworkConfigGridDisplay
 DROP VIEW FrameworkConfigFieldBuiltIn
 DROP TABLE FrameworkConfigField
 DROP VIEW FrameworkConfigGridBuiltIn

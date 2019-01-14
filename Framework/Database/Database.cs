@@ -80,7 +80,7 @@ namespace Database.dbo
     public class FrameworkConfigFieldDisplay : Row
     {
         [SqlField("ConfigGridId", FrameworkTypeEnum.Int)]
-        public int ConfigGridId { get; set; }
+        public int? ConfigGridId { get; set; }
 
         [SqlField("ConfigGridTableId", FrameworkTypeEnum.Int)]
         public int ConfigGridTableId { get; set; }
@@ -95,7 +95,7 @@ namespace Database.dbo
         public string ConfigGridConfigName { get; set; }
 
         [SqlField("ConfigGridIsExist", FrameworkTypeEnum.Bit)]
-        public bool ConfigGridIsExist { get; set; }
+        public bool? ConfigGridIsExist { get; set; }
 
         [SqlField("FieldId", FrameworkTypeEnum.Int)]
         public int FieldId { get; set; }
@@ -112,20 +112,29 @@ namespace Database.dbo
         [SqlField("FieldIsExist", FrameworkTypeEnum.Bit)]
         public bool FieldIsExist { get; set; }
 
+        [SqlField("ConfigFieldId", FrameworkTypeEnum.Int)]
+        public int? ConfigFieldId { get; set; }
+
+        [SqlField("ConfigFieldConfigGridId", FrameworkTypeEnum.Int)]
+        public int? ConfigFieldConfigGridId { get; set; }
+
+        [SqlField("ConfigFieldFieldId", FrameworkTypeEnum.Int)]
+        public int? ConfigFieldFieldId { get; set; }
+
         [SqlField("ConfigFieldText", FrameworkTypeEnum.Nvarcahr)]
         public string ConfigFieldText { get; set; }
 
         [SqlField("ConfigFieldDescription", FrameworkTypeEnum.Nvarcahr)]
         public string ConfigFieldDescription { get; set; }
 
-        [SqlField("ConfigFieldIsVisible", FrameworkTypeEnum.Nvarcahr)]
-        public string ConfigFieldIsVisible { get; set; }
+        [SqlField("ConfigFieldIsVisible", FrameworkTypeEnum.Bit)]
+        public bool? ConfigFieldIsVisible { get; set; }
 
-        [SqlField("ConfigFieldIsReadOnly", FrameworkTypeEnum.Nvarcahr)]
-        public string ConfigFieldIsReadOnly { get; set; }
+        [SqlField("ConfigFieldIsReadOnly", FrameworkTypeEnum.Bit)]
+        public bool? ConfigFieldIsReadOnly { get; set; }
 
-        [SqlField("ConfigFieldSort", FrameworkTypeEnum.Nvarcahr)]
-        public string ConfigFieldSort { get; set; }
+        [SqlField("ConfigFieldSort", FrameworkTypeEnum.Float)]
+        public double? ConfigFieldSort { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigGrid")]
@@ -179,6 +188,34 @@ namespace Database.dbo
 
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkConfigGridDisplay")]
+    public class FrameworkConfigGridDisplay : Row
+    {
+        [SqlField("Id", FrameworkTypeEnum.Int)]
+        public int? Id { get; set; }
+
+        [SqlField("TableId", FrameworkTypeEnum.Int)]
+        public int TableId { get; set; }
+
+        [SqlField("TableNameCSharp", FrameworkTypeEnum.Nvarcahr)]
+        public string TableNameCSharp { get; set; }
+
+        [SqlField("TableNameSql", FrameworkTypeEnum.Nvarcahr)]
+        public string TableNameSql { get; set; }
+
+        [SqlField("ConfigName", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigName { get; set; }
+
+        [SqlField("RowCountMax", FrameworkTypeEnum.Int)]
+        public int? RowCountMax { get; set; }
+
+        [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
+        public bool? IsAllowInsert { get; set; }
+
+        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
+        public bool? IsExist { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkField")]

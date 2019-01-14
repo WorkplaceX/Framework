@@ -106,27 +106,88 @@ FROM
 GO
 
 GO
+CREATE VIEW FrameworkConfigGridDisplay AS
+SELECT
+	ConfigGrid.Id AS Id,    
+	ConfigGrid.TableId AS TableId,
+	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
+	(SELECT FrameworkTable.TableNameSql FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameSql,
+	ConfigGrid.ConfigName AS ConfigName,
+	ConfigGrid.RowCountMax AS RowCountMax,
+	ConfigGrid.IsAllowInsert AS IsAllowInsert,
+	ConfigGrid.IsExist AS IsExist
+FROM
+	FrameworkConfigGrid ConfigGrid
+UNION ALL
+SELECT
+	NULL AS Id,
+	FrameworkTable.Id AS TableId,
+	FrameworkTable.TableNameCSharp,
+	FrameworkTable.TableNameSql,
+	NULL AS ConfigName,
+	NULL AS RowCountMax,
+	NULL AS IsAllowInsert,
+	NULL AS IsExist
+FROM
+	FrameworkTable FrameworkTable
+WHERE
+	FrameworkTable.Id NOT IN (SELECT TableId FROM FrameworkConfigGrid)
+GO
+
+GO
 CREATE VIEW FrameworkConfigFieldDisplay AS
+WITH ConfigGrid AS (
+	SELECT
+		ConfigGrid.Id AS Id,    
+		ConfigGrid.TableId AS TableId,
+		(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
+		(SELECT FrameworkTable.TableNameSql FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameSql,
+		ConfigGrid.ConfigName AS ConfigName,
+		ConfigGrid.IsExist AS IsExist
+	FROM
+		FrameworkConfigGrid ConfigGrid
+	UNION ALL
+	SELECT
+		NULL AS Id,
+		FrameworkTable.Id AS TableId,
+		FrameworkTable.TableNameCSharp,
+		FrameworkTable.TableNameSql,
+		NULL AS ConfigName,
+		NULL AS IsExist
+	FROM
+		FrameworkTable FrameworkTable
+	WHERE
+		FrameworkTable.Id NOT IN (SELECT TableId FROM FrameworkConfigGrid)
+)
 SELECT 
+	/* ConfigGrid */
 	ConfigGrid.Id AS ConfigGridId,
 	ConfigGrid.TableId AS ConfigGridTableId,
 	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS ConfigGridTableIdName,
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS ConfigGridTableNameCSharp,
 	ConfigGrid.ConfigName AS ConfigGridConfigName,
 	ConfigGrid.IsExist AS ConfigGridIsExist,
+	/* Field */
 	Field.Id AS FieldId,
 	Field.TableId AS FieldTableId,
 	Field.FieldNameCSharp AS FieldFieldNameCSharp,
 	Field.FieldNameSql AS FieldFieldNameSql,
 	Field.IsExist AS FieldIsExist,
-	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldText,
-	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldDescription,
-	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldIsVisible,
-	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldIsReadOnly,
-	(SELECT ConfigField.Text FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id) AS ConfigFieldSort
+	/* ConfigField */
+	ConfigField.Id AS ConfigFieldId,
+	ConfigField.ConfigGridId AS ConfigFieldConfigGridId,
+	ConfigField.FieldId AS ConfigFieldFieldId,
+	ConfigField.Text AS ConfigFieldText,
+	ConfigField.Description AS ConfigFieldDescription,
+	ConfigField.IsVisible AS ConfigFieldIsVisible,
+	ConfigField.IsReadOnly AS ConfigFieldIsReadOnly,
+	ConfigField.Sort AS ConfigFieldSort
 FROM
-	FrameworkConfigGrid ConfigGrid,
-	FrameworkField Field
-WHERE
-	Field.TableId = ConfigGrid.TableId
+	ConfigGrid ConfigGrid
+JOIN 
+	FrameworkField Field ON	Field.TableId = ConfigGrid.TableId
+OUTER APPLY
+(
+	SELECT * FROM  FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id
+) ConfigField
 GO
