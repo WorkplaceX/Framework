@@ -215,8 +215,8 @@
             {
                 result = (T)Activator.CreateInstance(typeof(T), owner);
                 result.Name = name;
-                await result.InitAsync();
                 init?.Invoke(result);
+                await result.InitAsync();
             }
             result = ComponentGet<T>(owner, name);
             UtilFramework.Assert(result != null);
@@ -231,6 +231,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
+        /// </summary>
         public static Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
             return ComponentPageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
@@ -563,6 +566,11 @@
         /// Gets Index. This is the grid session index. See also class GridSession.
         /// </summary>
         public int? Index { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets ConfigName. See also sql table FrameworkConfigGrid.
+        /// </summary>
+        public string ConfigName;
 
         /// <summary>
         /// Gets or sets IsHide. If true, grid data (ColumnList and RowList) are not beeing transfered to client and back. See also method GridRender();

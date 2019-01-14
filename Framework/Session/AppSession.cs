@@ -8,7 +8,6 @@
     using Framework.Server;
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -395,7 +394,6 @@
         /// <summary>
         /// Process GridIsClickEnum.
         /// </summary>
-        /// <returns></returns>
         private async Task ProcessGridIsClickEnumAsync()
         {
             foreach (GridItem gridItem in UtilSession.GridItemList())
@@ -450,6 +448,17 @@
                         gridItem.GridSession.OffsetRow = 0;
                         gridItem.GridSession.OffsetColumn = 0;
                         await GridLoadAsync(gridItem.Grid);
+                    }
+                    // Config
+                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.Config)
+                    {
+                        Page page = gridItem.Grid.ComponentOwner<Page>();
+                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
+                        string configName = gridItem.Grid.ConfigName; ;
+                        await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                        {
+                            pageGridConfig.Init(tableNameCSharp, configName, null);
+                        });
                     }
                 }
             }
