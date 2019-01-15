@@ -62,7 +62,12 @@
             if (grid == GridConfigField())
             {
                 var rowSelected = (FrameworkConfigGridDisplay)GridConfigGrid().GridRowSelected();
-                return Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
+                var result = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
+                if (FieldNameCSharp != null)
+                {
+                    result = result.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
+                }
+                return result;
             }
             return base.GridQuery(grid);
         }

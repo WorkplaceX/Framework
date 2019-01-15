@@ -767,6 +767,17 @@
                         gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
                         gridItem.GridSession.OffsetRow = 0; // Reset paging.
                     }
+                    if (gridColumnItem.GridColumn?.IsClickConfig == true)
+                    {
+                        Page page = gridItem.Grid.ComponentOwner<Page>();
+                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
+                        string configName = gridItem.Grid.ConfigName;
+                        string fieldName = gridColumnItem.Field.PropertyInfo.Name;
+                        await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                        {
+                            pageGridConfig.Init(tableNameCSharp, configName, fieldName);
+                        });
+                    }
                 }
             }
 
