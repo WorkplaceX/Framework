@@ -146,6 +146,10 @@
         /// </summary>
         public static T ComponentCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
         {
+            if (UtilFramework.IsSubclassOf(typeof(T), typeof(Page)))
+            {
+                throw new Exception("Use await method ComponentPageShowAsync();");
+            }
             T component = (T)Activator.CreateInstance(typeof(T), owner);
             component.Name = name;
             init?.Invoke(component);
@@ -256,6 +260,14 @@
         }
 
         /// <summary>
+        /// Returns count of this component parents list.
+        /// </summary>
+        public static int ComponentCount(this ComponentJson component)
+        {
+            return component.ComponentOwner().List.Count();
+        }
+
+        /// <summary>
         /// Remove child component if exists.
         /// </summary>
         public static void ComponentRemoveItem(this ComponentJson component, string name)
@@ -283,6 +295,14 @@
             var list = component?.ComponentOwner().List;
             list.Remove(component);
             list.Insert(index, component);
+        }
+
+        /// <summary>
+        /// Move this component to last index.
+        /// </summary>
+        public static void ComponentMoveLast(this ComponentJson component)
+        {
+            component.ComponentMove(component.ComponentCount() - 1);
         }
 
         /// <summary>
@@ -321,6 +341,7 @@
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessBootstrapNavbarAsync();
             await UtilApp.ProcessButtonAsync(); // Button
+            UtilApp.ProcessBootstrapModal(); // Modal dialog window
 
             foreach (Page page in UtilServer.AppJson.ComponentListAll().OfType<Page>())
             {
@@ -362,6 +383,12 @@
         public string Session { get; set; }
 
         public string SessionApp { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsModal. Indicating an object PageModal exists in the component tree. 
+        /// Used for example for html "body class='modal-open'" to enable vertical scroll bar.
+        /// </summary>
+        public bool IsBootstrapModal { get; set; }
 
         /// <summary>
         /// Gets SessionState. Debug server side session state.
@@ -429,7 +456,7 @@
 
         }
 
-        public string Text;
+        public string TextHtml;
 
         public bool IsClick;
     }

@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, Input } from '@angular/core';
+import { Component, ViewEncapsulation, Input, Renderer2 } from '@angular/core';
 import { DataService } from '../data.service';
 
 @Component({
@@ -22,7 +22,13 @@ import { DataService } from '../data.service';
   encapsulation: ViewEncapsulation.None // Prevent html 5 invalid attributes like "_nghost-sc0", "_ngcontent-sc0"
 })
 export class AppComponent {
-  constructor(public DataService: DataService){
+  constructor(public DataService: DataService, private renderer: Renderer2 ){
+    if (this.DataService.json.IsBootstrapModal == true)
+    {
+      // TODO detect changes!
+      // this.renderer.addClass(document.body, 'modal-open');
+      // this.renderer.removeClass(document.body, 'modal-open');
+    }
   }
 
   trackBy(index: any, item: any) {
@@ -75,7 +81,7 @@ export class Html {
 @Component({
   selector: '[data-Button]',
   template: `
-  <button [ngClass]="json.CssClass" (click)="click();">{{ json.Text }}</button>
+  <button [ngClass]="json.CssClass" (click)="click();" [innerHtml]="json.TextHtml"></button>
   `
 })
 export class Button {

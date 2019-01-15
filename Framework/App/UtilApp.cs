@@ -27,6 +27,27 @@
         }
 
         /// <summary>
+        /// Process bootstrap modal dialog window.
+        /// </summary>
+        public static void ProcessBootstrapModal()
+        {
+            var app = UtilServer.AppInternal;
+            app.AppJson.IsBootstrapModal = false;
+            BootstrapModal.DivModalBackdropRemove(app.AppJson);
+            bool isExist = false;
+            foreach (var item in app.AppJson.ComponentListAll().OfType<BootstrapModal>())
+            {
+                item.ButtonClose()?.ComponentMoveLast();
+                isExist = true;
+            }
+            if (isExist)
+            {
+                app.AppJson.IsBootstrapModal = true;
+                BootstrapModal.DivModalBackdropCreate(app.AppJson);
+            }
+        }
+
+        /// <summary>
         /// Process navbar button click.
         /// </summary>
         public static async Task ProcessBootstrapNavbarAsync()

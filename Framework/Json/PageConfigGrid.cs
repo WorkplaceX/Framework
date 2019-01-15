@@ -9,7 +9,7 @@
     /// <summary>
     /// Page to configure data grid and columns.
     /// </summary>
-    public class PageConfigGrid : Page
+    public class PageConfigGrid : BootstrapModal
     {
         public PageConfigGrid() : this(null) { }
 
@@ -30,9 +30,11 @@
 
         protected internal override async Task InitAsync()
         {
-            this.ComponentCreate<Html>().TextHtml = "<h1>Config Grid</h1>";
+            Init(true, false, isLarge: true);
+            DivHeader().ComponentCreate<Html>().TextHtml = "Config";
+            DivBody().ComponentCreate<Html>().TextHtml = "<h1>Config Grid</h1>";
             GridConfigGrid();
-            this.ComponentCreate<Html>().TextHtml = "<h1>Config Field</h1>";
+            DivBody().ComponentCreate<Html>().TextHtml = "<h1>Config Field</h1>";
             GridConfigField();
 
             await GridConfigGrid().LoadAsync();
@@ -40,12 +42,12 @@
 
         public Grid GridConfigGrid()
         {
-            return this.ComponentGetOrCreate<Grid>("ConfigGrid");
+            return DivBody().ComponentGetOrCreate<Grid>("ConfigGrid");
         }
 
         public Grid GridConfigField()
         {
-            return this.ComponentGetOrCreate<Grid>("ConfigField");
+            return DivBody().ComponentGetOrCreate<Grid>("ConfigField");
         }
 
         protected internal override IQueryable GridQuery(Grid grid)
