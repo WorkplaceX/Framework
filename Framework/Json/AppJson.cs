@@ -330,6 +330,34 @@
 
         }
 
+        /// <summary>
+        /// Returns NamingConvention for app related sql tables.
+        /// </summary>
+        protected virtual NamingConvention NamingConventionApp()
+        {
+            return new NamingConvention();
+        }
+
+        private NamingConvention namingConventionFramework;
+
+        private NamingConvention namingConventionApp;
+
+        internal NamingConvention NamingConventionInternal(Type typeRow)
+        {
+            if (UtilDalType.TypeRowIsFrameworkDb(typeRow))
+            {
+                if (namingConventionFramework == null)
+                {
+                    namingConventionFramework = new NamingConvention();
+                }
+            }
+            if (namingConventionApp == null)
+            {
+                namingConventionApp = NamingConventionApp();
+            }
+            return namingConventionApp;
+        }
+
         internal async Task InitInternalAsync()
         {
             await InitAsync();
