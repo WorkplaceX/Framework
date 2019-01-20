@@ -185,19 +185,12 @@
         private async Task GridLoadConfigAsync(Grid grid, Type typeRow, IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery)
         {
             GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
-            if (typeRow == null || configFieldQuery == null)
-            {
-                foreach (var columnSession in gridSession.GridColumnSessionList)
-                {
-                    columnSession.TextConfig = null; // Reset
-                }
-            }
-            else
+            // (FieldName, FrameworkConfigFieldBuiltIn)
+            Dictionary<string, FrameworkConfigFieldBuiltIn> fieldList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
+            if (!(typeRow == null || configFieldQuery == null))
             {
                 string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                 var configFieldList = await Data.SelectAsync(configFieldQuery);
-                // (FieldName, FrameworkConfigFieldBuiltIn)
-                Dictionary<string, FrameworkConfigFieldBuiltIn> fieldList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
                 foreach (var frameworkConfigFieldBuiltIn in configFieldList)
                 {
                     if (frameworkConfigFieldBuiltIn.TableNameCSharp != null) // If set, it needs to be correct.
@@ -206,13 +199,21 @@
                     }
                     fieldList.Add(frameworkConfigFieldBuiltIn.FieldNameCSharp, frameworkConfigFieldBuiltIn);
                 }
-                foreach (var columnSession in gridSession.GridColumnSessionList)
+            }
+
+            AppJson appJson = UtilServer.AppJson;
+            NamingConvention namingConvention = appJson.NamingConventionInternal(typeRow);
+            foreach (var columnSession in gridSession.GridColumnSessionList)
+            {
+                string textConfig = null;
+                bool? isVisibleConfig = null;
+                if (fieldList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
                 {
-                    if (fieldList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
-                    {
-                        columnSession.TextConfig = frameworkConfigFieldBuiltIn.Text;
-                    }
+                    textConfig = frameworkConfigFieldBuiltIn.Text;
+                    isVisibleConfig = frameworkConfigFieldBuiltIn.IsVisible;
                 }
+                columnSession.Text = namingConvention.ColumnTextInternal(typeRow, columnSession.FieldName, textConfig);
+                columnSession.IsVisible = namingConvention.ColumnIsVisibleInternal(typeRow, columnSession.FieldName, isVisibleConfig);
             }
         }
 
@@ -319,7 +320,7 @@
                             if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
                             {
                                 GridColumn gridColumn = new GridColumn();
-                                gridColumn.Text = gridColumnItem.GridColumnSession.TextGet();
+                                gridColumn.Text = gridColumnItem.GridColumnSession.Text;
                                 gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
                                 gridItem.Grid.ColumnList.Add(gridColumn);
                             }
@@ -1017,17 +1018,14 @@
         public string FieldName;
 
         /// <summary>
-        /// Session state for column header.
+        /// Gets or sets Text. Session state for column header text.
         /// </summary>
-        public string TextConfig;
+        public string Text;
 
         /// <summary>
-        /// Returns column header.
+        /// Gets or sets IsVisible. Session state indicating column is shown.
         /// </summary>
-        public string TextGet()
-        {
-            return TextConfig != null ? TextConfig : FieldName;
-        }
+        public bool IsVisible;
 
         public bool? IsSort;
     }
