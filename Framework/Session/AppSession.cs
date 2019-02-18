@@ -186,7 +186,7 @@
         {
             GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
             // (FieldName, FrameworkConfigFieldBuiltIn)
-            Dictionary<string, FrameworkConfigFieldBuiltIn> fieldList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
+            Dictionary<string, FrameworkConfigFieldBuiltIn> fieldBuiltInList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
             if (!(typeRow == null || configFieldQuery == null))
             {
                 string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
@@ -197,7 +197,7 @@
                     {
                         UtilFramework.Assert(frameworkConfigFieldBuiltIn.TableNameCSharp == tableNameCSharp, string.Format("TableNameCSharp wrong! ({0}; {1})", tableNameCSharp, frameworkConfigFieldBuiltIn.TableNameCSharp));
                     }
-                    fieldList.Add(frameworkConfigFieldBuiltIn.FieldNameCSharp, frameworkConfigFieldBuiltIn);
+                    fieldBuiltInList.Add(frameworkConfigFieldBuiltIn.FieldNameCSharp, frameworkConfigFieldBuiltIn);
                 }
             }
 
@@ -207,7 +207,7 @@
             {
                 string textConfig = null;
                 bool? isVisibleConfig = null;
-                if (fieldList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
+                if (fieldBuiltInList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
                 {
                     textConfig = frameworkConfigFieldBuiltIn.Text;
                     isVisibleConfig = frameworkConfigFieldBuiltIn.IsVisible;

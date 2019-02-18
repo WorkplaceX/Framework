@@ -610,7 +610,7 @@
         }
 
         /// <summary>
-        /// Load data into grid. Override method App.Query(); to define query. It's also called to reload data.
+        /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
         /// </summary>
         public async Task LoadAsync()
         {

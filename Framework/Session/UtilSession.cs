@@ -57,6 +57,19 @@
 
             public List<GridColumnItem> GridColumnItemList = new List<GridColumnItem>();
 
+            public List<GridColumnItem> GridColumnItemListWithConfig()
+            {
+                List<GridColumnItem> result = new List<GridColumnItem>();
+                foreach (GridColumnItem gridColumnItem in GridColumnItemList)
+                {
+                    if (gridColumnItem.GridColumnSession.IsVisible)
+                    {
+                        result.Add(gridColumnItem);
+                    }
+                }
+                return result;
+            }
+
             public List<GridRowItem> GridRowList = new List<GridRowItem>();
         }
 
