@@ -314,10 +314,12 @@
 
                     if (gridItem.Grid.IsHide == false)
                     {
+                        var config = new UtilColumnIndexConfig(gridItem);
+
                         // Grid Header
-                        foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                        foreach (GridColumnItem gridColumnItem in config.ConfigList(gridItem.GridColumnItemList))
                         {
-                            if (gridItem.GridSession.IsRange(gridColumnItem.CellIndex))
+                            if (gridItem.GridSession.IsRange(config.IndexToIndexConfig(gridColumnItem.CellIndex)))
                             {
                                 GridColumn gridColumn = new GridColumn();
                                 gridColumn.Text = gridColumnItem.GridColumnSession.Text;
@@ -339,11 +341,11 @@
                                 gridRow.CellList = new List<GridCell>();
 
                                 // Grid Cell
-                                foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                                foreach (GridCellItem gridCellItem in config.ConfigList(gridRowItem.GridCellList))
                                 {
                                     if (gridCellItem.GridCellSession != null)
                                     {
-                                        if (gridItem.GridSession.IsRange(gridCellItem.CellIndex))
+                                        if (gridItem.GridSession.IsRange(config.IndexToIndexConfig(gridCellItem.CellIndex)))
                                         {
                                             GridCell gridCell = new GridCell();
                                             gridRow.CellList.Add(gridCell);
@@ -414,9 +416,10 @@
                     if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageRight)
                     {
                         gridItem.GridSession.OffsetColumn += 1;
-                        if (gridItem.GridSession.OffsetColumn > (gridItem.GridSession.GridColumnSessionList.Count - gridItem.GridSession.ColumnCountMax))
+                        var config = new UtilColumnIndexConfig(gridItem);
+                        if (gridItem.GridSession.OffsetColumn > (config.Count - gridItem.GridSession.ColumnCountMax))
                         {
-                            gridItem.GridSession.OffsetColumn = gridItem.GridSession.GridColumnSessionList.Count - gridItem.GridSession.ColumnCountMax;
+                            gridItem.GridSession.OffsetColumn = config.Count - gridItem.GridSession.ColumnCountMax;
                             if (gridItem.GridSession.OffsetColumn < 0)
                             {
                                 gridItem.GridSession.OffsetColumn = 0;

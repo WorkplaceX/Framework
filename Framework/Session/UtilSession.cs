@@ -9,7 +9,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using static Framework.DataAccessLayer.UtilDalType;
 
     internal static class UtilSession
@@ -56,19 +55,6 @@
             public Grid Grid;
 
             public List<GridColumnItem> GridColumnItemList = new List<GridColumnItem>();
-
-            public List<GridColumnItem> GridColumnItemListWithConfig()
-            {
-                List<GridColumnItem> result = new List<GridColumnItem>();
-                foreach (GridColumnItem gridColumnItem in GridColumnItemList)
-                {
-                    if (gridColumnItem.GridColumnSession.IsVisible)
-                    {
-                        result.Add(gridColumnItem);
-                    }
-                }
-                return result;
-            }
 
             public List<GridRowItem> GridRowList = new List<GridRowItem>();
         }
@@ -183,9 +169,19 @@
 
                     // Set Column
                     gridColumnItem.CellIndex = cellIndex;
-                    gridColumnItem.GridColumnSession = gridSession.GridColumnSessionList[cellIndex];
-                    gridColumnItem.GridColumn = grid?.ColumnList?.TryGetValue(cellIndex - gridSession.OffsetColumn);
+                    gridColumnItem.GridColumnSession = gridSession.GridColumnSessionList[cellIndex]; // Outgoing Column (Session)
                     gridColumnItem.Field = fieldList[cellIndex];
+                }
+
+                var config = new UtilColumnIndexConfig(gridItem);
+                foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                {
+                    int cellIndex = gridColumnItem.CellIndex;
+                    if (config.IndexToIndexConfigExist(cellIndex))
+                    {
+                        int cellIndexConfig = config.IndexToIndexConfig(cellIndex);
+                        gridColumnItem.GridColumn = grid?.ColumnList?.TryGetValue(cellIndexConfig - gridSession.OffsetColumn); // Incoming Column (Json)
+                    }
                 }
 
                 for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
@@ -206,13 +202,18 @@
                     {
                         GridCellItem gridCellItem = new GridCellItem();
                         gridRowItem.GridCellList.Add(gridCellItem);
-                        GridCellSession gridCellSession = gridRowSession?.GridCellSessionList.TryGetValue(cellIndex);
-                        GridCell gridCell = gridRow?.CellList?.TryGetValue(cellIndex - offsetColumn);
+                        GridCellSession gridCellSession = gridRowSession?.GridCellSessionList[cellIndex];
+                        GridCell gridCell = null;
+                        if (config.IndexToIndexConfigExist(cellIndex))
+                        {
+                            int cellIndexConfig = config.IndexToIndexConfig(cellIndex);
+                            gridCell = gridRow?.CellList?.TryGetValue(cellIndexConfig - offsetColumn);
+                        }
 
                         // Set Cell
                         gridCellItem.CellIndex = cellIndex;
-                        gridCellItem.GridCellSession = gridCellSession;
-                        gridCellItem.GridCell = gridCell;
+                        gridCellItem.GridCellSession = gridCellSession; // Outgoing Cell (Session)
+                        gridCellItem.GridCell = gridCell; // Incoming Cell (Json)
                         if (gridCellSession != null)
                         {
                             gridCellItem.Field = fieldList[cellIndex];
@@ -332,6 +333,87 @@
             grid.LookupCellIndex = null;
             grid.LookupGridIndex = null;
             grid.LookupRowIndex = null;
+        }
+    }
+
+    /// <summary>
+    /// Map column index to configured column index (IsVisible, Sort).
+    /// </summary>
+    internal class UtilColumnIndexConfig
+    {
+        public UtilColumnIndexConfig(UtilSession.GridItem gridItem)
+        {
+            List<UtilSession.GridColumnItem> result = new List<UtilSession.GridColumnItem>();
+            foreach (UtilSession.GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+            {
+                if (gridColumnItem.GridColumnSession.IsVisible)
+                {
+                    result.Add(gridColumnItem);
+                }
+            }
+
+            for (int indexConfig = 0; indexConfig < result.Count; indexConfig++)
+            {
+                UtilSession.GridColumnItem item = result[indexConfig];
+                int index = gridItem.GridColumnItemList.IndexOf(item);
+                AddIndex(index, indexConfig);
+            }
+        }
+
+        private Dictionary<int, int> indexToIndexConfigList = new Dictionary<int, int>();
+
+        private Dictionary<int, int> indexConfigToIndexList = new Dictionary<int, int>();
+
+        private void AddIndex(int index, int? indexConfig)
+        {
+            if (indexConfig != null)
+            {
+                this.indexToIndexConfigList.Add(index, indexConfig.Value);
+                this.indexConfigToIndexList.Add(indexConfig.Value, index);
+            }
+        }
+
+        public int IndexConfigToIndex(int index)
+        {
+            return this.indexConfigToIndexList[index];
+        }
+
+        /// <summary>
+        /// Returns true, if column IsVisible.
+        /// </summary>
+        public bool IndexToIndexConfigExist(int index)
+        {
+            return this.indexToIndexConfigList.ContainsKey(index);
+        }
+
+        public int IndexToIndexConfig(int index)
+        {
+            return this.indexToIndexConfigList[index];
+        }
+
+        /// <summary>
+        /// Gets Count. Is less than GridColumnItemList.Count, if some columns are IsVisible false.
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return this.indexToIndexConfigList.Count;
+            }
+        }
+
+        /// <summary>
+        /// Returns list with configuration (IsVisible, Sort).
+        /// </summary>
+        public List<T> ConfigList<T>(List<T> list)
+        {
+            List<T> listLocal = new List<T>(list);
+            list.Clear();
+            foreach (var item in this.indexToIndexConfigList)
+            {
+                list.Add(listLocal[item.Key]);
+            }
+            return list;
         }
     }
 }
