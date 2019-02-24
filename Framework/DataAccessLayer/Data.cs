@@ -1279,15 +1279,29 @@
 
         internal class Field
         {
-            public Field(PropertyInfo propertyInfo, string fieldNameSql, bool isPrimaryKey, FrameworkTypeEnum frameworkTypeEnum)
+            public Field(PropertyInfo propertyInfo, int sort, string fieldNameSql, bool isPrimaryKey, FrameworkTypeEnum frameworkTypeEnum)
             {
                 this.PropertyInfo = propertyInfo;
+                this.Sort = sort;
                 this.FieldNameSql = fieldNameSql;
                 this.IsPrimaryKey = isPrimaryKey;
                 this.FrameworkTypeEnum = frameworkTypeEnum;
             }
 
             public readonly PropertyInfo PropertyInfo;
+
+            public string FieldNameCSharp
+            {
+                get
+                {
+                    return PropertyInfo.Name;
+                }
+            }
+
+            /// <summary>
+            /// Gets Sort. (FieldNameCSharpSort).
+            /// </summary>
+            public readonly int Sort;
 
             public readonly string FieldNameSql;
 
@@ -1306,12 +1320,13 @@
         }
 
         /// <summary>
-        /// See also method FrameworkTypeEnumToFrameworkType();
+        /// Returns CSharp fields. Sequence (FieldNameCSharpSort) is identical as in CSharp code.
         /// </summary>
         internal static List<Field> TypeRowToFieldList(Type typeRow)
         {
             var result = new List<Field>();
             var propertyInfoList = TypeRowToPropertyInfoList(typeRow);
+            int sort = 1;
             foreach (PropertyInfo propertyInfo in propertyInfoList)
             {
                 SqlFieldAttribute fieldAttribute = (SqlFieldAttribute)propertyInfo.GetCustomAttribute(typeof(SqlFieldAttribute));
@@ -1324,7 +1339,24 @@
                     frameworkTypeEnum = fieldAttribute.FrameworkTypeEnum;
                     isPrimaryKey = fieldAttribute.IsPrimaryKey;
                 }
-                result.Add(new Field(propertyInfo, fieldNameSql, isPrimaryKey, frameworkTypeEnum));
+                result.Add(new Field(propertyInfo, sort, fieldNameSql, isPrimaryKey, frameworkTypeEnum));
+                sort += 1;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns CSharp field list as Dictionary.
+        /// </summary>
+        /// <returns>(FieldNameCSharp, Field)</returns>
+        internal static Dictionary<string, Field> TypeRowToFieldListDictionary(Type typeRow)
+        {
+            var fieldList = TypeRowToFieldList(typeRow);
+
+            var result = new Dictionary<string, Field>();
+            foreach (Field field in fieldList)
+            {
+                result.Add(field.PropertyInfo.Name, field);
             }
             return result;
         }

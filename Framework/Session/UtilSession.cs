@@ -351,6 +351,9 @@
                     result.Add(gridColumnItem);
                 }
             }
+            result = result
+                .OrderBy(item => item.GridColumnSession.Sort)
+                .ThenBy(item => item.Field.Sort).ToList(); // Make it deterministic if multiple columns have same Sort.
 
             for (int indexConfig = 0; indexConfig < result.Count; indexConfig++)
             {

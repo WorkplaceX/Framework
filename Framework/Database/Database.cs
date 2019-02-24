@@ -24,10 +24,10 @@ namespace Database.dbo
         public string Description { get; set; }
 
         [SqlField("IsVisible", FrameworkTypeEnum.Bit)]
-        public bool IsVisible { get; set; }
+        public bool? IsVisible { get; set; }
 
         [SqlField("IsReadOnly", FrameworkTypeEnum.Bit)]
-        public bool IsReadOnly { get; set; }
+        public bool? IsReadOnly { get; set; }
 
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
@@ -67,10 +67,10 @@ namespace Database.dbo
         public string Description { get; set; }
 
         [SqlField("IsVisible", FrameworkTypeEnum.Bit)]
-        public bool IsVisible { get; set; }
+        public bool? IsVisible { get; set; }
 
         [SqlField("IsReadOnly", FrameworkTypeEnum.Bit)]
-        public bool IsReadOnly { get; set; }
+        public bool? IsReadOnly { get; set; }
 
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }

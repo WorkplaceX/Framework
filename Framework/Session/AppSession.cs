@@ -203,17 +203,24 @@
 
             AppJson appJson = UtilServer.AppJson;
             NamingConvention namingConvention = appJson.NamingConventionInternal(typeRow);
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
+
             foreach (var columnSession in gridSession.GridColumnSessionList)
             {
+                Field field = fieldList[columnSession.FieldName];
+
                 string textConfig = null;
                 bool? isVisibleConfig = null;
+                double? sortConfig = null;
                 if (fieldBuiltInList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
                 {
                     textConfig = frameworkConfigFieldBuiltIn.Text;
                     isVisibleConfig = frameworkConfigFieldBuiltIn.IsVisible;
+                    sortConfig = frameworkConfigFieldBuiltIn.Sort;
                 }
                 columnSession.Text = namingConvention.ColumnTextInternal(typeRow, columnSession.FieldName, textConfig);
                 columnSession.IsVisible = namingConvention.ColumnIsVisibleInternal(typeRow, columnSession.FieldName, isVisibleConfig);
+                columnSession.Sort = namingConvention.ColumnSortInternal(typeRow, columnSession.FieldName, field, sortConfig);
             }
         }
 
@@ -1016,7 +1023,7 @@
     internal class GridColumnSession
     {
         /// <summary>
-        /// FieldName CSharp.
+        /// FieldNameCSharp.
         /// </summary>
         public string FieldName;
 
@@ -1030,6 +1037,14 @@
         /// </summary>
         public bool IsVisible;
 
+        /// <summary>
+        /// Gets or sets Sort (FieldNameCSharpSort). Session state for column order.
+        /// </summary>
+        public double? Sort;
+
+        /// <summary>
+        /// Gets or sets IsSort. Session statue for column sort down or up.
+        /// </summary>
         public bool? IsSort;
     }
 

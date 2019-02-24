@@ -75,8 +75,8 @@ CREATE TABLE FrameworkConfigField
 	FieldId INT FOREIGN KEY REFERENCES FrameworkField(Id) NOT NULL,
 	Text NVARCHAR(256), -- Column header text.
 	Description NVARCHAR(256), -- Column header description.
-	IsVisible BIT NOT NULL,
-	IsReadOnly BIT NOT NULL,
+	IsVisible BIT,
+	IsReadOnly BIT,
 	Sort FLOAT,
 	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId)
 )
