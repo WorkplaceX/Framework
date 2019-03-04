@@ -78,7 +78,7 @@
                 }
                 else
                 {
-                    // Running in Visual Studio
+                    // Running in Visual Studio.
                     url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
                 }
                 var app = await appSelector.CreateAppAndProcessAsync(context);  // Process (Server side rendering)

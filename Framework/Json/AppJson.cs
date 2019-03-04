@@ -920,8 +920,15 @@
             public IQueryable<FrameworkConfigFieldBuiltIn> ConfigFieldQuery { get; set; }
         }
 
-        protected virtual internal void GridQueryConfig(Grid grid, ConfigResult result)
+        /// <summary>
+        /// Returns configuration of data grid to load.
+        /// </summary>
+        /// <param name="grid">Json data grid to load.</param>
+        /// <param name="tableNameCSharp">Type of row to load.</param>
+        protected virtual internal void GridQueryConfig(Grid grid, string tableNameCSharp, ConfigResult result)
         {
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+
             // Example:
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
@@ -1074,7 +1081,7 @@
         /// <summary>
         /// Parse user entered cell filter text. Called only if text is not null.
         /// </summary>
-        protected virtual internal void GridCellParseFilter(Grid grid, Type typeRow, string fieldName, string text, Filter filter, out bool isHandled)
+        protected virtual internal void GridCellParseFilter(Grid grid, string fieldName, string text, Filter filter, out bool isHandled)
         {
             isHandled = false;
         }

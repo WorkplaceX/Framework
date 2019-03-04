@@ -283,7 +283,7 @@
             if (gridSession.TypeRow != typeRow)
             {
                 Page.ConfigResult configResult = new Page.ConfigResult();
-                grid.ComponentOwner<Page>().GridQueryConfig(grid, configResult);
+                grid.ComponentOwner<Page>().GridQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(typeRow), configResult);
                 // Load config into session state.
                 await GridLoadConfigAsync(grid, typeRow, configResult.ConfigGridQuery);
                 fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, configResult.ConfigFieldQuery);
@@ -715,7 +715,7 @@
                                         bool isHandled = false;
                                         if (gridCellItem.GridCellSession.Text != null)
                                         {
-                                            page.GridCellParseFilter(grid, gridItem.GridSession.TypeRow, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
+                                            page.GridCellParseFilter(grid, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
                                         }
                                         if (isHandled == false)
                                         {
