@@ -5,7 +5,7 @@
     using System.Linq;
 
     /// <summary>
-    /// Meta information for CSharp code.
+    /// Meta information to generate CSharp code.
     /// </summary>
     public class MetaCSharp
     {
