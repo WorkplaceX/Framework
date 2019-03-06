@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Framework.Cli": {
-      "commandName": "Project",
-      "commandLineArgs": "deployDb"
+      "commandName": "Project"
     }
   }
 }

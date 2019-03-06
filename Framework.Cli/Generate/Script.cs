@@ -15,15 +15,21 @@
         {
             MetaSql metaSql = new MetaSql(isFrameworkDb, appCli);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
-            string cSharp;
-            new CSharpGenerate(metaCSharp).Run(out cSharp);
+
+            new CSharpGenerate(metaCSharp).Run(out string cSharp);
+            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpCli, isApplication: false);
+            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpApplication, isApplication: true);
             if (isFrameworkDb == false)
             {
                 UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database.cs", cSharp);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/DatabaseBuiltIn.cs", cSharpApplication);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);
             }
             else
             {
                 UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/Database.cs", cSharp);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/DatabaseBuiltIn.cs", cSharpApplication);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);
             }
         }
     }
