@@ -17,8 +17,8 @@
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
 
             new CSharpGenerate(metaCSharp).Run(out string cSharp);
-            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpCli, isApplication: false);
-            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpApplication, isApplication: true);
+            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpCli, isFrameworkDb, isApplication: false);
+            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpApplication, isFrameworkDb, isApplication: true);
             if (isFrameworkDb == false)
             {
                 UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database.cs", cSharp);
