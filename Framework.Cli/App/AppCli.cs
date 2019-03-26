@@ -1,6 +1,7 @@
 ﻿namespace Framework.Cli.Command
 {
     using Database.dbo;
+    using DatabaseBuiltIn.dbo;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
     using Framework.DataAccessLayer;
@@ -8,6 +9,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Reflection;
 
     /// <summary>
@@ -39,6 +41,9 @@
         /// </summary>
         public readonly Assembly AssemblyApp;
 
+        /// <summary>
+        /// Gets Framework assembly.
+        /// </summary>
         internal Assembly AssemblyFramework
         {
             get
@@ -48,10 +53,23 @@
         }
 
         /// <summary>
-        /// Returns Framework, Database, Application assembly when running in cli mode.
+        /// Gets Framework.Cli assembly.
         /// </summary>
-        /// <param name="isIncludeApp">If true, App assembly (with derived custom logic) is included.</param>
-        public List<Assembly> AssemblyList(bool isIncludeApp = false)
+        internal Assembly AssemblyFrameworkCli
+        {
+            get
+            {
+                return typeof(AppCli).Assembly;
+            }
+        }
+
+        /// <summary>
+        /// Returns Framework, Application.Database, Application and Framework.Cli assembly when running in cli mode.
+        /// </summary>
+        /// <param name="isIncludeApp">If true, Application assembly (with App class and derived custom logic) is included.</param>
+        /// <param name="isIncludeFrameworkCli">If true, Framework.Cli assembly is included</param>
+        /// <returns>List of assemblies.</returns>
+        public List<Assembly> AssemblyList(bool isIncludeApp = false, bool isIncludeFrameworkCli = false)
         {
             List<Assembly> result = new List<Assembly>();
             result.Add(AssemblyFramework);
@@ -60,6 +78,16 @@
             {
                 result.Add(AssemblyApp);
             }
+            if (isIncludeFrameworkCli)
+            {
+                result.Add(AssemblyFrameworkCli);
+            }
+
+            // No assembly double in result!
+            int count = result.Count();
+            result = result.Distinct().ToList();
+            UtilFramework.Assert(count == result.Count);
+
             return result;
         }
 
@@ -174,6 +202,26 @@
                 Console.WriteLine("Press enter...");
                 Console.ReadLine();
             }
+        }
+
+        /// <summary>
+        /// Override this method to return application BuiltIn rows. Used by cli for deployDb command.
+        /// </summary>
+        protected virtual List<Row> DeployDbBuiltInRowList()
+        {
+            var result = new List<Row>();
+            return result;
+        }
+
+        /// <summary>
+        /// Returns BuiltIn rows to deploy to sql database.
+        /// </summary>
+        protected virtual internal List<Row> DeployDbBuiltInRowListInternal()
+        {
+            var result = new List<Row>();
+            result.AddRange(FrameworkConfigFieldBuiltInCli.List);
+            result.AddRange(DeployDbBuiltInRowList());
+            return result;
         }
     }
 }

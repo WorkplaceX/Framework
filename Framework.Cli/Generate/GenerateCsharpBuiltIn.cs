@@ -2,6 +2,7 @@
 {
     using Framework.Cli.Config;
     using Framework.DataAccessLayer;
+    using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
     using System.Linq;
@@ -75,7 +76,12 @@
                     {
                         result.AppendLine();
                     }
-                    result.AppendLine(string.Format("    public static class {0}Memory", item.TableNameCSharp));
+                    string classNameExtension = "Cli";
+                    if (isApplication)
+                    {
+                        classNameExtension = "Application";
+                    }
+                    result.AppendLine(string.Format("    public static class {0}{1}", item.TableNameCSharp, classNameExtension));
                     result.AppendLine(string.Format("    {{"));
                     result.AppendLine(string.Format("        public static List<{0}> List", item.TableNameCSharp));
                     result.AppendLine(string.Format("        {{"));
@@ -108,18 +114,37 @@
                     {
                         while (reader.Read())
                         {
-                            result.Append(string.Format("                result.Add(new {0}());", tableNameCSharp));
-                            result.AppendLine();
+                            result.Append(string.Format("                result.Add(new {0}()", tableNameCSharp));
+                            bool isFirst = true;
                             for (int fieldIndex = 0; fieldIndex < reader.FieldCount; fieldIndex++)
                             {
                                 string fieldNameSql = reader.GetName(fieldIndex);
                                 MetaCSharpSchema field = fieldNameList.Where(item => item.Schema.FieldName == fieldNameSql).SingleOrDefault();
                                 if (field != null)
                                 {
+                                    if (isFirst)
+                                    {
+                                        result.Append(" { ");
+                                        isFirst = false;
+                                    }
+                                    else
+                                    {
+                                        result.Append(", ");
+                                    }
                                     object value = reader.GetValue(fieldIndex);
+                                    if (value == DBNull.Value)
+                                    {
+                                        value = null;
+                                    }
                                     GenerateCSharpRowBuiltInField(field, value, result);
                                 }
                             }
+                            if (isFirst == false)
+                            {
+                                result.Append(" }");
+                            }
+                            result.Append(");");
+                            result.AppendLine();
                         }
                     }
                 }
@@ -131,6 +156,9 @@
             string fieldNameCSharp = field.FieldNameCSharp;
             string fieldTypeCSharp = UtilGenerate.SqlTypeToCSharpType(field.Schema.SqlType, field.Schema.IsNullable);
             var frameworkTypeEnum = UtilDalType.SqlTypeToFrameworkTypeEnum(field.Schema.SqlType);
+            FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(frameworkTypeEnum);
+            string valueCSharp = frameworkType.ValueToCSharp(value);
+            result.Append(string.Format("{0} = {1}", fieldNameCSharp, valueCSharp));
         }
 
         /// <summary>

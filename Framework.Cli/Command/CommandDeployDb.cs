@@ -5,6 +5,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     public class CommandDeployDb : CommandBase
     {
@@ -92,6 +93,23 @@
             }
         }
 
+        /// <summary>
+        /// Populate sql BuiltIn tables.
+        /// </summary>
+        private void BuiltIn()
+        {
+            // List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
+            var builtInRowList = AppCli.DeployDbBuiltInRowListInternal();
+            var builtInRowListGroup = builtInRowList
+                .GroupBy(item => item.GetType())
+                .Select(item => new { TypeRow = item.Key, RowList = item.ToList() });
+            foreach (var item in builtInRowListGroup)
+            {
+                // TODO
+                // UtilDalUpsert.UpsertAsync(item.TypeRow, item.RowList, new string[] { "ConfigGridId", "FieldId" }).Wait();
+            }
+        }
+
         protected internal override void Execute()
         {
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json
@@ -108,9 +126,13 @@
             SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
             SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);
 
-            Console.WriteLine("DeployDb successful!");
-
+            // Populate sql tables FrameworkTable, FrameworkField.
             Meta();
+
+            // Populate sql BuiltIn tables.
+            BuiltIn();
+
+            Console.WriteLine("DeployDb successful!");
         }
     }
 }

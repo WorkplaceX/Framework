@@ -1536,6 +1536,24 @@
             }
             return result;
         }
+
+        protected virtual internal string ValueToCSharp(object value)
+        {
+            string result = null;
+            if (value != null)
+            {
+                result = value.ToString();
+            }
+            if (IsNumber == false)
+            {
+                result = "\"" + result + "\"";
+            }
+            if (value == null)
+            {
+                result = "null";
+            }
+            return result;
+        }
     }
 
     internal class FrameworkTypeInt : FrameworkType
@@ -1721,6 +1739,20 @@
                 return true;
             }
             return base.CellTextParse(text);
+        }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            string result = "null";
+            if ((bool?)value == false)
+            {
+                result = "false";
+            }
+            if ((bool?)value == true)
+            {
+                result = "true";
+            }
+            return result;
         }
     }
 
