@@ -1,4 +1,4 @@
-# Framework
+# Framework2
 
 [![Build Status](https://travis-ci.org/WorkplaceX/Application.svg?branch=master)](https://travis-ci.org/WorkplaceX/Application)
 (Application; travis;)
