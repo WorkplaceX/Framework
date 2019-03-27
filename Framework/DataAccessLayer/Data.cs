@@ -1522,6 +1522,10 @@
         protected virtual internal string ValueToSqlParameterDebug(object value)
         {
             string result = null;
+            if (value == DBNull.Value)
+            {
+                value = null;
+            }
             if (value != null)
             {
                 result = value.ToString();
@@ -1713,6 +1717,10 @@
         protected internal override string ValueToSqlParameterDebug(object value)
         {
             string result = null;
+            if (value == DBNull.Value)
+            {
+                value = null;
+            }
             if (value != null)
             {
                 UtilFramework.Assert(value.GetType() == ValueType);
@@ -1724,6 +1732,10 @@
                 {
                     result = "CAST(1 AS BIT)";
                 }
+            }
+            if (value == null)
+            {
+                result = "NULL";
             }
             return result;
         }

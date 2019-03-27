@@ -98,7 +98,7 @@
         /// </summary>
         private void BuiltIn()
         {
-            // List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
+            List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
             var builtInRowList = AppCli.DeployDbBuiltInRowListInternal();
             var builtInRowListGroup = builtInRowList
                 .GroupBy(item => item.GetType())
@@ -106,7 +106,10 @@
             foreach (var item in builtInRowListGroup)
             {
                 // TODO
+                List<Row> rowList = new List<Row>();
+                rowList.Add(item.RowList.First());
                 // UtilDalUpsert.UpsertAsync(item.TypeRow, item.RowList, new string[] { "ConfigGridId", "FieldId" }).Wait();
+                // UtilDalUpsertBuiltIn.UpsertAsync(item.TypeRow, rowList, new string[] { "ConfigGridId", "FieldId" }, null, assemblyList).Wait();
             }
         }
 
