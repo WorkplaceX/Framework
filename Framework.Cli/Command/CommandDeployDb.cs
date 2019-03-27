@@ -105,7 +105,7 @@
                 .Select(item => new { TypeRow = item.Key, RowList = item.ToList() });
             foreach (var item in builtInRowListGroup)
             {
-                // TODO
+                // TODO Remov
                 List<Row> rowList = new List<Row>();
                 rowList.Add(item.RowList.First());
                 // UtilDalUpsert.UpsertAsync(item.TypeRow, item.RowList, new string[] { "ConfigGridId", "FieldId" }).Wait();
