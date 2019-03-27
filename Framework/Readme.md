@@ -1,4 +1,4 @@
-# Framework 2019-03-27
+# Framework
 
 Application framework library.
 
