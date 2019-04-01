@@ -205,22 +205,61 @@
         }
 
         /// <summary>
-        /// Override this method to return application BuiltIn rows. Used by cli for deployDb command.
+        /// Override this method to return application BuiltIn rows. Used by cli for deployDb command to deploy BuiltIn rows to database.
         /// </summary>
-        protected virtual List<Row> DeployDbBuiltInRowList()
+        protected virtual List<DeployDbBuiltInItem> DeployDbBuiltInList()
         {
-            var result = new List<Row>();
+            var result = new List<DeployDbBuiltInItem>();
             return result;
+        }
+
+        /// <summary>
+        /// Group of BuiltIn TypeRow.
+        /// </summary>
+        public class DeployDbBuiltInItem
+        {
+            /// <summary>
+            /// Gets or sets RowList. Items have to be all of same TypeRow.
+            /// </summary>
+            public List<Row> RowList;
+
+            /// <summary>
+            /// Gets or sets FieldNameKeyList. Sql unique index for upsert.
+            /// </summary>
+            public string[] FieldNameKeyList;
+
+            /// <summary>
+            /// Gets or sets TableNameSqlReferencePrefex. Used to find reference tables.
+            /// </summary>
+            public string TableNameSqlReferencePrefex;
         }
 
         /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
-        protected virtual internal List<Row> DeployDbBuiltInRowListInternal()
+        protected virtual internal List<DeployDbBuiltInItem> DeployDbBuiltInListInternal()
         {
-            var result = new List<Row>();
-            result.AddRange(FrameworkConfigFieldBuiltInCli.List);
-            result.AddRange(DeployDbBuiltInRowList());
+            var result = new List<DeployDbBuiltInItem>();
+
+            // FrameworkConfigGridBuiltIn
+            {
+                var item = new DeployDbBuiltInItem();
+                result.Add(item);
+                item.RowList = new List<Row>(FrameworkConfigGridBuiltInCli.List);
+                item.FieldNameKeyList = new string[] { "TableId", "ConfigName" };
+                item.TableNameSqlReferencePrefex = "Framework";
+            }
+
+            // FrameworkConfigFieldBuiltIn
+            {
+                var item = new DeployDbBuiltInItem();
+                result.Add(item);
+                item.RowList = new List<Row>(FrameworkConfigFieldBuiltInCli.List);
+                item.FieldNameKeyList = new string[] { "ConfigGridId", "FieldId" };
+                item.TableNameSqlReferencePrefex = "Framework";
+            }
+
+            result.AddRange(DeployDbBuiltInList());
             return result;
         }
     }
