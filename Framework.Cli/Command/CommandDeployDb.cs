@@ -61,7 +61,7 @@
                     table.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                     if (UtilDalType.TypeRowIsTableNameSql(typeRow))
                     {
-                        table.TableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
+                        table.TableNameSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
                     }
                     table.IsExist = true;
                 }

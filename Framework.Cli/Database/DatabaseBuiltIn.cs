@@ -45,9 +45,9 @@ namespace DatabaseBuiltIn.dbo
             get
             {
                 var result = new List<FrameworkConfigGridBuiltIn>();
-                result.Add(new FrameworkConfigGridBuiltIn() { Id = 1, IdName = "Demo.RawWikipediaAircraft; ", TableId = 18, TableIdName = "Demo.RawWikipediaAircraft", TableNameCSharp = "Demo.RawWikipediaAircraft", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsExist = false });
-                result.Add(new FrameworkConfigGridBuiltIn() { Id = 2, IdName = "dbo.FrameworkConfigFieldDisplay; ", TableId = 3, TableIdName = "dbo.FrameworkConfigFieldDisplay", TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsExist = false });
-                result.Add(new FrameworkConfigGridBuiltIn() { Id = 3, IdName = "dbo.FrameworkConfigGridDisplay; ", TableId = 6, TableIdName = "dbo.FrameworkConfigGridDisplay", TableNameCSharp = "dbo.FrameworkConfigGridDisplay", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsExist = false });
+                result.Add(new FrameworkConfigGridBuiltIn() { Id = 1, IdName = "Demo.RawWikipediaAircraft; ", TableId = 18, TableIdName = "Demo.RawWikipediaAircraft", TableNameCSharp = "Demo.RawWikipediaAircraft", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsExist = true });
+                result.Add(new FrameworkConfigGridBuiltIn() { Id = 2, IdName = "dbo.FrameworkConfigFieldDisplay; ", TableId = 3, TableIdName = "dbo.FrameworkConfigFieldDisplay", TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsExist = true });
+                result.Add(new FrameworkConfigGridBuiltIn() { Id = 3, IdName = "dbo.FrameworkConfigGridDisplay; ", TableId = 6, TableIdName = "dbo.FrameworkConfigGridDisplay", TableNameCSharp = "dbo.FrameworkConfigGridDisplay", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsExist = true });
                 return result;
             }
         }

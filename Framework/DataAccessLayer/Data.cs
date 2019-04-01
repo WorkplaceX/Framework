@@ -844,7 +844,7 @@
 
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList)
         {
-            string tableName = UtilDalType.TypeRowToTableNameSql(typeRow);
+            string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             var fieldNameSqlList = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.IsPrimaryKey == false).Select(item => item.FieldNameSql).ToArray();
 
@@ -873,7 +873,7 @@
 	            INSERT ({5})
 	            VALUES ({6});
             ";
-            sqlUpsert = string.Format(sqlUpsert, tableName, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
+            sqlUpsert = string.Format(sqlUpsert, tableNameWithSchemaSql, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
             // string sqlDebug = Data.ExecuteParamDebug(sqlUpsert, paramList);
 
             // Upsert
@@ -895,10 +895,10 @@
         /// </summary>
         internal static async Task UpsertIsExistAsync(Type typeRow, string fieldNameSqlIsExist = "IsExist")
         {
-            string tableNameSql = UtilDalType.TypeRowToTableNameSql(typeRow);
+            string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             // IsExists
-            string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT)", tableNameSql, fieldNameSqlIsExist);
+            string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT)", tableNameWithSchemaSql, fieldNameSqlIsExist);
             await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
         }
 
@@ -976,9 +976,9 @@
                     if (fieldNameSqlList.Contains(fieldNameIdSql))
                     {
                         UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-                        string tableNameSqlBuiltIn = tableNameSqlPrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
-                        tableNameSqlBuiltIn = UtilDalType.TableNameSql(schemaNameSql, tableNameSqlBuiltIn);
-                        var tableReferenceList = tableNameSqlList.Where(item => item.Value == tableNameSqlBuiltIn).ToList();
+                        string tableNameWithSchemaSqlBuiltIn = tableNameSqlPrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
+                        tableNameWithSchemaSqlBuiltIn = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameWithSchemaSqlBuiltIn);
+                        var tableReferenceList = tableNameSqlList.Where(item => item.Value == tableNameWithSchemaSqlBuiltIn).ToList();
                         var tableReference = tableReferenceList.SingleOrDefault();
                         if (tableReference.Value != null)
                         {
@@ -1106,7 +1106,7 @@
                 }
                 Type typeRowDest = UtilDalType.TypeRowFromTableNameSql(schemaNameSql, tableNameSql, assemblyList);
                 var fieldDestList = UtilDalType.TypeRowToFieldListDictionary(typeRowDest);
-                tableNameSql = UtilDalType.TableNameSql(schemaNameSql, tableNameSql);
+                string tableNameWithSchemaSql = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameSql);
 
                 var fieldNameSqlList = FieldBuiltInList(typeRow, tableNameSqlPrefix, assemblyList)
                     .Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false && item.IsKey == false && fieldDestList.ContainsKey(item.Field.FieldNameCSharp))
@@ -1132,7 +1132,7 @@
 	                INSERT ({5})
 	                VALUES ({6});
                 ";
-                sqlUpsert = string.Format(sqlUpsert, tableNameSql, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
+                sqlUpsert = string.Format(sqlUpsert, tableNameWithSchemaSql, sqlSelect, fieldNameKeySourceList, fieldNameKeyTargetList, fieldNameAssignList, fieldNameInsertList, fieldNameValueList);
                 // string sqlDebug = Data.ExecuteParamDebug(sqlUpsert, paramList);
 
                 // Upsert
@@ -1254,7 +1254,7 @@
         }
 
         /// <summary>
-        /// Returns (TypeRow, TableNameSql) list.
+        /// Returns (TypeRow, TableNameWithSchemaSql) list.
         /// </summary>
         internal static Dictionary<Type, string> TableNameSqlList(List<Assembly> assemblyList)
         {
@@ -1262,8 +1262,8 @@
             List<Type> typeRowList = TypeRowList(assemblyList);
             foreach (Type typeRow in typeRowList)
             {
-                string tableNameSql = TypeRowToTableNameSql(typeRow);
-                result.Add(typeRow, tableNameSql);
+                string tableNameWithSchemaSql = TypeRowToTableNameWithSchemaSql(typeRow);
+                result.Add(typeRow, tableNameWithSchemaSql);
             }
             return result;
         }
@@ -1308,7 +1308,7 @@
         /// <summary>
         /// Returns sql table name with schema name.
         /// </summary>
-        internal static string TableNameSql(string schemaNameSql, string tableNameSql)
+        internal static string TableNameWithSchemaSql(string schemaNameSql, string tableNameSql)
         {
             string result = string.Format("[{0}].[{1}]", schemaNameSql, tableNameSql);
             return result;
@@ -1317,10 +1317,10 @@
         /// <summary>
         /// See also method TypeRowIsTableNameSql();
         /// </summary>
-        internal static string TypeRowToTableNameSql(Type typeRow)
+        internal static string TypeRowToTableNameWithSchemaSql(Type typeRow)
         {
             TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-            string result = TableNameSql(schemaNameSql, tableNameSql);
+            string result = TableNameWithSchemaSql(schemaNameSql, tableNameSql);
             return result;
         }
 

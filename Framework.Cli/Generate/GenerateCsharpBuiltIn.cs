@@ -30,7 +30,7 @@
         /// </summary>
         private static void GenerateCSharpSchemaName(MetaCSharp metaCSharp, bool isFrameworkDb, bool isApplication, StringBuilder result)
         {
-            var schemaNameList = metaCSharp.List.GroupBy(item => new { item.Schema.SchemaName, item.SchemaNameCSharp }, (key, group) => key).ToArray();
+            var schemaNameList = metaCSharp.List.GroupBy(item => new { SchemaNameSql = item.Schema.SchemaName, item.SchemaNameCSharp }, (key, group) => key).ToArray();
             bool isFirst = true;
             foreach (var item in schemaNameList)
             {
@@ -42,14 +42,14 @@
                 {
                     result.AppendLine();
                 }
-                if (GenerateCSharpTableNameClass(metaCSharp, item.SchemaName, isFrameworkDb, isApplication, null) > 0) // Generate CSharp schema only if it contains tables.
+                if (GenerateCSharpTableNameClass(metaCSharp, item.SchemaNameSql, isFrameworkDb, isApplication, null) > 0) // Generate CSharp schema only if it contains tables.
                 {
                     result.AppendLine(string.Format("namespace DatabaseBuiltIn.{0}", item.SchemaNameCSharp));
                     result.AppendLine(string.Format("{{"));
                     result.AppendLine(string.Format("    using System.Collections.Generic;"));
                     result.AppendLine(string.Format("    using Database.{0};", item.SchemaNameCSharp));
                     result.AppendLine();
-                    GenerateCSharpTableNameClass(metaCSharp, item.SchemaName, isFrameworkDb, isApplication, result);
+                    GenerateCSharpTableNameClass(metaCSharp, item.SchemaNameSql, isFrameworkDb, isApplication, result);
                     result.AppendLine(string.Format("}}"));
                 }
             }
@@ -58,9 +58,9 @@
         /// <summary>
         /// Generate static CSharp class for every database table.
         /// </summary>
-        private static int GenerateCSharpTableNameClass(MetaCSharp metaCSharp, string schemaName, bool isFrameworkDb, bool isApplication, StringBuilder result)
+        private static int GenerateCSharpTableNameClass(MetaCSharp metaCSharp, string schemaNameSql, bool isFrameworkDb, bool isApplication, StringBuilder result)
         {
-            var tableNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName).GroupBy(item => new { item.Schema.SchemaName, item.Schema.TableName, item.TableNameCSharp }, (key, group) => key).ToArray();
+            var tableNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaNameSql).GroupBy(item => new { item.Schema.SchemaName, item.Schema.TableName, item.TableNameCSharp }, (key, group) => key).ToArray();
             tableNameList = tableNameList.Where(item => NamingConventionBuiltIn.TableNameIsBuiltIn(item.TableNameCSharp)).ToArray();
             if (result != null)
             {
@@ -98,16 +98,16 @@
             return tableNameList.Length;
         }
 
-        private static void GenerateCSharpRowBuiltIn(MetaCSharp metaCSharp, string schemaName, string tableNameCSharp, bool isFrameworkDb, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpRowBuiltIn(MetaCSharp metaCSharp, string schemaNameSql, string tableNameCSharp, bool isFrameworkDb, bool isApplication, StringBuilder result)
         {
-            var fieldNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaName && item.Schema.TableName == tableNameCSharp).ToList();
+            var fieldNameList = metaCSharp.List.Where(item => item.Schema.SchemaName == schemaNameSql && item.Schema.TableName == tableNameCSharp).ToList();
             string tableNameSql = fieldNameList.First().Schema.TableName;
             string connectionString = ConfigCli.ConnectionString(isFrameworkDb);
 
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                string tableNameWithSchemaSql = UtilGenerate.TableNameWithSchemaSql(schemaName, tableNameSql);
+                string tableNameWithSchemaSql = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameSql);
                 using (var sqlCommand = new SqlCommand(string.Format("SELECT * FROM {0}", tableNameWithSchemaSql), connection))
                 {
                     using (var reader = sqlCommand.ExecuteReader())

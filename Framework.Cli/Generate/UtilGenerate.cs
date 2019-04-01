@@ -101,18 +101,5 @@
             }
             return result;
         }
-
-        /// <summary>
-        /// Returns for example: "dbo.FrameworkField".
-        /// </summary>
-        public static string TableNameWithSchemaSql(string schemaName, string tableNameSql)
-        {
-            string result = string.Format("[{0}].[{1}]", schemaName, tableNameSql);
-            if (schemaName == null)
-            {
-                result = string.Format("[{0}].[{1}]", schemaName, tableNameSql);
-            }
-            return result;
-        }
     }
 }
