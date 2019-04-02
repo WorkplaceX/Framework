@@ -237,7 +237,7 @@
         /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
-        protected virtual internal List<DeployDbBuiltInItem> DeployDbBuiltInListInternal()
+        protected internal List<DeployDbBuiltInItem> DeployDbBuiltInListInternal()
         {
             var result = new List<DeployDbBuiltInItem>();
 
@@ -261,6 +261,106 @@
 
             result.AddRange(DeployDbBuiltInList());
             return result;
+        }
+
+        /// <summary>
+        /// Returns BuiltIn rows to generate CSharp code.
+        /// </summary>
+        protected internal List<GenerateBuiltInItem> GenerateBuiltInListInternal()
+        {
+            var result = new List<GenerateBuiltInItem>();
+
+            // FrameworkConfigGridBuiltIn
+            result.Add(new GenerateBuiltInItem(
+                isFrameworkDb: true,
+                isApplication: false,
+                typeRow: typeof(FrameworkConfigGridBuiltIn),
+                rowList: Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.IsExist).OrderBy(item => item.IdName).ToList<Row>()
+            ));
+
+            // FrameworkConfigFieldBuiltIn
+            result.Add(new GenerateBuiltInItem(
+                isFrameworkDb: true,
+                isApplication: false,
+                typeRow: typeof(FrameworkConfigFieldBuiltIn),
+                rowList: Data.Query<FrameworkConfigFieldBuiltIn>().OrderBy(item => item.FieldIdName).ToList<Row>()
+            ));
+
+            result.AddRange(GenerateBuiltInList());
+            return result;
+        }
+
+        /// <summary>
+        /// Returns BuiltIn rows to generate CSharp code for application.
+        /// </summary>
+        protected virtual List<GenerateBuiltInItem> GenerateBuiltInList()
+        {
+            var result = new List<GenerateBuiltInItem>();
+            return result;
+        }
+
+        /// <summary>
+        /// Group of BuiltIn TypeRow.
+        /// </summary>
+        public class GenerateBuiltInItem
+        {
+            /// <summary>
+            /// Constructor for Framework and Application.
+            /// </summary>
+            internal GenerateBuiltInItem(bool isFrameworkDb, bool isApplication, Type typeRow, List<Row> rowList)
+            {
+                this.IsFrameworkDb = isFrameworkDb;
+                this.IsApplication = isApplication;
+                this.TypeRow = typeRow;
+                this.RowList = rowList;
+                UtilDalType.TypeRowToTableNameSql(TypeRow, out string schemaNameSql, out string tableNameSql);
+                this.SchemaNameCSharp = UtilDalType.TypeRowToSchemaNameCSharp(TypeRow);
+                this.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharpWithoutSchema(TypeRow);
+
+                foreach (var row in RowList)
+                {
+                    UtilFramework.Assert(row.GetType() == TypeRow);
+                }
+            }
+
+            /// <summary>
+            /// Constructor for Application.
+            /// </summary>
+            public GenerateBuiltInItem(bool isApplication, Type typeRow, List<Row> rowList) 
+                : this(false, isApplication, typeRow, rowList)
+            {
+
+            }
+
+            /// <summary>
+            /// Gets IsFrameworkDb. If true, RowList is generated into Framework library (internal use only). If false, RowList is generated into Application library.
+            /// </summary>
+            public readonly bool IsFrameworkDb;
+
+            /// <summary>
+            /// Gets IsApplication. If true, RowList will be able at runtime. If false, RowList will be generated into cli.
+            /// </summary>
+            public readonly bool IsApplication;
+
+            /// <summary>
+            /// Gets TypeRow. From database returned RowList can be empty.
+            /// </summary>
+            public readonly Type TypeRow;
+
+            /// <summary>
+            /// Gets SchemaNameCSharp.
+            /// </summary>
+            public readonly string SchemaNameCSharp;
+
+            /// <summary>
+            /// Gets TableNameCSharp. Without schema.
+            /// </summary>
+            public readonly string TableNameCSharp;
+
+            /// <summary>
+            /// Gets RowList. Items need to be all of same TypeRow.
+            /// </summary>
+            public readonly List<Row> RowList;
         }
     }
 }

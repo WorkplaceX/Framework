@@ -10,15 +10,16 @@
         /// <summary>
         /// Script to generate CSharp code.
         /// </summary>
-        /// <param name="isFrameworkDb">If true, generate CSharp code for framework (nternal use only) otherwise generate code for Application.</param>
+        /// <param name="isFrameworkDb">If true, generate CSharp code for framework library (internal use only) otherwise generate code for Application.</param>
         public static void Run(bool isFrameworkDb, AppCli appCli)
         {
             MetaSql metaSql = new MetaSql(isFrameworkDb, appCli);
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
 
             new CSharpGenerate(metaCSharp).Run(out string cSharp);
-            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpCli, isFrameworkDb, isApplication: false);
-            new GenerateCSharpBuiltIn(metaCSharp).Run(out string cSharpApplication, isFrameworkDb, isApplication: true);
+            var builtInlist = appCli.GenerateBuiltInListInternal();
+            new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: builtInlist);
+            new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: builtInlist);
             if (isFrameworkDb == false)
             {
                 UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database.cs", cSharp);

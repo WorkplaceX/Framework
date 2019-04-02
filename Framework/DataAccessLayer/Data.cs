@@ -1254,6 +1254,38 @@
         }
 
         /// <summary>
+        /// Returns row type as string. For example: "User". Omits "Database" namespace prefix and schema.
+        /// </summary>
+        internal static string TypeRowToTableNameCSharpWithoutSchema(Type typeRow)
+        {
+            string result = TypeRowToTableNameCSharp(typeRow);
+            int index = result.IndexOf(".");
+            if (index != -1)
+            {
+                result = result.Substring(index + ".".Length);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns SchemaNameCSharp. For example: "dbo".
+        /// </summary>
+        internal static string TypeRowToSchemaNameCSharp(Type typeRow)
+        {
+            string result = TypeRowToTableNameCSharp(typeRow);
+            int index = result.IndexOf(".");
+            if (index == -1)
+            {
+                result = null; // Sql table without schema
+            }
+            else
+            {
+                result = result.Substring(0, index);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns (TypeRow, TableNameWithSchemaSql) list.
         /// </summary>
         internal static Dictionary<Type, string> TableNameSqlList(List<Assembly> assemblyList)
