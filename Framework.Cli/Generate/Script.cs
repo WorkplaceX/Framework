@@ -22,8 +22,8 @@
             new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: builtInlist);
             if (isFrameworkDb == false)
             {
-                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database.cs", cSharp);
-                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/DatabaseBuiltIn.cs", cSharpApplication);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database/Database.cs", cSharp);
+                UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database/DatabaseBuiltIn.cs", cSharpApplication);
                 UtilFramework.FileSave(UtilFramework.FolderName + "Application.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);
             }
             else
