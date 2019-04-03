@@ -218,20 +218,27 @@
         /// </summary>
         public class DeployDbBuiltInItem
         {
-            /// <summary>
-            /// Gets or sets RowList. Items have to be all of same TypeRow.
-            /// </summary>
-            public List<Row> RowList;
+            public DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex)
+            {
+                this.RowList = rowList;
+                this.FieldNameKeyList = fieldNameKeyList;
+                this.TableNameSqlReferencePrefex = tableNameSqlReferencePrefex;
+            }
 
             /// <summary>
-            /// Gets or sets FieldNameKeyList. Sql unique index for upsert.
+            /// Gets RowList. Items have to be all of same TypeRow.
             /// </summary>
-            public string[] FieldNameKeyList;
+            public readonly List<Row> RowList;
 
             /// <summary>
-            /// Gets or sets TableNameSqlReferencePrefex. Used to find reference tables.
+            /// Gets FieldNameKeyList. Sql unique index for upsert.
             /// </summary>
-            public string TableNameSqlReferencePrefex;
+            public readonly string[] FieldNameKeyList;
+
+            /// <summary>
+            /// Gets TableNameSqlReferencePrefex. Used to find reference tables.
+            /// </summary>
+            public readonly string TableNameSqlReferencePrefex;
         }
 
         /// <summary>
@@ -243,20 +250,22 @@
 
             // FrameworkConfigGridBuiltIn
             {
-                var item = new DeployDbBuiltInItem();
+                var item = new DeployDbBuiltInItem(
+                    rowList: new List<Row>(FrameworkConfigGridBuiltInCli.List),
+                    fieldNameKeyList: new string[] { "TableId", "ConfigName" },
+                    tableNameSqlReferencePrefex: "Framework"
+                );
                 result.Add(item);
-                item.RowList = new List<Row>(FrameworkConfigGridBuiltInCli.List);
-                item.FieldNameKeyList = new string[] { "TableId", "ConfigName" };
-                item.TableNameSqlReferencePrefex = "Framework";
             }
 
             // FrameworkConfigFieldBuiltIn
             {
-                var item = new DeployDbBuiltInItem();
+                var item = new DeployDbBuiltInItem(
+                    rowList: new List<Row>(FrameworkConfigFieldBuiltInCli.List),
+                    fieldNameKeyList: new string[] { "ConfigGridId", "FieldId" },
+                    tableNameSqlReferencePrefex: "Framework"
+                );
                 result.Add(item);
-                item.RowList = new List<Row>(FrameworkConfigFieldBuiltInCli.List);
-                item.FieldNameKeyList = new string[] { "ConfigGridId", "FieldId" };
-                item.TableNameSqlReferencePrefex = "Framework";
             }
 
             result.AddRange(DeployDbBuiltInList());
