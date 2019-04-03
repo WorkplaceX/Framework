@@ -20,10 +20,10 @@
         /// <summary>
         /// Constructor.
         /// </summary>
-        public AppCli(Assembly assemblyDatabase, Assembly assemblyApp)
+        public AppCli(Assembly assemblyApplicationDatabase, Assembly assemblyApplication)
         {
-            this.AssemblyDatabase = assemblyDatabase;
-            this.AssemblyApp = assemblyApp;
+            this.AssemblyApplicationDatabase = assemblyApplicationDatabase;
+            this.AssemblyApplication = assemblyApplication;
 
             this.commandLineApplication = new CommandLineApplication();
 
@@ -32,17 +32,17 @@
         }
 
         /// <summary>
-        /// Gets AssemblyDatabase. This assembly hosts from database generated rows.
+        /// Gets "Application.Database" assembly. This assembly hosts from database generated rows.
         /// </summary>
-        public readonly Assembly AssemblyDatabase;
+        public readonly Assembly AssemblyApplicationDatabase;
 
         /// <summary>
-        /// Gets AssemblyApp. This assembly hosts business logic.
+        /// Gets "Application" assembly. This assembly hosts business logic.
         /// </summary>
-        public readonly Assembly AssemblyApp;
+        public readonly Assembly AssemblyApplication;
 
         /// <summary>
-        /// Gets Framework assembly.
+        /// Gets "Framework" assembly.
         /// </summary>
         internal Assembly AssemblyFramework
         {
@@ -53,13 +53,26 @@
         }
 
         /// <summary>
-        /// Gets Framework.Cli assembly.
+        /// Gets "Framework.Cli" assembly.
         /// </summary>
         internal Assembly AssemblyFrameworkCli
         {
             get
             {
                 return typeof(AppCli).Assembly;
+            }
+        }
+
+        /// <summary>
+        /// Gets "Application.Cli" assembly.
+        /// </summary>
+        internal Assembly AssemblyApplicationCli
+        {
+            get
+            {
+                Assembly result = GetType().Assembly;
+                UtilFramework.Assert(result != AssemblyFrameworkCli);
+                return result;
             }
         }
 
@@ -73,10 +86,10 @@
         {
             List<Assembly> result = new List<Assembly>();
             result.Add(AssemblyFramework);
-            result.Add(AssemblyDatabase);
+            result.Add(AssemblyApplicationDatabase);
             if (isIncludeApp)
             {
-                result.Add(AssemblyApp);
+                result.Add(AssemblyApplication);
             }
             if (isIncludeFrameworkCli)
             {
@@ -256,6 +269,13 @@
                     tableNameSqlReferencePrefex: "Framework"
                 );
                 result.Add(item);
+
+                // Read FrameworkConfigGridBuiltInCli.List from Application.Cli project.
+                string nameCli = UtilFramework.TypeToName(typeof(FrameworkConfigGridBuiltInCli));
+                var typeCli = AssemblyApplicationCli.GetType(nameCli);
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInCli.List));
+                var rowList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
+                item.RowList.AddRange(rowList);
             }
 
             // FrameworkConfigFieldBuiltIn
@@ -266,6 +286,13 @@
                     tableNameSqlReferencePrefex: "Framework"
                 );
                 result.Add(item);
+
+                // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
+                string nameCli = UtilFramework.TypeToName(typeof(FrameworkConfigFieldBuiltInCli));
+                var typeCli = AssemblyApplicationCli.GetType(nameCli);
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInCli.List));
+                var rowList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
+                item.RowList.AddRange(rowList);
             }
 
             result.AddRange(DeployDbBuiltInList());
@@ -280,20 +307,62 @@
             var result = new List<GenerateBuiltInItem>();
 
             // FrameworkConfigGridBuiltIn
-            result.Add(new GenerateBuiltInItem(
-                isFrameworkDb: true,
-                isApplication: false,
-                typeRow: typeof(FrameworkConfigGridBuiltIn),
-                rowList: Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.IsExist).OrderBy(item => item.IdName).ToList<Row>()
-            ));
+            {
+                var rowList = Data.Query<FrameworkConfigGridBuiltIn>().OrderBy(item => item.IdName).ToList<FrameworkConfigGridBuiltIn>();
+                // Framework (.\cli.cmd generate -f)
+                {
+                    var tableNameCSharpList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
+                    var rowFilterList = rowList.Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // Filter Framework.
+                    result.Add(new GenerateBuiltInItem(
+                        isFrameworkDb: true,
+                        isApplication: false,
+                        typeRow: typeof(FrameworkConfigGridBuiltIn),
+                        rowList: rowFilterList.ToList<Row>()
+                    ));
+                }
+                // Application (.\cli.cmd generate)
+                {
+                    List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
+                    var tableNameCSharpIsFrameworkDbList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
+                    var tableNameCSharpList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
+                    var rowFilterList = rowList.Where(item => !tableNameCSharpIsFrameworkDbList.Contains(item.TableNameCSharp) && tableNameCSharpList.ContainsKey(item.TableNameCSharp)).ToList(); // Filter Application.
+                    result.Add(new GenerateBuiltInItem(
+                        isFrameworkDb: false,
+                        isApplication: false,
+                        typeRow: typeof(FrameworkConfigGridBuiltIn),
+                        rowList: rowFilterList.ToList<Row>()
+                    ));
+                }
+            }
 
             // FrameworkConfigFieldBuiltIn
-            result.Add(new GenerateBuiltInItem(
-                isFrameworkDb: true,
-                isApplication: false,
-                typeRow: typeof(FrameworkConfigFieldBuiltIn),
-                rowList: Data.Query<FrameworkConfigFieldBuiltIn>().OrderBy(item => item.FieldIdName).ToList<Row>()
-            ));
+            {
+                var rowList = Data.Query<FrameworkConfigFieldBuiltIn>().OrderBy(item => item.FieldIdName).ToList<FrameworkConfigFieldBuiltIn>();
+                // Framework (.\cli.cmd generate -f)
+                {
+                    var tableNameCSharpList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()).ToList(); // TableNameCSharp declared in Framework assembly.
+                    var rowFilterList = rowList.Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // Filter Framework.
+                    result.Add(new GenerateBuiltInItem(
+                        isFrameworkDb: true,
+                        isApplication: false,
+                        typeRow: typeof(FrameworkConfigFieldBuiltIn),
+                        rowList: rowFilterList.ToList<Row>()
+                    ));
+                }
+                // Application (.\cli.cmd generate)
+                {
+                    List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
+                    var tableNameCSharpIsFrameworkDbList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
+                    var tableNameCSharpList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
+                    var rowFilterList = rowList.Where(item => !tableNameCSharpIsFrameworkDbList.Contains(item.TableNameCSharp) && tableNameCSharpList.ContainsKey(item.TableNameCSharp)).ToList(); // Filter Application.
+                    result.Add(new GenerateBuiltInItem(
+                        isFrameworkDb: false,
+                        isApplication: false,
+                        typeRow: typeof(FrameworkConfigFieldBuiltIn),
+                        rowList: rowFilterList.ToList<Row>()
+                    ));
+                }
+            }
 
             result.AddRange(GenerateBuiltInList());
             return result;

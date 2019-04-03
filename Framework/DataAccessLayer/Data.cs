@@ -1194,6 +1194,27 @@
         }
 
         /// <summary>
+        /// Return TableNameCSharp, if declared in Framework assembly.
+        /// </summary>
+        /// <param name="tableNameCSharpList">For example "dbo.FrameworkScript"</param>
+        internal static List<string> TableNameCSharpIsFrameworkDbList(List<string> tableNameCSharpList)
+        {
+            var result = new List<string>();
+            foreach (Type type in typeof(Data).Assembly.GetTypes())
+            {
+                if (type.IsSubclassOf(typeof(Row))) // TypeRow
+                {
+                    string tableNameCSharp = TypeRowToTableNameCSharp(type);
+                    if (tableNameCSharpList.Contains(tableNameCSharp))
+                    {
+                        result.Add(tableNameCSharp);
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns true if typeRow has database table.
         /// </summary>
         internal static bool TypeRowIsTableNameSql(Type typeRow)
@@ -1317,7 +1338,7 @@
         /// <param name="assemblyList">Assemblies to scan for TypeRow.</param>
         internal static Type TypeRowFromTableNameSql(string schemaNameSql, string tableNameSql, List<Assembly> assemblyList)
         {
-            List<Type> resultList = new List<Type>();
+            List<Type> result = new List<Type>();
             foreach (Assembly assembly in assemblyList)
             {
                 foreach (Type type in assembly.GetTypes())
@@ -1328,15 +1349,41 @@
                         {
                             if (schemaNameSqlLocal == schemaNameSql && tableNameSqlLocal == tableNameSql)
                             {
-                                resultList.Add(type);
+                                result.Add(type);
                             }
                         }
                     }
                 }
             }
-            return resultList.Single();
+            return result.Single();
         }
 
+        /// <summary>
+        /// Returns TypeRow from TableNameCSharp if exists in assembly.
+        /// </summary>
+        /// <param name="tableNameCSharpList">For example: "dbo.FrameworkScript"</param>
+        /// <param name="assemblyList">Assemblies in which to search for TypeRow.</param>
+        internal static Dictionary<string, Type> TypeRowFromTableNameCSharpList(List<string> tableNameCSharpList, List<Assembly> assemblyList)
+        {
+            var result = new Dictionary<string, Type>();
+            tableNameCSharpList = tableNameCSharpList.Distinct().ToList();
+            foreach (Assembly assembly in assemblyList)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (UtilFramework.IsSubclassOf(type, typeof(Row)))
+                    {
+                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
+                        if (tableNameCSharpList.Contains(tableNameCSharp))
+                        {
+                            result.Add(tableNameCSharp, type);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+            
         /// <summary>
         /// Returns sql table name with schema name.
         /// </summary>
