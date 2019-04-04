@@ -1194,20 +1194,21 @@
         }
 
         /// <summary>
-        /// Return TableNameCSharp, if declared in Framework assembly.
+        /// Return (TypeRow, TableNameCSharp), if declared in Framework assembly.
         /// </summary>
         /// <param name="tableNameCSharpList">For example "dbo.FrameworkScript"</param>
-        internal static List<string> TableNameCSharpIsFrameworkDbList(List<string> tableNameCSharpList)
+        internal static Dictionary<Type, string> TypeRowIsFrameworkDbFromTableNameCSharpList(List<string> tableNameCSharpList)
         {
-            var result = new List<string>();
+            var result = new Dictionary<Type, string>();
             foreach (Type type in typeof(Data).Assembly.GetTypes())
             {
                 if (type.IsSubclassOf(typeof(Row))) // TypeRow
                 {
-                    string tableNameCSharp = TypeRowToTableNameCSharp(type);
+                    Type typeRow = type;
+                    string tableNameCSharp = TypeRowToTableNameCSharp(typeRow);
                     if (tableNameCSharpList.Contains(tableNameCSharp))
                     {
-                        result.Add(tableNameCSharp);
+                        result.Add(typeRow, tableNameCSharp);
                     }
                 }
             }
@@ -1359,13 +1360,13 @@
         }
 
         /// <summary>
-        /// Returns TypeRow from TableNameCSharp if exists in assembly.
+        /// Returns (TypeRow, TableNameCSharp) from TableNameCSharp if declared in assembly.
         /// </summary>
         /// <param name="tableNameCSharpList">For example: "dbo.FrameworkScript"</param>
         /// <param name="assemblyList">Assemblies in which to search for TypeRow.</param>
-        internal static Dictionary<string, Type> TypeRowFromTableNameCSharpList(List<string> tableNameCSharpList, List<Assembly> assemblyList)
+        internal static Dictionary<Type, string> TypeRowFromTableNameCSharpList(List<string> tableNameCSharpList, List<Assembly> assemblyList)
         {
-            var result = new Dictionary<string, Type>();
+            var result = new Dictionary<Type, string>();
             tableNameCSharpList = tableNameCSharpList.Distinct().ToList();
             foreach (Assembly assembly in assemblyList)
             {
@@ -1376,9 +1377,29 @@
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
                         if (tableNameCSharpList.Contains(tableNameCSharp))
                         {
-                            result.Add(tableNameCSharp, type);
+                            result.Add(type, tableNameCSharp);
                         }
                     }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns (TableNameCSharp, FieldNameCSharp) from typeRowList. See also method TypeRowFromTableNameCSharpList.
+        /// </summary>
+        /// <param name="typeRowList">(TypeRow, TableNameCSharp).</param>
+        internal static List<Tuple<string, string>> FieldNameCSharpFromTypeRowList(Dictionary<Type, string> typeRowList)
+        {
+            var result = new List<Tuple<string, string>>();
+            foreach (var item in typeRowList)
+            {
+                Type typeRow = item.Key;
+                string tableNameCSharp = item.Value;
+                var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+                foreach (var field in fieldList)
+                {
+                    result.Add(new Tuple<string, string>(tableNameCSharp, field.FieldNameCSharp));
                 }
             }
             return result;

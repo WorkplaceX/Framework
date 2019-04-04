@@ -31,6 +31,9 @@ namespace Database.dbo
 
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
+
+        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
+        public bool IsExist { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigFieldBuiltIn")]
@@ -74,6 +77,9 @@ namespace Database.dbo
 
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
+
+        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
+        public bool IsExist { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigFieldDisplay")]

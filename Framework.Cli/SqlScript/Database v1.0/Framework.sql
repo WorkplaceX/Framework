@@ -78,6 +78,7 @@ CREATE TABLE FrameworkConfigField
 	IsVisible BIT,
 	IsReadOnly BIT,
 	Sort FLOAT,
+	IsExist BIT NOT NULL
 	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId)
 )
 
@@ -100,7 +101,8 @@ SELECT
 	ConfigField.Description,
 	ConfigField.IsVisible,
 	ConfigField.IsReadOnly,
-	ConfigField.Sort
+	ConfigField.Sort,
+	ConfigField.IsExist
 FROM
 	FrameworkConfigField ConfigField
 GO

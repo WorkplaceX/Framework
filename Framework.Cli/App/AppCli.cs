@@ -309,10 +309,10 @@
             // FrameworkConfigGridBuiltIn
             {
                 var rowList = Data.Query<FrameworkConfigGridBuiltIn>().OrderBy(item => item.IdName).ToList<FrameworkConfigGridBuiltIn>();
+                var typeRowIsFrameworkDbList = UtilDalType.TypeRowIsFrameworkDbFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
                 // Framework (.\cli.cmd generate -f)
                 {
-                    var tableNameCSharpList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
-                    var rowFilterList = rowList.Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // Filter Framework.
+                    var rowFilterList = rowList.Where(item => typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Framework.
                     result.Add(new GenerateBuiltInItem(
                         isFrameworkDb: true,
                         isApplication: false,
@@ -323,9 +323,8 @@
                 // Application (.\cli.cmd generate)
                 {
                     List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
-                    var tableNameCSharpIsFrameworkDbList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
-                    var tableNameCSharpList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
-                    var rowFilterList = rowList.Where(item => !tableNameCSharpIsFrameworkDbList.Contains(item.TableNameCSharp) && tableNameCSharpList.ContainsKey(item.TableNameCSharp)).ToList(); // Filter Application.
+                    var typeRowList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
+                    var rowFilterList = rowList.Where(item => !typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp) && typeRowList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Application.
                     result.Add(new GenerateBuiltInItem(
                         isFrameworkDb: false,
                         isApplication: false,
@@ -338,10 +337,12 @@
             // FrameworkConfigFieldBuiltIn
             {
                 var rowList = Data.Query<FrameworkConfigFieldBuiltIn>().OrderBy(item => item.FieldIdName).ToList<FrameworkConfigFieldBuiltIn>();
+                var typeRowIsFrameworkDbList = UtilDalType.TypeRowIsFrameworkDbFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
                 // Framework (.\cli.cmd generate -f)
                 {
-                    var tableNameCSharpList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()).ToList(); // TableNameCSharp declared in Framework assembly.
-                    var rowFilterList = rowList.Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList(); // Filter Framework.
+                    var fieldNameCSharpList = UtilDalType.FieldNameCSharpFromTypeRowList(typeRowIsFrameworkDbList);
+                    var rowFilterList = rowList.Where(item => typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter FrameworkDb.
+                    rowFilterList = rowList.Where(item => fieldNameCSharpList.Contains(new Tuple<string, string>(item.TableNameCSharp, item.FieldNameCSharp))).ToList(); // Filter FieldNameCSharp declared in Framework assembly.
                     result.Add(new GenerateBuiltInItem(
                         isFrameworkDb: true,
                         isApplication: false,
@@ -352,9 +353,10 @@
                 // Application (.\cli.cmd generate)
                 {
                     List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
-                    var tableNameCSharpIsFrameworkDbList = UtilDalType.TableNameCSharpIsFrameworkDbList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
-                    var tableNameCSharpList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
-                    var rowFilterList = rowList.Where(item => !tableNameCSharpIsFrameworkDbList.Contains(item.TableNameCSharp) && tableNameCSharpList.ContainsKey(item.TableNameCSharp)).ToList(); // Filter Application.
+                    var typeRowList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
+                    var fieldNameCSharpList = UtilDalType.FieldNameCSharpFromTypeRowList(typeRowList);
+                    var rowFilterList = rowList.Where(item => !typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp) && typeRowList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Application.
+                    rowFilterList = rowList.Where(item => fieldNameCSharpList.Contains(new Tuple<string, string>(item.TableNameCSharp, item.FieldNameCSharp))).ToList(); // Filter FieldNameCSharp declared in Application assembly.
                     result.Add(new GenerateBuiltInItem(
                         isFrameworkDb: false,
                         isApplication: false,
