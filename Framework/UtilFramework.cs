@@ -21,18 +21,18 @@ namespace Framework
             get
             {
                 // dotnet --version
-                // 2.1.201
+                // 2.2.300
 
                 // node --version
                 // v8.11.3
 
                 // npm --version
-                // 6.2.0
+                // 6.9.0
 
                 // ng --version
-                // Angular CLI: 6.0.8
+                // Angular CLI: 6.1.1
 
-                return "v2.011";
+                return "v2.012";
             }
         }
 
@@ -275,7 +275,7 @@ namespace Framework
         /// </summary>
         internal static void LogDebug(string text)
         {
-            TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging
+            // TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging // .NET Core 2.2 throws "Could not load file or assembly Microsoft.ApplicationInsights" error. Not needed anymore.
             Debug.WriteLine("### {0} {1}", UtilFramework.DateTimeToString(DateTime.Now, true), text);
         }
 

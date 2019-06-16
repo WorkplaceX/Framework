@@ -24,7 +24,6 @@ v2.1
 
 ToDo
 -Question: sealed class Grid because of OfType<Grid>(). However Page derived class is possible
--ASP.NET Core 2.1
 -ProcessAsync
 -https://github.com/Microsoft/sql-server-samples
 -deploy can not be called twice. (remote azure already exists)

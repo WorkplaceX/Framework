@@ -1,4 +1,6 @@
-﻿sudo: required # Needed to install .NET Core 2.1
+﻿dist: xenial // Ubuntu Xenial 16.04 // https://docs.travis-ci.com/user/reference/xenial/
+
+sudo: required # Needed to install .NET Core 2.2
 
 install: ./Framework/Framework.Cli/Ci/travis-ci.org/Install.sh
 
