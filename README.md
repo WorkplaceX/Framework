@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/WorkplaceX/Application.svg?branch=master)](https://travis-ci.org/WorkplaceX/Application)
 (Application; travis;)
 
-Framework to create database applications based on Angular 6 with server side rendering, ASP.NET Core 2.1 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
+Framework to create database applications based on Angular 6 with server side rendering, ASP.NET Core 2.2 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
 
 ## Getting started
 

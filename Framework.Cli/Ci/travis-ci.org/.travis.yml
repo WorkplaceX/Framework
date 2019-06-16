@@ -1,4 +1,4 @@
-﻿sudo: required # Needed to install .NET Core 2.1
+﻿sudo: required # Needed to install .NET Core 2.2
 
 install: ./Framework/Framework.Cli/Ci/travis-ci.org/Install.sh
 
