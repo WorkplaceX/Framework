@@ -116,8 +116,6 @@
         {
             UtilSession.GridReset(grid);
 
-            List<Field> fieldList = UtilDalType.TypeRowToFieldList(typeRow);
-
             GridSession gridSession = UtilSession.GridSessionFromGrid(grid);
             int gridIndex = UtilSession.GridToIndex(grid);
 
@@ -139,6 +137,7 @@
 
             if (rowList != null)
             {
+                List<Field> fieldList = UtilDalType.TypeRowToFieldList(typeRow);
                 foreach (Row row in rowList)
                 {
                     GridRowSession gridRowSession = new GridRowSession();
@@ -463,13 +462,16 @@
                     // Config
                     if (gridItem.Grid.IsClickEnum == GridIsClickEnum.Config)
                     {
-                        Page page = gridItem.Grid.ComponentOwner<Page>();
-                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
-                        string configName = gridItem.Grid.ConfigName; ;
-                        await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                        if (gridItem.GridSession.TypeRow != null) // Do not show config if for example no query is defined for data grid.
                         {
-                            pageGridConfig.Init(tableNameCSharp, configName, null);
-                        });
+                            Page page = gridItem.Grid.ComponentOwner<Page>();
+                            string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
+                            string configName = gridItem.Grid.ConfigName;
+                            await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                            {
+                                pageGridConfig.Init(tableNameCSharp, configName, null);
+                            });
+                        }
                     }
                 }
             }

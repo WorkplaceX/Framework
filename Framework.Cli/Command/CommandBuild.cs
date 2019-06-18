@@ -110,7 +110,7 @@
         /// </summary>
         private static void BuildConfigWebServer()
         {
-            Console.WriteLine("Copy values from ConfigCli to ConfigWebServer");
+            Console.WriteLine("Copy runtime specific values from ConfigCli to ConfigWebServer"); // There is also other values not needed for runtime like DeployAzureGitUrl.
             var configCli = ConfigCli.Load();
             var configWebServer = ConfigWebServer.Load();
 

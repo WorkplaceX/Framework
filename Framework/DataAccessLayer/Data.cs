@@ -1475,7 +1475,7 @@
         }
 
         /// <summary>
-        /// Returns CSharp fields. Sequence (FieldNameCSharpSort) is identical as in CSharp code.
+        /// Returns CSharp fields. Sequence (FieldNameCSharpSort) is identical to CSharp code typeRow property declarations.
         /// </summary>
         internal static List<Field> TypeRowToFieldList(Type typeRow)
         {

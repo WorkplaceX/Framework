@@ -84,13 +84,16 @@
         /// </summary>
         public static DatabaseEnum DatabaseEnum(IQueryable query)
         {
-            var expressionVisitorScope = new ExpressionVisitorScope();
-            expressionVisitorScope.Visit(query.Expression);
-
             DatabaseEnum result = Framework.DataAccessLayer.DatabaseEnum.None;
-            if (expressionVisitorScope.DatabaseEnumList.Count == 1)
+            if (query != null)
             {
-                return expressionVisitorScope.DatabaseEnumList.Single();
+                var expressionVisitorScope = new ExpressionVisitorScope();
+                expressionVisitorScope.Visit(query.Expression);
+
+                if (expressionVisitorScope.DatabaseEnumList.Count == 1)
+                {
+                    return expressionVisitorScope.DatabaseEnumList.Single();
+                }
             }
             return result;
         }

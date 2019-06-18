@@ -160,17 +160,21 @@
                 gridList.TryGetValue(gridIndex, out Grid grid);
                 gridItem.Grid = grid;
 
-                var fieldList = UtilDalType.TypeRowToFieldList(gridItem.GridSession.TypeRow);
+                List<Field> fieldList = null;
                 gridItem.GridColumnItemList = new List<GridColumnItem>();
-                for (int cellIndex = 0; cellIndex < fieldList.Count; cellIndex++)
+                if (gridItem.GridSession.TypeRow != null)
                 {
-                    GridColumnItem gridColumnItem = new GridColumnItem();
-                    gridItem.GridColumnItemList.Add(gridColumnItem);
+                    fieldList = UtilDalType.TypeRowToFieldList(gridItem.GridSession.TypeRow);
+                    for (int cellIndex = 0; cellIndex < fieldList.Count; cellIndex++)
+                    {
+                        GridColumnItem gridColumnItem = new GridColumnItem();
+                        gridItem.GridColumnItemList.Add(gridColumnItem);
 
-                    // Set Column
-                    gridColumnItem.CellIndex = cellIndex;
-                    gridColumnItem.GridColumnSession = gridSession.GridColumnSessionList[cellIndex]; // Outgoing Column (Session)
-                    gridColumnItem.Field = fieldList[cellIndex];
+                        // Set Column
+                        gridColumnItem.CellIndex = cellIndex;
+                        gridColumnItem.GridColumnSession = gridSession.GridColumnSessionList[cellIndex]; // Outgoing Column (Session)
+                        gridColumnItem.Field = fieldList[cellIndex];
+                    }
                 }
 
                 var config = new UtilColumnIndexConfig(gridItem);
