@@ -123,13 +123,16 @@
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
             Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
+            Console.WriteLine("Deploy SqlScript");
             SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
             SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);
 
             // Populate sql tables FrameworkTable, FrameworkField.
+            Console.WriteLine("Update FrameworkTable, FrameworkField tables");
             Meta();
 
             // Populate sql BuiltIn tables.
+            Console.WriteLine("Update BuiltIn tables");
             BuiltIn();
 
             Console.WriteLine("DeployDb successful!");

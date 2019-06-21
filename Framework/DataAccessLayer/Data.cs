@@ -83,7 +83,35 @@
         {
             public object Create(DbContext context)
             {
-                return ((DbContextInternal)context).TypeRow;
+                DbContextInternal dbContextInternal = (DbContextInternal)context;
+                return new ModelCacheKey(dbContextInternal.TypeRow, dbContextInternal.IsQuery);
+            }
+        }
+
+        /// <summary>
+        /// One DbContext for DbSet and one DbContext for DbQuery for one TypeRow.
+        /// </summary>
+        internal class ModelCacheKey
+        {
+            public ModelCacheKey(Type typeRow, bool isQuery)
+            {
+                this.TypeRow = typeRow;
+                this.IsQuery = isQuery;
+            }
+
+            public readonly Type TypeRow;
+
+            public readonly bool IsQuery;
+
+            public override int GetHashCode()
+            {
+                return TypeRow.GetHashCode() + IsQuery.GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                ModelCacheKey modelCacheKey = (ModelCacheKey)obj;
+                return TypeRow == modelCacheKey.TypeRow && IsQuery == modelCacheKey.IsQuery;
             }
         }
 
@@ -92,15 +120,22 @@
         /// </summary>
         internal class DbContextInternal : DbContext
         {
-            public DbContextInternal(string connectionString, Type typeRow)
+            public DbContextInternal(string connectionString, Type typeRow, bool isQuery)
             {
                 this.ConnectionString = connectionString;
                 this.TypeRow = typeRow;
+                this.IsQuery = isQuery;
             }
 
             public readonly string ConnectionString;
 
             public readonly Type TypeRow;
+
+            /// <summary>
+            /// Gets IsQuery. If true, EF Core DbQuery is used otherwise DbSet.
+            /// DbQuery is used for select. DbSet for insert, update and delete.
+            /// </summary>
+            public readonly bool IsQuery;
 
             /// <summary>
             /// Gets Query for TypeRow.
@@ -109,7 +144,8 @@
             {
                 get
                 {
-                    return (IQueryable)(this.GetType().GetTypeInfo().GetMethod("Set").MakeGenericMethod(TypeRow).Invoke(this, null));
+                    string methodName = IsQuery == false ? "Set" : "Query";
+                    return (IQueryable)(this.GetType().GetTypeInfo().GetMethod(methodName).MakeGenericMethod(TypeRow).Invoke(this, null));
                 }
             }
 
@@ -124,50 +160,133 @@
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
-                // Entity model
-                var entityBuilder = modelBuilder.Entity(TypeRow);
-                SqlTableAttribute tableAttribute = (SqlTableAttribute)TypeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
-                entityBuilder.ToTable(tableAttribute.TableNameSql, tableAttribute.SchemaNameSql); // By default EF maps sql table name to class name.
-
-                // Field model
                 var fieldList = UtilDalType.TypeRowToFieldList(TypeRow);
-                bool isPrimaryKey = false; // Sql view 
-                foreach (var field in fieldList)
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)TypeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+
+                if (IsQuery == false)
                 {
-                    if (field.FieldNameSql == null) // Calculated column. Do not include it in sql select.
+                    // Table (DbContext.DbSet)
+                    var entityTypeBuilder = modelBuilder.Entity(TypeRow);
+                    entityTypeBuilder.ToTable(tableAttribute.TableNameSql, tableAttribute.SchemaNameSql); // By default EF maps sql table name to class name.
+                    bool isPrimaryKey = false; // Sql view 
+                    foreach (var field in fieldList)
                     {
-                        entityBuilder.Ignore(field.PropertyInfo.Name);
+                        if (field.FieldNameSql == null) // Calculated column. Do not include it in sql select.
+                        {
+                            entityTypeBuilder.Ignore(field.PropertyInfo.Name);
+                        }
+                        else
+                        {
+                            if (field.IsPrimaryKey)
+                            {
+                                isPrimaryKey = true;
+                                entityTypeBuilder.HasKey(field.PropertyInfo.Name); // Prevent null exception if primary key name is not "Id".
+                            }
+                            var propertyBuilder = entityTypeBuilder.Property(field.PropertyInfo.PropertyType, field.PropertyInfo.Name);
+                            propertyBuilder.HasColumnName(field.FieldNameSql);
+                            if (UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum).SqlTypeName == "datetime")
+                            {
+                                // Prevent "Conversion failed when converting date and/or time from character string." exception for 
+                                // sql field type "datetime" for dynamic linq where function. See also method QueryFilter();
+                                propertyBuilder.HasColumnType("datetime");
+                            }
+                        }
                     }
-                    else
+                    if (isPrimaryKey == false)
                     {
-                        if (field.IsPrimaryKey)
-                        {
-                            isPrimaryKey = true;
-                            entityBuilder.HasKey(field.PropertyInfo.Name); // Prevent null exception if primary key name is not "Id".
-                        }
-                        var propertyBuilder = entityBuilder.Property(field.PropertyInfo.PropertyType, field.PropertyInfo.Name);
-                        propertyBuilder.HasColumnName(field.FieldNameSql);
-                        if (UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum).SqlTypeName == "datetime")
-                        {
-                            // Prevent "Conversion failed when converting date and/or time from character string." exception for 
-                            // sql field type "datetime" for dynamic linq where function. See also method QueryFilter();
-                            propertyBuilder.HasColumnType("datetime");
-                        }
+                        throw new Exception("No primary key defined!");
                     }
                 }
-
-                if (isPrimaryKey == false)
+                else
                 {
-                    string propertyName = fieldList.Where(item => item.FieldNameSql != null).First().PropertyInfo.Name;
-                    entityBuilder.HasKey(propertyName); // Prevent null exception if name of first field (of view) is not "Id". See also QueryTrackingBehavior.NoTracking;
+                    // Query (DbContext.DbQuery)
+                    var queryTypeBuilder = modelBuilder.Query(TypeRow);
+                    queryTypeBuilder.ToView(tableAttribute.TableNameSql, tableAttribute.SchemaNameSql); // By default EF maps sql table name to class name.
+                    foreach (var field in fieldList)
+                    {
+                        if (field.FieldNameSql == null) // Calculated column. Do not include it in sql select.
+                        {
+                            queryTypeBuilder.Ignore(field.PropertyInfo.Name);
+                        }
+                        else
+                        {
+                            var propertyBuilder = queryTypeBuilder.Property(field.PropertyInfo.PropertyType, field.PropertyInfo.Name);
+                            propertyBuilder.HasColumnName(field.FieldNameSql);
+                            if (UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum).SqlTypeName == "datetime")
+                            {
+                                // Prevent "Conversion failed when converting date and/or time from character string." exception for 
+                                // sql field type "datetime" for dynamic linq where function. See also method QueryFilter();
+                                propertyBuilder.HasColumnType("datetime");
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        /*
+        CREATE VIEW MyDebug AS
+        SELECT 1 AS Id, 'Blue' AS Text
+        UNION ALL
+        SELECT NULL AS Id, NULL AS Text
+        */
+
+        /*
+        public class MyDebug
+        {
+            public int? Id { get; set; }
+
+            public string Text { get; set; }
+
+            public static void Run()
+            {
+                foreach (var item in new DbContextDebug().MyQuery)
+                {
+
+                }
+            }
+        }
+
+        internal class DbContextDebug : DbContext
+        {
+            // public DbSet<MyDebug> MyDebug { get; set; }
+            // public DbQuery<MyDebug> MyDebug { get; set; }
+
+            public IQueryable<MyDebug> MyQuery
+            {
+                get
+                {
+                    // var result = (IQueryable)(this.GetType().GetTypeInfo().GetMethod("Set").MakeGenericMethod(typeof(MyDebug)).Invoke(this, null));
+                    var result = (IQueryable)(this.GetType().GetTypeInfo().GetMethod("Query").MakeGenericMethod(typeof(MyDebug)).Invoke(this, null));
+                    return (IQueryable<MyDebug>)result;
+                }
+            }
+
+            protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            {
+                base.OnConfiguring(optionsBuilder);
+
+                optionsBuilder.UseSqlServer(ConfigWebServer.ConnectionString(isFrameworkDb: false));
+                // optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                // optionsBuilder.ReplaceService<IModelCacheKeyFactory, ModelCacheKeyFactory>();
+            }
+
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            {
+                // Entity model
+                // var entityBuilder = modelBuilder.Entity(typeof(MyDebug));
+                var entityBuilder = modelBuilder.Query(typeof(MyDebug));
+                entityBuilder.ToView("MyDebug");
+                entityBuilder.Property("Id");
+                entityBuilder.Property("Text");
+            }
+        }
+        */
+
         /// <summary>
         /// Returns DbContext with ConnectionString and model for one row, defined in typeRow.
         /// </summary>
-        internal static DbContextInternal DbContextInternalCreate(Type typeRow)
+        internal static DbContextInternal DbContextInternalCreate(Type typeRow, bool isQuery)
         {
             string connectionString = ConfigWebServer.ConnectionString(typeRow);
             if (connectionString == null)
@@ -180,7 +299,7 @@
                 throw new Exception("TypeRow does not have TableNameSql definition!");
             }
 
-            return new DbContextInternal(connectionString, typeRow);
+            return new DbContextInternal(connectionString, typeRow, isQuery);
         }
 
         private static string ExecuteParamAddPrivate(FrameworkTypeEnum frameworkTypeEnum, string paramName, object value, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
@@ -388,7 +507,7 @@
             switch (databaseEnum)
             {
                 case DatabaseEnum.Database:
-                    return DbContextInternalCreate(typeRow).Query;
+                    return DbContextInternalCreate(typeRow, isQuery: true).Query;
                 case DatabaseEnum.MemorySingleton:
                     return DatabaseMemoryInternal.Instance.RowListGet(typeRow).AsQueryable();
                 default:
@@ -567,7 +686,7 @@
         /// </summary>
         public static async Task Delete(Row row)
         {
-            DbContext dbContext = DbContextInternalCreate(row.GetType());
+            DbContext dbContext = DbContextInternalCreate(row.GetType(), isQuery: false);
             dbContext.Remove(row);
             int count = await dbContext.SaveChangesAsync();
             UtilFramework.Assert(count == 1, "Update failed!");
@@ -585,7 +704,7 @@
                 case DatabaseEnum.Database:
                     {
                         Row rowCopy = Data.RowCopy(row);
-                        DbContext dbContext = DbContextInternalCreate(row.GetType());
+                        DbContext dbContext = DbContextInternalCreate(row.GetType(), isQuery: false);
                         dbContext.Add(row); // Throws NullReferenceException if no primary key is defined. // EF sets auto increment field to 2147482647.
                         try
                         {
@@ -631,7 +750,7 @@
                     case DatabaseEnum.Database:
                         {
                             row = Data.RowCopy(row); // Prevent modifications on SetValues(rowNew);
-                            DbContext dbContext = Data.DbContextInternalCreate(row.GetType());
+                            DbContext dbContext = Data.DbContextInternalCreate(row.GetType(), isQuery: false);
                             var tracking = dbContext.Attach(row);
                             tracking.CurrentValues.SetValues(rowNew);
                             tracking.State = EntityState.Modified; // Update also if row and rowNew are equal.

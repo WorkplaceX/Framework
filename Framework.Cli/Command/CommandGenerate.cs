@@ -2,11 +2,12 @@
 {
     using Framework.Cli.Generate;
     using Microsoft.Extensions.CommandLineUtils;
+    using System;
 
     public class CommandGenerate : CommandBase
     {
         public CommandGenerate(AppCli appCli)
-            : base(appCli, "generate", "Generate CSharp code with database classes.")
+            : base(appCli, "generate", "Generate CSharp code classes from database schema")
         {
 
         }
@@ -15,7 +16,7 @@
 
         protected internal override void Register(CommandLineApplication configuration)
         {
-            optionFramework = configuration.Option("-f|--framework", "Generate CSharp code for framework (internal use only).", CommandOptionType.NoValue);
+            optionFramework = configuration.Option("-f|--framework", "Generate CSharp code for framework (internal use only)", CommandOptionType.NoValue);
         }
 
         private void ArgumentGenerate()
@@ -26,6 +27,8 @@
         {
             bool isFrameworkDb = optionFramework.Value() == "on";
             Script.Run(isFrameworkDb, AppCli);
+
+            Console.WriteLine("Generate successful!");
         }
     }
 }

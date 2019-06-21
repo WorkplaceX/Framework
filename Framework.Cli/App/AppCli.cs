@@ -20,6 +20,8 @@
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <param name="assemblyApplicationDatabase">Register Application.Database.dll</param>
+        /// <param name="assemblyApplication">Register Application.dll</param>
         public AppCli(Assembly assemblyApplicationDatabase, Assembly assemblyApplication)
         {
             this.AssemblyApplicationDatabase = assemblyApplicationDatabase;
@@ -418,7 +420,7 @@
             public readonly bool IsFrameworkDb;
 
             /// <summary>
-            /// Gets IsApplication. If true, RowList will be able at runtime. If false, RowList will be generated into cli.
+            /// Gets IsApplication. If true, RowList will be available at runtime. If false, RowList will be generated into cli.
             /// </summary>
             public readonly bool IsApplication;
 
