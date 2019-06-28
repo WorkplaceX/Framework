@@ -99,7 +99,7 @@
         private void BuiltIn()
         {
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
-            var builtInList = AppCli.DeployDbBuiltInListInternal();
+            var builtInList = AppCli.CommandDeployDbBuiltInListInternal();
             foreach (var item in builtInList)
             {
                 if (item.RowList.Count > 0)

@@ -188,7 +188,7 @@
         /// </summary>
         /// <param name="list">Input list.</param>
         /// <returns>Returns filtered output list.</returns>
-        protected virtual internal MetaSqlSchema[] GenerateFilter(MetaSqlSchema[] list)
+        protected virtual internal MetaSqlSchema[] CommandGenerateFilter(MetaSqlSchema[] list)
         {
             // return list.Where(item => item.SchemaName == "dbo" && item.TableName.StartsWith("Explorer")).ToArray();
             return list;
@@ -220,12 +220,11 @@
         }
 
         /// <summary>
-        /// Override this method to return application BuiltIn rows. Used by cli for deployDb command to deploy BuiltIn rows to database.
+        /// Override this method to add BuiltIn data rows to list. Used by cli in deployDb command to deploy BuiltIn rows to database.
         /// </summary>
-        protected virtual List<DeployDbBuiltInItem> DeployDbBuiltInList()
+        protected virtual void CommandDeployDbBuiltIn(List<DeployDbBuiltInItem> list)
         {
-            var result = new List<DeployDbBuiltInItem>();
-            return result;
+
         }
 
         /// <summary>
@@ -233,11 +232,30 @@
         /// </summary>
         public class DeployDbBuiltInItem
         {
+            /// <summary>
+            /// Constructor.
+            /// </summary>
             public DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex)
             {
                 this.RowList = rowList;
                 this.FieldNameKeyList = fieldNameKeyList;
                 this.TableNameSqlReferencePrefex = tableNameSqlReferencePrefex;
+            }
+
+            /// <summary>
+            /// Constructor.
+            /// </summary>
+            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex) where TRow : Row
+            {
+                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefex);
+            }
+
+            /// <summary>
+            /// Constructor.
+            /// </summary>
+            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefex) where TRow : Row
+            {
+                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), new string[] { fieldNameKey }, tableNameSqlReferencePrefex);
             }
 
             /// <summary>
@@ -259,7 +277,7 @@
         /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
-        protected internal List<DeployDbBuiltInItem> DeployDbBuiltInListInternal()
+        protected internal List<DeployDbBuiltInItem> CommandDeployDbBuiltInListInternal()
         {
             var result = new List<DeployDbBuiltInItem>();
 
@@ -297,14 +315,18 @@
                 item.RowList.AddRange(rowList);
             }
 
-            result.AddRange(DeployDbBuiltInList());
+            // Application (custom) BuiltIn data rows to deploy to database.
+            var list = new List<DeployDbBuiltInItem>();
+            CommandDeployDbBuiltIn(list);
+            result.AddRange(list);
+
             return result;
         }
 
         /// <summary>
         /// Returns BuiltIn rows to generate CSharp code.
         /// </summary>
-        protected internal List<GenerateBuiltInItem> GenerateBuiltInListInternal()
+        protected internal List<GenerateBuiltInItem> CommandGenerateBuiltInListInternal()
         {
             var result = new List<GenerateBuiltInItem>();
 
@@ -368,17 +390,20 @@
                 }
             }
 
-            result.AddRange(GenerateBuiltInList());
+            // Application (custom) BuiltIn data rows to generate csharp code from.
+            var list = new List<GenerateBuiltInItem>();
+            CommandGenerateBuiltIn(list);
+            result.AddRange(list);
+
             return result;
         }
 
         /// <summary>
-        /// Returns BuiltIn rows to generate CSharp code for application.
+        /// Override this method to add BuiltIn data rows to list. Used by cli in Generate command to generate CSharp code.
         /// </summary>
-        protected virtual List<GenerateBuiltInItem> GenerateBuiltInList()
+        protected virtual void CommandGenerateBuiltIn(List<GenerateBuiltInItem> list)
         {
-            var result = new List<GenerateBuiltInItem>();
-            return result;
+
         }
 
         /// <summary>

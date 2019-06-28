@@ -17,7 +17,7 @@
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
 
             new CSharpGenerate(metaCSharp).Run(out string cSharp);
-            var builtInlist = appCli.GenerateBuiltInListInternal();
+            var builtInlist = appCli.CommandGenerateBuiltInListInternal();
             new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: builtInlist);
             new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: builtInlist);
             if (isFrameworkDb == false)

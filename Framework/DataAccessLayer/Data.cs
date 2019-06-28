@@ -602,6 +602,22 @@
         /// <summary>
         /// Select data from database.
         /// </summary>
+        public static List<Row> Select(IQueryable query)
+        {
+            return query.ToDynamicList().Cast<Row>().ToList();
+        }
+
+        /// <summary>
+        /// Select data from database.
+        /// </summary>
+        public static List<TRow> Select<TRow>(IQueryable<TRow> query) where TRow : Row
+        {
+            return query.ToDynamicList().Cast<TRow>().ToList();
+        }
+
+        /// <summary>
+        /// Select data from database.
+        /// </summary>
         public static async Task<List<Row>> SelectAsync(IQueryable query)
         {
             UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));

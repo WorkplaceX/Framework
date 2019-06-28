@@ -27,7 +27,7 @@
             if (isFrameworkDb == false)
             {
                 this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
-                this.List = appCli.GenerateFilter(this.List); // Custom table name filtering for code generation.
+                this.List = appCli.CommandGenerateFilter(this.List); // Custom table name filtering for code generation.
             }
             else
             {
