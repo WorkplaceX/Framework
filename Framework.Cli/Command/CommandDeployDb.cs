@@ -1,6 +1,6 @@
 ﻿namespace Framework.Cli.Command
 {
-    using Database.dbo;
+    using DatabaseFramework.dbo;
     using Framework.DataAccessLayer;
     using System;
     using System.Collections.Generic;

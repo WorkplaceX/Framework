@@ -3,7 +3,7 @@
 namespace DatabaseBuiltIn.dbo
 {
     using System.Collections.Generic;
-    using Database.dbo;
+    using DatabaseFramework.dbo;
 
     public static class FrameworkConfigGridBuiltInCli
     {

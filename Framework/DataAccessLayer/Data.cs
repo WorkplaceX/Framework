@@ -1405,8 +1405,16 @@
             string result = null;
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
             result = UtilFramework.TypeToName(typeRow);
-            UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "Database.Calculated".
-            result = result.Substring("Database.".Length); // Remove "Database" namespace.
+            if (TypeRowIsFrameworkDb(typeRow))
+            {
+                UtilFramework.Assert(result.StartsWith("DatabaseFramework."));
+                result = result.Substring("DatabaseFramework.".Length); // Remove "DatabaseFramework" namespace.
+            }
+            else
+            {
+                UtilFramework.Assert(result.StartsWith("DatabaseApplication")); // If it is a calculated row which does not exist on database move it for example to namespace "DatabaseApplication.Calculated".
+                result = result.Substring("DatabaseApplication.".Length); // Remove "DatabaseApplication" namespace.
+            }
             return result;
         }
 

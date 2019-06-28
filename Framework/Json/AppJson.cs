@@ -1,6 +1,6 @@
 ﻿namespace Framework.Json
 {
-    using Database.dbo;
+    using DatabaseFramework.dbo;
     using Framework.App;
     using Framework.DataAccessLayer;
     using Framework.Server;

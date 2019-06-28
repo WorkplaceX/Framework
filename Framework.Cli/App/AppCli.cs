@@ -1,6 +1,6 @@
 ﻿namespace Framework.Cli.Command
 {
-    using Database.dbo;
+    using DatabaseFramework.dbo;
     using DatabaseBuiltIn.dbo;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
