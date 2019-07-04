@@ -19,6 +19,8 @@
         /// <summary>
         /// Generate CSharp namespace for every database schema.
         /// </summary>
+        /// <param name="isFrameworkDb">If true, generate CSharp code for Framework library (internal use only) otherwise generate code for Application.</param>
+        /// <param name="isApplication">If false, generate CSharp code for cli. If true, generate code for Application or Framework.</param>
         private static void GenerateCSharpSchemaName(List<GenerateBuiltInItem> builtInList, bool isFrameworkDb, bool isApplication, StringBuilder result)
         {
             builtInList = builtInList.Where(item => item.IsFrameworkDb == isFrameworkDb && item.IsApplication == isApplication).ToList();
@@ -34,7 +36,7 @@
                 {
                     result.AppendLine();
                 }
-                if (isApplication == false)
+                if (isFrameworkDb)
                 {
                     result.AppendLine(string.Format("namespace DatabaseFrameworkBuiltIn.{0}", schemaNameCSharp));
                 }
@@ -44,7 +46,7 @@
                 }
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
-                if (isApplication == false)
+                if (isFrameworkDb)
                 {
                     result.AppendLine(string.Format("    using DatabaseFramework.{0};", schemaNameCSharp));
                 }

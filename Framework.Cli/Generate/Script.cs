@@ -10,7 +10,7 @@
         /// <summary>
         /// Script to generate CSharp code.
         /// </summary>
-        /// <param name="isFrameworkDb">If true, generate CSharp code for framework library (internal use only) otherwise generate code for Application.</param>
+        /// <param name="isFrameworkDb">If true, generate CSharp code for Framework library (internal use only) otherwise generate code for Application.</param>
         public static void Run(bool isFrameworkDb, AppCli appCli)
         {
             MetaSql metaSql = new MetaSql(isFrameworkDb, appCli);
