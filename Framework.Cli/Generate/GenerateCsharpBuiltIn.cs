@@ -77,14 +77,14 @@
                 {
                     result.AppendLine();
                 }
-                string classNameExtension = "Cli";
+                string classNameExtension = "TableCli";
                 if (isApplication)
                 {
-                    classNameExtension = "Application";
+                    classNameExtension = "TableApp";
                 }
                 result.AppendLine(string.Format("    public static class {0}{1}", builtIn.TableNameCSharp, classNameExtension));
                 result.AppendLine(string.Format("    {{"));
-                result.AppendLine(string.Format("        public static List<{0}> List", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("        public static List<{0}> RowList", builtIn.TableNameCSharp));
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            get"));
                 result.AppendLine(string.Format("            {{"));
