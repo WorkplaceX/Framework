@@ -290,8 +290,8 @@
                 );
                 result.Add(item);
 
-                // Read FrameworkConfigGridBuiltInCli.List from Application.Cli project.
-                string nameCli = UtilFramework.TypeToName(typeof(FrameworkConfigGridBuiltInTableCli));
+                // Read FrameworkConfigGridBuiltIn.RowListList from Application.Cli project.
+                string nameCli = "DatabaseApplicationBuiltIn.dbo.FrameworkConfigGridBuiltInTableCli";
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInTableCli.RowList));
                 var rowList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
@@ -308,7 +308,7 @@
                 result.Add(item);
 
                 // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
-                string nameCli = UtilFramework.TypeToName(typeof(FrameworkConfigFieldBuiltInTableCli));
+                string nameCli = "DatabaseApplicationBuiltIn.dbo.FrameworkConfigFieldBuiltInTableCli";
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInTableCli.RowList));
                 var rowList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);

@@ -1365,7 +1365,7 @@
         }
 
         /// <summary>
-        /// Returns rows defined in "Database" namespace in assemblies.
+        /// Returns rows defined in "DatabaseFramework" or "DatabaseApplication" namespace in assemblies.
         /// </summary>
         /// <param name="assemblyList">Use method AppCli.AssemblyList(); when running in cli mode or method UtilServer.AssemblyList(); when running in web mode.</param>
         internal static List<Type> TypeRowList(List<Assembly> assemblyList)
@@ -1377,7 +1377,8 @@
                 {
                     if (type.IsSubclassOf(typeof(Row)))
                     {
-                        if (UtilFramework.TypeToName(type).StartsWith("Database."))
+                        string name = UtilFramework.TypeToName(type);
+                        if (name.StartsWith("DatabaseFramework.") || name.StartsWith("DatabaseApplication."))
                         {
                             string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
                             if (result.ContainsKey(tableNameCSharp))

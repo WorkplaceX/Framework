@@ -13,6 +13,8 @@
 
         protected internal override void Execute()
         {
+            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+
             string folderName = UtilFramework.FolderName + @"Application.Server/";
             UtilCli.DotNet(folderName, "build");
             UtilCli.DotNet(folderName, "run --no-build", false);

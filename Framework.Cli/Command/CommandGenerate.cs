@@ -25,6 +25,8 @@
 
         protected internal override void Execute()
         {
+            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json. Command reads ConnectionString from ConfigWebServer.json.
+
             bool isFrameworkDb = optionFramework.Value() == "on";
             Script.Run(isFrameworkDb, AppCli);
 

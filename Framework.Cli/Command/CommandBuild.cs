@@ -143,7 +143,7 @@
 
         protected internal override void Execute()
         {
-            InitConfigWebServer(AppCli);
+            InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
             // Build
             BuildWebsite();
