@@ -46,7 +46,8 @@
                 }
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
-                if (isFrameworkDb)
+                bool TypeRowIsFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).First().TypeRow);
+                if (TypeRowIsFrameworkDb)
                 {
                     result.AppendLine(string.Format("    using DatabaseFramework.{0};", schemaNameCSharp));
                 }
