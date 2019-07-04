@@ -34,10 +34,24 @@
                 {
                     result.AppendLine();
                 }
-                result.AppendLine(string.Format("namespace DatabaseBuiltIn.{0}", schemaNameCSharp));
+                if (isApplication == false)
+                {
+                    result.AppendLine(string.Format("namespace DatabaseFrameworkBuiltIn.{0}", schemaNameCSharp));
+                }
+                else
+                {
+                    result.AppendLine(string.Format("namespace DatabaseApplicationBuiltIn.{0}", schemaNameCSharp));
+                }
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
-                result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
+                if (isApplication == false)
+                {
+                    result.AppendLine(string.Format("    using DatabaseFramework.{0};", schemaNameCSharp));
+                }
+                else
+                {
+                    result.AppendLine(string.Format("    using DatabaseApplication.{0};", schemaNameCSharp));
+                }
                 result.AppendLine();
                 GenerateCSharpTableNameClass(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, result);
                 result.AppendLine(string.Format("}}"));

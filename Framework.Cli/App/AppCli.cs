@@ -1,7 +1,7 @@
 ﻿namespace Framework.Cli.Command
 {
     using DatabaseFramework.dbo;
-    using DatabaseBuiltIn.dbo;
+    using DatabaseFrameworkBuiltIn.dbo;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
     using Framework.DataAccessLayer;
@@ -220,7 +220,7 @@
         }
 
         /// <summary>
-        /// Override this method to add BuiltIn data rows to list. Used by cli in deployDb command to deploy BuiltIn rows to database.
+        /// Override this method to add BuiltIn data rows to list. Used by cli deployDb command to deploy BuiltIn rows to database.
         /// </summary>
         protected virtual void CommandDeployDbBuiltIn(List<DeployDbBuiltInItem> list)
         {
@@ -399,7 +399,7 @@
         }
 
         /// <summary>
-        /// Override this method to add BuiltIn data rows to list. Used by cli in Generate command to generate CSharp code.
+        /// Override this method to add BuiltIn data rows to list. Used by cli generate command to generate CSharp code.
         /// </summary>
         protected virtual void CommandGenerateBuiltIn(List<GenerateBuiltInItem> list)
         {
