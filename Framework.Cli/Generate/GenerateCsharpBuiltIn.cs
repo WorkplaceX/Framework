@@ -64,7 +64,8 @@
                     result.AppendLine();
                 }
 
-                string classNameExtension = null; // See also method CommandDeployDbBuiltInListInternal();
+                // Use one "Database" and "DatabaseBuiltIn" namespace for Framework and Application
+                string classNameExtension = "Table"; // See also method CommandDeployDbBuiltInListInternal();
 
                 // Framework, Application
                 if (isFrameworkDb)

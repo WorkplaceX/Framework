@@ -284,16 +284,16 @@
             // FrameworkConfigGridBuiltIn
             {
                 var item = new DeployDbBuiltInItem(
-                    rowList: new List<Row>(FrameworkConfigGridBuiltInFrameworkCli.RowList),
+                    rowList: new List<Row>(FrameworkConfigGridBuiltInTableFrameworkCli.RowList),
                     fieldNameKeyList: new string[] { "TableId", "ConfigName" },
                     tableNameSqlReferencePrefex: "Framework"
                 );
                 result.Add(item);
 
                 // Read FrameworkConfigGridBuiltIn.RowListList from Application.Cli project.
-                string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigGridBuiltInApplicationCli"; // See also method GenerateCSharpTableNameClass();
+                string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigGridBuiltInTableApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInFrameworkCli.RowList));
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInTableFrameworkCli.RowList));
                 var rowList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
                 item.RowList.AddRange(rowList);
             }
@@ -301,16 +301,16 @@
             // FrameworkConfigFieldBuiltIn
             {
                 var item = new DeployDbBuiltInItem(
-                    rowList: new List<Row>(FrameworkConfigFieldBuiltInFrameworkCli.RowList),
+                    rowList: new List<Row>(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList),
                     fieldNameKeyList: new string[] { "ConfigGridId", "FieldId" },
                     tableNameSqlReferencePrefex: "Framework"
                 );
                 result.Add(item);
 
                 // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
-                string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigFieldBuiltInApplicationCli"; // See also method GenerateCSharpTableNameClass();
+                string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigFieldBuiltInTableApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInFrameworkCli.RowList));
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList));
                 var rowList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
                 item.RowList.AddRange(rowList);
             }

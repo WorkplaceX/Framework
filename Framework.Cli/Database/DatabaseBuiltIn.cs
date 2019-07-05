@@ -5,7 +5,7 @@ namespace DatabaseBuiltIn.dbo
     using System.Collections.Generic;
     using Database.dbo;
 
-    public static class FrameworkConfigGridBuiltInFrameworkCli
+    public static class FrameworkConfigGridBuiltInTableFrameworkCli
     {
         public static List<FrameworkConfigGridBuiltIn> RowList
         {
@@ -19,7 +19,7 @@ namespace DatabaseBuiltIn.dbo
         }
     }
 
-    public static class FrameworkConfigFieldBuiltInFrameworkCli
+    public static class FrameworkConfigFieldBuiltInTableFrameworkCli
     {
         public static List<FrameworkConfigFieldBuiltIn> RowList
         {
