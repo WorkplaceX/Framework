@@ -36,7 +36,7 @@
                 {
                     result.AppendLine();
                 }
-                result.AppendLine(string.Format("namespace DatabasekBuiltIn.{0}", schemaNameCSharp));
+                result.AppendLine(string.Format("namespace DatabaseBuiltIn.{0}", schemaNameCSharp));
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
                 bool TypeRowIsFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).First().TypeRow);
