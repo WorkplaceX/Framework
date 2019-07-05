@@ -1,6 +1,6 @@
 ﻿namespace Framework.Session
 {
-    using DatabaseFramework.dbo;
+    using Database.dbo;
     using Framework.Application;
     using Framework.DataAccessLayer;
     using Framework.DataAccessLayer.DatabaseMemory;
