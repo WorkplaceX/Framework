@@ -1365,7 +1365,7 @@
         }
 
         /// <summary>
-        /// Returns rows defined in "DatabaseFramework" or "DatabaseApplication" namespace in assemblies.
+        /// Returns rows defined in "Database" namespace in assemblies.
         /// </summary>
         /// <param name="assemblyList">Use method AppCli.AssemblyList(); when running in cli mode or method UtilServer.AssemblyList(); when running in web mode.</param>
         internal static List<Type> TypeRowList(List<Assembly> assemblyList)
@@ -1378,7 +1378,7 @@
                     if (type.IsSubclassOf(typeof(Row)))
                     {
                         string name = UtilFramework.TypeToName(type);
-                        if (name.StartsWith("DatabaseFramework.") || name.StartsWith("DatabaseApplication."))
+                        if (name.StartsWith("Database."))
                         {
                             string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
                             if (result.ContainsKey(tableNameCSharp))
@@ -1406,16 +1406,8 @@
             string result = null;
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
             result = UtilFramework.TypeToName(typeRow);
-            if (TypeRowIsFrameworkDb(typeRow))
-            {
-                UtilFramework.Assert(result.StartsWith("DatabaseFramework."));
-                result = result.Substring("DatabaseFramework.".Length); // Remove "DatabaseFramework" namespace.
-            }
-            else
-            {
-                UtilFramework.Assert(result.StartsWith("DatabaseApplication")); // If it is a calculated row which does not exist on database move it for example to namespace "DatabaseApplication.Calculated".
-                result = result.Substring("DatabaseApplication.".Length); // Remove "DatabaseApplication" namespace.
-            }
+            UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "DatabaseCalculated".
+            result = result.Substring("Database.".Length); // Remove "DatabaseFramework" namespace.
             return result;
         }
 

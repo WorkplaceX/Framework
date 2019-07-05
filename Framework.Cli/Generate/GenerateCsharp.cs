@@ -36,14 +36,7 @@
                 {
                     result.AppendLine();
                 }
-                if (isFrameworkDb)
-                {
-                    result.AppendLine(string.Format("namespace DatabaseFramework.{0}", item.SchemaNameCSharp));
-                }
-                else
-                {
-                    result.AppendLine(string.Format("namespace DatabaseApplication.{0}", item.SchemaNameCSharp));
-                }
+                result.AppendLine(string.Format("namespace Database.{0}", item.SchemaNameCSharp));
                 result.AppendLine("{");
                 result.AppendLine("    using Framework.DataAccessLayer;");
                 result.AppendLine("    using System;");

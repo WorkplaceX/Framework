@@ -36,25 +36,11 @@
                 {
                     result.AppendLine();
                 }
-                if (isFrameworkDb)
-                {
-                    result.AppendLine(string.Format("namespace DatabaseFrameworkBuiltIn.{0}", schemaNameCSharp));
-                }
-                else
-                {
-                    result.AppendLine(string.Format("namespace DatabaseApplicationBuiltIn.{0}", schemaNameCSharp));
-                }
+                result.AppendLine(string.Format("namespace DatabasekBuiltIn.{0}", schemaNameCSharp));
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
                 bool TypeRowIsFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).First().TypeRow);
-                if (TypeRowIsFrameworkDb)
-                {
-                    result.AppendLine(string.Format("    using DatabaseFramework.{0};", schemaNameCSharp));
-                }
-                else
-                {
-                    result.AppendLine(string.Format("    using DatabaseApplication.{0};", schemaNameCSharp));
-                }
+                result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
                 result.AppendLine();
                 GenerateCSharpTableNameClass(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, result);
                 result.AppendLine(string.Format("}}"));
@@ -77,11 +63,29 @@
                 {
                     result.AppendLine();
                 }
-                string classNameExtension = "TableCli";
+
+                string classNameExtension = null; // See also method CommandDeployDbBuiltInListInternal();
+
+                // Framework, Application
+                if (isFrameworkDb)
+                {
+                    classNameExtension += "Framework";
+                }
+                else
+                {
+                    classNameExtension += "Application";
+                }
+
+                // Cli, Application
                 if (isApplication)
                 {
-                    classNameExtension = "TableApp";
+                    classNameExtension += "";
                 }
+                else
+                {
+                    classNameExtension += "Cli";
+                }
+
                 result.AppendLine(string.Format("    public static class {0}{1}", builtIn.TableNameCSharp, classNameExtension));
                 result.AppendLine(string.Format("    {{"));
                 result.AppendLine(string.Format("        public static List<{0}> RowList", builtIn.TableNameCSharp));
