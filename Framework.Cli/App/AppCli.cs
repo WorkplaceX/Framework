@@ -433,10 +433,19 @@
             /// <summary>
             /// Constructor for Application.
             /// </summary>
-            public GenerateBuiltInItem(bool isApplication, Type typeRow, List<Row> rowList) 
+            private GenerateBuiltInItem(bool isApplication, Type typeRow, List<Row> rowList) 
                 : this(false, isApplication, typeRow, rowList)
             {
 
+            }
+
+            /// <summary>
+            /// Constructor for Application.
+            /// </summary>
+            /// <param name="isApplication">If true, RowList will be available at runtime. If false, RowList will be generated into cli.</param>
+            public static GenerateBuiltInItem Create<TRow>(List<TRow> rowList, bool isApplication = false) where TRow : Row
+            {
+                return new GenerateBuiltInItem(isApplication, typeof(TRow), rowList.Cast<Row>().ToList());
             }
 
             /// <summary>
