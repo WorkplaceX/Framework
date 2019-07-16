@@ -235,7 +235,7 @@
             /// <summary>
             /// Constructor.
             /// </summary>
-            public DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex)
+            private DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex)
             {
                 this.RowList = rowList;
                 this.FieldNameKeyList = fieldNameKeyList;
@@ -283,11 +283,7 @@
 
             // FrameworkConfigGridBuiltIn
             {
-                var item = new DeployDbBuiltInItem(
-                    rowList: new List<Row>(FrameworkConfigGridBuiltInTableFrameworkCli.RowList),
-                    fieldNameKeyList: new string[] { "TableId", "ConfigName" },
-                    tableNameSqlReferencePrefex: "Framework"
-                );
+                var item = DeployDbBuiltInItem.Create(FrameworkConfigGridBuiltInTableFrameworkCli.RowList, new string[] { "TableId", "ConfigName" }, "Framework");
                 result.Add(item);
 
                 // Read FrameworkConfigGridBuiltIn.RowListList from Application.Cli project.
@@ -300,11 +296,7 @@
 
             // FrameworkConfigFieldBuiltIn
             {
-                var item = new DeployDbBuiltInItem(
-                    rowList: new List<Row>(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList),
-                    fieldNameKeyList: new string[] { "ConfigGridId", "FieldId" },
-                    tableNameSqlReferencePrefex: "Framework"
-                );
+                var item = DeployDbBuiltInItem.Create(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList, new string[] { "ConfigGridId", "FieldId" }, "Framework");
                 result.Add(item);
 
                 // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
