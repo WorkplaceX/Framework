@@ -108,12 +108,23 @@
             }
         }
 
+        /// <summary>
+        /// Returns list of all child components recursively including this.
+        /// </summary>
         public static List<ComponentJson> ComponentListAll(this ComponentJson component)
         {
             List<ComponentJson> result = new List<ComponentJson>();
             result.Add(component);
             ComponentListAll(component, result);
             return result;
+        }
+
+        /// <summary>
+        /// Returns all child components.
+        /// </summary>
+        public static List<ComponentJson> ComponentList(this ComponentJson component)
+        {
+            return component.List;
         }
 
         public static ComponentJson ComponentGet(this ComponentJson owner, string name)
