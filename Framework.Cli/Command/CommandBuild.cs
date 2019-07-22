@@ -13,7 +13,7 @@
     public class CommandBuild : CommandBase
     {
         public CommandBuild(AppCli appCli)
-            : base(appCli, "build", "Build client and server")
+            : base(appCli, "build", "Build Angular client and .NET server")
         {
 
         }

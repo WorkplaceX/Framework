@@ -127,6 +127,22 @@
             return component.List;
         }
 
+        /// <summary>
+        /// Returns all child components of type T.
+        /// </summary>
+        public static List<T> ComponentList<T>(this ComponentJson component) where T : ComponentJson
+        {
+            var result = new List<T>();
+            foreach (var item in component.List)
+            {
+                if (UtilFramework.IsSubclassOf(item.GetType(), typeof(T)))
+                {
+                    result.Add((T)item);
+                }
+            }
+            return result;
+        }
+
         public static ComponentJson ComponentGet(this ComponentJson owner, string name)
         {
             var resultList = owner.List.Where(item => item.Name == name).ToArray();
@@ -329,6 +345,40 @@
             }
             return result;
         }
+
+        /// <summary>
+        /// Add css class to ComponentJson.
+        /// </summary>
+        public static void CssClassAdd(this ComponentJson component, string value)
+        {
+            string cssClass = component.CssClass;
+            string cssClassWholeWord = " " + cssClass + " ";
+            if (!cssClassWholeWord.Contains(" " + value + " "))
+            {
+                if (UtilFramework.StringNull(cssClass) == null)
+                {
+                    component.CssClass = value;
+                }
+                else
+                {
+                    component.CssClass += " " + value;
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove css class from ComponentJson.
+        /// </summary>
+        public static void CssClassRemove(this ComponentJson component, string value)
+        {
+            string cssClass = component.CssClass;
+            string cssClassWholeWord = " " + cssClass + " ";
+            if (cssClassWholeWord.Contains(" " + value + " "))
+            {
+                component.CssClass = cssClassWholeWord.Replace(" " + value + " ", "").Trim();
+            }
+        }
     }
 
     public class AppJson : Page
@@ -387,6 +437,7 @@
                 await page.ProcessAsync();
             }
 
+            UtilApp.BootstrapRowRender();
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
             UtilApp.BootstrapNavbarRender();
 
@@ -536,6 +587,37 @@
         public int? GridIndex;
 
         public List<BootstrapNavbarButton> ButtonList;
+    }
+
+    /// <summary>
+    /// Renders row and col div without selector div in between.
+    /// </summary>
+    public sealed class BootstrapRow : ComponentJson
+    {
+        public BootstrapRow() { }
+
+        public BootstrapRow(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets col. Automatically expands and adds cols on get.
+        /// </summary>
+        public Div this[int index]
+        {
+            get
+            {
+                int count = this.ComponentList<Div>().Count;
+                while (count -1 < index)
+                {
+                    this.ComponentCreate<Div>(div => div.CssClass = "col");
+                    count += 1;
+                }
+                return this.ComponentList<Div>()[index];
+            }
+        }
     }
 
     public sealed class BootstrapNavbarButton : ComponentJson

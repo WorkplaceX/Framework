@@ -95,6 +95,30 @@
             }
         }
 
+        /// <summary>
+        /// Set Div.IsListDiv flag.
+        /// </summary>
+        public static void BootstrapRowRender()
+        {
+            var app = UtilServer.AppInternal;
+            foreach (var bootstrapRow in app.AppJson.ComponentListAll().OfType<BootstrapRow>())
+            {
+                bootstrapRow.CssClassAdd("row");
+                List<ComponentJson> listRemove = new List<ComponentJson>();
+                foreach (var item in bootstrapRow.List)
+                {
+                    if (item.GetType() != typeof(Div)) // ComponentJson.Type is not evalueted on BootstrapRow children!
+                    {
+                        listRemove.Add(item);
+                    }
+                }
+                foreach (var item in listRemove)
+                {
+                    bootstrapRow.List.Remove(item);
+                }
+            }
+        }
+
         public static void BootstrapNavbarRender()
         {
             var app = UtilServer.AppInternal;

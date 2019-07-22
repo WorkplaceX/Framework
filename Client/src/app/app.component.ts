@@ -16,7 +16,7 @@ import { DataService } from '../data.service';
   Version={{ DataService.json.Version }} {{ DataService.json.VersionBuild }} <br/>
   VersionBuild.Client = {{ DataService.VersionBuild }}
   -->
-  <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of DataService.json.List; trackBy trackBy"></div>  
+  <div style="display:inline" data-Selector [json]=item *ngFor="let item of DataService.json.List; trackBy trackBy"></div>  
   `,
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None // Prevent html 5 invalid attributes like "_nghost-sc0", "_ngcontent-sc0"
@@ -40,12 +40,13 @@ export class AppComponent {
 @Component({
   selector: '[data-Selector]',
   template: `
-  <div data-Button *ngIf="json.Type=='Button'" [json]=json style="display:inline"></div>
-  <div data-Div *ngIf="json.Type=='Div'" [json]=json [ngClass]="json.CssClass"></div>
-  <div data-BootstrapNavbar *ngIf="json.Type=='BootstrapNavbar'" [json]=json style="display:inline"></div>
-  <div data-Grid *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json style="display:inline"></div>
-  <div data-Page *ngIf="json.Type=='Page' && !json.IsHide" [json]=json style="display:inline"></div>
-  <div data-Html *ngIf="json.Type=='Html'" [json]=json style="display:inline"></div>
+  <div data-Button style="display:inline" *ngIf="json.Type=='Button'" [json]=json></div>
+  <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
+  <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>
+  <div data-BootstrapRow [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapRow'" [json]=json></div>
+  <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
+  <div data-Page [ngClass]="json.CssClass" *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
+  <div data-Html style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
   `
 })
 export class Selector {
@@ -56,7 +57,7 @@ export class Selector {
 @Component({
   selector: '[data-Page]',
   template: `
-  <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
+  <div style="display:inline" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
   `
 })
 export class Page {
@@ -71,7 +72,7 @@ export class Page {
 /* Html */
 @Component({
   selector: '[data-Html]',
-  template: `<div [ngClass]="json.CssClass" [innerHtml]="json.TextHtml" style="display:inline"></div>`
+  template: `<div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="json.TextHtml"></div>`
 })
 export class Html {
   @Input() json: any
@@ -102,7 +103,7 @@ export class Button {
 @Component({
   selector: '[data-Div]',
   template: `
-  <div style="display:inline" class="selector" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>  
+  <div style="display:inline" data-Selector [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
   `
 })
 export class Div {
