@@ -347,6 +347,14 @@
         }
 
         /// <summary>
+        /// Returns currently selected row.
+        /// </summary>
+        public static T GridRowSelected<T>(this Grid grid) where T : Row
+        {
+            return (T)GridRowSelected(grid);
+        }
+
+        /// <summary>
         /// Add css class to ComponentJson.
         /// </summary>
         public static void CssClassAdd(this ComponentJson component, string value)
