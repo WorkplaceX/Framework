@@ -28,9 +28,10 @@
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json. Command reads ConnectionString from ConfigWebServer.json.
 
             bool isFrameworkDb = optionFramework.Value() == "on";
-            Script.Run(isFrameworkDb, AppCli);
-
-            Console.WriteLine("Generate successful!");
+            if (Script.Run(isFrameworkDb, AppCli))
+            {
+                Console.WriteLine("Generate successful!");
+            }
         }
     }
 }
