@@ -711,7 +711,7 @@
         }
 
         /// <summary>
-        /// Gets Index. This is the grid session index. See also class GridSession.
+        /// Gets Index. This is the grid session index. It's unique accross a session. Available once method LoadAsync(); has been called. See also class GridSession.
         /// </summary>
         public int? Index { get; internal set; }
 
