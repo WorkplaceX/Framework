@@ -14,13 +14,14 @@
         {
             ConfigCli configCli = ConfigCli.Load();
             string deployAzureGitUrl = configCli.DeployAzureGitUrl; // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
+            string deployAzureGitUrlPasswordHide = UtilFramework.PasswordHide(configCli.DeployAzureGitUrl); // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
             string folderName = UtilFramework.FolderName + "Application.Server/";
             string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.2/publish/";
 
             UtilCli.Start(folderNamePublish, "git", "init");
             UtilCli.Start(folderNamePublish, "git", "config user.email \"deploy@deploy.deploy\""); // Prevent: Error "Please tell me who you are". See also: http://www.thecreativedev.com/solution-github-please-tell-me-who-you-are-error/
             UtilCli.Start(folderNamePublish, "git", "config user.name \"Deploy\"");
-            UtilCli.Start(folderNamePublish, "git", "remote add azure " + deployAzureGitUrl);
+            UtilCli.Start(folderNamePublish, "git", "remote add azure " + deployAzureGitUrl, "remote add azure " + deployAzureGitUrlPasswordHide);
             UtilCli.Start(folderNamePublish, "git", "fetch --all", isRedirectStdErr: true); // Another possibility is argument "-q" to do not write to stderr.
             UtilCli.Start(folderNamePublish, "git", "config core.autocrlf false"); // Prevent "LF will be replaced by CRLF" error in stderr.
             UtilCli.Start(folderNamePublish, "git", "add ."); // Can throw "LF will be replaced by CRLF".

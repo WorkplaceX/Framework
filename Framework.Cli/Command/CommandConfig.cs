@@ -138,7 +138,7 @@
             else
             {
                 // Read
-                Console.WriteLine(argumentConnectionStringFramework.Name + "=" + configCli.ConnectionStringFramework);
+                Console.WriteLine(argumentConnectionStringFramework.Name + "=" + UtilFramework.PasswordHide(configCli.ConnectionStringFramework));
             }
         }
 
@@ -157,7 +157,7 @@
             else
             {
                 // Read
-                Console.WriteLine(argumentConnectionStringApplication.Name + "=" + configCli.ConnectionStringApplication);
+                Console.WriteLine(argumentConnectionStringApplication.Name + "=" + UtilFramework.PasswordHide(configCli.ConnectionStringApplication));
             }
         }
 
@@ -196,7 +196,7 @@
                 else
                 {
                     // Read
-                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + configCli.DeployAzureGitUrl);
+                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + UtilFramework.PasswordHide(configCli.DeployAzureGitUrl));
                 }
             }
 

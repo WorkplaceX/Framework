@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 namespace Framework
 {
     using Framework.Server;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
@@ -13,6 +12,8 @@ namespace Framework
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Cryptography;
+    using System.Text;
 
     internal class UtilFramework
     {
@@ -48,9 +49,24 @@ namespace Framework
         }
 
         /// <summary>
+        /// Returns value with hidden password.
+        /// </summary>
+        public static string PasswordHide(string value)
+        {
+            return "[Password]"; // Remove password from ConnectionString or GitUrl.
+
+            // For debug only:
+            // StringBuilder result = new StringBuilder();
+            // HashAlgorithm algorithm = MD5.Create();
+            // var hashCode = algorithm.ComputeHash(Encoding.UTF8.GetBytes(value));
+            // foreach (byte b in hashCode)
+            //     result.Append(b.ToString("X2"));
+            // return result.ToString();
+        }
+
+        /// <summary>
         /// Returns root folder name. Does not throw an exception, if running on IIS server.
         /// </summary>
-        /// <returns></returns>
         internal static string FolderNameGet()
         {
             Uri result = new Uri(typeof(UtilFramework).Assembly.CodeBase);

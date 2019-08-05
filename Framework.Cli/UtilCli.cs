@@ -14,7 +14,7 @@
         /// </summary>
         internal static void DotNet(string workingDirectory, string arguments, bool isWait = true)
         {
-            Start(workingDirectory, "dotnet", arguments, isWait);
+            Start(workingDirectory, "dotnet", arguments, isWait: isWait);
         }
 
         /// <summary>
@@ -36,10 +36,14 @@
         /// Start script.
         /// </summary>
         /// <param name="isRedirectStdErr">If true, do not write to stderr.</param>
-        internal static void Start(string workingDirectory, string fileName, string arguments, bool isWait = true, bool isRedirectStdErr = false)
+        internal static void Start(string workingDirectory, string fileName, string arguments, string argumentsPasswordHide = null, bool isWait = true, bool isRedirectStdErr = false)
         {
             string time = UtilFramework.DateTimeToString(DateTime.Now);
-            UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process Begin (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.Green);
+            if (argumentsPasswordHide == null)
+            {
+                argumentsPasswordHide = arguments; // Contains no sensitive information to log such as ConnectionString.
+            }
+            UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process Begin (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, argumentsPasswordHide, isWait, time), ConsoleColor.Green);
 
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = workingDirectory;
@@ -59,7 +63,7 @@
                     string errorText = process.StandardError.ReadToEnd();
                     if (!string.IsNullOrEmpty(errorText))
                     {
-                        UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
+                        UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, argumentsPasswordHide, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
                         UtilFramework.ConsoleWriteLineColor(errorText, ConsoleColor.DarkGreen);
                     }
                 }
@@ -69,7 +73,7 @@
                 }
             }
 
-            UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen);
+            UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, argumentsPasswordHide, isWait, time), ConsoleColor.DarkGreen);
         }
 
         /// <summary>
@@ -95,7 +99,7 @@
 
         internal static void OpenWebBrowser(string url)
         {
-            Start(null, "cmd", $"/c start {url}", false);
+            Start(null, "cmd", $"/c start {url}", isWait: false);
         }
 
         internal static void FolderNameDelete(string folderName)
