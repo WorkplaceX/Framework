@@ -648,6 +648,8 @@
         public bool IsActive;
 
         public bool IsClick;
+
+        public List<BootstrapNavbarButton> ButtonList;
     }
 
     public enum BootstrapAlertEnum

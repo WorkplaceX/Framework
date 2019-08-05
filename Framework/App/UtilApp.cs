@@ -119,6 +119,37 @@
             }
         }
 
+        /// <summary>
+        /// Add BootstrapNavbarButton.
+        /// </summary>
+        /// <param name="buttonList">List to add buttons.</param>
+        /// <param name="gridSession">Grid on which to search (child) buttons.</param>
+        /// <param name="findParentId">Add buttons with this parentId.</param>
+        private static void BootstrapNavbarRender(ref List<BootstrapNavbarButton> buttonList, GridSession gridSession, int? findParentId, PropertyInfo propertyInfoId, PropertyInfo propertyInfoParentId, PropertyInfo propertyInfoText)
+        {
+            for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
+            {
+                GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
+                if (gridRowSession.RowEnum == GridRowEnum.Index)
+                {
+                    int itemId = (int)propertyInfoId.GetValue(gridRowSession.Row);
+                    int? itemParentId = (int?)propertyInfoParentId.GetValue(gridRowSession.Row);
+                    string itemText = (string)propertyInfoText.GetValue(gridRowSession.Row);
+                    bool isActive = gridRowSession.IsSelect;
+                    if (itemParentId == findParentId)
+                    {
+                        BootstrapNavbarButton button = new BootstrapNavbarButton() { RowIndex = rowIndex, TextHtml = itemText, IsActive = isActive };
+                        if (buttonList == null)
+                        {
+                            buttonList = new List<BootstrapNavbarButton>();
+                        }
+                        buttonList.Add(button);
+                        BootstrapNavbarRender(ref button.ButtonList, gridSession, itemId, propertyInfoId, propertyInfoParentId, propertyInfoText);
+                    }
+                }
+            }
+        }
+
         public static void BootstrapNavbarRender()
         {
             var app = UtilServer.AppInternal;
@@ -129,21 +160,11 @@
                 {
                     GridSession gridSession = UtilSession.GridSessionFromIndex(navbar.GridIndex.Value);
 
-                    PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "Text" && item.PropertyType == typeof(string)).SingleOrDefault();
-                    if (propertyInfo != null)
-                    {
-                        for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
-                        {
-                            GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
-                            if (gridRowSession.RowEnum == GridRowEnum.Index)
-                            {
-                                string text = (string)propertyInfo.GetValue(gridRowSession.Row);
-                                bool isActive = gridRowSession.IsSelect;
-                                BootstrapNavbarButton button = new BootstrapNavbarButton() { RowIndex = rowIndex, TextHtml = text, IsActive = isActive };
-                                navbar.ButtonList.Add(button);
-                            }
-                        }
-                    }
+                    PropertyInfo propertyInfoId = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "Id" && item.PropertyType == typeof(int)).SingleOrDefault();
+                    PropertyInfo propertyInfoParentId = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "ParentId" && item.PropertyType == typeof(int?)).SingleOrDefault();
+                    PropertyInfo propertyInfoText = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "Text" && item.PropertyType == typeof(string)).SingleOrDefault();
+
+                    BootstrapNavbarRender(ref navbar.ButtonList, gridSession, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoText);
                 }
             }
         }
