@@ -26,7 +26,7 @@ function Main
 
 	# Config
 	echo "### Build.sh (Config)"
-    #set +x # Prevent DeployAzureGitUrl in log
+    set +x # Prevent DeployAzureGitUrl in log (PasswordHide)
     dotnet run --no-build -- config json="$ConfigCli" # Set DeployAzureGitUrl, ConnectionString ...
     set -x
 	ErrorCheck

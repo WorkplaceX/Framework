@@ -49,7 +49,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Returns value with hidden password.
+        /// Returns value with hidden password. See also file Build.sh (PasswordHide).
         /// </summary>
         public static string PasswordHide(string value)
         {
