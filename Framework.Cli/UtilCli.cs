@@ -4,6 +4,8 @@
     using Framework.Cli.Config;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
+    using System.CodeDom;
+    using System.CodeDom.Compiler;
     using System.Diagnostics;
     using System.IO;
     using System.Runtime.InteropServices;
@@ -345,12 +347,26 @@
         /// <summary>
         /// Write to stderr.
         /// </summary>
-        /// <param name="value"></param>
         internal static void ConsoleWriteLineError(object value)
         {
             using (TextWriter textWriter = Console.Error)
             {
                 textWriter.WriteLine(value);
+            }
+        }
+
+        /// <summary>
+        /// Returns text escaped as CSharp code. Handles special characters.
+        /// </summary>
+        public static string EscapeCSharpString(string text)
+        {
+            using (var writer = new StringWriter())
+            {
+                using (var provider = CodeDomProvider.CreateProvider("CSharp"))
+                {
+                    provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, null);
+                    return writer.ToString();
+                }
             }
         }
     }

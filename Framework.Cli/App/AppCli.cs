@@ -382,7 +382,7 @@
                 }
             }
 
-            // Application (custom) BuiltIn data rows to generate csharp code from.
+            // Application (custom) BuiltIn data rows to generate CSharp code from.
             var list = new List<GenerateBuiltInItem>();
             CommandGenerateBuiltIn(list);
             result.AddRange(list); // Combine FrameworkConfig with Application.

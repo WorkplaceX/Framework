@@ -127,6 +127,7 @@
         /// <param name="findParentId">Add buttons with this parentId.</param>
         private static void BootstrapNavbarRender(ref List<BootstrapNavbarButton> buttonList, GridSession gridSession, int? findParentId, PropertyInfo propertyInfoId, PropertyInfo propertyInfoParentId, PropertyInfo propertyInfoText)
         {
+            int gridIndex = UtilSession.GridSessionToIndex(gridSession);
             for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
             {
                 GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
@@ -137,7 +138,7 @@
                     bool isActive = gridRowSession.IsSelect;
                     if (itemParentId == findParentId)
                     {
-                        BootstrapNavbarButton button = new BootstrapNavbarButton() { RowIndex = rowIndex, TextHtml = itemText, IsActive = isActive };
+                        BootstrapNavbarButton button = new BootstrapNavbarButton() { GridIndex = gridIndex, RowIndex = rowIndex, TextHtml = itemText, IsActive = isActive };
                         if (buttonList == null)
                         {
                             buttonList = new List<BootstrapNavbarButton>();

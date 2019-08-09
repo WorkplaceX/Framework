@@ -139,7 +139,15 @@
         {
             string fieldNameCSharp = field.FieldNameCSharp;
             FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum);
-            string valueCSharp = frameworkType.ValueToCSharp(value);
+            string valueCSharp;
+            if (value is string)
+            {
+                valueCSharp = UtilCli.EscapeCSharpString(value.ToString());
+            }
+            else
+            {
+                valueCSharp = frameworkType.ValueToCSharp(value);
+            }
             result.Append(string.Format("{0} = {1}", fieldNameCSharp, valueCSharp));
         }
 
