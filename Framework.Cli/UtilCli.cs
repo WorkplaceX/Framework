@@ -292,12 +292,15 @@
         /// </summary>
         private static string ConsoleWriteLinePasswordHide(string text, string password)
         {
-            while (text.ToLower().IndexOf(password.ToLower()) >= 0)
+            if (text != null && password?.Length > 0)
             {
-                int indexStart = text.ToLower().IndexOf(password.ToLower());
-                int length = password.Length;
-                string passwordHide = ConsoleWriteLinePasswordHide(password);
-                text = text.Substring(0, indexStart) + passwordHide + text.Substring(indexStart + length);
+                while (text.ToLower().IndexOf(password.ToLower()) >= 0)
+                {
+                    int indexStart = text.ToLower().IndexOf(password.ToLower());
+                    int length = password.Length;
+                    string passwordHide = ConsoleWriteLinePasswordHide(password);
+                    text = text.Substring(0, indexStart) + passwordHide + text.Substring(indexStart + length);
+                }
             }
             return text;
         }

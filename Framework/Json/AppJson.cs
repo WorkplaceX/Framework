@@ -590,15 +590,15 @@
         public string BrandTextHtml;
 
         /// <summary>
-        /// Gets or sets GridIndex. Row should have a field "Text".
+        /// Gets or sets GridIndexList. Data grid row should have a field "Text" and "ParentId" for hierarchical navigation.
         /// </summary>
-        public int? GridIndex;
+        public List<int> GridIndexList = new List<int>(); // Empty list is removed by json serializer.
 
         public List<BootstrapNavbarButton> ButtonList;
     }
 
     /// <summary>
-    /// Renders row and col div without selector div in between.
+    /// Renders a Bootstrap row and col div without Angular selector div in between.
     /// </summary>
     public sealed class BootstrapRow : ComponentJson
     {
@@ -637,6 +637,11 @@
         {
 
         }
+
+        /// <summary>
+        /// Gets or sets GridIndex. For example navigation and language buttons can be shown in the Navbar.
+        /// </summary>
+        public int? GridIndex;
 
         /// <summary>
         /// RowIndex needs to be stored because unlike in the data grid sequence of buttons is different because filter row is omitted.

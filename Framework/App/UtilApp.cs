@@ -62,9 +62,9 @@
                         if (button.IsClick)
                         {
                             button.IsClick = false;
-                            if (navbar.GridIndex != null)
+                            if (button.GridIndex != null)
                             {
-                                GridItem gridItem = UtilSession.GridItemList().Where(item => item.GridIndex == navbar.GridIndex).First();
+                                GridItem gridItem = UtilSession.GridItemList().Where(item => item.GridIndex == button.GridIndex).First();
 
                                 // Set IsSelect
                                 // See also method ProcessGridRowIsClick();
@@ -132,9 +132,8 @@
                 GridRowSession gridRowSession = gridSession.GridRowSessionList[rowIndex];
                 if (gridRowSession.RowEnum == GridRowEnum.Index)
                 {
-                    int itemId = (int)propertyInfoId.GetValue(gridRowSession.Row);
-                    int? itemParentId = (int?)propertyInfoParentId.GetValue(gridRowSession.Row);
                     string itemText = (string)propertyInfoText.GetValue(gridRowSession.Row);
+                    int? itemParentId = (int?)propertyInfoParentId?.GetValue(gridRowSession.Row); // Null if row does not have field "ParentId".
                     bool isActive = gridRowSession.IsSelect;
                     if (itemParentId == findParentId)
                     {
@@ -144,7 +143,11 @@
                             buttonList = new List<BootstrapNavbarButton>();
                         }
                         buttonList.Add(button);
-                        BootstrapNavbarRender(ref button.ButtonList, gridSession, itemId, propertyInfoId, propertyInfoParentId, propertyInfoText);
+                        if (propertyInfoParentId != null) // Hierarchical navigation
+                        {
+                            int itemId = (int)propertyInfoId.GetValue(gridRowSession.Row);
+                            BootstrapNavbarRender(ref button.ButtonList, gridSession, itemId, propertyInfoId, propertyInfoParentId, propertyInfoText);
+                        }
                     }
                 }
             }
@@ -156,13 +159,21 @@
             foreach (BootstrapNavbar navbar in app.AppJson.ComponentListAll().OfType<BootstrapNavbar>())
             {
                 navbar.ButtonList = new List<BootstrapNavbarButton>();
-                if (navbar.GridIndex != null)
+                foreach (int gridIndex in navbar.GridIndexList)
                 {
-                    GridSession gridSession = UtilSession.GridSessionFromIndex(navbar.GridIndex.Value);
+                    GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
 
-                    PropertyInfo propertyInfoId = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "Id" && item.PropertyType == typeof(int)).SingleOrDefault();
-                    PropertyInfo propertyInfoParentId = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "ParentId" && item.PropertyType == typeof(int?)).SingleOrDefault();
-                    PropertyInfo propertyInfoText = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow).Where(item => item.Name == "Text" && item.PropertyType == typeof(string)).SingleOrDefault();
+                    var propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(gridSession.TypeRow);
+
+                    PropertyInfo propertyInfoId = propertyInfoList.Where(item => item.Name == "Id" && item.PropertyType == typeof(int)).SingleOrDefault();
+                    PropertyInfo propertyInfoParentId = propertyInfoList.Where(item => item.Name == "ParentId" && item.PropertyType == typeof(int?)).SingleOrDefault();
+                    PropertyInfo propertyInfoText = propertyInfoList.Where(item => item.Name == "Text" && item.PropertyType == typeof(string)).SingleOrDefault();
+
+                    if (propertyInfoParentId != null)
+                    {
+                        UtilFramework.Assert(propertyInfoId != null, "Row needs a column called 'Id'!");
+                    }
+                    UtilFramework.Assert(propertyInfoText != null, "Row needs a column called 'Text'!");
 
                     BootstrapNavbarRender(ref navbar.ButtonList, gridSession, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoText);
                 }
