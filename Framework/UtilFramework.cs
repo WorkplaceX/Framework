@@ -49,22 +49,6 @@ namespace Framework
         }
 
         /// <summary>
-        /// Returns value with hidden password. See also file Build.sh (PasswordHide).
-        /// </summary>
-        public static string PasswordHide(string value)
-        {
-            return "[Password]"; // Remove password from ConnectionString or GitUrl.
-
-            // For debug only:
-            // StringBuilder result = new StringBuilder();
-            // HashAlgorithm algorithm = MD5.Create();
-            // var hashCode = algorithm.ComputeHash(Encoding.UTF8.GetBytes(value));
-            // foreach (byte b in hashCode)
-            //     result.Append(b.ToString("X2"));
-            // return result.ToString();
-        }
-
-        /// <summary>
         /// Returns root folder name. Does not throw an exception, if running on IIS server.
         /// </summary>
         internal static string FolderNameGet()
@@ -106,35 +90,6 @@ namespace Framework
                 folderName += "/";
             }
             return folderName;
-        }
-
-        /// <summary>
-        /// Write to console in color.
-        /// </summary>
-        internal static void ConsoleWriteLineColor(object value, ConsoleColor color)
-        {
-            ConsoleColor foregroundColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            try
-            {
-                Console.WriteLine(value);
-            }
-            finally
-            {
-                Console.ForegroundColor = foregroundColor;
-            }
-        }
-
-        /// <summary>
-        /// Write to stderr.
-        /// </summary>
-        /// <param name="value"></param>
-        internal static void ConsoleWriteLineError(object value)
-        {
-            using (TextWriter textWriter = Console.Error)
-            {
-                textWriter.WriteLine(value);
-            }
         }
 
         internal static void Assert(bool isAssert, string exceptionText)

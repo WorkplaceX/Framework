@@ -172,7 +172,7 @@
                     command.Register(configuration);
                     configuration.OnExecute(() =>
                     {
-                        UtilFramework.ConsoleWriteLineColor($"Execute Framework CLI Command ({command.Name})", ConsoleColor.Yellow);
+                        UtilCli.ConsoleWriteLineColor($"Execute Framework Cli Command ({command.Name})", ConsoleColor.Yellow);
                         command.Execute();
                         return 0;
                     });
@@ -207,7 +207,7 @@
             }
             catch (Exception exception) // For example unrecognized option
             {
-                UtilFramework.ConsoleWriteLineError(exception);
+                UtilCli.ConsoleWriteLineError(exception);
                 Environment.ExitCode = 1; // echo %errorlevel%
             }
 

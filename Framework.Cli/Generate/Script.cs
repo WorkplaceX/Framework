@@ -32,7 +32,7 @@
             {
                 UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/Database.cs", cSharp);
             }
-            UtilFramework.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
+            UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
 
             // Read BuiltIn data from database and save (*.cs) files.
             List<GenerateBuiltInItem> builtInlist = null;
@@ -44,7 +44,7 @@
             {
                 isSuccessful = false;
                 string message = string.Format("Read BuiltIn data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
-                UtilFramework.ConsoleWriteLineColor(message, ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(message, ConsoleColor.Red);
             }
             if (builtInlist != null)
             {
@@ -60,7 +60,7 @@
                     UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);
                     UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/DatabaseBuiltIn.cs", cSharpApplication);
                 }
-                UtilFramework.ConsoleWriteLineColor("Generate CSharp code for BuiltIn data and write to (*.cs) files successful!", ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor("Generate CSharp code for BuiltIn data and write to (*.cs) files successful!", ConsoleColor.Green);
             }
 
             return isSuccessful;

@@ -1,6 +1,7 @@
 ﻿namespace Framework.Cli
 {
     using Framework.Cli.Command;
+    using Framework.Cli.Config;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Diagnostics;
@@ -35,15 +36,11 @@
         /// <summary>
         /// Start script.
         /// </summary>
-        /// <param name="isRedirectStdErr">If true, do not write to stderr.</param>
-        internal static void Start(string workingDirectory, string fileName, string arguments, string argumentsPasswordHide = null, bool isWait = true, bool isRedirectStdErr = false)
+        /// <param name="isRedirectStdErr">If true, do not write to stderr. Use this flag if shell command is known to write info (mistakenly) to stderror.</param>
+        internal static void Start(string workingDirectory, string fileName, string arguments, bool isWait = true, bool isRedirectStdErr = false)
         {
             string time = UtilFramework.DateTimeToString(DateTime.Now);
-            if (argumentsPasswordHide == null)
-            {
-                argumentsPasswordHide = arguments; // Contains no sensitive information to log such as ConnectionString.
-            }
-            UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process Begin (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, argumentsPasswordHide, isWait, time), ConsoleColor.Green);
+            UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process Begin (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.Green);
 
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = workingDirectory;
@@ -63,8 +60,8 @@
                     string errorText = process.StandardError.ReadToEnd();
                     if (!string.IsNullOrEmpty(errorText))
                     {
-                        UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, argumentsPasswordHide, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
-                        UtilFramework.ConsoleWriteLineColor(errorText, ConsoleColor.DarkGreen);
+                        UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
+                        UtilCli.ConsoleWriteLinePassword(errorText, ConsoleColor.DarkGreen); // Log DarkGreen because it is not treated like an stderr output.
                     }
                 }
                 if (process.ExitCode != 0)
@@ -73,7 +70,7 @@
                 }
             }
 
-            UtilFramework.ConsoleWriteLineColor(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, argumentsPasswordHide, isWait, time), ConsoleColor.DarkGreen);
+            UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process End (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen);
         }
 
         /// <summary>
@@ -278,6 +275,79 @@
             {
                 File.WriteAllText(fileNameServer, textServer); // Back to original text.
                 File.WriteAllText(fileNameClient, textClient); // Back to original text.
+            }
+        }
+
+        /// <summary>
+        /// Returns password (ConnectionString or GitUrl) without sensitive data.
+        /// </summary>
+        /// <param name="password">For example ConnectionString or GitUrl.</param>
+        private static string ConsoleWriteLinePasswordHide(string password)
+        {
+            return "[Password]"; // // Remove password from ConnectionString or GitUrl.
+        }
+
+        /// <summary>
+        /// Returns text without password. It replaces password with PasswordHide.
+        /// </summary>
+        private static string ConsoleWriteLinePasswordHide(string text, string password)
+        {
+            while (text.ToLower().IndexOf(password.ToLower()) >= 0)
+            {
+                int indexStart = text.ToLower().IndexOf(password.ToLower());
+                int length = password.Length;
+                string passwordHide = ConsoleWriteLinePasswordHide(password);
+                text = text.Substring(0, indexStart) + passwordHide + text.Substring(indexStart + length);
+            }
+            return text;
+        }
+
+        /// <summary>
+        /// Write text which might contain sensitive data (ConnectionString and GitUrl) with this method to console.
+        /// </summary>
+        internal static void ConsoleWriteLinePassword(object value, ConsoleColor? color = null)
+        {
+            string text = string.Format("{0}", value);
+            var configCli = ConfigCli.Load();
+            text = ConsoleWriteLinePasswordHide(text, configCli.ConnectionStringFramework);
+            text = ConsoleWriteLinePasswordHide(text, configCli.ConnectionStringApplication);
+            text = ConsoleWriteLinePasswordHide(text, configCli.DeployAzureGitUrl);
+            Console.WriteLine(text, color);
+        }
+
+        /// <summary>
+        /// Write to console in color.
+        /// </summary>
+        internal static void ConsoleWriteLineColor(object value, ConsoleColor? color)
+        {
+            if (color == null)
+            {
+                Console.WriteLine(value);
+            }
+            else
+            {
+                ConsoleColor foregroundColor = Console.ForegroundColor;
+                Console.ForegroundColor = color.Value;
+                try
+                {
+                    Console.WriteLine(value);
+                }
+                finally
+                {
+                    Console.ForegroundColor = foregroundColor;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Write to stderr.
+        /// </summary>
+        /// <param name="value"></param>
+        internal static void ConsoleWriteLineError(object value)
+        {
+            using (TextWriter textWriter = Console.Error)
+            {
+                textWriter.WriteLine(value);
             }
         }
     }

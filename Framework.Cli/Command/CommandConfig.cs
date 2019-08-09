@@ -40,7 +40,7 @@
         private void ArgumentWebsite()
         {
             // Input FolderNameServer
-            UtilFramework.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
+            UtilCli.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
             Console.WriteLine("Enter FolderNameServer. For example: 'example.com':");
             Console.Write(">");
             string folderNameServer = Console.ReadLine();
@@ -57,7 +57,7 @@
             string appTypeName = Console.ReadLine();
             if (Type.GetType(appTypeName) == null)
             {
-                UtilFramework.ConsoleWriteLineColor(string.Format("Type not found! ({0})", appTypeName), ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(string.Format("Type not found! ({0})", appTypeName), ConsoleColor.Red);
             }
 
             // Input FolderName
@@ -69,7 +69,7 @@
             string folderNameNpmBuildCheck = UtilFramework.FolderName + folderNameNpmBuild;
             if (!Directory.Exists(folderNameNpmBuildCheck))
             {
-                UtilFramework.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Red);
             }
 
             // Input FolderNameDist
@@ -80,7 +80,7 @@
             string folderNameDistCheck = UtilFramework.FolderName + folderNameDist;
             if (!Directory.Exists(folderNameDistCheck))
             {
-                UtilFramework.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameDist), ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameDist), ConsoleColor.Red);
             }
 
             // Add Website
@@ -138,7 +138,7 @@
             else
             {
                 // Read
-                Console.WriteLine(argumentConnectionStringFramework.Name + "=" + UtilFramework.PasswordHide(configCli.ConnectionStringFramework));
+                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringFramework.Name + "=" + configCli.ConnectionStringFramework);
             }
         }
 
@@ -157,7 +157,7 @@
             else
             {
                 // Read
-                Console.WriteLine(argumentConnectionStringApplication.Name + "=" + UtilFramework.PasswordHide(configCli.ConnectionStringApplication));
+                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringApplication.Name + "=" + configCli.ConnectionStringApplication);
             }
         }
 
@@ -196,7 +196,7 @@
                 else
                 {
                     // Read
-                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + UtilFramework.PasswordHide(configCli.DeployAzureGitUrl));
+                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + configCli.DeployAzureGitUrl);
                 }
             }
 
@@ -228,11 +228,11 @@
             {
                 configCli = ConfigCli.Load();
                 Console.WriteLine();
-                UtilFramework.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
-                UtilFramework.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
-                UtilFramework.ConsoleWriteLineColor(string.Format("\"{0}\"", json), ConsoleColor.DarkGreen);
+                UtilCli.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
+                UtilCli.ConsoleWriteLineColor(string.Format("\"{0}\"", json), ConsoleColor.DarkGreen);
                 Console.WriteLine();
             }
         }
