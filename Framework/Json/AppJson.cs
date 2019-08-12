@@ -595,6 +595,13 @@
         public List<int> GridIndexList = new List<int>(); // Empty list is removed by json serializer.
 
         public List<BootstrapNavbarButton> ButtonList;
+
+        /*
+        <nav class="navbar-dark bg-primary sticky-top">
+        <li style="white-space:nowrap;">
+        <a style="display:inline;">
+        <i class="fas fa-spinner fa-spin text-white"></i>         
+        */
     }
 
     /// <summary>
@@ -653,6 +660,11 @@
         public bool IsActive;
 
         public bool IsClick;
+
+        /// <summary>
+        /// Gets or sets IsDropDown. True, if button has level 2 navigation.
+        /// </summary>
+        public bool IsDropDown;
 
         public List<BootstrapNavbarButton> ButtonList;
     }
