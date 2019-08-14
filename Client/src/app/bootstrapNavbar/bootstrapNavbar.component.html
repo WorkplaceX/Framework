@@ -1,25 +1,29 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top" [ngClass]="json.CssClass">
-    <a class="navbar-brand" href="#" [innerHtml]="json.BrandTextHtml"></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item" *ngFor="let button of json.ButtonList; trackBy trackBy" (click)="click(button)">
-          <div style="display:flex;" [ngClass]="{'active':button.IsActive}" >
-            <a class="nav-link"  style="cursor: pointer" [innerHtml]="button.TextHtml"></a>
-            <div style="padding-left:2px;" class="nav-link" >
-              <i *ngIf="button.IsClick" class="fas fa-spinner fa-spin colorWhite"></i>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#" [innerHtml]="json.BrandTextHtml"></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto" style="display: flex; flex-wrap: wrap">
+      <ng-container *ngFor="let buttonLevel0 of json.ButtonList; trackBy trackBy">
+        <li class="nav-item" [ngClass]="{'active':buttonLevel0.IsActive}" *ngIf="!buttonLevel0.IsDropDown">
+          <a class="nav-link" href="#" [innerHtml]="buttonLevel0.TextHtml" (click)="click(buttonLevel0)" style="display:inline-block;"></a>
+          <i class="fas fa-spinner fa-spin text-white" *ngIf="buttonLevel0.IsClick || buttonLevel0.IsClickLevel1"></i>
+        </li>
+        <li class="nav-item dropdown" *ngIf="buttonLevel0.IsDropDown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" [innerHtml]="buttonLevel0.TextHtml" (click)="click(buttonLevel0)" style="display:inline-block;"></a>
+          <i class="fas fa-spinner fa-spin text-white" *ngIf="buttonLevel0.IsClick"></i>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#" *ngFor="let buttonLevel1 of buttonLevel0.ButtonList; trackBy trackBy" [innerHtml]="buttonLevel1.TextHtml" (click)="buttonLevel0.IsClickLevel1 = true; click(buttonLevel1)"></a>
           </div>
-        </li> 
-      </ul>
-      <!--
-      <form class="form-inline my-2 my-lg-0">
-        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-      </form>
-      -->
-    </div>
-  </nav>
+        </li>
+      </ng-container>
+    </ul>
+    <!--
+    <form class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+    -->
+  </div>
+</nav>

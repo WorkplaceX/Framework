@@ -599,8 +599,7 @@
         /*
         <nav class="navbar-dark bg-primary sticky-top">
         <ul style="display: flex; flex-wrap: wrap"> // Wrapp if too many li.
-        <li style="white-space:nowrap;">
-        <a style="display:inline;">
+        <a style="display:inline-block;">
         <i class="fas fa-spinner fa-spin text-white"></i>         
         */
     }

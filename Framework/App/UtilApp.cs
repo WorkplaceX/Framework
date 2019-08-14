@@ -48,6 +48,21 @@
         }
 
         /// <summary>
+        /// Returns all button recursively.
+        /// </summary>
+        private static void ProcessBootstrapNavbarButtonListAll(List<BootstrapNavbarButton> buttonList, List<BootstrapNavbarButton> result)
+        {
+            foreach (var button in buttonList)
+            {
+                result.Add(button);
+                if (button.ButtonList != null)
+                {
+                    ProcessBootstrapNavbarButtonListAll(button.ButtonList, result);
+                }
+            }
+        }
+
+        /// <summary>
         /// Process navbar button click.
         /// </summary>
         public static async Task ProcessBootstrapNavbarAsync()
@@ -57,7 +72,9 @@
             {
                 if (navbar.ButtonList != null)
                 {
-                    foreach (BootstrapNavbarButton button in navbar.ButtonList)
+                    var buttonList = new List<BootstrapNavbarButton>();
+                    ProcessBootstrapNavbarButtonListAll(navbar.ButtonList, buttonList);
+                    foreach (BootstrapNavbarButton button in buttonList)
                     {
                         if (button.IsClick)
                         {
@@ -125,7 +142,7 @@
         /// <param name="buttonList">List to add buttons.</param>
         /// <param name="gridSession">Grid on which to search (child) buttons.</param>
         /// <param name="findParentId">Add buttons with this parentId.</param>
-        private static void BootstrapNavbarRender(ref List<BootstrapNavbarButton> buttonList, GridSession gridSession, int? findParentId, PropertyInfo propertyInfoId, PropertyInfo propertyInfoParentId, PropertyInfo propertyInfoTextHtml)
+        private static void BootstrapNavbarRender(BootstrapNavbarButton buttonParent, ref List<BootstrapNavbarButton> buttonList, GridSession gridSession, int? findParentId, PropertyInfo propertyInfoId, PropertyInfo propertyInfoParentId, PropertyInfo propertyInfoTextHtml)
         {
             int gridIndex = UtilSession.GridSessionToIndex(gridSession);
             for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
@@ -138,6 +155,10 @@
                     bool isActive = gridRowSession.IsSelect;
                     if (itemParentId == findParentId)
                     {
+                        if (buttonParent != null)
+                        {
+                            buttonParent.IsDropDown = true; // Has children.
+                        }
                         BootstrapNavbarButton button = new BootstrapNavbarButton() { GridIndex = gridIndex, RowIndex = rowIndex, TextHtml = itemText, IsActive = isActive };
                         if (buttonList == null)
                         {
@@ -147,7 +168,7 @@
                         if (propertyInfoParentId != null) // Hierarchical navigation
                         {
                             int itemId = (int)propertyInfoId.GetValue(gridRowSession.Row);
-                            BootstrapNavbarRender(ref button.ButtonList, gridSession, itemId, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml);
+                            BootstrapNavbarRender(button, ref button.ButtonList, gridSession, itemId, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml);
                         }
                     }
                 }
@@ -176,7 +197,7 @@
                     }
                     UtilFramework.Assert(propertyInfoTextHtml != null, string.Format("Row needs a column called 'TextHtml' ({0})!", UtilDalType.TypeRowToTableNameCSharp(gridSession.TypeRow)));
 
-                    BootstrapNavbarRender(ref navbar.ButtonList, gridSession, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml);
+                    BootstrapNavbarRender(null, ref navbar.ButtonList, gridSession, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml);
                 }
             }
         }
