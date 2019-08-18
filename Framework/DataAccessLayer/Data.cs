@@ -1231,7 +1231,6 @@
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
                 string sqlSelect = UpsertSelect(typeRow, rowListSplit, tableNameSqlPrefix, paramList, assemblyList);
-                // string sqlDebug = Data.ExecuteParamDebug(sqlSelect, paramList); sqlSelect = sqlDebug;
 
                 // Update underlying sql table if sql view ends with "BuiltIn".
                 UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
@@ -1255,7 +1254,12 @@
 
                 string sqlUpsert = @"
                 MERGE INTO {0} AS Target
-                USING ({1}) AS Source
+                USING 
+                
+                -- Source (sqlSelect)
+                ({1}) 
+
+                AS Source
 	            ON NOT EXISTS(
                     SELECT {2}
                     EXCEPT
