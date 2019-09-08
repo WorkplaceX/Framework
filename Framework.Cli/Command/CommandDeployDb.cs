@@ -15,14 +15,14 @@
 
         }
 
-        private void SqlScriptExecute(string folderName, bool isFrameworkDb)
+        private void DeployDbExecute(string folderName, bool isFrameworkDb)
         {
             // SELECT FrameworkScript
             var task = Data.SelectAsync(Data.Query<FrameworkScript>());
             task.Wait();
             var rowList = task.Result;
 
-            // FileNameList. For example "Framework/Framework.Cli/SqlScript/Config.sql"
+            // FileNameList. For example "Framework/Framework.Cli/DeployDb/Config.sql"
             List<string> fileNameList = new List<string>();
             foreach (string fileName in UtilFramework.FileNameList(folderName, "*.sql"))
             {
@@ -114,18 +114,18 @@
         {
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json. Command reads ConnectionString from ConfigWebServer.json.
 
-            // FolderNameSqlScript
-            string folderNameSqlScriptFramework = UtilFramework.FolderName + "Framework/Framework.Cli/SqlScript/";
-            string folderNameSqlScriptApplication = UtilFramework.FolderName + "Application.Cli/SqlScript/";
+            // FolderNameDeployDb
+            string folderNameDeployDbFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDb/";
+            string folderNameDeployDbApplication = UtilFramework.FolderName + "Application.Cli/DeployDb/";
 
             // SqlInit
-            string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/Sql/Init.sql";
+            string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDbInit/Init.sql";
             string sqlInit = UtilFramework.FileLoad(fileNameInit);
             Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
-            Console.WriteLine("Deploy SqlScript");
-            SqlScriptExecute(folderNameSqlScriptFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
-            SqlScriptExecute(folderNameSqlScriptApplication, isFrameworkDb: false);
+            Console.WriteLine("DeployDb");
+            DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
+            DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
 
             // Populate sql tables FrameworkTable, FrameworkField.
             Console.WriteLine("Update FrameworkTable, FrameworkField tables");
