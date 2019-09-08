@@ -1,4 +1,5 @@
 ﻿ToDo
+-https://www.youtube.com/watch?v=moBhzSC455o (Build a Responsive Grid CSS Website Layout From Scratch)
 -Move AppSelector to ConfigFramework.json
 -SSL [Ok]
 -Load Grid with null query no error
