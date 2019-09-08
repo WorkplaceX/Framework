@@ -3,9 +3,6 @@
     using Framework.Cli.Command;
     using Framework.Cli.Config;
     using Microsoft.EntityFrameworkCore;
-    using System;
-    using System.ComponentModel.DataAnnotations;
-    using System.IO;
     using System.Linq;
 
     /// <summary>
@@ -60,7 +57,7 @@
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
-        public DbSet<MetaSqlSchema> Schema { get; set; }
+        public DbQuery<MetaSqlSchema> Schema { get; set; }
     }
 
     /// <summary>
@@ -68,7 +65,6 @@
     /// </summary>
     public class MetaSqlSchema
     {
-        [Key] // Prevent exception "requires a primary key to be defined". For sql view set first column to primary. See also optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         public string SchemaName { get; set; }
 
         public string TableName { get; set; }
