@@ -42,8 +42,8 @@ export class AppComponent {
   template: `
   <div data-Button style="display:inline" *ngIf="json.Type=='Button'" [json]=json></div>
   <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
+  <div data-DivContainer [ngClass]="json.CssClass" *ngIf="json.Type=='DivContainer'" [json]=json></div>
   <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>
-  <div data-BootstrapRow [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapRow'" [json]=json></div>
   <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-Page [ngClass]="json.CssClass" *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
   <div data-Html style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
@@ -115,3 +115,18 @@ export class Div {
   }
 }
 
+/* DivContainer */
+@Component({
+  selector: '[data-DivContainer]',
+  template: `
+  <div [ngClass]="item.CssClass" data-Div [json]=item *ngFor="let item of json.List; trackBy trackBy"></div>
+  `
+})
+export class DivContainer {
+  @Input() json: any
+  
+  trackBy(index, item) {
+    return index; // or item.id
+  }
+}
+  

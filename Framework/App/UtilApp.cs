@@ -113,25 +113,24 @@
         }
 
         /// <summary>
-        /// Set Div.IsListDiv flag.
+        /// Remove non Div components from DivContainer.
         /// </summary>
-        public static void BootstrapRowRender()
+        public static void DivContainerRender()
         {
             var app = UtilServer.AppInternal;
-            foreach (var bootstrapRow in app.AppJson.ComponentListAll().OfType<BootstrapRow>())
+            foreach (var divContainer in app.AppJson.ComponentListAll().OfType<DivContainer>())
             {
-                bootstrapRow.CssClassAdd("row");
-                List<ComponentJson> listRemove = new List<ComponentJson>();
-                foreach (var item in bootstrapRow.List)
+                List<ComponentJson> listRemove = new List<ComponentJson>(); // Collect items to remove.
+                foreach (var item in divContainer.List)
                 {
-                    if (item.GetType() != typeof(Div)) // ComponentJson.Type is not evalueted on BootstrapRow children!
+                    if (item.GetType() != typeof(Div)) // ComponentJson.Type is not evalueted on DivComponent children!
                     {
                         listRemove.Add(item);
                     }
                 }
                 foreach (var item in listRemove)
                 {
-                    bootstrapRow.List.Remove(item);
+                    divContainer.List.Remove(item);
                 }
             }
         }

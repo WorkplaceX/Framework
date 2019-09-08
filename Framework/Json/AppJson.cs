@@ -169,6 +169,14 @@
         }
 
         /// <summary>
+        /// Returns child component of Type T on index.
+        /// </summary>
+        public static T ComponentGet<T>(this ComponentJson owner, int index) where T : ComponentJson
+        {
+            return owner.ComponentList<T>()[index];
+        }
+
+        /// <summary>
         /// Returns new ComponentJson.
         /// </summary>
         public static T ComponentCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
@@ -192,7 +200,7 @@
         /// <summary>
         /// Returns ComponentJson or creates new if not yet exists.
         /// </summary>
-        /// <param name="init">Callback method if ComponentJson has been created new. For example to init text.</param>
+        /// <param name="init">Callback method if ComponentJson has been created new. For example to init CssClass.</param>
         public static T ComponentGetOrCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
         {
             if (owner.ComponentGet(name) == null)
@@ -207,6 +215,21 @@
         public static T ComponentGetOrCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
         {
             return ComponentGetOrCreate<T>(owner, typeof(T).Name, init);
+        }
+
+        /// <summary>
+        /// Returns ComponentJson or creates new if not yet exists.
+        /// </summary>
+        /// <param name="init">Callback method if ComponentJson has been created new. For example to init CssClass.</param>
+        public static T ComponentGetOrCreate<T>(this ComponentJson owner, int index, Action<T> init = null) where T : ComponentJson
+        {
+            int count = owner.ComponentList<T>().Count;
+            while (count - 1 < index)
+            {
+                owner.ComponentCreate<T>(init);
+                count += 1;
+            }
+            return owner.ComponentList<T>()[index];
         }
 
         public enum PageShowEnum
@@ -445,7 +468,7 @@
                 await page.ProcessAsync();
             }
 
-            UtilApp.BootstrapRowRender();
+            UtilApp.DivContainerRender();
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
             UtilApp.BootstrapNavbarRender();
 
@@ -574,6 +597,20 @@
     }
 
     /// <summary>
+    /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
+    /// </summary>
+    public sealed class DivContainer : ComponentJson
+    {
+        public DivContainer() { }
+
+        public DivContainer(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+    }
+
+    /// <summary>
     /// See also: https://getbootstrap.com/docs/4.1/components/navbar/
     /// Change background color with style "background-color: red !important".
     /// </summary>
@@ -602,37 +639,6 @@
         <a style="display:inline-block;">
         <i class="fas fa-spinner fa-spin text-white"></i>         
         */
-    }
-
-    /// <summary>
-    /// Renders a Bootstrap row and col div without Angular selector div in between.
-    /// </summary>
-    public sealed class BootstrapRow : ComponentJson
-    {
-        public BootstrapRow() { }
-
-        public BootstrapRow(ComponentJson owner)
-            : base(owner)
-        {
-
-        }
-
-        /// <summary>
-        /// Gets col. Automatically expands and adds cols on get.
-        /// </summary>
-        public Div this[int index]
-        {
-            get
-            {
-                int count = this.ComponentList<Div>().Count;
-                while (count -1 < index)
-                {
-                    this.ComponentCreate<Div>(div => div.CssClass = "col");
-                    count += 1;
-                }
-                return this.ComponentList<Div>()[index];
-            }
-        }
     }
 
     public sealed class BootstrapNavbarButton : ComponentJson
