@@ -1076,6 +1076,11 @@
             /// Gets or sets TypeRowReference. Referenced table (or view) containing field "Id" and "Name". For example view "FrameworkTableBuiltIn".
             /// </summary>
             public Type TypeRowReference;
+
+            /// <summary>
+            /// Gets or sets IsParentId. Hierarchical sql.
+            /// </summary>
+            public bool IsParentId;
         }
 
         private static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, string tableNameSqlPrefix, List<Assembly> assemblyList)
@@ -1114,20 +1119,30 @@
                         string tableNameWithSchemaSqlBuiltIn = tableNameSqlPrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
                         tableNameWithSchemaSqlBuiltIn = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameWithSchemaSqlBuiltIn);
                         var tableReferenceList = tableNameSqlList.Where(item => item.Value == tableNameWithSchemaSqlBuiltIn).ToList();
-                        var tableReference = tableReferenceList.SingleOrDefault();
-                        if (tableReference.Value != null)
+                        Type typeRowReference = tableReferenceList.SingleOrDefault().Key;
+                        bool isParentId = false;
+                        if (fieldNameSql == "ParentIdName") // BuiltIn naming convention.
                         {
-                            List<string> propertyNameList = UtilDalType.TypeRowToPropertyInfoList(tableReference.Key).Select(item => item.Name).ToList();
+                            isParentId = true;
+                            typeRowReference = typeRow;
+                        }
+                        if (typeRowReference != null)
+                        {
+                            List<string> propertyNameList = UtilDalType.TypeRowToPropertyInfoList(typeRowReference).Select(item => item.Name).ToList();
                             if (propertyNameList.Contains("Id") && propertyNameList.Contains("IdName")) // BuiltIn naming convention.
                             {
+                                // IdName
                                 fieldBuiltIn.IsIdName = true;
-                                fieldBuiltIn.TypeRowReference = tableReference.Key;
+                                fieldBuiltIn.TypeRowReference = typeRowReference;
                                 fieldBuiltIn.FieldNameIdSql = fieldNameIdSql;
+                                fieldBuiltIn.IsParentId = isParentId;
 
+                                // Id
                                 var fieldBuiltInId = result.Where(item => item.Field.FieldNameSql == fieldNameIdSql).Single();
                                 fieldBuiltInId.IsId = true;
-                                fieldBuiltInId.TypeRowReference = tableReference.Key;
+                                fieldBuiltInId.TypeRowReference = typeRowReference;
                                 fieldBuiltInId.FieldNameIdSql = fieldNameIdSql;
+                                fieldBuiltInId.IsParentId = isParentId;
                             }
                         }
                     }
@@ -1140,7 +1155,6 @@
         {
             StringBuilder sqlSelect = new StringBuilder();
             var fieldBuiltInList = FieldBuiltInList(typeRow, tableNameSqlPrefix, assemblyList);
-            var tableNameSqlList = UtilDalType.TableNameSqlList(assemblyList);
 
             // Row
             bool isFirstRow = true;
@@ -1227,6 +1241,8 @@
 
             IsExistSet(typeRow, rowList);
 
+            var fieldNameSqlListAll = FieldBuiltInList(typeRow, tableNameSqlPrefix, assemblyList);
+
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
@@ -1242,7 +1258,7 @@
                 var fieldDestList = UtilDalType.TypeRowToFieldListDictionary(typeRowDest);
                 string tableNameWithSchemaSql = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameSql);
 
-                var fieldNameSqlList = FieldBuiltInList(typeRow, tableNameSqlPrefix, assemblyList)
+                var fieldNameSqlList = fieldNameSqlListAll
                     .Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false && item.IsKey == false && fieldDestList.ContainsKey(item.Field.FieldNameCSharp))
                     .Select(item => item.Field.FieldNameSql).ToArray();
 

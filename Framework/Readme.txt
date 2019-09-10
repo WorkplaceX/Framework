@@ -1,4 +1,8 @@
 ﻿ToDo
+-BootstrapExtension.BootstrapRow
+-ComponentJsonExtension typeof(T).Name replace with null. Child has either name or is identified by type.
+-IoC for singleton and [ThreadStatic]
+-https://w3bits.com/css-dropdown-menu/ for ThemeDefault.
 -https://www.youtube.com/watch?v=moBhzSC455o (Build a Responsive Grid CSS Website Layout From Scratch)
 -Move AppSelector to ConfigFramework.json
 -SSL [Ok]
