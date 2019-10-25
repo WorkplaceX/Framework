@@ -10,7 +10,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Data;
-    using System.Data.SqlClient;
+    using Microsoft.Data.SqlClient;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Reflection;
@@ -200,17 +200,18 @@
                 else
                 {
                     // Query (DbContext.DbQuery)
-                    var queryTypeBuilder = modelBuilder.Query(TypeRow);
-                    queryTypeBuilder.ToView(tableAttribute.TableNameSql, tableAttribute.SchemaNameSql); // By default EF maps sql table name to class name.
+                    var entityTypeBuilder = modelBuilder.Entity(TypeRow);
+                    entityTypeBuilder.HasNoKey();
+                    entityTypeBuilder.ToView(tableAttribute.TableNameSql, tableAttribute.SchemaNameSql); // By default EF maps sql table name to class name.
                     foreach (var field in fieldList)
                     {
                         if (field.FieldNameSql == null) // Calculated column. Do not include it in sql select.
                         {
-                            queryTypeBuilder.Ignore(field.PropertyInfo.Name);
+                            entityTypeBuilder.Ignore(field.PropertyInfo.Name);
                         }
                         else
                         {
-                            var propertyBuilder = queryTypeBuilder.Property(field.PropertyInfo.PropertyType, field.PropertyInfo.Name);
+                            var propertyBuilder = entityTypeBuilder.Property(field.PropertyInfo.PropertyType, field.PropertyInfo.Name);
                             propertyBuilder.HasColumnName(field.FieldNameSql);
                             if (UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum).SqlTypeName == "datetime")
                             {

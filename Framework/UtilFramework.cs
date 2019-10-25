@@ -246,7 +246,7 @@ namespace Framework
         /// </summary>
         internal static void LogDebug(string text)
         {
-            // TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging // .NET Core 2.2 throws "Could not load file or assembly Microsoft.ApplicationInsights" error. Not needed anymore.
+            // TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging // .NET Core throws "Could not load file or assembly Microsoft.ApplicationInsights" error. Not needed anymore.
             Debug.WriteLine("### {0} {1}", UtilFramework.DateTimeToString(DateTime.Now, true), text);
         }
 
