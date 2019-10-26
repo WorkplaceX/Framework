@@ -70,7 +70,7 @@ export class DataService {
       this.json.IsServerSideRendering = false;
       this.alertErrorList$ = this.alertError.pipe(bufferTime(2000, 1, 1)); // No async during server side rendering!
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Client\
-        this.json.RequestUrl = "https://localhost:44369/";
+        this.json.RequestUrl = "http://localhost:50919/";
         this.update();
       } 
       if (window != null) { // Running on client.
