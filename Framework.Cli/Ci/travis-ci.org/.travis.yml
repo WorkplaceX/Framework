@@ -2,7 +2,7 @@
 dist: xenial // Ubuntu Xenial 16.04 // https://docs.travis-ci.com/user/reference/xenial/
 
 node_js:
-  - 12 # Used for Angular 8
+  - 10 # Used for Angular 8
 
 sudo: required # Needed to install .NET Core 2.2
 
