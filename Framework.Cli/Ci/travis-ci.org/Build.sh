@@ -12,8 +12,8 @@ set -x # Enable print execute cammands to stdout.
 # ubuntu, dotnet, npm, node version check
 lsb_release -a
 dotnet --version
-npm --version
 node --version
+npm --version
 
 function Main
 {
