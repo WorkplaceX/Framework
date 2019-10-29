@@ -1,9 +1,10 @@
-﻿dist: xenial // Ubuntu Xenial 16.04 // https://docs.travis-ci.com/user/reference/xenial/
-
-sudo: required # Needed to install .NET Core 2.2
+﻿# Copy this file to ./travis.yml
+dist: xenial // Ubuntu Xenial 16.04 // https://docs.travis-ci.com/user/reference/xenial/
 
 node_js:
-  - 10
+  - 12 # Used for Angular 8
+
+sudo: required # Needed to install .NET Core 2.2
 
 install: ./Framework/Framework.Cli/Ci/travis-ci.org/Install.sh
 
