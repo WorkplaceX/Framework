@@ -3,17 +3,17 @@
 
 echo "### Build.sh"
 
-# ubuntu, dotnet, npm, node version check
-lsb_release -a
-dotnet --version
-npm --version
-node --version
-
 FolderName=$(pwd)"/" # Working directory
 FileNameErrorText=$FolderName"Error.txt"
 
 BASH_XTRACEFD=1 # Print execute command to stdout. Not to stderr.
 set -x # Enable print execute cammands to stdout.
+
+# ubuntu, dotnet, npm, node version check
+lsb_release -a
+dotnet --version
+npm --version
+node --version
 
 function Main
 {
