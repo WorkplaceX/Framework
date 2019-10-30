@@ -1,10 +1,12 @@
-﻿# Copy this file to ./travis.yml
+﻿# Copy this file from "./Framework/Framework.Cli/Ci/travis-ci.org/.travis.yml" to "./travis.yml"
+
 dist: xenial // Ubuntu Xenial 16.04 // https://docs.travis-ci.com/user/reference/xenial/
 
-node_js:
-  - 10 # Used for Angular 8
+sudo: required # Needed to install .NET Core
 
-sudo: required # Needed to install .NET Core 2.2
+language: node_js
+node_js:
+  - "12" # Used for Angular 8
 
 install: ./Framework/Framework.Cli/Ci/travis-ci.org/Install.sh
 
