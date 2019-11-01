@@ -1,0 +1,138 @@
+$colorBlue: #007bff;
+$colorBlueHover: lightblue;
+$colorWhite: #fff;
+$colorBlack: #444;
+$colorRed: red;
+
+.modal {
+    display: block; /* Make bootstrap modal window visible */
+}
+
+.modal-lg {
+    max-width: 75%; /* Large bootstrap modal window */
+}
+
+data-app {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+}
+
+data-app > button, data-app * button { /* Child and descendent */
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0px;
+    border: 1px solid transparent;
+    background-color: $colorBlue;
+    color: $colorWhite;
+}
+
+data-app > input, data-app * input {
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0px;
+    border: none;
+    background: transparent;
+    width: 100%
+}
+
+data-app * .textAlignCenter {
+    text-align: center;
+}
+
+data-app * .textAlignRight {
+    text-align: right;
+}
+
+data-app * .alignSelfCenter {
+    align-self: center;
+}
+
+data-app * .alignSelfFlexEnd {
+    align-self: flex-end;
+}
+
+data-app * .errorSave {
+    background-color: $colorRed;
+    color: $colorWhite;
+}
+
+data-app > .alertError {
+    background-color: $colorRed;
+    color: $colorWhite;
+}
+
+data-app > .alertInfo {
+    background-color: lightblue;
+}
+
+data-app * .gridRowIsSelect {
+    background-color: lightblue;
+}
+
+data-app * .gridRow {
+    border-bottom: 1px solid lightgray;
+}
+
+data-app * .gridRowFilter {
+    background-image: linear-gradient(gray, white);
+    border-bottom: 1px solid black;
+}
+
+data-app * .girdCellIsModify {
+    background-color: orange;
+}
+
+data-app * .colorWhite {
+    color: $colorWhite;
+}
+
+data-app * .colorBlue {
+    color: $colorBlue;
+}
+
+data-app * .colorBlueHover:hover {
+    color: $colorBlueHover;
+}
+
+data-app * .colorBlack {
+    color: $colorBlack;
+}
+
+
+/* Table */
+data-app > table, data-app * table {
+    table-layout: fixed;
+    border-spacing: 1px;
+    border-collapse: collapse;
+    width: 100%;
+    border-top: 1px solid transparent;
+}
+
+data-app * th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    cursor: pointer;
+    background-color: $colorBlue;
+    color: $colorWhite;
+    border-right: 1px solid transparent;
+}
+
+data-app * td {
+    padding: 0px;
+}
+
+data-app * .gridLookup {
+    position: absolute;
+    background-color: $colorWhite;
+    border: 1px solid rgba(0, 0, 0, 0.7);
+    box-shadow: 10px 10px 5px #888888;
+    z-index: 1;
+}
+
+data-app * .pointer {
+    cursor: pointer;
+}
+
+data-app * .fas {
+    padding-right: 2px;
+}
