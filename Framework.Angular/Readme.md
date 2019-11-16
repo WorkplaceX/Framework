@@ -15,7 +15,7 @@ ng add @nguniversal/express-engine --clientProject application
 ```
 
 ## Modify file package.json
-Add "--outputHashing=none" to npm script "build:client-and-server-bundles"
+Add "--outputHashing=none" and "--progress=false" to npm script "build:client-and-server-bundles"
 
 ## Modify file server.ts
 See tag: "// Framework: Enable SSR POST"
