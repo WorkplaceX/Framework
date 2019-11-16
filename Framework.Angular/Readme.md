@@ -8,11 +8,17 @@ ng --version # Angular CLI: 8.3.15
 npm list -g --depth 0 # List globally installed packages
 ```
 
-## Install
+## Setup Angular
 ```cmd
 ng new application
 ng add @nguniversal/express-engine --clientProject application
 ```
+
+## Modify file package.json
+Add "--outputHashing=none" to npm script "build:client-and-server-bundles"
+
+## Modify file server.ts
+See tag: "// Framework: Enable SSR POST"
 
 ## Build and Start
 ```cmd

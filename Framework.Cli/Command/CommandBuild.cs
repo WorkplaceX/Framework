@@ -25,13 +25,16 @@
             optionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
         }
 
-        private static void BuildClient()
+        /// <summary>
+        /// Build Framework/Framework.Angular/application/.
+        /// </summary>
+        private static void BuildAngular()
         {
-            string folderName = UtilFramework.FolderName + "Framework/Client/";
-            UtilCli.Npm(folderName, "install --loglevel error --no-save"); // Prevent changin package-lock.json. See also:  https://github.com/npm/npm/issues/20934
-            UtilCli.Npm(folderName, "run build:ssr"); // Build Universal to folder Framework/Client/dist/ // For ci stderror see also package.json: "webpack:server --progress --colors (removed); ng build --output-hashing none --no-progress (added); ng run --no-progress (added)
+            string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
+            UtilCli.Npm(folderName, "install"); // Angular install
+            UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
 
-            string folderNameSource = UtilFramework.FolderName + "Framework/Client/dist/";
+            string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/";
             string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/dist/";
 
             // Copy folder
@@ -40,13 +43,10 @@
             UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
             UtilFramework.Assert(Directory.Exists(folderNameDest));
 
-            // Copy styles.css to frameworkStyle.css
-            UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Output file name styles.css can not be changed in angular.json!
-
             // indexEmpty.html
-            string fileName = folderNameDest + "browser/indexEmpty.html";
-            File.WriteAllText(fileName, "<data-app></data-app>");
-        } 
+            string fileName = folderNameDest + "browser/indexEmpty.html"; // See also Framework/Framework.Angular/application/server.ts
+            File.WriteAllText(fileName, "<app-root></app-root>");
+        }
 
         private static void BuildServer()
         {
@@ -63,6 +63,9 @@
             UtilCli.FileCopy(fileNameSource, fileNameDest);
         }
 
+        /// <summary>
+        /// Execute "npm run build" command.
+        /// </summary>
         private static void BuildWebsiteNpm(ConfigCliWebsite config)
         {
             string folderNameNpmBuild = UtilFramework.FolderNameParse(config.FolderNameNpmBuild);
@@ -74,6 +77,9 @@
             }
         }
 
+        /// <summary>
+        /// Build for example: "WebsiteDefault/"
+        /// </summary>
         private static void BuildWebsite()
         {
             var configCli = ConfigCli.Load();
@@ -145,15 +151,18 @@
         {
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
-            // Build
-            BuildWebsite();
             UtilCli.VersionBuild(() => {
-                BuildClient();
+                BuildAngular();
+
+                // BuildClient
                 if (!(optionClientOnly.Value() == "on"))
                 {
                     BuildServer();
                 }
             });
+
+            // Build WebSite
+            BuildWebsite();
         }
     }
 }
