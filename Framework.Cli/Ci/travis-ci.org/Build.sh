@@ -73,6 +73,7 @@ function ErrorText
 	then
     	set +x # Disable print command to avoid Error.txt double in log.
 	    echo "### Error (Begin)"
+		echo "### Build.sh section (Cli Build, Config, Build or Deploy) wrote to STDERR. Run locally on Windows with '.\cli.cmd build 2>Error.txt'"
 	    echo "$(<$FileNameErrorText)" # Print file Error.txt 
 	    echo "### Error (End)"
 	    exit 1 # Set exit code

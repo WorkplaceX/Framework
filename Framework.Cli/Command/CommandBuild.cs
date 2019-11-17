@@ -31,7 +31,7 @@
         private static void BuildAngular()
         {
             string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
-            UtilCli.Npm(folderName, "install"); // Angular install
+            UtilCli.Npm(folderName, "install --loglevel error"); // Angular install. --loglevel error prevent writing to STDERROR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
             UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
 
             string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/";
@@ -72,7 +72,7 @@
             if (UtilFramework.StringNull(folderNameNpmBuild) != null)
             {
                 string folderName = UtilFramework.FolderName + folderNameNpmBuild;
-                UtilCli.Npm(folderName, "install --no-optional");
+                UtilCli.Npm(folderName, "install --loglevel error"); // --loglevel error prevent writing to STDERR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
                 UtilCli.Npm(folderName, "run build");
             }
         }
