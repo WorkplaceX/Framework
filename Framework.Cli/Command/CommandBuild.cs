@@ -43,6 +43,9 @@
             UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
             UtilFramework.Assert(Directory.Exists(folderNameDest));
 
+            // Copy styles.css to frameworkStyle.css
+            UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
+
             // indexEmpty.html
             string fileName = folderNameDest + "browser/indexEmpty.html"; // See also Framework/Framework.Angular/application/server.ts
             File.WriteAllText(fileName, "<app-root></app-root>");
