@@ -1,6 +1,6 @@
 ﻿# Copy this file from "./Framework/Framework.Cli/Ci/travis-ci.org/.travis.yml" to "./travis.yml"
 
-dist: xenial // Ubuntu Xenial 16.04 // https://docs.travis-ci.com/user/reference/xenial/
+dist: bionic // Ubuntu 18.04 // https://docs.travis-ci.com/user/reference/bionic/
 
 sudo: required # Needed to install .NET Core
 
