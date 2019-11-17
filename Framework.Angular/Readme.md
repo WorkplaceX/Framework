@@ -15,10 +15,10 @@ ng add @nguniversal/express-engine --clientProject application
 ```
 
 ## Modify file package.json
-Add "--outputHashing=none" and "--progress=false" to npm script "build:client-and-server-bundles"
+Add "--outputHashing=none" and "--progress=false"
 
 ## Modify file server.ts
-See tag: "// Framework: Enable SSR POST"
+See source code tag: "// Framework: Enable SSR POST"
 
 ## Build and Start
 ```cmd

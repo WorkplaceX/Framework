@@ -8,10 +8,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "compile:server": "webpack --config webpack.server.config.js --progress --colors",
+    "compile:server": "webpack --config webpack.server.config.js --progress=false --colors",
     "serve:ssr": "node dist/server",
     "build:ssr": "npm run build:client-and-server-bundles && npm run compile:server",
-    "build:client-and-server-bundles": "ng build --prod --outputHashing=none --progress=false && ng run application:server:production --bundleDependencies all"
+    "build:client-and-server-bundles": "ng build --prod --outputHashing=none --progress=false && ng run application:server:production --bundleDependencies all --progress=false"
   },
   "private": true,
   "dependencies": {
