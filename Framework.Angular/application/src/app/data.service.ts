@@ -39,6 +39,8 @@ export class Json {
 export class DataService {
   public json: Json = new Json();
   
+  public VersionBuild: string = "Build (local)";
+  
   public isRequestPending: boolean = false; // Request is in prgress.
 
   public mergeCount: number = 0; // Make cell merge ready on first modify.

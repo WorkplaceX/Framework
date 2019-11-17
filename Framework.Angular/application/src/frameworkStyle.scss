@@ -12,11 +12,11 @@ $colorRed: red;
     max-width: 75%; /* Large bootstrap modal window */
 }
 
-data-app {
+app-root {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 
-data-app > button, data-app * button { /* Child and descendent */
+app-root > button, app-root * button { /* Child and descendent */
     font-family: inherit;
     font-size: inherit;
     padding: 0px;
@@ -25,7 +25,7 @@ data-app > button, data-app * button { /* Child and descendent */
     color: $colorWhite;
 }
 
-data-app > input, data-app * input {
+app-root > input, app-root * input {
     font-family: inherit;
     font-size: inherit;
     padding: 0px;
@@ -34,72 +34,72 @@ data-app > input, data-app * input {
     width: 100%
 }
 
-data-app * .textAlignCenter {
+app-root * .textAlignCenter {
     text-align: center;
 }
 
-data-app * .textAlignRight {
+app-root * .textAlignRight {
     text-align: right;
 }
 
-data-app * .alignSelfCenter {
+app-root * .alignSelfCenter {
     align-self: center;
 }
 
-data-app * .alignSelfFlexEnd {
+app-root * .alignSelfFlexEnd {
     align-self: flex-end;
 }
 
-data-app * .errorSave {
+app-root * .errorSave {
     background-color: $colorRed;
     color: $colorWhite;
 }
 
-data-app > .alertError {
+app-root > .alertError {
     background-color: $colorRed;
     color: $colorWhite;
 }
 
-data-app > .alertInfo {
+app-root > .alertInfo {
     background-color: lightblue;
 }
 
-data-app * .gridRowIsSelect {
+app-root * .gridRowIsSelect {
     background-color: lightblue;
 }
 
-data-app * .gridRow {
+app-root * .gridRow {
     border-bottom: 1px solid lightgray;
 }
 
-data-app * .gridRowFilter {
+app-root * .gridRowFilter {
     background-image: linear-gradient(gray, white);
     border-bottom: 1px solid black;
 }
 
-data-app * .girdCellIsModify {
+app-root * .girdCellIsModify {
     background-color: orange;
 }
 
-data-app * .colorWhite {
+app-root * .colorWhite {
     color: $colorWhite;
 }
 
-data-app * .colorBlue {
+app-root * .colorBlue {
     color: $colorBlue;
 }
 
-data-app * .colorBlueHover:hover {
+app-root * .colorBlueHover:hover {
     color: $colorBlueHover;
 }
 
-data-app * .colorBlack {
+app-root * .colorBlack {
     color: $colorBlack;
 }
 
 
 /* Table */
-data-app > table, data-app * table {
+app-root > table, app-root * table {
     table-layout: fixed;
     border-spacing: 1px;
     border-collapse: collapse;
@@ -107,7 +107,7 @@ data-app > table, data-app * table {
     border-top: 1px solid transparent;
 }
 
-data-app * th {
+app-root * th {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: left;
@@ -117,11 +117,11 @@ data-app * th {
     border-right: 1px solid transparent;
 }
 
-data-app * td {
+app-root * td {
     padding: 0px;
 }
 
-data-app * .gridLookup {
+app-root * .gridLookup {
     position: absolute;
     background-color: $colorWhite;
     border: 1px solid rgba(0, 0, 0, 0.7);
@@ -129,10 +129,10 @@ data-app * .gridLookup {
     z-index: 1;
 }
 
-data-app * .pointer {
+app-root * .pointer {
     cursor: pointer;
 }
 
-data-app * .fas {
+app-root * .fas {
     padding-right: 2px;
 }
