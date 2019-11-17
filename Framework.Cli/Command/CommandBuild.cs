@@ -72,8 +72,8 @@
             if (UtilFramework.StringNull(folderNameNpmBuild) != null)
             {
                 string folderName = UtilFramework.FolderName + folderNameNpmBuild;
-                UtilCli.Npm(folderName, "install");
-                UtilCli.Npm(folderName, "run build");
+                UtilCli.Npm(folderName, "install --loglevel error");
+                UtilCli.Npm(folderName, "run build --loglevel error");
             }
         }
 
