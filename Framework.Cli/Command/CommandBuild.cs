@@ -72,7 +72,7 @@
             if (UtilFramework.StringNull(folderNameNpmBuild) != null)
             {
                 string folderName = UtilFramework.FolderName + folderNameNpmBuild;
-                UtilCli.Npm(folderName, "install --loglevel error --no-save"); // Prevent changin package-lock.json. See also:  https://github.com/npm/npm/issues/20934
+                UtilCli.Npm(folderName, "install");
                 UtilCli.Npm(folderName, "run build");
             }
         }
@@ -112,7 +112,7 @@
         }
 
         /// <summary>
-        /// Copy from ConfigCli to ConfigWebServer.
+        /// Copy from file ConfigCli.json to ConfigWebServer.json
         /// </summary>
         private static void BuildConfigWebServer()
         {

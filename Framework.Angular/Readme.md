@@ -9,6 +9,7 @@ npm list -g --depth 0 # List globally installed packages
 ```
 
 ## Setup Angular
+Create new application with Angular CLI.
 ```cmd
 ng new application
 ng add @nguniversal/express-engine --clientProject application
