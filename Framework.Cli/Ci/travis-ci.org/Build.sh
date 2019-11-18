@@ -3,17 +3,20 @@
 
 echo "### Build.sh"
 
-# ubuntu, dotnet, npm, node version check
-lsb_release -a
-dotnet --version
-npm --version
-node --version
-
 FolderName=$(pwd)"/" # Working directory
 FileNameErrorText=$FolderName"Error.txt"
 
 BASH_XTRACEFD=1 # Print execute command to stdout. Not to stderr.
 set -x # Enable print execute cammands to stdout.
+
+# Ubuntu, dotnet, node, npm version check
+lsb_release -a
+dotnet --version
+node --version
+npm --version
+
+# List globally installed packages
+npm list -g --depth 0
 
 function Main
 {
@@ -70,6 +73,7 @@ function ErrorText
 	then
     	set +x # Disable print command to avoid Error.txt double in log.
 	    echo "### Error (Begin)"
+		echo "### Build.sh section (Cli Build, Config, Build or Deploy) wrote to STDERR. Run locally on Windows with '.\cli.cmd build 2>Error.txt'"
 	    echo "$(<$FileNameErrorText)" # Print file Error.txt 
 	    echo "### Error (End)"
 	    exit 1 # Set exit code
