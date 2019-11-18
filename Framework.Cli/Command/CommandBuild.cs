@@ -158,16 +158,17 @@
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
             UtilCli.VersionBuild(() => {
+                // Build Angular client
                 BuildAngular();
 
-                // BuildClient
                 if (!(optionClientOnly.Value() == "on"))
                 {
+                    // Build .NET Core server
                     BuildServer();
                 }
             });
 
-            // Build WebSite
+            // Build WebSite(s)
             BuildWebsite();
         }
     }
