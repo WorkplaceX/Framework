@@ -171,6 +171,7 @@
             {
                 if (UtilCli.ArgumentValue(this, argumentJson, out string json))
                 {
+                    Console.WriteLine("dl9s4" + json.Substring(0, 20).ToUpper());
                     // Write
                     try
                     {
