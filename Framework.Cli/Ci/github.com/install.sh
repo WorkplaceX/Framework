@@ -7,6 +7,9 @@ dotnet --version
 node --version
 npm --version
 
+# List globally installed packages
+npm list -g --depth 0
+
 # Install Git
 sudo apt update
 sudo apt install git
