@@ -199,13 +199,21 @@
             }
         }
 
+        /// <summary>
+        /// Create folder if it does not yet exist.
+        /// </summary>
+        internal static void FolderCreate(string fileName)
+        {
+            string folderName = new FileInfo(fileName).DirectoryName;
+            if (!Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+        }
+
         internal static void FileCopy(string fileNameSource, string fileNameDest)
         {
-            string folderNameDest = new FileInfo(fileNameDest).DirectoryName;
-            if (!Directory.Exists(folderNameDest))
-            {
-                Directory.CreateDirectory(folderNameDest);
-            }
+            FolderCreate(fileNameDest);
             File.Copy(fileNameSource, fileNameDest, true);
         }
 

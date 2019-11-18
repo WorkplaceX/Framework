@@ -53,12 +53,12 @@ app.get('*.*', express.static(DIST_FOLDER, {
 
 // All regular routes use the Universal engine
 app.get('*', (req, res) => {
-  res.send("Angular Universal Server Side Rendering. Use POST."); // res.render('index', { req }); // Framework: Enable SSR POST
+  res.send("Angular Universal Server Side Rendering. Converts json to html. Use POST method."); // res.render('index', { req }); // Framework: Enable SSR POST
 });
 
 // Framework: Enable SSR POST
 app.post('*', (req, res) => {
-  var view = 'indexEmpty';
+  var view = 'indexUniversal.html';
   res.render(view,     
     {
       req: req,

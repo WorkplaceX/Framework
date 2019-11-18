@@ -33,3 +33,8 @@ ng generate service data
 ```
 
 * Add HttpClient
+
+# Local IIS
+In order to run application on local IIS server install:
+* [Hosting Bundle for Windows](https://dotnet.microsoft.com/download/thank-you/dotnet-runtime-3.0.0-windows-hosting-bundle-installer) Enable .NET Core hosting on IIS.
+* [iisnode-full-v0.2.21-x64.msi](https://github.com/azure/iisnode) Enable nodejs on IIS server.
