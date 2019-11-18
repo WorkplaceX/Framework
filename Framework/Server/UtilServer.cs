@@ -28,21 +28,21 @@
         [ThreadStatic]
         public static IApplicationBuilder ApplicationBuilder;
 
-        public static IHostingEnvironment HostingEnvironment
+        public static IWebHostEnvironment HostingEnvironment
         {
             get
             {
-                IHostingEnvironment result = null;
+                IWebHostEnvironment result = null;
                 HttpContext context = Context;
                 if (context != null)
                 {
-                    result = (IHostingEnvironment)context.RequestServices.GetService(typeof(IHostingEnvironment));
+                    result = (IWebHostEnvironment)context.RequestServices.GetService(typeof(IWebHostEnvironment));
                 }
                 else
                 {
                     if (ApplicationBuilder != null)
                     {
-                        result = (IHostingEnvironment)ApplicationBuilder.ApplicationServices.GetService(typeof(IHostingEnvironment));
+                        result = (IWebHostEnvironment)ApplicationBuilder.ApplicationServices.GetService(typeof(IWebHostEnvironment));
                     }
                 }
                 return result;

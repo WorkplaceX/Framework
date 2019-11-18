@@ -18,7 +18,7 @@
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilFramework.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
-            this.List = dbContext.Schema.FromSql(sql).ToArray(); // Schema changes can cause timeout. Run sql command sp_updatestats on master database.
+            this.List = dbContext.Schema.FromSqlRaw(sql).ToArray(); // Schema changes can cause timeout. Run sql command sp_updatestats on master database.
             //
             // For Application filter out "dbo.Framework" tables.
             if (isFrameworkDb == false)
@@ -57,7 +57,7 @@
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
-        public DbQuery<MetaSqlSchema> Schema { get; set; }
+        public DbSet<MetaSqlSchema> Schema { get; set; }
     }
 
     /// <summary>

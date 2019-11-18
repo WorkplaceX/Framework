@@ -15,7 +15,7 @@
             ConfigCli configCli = ConfigCli.Load();
             string deployAzureGitUrl = configCli.DeployAzureGitUrl; // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
             string folderName = UtilFramework.FolderName + "Application.Server/";
-            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp2.2/publish/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.0/publish/";
             string folderNamePublishGit = folderNamePublish + ".git";
 
             UtilCli.FolderDelete(folderNamePublishGit); // Undo git init.
