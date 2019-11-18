@@ -14,8 +14,8 @@ jobs:
       with:
         submodules: recursive
     - name: Install script
-      env: 
-        ConfigCli: ${{ secrets.ConfigCli }} 
       run: ./Framework/Framework.Cli/Ci/github.com/install.sh
     - name: Build script
+      env: 
+        ConfigCli: ${{ secrets.ConfigCli }} 
       run: ./Framework/Framework.Cli/Ci/github.com/build.sh
