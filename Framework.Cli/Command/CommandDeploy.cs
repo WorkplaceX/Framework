@@ -1,7 +1,6 @@
 ﻿namespace Framework.Cli.Command
 {
     using Framework.Cli.Config;
-    using System;
 
     public class CommandDeploy : CommandBase
     {
@@ -23,7 +22,6 @@
             UtilCli.Start(folderNamePublish, "git", "init");
             UtilCli.Start(folderNamePublish, "git", "config user.email \"deploy@deploy.deploy\""); // Prevent: Error "Please tell me who you are". See also: http://www.thecreativedev.com/solution-github-please-tell-me-who-you-are-error/
             UtilCli.Start(folderNamePublish, "git", "config user.name \"Deploy\"");
-            Console.WriteLine("dl9s4" + deployAzureGitUrl);
             UtilCli.Start(folderNamePublish, "git", "remote add azure " + deployAzureGitUrl);
             UtilCli.Start(folderNamePublish, "git", "fetch --all", isRedirectStdErr: true); // Another possibility is argument "-q" to do not write to stderr.
             UtilCli.Start(folderNamePublish, "git", "config core.autocrlf false"); // Prevent "LF will be replaced by CRLF" error in stderr.
