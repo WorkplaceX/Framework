@@ -11,6 +11,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      with:
+        submodules: recursive
     - name: Install script
       env: 
         My: ${{ secrets.My }} 
