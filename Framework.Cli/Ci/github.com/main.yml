@@ -14,6 +14,6 @@ jobs:
     - name: Install script
       env: 
         My: ${{ secrets.My }} 
-      run: ./"GitHub Actions"/install.sh
+      run: ./Framework/Framework.Cli/Ci/github.com/Install.sh
     - name: Build script
-      run: ./"GitHub Actions"/build.sh
+      run: ./Framework/Framework.Cli/Ci/github.com/build.sh
