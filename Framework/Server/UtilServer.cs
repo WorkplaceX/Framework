@@ -122,9 +122,8 @@
         }
 
         /// <summary>
-        /// Returns true, if application runs on IIS server.
+        /// Returns true, if application runs on IIS server. Otherwise it runs from Visual Studio.
         /// </summary>
-        /// <returns></returns>
         public static bool IsIssServer
         {
             get
@@ -140,8 +139,8 @@
         /// </summary>
         public static void StartUniversalServer()
         {
-            string folderName = UtilFramework.FolderName + "Application.Server/Framework/dist/";
-            string fileNameServer = folderName + "server.js";
+            string folderName = UtilFramework.FolderName + "Application.Server/Framework/";
+            string fileNameServer = folderName + "dist/server.js";
             if (!File.Exists(fileNameServer))
             {
                 throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer));
@@ -149,9 +148,8 @@
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = folderName;
             info.FileName = "node.exe";
-            info.Arguments = "server.js";
+            info.Arguments = "dist/server.js";
             info.UseShellExecute = true; // Open additional node window.
-            // info.Environment.Add("PORT", "4000"); // Does not work in connection with "info.UseShellExecute = true;". For default port see also: Submodule/Client/src/server.ts
             info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
             Process.Start(info);
         }

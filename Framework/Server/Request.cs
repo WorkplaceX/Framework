@@ -68,7 +68,7 @@
         private static async Task<string> ServerSideRenderingAsync(HttpContext context, string indexHtml, AppSelector appSelector)
         {
             string result = indexHtml;
-            if (result.Contains("<data-app></data-app>")) // Needs server sie rendering
+            if (result.Contains("<app-root></app-root>")) // Needs server sie rendering
             {
                 string url;
                 if (UtilServer.IsIssServer)
@@ -90,10 +90,10 @@
                 // Server side render post.
                 string htmlServerSideRendering = await UtilServer.WebPost(url, json);
 
-                htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><style ng-transition=\"Application\"></style></head><body>", "");
+                htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><style ng-transition=\"serverApp\"></style></head><body>", "");
                 htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "</body></html>", "");
 
-                result = UtilFramework.Replace(result, "<data-app></data-app>", htmlServerSideRendering);
+                result = UtilFramework.Replace(result, "<app-root></app-root>", htmlServerSideRendering);
 
                 // Set jsonBrowser in html.
                 string scriptFind = "var jsonBrowser = {};";

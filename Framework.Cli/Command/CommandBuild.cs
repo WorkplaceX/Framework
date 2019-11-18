@@ -25,13 +25,16 @@
             optionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
         }
 
-        private static void BuildClient()
+        /// <summary>
+        /// Build Framework/Framework.Angular/application/.
+        /// </summary>
+        private static void BuildAngular()
         {
-            string folderName = UtilFramework.FolderName + "Framework/Client/";
-            UtilCli.Npm(folderName, "install --loglevel error --no-save"); // Prevent changin package-lock.json. See also:  https://github.com/npm/npm/issues/20934
-            UtilCli.Npm(folderName, "run build:ssr"); // Build Universal to folder Framework/Client/dist/ // For ci stderror see also package.json: "webpack:server --progress --colors (removed); ng build --output-hashing none --no-progress (added); ng run --no-progress (added)
+            string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
+            UtilCli.Npm(folderName, "install --loglevel error"); // Angular install. --loglevel error prevent writing to STDERROR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
+            UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
 
-            string folderNameSource = UtilFramework.FolderName + "Framework/Client/dist/";
+            string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/";
             string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/dist/";
 
             // Copy folder
@@ -41,12 +44,15 @@
             UtilFramework.Assert(Directory.Exists(folderNameDest));
 
             // Copy styles.css to frameworkStyle.css
-            UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Output file name styles.css can not be changed in angular.json!
+            UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
 
-            // indexEmpty.html
-            string fileName = folderNameDest + "browser/indexEmpty.html";
-            File.WriteAllText(fileName, "<data-app></data-app>");
-        } 
+            // indexUniversal.html
+            string fileName = folderNameDest + "/browser/indexUniversal.html"; // See also Framework/Framework.Angular/application/server.ts
+            File.WriteAllText(fileName, "<app-root></app-root>");
+            fileName = folderNameDest + "dist/browser/indexUniversal.html"; // Working directory is different when running in node (Visual Studio) vs issnode (IIS)
+            UtilCli.FolderCreate(fileName);
+            File.WriteAllText(fileName, "<app-root></app-root>");
+        }
 
         private static void BuildServer()
         {
@@ -63,17 +69,23 @@
             UtilCli.FileCopy(fileNameSource, fileNameDest);
         }
 
+        /// <summary>
+        /// Execute "npm run build" command.
+        /// </summary>
         private static void BuildWebsiteNpm(ConfigCliWebsite config)
         {
             string folderNameNpmBuild = UtilFramework.FolderNameParse(config.FolderNameNpmBuild);
             if (UtilFramework.StringNull(folderNameNpmBuild) != null)
             {
                 string folderName = UtilFramework.FolderName + folderNameNpmBuild;
-                UtilCli.Npm(folderName, "install --loglevel error --no-save"); // Prevent changin package-lock.json. See also:  https://github.com/npm/npm/issues/20934
+                UtilCli.Npm(folderName, "install --loglevel error"); // --loglevel error prevent writing to STDERR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
                 UtilCli.Npm(folderName, "run build");
             }
         }
 
+        /// <summary>
+        /// Build for example: "WebsiteDefault/"
+        /// </summary>
         private static void BuildWebsite()
         {
             var configCli = ConfigCli.Load();
@@ -106,7 +118,7 @@
         }
 
         /// <summary>
-        /// Copy from ConfigCli to ConfigWebServer.
+        /// Copy from file ConfigCli.json to ConfigWebServer.json
         /// </summary>
         private static void BuildConfigWebServer()
         {
@@ -145,15 +157,19 @@
         {
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
-            // Build
-            BuildWebsite();
             UtilCli.VersionBuild(() => {
-                BuildClient();
+                // Build Angular client
+                BuildAngular();
+
                 if (!(optionClientOnly.Value() == "on"))
                 {
+                    // Build .NET Core server
                     BuildServer();
                 }
             });
+
+            // Build WebSite(s)
+            BuildWebsite();
         }
     }
 }

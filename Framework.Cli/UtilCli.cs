@@ -199,13 +199,21 @@
             }
         }
 
+        /// <summary>
+        /// Create folder if it does not yet exist.
+        /// </summary>
+        internal static void FolderCreate(string fileName)
+        {
+            string folderName = new FileInfo(fileName).DirectoryName;
+            if (!Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+        }
+
         internal static void FileCopy(string fileNameSource, string fileNameDest)
         {
-            string folderNameDest = new FileInfo(fileNameDest).DirectoryName;
-            if (!Directory.Exists(folderNameDest))
-            {
-                Directory.CreateDirectory(folderNameDest);
-            }
+            FolderCreate(fileNameDest);
             File.Copy(fileNameSource, fileNameDest, true);
         }
 
@@ -253,10 +261,10 @@
             // Read UtilFramework.cs
             string fileNameServer = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
             string textServer = UtilFramework.FileLoad(fileNameServer);
-            string fileNameClient = UtilFramework.FolderName + "Framework/Client/src/data.service.ts";
+            string fileNameClient = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/app/data.service.ts";
             string textClient = UtilFramework.FileLoad(fileNameClient);
 
-            string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2};)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()));
+            string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2} (UTC);)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()));
 
             string findServer = "return \"Build (local)\";"; // See also: method CommandBuild.BuildServer();
             string replaceServer = string.Format("return \"{0}\";", versionBuild);
@@ -286,7 +294,7 @@
         /// <param name="password">For example ConnectionString or GitUrl.</param>
         private static string ConsoleWriteLinePasswordHide(string password)
         {
-            return "[Password]"; // // Remove password from ConnectionString or GitUrl.
+            return "[Password]"; // Remove password from ConnectionString or GitUrl.
         }
 
         /// <summary>
