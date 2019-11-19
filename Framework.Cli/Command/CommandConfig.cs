@@ -173,7 +173,6 @@
                 {
                     // Set ConfigCli.json with command: ".\cli.cmd config json='{}'"
                     json = json.Trim('\"'); // Remove quotation marks at the begin and end. 
-                    Console.WriteLine("dl9s4" + json.Substring(0, 20).ToUpper());
                     // Write
                     try
                     {
