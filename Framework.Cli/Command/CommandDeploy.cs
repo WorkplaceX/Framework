@@ -25,9 +25,9 @@
                 string folderNamePublishGit = folderNamePublish + ".git";
 
                 UtilCli.FolderDelete(folderNamePublishGit); // Undo git init.
-
-                UtilCli.FolderDelete(folderNamePublishGit); // Undo git init.
                 UtilCli.Start(folderNamePublish, "git", "init");
+                UtilCli.Start(folderNamePublish, "git", "config user.email \"deploy@deploy.deploy\""); // Prevent: Error "Please tell me who you are". See also: http://www.thecreativedev.com/solution-github-please-tell-me-who-you-are-error/
+                UtilCli.Start(folderNamePublish, "git", "config user.name \"Deploy\"");
                 UtilCli.Start(folderNamePublish, "git", "config core.autocrlf false"); // Prevent "LF will be replaced by CRLF" error in stderr.
                 UtilCli.Start(folderNamePublish, "git", "add ."); // Can throw "LF will be replaced by CRLF".
                 UtilCli.Start(folderNamePublish, "git", "commit -m Deploy");
