@@ -167,6 +167,9 @@
         {
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
+            // Build WebSite(s)
+            BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Website/
+
             UtilCli.VersionBuild(() => {
                 // Build Angular client
                 BuildAngular();
@@ -177,9 +180,6 @@
                     BuildServer();
                 }
             });
-
-            // Build WebSite(s)
-            BuildWebsite();
         }
     }
 }
