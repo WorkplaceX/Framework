@@ -54,6 +54,18 @@
             File.WriteAllText(fileName, "<app-root></app-root>");
         }
 
+        /// <summary>
+        /// Copy ConfigWebServer.json to publish folder.
+        /// </summary>
+        internal static void ConfigWebServerPublish()
+        {
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.0/publish/";
+
+            string fileNameSource = UtilFramework.FolderName + "ConfigWebServer.json";
+            string fileNameDest = folderNamePublish + "ConfigWebServer.json";
+            UtilCli.FileCopy(fileNameSource, fileNameDest);
+        }
+
         private static void BuildServer()
         {
             string folderName = UtilFramework.FolderName + "Application.Server/";
@@ -64,9 +76,7 @@
             UtilCli.DotNet(folderName, "publish"); // Use publish instead to build.
             UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
 
-            string fileNameSource = UtilFramework.FolderName + "ConfigWebServer.json";
-            string fileNameDest = folderNamePublish + "ConfigWebServer.json";
-            UtilCli.FileCopy(fileNameSource, fileNameDest);
+            ConfigWebServerPublish();
         }
 
         /// <summary>
