@@ -166,6 +166,8 @@
             ConfigCli.Init(AppCli);
             ConfigCli configCli = ConfigCli.Load();
 
+            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+
             // Command "json"
             if (UtilCli.ArgumentValueIsExist(this, argumentJson))
             {

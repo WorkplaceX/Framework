@@ -13,7 +13,7 @@
         protected internal override void Execute()
         {
             // Make sure deploy has latest ConfigCli.json data.
-            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json. Command reads ConnectionString from ConfigWebServer.json.
+            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
             CommandBuild.ConfigWebServerPublish();
 
             ConfigCli configCli = ConfigCli.Load();
