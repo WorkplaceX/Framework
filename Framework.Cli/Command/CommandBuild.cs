@@ -35,7 +35,7 @@
             UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
 
             string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/";
-            string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/dist/";
+            string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Angular/";
 
             // Copy folder
             UtilCli.FolderDelete(folderNameDest);
@@ -94,7 +94,7 @@
         }
 
         /// <summary>
-        /// Build for example: "WebsiteDefault/"
+        /// Build all Websites. For example: "WebsiteDefault/"
         /// </summary>
         private static void BuildWebsite()
         {
@@ -167,7 +167,7 @@
         {
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
-            // Build WebSite(s)
+            // Build Website(s)
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Website/
 
             UtilCli.VersionBuild(() => {

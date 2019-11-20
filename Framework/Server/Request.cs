@@ -6,6 +6,7 @@
     using Framework.Session;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using System;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -74,7 +75,7 @@
                 if (UtilServer.IsIssServer)
                 {
                     // Running on IIS Server.
-                    url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/dist/server.js";
+                    url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/Angular/server.js";
                 }
                 else
                 {
@@ -113,6 +114,11 @@
             var website = configWebServer.WebsiteList.FirstOrDefault();
             if (website != null)
             {
+                string folderName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + website.FolderNameServer;
+                if (!Directory.Exists(folderName))
+                {
+                    throw new Exception(string.Format("Folder does not exis! Make sure cli build did run. ({0})", folderName));
+                }
                 string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + website.FolderNameServer + path;
                 if (File.Exists(fileName))
                 {
@@ -157,15 +163,15 @@
         }
 
         /// <summary>
-        /// Returns true, if file found in "framework/dist/browser" folder.
+        /// Returns true, if file found in "framework/Angular/browser" folder.
         /// </summary>
         private async Task<bool> DistBrowser(HttpContext context, string path)
         {
-            // Fallback dist/browser/
+            // Fallback Angular/browser/
             if (UtilServer.PathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + "Framework/dist/browser" + path;
+                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Angular/browser" + path;
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
