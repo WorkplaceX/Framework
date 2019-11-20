@@ -1,7 +1,6 @@
 # Framework
 
-[![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg)](https://github.com/WorkplaceX/ApplicationDemo/actions)
-(ApplicationDemo; github actions;)
+![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
