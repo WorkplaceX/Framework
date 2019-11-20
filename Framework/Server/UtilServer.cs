@@ -10,6 +10,7 @@
     using System.Diagnostics;
     using System.IO;
     using System.Net.Http;
+    using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -148,6 +149,10 @@
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = folderName;
             info.FileName = "node.exe";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                info.FileName = "node";
+            }
             info.Arguments = "dist/server.js";
             info.UseShellExecute = true; // Open additional node window.
             info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
