@@ -1,5 +1,7 @@
 ﻿namespace Framework.Cli.Command
 {
+    using System.Runtime.InteropServices;
+
     /// <summary>
     /// Cli start command.
     /// </summary>
@@ -18,7 +20,10 @@
             string folderName = UtilFramework.FolderName + @"Application.Server/";
             UtilCli.DotNet(folderName, "build");
             UtilCli.DotNet(folderName, "run --no-build", false);
-            UtilCli.OpenWebBrowser("http://localhost:50919/"); // For port setting see also: Application.Server\Properties\launchSettings.json (applicationUrl, sslPort)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                UtilCli.OpenWebBrowser("http://localhost:50919/"); // For port setting see also: Application.Server\Properties\launchSettings.json (applicationUrl, sslPort)
+            }
         }
     }
 }
