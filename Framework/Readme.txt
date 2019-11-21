@@ -1,21 +1,21 @@
 ﻿ToDo
--BootstrapExtension.BootstrapRow
+-BootstrapExtension.BootstrapRow --> DivContainer [Ok]
 -ComponentJsonExtension typeof(T).Name replace with null. Child has either name or is identified by type.
 -IoC for singleton and [ThreadStatic]
 -https://w3bits.com/css-dropdown-menu/ for ThemeDefault.
 -https://www.youtube.com/watch?v=moBhzSC455o (Build a Responsive Grid CSS Website Layout From Scratch)
--Move AppSelector to ConfigFramework.json
+-Move AppSelector to ConfigFramework.json --> ConfigWebServer.json WebsiteList [Ok]
 -SSL [Ok]
 -Load Grid with null query no error
 -Remove not used grids from AppSession
 -Show session size on AppJson
 -Component Version
--Cli show node version, npm version
+-Cli show node version, npm version --> build.sh [Ok]
 -Build version UtilFramework.VersionBuild recover after build failure
--Search password in logs
+-Search password in logs [Ok]
 -App root (<data-app>) two times in index.html
 -Use string instead of removing property (Warning! Type not supported by framework.)
--Rename Generate.cs to Database.cs
+-Rename Generate.cs to Database.cs [Ok]
 -ComponentJson sealed classes internal constructor.
 -Nuget package for Framework and FrameworkCli. And npm for Framework/Client
 -Rename GridCell.Text to GridCell.T
