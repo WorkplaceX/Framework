@@ -12,8 +12,6 @@ namespace Framework
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Security.Cryptography;
-    using System.Text;
 
     internal class UtilFramework
     {
@@ -22,16 +20,16 @@ namespace Framework
             get
             {
                 // dotnet --version
-                // 2.2.300
+                // 3.0.100
 
                 // node --version
-                // v8.11.3
+                // v12.13.0
 
                 // npm --version
-                // 6.9.0
+                // 6.12.0
 
-                // ng --version
-                // Angular CLI: 6.1.1
+                // npm run ng -- --version (Framework/Framework.Angular/application/)
+                // Angular CLI: 8.3.15
 
                 return "v2.012";
             }
@@ -304,5 +302,10 @@ namespace Framework
             }
             return result;
         }
+
+        /// <summary>
+        /// Gets IsJson2. Feature toogle for new serialization, deserialization and new ComponentJson2 object tree.
+        /// </summary>
+        internal static bool IsJson2 = false; // JsonLayer2
     }
 }

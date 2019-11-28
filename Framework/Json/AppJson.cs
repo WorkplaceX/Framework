@@ -1213,3 +1213,62 @@
         }
     }
 }
+
+namespace Framework.Json2
+{
+    using System.Collections.Generic;
+
+    public class ComponentJson2
+    {
+        public ComponentJson2(ComponentJson2 owner)
+        {
+            this.Constructor(owner);
+        }
+
+        internal void Constructor(ComponentJson2 owner)
+        {
+            if (owner != null)
+            {
+                owner.ListInternal.Add(this);
+                this.root = owner.root;
+            }
+            else
+            {
+                this.root = this;
+            }
+            this.root.rootIdCount += 1;
+            this.Id = this.root.rootIdCount;
+        }
+
+        /// <summary>
+        /// Gets or sets Id. This is the id of the component in the tree.
+        /// </summary>
+        public int Id { get; private set; }
+
+        private int rootIdCount;
+
+        private ComponentJson2 root;
+
+        internal List<ComponentJson2> ListInternal = new List<ComponentJson2>();
+
+        public IReadOnlyList<ComponentJson2> List => ListInternal;
+    }
+
+    public class Page : ComponentJson2
+    {
+        public Page(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+    }
+
+    public class AppJson2 : Page
+    {
+        public AppJson2()
+            : base(null)
+        {
+
+        }
+    }
+}
