@@ -630,3 +630,392 @@
         }
     }
 }
+
+namespace Framework.Json2
+{
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
+    using System.Linq;
+    using Framework.DataAccessLayer;
+
+    /// <summary>
+    /// AppJson serializer and deserializer.
+    /// </summary>
+    internal static class UtilJson2
+    {
+        /// <summary>
+        /// Serialize AppJson for server (session state) and client (Angular).
+        /// </summary>
+        public static void Serialize(AppJson2 appJson, out string jsonServer, out string jsonClient)
+        {
+            // Serialize with System.Text.Json (Init)
+            var options = new JsonSerializerOptions();
+            var converterFactory = new ConverterFactory();
+            options.Converters.Add(converterFactory);
+            options.WriteIndented = true;
+
+            // Serialize AppJson for server
+            converterFactory.IsClient = false;
+            jsonServer = JsonSerializer.Serialize(appJson, appJson.GetType(), options);
+
+            // Serialize AppJson for client
+            converterFactory.IsClient = true;
+            jsonClient = JsonSerializer.Serialize(appJson, appJson.GetType(), options);
+        }
+
+        /// <summary>
+        /// Deserialize AppJson object from jsonServer (session state).
+        /// </summary>
+        public static AppJson2 Deserialize(string jsonServer)
+        {
+            // Deserialize with System.Text.Json (Init)
+            var options = new JsonSerializerOptions();
+            var converterFactory = new ConverterFactory();
+            options.Converters.Add(converterFactory);
+
+            // Deserialize AppJson
+            var result = JsonSerializer.Deserialize<AppJson2>(jsonServer, options);
+
+            // Resolve ComponentJson references
+            foreach (var item in converterFactory.ComponentJsonReferenceList)
+            {
+                PropertyInfo propertyInfo = item.PropertyInfo;
+                ComponentJson2 componentJson = item.ComponentJson;
+                ComponentJson2 componentJsonReference = converterFactory.ComponentJsonList[item.IdReference];
+                propertyInfo.SetValue(componentJson, componentJsonReference);
+            }
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// Factory to serialize, deserialize ComponentJson object.
+    /// </summary>
+    internal class ConverterFactory : JsonConverterFactory
+    {
+        /// <summary>
+        /// Returns true for ComponentJson, data Row and Type objects.
+        /// </summary>
+        public override bool CanConvert(Type typeToConvert)
+        {
+            // Handle inheritance of ComponentJson and Row classes. Also handle Type object.
+            return UtilFramework.IsSubclassOf(typeToConvert, typeof(ComponentJson2)) || UtilFramework.IsSubclassOf(typeToConvert, typeof(Row)) || typeToConvert == typeof(Type);
+        }
+
+        public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+        {
+            var converterType = typeof(Converter<>).MakeGenericType(typeToConvert);
+            return (JsonConverter)Activator.CreateInstance(converterType, this);
+        }
+
+        /// <summary>
+        /// Gets or sets IsClient. If false, everithing is serialized to store on server. If true, data Row and ComponentJson references are excluded.
+        /// </summary>
+        public bool IsClient;
+
+        /// <summary>
+        /// List of deserialized ComponentJson references.
+        /// </summary>
+        public List<ComponentJsonReference> ComponentJsonReferenceList = new List<ComponentJsonReference>();
+
+        /// <summary>
+        /// List of deserialized ComponentJson objects.
+        /// </summary>
+        public Dictionary<int, ComponentJson2> ComponentJsonList = new Dictionary<int, ComponentJson2>();
+    }
+
+    public class ComponentJsonReference
+    {
+        public PropertyInfo PropertyInfo;
+
+        public ComponentJson2 ComponentJson;
+
+        public int IdReference;
+    }
+
+    public enum PropertyEnum { None = 0, Property = 1, List = 2, Dictionary = 3 }
+
+    /// <summary>
+    /// Access property, list or dictionary.
+    /// </summary>
+    public class Property
+    {
+        public Property(PropertyInfo propertyInfo, object propertyValue)
+        {
+            // Property
+            PropertyEnum = PropertyEnum.Property;
+            PropertyType = propertyInfo.PropertyType;
+            PropertyValue = propertyValue;
+            PropertyValueList = new List<object>(new object[] { propertyValue });
+
+            var interfaceList = propertyInfo.PropertyType.GetInterfaces();
+
+            // List
+            if (interfaceList.Contains(typeof(IList)))
+            {
+                PropertyEnum = PropertyEnum.List;
+                PropertyType = propertyInfo.PropertyType.GetGenericArguments()[0]; // List type
+                PropertyValueList = (IList)propertyValue;
+            }
+
+            // Dictionary
+            if (interfaceList.Contains(typeof(IDictionary)))
+            {
+                PropertyEnum = PropertyEnum.Dictionary;
+                PropertyType = propertyInfo.PropertyType.GetGenericArguments()[1]; // Key type
+                PropertyDictionary = (IDictionary)propertyValue;
+                PropertyValueList = PropertyDictionary?.Values;
+            }
+        }
+
+        /// <summary>
+        /// Gets PropertyEnum (property, list or dictionary)
+        /// </summary>
+        public PropertyEnum PropertyEnum;
+
+        /// <summary>
+        /// Gets PropertyType for property, list and dictionary.
+        /// </summary>
+        public Type PropertyType;
+
+        /// <summary>
+        /// Gets PropertyValueList for property, list and dictionary.
+        /// </summary>
+        public ICollection PropertyValueList;
+
+        /// <summary>
+        /// Gets PropertyValue for property.
+        /// </summary>
+        public object PropertyValue;
+
+        /// <summary>
+        /// Gets PropertyDictionary for dictionary to access key, value pair with DictionaryEntry.
+        /// </summary>
+        public IDictionary PropertyDictionary;
+    }
+
+    internal class Converter<T> : JsonConverter<T>
+    {
+        public Converter(ConverterFactory converterFactory)
+        {
+            this.ConverterFactory = converterFactory;
+        }
+
+        public readonly ConverterFactory ConverterFactory;
+
+        /// <summary>
+        /// Deserialize ComponentJson, Row or Type objects.
+        /// </summary>
+        public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            // Deserialize Type object
+            if (typeToConvert == typeof(Type))
+            {
+                var typeName = JsonSerializer.Deserialize<string>(ref reader);
+                return (T)(object)Type.GetType(typeName);
+            }
+
+            // Deserialize ComponentJson or Row object
+            var valueList = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(ref reader);
+
+            // Deserialize data row object
+            if (UtilFramework.IsSubclassOf(typeToConvert, typeof(Row)))
+            {
+                var typeRowName = valueList["$typeRow"].GetString();
+                string rowJson = valueList["$row"].GetRawText();
+                Type typeRow = Type.GetType(typeRowName);
+                var resultRow = JsonSerializer.Deserialize(rowJson, typeRow); // Native deserialization for data row.
+                return (T)(object)resultRow;
+            }
+
+            // Read type information
+            string typeText = valueList["$type"].GetString();
+            Type type = Type.GetType(typeText); // TODO Cache on factory
+
+            // Create ComponentJson
+            ComponentJson2 result;
+            if (UtilFramework.IsSubclassOf(type, typeof(AppJson2)))
+            {
+                result = (ComponentJson2)Activator.CreateInstance(type);
+            }
+            else
+            {
+                result = (ComponentJson2)Activator.CreateInstance(type, null); 
+            }
+
+            // Loop through created ComponentJson properties
+            foreach (var propertyInfo in result.GetType().GetProperties())
+            {
+                if (valueList.ContainsKey(propertyInfo.Name))
+                {
+                    // Deserialize ComponentJsonReference
+                    if (IsComponentJsonReference(propertyInfo))
+                    {
+                        var componentJsonReferenceValueList = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(valueList[propertyInfo.Name].GetRawText());
+                        UtilFramework.Assert(componentJsonReferenceValueList["$type"].GetString() == "$componentJsonReference");
+                        int id = componentJsonReferenceValueList["$id"].GetInt32();
+                        ConverterFactory.ComponentJsonReferenceList.Add(new ComponentJsonReference { PropertyInfo = propertyInfo, ComponentJson = result, IdReference = id });
+                        continue;
+                    }
+
+                    // Deserialize property value
+                    var propertyValue = JsonSerializer.Deserialize(valueList[propertyInfo.Name].GetRawText(), propertyInfo.PropertyType, options);
+                    propertyInfo.SetValue(result, propertyValue);
+
+                    // ComponentJson.List
+                    if (propertyValue is ComponentJson2 componentJson)
+                    {
+                        result.ListInternal.Add(componentJson);
+                    }
+                }
+            }
+
+            // Add ComponentJson for ComponentJsonReference resolve.
+            ConverterFactory.ComponentJsonList.Add(result.Id, result);
+
+            return (T)(object)result;
+        }
+
+        /// <summary>
+        /// PropertyType has to be (ComponentJson, Row or Type). Or PropertyType and PropertyValue type need to match. Applies also for list or dictionary.
+        /// </summary>
+        private void ValidatePropertyAndValueType(PropertyInfo propertyInfo, object propertyValue)
+        {
+            var property = new Property(propertyInfo, propertyValue);
+
+            Type propertyType = property.PropertyType;
+            ICollection propertyValueList = property.PropertyValueList;
+
+            // Property type is of type ComponentJson or Row. For example property type object would throw exception.
+            if (UtilFramework.IsSubclassOf(propertyType, typeof(ComponentJson2)) || UtilFramework.IsSubclassOf(propertyType, typeof(Row)))
+            {
+                return;
+            }
+            // Property type is class Type. Property value typeof(int) is class RuntimeType (which derives from class Type)
+            if (propertyType == typeof(Type))
+            {
+                return;
+            }
+
+            foreach (var item in propertyValueList)
+            {
+                if (item != null)
+                {
+                    // Property type is equal to value. No inheritance.
+                    if (!(UtilFramework.TypeUnderlying(propertyType) == item.GetType()))
+                    {
+                        throw new Exception(string.Format("Combination property type and value type not supported! (PropertyName={0}.{1}; PropertyType={2}; ValueType={3}; Value={4};)", propertyInfo.DeclaringType.Name, propertyInfo.Name, propertyType.Name, item.GetType().Name, item));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns true, if property is a reference to ComponentJson. 
+        /// </summary>
+        private bool IsComponentJsonReference(PropertyInfo propertyInfo)
+        {
+            bool result = false;
+            Property property = new Property(propertyInfo, null);
+            bool isComponentJsonList = propertyInfo.DeclaringType == typeof(ComponentJson2) && propertyInfo.Name == nameof(ComponentJson2.List);
+            bool isComponentJson = UtilFramework.IsSubclassOf(property.PropertyType, typeof(ComponentJson2));
+            if (!isComponentJsonList && isComponentJson) // Is it a component reference?
+            {
+                if (property.PropertyEnum == PropertyEnum.List || property.PropertyEnum == PropertyEnum.Dictionary)
+                {
+                    throw new Exception("ComponentJson reference supported only for property! Not for list and dictionary!");
+                }
+                result = true;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Serialize ComponentJson or Row objects.
+        /// </summary>
+        public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+        {
+            // Serialize Type object
+            if (typeof(T) == typeof(Type))
+            {
+                JsonSerializer.Serialize(writer, (value as Type).FullName);
+                return;
+            }
+
+            // Serialize data row object
+            if (UtilFramework.IsSubclassOf(typeof(T), typeof(Row)))
+            {
+                if (ConverterFactory.IsClient)
+                {
+                    return; // Exclude data Row for client (Angular)-
+                }
+                writer.WriteStartObject();
+                writer.WritePropertyName("$typeRow");
+                JsonSerializer.Serialize(writer, value.GetType().FullName);
+                writer.WritePropertyName("$row");
+                JsonSerializer.Serialize(writer, value, value.GetType()); // Native serialization of data row
+                writer.WriteEndObject();
+                return;
+            }
+
+            // ComponentJson or Row object start
+            writer.WriteStartObject();
+
+            // Type information
+            writer.WritePropertyName("$type"); // Note: Type information could be omitted if property type is equal to property value type
+            JsonSerializer.Serialize(writer, value.GetType().FullName);
+
+            // Loop through properties
+            foreach (var propertyInfo in value.GetType().GetProperties())
+            {
+                var propertyValue = propertyInfo.GetValue(value);
+                bool isIgnoreNullValue = false;
+                if (propertyValue == null)
+                {
+                    isIgnoreNullValue = true;
+                }
+                if (propertyValue is ICollection list && list.Count == 0)
+                {
+                    isIgnoreNullValue = true;
+                }
+
+                // Property contains value
+                if (!isIgnoreNullValue)
+                {
+                    ValidatePropertyAndValueType(propertyInfo, propertyValue);
+
+                    if (IsComponentJsonReference(propertyInfo))
+                    {
+                        // Serialize ComponentJson reference
+                        if (ConverterFactory.IsClient)
+                        {
+                            continue; // Exclude ComponentJson reference for client
+                        }
+                        writer.WritePropertyName(propertyInfo.Name);
+                        writer.WriteStartObject();
+                        writer.WritePropertyName("$type");
+                        JsonSerializer.Serialize(writer, "$componentJsonReference");
+                        writer.WritePropertyName("$id");
+                        var id = ((ComponentJson2)propertyValue).Id;
+                        JsonSerializer.Serialize<int>(writer, id);
+                        writer.WriteEndObject();
+                    }
+                    else
+                    {
+                        // Serialize property value
+                        writer.WritePropertyName(propertyInfo.Name);
+                        JsonSerializer.Serialize(writer, propertyValue, propertyInfo.PropertyType, options);
+                    }
+                }
+            }
+
+            // ComponentJson or Row object end
+            writer.WriteEndObject();
+        }
+    }
+}
