@@ -324,6 +324,6 @@ namespace Framework
         /// <summary>	
         /// Gets IsJson2. Feature toogle for new serialization, deserialization and new ComponentJson2 object tree.	
         /// </summary>	
-        internal static bool IsJson2 = false; // Json2 layer
+        internal static bool IsJson2 = true; // Json2 layer
     }
 }
