@@ -121,6 +121,10 @@
         /// </summary>
         protected virtual Type TypeAppJson()
         {
+            if (UtilFramework.IsJson2 == false)
+            {
+                return Type.GetType("Application.AppMain, Application");
+            }
             string requestDomainName = UtilServer.RequestDomainName();
             var config = ConfigWebServer.Load();
             string appTypeName = null; 
