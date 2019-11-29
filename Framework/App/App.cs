@@ -8,8 +8,11 @@
     using System.Threading.Tasks;
     using System.Linq;
     using Framework.Config;
+    using Framework.Json2;
+    using System.Text.Json;
+    using System.Collections.Generic;
 
-    internal class AppInternal
+    internal class AppInternal // TODO Json2 remove
     {
         /// <summary>
         /// Gets or sets AppJson. This is the application root json component being transferred between server and client.
@@ -24,7 +27,7 @@
         public Type[] TypeComponentInNamespaceList;
     }
 
-    internal class AppSelector
+    internal class AppSelector // TODO Json2 remove
     {
         internal async Task<AppInternal> CreateAppAndProcessAsync(HttpContext context)
         {
@@ -167,6 +170,100 @@
                 typeAppJson, // Namespace of running application.
                 typeof(AppJson), // For example button.
             }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
+        }
+    }
+
+    /// <summary>
+    /// Create AppJson or deserialize from server session. Process request. Serialize AppJson to server session and angular client.
+    /// </summary>
+    internal class AppSelector2
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public AppSelector2()
+        {
+            List<ConfigWebServerWebsite> result = new List<ConfigWebServerWebsite>();
+            string requestDomainName = UtilServer.RequestDomainName();
+            var config = ConfigWebServer.Load();
+            foreach (var website in config.WebsiteList)
+            {
+                foreach (string domainName in website.DomainNameList)
+                {
+                    if (domainName == requestDomainName)
+                    {
+                        result.Add(website);
+                    }
+                }
+            }
+
+            // Make sure Website has been found
+            if (result.Count == 0)
+            {
+                throw new Exception(string.Format("Website not found! See also: ConfigWebServer.json ({0})", requestDomainName));
+            }
+            if (result.Count > 1)
+            {
+                throw new Exception(string.Format("More than one website found! See also: ConfigWebServer.json ({0})", requestDomainName));
+            }
+
+            this.Website = result.Single();
+        }
+
+        /// <summary>
+        /// Gets Website. This is the currently requested Website.
+        /// </summary>
+        public readonly ConfigWebServerWebsite Website;
+
+        /// <summary>
+        /// Returns JsonClient. Create AppJson and process request.
+        /// </summary>
+        internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
+        {
+            AppJson2 appJson = null; // AppJson to process
+            AppJson2Request appJsonRequest = null;
+
+            // Deserialize AppJson from server session
+            appJson = UtilSession2.Deserialize();
+            if (appJson == null)
+            {
+                appJson = CreateAppJson(); // Create new session
+            }
+
+            // Deserialize AppJson2Request
+            string jsonPostBody = await UtilServer.StreamToString(context.Request.Body); // Get request POST body
+            if (jsonPostBody != null) // If post
+            {
+                appJsonRequest = JsonSerializer.Deserialize<AppJson2Request>(jsonPostBody);
+            }
+
+            appJson.RequestUrl = UtilServer.RequestUrl();
+            appJson.RequestCount = (appJsonRequest?.RequestCount).GetValueOrDefault();
+            appJson.ServerSideRenderView = "Website/" + UtilFramework.FolderNameParse(Website.FolderNameServer, "/index.html");
+
+            // Process request
+            await appJson.ProcessInternalAsync(appJsonRequest);
+
+            // Serialize AppJson to server session and angular client
+            UtilSession2.Serialize(appJson, out string jsonClient);
+
+            return jsonClient;
+        }
+
+        /// <summary>
+        /// Create new AppJson session.
+        /// </summary>
+        private AppJson2 CreateAppJson()
+        {
+            Type type = UtilJson2.TypeFromName(Website.AppTypeName);
+            if (type == null)
+            {
+                throw new Exception("AppTypeName not defined! See also file: ConfigWebServer.json");
+            }
+
+            AppJson2 result = (AppJson2)Activator.CreateInstance(type);
+            result.Constructor(null);
+            return result;
         }
     }
 }

@@ -412,7 +412,7 @@
         }
     }
 
-    public class AppJson : Page
+    public class AppJson : Page // TODO Json2 remove
     {
         public AppJson() { }
 
@@ -479,6 +479,8 @@
         /// Gets or sets RequestCount. Used by client. Does not send new request while old is still pending.
         /// </summary>
         public int RequestCount { get; internal set; }
+
+        public string ServerSideRenderView { get; set; }
 
         /// <summary>
         /// Gets or sets RequestCount. Used by server to verify incoming request matches last response.
@@ -1217,6 +1219,7 @@
 namespace Framework.Json2
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public class ComponentJson2
     {
@@ -1243,7 +1246,7 @@ namespace Framework.Json2
         /// <summary>
         /// Gets or sets Id. This is the id of the component in the tree.
         /// </summary>
-        public int Id { get; private set; }
+        public int Id { get; internal set; }
 
         private int rootIdCount;
 
@@ -1263,10 +1266,45 @@ namespace Framework.Json2
         }
     }
 
+    public class AppJson2Request
+    {
+        /// <summary>
+        /// Gets or sets Id. This is the ComponentJson.Id
+        /// </summary>
+        public int Id;
+
+        /// <summary>
+        /// Gets or sets IsClick. Used for Button.
+        /// </summary>
+        public bool IsClick;
+
+        /// <summary>
+        /// Gets or sets RequestCount. Used by client only. Does not send new request while old is still pending.
+        /// </summary>
+        public int RequestCount { get; set; }
+    }
+
     public class AppJson2 : Page
     {
         public AppJson2()
             : base(null)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method: UtilServer.RequestUrl();
+        /// </summary>
+        public string RequestUrl { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets RequestCount. Used by client only. Does not send new request while old is still pending.
+        /// </summary>
+        public int RequestCount { get; internal set; }
+
+        public string ServerSideRenderView { get; set; }
+
+        internal async Task ProcessInternalAsync(AppJson2Request appJsonRequest)
         {
 
         }

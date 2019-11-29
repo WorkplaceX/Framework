@@ -641,6 +641,8 @@ namespace Framework.Json2
     using System.Text.Json.Serialization;
     using System.Linq;
     using Framework.DataAccessLayer;
+    using Framework.Server;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// AppJson serializer and deserializer.
@@ -691,6 +693,24 @@ namespace Framework.Json2
 
             return result;
         }
+
+        /// <summary>
+        /// Returns for example: "Application.AppMain2, Application"
+        /// </summary>
+        public static string TypeToName(Type type)
+        {
+            return type.FullName + ", " + type.Assembly.GetName().Name;
+        }
+
+        /// <summary>
+        /// Returns type of for example "Application.AppMain2, Application".
+        /// </summary>
+        public static Type TypeFromName(string typeName)
+        {
+            string key = string.Format("{0}; TypeNameList; {1};", typeof(UtilJson2).FullName, typeName);
+             
+            return UtilServer.MemoryCache.GetOrCreate(key, (entry) => Type.GetType(typeName));
+        }
     }
 
     /// <summary>
@@ -729,7 +749,7 @@ namespace Framework.Json2
         public Dictionary<int, ComponentJson2> ComponentJsonList = new Dictionary<int, ComponentJson2>();
     }
 
-    public class ComponentJsonReference
+    internal class ComponentJsonReference
     {
         public PropertyInfo PropertyInfo;
 
@@ -738,12 +758,12 @@ namespace Framework.Json2
         public int IdReference;
     }
 
-    public enum PropertyEnum { None = 0, Property = 1, List = 2, Dictionary = 3 }
+    internal enum PropertyEnum { None = 0, Property = 1, List = 2, Dictionary = 3 }
 
     /// <summary>
     /// Access property, list or dictionary.
     /// </summary>
-    public class Property
+    internal class Property
     {
         public Property(PropertyInfo propertyInfo, object propertyValue)
         {
@@ -817,7 +837,7 @@ namespace Framework.Json2
             if (typeToConvert == typeof(Type))
             {
                 var typeName = JsonSerializer.Deserialize<string>(ref reader);
-                return (T)(object)Type.GetType(typeName);
+                return (T)(object)UtilJson2.TypeFromName(typeName);
             }
 
             // Deserialize ComponentJson or Row object
@@ -828,14 +848,14 @@ namespace Framework.Json2
             {
                 var typeRowName = valueList["$typeRow"].GetString();
                 string rowJson = valueList["$row"].GetRawText();
-                Type typeRow = Type.GetType(typeRowName);
+                Type typeRow = UtilJson2.TypeFromName(typeRowName);
                 var resultRow = JsonSerializer.Deserialize(rowJson, typeRow); // Native deserialization for data row.
                 return (T)(object)resultRow;
             }
 
             // Read type information
-            string typeText = valueList["$type"].GetString();
-            Type type = Type.GetType(typeText); // TODO Cache on factory
+            string typeNameComponentJson = valueList["$type"].GetString();
+            Type type = UtilJson2.TypeFromName(typeNameComponentJson); // TODO Cache on factory
 
             // Create ComponentJson
             ComponentJson2 result;
@@ -943,7 +963,7 @@ namespace Framework.Json2
             // Serialize Type object
             if (typeof(T) == typeof(Type))
             {
-                JsonSerializer.Serialize(writer, (value as Type).FullName);
+                JsonSerializer.Serialize(writer, UtilJson2.TypeToName(value as Type));
                 return;
             }
 
@@ -956,7 +976,7 @@ namespace Framework.Json2
                 }
                 writer.WriteStartObject();
                 writer.WritePropertyName("$typeRow");
-                JsonSerializer.Serialize(writer, value.GetType().FullName);
+                JsonSerializer.Serialize(writer, UtilJson2.TypeToName(value.GetType()));
                 writer.WritePropertyName("$row");
                 JsonSerializer.Serialize(writer, value, value.GetType()); // Native serialization of data row
                 writer.WriteEndObject();
@@ -968,7 +988,7 @@ namespace Framework.Json2
 
             // Type information
             writer.WritePropertyName("$type"); // Note: Type information could be omitted if property type is equal to property value type
-            JsonSerializer.Serialize(writer, value.GetType().FullName);
+            JsonSerializer.Serialize(writer, UtilJson2.TypeToName(value.GetType()));
 
             // Loop through properties
             foreach (var propertyInfo in value.GetType().GetProperties())

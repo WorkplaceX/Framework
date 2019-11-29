@@ -3,6 +3,7 @@
     using Framework.Application;
     using Framework.DataAccessLayer;
     using Framework.Json;
+    using Framework.Json2;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
@@ -11,7 +12,7 @@
     using System.Linq;
     using static Framework.DataAccessLayer.UtilDalType;
 
-    internal static class UtilSession
+    internal static class UtilSession // TODO Json2 remove
     {
         /// <summary>
         /// Serialize session state.
@@ -337,6 +338,35 @@
             grid.LookupCellIndex = null;
             grid.LookupGridIndex = null;
             grid.LookupRowIndex = null;
+        }
+    }
+
+    /// <summary>
+    /// AppJson on server session
+    /// </summary>
+    internal static class UtilSession2
+    {
+        /// <summary>
+        /// Deserialize AppJson from current server session
+        /// </summary>
+        public static AppJson2 Deserialize()
+        {
+            AppJson2 result = null;
+            string jsonServer = UtilServer.Session.GetString("JsonServer"); // Read from server session
+            if (UtilFramework.StringNull(jsonServer) != null)
+            {
+                result = UtilJson2.Deserialize(jsonServer);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Serialize AppJson to current server session
+        /// </summary>
+        public static void Serialize(AppJson2 appJson, out string jsonClient)
+        {
+            UtilJson2.Serialize(appJson, out string jsonServer, out jsonClient);
+            UtilServer.Session.SetString("JsonServer", jsonServer); // Write to server session
         }
     }
 

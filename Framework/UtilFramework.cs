@@ -90,6 +90,24 @@ namespace Framework
             return folderName;
         }
 
+        /// <summary>
+        /// Combines FolderName and path.
+        /// </summary>
+        /// <param name="folderName">For example "Default/"</param>
+        /// <param name="path">For example "/index.html"</param>
+        /// <returns>Returns for example "Default/index.html"</returns>
+        public static string FolderNameParse(string folderName, string path)
+        {
+            string result = FolderNameParse(folderName);
+            path = UtilFramework.StringEmpty(path);
+            if (path.StartsWith("/") || path.StartsWith("\""))
+            {
+                path = path.Substring(1);
+            }
+            result = result + path;
+            return result;
+        }
+
         internal static void Assert(bool isAssert, string exceptionText)
         {
             if (!isAssert)
@@ -302,5 +320,10 @@ namespace Framework
             }
             return result;
         }
+
+        /// <summary>	
+        /// Gets IsJson2. Feature toogle for new serialization, deserialization and new ComponentJson2 object tree.	
+        /// </summary>	
+        internal static bool IsJson2 = false; // Json2 layer
     }
 }

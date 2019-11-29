@@ -45,12 +45,9 @@
 
             // Copy styles.css to frameworkStyle.css
             UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
-
+            
             // indexUniversal.html
             string fileName = folderNameDest + "/browser/indexUniversal.html"; // See also Framework/Framework.Angular/application/server.ts
-            File.WriteAllText(fileName, "<app-root></app-root>");
-            fileName = folderNameDest + "dist/browser/indexUniversal.html"; // Working directory is different when running in node (Visual Studio) vs issnode (IIS)
-            UtilCli.FolderCreate(fileName);
             File.WriteAllText(fileName, "<app-root></app-root>");
         }
 

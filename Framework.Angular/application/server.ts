@@ -19,6 +19,7 @@ import 'zone.js/dist/zone-node';
 
 import * as express from 'express';
 import {join} from 'path';
+import * as fs from 'fs';
 
 import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
 
@@ -29,6 +30,11 @@ app.use(bodyParser.json()); // Framework: Enable SSR POST
 
 const PORT = process.env.PORT || 4000;
 const DIST_FOLDER = join(process.cwd(), 'dist/browser');
+var VIEW_FOLDER = DIST_FOLDER; // Framework: Enable change of index.html view
+if (!fs.existsSync(VIEW_FOLDER)) {
+  VIEW_FOLDER = join(process.cwd(), '../') // Framework: running on IIS
+}
+console.log("VIEW_FOLDER=", VIEW_FOLDER);
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {AppServerModuleNgFactory, LAZY_MODULE_MAP, ngExpressEngine, provideModuleMap} = require('./dist/server/main');
@@ -42,7 +48,7 @@ app.engine('html', ngExpressEngine({
 }));
 
 app.set('view engine', 'html');
-app.set('views', DIST_FOLDER);
+app.set('views', VIEW_FOLDER);
 
 // Example Express Rest API endpoints
 // app.get('/api/**', (req, res) => { });
@@ -58,14 +64,19 @@ app.get('*', (req, res) => {
 
 // Framework: Enable SSR POST
 app.post('*', (req, res) => {
-  var view = 'indexUniversal.html';
+  var reqBody = req.body;
+  var view = 'index.html';
+  if (reqBody.ServerSideRenderView != null) {
+    view = reqBody.ServerSideRenderView;
+  }
+  console.log("View=", view);
   res.render(view,     
     {
       req: req,
       res: res,
       providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
         {
-          provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
+          provide: 'jsonServerSideRendering', useValue: (reqBody) // Needs app.use(bodyParser.json());
         }
       ]
     },

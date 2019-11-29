@@ -22,6 +22,7 @@
             services.AddSingleton<DatabaseMemoryInternal>();
 
             services.AddDistributedMemoryCache();
+            services.AddMemoryCache(); // For IMemoryCache
             services.AddSession(options =>
             {
                 options.Cookie.Name = "FrameworkSession";
@@ -50,7 +51,14 @@
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
 
-            applicationBuilder.Run(new Request(applicationBuilder, new AppSelector()).RunAsync);
+            if (UtilFramework.IsJson2 == false)
+            {
+                applicationBuilder.Run(new Request(applicationBuilder, new AppSelector()).RunAsync);
+            }
+            else
+            {
+                applicationBuilder.Run(new Request2().RunAsync);
+            }
         }
     }
 }

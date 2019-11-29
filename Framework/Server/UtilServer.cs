@@ -6,6 +6,7 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Caching.Memory;
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -47,6 +48,17 @@
                     }
                 }
                 return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets MemoryCache. See also: method services.AddMemoryCache();
+        /// </summary>
+        public static IMemoryCache MemoryCache
+        {
+            get
+            {
+                return (IMemoryCache)Context.RequestServices.GetService(typeof(IMemoryCache));
             }
         }
 
@@ -209,7 +221,7 @@
         /// <summary>
         /// Gets currently processed app.
         /// </summary>
-        public static AppInternal AppInternal
+        public static AppInternal AppInternal // TODO Json2 remove
         {
             get
             {
