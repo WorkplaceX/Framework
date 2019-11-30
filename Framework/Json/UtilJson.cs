@@ -644,6 +644,18 @@ namespace Framework.Json2
     using Framework.Server;
     using Microsoft.Extensions.Caching.Memory;
 
+    public enum JsonSerialize { None = 0, Exclude = 1, ServerOnly = 2 }
+
+    public class JsonSerializeAttribute : Attribute 
+    {
+        public JsonSerializeAttribute(JsonSerialize jsonSerialize)
+        {
+            this.JsonSerialize = jsonSerialize;
+        }
+
+        public readonly JsonSerialize JsonSerialize;
+    }
+
     /// <summary>
     /// AppJson serializer and deserializer.
     /// </summary>
@@ -670,6 +682,18 @@ namespace Framework.Json2
         }
 
         /// <summary>
+        /// Set ComponentJson.Owner and ComponentJson.Root of every deserialized component.
+        /// </summary>
+        private static void Deserialize(ComponentJson2 componentJson)
+        {
+            foreach (var item in componentJson.List)
+            {
+                item.ConstructorDeserialize(componentJson);
+                Deserialize(item);
+            }
+        }
+
+        /// <summary>
         /// Deserialize AppJson object from jsonServer (session state).
         /// </summary>
         public static AppJson2 Deserialize(string jsonServer)
@@ -690,6 +714,8 @@ namespace Framework.Json2
                 ComponentJson2 componentJsonReference = converterFactory.ComponentJsonList[item.IdReference];
                 propertyInfo.SetValue(componentJson, componentJsonReference);
             }
+
+            Deserialize(result);
 
             return result;
         }
@@ -768,28 +794,29 @@ namespace Framework.Json2
         public Property(PropertyInfo propertyInfo, object propertyValue)
         {
             // Property
-            PropertyEnum = PropertyEnum.Property;
-            PropertyType = propertyInfo.PropertyType;
-            PropertyValue = propertyValue;
-            PropertyValueList = new List<object>(new object[] { propertyValue });
+            this.PropertyEnum = PropertyEnum.Property;
+            this.PropertyType = propertyInfo.PropertyType;
+            this.IsComponentJsonList = propertyInfo.DeclaringType == typeof(ComponentJson2) && propertyInfo.Name == nameof(ComponentJson2.List);
+            this.PropertyValue = propertyValue;
+            this.PropertyValueList = new List<object>(new object[] { propertyValue });
 
             var interfaceList = propertyInfo.PropertyType.GetInterfaces();
 
             // List
             if (interfaceList.Contains(typeof(IList)))
             {
-                PropertyEnum = PropertyEnum.List;
-                PropertyType = propertyInfo.PropertyType.GetGenericArguments()[0]; // List type
-                PropertyValueList = (IList)propertyValue;
+                this.PropertyEnum = PropertyEnum.List;
+                this.PropertyType = propertyInfo.PropertyType.GetGenericArguments()[0]; // List type
+                this.PropertyValueList = (IList)propertyValue;
             }
 
             // Dictionary
             if (interfaceList.Contains(typeof(IDictionary)))
             {
-                PropertyEnum = PropertyEnum.Dictionary;
-                PropertyType = propertyInfo.PropertyType.GetGenericArguments()[1]; // Key type
-                PropertyDictionary = (IDictionary)propertyValue;
-                PropertyValueList = PropertyDictionary?.Values;
+                this.PropertyEnum = PropertyEnum.Dictionary;
+                this.PropertyType = propertyInfo.PropertyType.GetGenericArguments()[1]; // Key type
+                this.PropertyDictionary = (IDictionary)propertyValue;
+                this.PropertyValueList = PropertyDictionary?.Values;
             }
         }
 
@@ -802,6 +829,11 @@ namespace Framework.Json2
         /// Gets PropertyType for property, list and dictionary.
         /// </summary>
         public Type PropertyType;
+
+        /// <summary>
+        /// Gets IsComponentJsonList. If true, property is ComponentJson.List property.
+        /// </summary>
+        public bool IsComponentJsonList;
 
         /// <summary>
         /// Gets PropertyValueList for property, list and dictionary.
@@ -865,11 +897,11 @@ namespace Framework.Json2
             }
             else
             {
-                result = (ComponentJson2)Activator.CreateInstance(type, null); 
+                result = (ComponentJson2)Activator.CreateInstance(type, new object[] { null });
             }
 
             // Loop through created ComponentJson properties
-            foreach (var propertyInfo in result.GetType().GetProperties())
+            foreach (var propertyInfo in result.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
             {
                 if (valueList.ContainsKey(propertyInfo.Name))
                 {
@@ -886,12 +918,6 @@ namespace Framework.Json2
                     // Deserialize property value
                     var propertyValue = JsonSerializer.Deserialize(valueList[propertyInfo.Name].GetRawText(), propertyInfo.PropertyType, options);
                     propertyInfo.SetValue(result, propertyValue);
-
-                    // ComponentJson.List
-                    if (propertyValue is ComponentJson2 componentJson)
-                    {
-                        result.ListInternal.Add(componentJson);
-                    }
                 }
             }
 
@@ -916,8 +942,15 @@ namespace Framework.Json2
             {
                 return;
             }
+
             // Property type is class Type. Property value typeof(int) is class RuntimeType (which derives from class Type)
             if (propertyType == typeof(Type))
+            {
+                return;
+            }
+
+            // Property is ComponentJson.List
+            if (property.IsComponentJsonList)
             {
                 return;
             }
@@ -942,9 +975,8 @@ namespace Framework.Json2
         {
             bool result = false;
             Property property = new Property(propertyInfo, null);
-            bool isComponentJsonList = propertyInfo.DeclaringType == typeof(ComponentJson2) && propertyInfo.Name == nameof(ComponentJson2.List);
             bool isComponentJson = UtilFramework.IsSubclassOf(property.PropertyType, typeof(ComponentJson2));
-            if (!isComponentJsonList && isComponentJson) // Is it a component reference?
+            if (!property.IsComponentJsonList && isComponentJson) // Is it a component reference?
             {
                 if (property.PropertyEnum == PropertyEnum.List || property.PropertyEnum == PropertyEnum.Dictionary)
                 {
@@ -978,7 +1010,7 @@ namespace Framework.Json2
                 writer.WritePropertyName("$typeRow");
                 JsonSerializer.Serialize(writer, UtilJson2.TypeToName(value.GetType()));
                 writer.WritePropertyName("$row");
-                JsonSerializer.Serialize(writer, value, value.GetType()); // Native serialization of data row
+                JsonSerializer.Serialize(writer, value, value.GetType()); // Native serialization of data row values (no inheritance)
                 writer.WriteEndObject();
                 return;
             }
@@ -987,50 +1019,61 @@ namespace Framework.Json2
             writer.WriteStartObject();
 
             // Type information
-            writer.WritePropertyName("$type"); // Note: Type information could be omitted if property type is equal to property value type
-            JsonSerializer.Serialize(writer, UtilJson2.TypeToName(value.GetType()));
+            if (ConverterFactory.IsClient == false)
+            {
+                writer.WritePropertyName("$type"); // Note: Type information could be omitted if property type is equal to property value type
+                JsonSerializer.Serialize(writer, UtilJson2.TypeToName(value.GetType()));
+            }
 
             // Loop through properties
-            foreach (var propertyInfo in value.GetType().GetProperties())
+            foreach (var propertyInfo in value.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
             {
                 var propertyValue = propertyInfo.GetValue(value);
-                bool isIgnoreNullValue = false;
                 if (propertyValue == null)
                 {
-                    isIgnoreNullValue = true;
+                    continue;
                 }
                 if (propertyValue is ICollection list && list.Count == 0)
                 {
-                    isIgnoreNullValue = true;
+                    continue;
+                }
+                if (propertyValue is int propertyValueInt && propertyValueInt == 0)
+                {
+                    continue;
+                }
+                var attribute = propertyInfo.GetCustomAttribute<JsonSerializeAttribute>();
+                if (attribute != null)
+                {
+                    if (attribute.JsonSerialize == JsonSerialize.Exclude || (ConverterFactory.IsClient && attribute.JsonSerialize == JsonSerialize.ServerOnly))
+                    {
+                        continue;
+                    }
                 }
 
-                // Property contains value
-                if (!isIgnoreNullValue)
-                {
-                    ValidatePropertyAndValueType(propertyInfo, propertyValue);
+                // Property has value
+                ValidatePropertyAndValueType(propertyInfo, propertyValue);
 
-                    if (IsComponentJsonReference(propertyInfo))
+                if (IsComponentJsonReference(propertyInfo))
+                {
+                    // Serialize ComponentJson reference
+                    if (ConverterFactory.IsClient)
                     {
-                        // Serialize ComponentJson reference
-                        if (ConverterFactory.IsClient)
-                        {
-                            continue; // Exclude ComponentJson reference for client
-                        }
-                        writer.WritePropertyName(propertyInfo.Name);
-                        writer.WriteStartObject();
-                        writer.WritePropertyName("$type");
-                        JsonSerializer.Serialize(writer, "$componentJsonReference");
-                        writer.WritePropertyName("$id");
-                        var id = ((ComponentJson2)propertyValue).Id;
-                        JsonSerializer.Serialize<int>(writer, id);
-                        writer.WriteEndObject();
+                        continue; // Exclude ComponentJson reference for client
                     }
-                    else
-                    {
-                        // Serialize property value
-                        writer.WritePropertyName(propertyInfo.Name);
-                        JsonSerializer.Serialize(writer, propertyValue, propertyInfo.PropertyType, options);
-                    }
+                    writer.WritePropertyName(propertyInfo.Name);
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("$type");
+                    JsonSerializer.Serialize(writer, "$componentJsonReference");
+                    writer.WritePropertyName("$id");
+                    var id = ((ComponentJson2)propertyValue).Id;
+                    JsonSerializer.Serialize<int>(writer, id);
+                    writer.WriteEndObject();
+                }
+                else
+                {
+                    // Serialize property value
+                    writer.WritePropertyName(propertyInfo.Name);
+                    JsonSerializer.Serialize(writer, propertyValue, propertyInfo.PropertyType, options);
                 }
             }
 

@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.App;
     using Framework.DataAccessLayer;
+    using Framework.Json2;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -97,7 +98,6 @@
             } while (component != null);
             return null;
         }
-
 
         private static void ComponentListAll(ComponentJson component, List<ComponentJson> result)
         {
@@ -480,7 +480,7 @@
         /// </summary>
         public int RequestCount { get; internal set; }
 
-        public string ServerSideRenderView { get; set; }
+        public string ServerSideRenderView { get; set; } // TODO Pass parameter as url query to SSR
 
         /// <summary>
         /// Gets or sets RequestCount. Used by server to verify incoming request matches last response.
@@ -1218,51 +1218,130 @@
 
 namespace Framework.Json2
 {
+    using Framework.App;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Component tree. Every ComponentJson has an Angular component. See also file: "Framework/Framework.Angular/application/src/app/app.component.ts"
+    /// </summary>
     public class ComponentJson2
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public ComponentJson2(ComponentJson2 owner)
         {
+            this.Owner = owner;
             this.Constructor(owner);
+            this.Type = GetType().Name;
         }
 
         internal void Constructor(ComponentJson2 owner)
         {
             if (owner != null)
             {
-                owner.ListInternal.Add(this);
-                this.root = owner.root;
+                owner.list.Add(this);
+                this.Root = owner.Root;
             }
             else
             {
-                this.root = this;
+                this.Root = this as AppJson2;
             }
-            this.root.rootIdCount += 1;
-            this.Id = this.root.rootIdCount;
+
+            if (this.Root != null)
+            {
+                this.Root.RootIdCount += 1;
+                this.Id = this.Root.RootIdCount;
+            }
         }
+
+        internal void ConstructorDeserialize(ComponentJson2 owner)
+        {
+            this.Owner = owner;
+            this.Root = owner.Root;
+            this.RootIdCount = 0;
+        }
+
+        [JsonSerialize(JsonSerialize.Exclude)]
+        public ComponentJson2 Owner { get; private set; }
 
         /// <summary>
         /// Gets or sets Id. This is the id of the component in the tree.
         /// </summary>
         public int Id { get; internal set; }
 
-        private int rootIdCount;
+        [JsonSerialize(JsonSerialize.ServerOnly)]
+        internal int RootIdCount { get; set; }
 
-        private ComponentJson2 root;
+        internal AppJson2 Root;
 
-        internal List<ComponentJson2> ListInternal = new List<ComponentJson2>();
+        /// <summary>
+        /// Gets AppJson. This is the application root component.
+        /// </summary>
+        [JsonSerialize(JsonSerialize.Exclude)]
+        public AppJson2 AppJson
+        {
+            get
+            {
+                return Root;
+            }
+        }
 
-        public IReadOnlyList<ComponentJson2> List => ListInternal;
+        private List<ComponentJson2> list = new List<ComponentJson2>();
+
+        /// <summary>
+        /// Gets List. ComponentJson tree.
+        /// </summary>
+        public IReadOnlyList<ComponentJson2> List
+        {
+            get
+            {
+                return list;
+            }
+            internal set
+            {
+                list = (List<ComponentJson2>)value;
+            }
+        }
+
+        private string type;
+
+        /// <summary>
+        /// Gets Type. Used by Angular to determine Component.
+        /// </summary>
+        public string Type
+        {
+            get
+            {
+                return type;
+            }
+            internal set
+            {
+                if (value.EndsWith("2")) // TODO Json2 remove
+                {
+                    value = value.TrimEnd('2');
+                }
+                type = value;
+            }
+        }
     }
 
-    public class Page : ComponentJson2
+    public class Page2 : ComponentJson2
     {
-        public Page(ComponentJson2 owner)
+        public Page2(ComponentJson2 owner)
             : base(owner)
         {
+            this.Type = typeof(Page2).Name;
+        }
 
+        /// <summary>
+        /// Override this method to implement custom process. Called once every request.
+        /// </summary>
+        protected virtual internal Task ProcessAsync()
+        {
+            return Task.FromResult(0);
         }
     }
 
@@ -1271,12 +1350,7 @@ namespace Framework.Json2
         /// <summary>
         /// Gets or sets Id. This is the ComponentJson.Id
         /// </summary>
-        public int Id;
-
-        /// <summary>
-        /// Gets or sets IsClick. Used for Button.
-        /// </summary>
-        public bool IsClick;
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets RequestCount. Used by client only. Does not send new request while old is still pending.
@@ -1284,13 +1358,18 @@ namespace Framework.Json2
         public int RequestCount { get; set; }
     }
 
-    public class AppJson2 : Page
+    public class AppJson2 : Page2
     {
         public AppJson2()
             : base(null)
         {
 
         }
+
+        /// <summary>
+        /// Gets or sets AppJson2Request. This is the request sent by the client.
+        /// </summary>
+        internal AppJson2Request AppJson2Request;
 
         /// <summary>
         /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method: UtilServer.RequestUrl();
@@ -1302,11 +1381,121 @@ namespace Framework.Json2
         /// </summary>
         public int RequestCount { get; internal set; }
 
-        public string ServerSideRenderView { get; set; }
+        public string ServerSideRenderView { get; set; } // TODO Pass as query parameter
+
+        public bool IsJson2 { get; set; } // TODO Json2 remove
+
+        /// <summary>
+        /// Gets Version. 
+        /// </summary>
+        public string Version
+        {
+            get
+            {
+                return UtilFramework.VersionBuild;
+            }
+            internal set
+            {
+                // Deserialization
+            }
+        }
+
+        /// <summary>
+        /// Called once a lifetime when page is created.
+        /// </summary>
+        protected virtual internal Task InitAsync()
+        {
+            return Task.FromResult(0);
+        }
 
         internal async Task ProcessInternalAsync(AppJson2Request appJsonRequest)
         {
+            foreach (Page2 page in AppJson.ComponentListAll().OfType<Page2>())
+            {
+                await page.ProcessAsync();
+            }
+        }
+    }
 
+    /// <summary>
+    /// Render html directly.
+    /// </summary>
+    public sealed class Html2 : ComponentJson2
+    {
+        public Html2(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+
+        public string TextHtml { get; set; }
+    }
+
+    /// <summary>
+    /// Json Button. Rendered as html button element.
+    /// </summary>
+    public sealed class Button2 : ComponentJson2
+    {
+        public Button2(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+
+        public string TextHtml { get; set; }
+
+        /// <summary>
+        /// Gets IsClick. True, if user clicked button.
+        /// </summary>
+        [JsonSerialize(JsonSerialize.Exclude)]
+        public bool IsClick
+        {
+            get
+            {
+                return Root.AppJson2Request?.Id == Id;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Extension methods to manage json component tree.
+    /// </summary>
+    public static class ComponentJsonExtension2
+    {
+        private static void ComponentListAll(ComponentJson2 component, List<ComponentJson2> result)
+        {
+            result.AddRange(component.List);
+            foreach (var item in component.List)
+            {
+                ComponentListAll(item, result);
+            }
+        }
+
+        /// <summary>
+        /// Returns list of all child components recursively including this.
+        /// </summary>
+        public static List<ComponentJson2> ComponentListAll(this ComponentJson2 component)
+        {
+            List<ComponentJson2> result = new List<ComponentJson2>();
+            result.Add(component);
+            ComponentListAll(component, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns owner of type T. Searches in parent and grand parents.
+        /// </summary>
+        public static T ComponentOwner<T>(this ComponentJson2 component) where T : ComponentJson2
+        {
+            do
+            {
+                component = component.Owner;
+                if (component is T)
+                {
+                    return (T)component;
+                }
+            } while (component != null);
+            return null;
         }
     }
 }

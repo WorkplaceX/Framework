@@ -225,7 +225,14 @@
                 {
                     fileInfo.Attributes = FileAttributes.Normal; // See also: https://stackoverflow.com/questions/1701457/directory-delete-doesnt-work-access-denied-error-but-under-windows-explorer-it/30673648
                 }
-                Directory.Delete(folderName, true);
+                try
+                {
+                    Directory.Delete(folderName, true);
+                }
+                catch (IOException exception)
+                {
+                    throw new Exception(string.Format("Could not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
+                }
             }
             UtilFramework.Assert(!UtilCli.FolderNameExist(folderName));
         }
@@ -264,17 +271,17 @@
             string fileNameClient = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/app/data.service.ts";
             string textClient = UtilFramework.FileLoad(fileNameClient);
 
-            string versionBuild = string.Format("Build (Commit={0}; Pc={1}; Time={2} (UTC);)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()));
+            string versionBuild = string.Format("Build (WorkplaceX={3}; Commit={0}; Pc={1}; Time={2} (UTC);)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()), UtilFramework.Version);
 
-            string findServer = "return \"Build (local)\";"; // See also: method CommandBuild.BuildServer();
-            string replaceServer = string.Format("return \"{0}\";", versionBuild);
-            string findClient = "public VersionBuild: string = \"Build (local)\";"; // See also: file data.service.ts
-            string replaceClient = string.Format("public VersionBuild: string = \"{0}\";", versionBuild);
+            string findServer = "/* VersionBuild */"; // See also: method CommandBuild.BuildServer();
+            string replaceServer = string.Format("                return \"{0}\"; /* VersionBuild */", versionBuild);
+            string findClient = "/* VersionBuild */"; // See also: file data.service.ts
+            string replaceClient = string.Format("  public VersionBuild: string = \"{0}\"; /* VersionBuild */", versionBuild);
 
             // Write UtilFramework.cs
-            string textNewServer = UtilFramework.Replace(textServer, findServer, replaceServer);
+            string textNewServer = UtilFramework.ReplaceLine(textServer, findServer, replaceServer);
             File.WriteAllText(fileNameServer, textNewServer);
-            string textNewClient = UtilFramework.Replace(textClient, findClient, replaceClient);
+            string textNewClient = UtilFramework.ReplaceLine(textClient, findClient, replaceClient);
             File.WriteAllText(fileNameClient, textNewClient);
 
             try

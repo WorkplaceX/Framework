@@ -31,6 +31,14 @@ export class Json {
   IsBootstrapModal: boolean;
 
   List: any;
+
+  IsJson2: boolean;
+}
+
+export class JsonRequest {
+  Id: number;
+
+  RequestCount: number;
 }
 
 @Injectable({
@@ -39,7 +47,7 @@ export class Json {
 export class DataService {
   public json: Json = new Json();
   
-  public VersionBuild: string = "Build (local)";
+  public VersionBuild: string = "Build (local)"; /* VersionBuild */
   
   public isRequestPending: boolean = false; // Request is in prgress.
 
@@ -57,12 +65,13 @@ export class DataService {
       this.json = jsonBrowser;
       this.json.IsServerSideRendering = false;
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
-        this.json.RequestUrl = "http://localhost:56097/";
-        this.update();
+        this.json.RequestUrl = "https://localhost:44369/"; // Visual Studio run IIS Express 
+        // this.json.RequestUrl = "http://localhost:50919/"; // Visual Studio run Application.Server application 
+        this.update(null);
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;
-        this.update();
+        this.update(null);
       }
     }
   }
@@ -86,7 +95,7 @@ export class DataService {
     }
   }
 
-  public update(): void {
+  public update(jsonRequest: JsonRequest): void {
     // RequestCount
     if (this.json.RequestCount == null) {
       this.json.RequestCount = 0;
@@ -102,8 +111,21 @@ export class DataService {
         requestUrl = new URL("/app.json", this.json.RequestUrl).href 
       }
 
+      // Json for POST
+      var bodyJson: string;
+      if (this.json.IsJson2) {
+        if (jsonRequest == null) {
+          jsonRequest = <JsonRequest> { };
+        }
+        jsonRequest.RequestCount = this.json.RequestCount;
+        bodyJson = JSON.stringify(jsonRequest)
+      } else {
+        bodyJson = JSON.stringify(this.json);
+      }
+
+      // POST app.json
       this.httpClient.request("POST", requestUrl, {
-        body: JSON.stringify(this.json),
+        body: bodyJson,
         withCredentials: true,
       })
       .subscribe(body => {
@@ -115,7 +137,7 @@ export class DataService {
           this.merge(jsonResponse);
           this.json = jsonResponse;
           this.isRequestPending = false;
-          this.update(); // Process new merged request.
+          this.update(null); // Process new merged request.
         }
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {

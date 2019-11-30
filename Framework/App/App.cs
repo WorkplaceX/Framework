@@ -121,7 +121,7 @@
         /// </summary>
         protected virtual Type TypeAppJson()
         {
-            if (UtilFramework.IsJson2 == false)
+            if (UtilFramework.IsJson2 == false) // TODO Json2
             {
                 return Type.GetType("Application.AppMain, Application");
             }
@@ -232,6 +232,7 @@
             if (appJson == null)
             {
                 appJson = CreateAppJson(); // Create new session
+                await appJson.InitAsync();
             }
 
             // Deserialize AppJson2Request
@@ -241,9 +242,11 @@
                 appJsonRequest = JsonSerializer.Deserialize<AppJson2Request>(jsonPostBody);
             }
 
+            appJson.AppJson2Request = appJsonRequest;
             appJson.RequestUrl = UtilServer.RequestUrl();
             appJson.RequestCount = (appJsonRequest?.RequestCount).GetValueOrDefault();
             appJson.ServerSideRenderView = "Website/" + UtilFramework.FolderNameParse(Website.FolderNameServer, "/index.html");
+            appJson.IsJson2 = true;
 
             // Process request
             await appJson.ProcessInternalAsync(appJsonRequest);
@@ -255,7 +258,7 @@
         }
 
         /// <summary>
-        /// Create new AppJson session.
+        /// Create new AppJson component for this session.
         /// </summary>
         private AppJson2 CreateAppJson()
         {
@@ -266,7 +269,6 @@
             }
 
             AppJson2 result = (AppJson2)Activator.CreateInstance(type);
-            result.Constructor(null);
             return result;
         }
     }

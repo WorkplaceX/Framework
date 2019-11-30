@@ -26,13 +26,13 @@ export class Grid {
       this.dataService.mergeBufferText = cell.Text; // Buffer user input during pending request.
     }
 
-    this.dataService.update();
+    this.dataService.update(null);
   }
 
   focus(row) {
     if (!row.IsSelect && !row.IsClick) {
       row.IsClick = true;
-      this.dataService.update();
+      this.dataService.update(null);
     }
   }
 
@@ -40,26 +40,26 @@ export class Grid {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     if (!row.IsSelect && !row.IsClick) {
       row.IsClick = true;
-      this.dataService.update();
+      this.dataService.update(null);
     }
   }
   
   clickSort(column, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     column.IsClickSort = true;
-    this.dataService.update();
+    this.dataService.update(null);
   }
 
   clickConfig(column, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     column.IsClickConfig = true;
-    this.dataService.update();
+    this.dataService.update(null);
   }
 
   clickGrid(isClickEnum, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.json.IsClickEnum = isClickEnum;
-    this.dataService.update();
+    this.dataService.update(null);
   }
 
 
