@@ -734,9 +734,9 @@ namespace Framework.Json
             foreach (var item in converterFactory.ComponentJsonReferenceList)
             {
                 PropertyInfo propertyInfo = item.PropertyInfo;
-                ComponentJson2 componentJson = item.ComponentJson;
+                object propertyObject = item.PropertyObject;
                 ComponentJson2 componentJsonReference = converterFactory.ComponentJsonList[item.IdReference];
-                propertyInfo.SetValue(componentJson, componentJsonReference);
+                propertyInfo.SetValue(propertyObject, componentJsonReference);
             }
 
             Deserialize(result);
@@ -774,12 +774,21 @@ namespace Framework.Json
         public override bool CanConvert(Type typeToConvert)
         {
             // Handle inheritance of ComponentJson and Row classes. Also handle Type object.
-            return
+            var result =
                 UtilFramework.IsSubclassOf(typeToConvert, typeof(ComponentJson2)) ||
                 UtilFramework.IsSubclassOf(typeToConvert, typeof(Row)) ||
                 typeToConvert == typeof(Type);
-                
-                // TODO DefaultValueHandling.Ignore
+
+            // For in Framework declared DTO's enable DefaultValueHandling.Ignore and ComponentJsonReference
+            if (result == false)
+            {
+                if (typeToConvert.Assembly == typeof(UtilFramework).Assembly)
+                {
+                    result = true;
+                }
+            }
+
+            return result;
         }
 
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
@@ -804,12 +813,21 @@ namespace Framework.Json
         public Dictionary<int, ComponentJson2> ComponentJsonList = new Dictionary<int, ComponentJson2>();
     }
 
+    /// <summary>
+    /// Not yet resolved ComponentJson reference.
+    /// </summary>
     internal class ComponentJsonReference
     {
         public PropertyInfo PropertyInfo;
 
-        public ComponentJson2 ComponentJson;
+        /// <summary>
+        /// Gets or sets PropertyObject. This is the object on which property is declared.
+        /// </summary>
+        public object PropertyObject; // ComponentJson or Framework declared DTO
 
+        /// <summary>
+        /// Gets or sets IdReference. This is the ComponentJson.Id reference.
+        /// </summary>
         public int IdReference;
     }
 
@@ -918,15 +936,23 @@ namespace Framework.Json
             string typeNameComponentJson = valueList["$type"].GetString();
             Type type = UtilJson2.TypeFromName(typeNameComponentJson); // TODO Cache on factory
 
-            // Create ComponentJson
-            ComponentJson2 result;
+            // Create AppJson, ComponentJson or Framework declared DTO
+            object result;
             if (UtilFramework.IsSubclassOf(type, typeof(AppJson2)))
             {
-                result = (ComponentJson2)Activator.CreateInstance(type);
+                result = Activator.CreateInstance(type); // Create AppJson
             }
             else
             {
-                result = (ComponentJson2)Activator.CreateInstance(type, new object[] { null });
+                if (UtilFramework.IsSubclassOf(type, typeof(ComponentJson2)))
+                {
+                    result = Activator.CreateInstance(type, new object[] { null }); // Create ComponentJson
+                }
+                else
+                {
+                    UtilFramework.Assert(!UtilFramework.IsSubclassOf(type, typeof(Row))); // Not a data row!
+                    result = Activator.CreateInstance(type); // Create in Framework declared DTO
+                }
             }
 
             // Loop through created ComponentJson properties
@@ -940,7 +966,7 @@ namespace Framework.Json
                         var componentJsonReferenceValueList = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(valueList[propertyInfo.Name].GetRawText());
                         UtilFramework.Assert(componentJsonReferenceValueList["$type"].GetString() == "$componentJsonReference");
                         int id = componentJsonReferenceValueList["$id"].GetInt32();
-                        ConverterFactory.ComponentJsonReferenceList.Add(new ComponentJsonReference { PropertyInfo = propertyInfo, ComponentJson = result, IdReference = id });
+                        ConverterFactory.ComponentJsonReferenceList.Add(new ComponentJsonReference { PropertyInfo = propertyInfo, PropertyObject = result, IdReference = id });
                         continue;
                     }
 
@@ -951,7 +977,10 @@ namespace Framework.Json
             }
 
             // Add ComponentJson for ComponentJsonReference resolve.
-            ConverterFactory.ComponentJsonList.Add(result.Id, result);
+            if (result is ComponentJson2 componentJson)
+            {
+                ConverterFactory.ComponentJsonList.Add(componentJson.Id, componentJson); // Exception item with same key happens, if DTO not declared in Framework references ComponentJson.
+            }
 
             return (T)(object)result;
         }
@@ -1058,7 +1087,7 @@ namespace Framework.Json
             foreach (var propertyInfo in value.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
             {
                 var propertyValue = propertyInfo.GetValue(value);
-                if (propertyValue == null)
+                if (propertyValue == null) // IgnoreNullValues
                 {
                     continue;
                 }
@@ -1066,11 +1095,11 @@ namespace Framework.Json
                 {
                     continue;
                 }
-                if (propertyValue is int propertyValueInt && propertyValueInt == 0)
+                if (propertyValue is int propertyValueInt && propertyValueInt == 0) // DefaultValueHandling.Ignore
                 {
                     continue;
                 }
-                if (propertyValue is bool propertyValueBool && propertyValueBool == false)
+                if (propertyValue is bool propertyValueBool && propertyValueBool == false) // DefaultValueHandling.Ignore
                 {
                     continue;
                 }
