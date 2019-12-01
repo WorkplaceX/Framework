@@ -213,9 +213,10 @@
 
             if (Debugger.IsAttached)
             {
-                Console.WriteLine();
-                Console.WriteLine("Press enter...");
-                Console.ReadLine();
+                // Not necessary anymore with .NET Core 3
+                // Console.WriteLine();
+                // Console.WriteLine("Press enter...");
+                // Console.ReadLine();
             }
         }
 

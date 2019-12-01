@@ -10,6 +10,7 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Web;
 
     internal class Request
     {
@@ -85,11 +86,10 @@
                 var app = await appSelector.CreateAppAndProcessAsync(context);  // Process (Server side rendering)
 
                 // Serialize
-                app.AppJson.ServerSideRenderView = "Angular/browser/indexUniversal.html";
                 string json = UtilJson.Serialize(app.AppJson, app.TypeComponentInNamespaceList);
                 UtilSession.Serialize(app);
 
-                // Server side render post.
+                // Server side rendering POST.
                 string htmlServerSideRendering = await UtilServer.WebPost(url, json);
 
                 htmlServerSideRendering = UtilFramework.Replace(htmlServerSideRendering, "<html><head><style ng-transition=\"serverApp\"></style></head><body>", "");
@@ -203,6 +203,7 @@
                 path += "index.html";
             }
 
+            // Get current website request from "ConfigWebServer.json"
             AppSelector2 appSelector = new AppSelector2();
 
             // POST app.json
@@ -211,19 +212,19 @@
                 return;
             }
 
-            // GET Website
-            if (await WebsiteAsync(context, path, appSelector)) // With server side rendering.
+            // GET index.html from "Application.Server/Framework/Website/" (With server side rendering)
+            if (await WebsiteServerSideRenderingAsync(context, path, appSelector))
             {
                 return;
             }
 
-            // GET "Application.Server/Framework/Website/"
+            // GET file from "Application.Server/Framework/Website/"
             if (await WebsiteFileAsync(context, path, appSelector))
             {
                 return;
             }
 
-            // GET "Application.Server/Framework/Angular/browser"
+            // GET Angular file from "Application.Server/Framework/Angular/browser"
             if (await AngularBrowserFileAsync(context, path))
             {
                 return;
@@ -253,7 +254,7 @@
         /// <summary>
         /// Divert request to "Application.Server/Framework/Website/"
         /// </summary>
-        private static async Task<bool> WebsiteAsync(HttpContext context, string path, AppSelector2 appSelector)
+        private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string path, AppSelector2 appSelector)
         {
             bool result = false;
             string folderName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + appSelector.Website.FolderNameServer;
@@ -264,11 +265,10 @@
             string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServer, path);
             if (File.Exists(fileName))
             {
-                if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering)
+                if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.Website.AppTypeName) != null)
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
-                    string htmlIndex = UtilFramework.FileLoad(fileName);
-                    htmlIndex = await ServerSideRenderingAsync(context, htmlIndex, appSelector);
+                    string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector);
                     await context.Response.WriteAsync(htmlIndex);
                     result = true;
                 }
@@ -279,33 +279,35 @@
         /// <summary>
         /// Render first html GET request.
         /// </summary>
-        private static async Task<string> ServerSideRenderingAsync(HttpContext context, string indexHtml, AppSelector2 appSelector)
+        private static async Task<string> WebsiteServerSideRenderingAsync(HttpContext context, AppSelector2 appSelector)
         {
-            string result = indexHtml;
-            if (result.Contains("<app-root></app-root>")) // Needs server sie rendering
+            string url;
+            if (UtilServer.IsIssServer)
             {
-                string url;
-                if (UtilServer.IsIssServer)
-                {
-                    // Running on IIS Server.
-                    url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/Angular/server.js";
-                }
-                else
-                {
-                    // Running in Visual Studio.
-                    url = "http://localhost:4000/"; // Call Universal server when running in Visual Studio.
-                }
-                string jsonClient = await appSelector.CreateAppAndProcessAsync(context);  // Process (Server side rendering)
-
-                // Server side render post.
-                result = await UtilServer.WebPost(url, jsonClient);
-
-                // Set jsonBrowser in html.
-                string scriptFind = "var jsonBrowser = {};";
-                string scriptReplace = "var jsonBrowser = " + jsonClient + ";";
-                result = UtilFramework.Replace(result, scriptFind, scriptReplace);
+                // Running on IIS Server.
+                url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/Angular/server.js"; // Url of server side rendering when running on IIS Server
             }
-            return result;
+            else
+            {
+                // Running in Visual Studio.
+                url = "http://localhost:4000/"; // Url of server side rendering when running in Visual Studio
+            }
+
+            // Process AppJson
+            string jsonClient = await appSelector.CreateAppAndProcessAsync(context);  // Process (For first server side rendering)
+
+            // Server side rendering POST.
+            string serverSideRenderView = "Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServer, "/index.html");
+            serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
+            url += "?view=" + serverSideRenderView;
+            string indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST
+
+            // Set jsonBrowser in index.html.
+            string scriptFind = "var jsonBrowser = {};";
+            string scriptReplace = "var jsonBrowser = " + jsonClient + ";";
+            indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
+            
+            return indexHtml;
         }
 
 

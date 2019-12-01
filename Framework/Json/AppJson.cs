@@ -480,8 +480,6 @@
         /// </summary>
         public int RequestCount { get; internal set; }
 
-        public string ServerSideRenderView { get; set; } // TODO Pass parameter as url query to SSR
-
         /// <summary>
         /// Gets or sets RequestCount. Used by server to verify incoming request matches last response.
         /// </summary>
@@ -1380,8 +1378,6 @@ namespace Framework.Json2
         /// Gets or sets RequestCount. Used by client only. Does not send new request while old is still pending.
         /// </summary>
         public int RequestCount { get; internal set; }
-
-        public string ServerSideRenderView { get; set; } // TODO Pass as query parameter
 
         public bool IsJson2 { get; set; } // TODO Json2 remove
 

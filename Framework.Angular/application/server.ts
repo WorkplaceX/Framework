@@ -20,6 +20,8 @@ import 'zone.js/dist/zone-node';
 import * as express from 'express';
 import {join} from 'path';
 import * as fs from 'fs';
+import * as url from 'url';
+import * as querystring from 'querystring';
 
 import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
 
@@ -64,10 +66,11 @@ app.get('*', (req, res) => {
 
 // Framework: Enable SSR POST
 app.post('*', (req, res) => {
-  var reqBody = req.body;
-  var view = 'index.html';
-  if (reqBody.ServerSideRenderView != null) {
-    view = reqBody.ServerSideRenderView;
+  let reqBody = req.body;
+  let view = 'Angular/browser/indexUniversal.html';
+  let viewParam = querystring.parse(url.parse(req.originalUrl).query).view as string;
+  if (viewParam != null) {
+    view = viewParam;
   }
   console.log("View=", view);
   res.render(view,     

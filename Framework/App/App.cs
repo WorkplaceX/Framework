@@ -245,7 +245,6 @@
             appJson.AppJson2Request = appJsonRequest;
             appJson.RequestUrl = UtilServer.RequestUrl();
             appJson.RequestCount = (appJsonRequest?.RequestCount).GetValueOrDefault();
-            appJson.ServerSideRenderView = "Website/" + UtilFramework.FolderNameParse(Website.FolderNameServer, "/index.html");
             appJson.IsJson2 = true;
 
             // Process request
@@ -265,7 +264,7 @@
             Type type = UtilJson2.TypeFromName(Website.AppTypeName);
             if (type == null)
             {
-                throw new Exception("AppTypeName not defined! See also file: ConfigWebServer.json");
+                throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigWebServer.json ({0})", Website.AppTypeName));
             }
 
             AppJson2 result = (AppJson2)Activator.CreateInstance(type);

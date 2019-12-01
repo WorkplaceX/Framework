@@ -126,7 +126,7 @@
         public string FolderNameServer;
 
         /// <summary>
-        /// Gets or sets AppTypeName. Needs to derrive from AppJson.
+        /// Gets or sets AppTypeName. Needs to derrive from AppJson. If null, index.html is rendered without server side rendering.
         /// </summary>
         public string AppTypeName;
 
