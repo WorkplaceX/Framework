@@ -986,35 +986,35 @@
         /// <summary>
         /// TypeRow of loaded data grid.
         /// </summary>
-        public Type TypeRow;
+        public Type TypeRow { get; set; }
 
         /// <summary>
         /// Determines where to write data back. To database or memory.
         /// </summary>
-        public DatabaseEnum DatabaseEnum;
+        public DatabaseEnum DatabaseEnum { get; set; }
 
         /// <summary>
         /// Grid columns in server side session state.
         /// </summary>
-        public List<GridColumnSession> GridColumnSessionList = new List<GridColumnSession>();
+        public List<GridColumnSession> GridColumnSessionList { get; set; } = new List<GridColumnSession>();
 
         /// <summary>
         /// Grid rows in server side session state.
         /// </summary>
-        public List<GridRowSession> GridRowSessionList = new List<GridRowSession>();
+        public List<GridRowSession> GridRowSessionList { get; set; } = new List<GridRowSession>();
 
-        public int? RowCountMaxConfig;
+        public int? RowCountMaxConfig { get; set; }
 
         public int RowCountMaxGet()
         {
             return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : 10; // Default value if no config.
         }
 
-        public int ColumnCountMax = 5;
+        public int ColumnCountMax { get; set; } = 5;
 
-        public int OffsetRow = 0;
+        public int OffsetRow { get; set; } = 0;
 
-        public int OffsetColumn = 0;
+        public int OffsetColumn { get; set; } = 0;
 
         public bool IsRange(int index)
         {
@@ -1027,44 +1027,44 @@
         /// <summary>
         /// FieldNameCSharp.
         /// </summary>
-        public string FieldName;
+        public string FieldName { get; set; }
 
         /// <summary>
         /// Gets or sets Text. Session state for column header text.
         /// </summary>
-        public string Text;
+        public string Text { get; set; }
 
         /// <summary>
         /// Gets or sets IsVisible. Session state indicating column is shown.
         /// </summary>
-        public bool IsVisible;
+        public bool IsVisible { get; set; }
 
         /// <summary>
         /// Gets or sets Sort (FieldNameCSharpSort). Session state for column order.
         /// </summary>
-        public double? Sort;
+        public double? Sort { get; set; }
 
         /// <summary>
         /// Gets or sets IsSort. Session statue for column sort down or up.
         /// </summary>
-        public bool? IsSort;
+        public bool? IsSort { get; set; }
     }
 
     internal class GridRowSession
     {
-        public Row Row;
+        public Row Row { get; set; }
 
-        public Row RowUpdate;
+        public Row RowUpdate { get; set; }
 
-        public Row RowInsert;
+        public Row RowInsert { get; set; }
 
-        public bool IsSelect;
+        public bool IsSelect { get; set; }
 
-        public string ErrorSave;
+        public string ErrorSave { get; set; }
 
-        public List<GridCellSession> GridCellSessionList = new List<GridCellSession>();
+        public List<GridCellSession> GridCellSessionList { get; set; } = new List<GridCellSession>();
 
-        public GridRowEnum RowEnum;
+        public GridRowEnum RowEnum { get; set; }
     }
 
     public enum GridRowEnum
@@ -1094,27 +1094,310 @@
 
     internal class GridCellSession
     {
-        public string Text;
+        public string Text { get; set; }
 
-        public string TextOld;
+        public string TextOld { get; set; }
 
-        public string ErrorParse;
+        public string ErrorParse { get; set; }
 
-        public bool IsModify;
+        public bool IsModify { get; set; }
 
-        public bool IsClick; // Show spinner. Used on client only!
+        public bool IsClick { get; set; } // Show spinner. Used on client only!
 
-        public bool IsLookup;
+        public bool IsLookup { get; set; }
 
         /// <summary>
         /// Gets pr sets IsLookupCloseForce. Enforce lookup closing even if set to open later in the process.
         /// </summary>
-        public bool IsLookupCloseForce;
+        public bool IsLookupCloseForce { get; set; }
 
-        public object FilterValue;
+        public object FilterValue { get; set; }
 
-        public FilterOperator FilterOperator;
+        public FilterOperator FilterOperator { get; set; }
 
-        public int MergeId;
+        public int MergeId { get; set; }
+    }
+}
+
+namespace Framework.Session
+{
+    using Database.dbo;
+    using Framework.DataAccessLayer;
+    using Framework.DataAccessLayer.DatabaseMemory;
+    using Framework.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.Threading.Tasks;
+    using static Framework.DataAccessLayer.UtilDalType;
+    using static Framework.Session.UtilSession;
+
+    internal static class AppSession2
+    {
+        public static async Task GridLoadAsync(Grid2 grid)
+        {
+            var query = grid.ComponentOwner<Page2>().GridQuery(grid);
+
+            await GridLoadAsync(grid, query);
+            // await GridRowSelectFirstAsync(grid);
+        }
+
+        /// <summary>
+        /// Load first grid config, then field config and data rows in parallel.
+        /// </summary>
+        private static async Task GridLoadAsync(Grid2 grid, IQueryable query)
+        {
+            GridSession gridSession = grid.GridSession = new GridSession();
+            Type typeRow = query?.ElementType;
+
+            // Load column definition into session state.
+            GridLoadColumn(grid, typeRow);
+
+            // Config get
+            Task fieldConfigLoad = Task.FromResult(0);
+            if (gridSession.TypeRow != typeRow)
+            {
+                Page.ConfigResult configResult = new Page.ConfigResult();
+                grid.ComponentOwner<Page2>().GridQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(typeRow), configResult);
+                // Load config into session state.
+                await GridLoadConfigAsync(grid, typeRow, configResult.ConfigGridQuery);
+                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, configResult.ConfigFieldQuery);
+            }
+
+            // Select rows and load data into session state.
+            var rowLoad = GridLoadRowAsync(grid, query); // Load grid.
+
+            await Task.WhenAll(fieldConfigLoad, rowLoad); // Load field config and row in parallel. Grid config needs to be loaded before because of RowCountMaxConfig dependency.
+        }
+
+        /// <summary>
+        /// Load column definitions into session state.
+        /// </summary>
+        private static void GridLoadColumn(Grid2 grid, Type typeRow)
+        {
+            GridSession gridSession = grid.GridSession;
+
+            if (gridSession.TypeRow != typeRow)
+            {
+                if (typeRow == null)
+                {
+                    gridSession.GridColumnSessionList.Clear();
+                }
+                else
+                {
+                    PropertyInfo[] propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(typeRow);
+                    foreach (PropertyInfo propertyInfo in propertyInfoList)
+                    {
+                        gridSession.GridColumnSessionList.Add(new GridColumnSession() { FieldName = propertyInfo.Name });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load FrameworkConfigGrid to GridSession.
+        /// </summary>
+        private static async Task GridLoadConfigAsync(Grid2 grid, Type typeRow, IQueryable<FrameworkConfigGridBuiltIn> configGridQuery)
+        {
+            GridSession gridSession = grid.GridSession;
+            if (typeRow == null || configGridQuery == null)
+            {
+                gridSession.RowCountMaxConfig = null; // Reset
+            }
+            else
+            {
+                var configGridList = await Data.SelectAsync(configGridQuery);
+                UtilFramework.Assert(configGridList.Count == 0 || configGridList.Count == 1);
+                var frameworkConfigGrid = configGridList.SingleOrDefault();
+                if (frameworkConfigGrid != null)
+                {
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    if (frameworkConfigGrid.TableNameCSharp != null)
+                    {
+                        UtilFramework.Assert(tableNameCSharp == frameworkConfigGrid.TableNameCSharp); // TableNameCSharp. See also file Framework.sql
+                    }
+                    if (frameworkConfigGrid.RowCountMax.HasValue)
+                    {
+                        gridSession.RowCountMaxConfig = frameworkConfigGrid.RowCountMax.Value;
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Load FrameworkConfigField to GridSession.
+        /// </summary>
+        private static async Task GridLoadConfigAsync(Grid2 grid, Type typeRow, IQueryable<FrameworkConfigFieldBuiltIn> configFieldQuery)
+        {
+            GridSession gridSession = grid.GridSession;
+            // (FieldName, FrameworkConfigFieldBuiltIn)
+            Dictionary<string, FrameworkConfigFieldBuiltIn> fieldBuiltInList = new Dictionary<string, FrameworkConfigFieldBuiltIn>();
+            if (!(typeRow == null || configFieldQuery == null))
+            {
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                var configFieldList = await Data.SelectAsync(configFieldQuery);
+                foreach (var frameworkConfigFieldBuiltIn in configFieldList)
+                {
+                    if (frameworkConfigFieldBuiltIn.TableNameCSharp != null) // If set, it needs to be correct.
+                    {
+                        UtilFramework.Assert(frameworkConfigFieldBuiltIn.TableNameCSharp == tableNameCSharp, string.Format("TableNameCSharp wrong! ({0}; {1})", tableNameCSharp, frameworkConfigFieldBuiltIn.TableNameCSharp));
+                    }
+                    fieldBuiltInList.Add(frameworkConfigFieldBuiltIn.FieldNameCSharp, frameworkConfigFieldBuiltIn);
+                }
+            }
+
+            AppJson2 appJson = grid.AppJson;
+            NamingConvention namingConvention = appJson.NamingConventionInternal(typeRow);
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
+
+            foreach (var columnSession in gridSession.GridColumnSessionList)
+            {
+                Field field = fieldList[columnSession.FieldName];
+
+                string textConfig = null;
+                bool? isVisibleConfig = null;
+                double? sortConfig = null;
+                if (fieldBuiltInList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
+                {
+                    textConfig = frameworkConfigFieldBuiltIn.Text;
+                    isVisibleConfig = frameworkConfigFieldBuiltIn.IsVisible;
+                    sortConfig = frameworkConfigFieldBuiltIn.Sort;
+                }
+                columnSession.Text = namingConvention.ColumnTextInternal(typeRow, columnSession.FieldName, textConfig);
+                columnSession.IsVisible = namingConvention.ColumnIsVisibleInternal(typeRow, columnSession.FieldName, isVisibleConfig);
+                columnSession.Sort = namingConvention.ColumnSortInternal(typeRow, columnSession.FieldName, field, sortConfig);
+            }
+        }
+
+        /// <summary>
+        /// Select data from database and write to session.
+        /// </summary>
+        private static async Task GridLoadRowAsync(Grid2 grid, IQueryable query)
+        {
+            List<Row> rowList = null;
+            if (query != null)
+            {
+                GridSession gridSession = grid.GridSession;
+
+                // Filter
+                GridRowSession gridRowSessionFilter = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).FirstOrDefault();
+                if (gridRowSessionFilter != null)
+                {
+                    for (int index = 0; index < gridSession.GridColumnSessionList.Count; index++)
+                    {
+                        string fieldName = gridSession.GridColumnSessionList[index].FieldName;
+                        object filterValue = gridRowSessionFilter.GridCellSessionList[index].FilterValue;
+                        FilterOperator filterOperator = gridRowSessionFilter.GridCellSessionList[index].FilterOperator;
+                        if (filterValue != null)
+                        {
+                            query = Data.QueryFilter(query, fieldName, filterValue, filterOperator);
+                        }
+                    }
+                }
+
+                // Sort
+                GridColumnSession gridColumnSessionSort = gridSession.GridColumnSessionList.Where(item => item.IsSort != null).SingleOrDefault();
+                if (gridColumnSessionSort != null)
+                {
+                    query = Data.QueryOrderBy(query, gridColumnSessionSort.FieldName, (bool)gridColumnSessionSort.IsSort);
+                }
+
+                // Skip, Take
+                query = Data.QuerySkipTake(query, gridSession.OffsetRow, gridSession.RowCountMaxGet());
+
+                rowList = await Data.SelectAsync(query);
+            }
+            DatabaseEnum databaseEnum = DatabaseMemoryInternal.DatabaseEnum(query);
+            GridLoad(grid, rowList, query?.ElementType, databaseEnum);
+        }
+
+        /// <summary>
+        /// Load a single row into session and create its cells.
+        /// </summary>
+        private static void GridLoad(Grid2 grid, int rowIndex, Row row, Type typeRow, GridRowEnum gridRowEnum, ref List<Field> fieldListCache)
+        {
+            if (fieldListCache == null)
+            {
+                fieldListCache = UtilDalType.TypeRowToFieldList(typeRow);
+            }
+
+            GridSession gridSession = grid.GridSession;
+            GridRowSession gridRowSession = new GridRowSession();
+            gridRowSession.IsSelect = gridSession.GridRowSessionList[rowIndex].IsSelect;
+            gridSession.GridRowSessionList[rowIndex] = gridRowSession;
+            gridRowSession.Row = row;
+            gridRowSession.RowEnum = gridRowEnum;
+            Page2 page = grid.ComponentOwner<Page2>();
+            foreach (Field field in fieldListCache)
+            {
+                GridCellSession gridCellSession = new GridCellSession();
+                gridRowSession.GridCellSessionList.Add(gridCellSession);
+                Data.CellTextFromValue2(page, grid, gridRowSession, field, gridCellSession, row);
+            }
+        }
+
+        /// <summary>
+        /// Copy data grid cell values to AppSession.
+        /// </summary>
+        private static void GridLoad(Grid2 grid, List<Row> rowList, Type typeRow, DatabaseEnum databaseEnum)
+        {
+            UtilSession.GridReset(grid);
+
+            GridSession gridSession = grid.GridSession;
+
+            // Reset GridRowSessionList but keep filter row.
+            var filterRow = gridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Filter).SingleOrDefault();
+            gridSession.GridRowSessionList.Clear();
+            if (filterRow != null)
+            {
+                gridSession.GridRowSessionList.Add(filterRow);
+            }
+
+            if (gridSession.TypeRow != typeRow)
+            {
+                gridSession.TypeRow = typeRow;
+                gridSession.DatabaseEnum = databaseEnum;
+                gridSession.GridRowSessionList.Clear();
+                GridLoadAddFilter(grid); // Add "filter row".
+            }
+
+            if (rowList != null)
+            {
+                List<Field> fieldList = UtilDalType.TypeRowToFieldList(typeRow);
+                foreach (Row row in rowList)
+                {
+                    GridRowSession gridRowSession = new GridRowSession();
+                    gridSession.GridRowSessionList.Add(gridRowSession);
+                    GridLoad(grid, gridSession.GridRowSessionList.Count - 1, row, typeRow, GridRowEnum.Index, ref fieldList);
+                }
+                GridLoadAddRowNew(grid); // Add one "new row" to end of grid.
+            }
+        }
+
+        /// <summary>
+        /// Add data filter row. That's where the user enters the filter (search) text.
+        /// </summary>
+        private static void GridLoadAddFilter(Grid2 grid)
+        {
+            GridSession gridSession = grid.GridSession;
+            gridSession.GridRowSessionList.Add(new GridRowSession());
+            int rowIndex = gridSession.GridRowSessionList.Count - 1;
+            List<Field> fieldList = null;
+            GridLoad(grid, rowIndex, null, gridSession.TypeRow, GridRowEnum.Filter, ref fieldList);
+        }
+
+        /// <summary>
+        /// Add empty data row. Thats where the user enters a new record.
+        /// </summary>
+        private static void GridLoadAddRowNew(Grid2 grid)
+        {
+            GridSession gridSession = grid.GridSession;
+            gridSession.GridRowSessionList.Add(new GridRowSession());
+            int rowIndex = gridSession.GridRowSessionList.Count - 1;
+            List<Field> fieldList = null;
+            GridLoad(grid, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref fieldList);
+        }
     }
 }

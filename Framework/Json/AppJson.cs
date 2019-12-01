@@ -3,7 +3,6 @@
     using Database.dbo;
     using Framework.App;
     using Framework.DataAccessLayer;
-    using Framework.Json2;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -1214,12 +1213,16 @@
     }
 }
 
-namespace Framework.Json2
+namespace Framework.Json
 {
-    using Framework.App;
+    using Database.dbo;
+    using Framework.DataAccessLayer;
+    using Framework.Session;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using static Framework.Json.Page;
 
     /// <summary>
     /// Component tree. Every ComponentJson has an Angular component. See also file: "Framework/Framework.Angular/application/src/app/app.component.ts"
@@ -1240,7 +1243,7 @@ namespace Framework.Json2
         {
             if (owner != null)
             {
-                owner.list.Add(this);
+                owner.ListInternal.Add(this);
                 this.Root = owner.Root;
             }
             else
@@ -1263,7 +1266,7 @@ namespace Framework.Json2
         }
 
         [JsonSerialize(JsonSerialize.Exclude)]
-        public ComponentJson2 Owner { get; private set; }
+        public ComponentJson2 Owner { get; internal set; }
 
         /// <summary>
         /// Gets or sets Id. This is the id of the component in the tree.
@@ -1287,7 +1290,7 @@ namespace Framework.Json2
             }
         }
 
-        private List<ComponentJson2> list = new List<ComponentJson2>();
+        internal List<ComponentJson2> ListInternal = new List<ComponentJson2>();
 
         /// <summary>
         /// Gets List. ComponentJson tree.
@@ -1296,11 +1299,11 @@ namespace Framework.Json2
         {
             get
             {
-                return list;
+                return ListInternal;
             }
             internal set
             {
-                list = (List<ComponentJson2>)value;
+                ListInternal = (List<ComponentJson2>)value;
             }
         }
 
@@ -1340,6 +1343,39 @@ namespace Framework.Json2
         protected virtual internal Task ProcessAsync()
         {
             return Task.FromResult(0);
+        }
+
+        /// <summary>
+        /// Returns query to load data grid. Override this method to define sql query.
+        /// </summary>
+        /// <param name="grid">Grid to get query to load.</param>
+        /// <returns>If value null, grid has no header and rows. If value is method Data.QueryEmpty(); grid has header but no rows.</returns>
+        protected virtual internal IQueryable GridQuery(Grid2 grid)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Returns configuration of data grid to be loaded.
+        /// </summary>
+        /// <param name="grid">Json data grid to load.</param>
+        /// <param name="tableNameCSharp">Type of row to load.</param>
+        protected virtual internal void GridQueryConfig(Grid2 grid, string tableNameCSharp, ConfigResult result)
+        {
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+
+            // Example:
+            // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
+
+
+        /// <summary>
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
+        protected virtual internal string GridCellText(Grid2 grid, Row row, string fieldName)
+        {
+            return null;
         }
     }
 
@@ -1382,19 +1418,9 @@ namespace Framework.Json2
         public bool IsJson2 { get; set; } // TODO Json2 remove
 
         /// <summary>
-        /// Gets Version. 
+        /// Gets VersionBuild. This is the server build version. See also file data.service.ts for client version.
         /// </summary>
-        public string Version
-        {
-            get
-            {
-                return UtilFramework.VersionBuild;
-            }
-            internal set
-            {
-                // Deserialization
-            }
-        }
+        public static string VersionBuild => UtilFramework.VersionBuild;
 
         /// <summary>
         /// Called once a lifetime when page is created.
@@ -1410,6 +1436,37 @@ namespace Framework.Json2
             {
                 await page.ProcessAsync();
             }
+
+            // AppSession2.GridRender(); // Grid render
+
+        }
+
+        /// <summary>
+        /// Returns NamingConvention for app related sql tables.
+        /// </summary>
+        protected virtual NamingConvention NamingConventionApp()
+        {
+            return new NamingConvention();
+        }
+
+        private NamingConvention namingConventionFramework;
+
+        private NamingConvention namingConventionApp;
+
+        internal NamingConvention NamingConventionInternal(Type typeRow)
+        {
+            if (UtilDalType.TypeRowIsFrameworkDb(typeRow))
+            {
+                if (namingConventionFramework == null)
+                {
+                    namingConventionFramework = new NamingConvention();
+                }
+            }
+            if (namingConventionApp == null)
+            {
+                namingConventionApp = NamingConventionApp();
+            }
+            return namingConventionApp;
         }
     }
 
@@ -1453,6 +1510,46 @@ namespace Framework.Json2
         }
     }
 
+    public sealed class Grid2 : ComponentJson2
+    {
+        public Grid2(ComponentJson2 owner) 
+            : base(owner)
+        {
+
+        }
+
+        [JsonSerialize(JsonSerialize.ServerOnly)]
+        internal GridSession GridSession { get; set; }
+
+        /// <summary>
+        /// Load data into grid. Override method Page.GridQuery(); to define query. Method method Page.GridQuery(); is also called to reload data.
+        /// </summary>
+        public async Task LoadAsync()
+        {
+            await AppSession2.GridLoadAsync(this);
+        }
+
+        /// <summary>
+        /// Gets or sets ConfigName. See also sql table FrameworkConfigGrid.
+        /// </summary>
+        public string ConfigName { get; set; }
+
+        public List<GridColumn> ColumnList { get; set; }
+
+        public List<GridRow> RowList { get; set; }
+
+        public GridIsClickEnum IsClickEnum { get; set; }
+
+        /// <summary>
+        /// Gets or sets LookupGrid. If not null, this lookup is a lookup of data grid LookupGrid.
+        /// </summary>
+        public Grid2 LookupGrid { get; set; }
+
+        public int? LookupRowIndex;
+
+        public int? LookupCellIndex;
+    }
+
     /// <summary>
     /// Extension methods to manage json component tree.
     /// </summary>
@@ -1479,6 +1576,23 @@ namespace Framework.Json2
         }
 
         /// <summary>
+        /// Clear all child components.
+        /// </summary>
+        public static void ListClear(this ComponentJson2 component)
+        {
+            foreach (var item in component.ComponentListAll())
+            {
+                if (item != component)
+                {
+                    item.Root = null;
+                    item.RootIdCount = 0;
+                    item.Owner = null;
+                }
+            }
+            component.ListInternal.Clear();
+        }
+
+        /// <summary>
         /// Returns owner of type T. Searches in parent and grand parents.
         /// </summary>
         public static T ComponentOwner<T>(this ComponentJson2 component) where T : ComponentJson2
@@ -1492,6 +1606,11 @@ namespace Framework.Json2
                 }
             } while (component != null);
             return null;
+        }
+
+        public static ComponentJson2 ComponentById(this AppJson2 app, int id)
+        {
+            return app.ComponentListAll().Where(item => item.Id == id).Single();
         }
     }
 }

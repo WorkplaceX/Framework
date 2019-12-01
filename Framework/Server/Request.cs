@@ -10,7 +10,6 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Web;
 
     internal class Request
     {
@@ -184,6 +183,17 @@
             return false;
         }
     }
+}
+
+namespace Framework.Server
+{
+    using Framework.Application;
+    using Framework.Config;
+    using Microsoft.AspNetCore.Http;
+    using System;
+    using System.IO;
+    using System.Threading.Tasks;
+    using System.Web;
 
     internal class Request2
     {

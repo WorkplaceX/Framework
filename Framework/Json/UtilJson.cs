@@ -631,7 +631,7 @@
     }
 }
 
-namespace Framework.Json2
+namespace Framework.Json
 {
     using System;
     using System.Collections;
@@ -644,8 +644,31 @@ namespace Framework.Json2
     using Framework.Server;
     using Microsoft.Extensions.Caching.Memory;
 
-    public enum JsonSerialize { None = 0, Exclude = 1, ServerOnly = 2 }
+    /// <summary>
+    /// Property attribute for properties of class ComponentJson.
+    /// </summary>
+    public enum JsonSerialize 
+    {
+        /// <summary>
+        /// Default behavior (serialize).
+        /// </summary>
+        None = 0, 
 
+        /// <summary>
+        /// Do not serialize property.
+        /// </summary>
+        Exclude = 1, 
+
+        /// <summary>
+        /// Serialize property only on server side. It's not sent to the client.
+        /// </summary>
+        ServerOnly = 2 
+    }
+
+    /// <summary>
+    /// Property attribute for properties of class ComponentJson.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
     public class JsonSerializeAttribute : Attribute 
     {
         public JsonSerializeAttribute(JsonSerialize jsonSerialize)
@@ -671,6 +694,7 @@ namespace Framework.Json2
             var converterFactory = new ConverterFactory();
             options.Converters.Add(converterFactory);
             options.WriteIndented = true;
+            options.IgnoreNullValues = true;
 
             // Serialize AppJson for server
             converterFactory.IsClient = false;
@@ -750,7 +774,12 @@ namespace Framework.Json2
         public override bool CanConvert(Type typeToConvert)
         {
             // Handle inheritance of ComponentJson and Row classes. Also handle Type object.
-            return UtilFramework.IsSubclassOf(typeToConvert, typeof(ComponentJson2)) || UtilFramework.IsSubclassOf(typeToConvert, typeof(Row)) || typeToConvert == typeof(Type);
+            return
+                UtilFramework.IsSubclassOf(typeToConvert, typeof(ComponentJson2)) ||
+                UtilFramework.IsSubclassOf(typeToConvert, typeof(Row)) ||
+                typeToConvert == typeof(Type);
+                
+                // TODO DefaultValueHandling.Ignore
         }
 
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
@@ -1038,6 +1067,10 @@ namespace Framework.Json2
                     continue;
                 }
                 if (propertyValue is int propertyValueInt && propertyValueInt == 0)
+                {
+                    continue;
+                }
+                if (propertyValue is bool propertyValueBool && propertyValueBool == false)
                 {
                     continue;
                 }

@@ -817,7 +817,29 @@
         /// <summary>
         /// Convert database value to text.
         /// </summary>
-        internal static void CellTextFromValue(Page page, Grid grid, GridRowSession gridRowSession, Field field, GridCellSession gridCellSession, Row row)
+        internal static void CellTextFromValue(Page page, Grid grid, GridRowSession gridRowSession, Field field, GridCellSession gridCellSession, Row row) // TODO Json2 remove
+        {
+            if (gridRowSession.Row != null)
+            {
+                string text = null;
+                object value = field.PropertyInfo.GetValue(row);
+                if (value != null)
+                {
+                    text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = UtilFramework.StringNull(text);
+                    if (text == null)
+                    {
+                        text = field.FrameworkType().CellTextFromValue(value);
+                    }
+                }
+                gridCellSession.Text = text;
+            }
+        }
+
+        /// <summary>
+        /// Convert database value to text.
+        /// </summary>
+        internal static void CellTextFromValue2(Page2 page, Grid2 grid, GridRowSession gridRowSession, Field field, GridCellSession gridCellSession, Row row) // TODO Json2 remove
         {
             if (gridRowSession.Row != null)
             {

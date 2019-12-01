@@ -3,7 +3,6 @@
     using Framework.Application;
     using Framework.DataAccessLayer;
     using Framework.Json;
-    using Framework.Json2;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
@@ -329,7 +328,7 @@
         /// <summary>
         /// Reject incoming data grid.
         /// </summary>
-        public static void GridReset(Grid grid)
+        public static void GridReset(Grid grid) // TODO Json2 remove
         {
             grid.ColumnList = null;
             grid.RowList = null;
@@ -339,34 +338,19 @@
             grid.LookupGridIndex = null;
             grid.LookupRowIndex = null;
         }
-    }
-
-    /// <summary>
-    /// AppJson on server session
-    /// </summary>
-    internal static class UtilSession2
-    {
-        /// <summary>
-        /// Deserialize AppJson from current server session
-        /// </summary>
-        public static AppJson2 Deserialize()
-        {
-            AppJson2 result = null;
-            string jsonServer = UtilServer.Session.GetString("JsonServer"); // Read from server session
-            if (UtilFramework.StringNull(jsonServer) != null)
-            {
-                result = UtilJson2.Deserialize(jsonServer);
-            }
-            return result;
-        }
 
         /// <summary>
-        /// Serialize AppJson to current server session
+        /// Reject incoming data grid.
         /// </summary>
-        public static void Serialize(AppJson2 appJson, out string jsonClient)
+        public static void GridReset(Grid2 grid)
         {
-            UtilJson2.Serialize(appJson, out string jsonServer, out jsonClient);
-            UtilServer.Session.SetString("JsonServer", jsonServer); // Write to server session
+            grid.ColumnList = null;
+            grid.RowList = null;
+            grid.IsClickEnum = GridIsClickEnum.None;
+            grid.ListClear();
+            grid.LookupCellIndex = null;
+            grid.LookupGrid = null;
+            grid.LookupRowIndex = null;
         }
     }
 
@@ -451,6 +435,42 @@
                 list.Add(listLocal[item.Key]);
             }
             return list;
+        }
+    }
+}
+
+namespace Framework.Session
+{
+    using Framework.Json;
+    using Framework.Server;
+    using Microsoft.AspNetCore.Http;
+
+    /// <summary>
+    /// AppJson on server session
+    /// </summary>
+    internal static class UtilSession2
+    {
+        /// <summary>
+        /// Deserialize AppJson from current server session
+        /// </summary>
+        public static AppJson2 Deserialize()
+        {
+            AppJson2 result = null;
+            string jsonServer = UtilServer.Session.GetString("JsonServer"); // Read from server session
+            if (UtilFramework.StringNull(jsonServer) != null)
+            {
+                result = UtilJson2.Deserialize(jsonServer);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Serialize AppJson to current server session
+        /// </summary>
+        public static void Serialize(AppJson2 appJson, out string jsonClient)
+        {
+            UtilJson2.Serialize(appJson, out string jsonServer, out jsonClient);
+            UtilServer.Session.SetString("JsonServer", jsonServer); // Write to server session
         }
     }
 }
