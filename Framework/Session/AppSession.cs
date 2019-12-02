@@ -1131,7 +1131,7 @@ namespace Framework.Session
     using System.Reflection;
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
-    using static Framework.Session.UtilSession;
+    using static Framework.Session.UtilSession2;
 
     internal static class AppSession2
     {
@@ -1398,6 +1398,104 @@ namespace Framework.Session
             int rowIndex = gridSession.GridRowSessionList.Count - 1;
             List<Field> fieldList = null;
             GridLoad(grid, rowIndex, null, gridSession.TypeRow, GridRowEnum.New, ref fieldList);
+        }
+
+        /// <summary>
+        /// Refresh rows and cells of each data grid.
+        /// </summary>
+        public static void GridRender(AppJson2 appJson)
+        {
+            foreach (GridItem gridItem in UtilSession2.GridItemList(appJson))
+            {
+                if (gridItem.Grid != null)
+                {
+                    Page2 page = gridItem.Grid.ComponentOwner<Page2>();
+
+                    // Grid Reset
+                    gridItem.Grid.ColumnList = new List<GridColumn>();
+                    gridItem.Grid.RowList = new List<GridRow>();
+                    gridItem.Grid.IsClickEnum = GridIsClickEnum.None;
+
+                    if (gridItem.Grid.IsHide == false)
+                    {
+                        var config = new UtilColumnIndexConfig2(gridItem);
+
+                        // Grid Header
+                        foreach (GridColumnItem gridColumnItem in config.ConfigList(gridItem.GridColumnItemList))
+                        {
+                            if (gridItem.GridSession.IsRange(config.IndexToIndexConfig(gridColumnItem.CellIndex)))
+                            {
+                                GridColumn gridColumn = new GridColumn();
+                                gridColumn.Text = gridColumnItem.GridColumnSession.Text;
+                                gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
+                                gridItem.Grid.ColumnList.Add(gridColumn);
+                            }
+                        }
+
+                        // Grid Row
+                        foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                        {
+                            if (gridRowItem.GridRowSession != null)
+                            {
+                                GridRow gridRow = new GridRow();
+                                gridRow.RowEnum = gridRowItem.GridRowSession.RowEnum;
+                                gridRow.ErrorSave = gridRowItem.GridRowSession.ErrorSave;
+                                gridItem.Grid.RowList.Add(gridRow);
+                                gridRow.IsSelect = gridRowItem.GridRowSession.IsSelect;
+                                gridRow.CellList = new List<GridCell>();
+
+                                // Grid Cell
+                                foreach (GridCellItem gridCellItem in config.ConfigList(gridRowItem.GridCellList))
+                                {
+                                    if (gridCellItem.GridCellSession != null)
+                                    {
+                                        if (gridItem.GridSession.IsRange(config.IndexToIndexConfig(gridCellItem.CellIndex)))
+                                        {
+                                            GridCell gridCell = new GridCell();
+                                            gridRow.CellList.Add(gridCell);
+                                            gridCell.Text = gridCellItem.GridCellSession.Text;
+
+                                            // GridCellTextHtml
+                                            Page.GridCellAnnotationResult result = new Page.GridCellAnnotationResult();
+                                            page.GridCellAnnotation(gridItem.Grid, gridCellItem.FieldName, gridRowItem.GridRowSession.RowEnum, gridRowItem.GridRowSession.Row, result);
+                                            gridCell.Html = UtilFramework.StringNull(result.Html);
+                                            gridCell.HtmlIsEdit = result.HtmlIsEdit;
+                                            gridCell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
+                                            gridCell.HtmlRight = UtilFramework.StringNull(result.HtmlRight);
+                                            gridCell.IsReadOnly = result.IsReadOnly;
+                                            gridCell.IsPassword = result.IsPassword;
+                                            gridCell.Align = result.Align;
+
+                                            if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
+                                            {
+                                                gridCell.Placeholder = "Search";
+                                            }
+                                            if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)
+                                            {
+                                                gridCell.Placeholder = "New";
+                                            }
+                                            gridCell.ErrorParse = gridCellItem.GridCellSession.ErrorParse;
+                                            gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
+                                            gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
+
+                                            // Lookup open, close
+                                            if (gridCellItem.GridCellSession.IsLookup == true)
+                                            {
+                                                if (gridCellItem.GridCellSession.IsLookupCloseForce == true)
+                                                {
+                                                    gridCellItem.GridCellSession.IsLookup = false;
+                                                }
+                                            }
+                                            gridCell.IsLookup = gridCellItem.GridCellSession.IsLookup;
+                                            gridCellItem.GridCellSession.IsLookupCloseForce = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

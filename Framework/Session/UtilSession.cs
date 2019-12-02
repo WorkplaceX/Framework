@@ -437,13 +437,102 @@
             return list;
         }
     }
+
+    /// <summary>
+    /// Map column index to configured column index (IsVisible, Sort).
+    /// </summary>
+    internal class UtilColumnIndexConfig2
+    {
+        public UtilColumnIndexConfig2(UtilSession2.GridItem gridItem)
+        {
+            List<UtilSession2.GridColumnItem> result = new List<UtilSession2.GridColumnItem>();
+            foreach (UtilSession2.GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+            {
+                if (gridColumnItem.GridColumnSession.IsVisible)
+                {
+                    result.Add(gridColumnItem);
+                }
+            }
+            result = result
+                .OrderBy(item => item.GridColumnSession.Sort)
+                .ThenBy(item => item.Field.Sort).ToList(); // Make it deterministic if multiple columns have same Sort.
+
+            for (int indexConfig = 0; indexConfig < result.Count; indexConfig++)
+            {
+                UtilSession2.GridColumnItem item = result[indexConfig];
+                int index = gridItem.GridColumnItemList.IndexOf(item);
+                AddIndex(index, indexConfig);
+            }
+        }
+
+        private Dictionary<int, int> indexToIndexConfigList = new Dictionary<int, int>();
+
+        private Dictionary<int, int> indexConfigToIndexList = new Dictionary<int, int>();
+
+        private void AddIndex(int index, int? indexConfig)
+        {
+            if (indexConfig != null)
+            {
+                this.indexToIndexConfigList.Add(index, indexConfig.Value);
+                this.indexConfigToIndexList.Add(indexConfig.Value, index);
+            }
+        }
+
+        public int IndexConfigToIndex(int index)
+        {
+            return this.indexConfigToIndexList[index];
+        }
+
+        /// <summary>
+        /// Returns true, if column IsVisible.
+        /// </summary>
+        public bool IndexToIndexConfigExist(int index)
+        {
+            return this.indexToIndexConfigList.ContainsKey(index);
+        }
+
+        public int IndexToIndexConfig(int index)
+        {
+            return this.indexToIndexConfigList[index];
+        }
+
+        /// <summary>
+        /// Gets Count. Is less than GridColumnItemList.Count, if some columns are IsVisible false.
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return this.indexToIndexConfigList.Count;
+            }
+        }
+
+        /// <summary>
+        /// Returns list with configuration (IsVisible, Sort).
+        /// </summary>
+        public List<T> ConfigList<T>(List<T> list)
+        {
+            List<T> listLocal = new List<T>(list);
+            list.Clear();
+            foreach (var item in this.indexToIndexConfigList)
+            {
+                list.Add(listLocal[item.Key]);
+            }
+            return list;
+        }
+    }
 }
 
 namespace Framework.Session
 {
+    using Framework.DataAccessLayer;
     using Framework.Json;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using static Framework.DataAccessLayer.UtilDalType;
 
     /// <summary>
     /// AppJson on server session
@@ -471,6 +560,181 @@ namespace Framework.Session
         {
             UtilJson2.Serialize(appJson, out string jsonServer, out jsonClient);
             UtilServer.Session.SetString("JsonServer", jsonServer); // Write to server session
+        }
+
+        /// <summary>
+        /// Returns incoming data grid (json) and outgoing grid (session) as one data structure.
+        /// Incoming data grid (json) has lower priority. It gets reset once new data has been loaded into grid (session).
+        /// </summary>
+        public static List<GridItem> GridItemList(AppJson2 appJson)
+        {
+            var result = new List<GridItem>();
+
+            var gridList = appJson.ComponentListAll().OfType<Grid2>();
+            foreach (var grid in gridList)
+            {
+                GridItem gridItem = new GridItem();
+                result.Add(gridItem);
+
+                GridSession gridSession = grid.GridSession;
+
+                // Set Grid
+                gridItem.GridSession = gridSession;
+
+                // gridList.TryGetValue(gridIndex, out Grid grid);
+                gridItem.Grid = grid;
+
+                List<Field> fieldList = null;
+                gridItem.GridColumnItemList = new List<GridColumnItem>();
+                if (gridItem.GridSession.TypeRow != null)
+                {
+                    fieldList = UtilDalType.TypeRowToFieldList(gridItem.GridSession.TypeRow);
+                    for (int cellIndex = 0; cellIndex < fieldList.Count; cellIndex++)
+                    {
+                        GridColumnItem gridColumnItem = new GridColumnItem();
+                        gridItem.GridColumnItemList.Add(gridColumnItem);
+
+                        // Set Column
+                        gridColumnItem.CellIndex = cellIndex;
+                        gridColumnItem.GridColumnSession = gridSession.GridColumnSessionList[cellIndex]; // Outgoing Column (Session)
+                        gridColumnItem.Field = fieldList[cellIndex];
+                    }
+                }
+
+                var config = new UtilColumnIndexConfig2(gridItem);
+                foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                {
+                    int cellIndex = gridColumnItem.CellIndex;
+                    if (config.IndexToIndexConfigExist(cellIndex))
+                    {
+                        int cellIndexConfig = config.IndexToIndexConfig(cellIndex);
+                        gridColumnItem.GridColumn = grid?.ColumnList?.TryGetValue(cellIndexConfig - gridSession.OffsetColumn); // Incoming Column (Json)
+                    }
+                }
+
+                for (int rowIndex = 0; rowIndex < gridSession.GridRowSessionList.Count; rowIndex++)
+                {
+                    GridRowItem gridRowItem = new GridRowItem();
+                    gridItem.GridRowList.Add(gridRowItem);
+                    GridRowSession gridRowSession = gridSession.GridRowSessionList.TryGetValue(rowIndex);
+                    GridRow gridRow = grid?.RowList?.TryGetValue(rowIndex);
+
+                    // Set Row
+                    gridRowItem.RowIndex = rowIndex;
+                    gridRowItem.GridRowSession = gridRowSession;
+                    gridRowItem.GridRow = gridRow;
+
+                    int offsetColumn = gridItem.GridSession.OffsetColumn;
+                    int cellCount = Math.Max(gridRowSession == null ? 0 : gridRowSession.GridCellSessionList.Count, (gridRow?.CellList.Count).GetValueOrDefault() + offsetColumn);
+                    for (int cellIndex = 0; cellIndex < cellCount; cellIndex++)
+                    {
+                        GridCellItem gridCellItem = new GridCellItem();
+                        gridRowItem.GridCellList.Add(gridCellItem);
+                        GridCellSession gridCellSession = gridRowSession?.GridCellSessionList[cellIndex];
+                        GridCell gridCell = null;
+                        if (config.IndexToIndexConfigExist(cellIndex))
+                        {
+                            int cellIndexConfig = config.IndexToIndexConfig(cellIndex);
+                            gridCell = gridRow?.CellList?.TryGetValue(cellIndexConfig - offsetColumn);
+                        }
+
+                        // Set Cell
+                        gridCellItem.CellIndex = cellIndex;
+                        gridCellItem.GridCellSession = gridCellSession; // Outgoing Cell (Session)
+                        gridCellItem.GridCell = gridCell; // Incoming Cell (Json)
+                        if (gridCellSession != null)
+                        {
+                            gridCellItem.Field = fieldList[cellIndex];
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Used to represent grid session data. Not a DTO.
+        /// </summary>
+        public class GridItem
+        {
+            public GridSession GridSession;
+
+            /// <summary>
+            /// Can be null if grid has been removed from json.
+            /// </summary>
+            public Grid2 Grid;
+
+            public List<GridColumnItem> GridColumnItemList = new List<GridColumnItem>();
+
+            public List<GridRowItem> GridRowList = new List<GridRowItem>();
+        }
+
+        /// <summary>
+        /// Used to represent grid session data. Not a DTO.
+        /// </summary>
+        public class GridColumnItem
+        {
+            public int CellIndex;
+
+            public GridColumnSession GridColumnSession;
+
+            public GridColumn GridColumn;
+
+            public Field Field;
+        }
+
+        /// <summary>
+        /// Used to represent grid session data. Not a DTO.
+        /// </summary>
+        public class GridRowItem
+        {
+            public int RowIndex;
+
+            /// <summary>
+            /// Can be null if second loaded grid has less records.
+            /// </summary>
+            public GridRowSession GridRowSession;
+
+            /// <summary>
+            /// Can be null if not yet rendered.
+            /// </summary>
+            public GridRow GridRow;
+
+            public List<GridCellItem> GridCellList = new List<GridCellItem>();
+        }
+
+        /// <summary>
+        /// Used to represent grid session data. Not a DTO.
+        /// </summary>
+        public class GridCellItem
+        {
+            public int CellIndex;
+
+            public GridCellSession GridCellSession;
+
+            public GridCell GridCell;
+
+            public Field Field;
+
+            public string FieldName
+            {
+                get
+                {
+                    return Field.PropertyInfo.Name;
+                }
+            }
+        }
+
+        private static T TryGetValue<T>(this List<T> list, int index)
+        {
+            if (list.Count > index && index >= 0)
+            {
+                return list[index];
+            }
+            else
+            {
+                return default(T);
+            }
         }
     }
 }

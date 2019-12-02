@@ -850,29 +850,29 @@
 
     public sealed class GridColumn
     {
-        public string Text;
+        public string Text { get; set; }
 
         /// <summary>
         /// Gets or sets IsSort. If false, ascending. If true descending.
         /// </summary>
-        public bool? IsSort;
+        public bool? IsSort { get; set; }
 
-        public bool IsClickSort;
+        public bool IsClickSort { get; set; }
 
-        public bool IsClickConfig;
+        public bool IsClickConfig { get; set; }
     }
 
     public sealed class GridRow
     {
-        public List<GridCell> CellList;
+        public List<GridCell> CellList { get; set; }
 
-        public bool IsClick;
+        public bool IsClick { get; set; }
 
-        public bool IsSelect;
+        public bool IsSelect { get; set; }
 
-        public GridRowEnum RowEnum;
+        public GridRowEnum RowEnum { get; set; }
 
-        public string ErrorSave;
+        public string ErrorSave { get; set; }
     }
 
     public sealed class GridCell
@@ -880,65 +880,65 @@
         /// <summary>
         /// Gets or sets json text. When coming from client Text can be null or ""!
         /// </summary>
-        public string Text;
+        public string Text { get; set; }
 
-        public string Placeholder;
+        public string Placeholder { get; set; }
 
-        public string ErrorParse;
+        public string ErrorParse { get; set; }
 
         public string TextGet()
         {
             return UtilFramework.StringNull(Text);
         }
 
-        public bool IsModify;
+        public bool IsModify { get; set; }
 
-        public bool IsClick; // Show spinner
+        public bool IsClick { get; set; } // Show spinner
 
         /// <summary>
         /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
         /// </summary>
-        public int MergeId;
+        public int MergeId { get; set; }
 
         /// <summary>
         /// Gets or sets IsLookup. If true, field shows an open Lookup window.
         /// </summary>
-        public bool IsLookup;
+        public bool IsLookup { get; set; }
 
         /// <summary>
         /// Gets or sets Html. Use for example to transform plain text into a hyper link.
         /// </summary>
-        public string Html;
+        public string Html { get; set; }
 
         /// <summary>
         /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
         /// </summary>
-        public bool HtmlIsEdit;
+        public bool HtmlIsEdit { get; set; }
 
         /// <summary>
         /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
         /// </summary>
-        public string HtmlLeft;
+        public string HtmlLeft { get; set; }
 
         /// <summary>
         /// Gets or sets HtmlRight. Use for example to render an indicator icon on the right hand side in the cell. 
         /// </summary>
-        public string HtmlRight;
+        public string HtmlRight { get; set; }
 
         /// <summary>
         /// Gets or sets IsReadOnly. If true, user can not edit text.
         /// </summary>
-        public bool IsReadOnly;
+        public bool IsReadOnly { get; set; }
 
         /// <summary>
         /// Gets or sets IsPassword. If true, user can not read text.
         /// </summary>
-        public bool IsPassword;
+        public bool IsPassword { get; set; }
 
         /// <summary>
         /// Gets or sets Align. Defines text allign of centent in the data grid cell.
         /// </summary>
-        public AlignEnum Align;
+        public AlignEnum Align { get; set; }
     }
 
     public sealed class Html : ComponentJson
@@ -1377,6 +1377,19 @@ namespace Framework.Json
         {
             return null;
         }
+
+        /// <summary>
+        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
+        /// </summary>
+        /// <param name="grid">Data grid on this page.</param>
+        /// <param name="fieldName">Data grid column name.</param>
+        /// <param name="gridRowEnum">Data grid row type.</param>
+        /// <param name="row">Data grid row if applicable for row type.</param>
+        /// <param name="result">Returns data grid cell annotation.</param>
+        protected virtual internal void GridCellAnnotation(Grid2 grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
+        {
+
+        }
     }
 
     public class AppJson2Request
@@ -1437,8 +1450,7 @@ namespace Framework.Json
                 await page.ProcessAsync();
             }
 
-            // AppSession2.GridRender(); // Grid render
-
+            AppSession2.GridRender(this); // Grid render
         }
 
         /// <summary>
@@ -1545,9 +1557,16 @@ namespace Framework.Json
         /// </summary>
         public Grid2 LookupGrid { get; set; }
 
-        public int? LookupRowIndex;
+        public int? LookupRowIndex { get; set; }
 
-        public int? LookupCellIndex;
+        public int? LookupCellIndex { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsHide. If true, grid data (ColumnList and RowList) are not beeing transfered to client. See also method GridRender();
+        /// But owner page and its method Page.GridRowSelectedAsync(); can still be called for example by method ProcessBootstrapNavbarAsync();
+        /// To hide other components use extension method Remove();
+        /// </summary>
+        public bool IsHide { get; set; }
     }
 
     /// <summary>

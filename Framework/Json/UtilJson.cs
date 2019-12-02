@@ -647,29 +647,29 @@ namespace Framework.Json
     /// <summary>
     /// Property attribute for properties of class ComponentJson.
     /// </summary>
-    public enum JsonSerialize 
+    public enum JsonSerialize
     {
         /// <summary>
         /// Default behavior (serialize).
         /// </summary>
-        None = 0, 
+        None = 0,
 
         /// <summary>
         /// Do not serialize property.
         /// </summary>
-        Exclude = 1, 
+        Exclude = 1,
 
         /// <summary>
         /// Serialize property only on server side. It's not sent to the client.
         /// </summary>
-        ServerOnly = 2 
+        ServerOnly = 2
     }
 
     /// <summary>
     /// Property attribute for properties of class ComponentJson.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class JsonSerializeAttribute : Attribute 
+    public class JsonSerializeAttribute : Attribute
     {
         public JsonSerializeAttribute(JsonSerialize jsonSerialize)
         {
@@ -758,7 +758,7 @@ namespace Framework.Json
         public static Type TypeFromName(string typeName)
         {
             string key = string.Format("{0}; TypeNameList; {1};", typeof(UtilJson2).FullName, typeName);
-             
+
             return UtilServer.MemoryCache.GetOrCreate(key, (entry) => Type.GetType(typeName));
         }
     }
@@ -782,7 +782,7 @@ namespace Framework.Json
             // For in Framework declared DTO's enable DefaultValueHandling.Ignore and ComponentJsonReference
             if (result == false)
             {
-                if (typeToConvert.Assembly == typeof(UtilFramework).Assembly)
+                if (typeToConvert.Assembly == typeof(UtilFramework).Assembly && !typeToConvert.IsEnum)
                 {
                     result = true;
                 }
@@ -979,7 +979,7 @@ namespace Framework.Json
             // Add ComponentJson for ComponentJsonReference resolve.
             if (result is ComponentJson2 componentJson)
             {
-                ConverterFactory.ComponentJsonList.Add(componentJson.Id, componentJson); // Exception item with same key happens, if DTO not declared in Framework references ComponentJson.
+                ConverterFactory.ComponentJsonList.Add(componentJson.Id, componentJson); // Exception item with same key happens, if same ComponentJson has been serialized more than once. DTO not declared in Framework does reference ComponentJson.
             }
 
             return (T)(object)result;
@@ -1100,6 +1100,10 @@ namespace Framework.Json
                     continue;
                 }
                 if (propertyValue is bool propertyValueBool && propertyValueBool == false) // DefaultValueHandling.Ignore
+                {
+                    continue;
+                }
+                if (propertyValue is Enum propertyValueEnum && (int)propertyValue == 0) // DefaultValueHandling.Ignore
                 {
                     continue;
                 }
