@@ -224,7 +224,7 @@
         internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
         {
             AppJson2 appJson = null; // AppJson to process
-            AppJson2Request appJsonRequest = null;
+            AppJson2Request appJsonRequest = new AppJson2Request(); // Default
 
             // Deserialize AppJson from server session
             appJson = UtilSession2.Deserialize();
@@ -265,7 +265,7 @@
             {
                 throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigWebServer.json ({0})", Website.AppTypeName));
             }
-
+            
             AppJson2 result = (AppJson2)Activator.CreateInstance(type);
             return result;
         }

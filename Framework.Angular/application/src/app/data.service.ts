@@ -38,6 +38,8 @@ export class Json {
 export class JsonRequest {
   Id: number;
 
+  ColumnId: number;
+
   RequestCount: number;
 }
 

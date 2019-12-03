@@ -1148,7 +1148,7 @@ namespace Framework.Session
         /// </summary>
         private static async Task GridLoadAsync(Grid2 grid, IQueryable query)
         {
-            GridSession gridSession = grid.GridSession = new GridSession();
+            GridSession gridSession = grid.GridSession;
             Type typeRow = query?.ElementType;
 
             // Load column definition into session state.
@@ -1495,6 +1495,55 @@ namespace Framework.Session
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Process data grid.
+        /// </summary>
+        public static async Task ProcessAsync(AppJson2 appJson)
+        {
+            await ProcessGridIsSortClickAsync(appJson);
+        }
+
+        private static async Task ProcessGridIsSortClickAsync(AppJson2 appJson)
+        {
+            List<GridItem> gridItemReloadList = new List<GridItem>();
+            foreach (GridItem gridItem in UtilSession2.GridItemList(appJson))
+            {
+                int columnId = 0;
+                foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                {
+                    columnId += 1;
+                    if (GridColumn.IsClickSort2(gridItem.Grid, columnId))
+                    {
+                        if (!gridItemReloadList.Contains(gridItem))
+                        {
+                            gridItemReloadList.Add(gridItem);
+                        }
+                        bool? isSort = gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort;
+                        if (isSort == null)
+                        {
+                            isSort = false;
+                        }
+                        else
+                        {
+                            isSort = !isSort;
+                        }
+                        foreach (GridColumnSession gridColumnSession in gridItem.GridSession.GridColumnSessionList)
+                        {
+                            gridColumnSession.IsSort = null;
+                        }
+                        gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
+                        gridItem.GridSession.OffsetRow = 0; // Reset paging.
+                    }
+                }
+            }
+
+            // Grid reload from database
+            foreach (GridItem gridItem in gridItemReloadList)
+            {
+                await GridLoadAsync(gridItem.Grid);
             }
         }
     }

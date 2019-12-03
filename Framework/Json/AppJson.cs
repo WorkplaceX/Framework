@@ -857,7 +857,13 @@
         /// </summary>
         public bool? IsSort { get; set; }
 
-        public bool IsClickSort { get; set; }
+        public bool IsClickSort { get; set; } // TODO Json2 remove
+
+        internal static bool IsClickSort2(Grid2 grid, int columnId)
+        {
+            var request = grid.AppJson.AppJson2Request;
+            return request.Id == grid.Id && request.ColumnId == columnId;
+        }
 
         public bool IsClickConfig { get; set; }
     }
@@ -1243,7 +1249,7 @@ namespace Framework.Json
         {
             if (owner != null)
             {
-                owner.ListInternal.Add(this);
+                owner.List.Add(this);
                 this.Root = owner.Root;
             }
             else
@@ -1290,22 +1296,10 @@ namespace Framework.Json
             }
         }
 
-        internal List<ComponentJson2> ListInternal = new List<ComponentJson2>();
-
         /// <summary>
-        /// Gets List. ComponentJson tree.
+        /// Gets json list.
         /// </summary>
-        public IReadOnlyList<ComponentJson2> List
-        {
-            get
-            {
-                return ListInternal;
-            }
-            internal set
-            {
-                ListInternal = (List<ComponentJson2>)value;
-            }
-        }
+        public List<ComponentJson2> List { get; internal set; } = new List<ComponentJson2>(); // Empty list is removed by json serializer.
 
         private string type;
 
@@ -1327,6 +1321,13 @@ namespace Framework.Json
                 type = value;
             }
         }
+
+        public string Name { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets custom html style classes for this component.
+        /// </summary>
+        public string CssClass { get; set; }
     }
 
     public class Page2 : ComponentJson2
@@ -1337,8 +1338,17 @@ namespace Framework.Json
             this.Type = typeof(Page2).Name;
         }
 
+
         /// <summary>
-        /// Override this method to implement custom process. Called once every request.
+        /// Called once a lifetime when page is created.
+        /// </summary>
+        protected virtual internal Task InitAsync()
+        {
+            return Task.FromResult(0);
+        }
+
+        /// <summary>
+        /// Override this method to implement custom process. Called once every client request.
         /// </summary>
         protected virtual internal Task ProcessAsync()
         {
@@ -1353,6 +1363,18 @@ namespace Framework.Json
         protected virtual internal IQueryable GridQuery(Grid2 grid)
         {
             return null;
+        }
+
+        /// <summary>
+        /// Override this method for custom grid save implementation. Return isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to save.</param>
+        /// <param name="row">Data row to update.</param>
+        /// <param name="rowNew">New data row to save to database.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual internal Task<bool> GridUpdateAsync(Grid2 grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -1390,6 +1412,20 @@ namespace Framework.Json
         {
 
         }
+
+        /// <summary>
+        /// Override this method for custom implementation. Method is called when data row has been selected. Get selected row with method grid.GridRowSelected(); and reload for example a detail data grid.
+        /// </summary>
+        protected virtual internal Task GridRowSelectedAsync(Grid2 grid)
+        {
+            return Task.FromResult(0);
+        }
+
+        /// <summary>
+        /// Gets or sets IsHide. If true, component and children are still being transferred to client and back to keep state.
+        /// To hide other components use extension method Remove();
+        /// </summary>
+        public bool IsHide { get; set; }
     }
 
     public class AppJson2Request
@@ -1398,6 +1434,11 @@ namespace Framework.Json
         /// Gets or sets Id. This is the ComponentJson.Id
         /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// Gets ColumnIndex.
+        /// </summary>
+        public int ColumnId { get; set; }
 
         /// <summary>
         /// Gets or sets RequestCount. Used by client only. Does not send new request while old is still pending.
@@ -1431,20 +1472,19 @@ namespace Framework.Json
         public bool IsJson2 { get; set; } // TODO Json2 remove
 
         /// <summary>
+        /// Gets IsSessionExpired. If true, session expired and application has been recycled.
+        /// </summary>
+        public bool IsSessionExpired { get; internal set; }
+
+        /// <summary>
         /// Gets VersionBuild. This is the server build version. See also file data.service.ts for client version.
         /// </summary>
         public static string VersionBuild => UtilFramework.VersionBuild;
 
-        /// <summary>
-        /// Called once a lifetime when page is created.
-        /// </summary>
-        protected virtual internal Task InitAsync()
-        {
-            return Task.FromResult(0);
-        }
-
         internal async Task ProcessInternalAsync(AppJson2Request appJsonRequest)
         {
+            await AppSession2.ProcessAsync(this); // Grid process
+
             foreach (Page2 page in AppJson.ComponentListAll().OfType<Page2>())
             {
                 await page.ProcessAsync();
@@ -1531,7 +1571,7 @@ namespace Framework.Json
         }
 
         [JsonSerialize(JsonSerialize.ServerOnly)]
-        internal GridSession GridSession { get; set; }
+        internal GridSession GridSession { get; set; } = new GridSession();
 
         /// <summary>
         /// Load data into grid. Override method Page.GridQuery(); to define query. Method method Page.GridQuery(); is also called to reload data.
@@ -1570,10 +1610,156 @@ namespace Framework.Json
     }
 
     /// <summary>
+    /// Json Div. Rendered as html div element.
+    /// </summary>
+    public sealed class Div2 : ComponentJson2
+    {
+        public Div2(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
+    /// </summary>
+    public sealed class DivContainer2 : ComponentJson2
+    {
+        public DivContainer2(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// See also: https://getbootstrap.com/docs/4.1/components/navbar/
+    /// Change background color with style "background-color: red !important".
+    /// </summary>
+    public sealed class BootstrapNavbar2 : ComponentJson2
+    {
+        public BootstrapNavbar2(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+
+        public string BrandTextHtml { get; set; }
+
+        ///// <summary>
+        ///// Gets or sets GridIndexList. Data grid row should have a field "Text" and "ParentId" for hierarchical navigation.
+        ///// </summary>
+        //public List<int> GridIndexList = new List<int>(); // Empty list is removed by json serializer.
+
+        public List<BootstrapNavbarButton> ButtonList { get; set; }
+
+        /*
+        <nav class="navbar-dark bg-primary sticky-top">
+        <ul style="display: flex; flex-wrap: wrap"> // Wrapp if too many li.
+        <a style="display:inline-block;">
+        <i class="fas fa-spinner fa-spin text-white"></i>         
+        */
+    }
+
+    public sealed class BootstrapNavbarButton2 : ComponentJson2
+    {
+        public BootstrapNavbarButton2(ComponentJson2 owner)
+            : base(owner)
+        {
+
+        }
+
+        ///// <summary>
+        ///// Gets or sets GridIndex. For example navigation and language buttons can be shown in the Navbar.
+        ///// </summary>
+        //public int? GridIndex { }
+
+        /// <summary>
+        /// RowIndex needs to be stored because unlike in the data grid sequence of buttons is different because filter row is omitted.
+        /// </summary>
+        public int RowIndex;
+
+        public string TextHtml;
+
+        public bool IsActive;
+
+        public bool IsClick;
+
+        /// <summary>
+        /// Gets or sets IsDropDown. True, if button has level 2 navigation.
+        /// </summary>
+        public bool IsDropDown;
+
+        public List<BootstrapNavbarButton> ButtonList;
+    }
+
+    public static class BootstrapExtension2
+    {
+        /// <summary>
+        /// Show bootstrap alert (on per page).
+        /// </summary>
+        public static Html2 BootstrapAlert(this Page2 page, string name, string textHtml, BootstrapAlertEnum alertEnum, int index = 0)
+        {
+            string htmlTextAlert = "<div class='alert {{CssClass}}' role='alert'>{{TextHtml}}</div>";
+            string cssClass = null;
+            switch (alertEnum)
+            {
+                case BootstrapAlertEnum.Info:
+                    cssClass = "alert-info";
+                    break;
+                case BootstrapAlertEnum.Success:
+                    cssClass = "alert-success";
+                    break;
+                case BootstrapAlertEnum.Warning:
+                    cssClass = "alert-warning";
+                    break;
+                case BootstrapAlertEnum.Error:
+                    cssClass = "alert-danger";
+                    break;
+                default:
+                    break;
+            }
+            htmlTextAlert = htmlTextAlert.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
+            Html2 result = page.ComponentGetOrCreate<Html2>(name);
+            result.TextHtml = htmlTextAlert;
+            result.ComponentMove(index);
+            return result;
+        }
+    }
+
+    /// <summary>
     /// Extension methods to manage json component tree.
     /// </summary>
     public static class ComponentJsonExtension2
     {
+        public static AppJson2 ComponentAppJson(this ComponentJson2 component)
+        {
+            return component.Root;
+        }
+
+        public static ComponentJson2 ComponentOwner(this ComponentJson2 component)
+        {
+            var result = component.ComponentAppJson().ComponentListAll().Where(item => item.List.Contains(component)).Single();
+            return result;
+        }
+
+        /// <summary>
+        /// Returns owner of type T. Searches in parent and grand parents.
+        /// </summary>
+        public static T ComponentOwner<T>(this ComponentJson2 component) where T : ComponentJson2
+        {
+            do
+            {
+                component = ComponentOwner(component);
+                if (component is T)
+                {
+                    return (T)component;
+                }
+            } while (component != null);
+            return null;
+        }
+
         private static void ComponentListAll(ComponentJson2 component, List<ComponentJson2> result)
         {
             result.AddRange(component.List);
@@ -1595,41 +1781,291 @@ namespace Framework.Json
         }
 
         /// <summary>
-        /// Clear all child components.
+        /// Returns all child components.
         /// </summary>
-        public static void ListClear(this ComponentJson2 component)
+        public static List<ComponentJson2> ComponentList(this ComponentJson2 component)
         {
-            foreach (var item in component.ComponentListAll())
-            {
-                if (item != component)
-                {
-                    item.Root = null;
-                    item.RootIdCount = 0;
-                    item.Owner = null;
-                }
-            }
-            component.ListInternal.Clear();
+            return new List<ComponentJson2>(component.List);
         }
 
         /// <summary>
-        /// Returns owner of type T. Searches in parent and grand parents.
+        /// Returns all child components of type T.
         /// </summary>
-        public static T ComponentOwner<T>(this ComponentJson2 component) where T : ComponentJson2
+        public static List<T> ComponentList<T>(this ComponentJson2 component) where T : ComponentJson2
         {
-            do
+            var result = new List<T>();
+            foreach (var item in component.List)
             {
-                component = component.Owner;
-                if (component is T)
+                if (UtilFramework.IsSubclassOf(item.GetType(), typeof(T)))
                 {
-                    return (T)component;
+                    result.Add((T)item);
                 }
-            } while (component != null);
-            return null;
+            }
+            return result;
         }
 
-        public static ComponentJson2 ComponentById(this AppJson2 app, int id)
+        public static ComponentJson2 ComponentGet(this ComponentJson2 owner, string name)
         {
-            return app.ComponentListAll().Where(item => item.Id == id).Single();
+            var resultList = owner.List.Where(item => item.Name == name).ToArray();
+            if (resultList.Count() > 1)
+            {
+                throw new Exception(string.Format("Component with same name exists more than once! ({0})", name));
+            }
+            return resultList.SingleOrDefault();
+        }
+
+        public static T ComponentGet<T>(this ComponentJson2 owner, string name) where T : ComponentJson2
+        {
+            ComponentJson2 result = owner.ComponentGet(name);
+            if (result != null && !(result is T))
+            {
+                throw new Exception(string.Format("Component wrong type! (Name={0})", name));
+            }
+            return (T)owner.ComponentGet(name);
+        }
+
+        public static T ComponentGet<T>(this ComponentJson2 owner) where T : ComponentJson2
+        {
+            return owner.ComponentGet<T>(typeof(T).Name);
+        }
+
+        /// <summary>
+        /// Returns child component of Type T on index.
+        /// </summary>
+        public static T ComponentGet<T>(this ComponentJson2 owner, int index) where T : ComponentJson2
+        {
+            return owner.ComponentList<T>()[index];
+        }
+
+        /// <summary>
+        /// Returns new ComponentJson.
+        /// </summary>
+        public static T ComponentCreate<T>(this ComponentJson2 owner, string name, Action<T> init = null) where T : ComponentJson2
+        {
+            if (UtilFramework.IsSubclassOf(typeof(T), typeof(Page2)))
+            {
+                throw new Exception("Use await method ComponentPageShowAsync();");
+            }
+            T component = (T)Activator.CreateInstance(typeof(T), owner);
+            component.Name = name;
+            init?.Invoke(component);
+
+            return component; // owner.Get<T>(name); // Do not check whether component with same name exists multiple times.
+        }
+
+        public static T ComponentCreate<T>(this ComponentJson2 owner, Action<T> init = null) where T : ComponentJson2
+        {
+            return ComponentCreate<T>(owner, typeof(T).Name, init);
+        }
+
+        /// <summary>
+        /// Returns ComponentJson or creates new if not yet exists.
+        /// </summary>
+        /// <param name="init">Callback method if ComponentJson has been created new. For example to init CssClass.</param>
+        public static T ComponentGetOrCreate<T>(this ComponentJson2 owner, string name, Action<T> init = null) where T : ComponentJson2
+        {
+            if (owner.ComponentGet(name) == null)
+            {
+                T component = (T)Activator.CreateInstance(typeof(T), owner);
+                component.Name = name;
+                init?.Invoke(component);
+            }
+            return owner.ComponentGet<T>(name);
+        }
+
+        public static T ComponentGetOrCreate<T>(this ComponentJson2 owner, Action<T> init = null) where T : ComponentJson2
+        {
+            return ComponentGetOrCreate<T>(owner, typeof(T).Name, init);
+        }
+
+        /// <summary>
+        /// Returns ComponentJson or creates new if not yet exists.
+        /// </summary>
+        /// <param name="init">Callback method if ComponentJson has been created new. For example to init CssClass.</param>
+        public static T ComponentGetOrCreate<T>(this ComponentJson2 owner, int index, Action<T> init = null) where T : ComponentJson2
+        {
+            int count = owner.ComponentList<T>().Count;
+            while (count - 1 < index)
+            {
+                owner.ComponentCreate<T>(init);
+                count += 1;
+            }
+            return owner.ComponentList<T>()[index];
+        }
+
+        public enum PageShowEnum
+        {
+            None = 0,
+
+            /// <summary>
+            /// Add page to sibling pages.
+            /// </summary>
+            Default = 1,
+
+            /// <summary>
+            /// Remove sibling pages.
+            /// </summary>
+            SiblingRemove = 1,
+
+            /// <summary>
+            /// Hide sibling pages and keep their state.
+            /// </summary>
+            SiblingHide = 2,
+        }
+
+        /// <summary>
+        /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
+        /// </summary>
+        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson2 owner, string name, PageShowEnum pageShowEnum = PageShowEnum.Default, Action<T> init = null) where T : Page2
+        {
+            T result = null;
+            if (pageShowEnum == PageShowEnum.SiblingHide)
+            {
+                foreach (Page2 page in owner.List.OfType<Page2>())
+                {
+                    page.IsHide = true; // Hide
+                }
+            }
+            if (ComponentGet(owner, name) == null)
+            {
+                result = (T)Activator.CreateInstance(typeof(T), owner);
+                result.Name = name;
+                init?.Invoke(result);
+                await result.InitAsync();
+            }
+            result = ComponentGet<T>(owner, name);
+            UtilFramework.Assert(result != null);
+            result.IsHide = false; // Show
+            if (pageShowEnum == PageShowEnum.SiblingRemove)
+            {
+                owner.List.OfType<Page2>().ToList().ForEach(page =>
+                {
+                    if (page != result) { page.ComponentRemove(); }
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
+        /// </summary>
+        public static Task<T> ComponentPageShowAsync<T>(this ComponentJson2 owner, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page2
+        {
+            return ComponentPageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
+        }
+
+        /// <summary>
+        /// Remove this component.
+        /// </summary>
+        public static void ComponentRemove(this ComponentJson2 component)
+        {
+            component?.ComponentOwner().List.Remove(component);
+        }
+
+        /// <summary>
+        /// Returns index of this component.
+        /// </summary>
+        public static int ComponentIndex(this ComponentJson2 component)
+        {
+            return component.ComponentOwner().List.IndexOf(component);
+        }
+
+        /// <summary>
+        /// Returns count of this component parents list.
+        /// </summary>
+        public static int ComponentCount(this ComponentJson2 component)
+        {
+            return component.ComponentOwner().List.Count();
+        }
+
+        /// <summary>
+        /// Remove child component if exists.
+        /// </summary>
+        public static void ComponentRemoveItem(this ComponentJson2 component, string name)
+        {
+            var item = component.ComponentGet(name);
+            if (item != null)
+            {
+                item.ComponentRemove();
+            }
+        }
+
+        /// <summary>
+        /// Remove child component if exists.
+        /// </summary>
+        public static void ComponentRemoveItem<T>(this ComponentJson2 component) where T : ComponentJson2
+        {
+            component.ComponentRemoveItem(typeof(T).Name);
+        }
+
+        /// <summary>
+        /// Move this component to index position.
+        /// </summary>
+        public static void ComponentMove(this ComponentJson2 component, int index)
+        {
+            var list = component?.ComponentOwner().List;
+            list.Remove(component);
+            list.Insert(index, component);
+        }
+
+        /// <summary>
+        /// Move this component to last index.
+        /// </summary>
+        public static void ComponentMoveLast(this ComponentJson2 component)
+        {
+            component.ComponentMove(component.ComponentCount() - 1);
+        }
+
+        /// <summary>
+        /// Returns currently selected row.
+        /// </summary>
+        public static Row GridRowSelected(this Grid2 grid)
+        {
+            var result = UtilSession2.GridItemList(grid.AppJson).Where(item => item.Grid == grid).Single() // TODO GridItemList(grid)
+                .GridRowList.Where(item => item.GridRowSession.IsSelect).Select(item => item.GridRowSession.Row).FirstOrDefault();
+            return result;
+        }
+
+        /// <summary>
+        /// Returns currently selected row.
+        /// </summary>
+        public static T GridRowSelected<T>(this Grid2 grid) where T : Row
+        {
+            return (T)GridRowSelected(grid);
+        }
+
+        /// <summary>
+        /// Add css class to ComponentJson.
+        /// </summary>
+        public static void CssClassAdd(this ComponentJson2 component, string value)
+        {
+            string cssClass = component.CssClass;
+            string cssClassWholeWord = " " + cssClass + " ";
+            if (!cssClassWholeWord.Contains(" " + value + " "))
+            {
+                if (UtilFramework.StringNull(cssClass) == null)
+                {
+                    component.CssClass = value;
+                }
+                else
+                {
+                    component.CssClass += " " + value;
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove css class from ComponentJson.
+        /// </summary>
+        public static void CssClassRemove(this ComponentJson2 component, string value)
+        {
+            string cssClass = component.CssClass;
+            string cssClassWholeWord = " " + cssClass + " ";
+            if (cssClassWholeWord.Contains(" " + value + " "))
+            {
+                component.CssClass = cssClassWholeWord.Replace(" " + value + " ", "").Trim();
+            }
         }
     }
 }

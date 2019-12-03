@@ -1,5 +1,5 @@
 import { Input, Component } from "@angular/core";
-import { DataService } from '../data.service';
+import { DataService, JsonRequest } from '../data.service';
 
 /* Grid */
 @Component({
@@ -44,10 +44,10 @@ export class Grid {
     }
   }
   
-  clickSort(column, event: MouseEvent) {
+  clickSort(param, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
-    column.IsClickSort = true;
-    this.dataService.update(null);
+    param.column.IsClickSort = true;
+    this.dataService.update(<JsonRequest> { Id: this.json.Id, ColumnId: param.columnId });
   }
 
   clickConfig(column, event: MouseEvent) {

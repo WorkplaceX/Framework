@@ -347,7 +347,7 @@
             grid.ColumnList = null;
             grid.RowList = null;
             grid.IsClickEnum = GridIsClickEnum.None;
-            grid.ListClear();
+            grid.List.Clear();
             grid.LookupCellIndex = null;
             grid.LookupGrid = null;
             grid.LookupRowIndex = null;
@@ -566,7 +566,7 @@ namespace Framework.Session
         /// Returns incoming data grid (json) and outgoing grid (session) as one data structure.
         /// Incoming data grid (json) has lower priority. It gets reset once new data has been loaded into grid (session).
         /// </summary>
-        public static List<GridItem> GridItemList(AppJson2 appJson)
+        public static List<GridItem> GridItemList(AppJson2 appJson) // TODO GridItem of one Grid
         {
             var result = new List<GridItem>();
 

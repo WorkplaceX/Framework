@@ -693,7 +693,7 @@ namespace Framework.Json
             var options = new JsonSerializerOptions();
             var converterFactory = new ConverterFactory();
             options.Converters.Add(converterFactory);
-            options.WriteIndented = true;
+            // options.WriteIndented = true;
             options.IgnoreNullValues = true;
 
             // Serialize AppJson for server
@@ -1095,17 +1095,20 @@ namespace Framework.Json
                 {
                     continue;
                 }
-                if (propertyValue is int propertyValueInt && propertyValueInt == 0) // DefaultValueHandling.Ignore
+                if (!UtilFramework.IsNullable(propertyInfo.PropertyType))
                 {
-                    continue;
-                }
-                if (propertyValue is bool propertyValueBool && propertyValueBool == false) // DefaultValueHandling.Ignore
-                {
-                    continue;
-                }
-                if (propertyValue is Enum propertyValueEnum && (int)propertyValue == 0) // DefaultValueHandling.Ignore
-                {
-                    continue;
+                    if (propertyValue is int propertyValueInt && propertyValueInt == 0) // DefaultValueHandling.Ignore
+                    {
+                        continue;
+                    }
+                    if (propertyValue is bool propertyValueBool && propertyValueBool == false) // DefaultValueHandling.Ignore
+                    {
+                        continue;
+                    }
+                    if (propertyValue is Enum propertyValueEnum && (int)propertyValue == 0) // DefaultValueHandling.Ignore
+                    {
+                        continue;
+                    }
                 }
                 var attribute = propertyInfo.GetCustomAttribute<JsonSerializeAttribute>();
                 if (attribute != null)

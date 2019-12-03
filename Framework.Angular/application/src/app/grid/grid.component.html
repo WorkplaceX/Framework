@@ -1,7 +1,7 @@
 <table style="height:100%">
   <!-- Header -->
   <tr>
-    <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);" >
+    <th *ngFor="let column of json.ColumnList; let i = index; trackBy trackBy" (click)="clickSort({column: column, columnId: i + 1}, $event);" >
       <div style="display:flex; white-space:nowrap;">
         <div style="flex:1; overflow:hidden;">
           <i *ngIf="column.IsSort==false" class="fas fa-caret-up colorWhite"></i>
