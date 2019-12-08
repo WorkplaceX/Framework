@@ -17,23 +17,26 @@ namespace Framework
 
     internal class UtilFramework
     {
+        /// <summary>
+        /// Gets Version. This is the framework version.
+        /// </summary>
         public static string Version
         {
             get
             {
                 // dotnet --version
-                // 2.2.300
+                // 3.0.100
 
                 // node --version
-                // v8.11.3
+                // v12.13.0
 
                 // npm --version
-                // 6.9.0
+                // 6.12.0
 
-                // ng --version
-                // Angular CLI: 6.1.1
+                // npm run ng -- --version (Framework/Framework.Angular/application/)
+                // Angular CLI: 8.3.15
 
-                return "v2.012";
+                return "v3.0.0";
             }
         }
 
@@ -71,6 +74,24 @@ namespace Framework
                 }
                 return FolderNameGet();
             }
+        }
+
+        /// <summary>
+        /// Combines FolderName and path.
+        /// </summary>
+        /// <param name="folderName">For example "Default/"</param>
+        /// <param name="path">For example "/index.html"</param>
+        /// <returns>Returns for example "Default/index.html"</returns>
+        public static string FolderNameParse(string folderName, string path)
+        {
+            string result = FolderNameParse(folderName);
+            path = UtilFramework.StringEmpty(path);
+            if (path.StartsWith("/") || path.StartsWith("\""))
+            {
+                path = path.Substring(1);
+            }
+            result = result + path;
+            return result;
         }
 
         public static string FolderNameParse(string folderName)
@@ -289,6 +310,26 @@ namespace Framework
         internal static string TypeToName(Type type)
         {
             return type.FullName;
+        }
+
+        /// <summary>
+        /// (TypeName, Type). Cache.
+        /// </summary>
+        private static readonly Dictionary<string, Type> typeFromNameList = new Dictionary<string, Type>();
+
+        /// <summary>
+        /// Returns type of for example "Application.AppMain, Application".
+        /// </summary>
+        public static Type TypeFromName(string typeName)
+        {
+            if (!typeFromNameList.ContainsKey(typeName))
+            {
+                Type type = Type.GetType(typeName);
+                typeFromNameList.TryAdd(typeName, type);
+            }
+
+            Type result = typeFromNameList[typeName];
+            return result;
         }
 
         internal static List<List<T>> Split<T>(List<T> list, int countMax)

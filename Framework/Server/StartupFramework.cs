@@ -50,7 +50,7 @@
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
 
-            applicationBuilder.Run(new Request(applicationBuilder, new AppSelector()).RunAsync);
+            applicationBuilder.Run(new Request().RunAsync);
         }
     }
 }

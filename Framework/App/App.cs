@@ -8,6 +8,7 @@
     using System.Threading.Tasks;
     using System.Linq;
     using Framework.Config;
+    using System.Collections.Generic;
 
     internal class AppInternal
     {
@@ -24,65 +25,128 @@
         public Type[] TypeComponentInNamespaceList;
     }
 
+    /// <summary>
+    /// Create AppJson or deserialize from server session. Process request. Serialize AppJson to server session and angular client.
+    /// </summary>
     internal class AppSelector
     {
-        internal async Task<AppInternal> CreateAppAndProcessAsync(HttpContext context)
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public AppSelector()
         {
-            var result = new AppInternal();
-            UtilServer.AppInternal = result;
-            result.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
+            List<ConfigWebServerWebsite> result = new List<ConfigWebServerWebsite>();
+            string requestDomainName = UtilServer.RequestDomainName();
+            var config = ConfigWebServer.Load();
+            foreach (var website in config.WebsiteList)
+            {
+                foreach (string domainName in website.DomainNameList)
+                {
+                    if (domainName == requestDomainName)
+                    {
+                        result.Add(website);
+                    }
+                }
+            }
+
+            // Make sure Website has been found
+            if (result.Count == 0)
+            {
+                throw new Exception(string.Format("Website not found! See also: ConfigWebServer.json ({0})", requestDomainName));
+            }
+            if (result.Count > 1)
+            {
+                throw new Exception(string.Format("More than one website found! See also: ConfigWebServer.json ({0})", requestDomainName));
+            }
+
+            this.Website = result.Single();
+        }
+
+        /// <summary>
+        /// Gets Website. This is the currently requested Website.
+        /// </summary>
+        public readonly ConfigWebServerWebsite Website;
+
+        /// <summary>
+        /// Returns JsonClient. Create AppJson and process request.
+        /// </summary>
+        internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
+        {
+            var appInternal = new AppInternal();
+            UtilServer.AppInternal = appInternal;
+            appInternal.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
             string json = await UtilServer.StreamToString(context.Request.Body);
             if (json != null) // If post
             {
-                result.AppJson = UtilJson.Deserialize<AppJson>(json, result.TypeComponentInNamespaceList);
-                result.AppJson.IsSessionExpired = false;
+                appInternal.AppJson = UtilJson.Deserialize<AppJson>(json, appInternal.TypeComponentInNamespaceList);
+                appInternal.AppJson.IsSessionExpired = false;
             }
             else
             {
-                result.AppJson = CreateAppJson();
+                appInternal.AppJson = CreateAppJson();
             }
-            int requestCountAssert = result.AppJson.RequestCount;
+            int requestCountAssert = appInternal.AppJson.RequestCount;
 
-            UtilSession.Deserialize(result); // Deserialize session or init.
+            UtilSession.Deserialize(appInternal); // Deserialize session or init.
 
             // User hit reload button in browser.
-            bool isBrowserRefresh = (result.AppJson.ResponseCount == 0 && result.AppSession.ResponseCount > 0);
+            bool isBrowserRefresh = (appInternal.AppJson.ResponseCount == 0 && appInternal.AppSession.ResponseCount > 0);
 
             // User has app open in two browser tabs.
-            bool isBrowserTabSwitch = (result.AppJson.ResponseCount != result.AppSession.ResponseCount);
+            bool isBrowserTabSwitch = (appInternal.AppJson.ResponseCount != appInternal.AppSession.ResponseCount);
 
             // Session expired
-            bool isSessionExpired = (result.AppSession.ResponseCount == 0 && result.AppJson.ResponseCount > 0);
+            bool isSessionExpired = (appInternal.AppSession.ResponseCount == 0 && appInternal.AppJson.ResponseCount > 0);
 
             // Init
-            if (result.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch || isSessionExpired)
+            if (appInternal.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch || isSessionExpired)
             {
-                int requestCount = result.AppJson.RequestCount;
-                int responseCount = result.AppSession.ResponseCount;
-                string browserUrl = result.AppJson.BrowserUrl;
-                string embeddedUrl = result.AppJson.EmbeddedUrl;
-                result.AppJson = CreateAppJson(); // Reset
-                result.AppSession = new AppSession(); // Reset
-                result.AppJson.RequestCount = requestCount;
-                result.AppJson.ResponseCount = responseCount;
-                result.AppSession.ResponseCount = responseCount;
-                result.AppJson.BrowserUrl = browserUrl;
-                result.AppJson.EmbeddedUrl = embeddedUrl;
-                result.AppJson.RequestUrl = UtilServer.RequestUrl();
-                result.AppJson.IsInit = true;
-                result.AppJson.IsSessionExpired = isSessionExpired;
-                await result.AppJson.InitInternalAsync();
+                int requestCount = appInternal.AppJson.RequestCount;
+                int responseCount = appInternal.AppSession.ResponseCount;
+                string browserUrl = appInternal.AppJson.BrowserUrl;
+                string embeddedUrl = appInternal.AppJson.EmbeddedUrl;
+                appInternal.AppJson = CreateAppJson(); // Reset
+                appInternal.AppSession = new AppSession(); // Reset
+                appInternal.AppJson.RequestCount = requestCount;
+                appInternal.AppJson.ResponseCount = responseCount;
+                appInternal.AppSession.ResponseCount = responseCount;
+                appInternal.AppJson.BrowserUrl = browserUrl;
+                appInternal.AppJson.EmbeddedUrl = embeddedUrl;
+                appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
+                appInternal.AppJson.IsInit = true;
+                appInternal.AppJson.IsSessionExpired = isSessionExpired;
+                await appInternal.AppJson.InitInternalAsync();
             }
 
-            UtilFramework.Assert(result.AppJson.ResponseCount == result.AppSession.ResponseCount, "Request mismatch!");
+            UtilFramework.Assert(appInternal.AppJson.ResponseCount == appInternal.AppSession.ResponseCount, "Request mismatch!");
 
             // Process
-            await result.AppJson.ProcessInternalAsync();
+            await appInternal.AppJson.ProcessInternalAsync();
 
-            RenderVersion(result.AppJson); // Version tag
+            RenderVersion(appInternal.AppJson); // Version tag
 
-            UtilFramework.Assert(result.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
+            UtilFramework.Assert(appInternal.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
+            // Serialize
+            string jsonClient = UtilJson.Serialize(appInternal.AppJson, appInternal.TypeComponentInNamespaceList);
+            UtilSession.Serialize(appInternal);
+
+            return jsonClient;
+        }
+
+        /// <summary>
+        /// Create new AppJson component for this session.
+        /// </summary>
+        private AppJson CreateAppJson()
+        {
+            Type type = UtilFramework.TypeFromName(Website.AppTypeName);
+            if (type == null)
+            {
+                throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigWebServer.json ({0})", Website.AppTypeName));
+            }
+
+            AppJson result = (AppJson)Activator.CreateInstance(type);
+            result.Constructor(null);
             return result;
         }
 
@@ -106,63 +170,12 @@
             }
         }
 
-        private AppJson CreateAppJson()
-        {
-            Type type = TypeAppJson();
-            AppJson result = (AppJson)Activator.CreateInstance(type, null);
-            return result;
-        }
-
-        /// <summary>
-        /// Returns type of AppJson. Used for first html request.
-        /// </summary>
-        protected virtual Type TypeAppJson()
-        {
-            string requestDomainName = UtilServer.RequestDomainName();
-            var config = ConfigWebServer.Load();
-            string appTypeName = null; 
-            foreach (var website in config.WebsiteList)
-            {
-                foreach (string domainName in website.DomainNameList)
-                {
-                    if (domainName == requestDomainName)
-                    {
-                        appTypeName = website.AppTypeName;
-                        break;
-                    }
-                }
-                if (appTypeName != null)
-                {
-                    break;
-                }
-            }
-            if (appTypeName == null)
-            {
-                appTypeName = config.WebsiteList.Where(item => item.DomainNameList.Count == 0).Select(item => item.AppTypeName).SingleOrDefault();
-            }
-            if (appTypeName == null)
-            {
-                throw new Exception("AppTypeName not defined! See also file: ConfigWebServer.json");
-            }
-            Type result = Type.GetType(appTypeName);
-            if (result == null)
-            {
-                throw new Exception(string.Format("Type not found! See also file: ConfigWebServer.json ({0})", appTypeName));
-            }
-            return result;
-        }
-
-        private Type typeAppJson;
-
         /// <summary>
         /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
         /// </summary>
         virtual internal Type[] TypeComponentInNamespaceList()
         {
-            if (typeAppJson == null)
-            {
-                typeAppJson = TypeAppJson();
-            }
+            var typeAppJson = UtilFramework.TypeFromName(Website.AppTypeName);
             return (new Type[] {
                 typeAppJson, // Namespace of running application.
                 typeof(AppJson), // For example button.
