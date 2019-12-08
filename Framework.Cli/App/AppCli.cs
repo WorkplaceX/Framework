@@ -134,7 +134,7 @@
                 {
                     Console.ForegroundColor = color;
                 }
-                Console.WriteLine("Framework {0};", UtilFramework.Version);
+                Console.WriteLine("WorkplaceX={0};", UtilFramework.Version);
 
                 commandLineApplication.Execute("-h"); // Show list of available commands.
             }
