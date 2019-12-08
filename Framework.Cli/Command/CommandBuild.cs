@@ -75,9 +75,9 @@
         /// <summary>
         /// Execute "npm run build" command.
         /// </summary>
-        private static void BuildWebsiteNpm(ConfigCliWebsite config)
+        private static void BuildWebsiteNpm(ConfigCliWebsite website)
         {
-            string folderNameNpmBuild = UtilFramework.FolderNameParse(config.FolderNameNpmBuild);
+            string folderNameNpmBuild = UtilFramework.FolderNameParse(website.FolderNameNpmBuild);
             if (UtilFramework.StringNull(folderNameNpmBuild) != null)
             {
                 string folderName = UtilFramework.FolderName + folderNameNpmBuild;
@@ -96,25 +96,26 @@
             {
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 BuildWebsiteNpm(website);
-
                 string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServer);
                 UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
+                UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Website/'!");
 
                 string folderNameDist = UtilFramework.FolderNameParse(website.FolderNameDist);
-                UtilFramework.Assert(folderNameDist != null, "FolderNameDist can not be null!");
-
-                string folderNameSource = UtilFramework.FolderName + folderNameDist;
-                string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Website/" + folderNameServer;
-                if (!UtilCli.FolderNameExist(folderNameSource))
+                if (folderNameDist != null)
                 {
-                    throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
-                }
+                    string folderNameSource = UtilFramework.FolderName + folderNameDist;
+                    string folderNameDest = UtilFramework.FolderName + folderNameServer;
+                    if (!UtilCli.FolderNameExist(folderNameSource))
+                    {
+                        throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
+                    }
 
-                // Copy folder
-                UtilCli.FolderDelete(folderNameDest);
-                UtilFramework.Assert(!UtilCli.FolderNameExist(folderNameDest));
-                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
-                UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
+                    // Copy folder
+                    UtilCli.FolderDelete(folderNameDest);
+                    UtilFramework.Assert(!UtilCli.FolderNameExist(folderNameDest));
+                    UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+                    UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
+                }
 
                 Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
             }

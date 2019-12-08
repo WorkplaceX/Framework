@@ -41,7 +41,7 @@
         {
             // Input FolderNameServer
             UtilCli.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
-            Console.WriteLine("Enter FolderNameServer. For example: 'example.com':");
+            Console.WriteLine("Enter FolderNameServer. For example: 'Application.Server/Framework/Website/example.com':");
             Console.Write(">");
             string folderNameServer = Console.ReadLine();
             folderNameServer = UtilFramework.FolderNameParse(folderNameServer);
@@ -73,7 +73,7 @@
             }
 
             // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Website/dist/'. Content of this folder is copied to 'Application.Server/Framework/Website/{FolderNameServer}'");
+            Console.WriteLine("Enter dist folder name. For example 'Website/Default/dist/'. Content of this folder is copied to FolderNameServer");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
             folderNameDist = UtilFramework.FolderNameParse(folderNameDist);

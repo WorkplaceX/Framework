@@ -121,9 +121,18 @@
     internal class ConfigWebServerWebsite
     {
         /// <summary>
-        /// Gets or sets FolderNameServer. Folder relative to "Application.Server/Framework/Website/".
+        /// Gets or sets FolderNameServer. For example: "Application.Server\Framework\Website\Default".
         /// </summary>
         public string FolderNameServer;
+
+        public string FolderNameServerGet(string prefixRemove)
+        {
+            UtilFramework.Assert(FolderNameServer != null && FolderNameServer.StartsWith("Application.Server/Framework/Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Website/'!");
+            UtilFramework.Assert(FolderNameServer.StartsWith(prefixRemove));
+            string result = FolderNameServer;
+            result = result.Substring(prefixRemove.Length);
+            return result;
+        }
 
         /// <summary>
         /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.

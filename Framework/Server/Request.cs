@@ -80,12 +80,19 @@
         private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
-            string folderName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + appSelector.Website.FolderNameServer;
+
+            // FolderNameServer
+            string folderNameServer = appSelector.Website.FolderNameServerGet("Application.Server/");
+
+            // FolderName
+            string folderName = UtilServer.FolderNameContentRoot() + folderNameServer;
             if (!Directory.Exists(folderName))
             {
                 throw new Exception(string.Format("Folder does not exis! Make sure cli build did run. ({0})", folderName));
             }
-            string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServer, path);
+
+            // FileName
+            string fileName = UtilFramework.FolderNameParse(folderName, path);
             if (File.Exists(fileName))
             {
                 if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.Website.AppTypeName) != null)
@@ -120,7 +127,9 @@
             string jsonClient = await appSelector.CreateAppAndProcessAsync(context);  // Process (For first server side rendering)
 
             // Server side rendering POST.
-            string serverSideRenderView = "Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServer, "/index.html");
+            string folderNameServer = appSelector.Website.FolderNameServerGet("Application.Server/Framework/");
+
+            string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
             serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
             url += "?view=" + serverSideRenderView;
             string indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST
@@ -143,7 +152,7 @@
             if (UtilServer.PathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServer, path);
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet("Application.Server/"), path);
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
