@@ -18,7 +18,10 @@
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
             string folderName = UtilFramework.FolderName + @"Application.Server/";
-            UtilCli.DotNet(folderName, "build");
+            UtilCli.VersionBuild(() =>
+            {
+                UtilCli.DotNet(folderName, "build");
+            });
             UtilCli.DotNet(folderName, "run --no-build", false);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

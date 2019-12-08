@@ -210,13 +210,6 @@
                 UtilCli.ConsoleWriteLineError(exception);
                 Environment.ExitCode = 1; // echo %errorlevel%
             }
-
-            if (Debugger.IsAttached)
-            {
-                Console.WriteLine();
-                Console.WriteLine("Press enter...");
-                Console.ReadLine();
-            }
         }
 
         /// <summary>

@@ -39,7 +39,7 @@ export class Json {
 export class DataService {
   public json: Json = new Json();
   
-  public VersionBuild: string = "Build (local)";
+  public VersionBuild: string = "Build (local)"; /* VersionBuild */
   
   public isRequestPending: boolean = false; // Request is in prgress.
 

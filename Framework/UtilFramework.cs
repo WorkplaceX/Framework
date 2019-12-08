@@ -12,7 +12,6 @@ namespace Framework
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Security.Cryptography;
     using System.Text;
 
     internal class UtilFramework
@@ -41,13 +40,14 @@ namespace Framework
         }
 
         /// <summary>
-        /// Gets time and pc name of Ci build.
+        /// Gets time and pc name of Ci build. Value is set during build process.
         /// </summary>
         public static string VersionBuild
         {
             get
             {
-                return "Build (local)"; // See also: method CommandBuild.BuildServer();
+                // See also: method CommandBuild.BuildServer();
+                return "Build (local)"; /* VersionBuild */
             }
         }
 
@@ -250,6 +250,34 @@ namespace Framework
             UtilFramework.Assert(text.Contains(find));
             string result = text.Replace(find, replace);
             return result;
+        }
+
+        /// <summary>
+        /// Search 'find' in every line. If found replace line with 'replace'.
+        /// </summary>
+        /// <param name="text">Text file.</param>
+        /// <param name="find">Text to find in line.</param>
+        /// <param name="replace">Text to replace line with.</param>
+        /// <returns>Returns modified text file.</returns>
+        internal static string ReplaceLine(string text, string find, string replace)
+        {
+            bool isFind = false;
+            StringBuilder result = new StringBuilder();
+            using (var reader = new StringReader(text))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.Contains(find))
+                    {
+                        isFind = true;
+                        line = replace;
+                    }
+                    result.AppendLine(line);
+                }
+            }
+            UtilFramework.Assert(isFind, string.Format("Text not found! ({0})", find));
+            return result.ToString();
         }
 
         internal static string DateTimeToString(DateTime dateTime, bool isThousand = false)
