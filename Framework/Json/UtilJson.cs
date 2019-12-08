@@ -363,14 +363,14 @@
             SerializePrepare(obj, rootType, false);
             string result = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
             SerializePrepare(obj, rootType, true);
-            // TODO Remove
-            {
-                string debugSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                object debugObj = Deserialize(result, rootType, typeInNamespaceList);
-                SerializePrepare(debugObj, rootType, true);
-                string debugDest = Newtonsoft.Json.JsonConvert.SerializeObject(debugObj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                UtilJson.Assert(debugSource == debugDest);
-            }
+            // TODO Enable, Disable Debug
+            //{
+            //    string debugSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+            //    object debugObj = Deserialize(result, rootType, typeInNamespaceList);
+            //    SerializePrepare(debugObj, rootType, true);
+            //    string debugDest = Newtonsoft.Json.JsonConvert.SerializeObject(debugObj, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+            //    UtilJson.Assert(debugSource == debugDest);
+            //}
             //
             return result;
         }
