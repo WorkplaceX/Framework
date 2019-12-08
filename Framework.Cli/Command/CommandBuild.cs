@@ -45,13 +45,6 @@
 
             // Copy styles.css to frameworkStyle.css
             UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
-
-            // indexUniversal.html
-            string fileName = folderNameDest + "/browser/indexUniversal.html"; // See also Framework/Framework.Angular/application/server.ts
-            File.WriteAllText(fileName, "<app-root></app-root>");
-            fileName = folderNameDest + "dist/browser/indexUniversal.html"; // Working directory is different when running in node (Visual Studio) vs issnode (IIS)
-            UtilCli.FolderCreate(fileName);
-            File.WriteAllText(fileName, "<app-root></app-root>");
         }
 
         /// <summary>
@@ -167,16 +160,16 @@
         {
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
-            // Build Website(s)
+            // Build Website(s) (npm)
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Website/
 
             UtilCli.VersionBuild(() => {
-                // Build Angular client
+                // Build Angular client (npm)
                 BuildAngular();
 
                 if (!(optionClientOnly.Value() == "on"))
                 {
-                    // Build .NET Core server
+                    // Build .NET Core server (dotnet)
                     BuildServer();
                 }
             });

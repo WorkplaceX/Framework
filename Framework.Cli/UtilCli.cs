@@ -225,7 +225,14 @@
                 {
                     fileInfo.Attributes = FileAttributes.Normal; // See also: https://stackoverflow.com/questions/1701457/directory-delete-doesnt-work-access-denied-error-but-under-windows-explorer-it/30673648
                 }
-                Directory.Delete(folderName, true);
+                try
+                {
+                    Directory.Delete(folderName, true);
+                }
+                catch (IOException exception)
+                {
+                    throw new Exception(string.Format("Could not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
+                }
             }
             UtilFramework.Assert(!UtilCli.FolderNameExist(folderName));
         }

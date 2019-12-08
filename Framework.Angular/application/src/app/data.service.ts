@@ -57,7 +57,7 @@ export class DataService {
       this.json = jsonBrowser;
       this.json.IsServerSideRendering = false;
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
-        this.json.RequestUrl = "http://localhost:56097/";
+        this.json.RequestUrl = "http://localhost:50919/";
         this.update();
       } 
       if (window != null) { // Running on client.
