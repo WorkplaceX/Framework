@@ -52,7 +52,7 @@
         /// </summary>
         internal static void ConfigWebServerPublish()
         {
-            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.0/publish/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.1/publish/";
 
             string fileNameSource = UtilFramework.FolderName + "ConfigWebServer.json";
             string fileNameDest = folderNamePublish + "ConfigWebServer.json";
@@ -62,7 +62,7 @@
         private static void BuildServer()
         {
             string folderName = UtilFramework.FolderName + "Application.Server/";
-            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.0/publish/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.1/publish/";
 
             UtilCli.FolderNameDelete(folderNamePublish);
             UtilFramework.Assert(!Directory.Exists(folderNamePublish), "Delete folder failed!");
