@@ -17,7 +17,7 @@
     /// <summary>
     /// Application server side session state. Get it with property UtilServer.AppInternal.AppSession
     /// </summary>
-    internal class AppSession
+    internal sealed class AppSession
     {
         public int ResponseCount;
 
@@ -981,7 +981,7 @@
     /// <summary>
     /// Stores server side grid session data.
     /// </summary>
-    internal class GridSession
+    internal sealed class GridSession
     {
         /// <summary>
         /// TypeRow of loaded data grid.
@@ -1022,7 +1022,7 @@
         }
     }
 
-    internal class GridColumnSession
+    internal sealed class GridColumnSession
     {
         /// <summary>
         /// FieldNameCSharp.
@@ -1050,7 +1050,7 @@
         public bool? IsSort;
     }
 
-    internal class GridRowSession
+    internal sealed class GridRowSession
     {
         public Row Row;
 
@@ -1092,7 +1092,7 @@
         Total = 4
     }
 
-    internal class GridCellSession
+    internal sealed class GridCellSession
     {
         public string Text;
 

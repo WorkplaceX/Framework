@@ -24,7 +24,7 @@ namespace Framework
             get
             {
                 // dotnet --version
-                // 3.0.100
+                // 3.1.100
 
                 // node --version
                 // v12.13.0
