@@ -458,6 +458,7 @@
 
         internal async Task ProcessInternalAsync()
         {
+            UtilStopwatch.TimeStart("Process");
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessBootstrapNavbarAsync();
             await UtilApp.ProcessButtonAsync(); // Button
@@ -473,6 +474,7 @@
             UtilApp.BootstrapNavbarRender();
 
             SessionState = UtilServer.Session.GetString("Main") + "; Grid.Count=" + UtilServer.AppSession.GridSessionList.Count;
+            UtilStopwatch.TimeStop("Process");
         }
 
         /// <summary>

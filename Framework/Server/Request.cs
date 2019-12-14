@@ -17,43 +17,48 @@
         {
             // await Task.Delay(500); // Simulate slow network.
 
-            UtilServer.Cors();
-
-            // Path init
-            string path = context.Request.Path;
-            if (UtilServer.PathIsFileName(path) == false)
+            UtilStopwatch.RequestBind();
+            try
             {
-                path += "index.html";
+                UtilStopwatch.TimeStart("Request");
+
+                UtilServer.Cors();
+
+                // Path init
+                string path = context.Request.Path;
+                if (UtilServer.PathIsFileName(path) == false)
+                {
+                    path += "index.html";
+                }
+
+                // Get current website request from "ConfigWebServer.json"
+                AppSelector appSelector = new AppSelector();
+
+                // POST app.json
+                if (!await Post(context, path, appSelector))
+                {
+                    // GET index.html from "Application.Server/Framework/Website/" (With server side rendering)
+                    if (!await WebsiteServerSideRenderingAsync(context, path, appSelector))
+                    {
+                        // GET file from "Application.Server/Framework/Website/"
+                        if (!await WebsiteFileAsync(context, path, appSelector))
+                        {
+                            // GET Angular file from "Application.Server/Framework/Angular/browser"
+                            if (!await AngularBrowserFileAsync(context, path))
+                            {
+                                context.Response.StatusCode = 404; // Not found
+                            }
+                        }
+                    }
+                }
+
+                UtilStopwatch.TimeStop("Request");
+                UtilStopwatch.TimeLog();
             }
-
-            // Get current website request from "ConfigWebServer.json"
-            AppSelector appSelector = new AppSelector();
-
-            // POST app.json
-            if (await Post(context, path, appSelector))
+            finally
             {
-                return;
+                UtilStopwatch.RequestRelease();
             }
-
-            // GET index.html from "Application.Server/Framework/Website/" (With server side rendering)
-            if (await WebsiteServerSideRenderingAsync(context, path, appSelector))
-            {
-                return;
-            }
-
-            // GET file from "Application.Server/Framework/Website/"
-            if (await WebsiteFileAsync(context, path, appSelector))
-            {
-                return;
-            }
-
-            // GET Angular file from "Application.Server/Framework/Angular/browser"
-            if (await AngularBrowserFileAsync(context, path))
-            {
-                return;
-            }
-
-            context.Response.StatusCode = 404; // Not found
         }
 
         /// <summary>
@@ -66,7 +71,7 @@
             {
                 string jsonClient = await appSelector.CreateAppAndProcessAsync(context); // Process (Client http post)
                 context.Response.ContentType = UtilServer.ContentType(path);
-
+                
                 await context.Response.WriteAsync(jsonClient);
                 result = true;
             }

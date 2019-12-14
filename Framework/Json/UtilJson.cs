@@ -360,6 +360,7 @@
 
         private static string Serialize(object obj, Type rootType, Type[] typeInNamespaceList)
         {
+            UtilStopwatch.TimeStart("Serialize");
             SerializePrepare(obj, rootType, false);
             string result = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
             SerializePrepare(obj, rootType, true);
@@ -372,6 +373,7 @@
             //    UtilJson.Assert(debugSource == debugDest);
             //}
             //
+            UtilStopwatch.TimeStop("Serialize");
             return result;
         }
 
@@ -599,9 +601,11 @@
 
         private static object Deserialize(string json, Type rootType, Type[] typeInNamespaceList)
         {
+            UtilStopwatch.TimeStart("Deserialize");
             JObject jObject = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(json);
             object result = DeserializeToken(jObject, rootType, rootType, typeInNamespaceList);
             SerializePrepare(result, rootType, true);
+            UtilStopwatch.TimeStop("Deserialize");
             return result;
         }
 

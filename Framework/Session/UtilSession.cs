@@ -18,8 +18,10 @@
         /// </summary>
         public static void Serialize(AppInternal appInternal)
         {
+            UtilStopwatch.TimeStart("Serialize");
             string json = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
             UtilServer.Session.SetString("AppSession", json);
+            UtilStopwatch.TimeStop("Serialize");
         }
 
         /// <summary>
@@ -27,6 +29,7 @@
         /// </summary>
         public static void Deserialize(AppInternal appInternal)
         {
+            UtilStopwatch.TimeStart("Deserialize");
             string json = UtilServer.Session.GetString("AppSession");
             AppSession appSession;
             if (string.IsNullOrEmpty(json))
@@ -38,6 +41,7 @@
                 appSession = JsonConvert.DeserializeObject<AppSession>(json, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
             }
             appInternal.AppSession = appSession;
+            UtilStopwatch.TimeStop("Deserialize");
         }
 
         public class GridItem
