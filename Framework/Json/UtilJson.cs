@@ -634,3 +634,619 @@
         }
     }
 }
+
+namespace Framework.Json
+{
+    using Framework.DataAccessLayer;
+    using System;
+    using System.Collections;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Reflection;
+    using System.Text;
+    using System.Text.Json;
+
+    internal static class UtilJson2
+    {
+        /// <summary>
+        /// (TypeName, DeclarationObject)
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, DeclarationObject> declarationObjectList = new ConcurrentDictionary<string, DeclarationObject>();
+
+        private static DeclarationObject DeclarationObjectGet(string typeName)
+        {
+            return declarationObjectList.GetOrAdd(typeName, (key) =>
+            {
+                Type type = Type.GetType(typeName);
+                UtilFramework.Assert(type.Assembly == typeof(object).Assembly || type.Assembly == typeof(UtilFramework).Assembly);
+                return new DeclarationObject(type);
+            });
+        }
+
+        private static DeclarationObject DeclarationObjectGet(Type type)
+        {
+            return DeclarationObjectGet(type.FullName);
+        }
+
+        private class DeclarationObject
+        {
+            public DeclarationObject(Type type)
+            {
+                this.Type = type;
+                this.TypeName = type.FullName;
+                // Property
+                foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    DeclarationProperty declarationProperty = new DeclarationProperty(propertyInfo);
+                    PropertyList.Add(declarationProperty.FieldName, declarationProperty);
+                }
+                // Field
+                foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    if (fieldInfo.Attributes != FieldAttributes.Private)
+                    {
+                        DeclarationProperty declarationProperty = new DeclarationProperty(fieldInfo);
+                        PropertyList.Add(declarationProperty.FieldName, declarationProperty);
+                    }
+                }
+            }
+
+            public readonly Type Type;
+
+            public readonly string TypeName;
+
+            /// <summary>
+            /// (PropertyName, DeclarationProperty).
+            /// </summary>
+            public Dictionary<string, DeclarationProperty> PropertyList = new Dictionary<string, DeclarationProperty>();
+        }
+
+        private class DeclarationProperty
+        {
+            public DeclarationProperty(PropertyInfo propertyInfo)
+            {
+                this.PropertyInfo = propertyInfo;
+                this.FieldName = propertyInfo.Name;
+                this.PropertyType = propertyInfo.PropertyType;
+
+                Constructor(ref this.PropertyType, ref this.IsList);
+
+                this.Converter = ConverterGet(this.PropertyType);
+            }
+
+            public DeclarationProperty(FieldInfo fieldInfo)
+            {
+                this.FieldInfo = fieldInfo;
+                this.FieldName = fieldInfo.Name;
+                this.PropertyType = fieldInfo.FieldType;
+
+                Constructor(ref this.PropertyType, ref this.IsList);
+                
+                this.Converter = ConverterGet(this.PropertyType);
+            }
+
+            private void Constructor(ref Type propertyType, ref bool isList)
+            {
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    isList = true;
+                    propertyType = propertyType.GetGenericArguments()[0];
+                }
+
+                if (propertyType.IsArray)
+                {
+                    isList = true;
+                    propertyType = this.PropertyType.GetElementType();
+                }
+            }
+
+            public readonly FieldInfo FieldInfo;
+
+            public readonly PropertyInfo PropertyInfo;
+
+            public readonly string FieldName;
+
+            /// <summary>
+            /// Gets PropertyType. Declaring type for property and list.
+            /// </summary>
+            public readonly Type PropertyType;
+
+            public readonly ConverterBase Converter;
+
+            /// <summary>
+            /// Gets IsList. Field is either single field or list.
+            /// </summary>
+            public readonly bool IsList;
+
+            public object ValueGet(object obj)
+            {
+                UtilFramework.Assert(this.IsList == false);
+                object result;
+                if (PropertyInfo != null)
+                {
+                    result = PropertyInfo.GetValue(obj);
+                }
+                else
+                {
+                    result = FieldInfo.GetValue(obj);
+                }
+                return result;
+            }
+
+            public IList ValueListGet(object obj)
+            {
+                UtilFramework.Assert(this.IsList == true);
+                IList result;
+                if (PropertyInfo != null)
+                {
+                    result = (IList)PropertyInfo.GetValue(obj);
+                }
+                else
+                {
+                    result = (IList)FieldInfo.GetValue(obj);
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// (PropertyType, Converter)
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, ConverterBase> converterList = new ConcurrentDictionary<Type, ConverterBase>(new KeyValuePair<Type, ConverterBase>[] { 
+            // Value types
+            new KeyValuePair<Type, ConverterBase>(new ConverterInt().TypeField, new ConverterInt()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterIntNullable().TypeField, new ConverterIntNullable()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterBoolean().TypeField, new ConverterBoolean()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterBooleanNullable().TypeField, new ConverterBooleanNullable()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterDouble().TypeField, new ConverterBoolean()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterDoubleNullable().TypeField, new ConverterDoubleNullable()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterString().TypeField, new ConverterString()),
+            
+            // Special types
+            new KeyValuePair<Type, ConverterBase>(new ConverterObjectValue().TypeField, new ConverterObjectValue()), // Value object
+            new KeyValuePair<Type, ConverterBase>(new ConverterType().TypeField, new ConverterType()), // Type
+        });
+
+        private static readonly ConverterObjectDto converterObjectDto = new ConverterObjectDto();
+        private static readonly ConverterObjectRow converterObjectRow = new ConverterObjectRow();
+        private static readonly ConverterObjectComponentJson converterObjectComponentJson = new ConverterObjectComponentJson();
+        private static readonly ConverterEnum converterEnum = new ConverterEnum();
+        private static readonly ConverterEnumNullable converterEnumNullable = new ConverterEnumNullable();
+
+        /// <summary>
+        /// Returns Converter.
+        /// </summary>
+        /// <param name="propertyType">Property type</param>
+        private static ConverterBase ConverterGet(Type propertyType)
+        {
+            if (!converterList.TryGetValue(propertyType, out ConverterBase result)) // Value type
+                if (propertyType.IsEnum) // Emum
+                    result = converterEnum;
+                else
+                    if (UtilFramework.TypeUnderlying(propertyType).IsEnum) // EnumNullable
+                        result = converterEnumNullable;
+                else
+                    if (UtilFramework.IsSubclassOf(propertyType, typeof(Row))) // Row
+                        result = converterObjectRow;
+                else
+                    if (UtilFramework.IsSubclassOf(propertyType, typeof(ComponentJson))) // ComponentJson
+                        result = converterObjectComponentJson;
+                else
+                    if (propertyType.Assembly == typeof(UtilFramework).Assembly) // Dto
+                        result = converterObjectDto;
+            UtilFramework.Assert(result != null, "Type not supported!");
+            return result;
+        }
+
+        private abstract class ConverterBase
+        {
+            public ConverterBase(Type typeField, bool isObject, object valueDefault)
+            {
+                this.TypeField = typeField;
+                this.IsObject = isObject;
+                this.ValueDefault = valueDefault;
+            }
+
+            public ConverterBase(bool isObject, object valueDefault) 
+                : this(null, isObject, valueDefault)
+            {
+
+            }
+
+            protected virtual bool IsValueDefault(object value)
+            {
+                return object.Equals(value, ValueDefault);
+            }
+
+            protected virtual void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteStringValue(string.Format("{0}", value));
+            }
+
+            protected virtual void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            {
+                // writer.WriteString("$type", UtilFramework.TypeToName(obj.GetType()));
+            }
+
+            protected void SerializeObject(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            {
+                DeclarationObject declarationObject;
+                if (declarationProperty != null)
+                {
+                    declarationObject = DeclarationObjectGet(declarationProperty.PropertyType); // Declaring property type
+                }
+                else
+                {
+                    declarationObject = DeclarationObjectGet(obj.GetType()); // Root
+                }
+                writer.WriteStartObject();
+                SerializeObjectType(declarationProperty, obj, writer);
+                foreach (var item in declarationObject.PropertyList.Values)
+                {
+                    if (item.IsList == false)
+                    {
+                        object value = item.ValueGet(obj);
+                        ConverterBase converter = item.Converter;
+                        if (!converter.IsValueDefault(value))
+                        {
+                            writer.WritePropertyName(item.FieldName);
+                            converter.Serialize(item, value, writer);
+                        }
+                    }
+                    else
+                    {
+                        IList valueList = item.ValueListGet(obj);
+                        if (valueList?.Count > 0)
+                        {
+                            writer.WritePropertyName(item.FieldName);
+                            ConverterBase converter = item.Converter;
+                            writer.WriteStartArray();
+                            foreach (var value in valueList)
+                            {
+                                converter.Serialize(item, value, writer);
+                            }
+                            writer.WriteEndArray();
+                        }
+                    }
+                }
+                writer.WriteEndObject();
+            }
+
+            protected internal void Serialize(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            {
+                if (IsObject == false)
+                {
+                    SerializeValue(declarationProperty, obj, writer);
+                }
+                else
+                {
+                    SerializeObject(declarationProperty, obj, writer);
+                }
+            }
+
+            /// <summary>
+            /// Gets TypeField. Declaring type. Can be null for example for Enum, Dto, Row and ComponentJson
+            /// </summary>
+            public readonly Type TypeField;
+
+            /// <summary>
+            /// Gets IsObject. If false, it is a value type. If true it is an object.
+            /// </summary>
+            public readonly bool IsObject;
+
+            /// <summary>
+            /// Gets ValueDefault. Used to ignore default values.
+            /// </summary>
+            public readonly object ValueDefault;
+        }
+
+        private abstract class ConverterBase<T> : ConverterBase
+        {
+            public ConverterBase(bool isObject) 
+                : base(typeof(T), isObject, default(T))
+            {
+
+            }
+        }
+
+        private class ConverterInt : ConverterBase<int>
+        {
+            public ConverterInt()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteNumberValue((int)value);
+            }
+        }
+
+        private class ConverterIntNullable : ConverterBase<int?>
+        {
+            public ConverterIntNullable()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteNumberValue((int)value);
+            }
+        }
+
+        private class ConverterString : ConverterBase<string>
+        {
+            public ConverterString()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteStringValue((string)value);
+            }
+        }
+
+        private class ConverterBoolean : ConverterBase<bool>
+        {
+            public ConverterBoolean()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteBooleanValue((bool)value);
+            }
+        }
+
+        private class ConverterBooleanNullable : ConverterBase<bool?>
+        {
+            public ConverterBooleanNullable()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteBooleanValue((bool)value);
+            }
+        }
+
+        private class ConverterDouble : ConverterBase<double>
+        {
+            public ConverterDouble() 
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteNumberValue((double)value);
+            }
+        }
+
+        private class ConverterDoubleNullable : ConverterBase<double?>
+        {
+            public ConverterDoubleNullable()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteNumberValue((double)value);
+            }
+        }
+
+        private class ConverterType : ConverterBase<Type>
+        {
+            public ConverterType() 
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteStringValue(((Type)value).FullName);
+            }
+        }
+
+        private class ConverterObjectRow : ConverterBase
+        {
+            public ConverterObjectRow() 
+                : base(false, null)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteStartObject();
+                writer.WriteString("$typeRow", UtilFramework.TypeToName(value.GetType()));
+                writer.WritePropertyName("Row");
+                JsonSerializer.Serialize(writer, value, value.GetType());
+                writer.WriteEndObject();
+            }
+        }
+
+        private class ConverterObjectComponentJson : ConverterBase
+        {
+            public ConverterObjectComponentJson() 
+                : base(true, null)
+            {
+
+            }
+
+            protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            {
+                writer.WriteString("$typeComponent", UtilFramework.TypeToName(obj.GetType()));
+            }
+        }
+
+        /// <summary>
+        /// Serialize an object. Declaring field type is object. Supports inheritance.
+        /// </summary>
+        private class ConverterObjectValue : ConverterBase<object>
+        {
+            public ConverterObjectValue() 
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                Type fieldType = value.GetType();
+                ConverterBase converter = ConverterGet(fieldType);
+                UtilFramework.Assert(converter.IsObject == false, "Field with declaring type object needs a value type!");
+                writer.WriteStartObject();
+                writer.WriteString("$typeValue", UtilFramework.TypeToName(fieldType));
+                writer.WritePropertyName("Value");
+                converter.Serialize(declarationProperty, value, writer);
+                writer.WriteEndObject();
+            }
+        }
+
+        private class ConverterObjectRoot : ConverterBase<object>
+        {
+            public ConverterObjectRoot() 
+                : base(true)
+            {
+
+            }
+
+            protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            {
+                writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType()));
+            }
+        }
+
+        /// <summary>
+        /// Serialize a dto object. Declaring field type and dto object type are identical.
+        /// </summary>
+        private class ConverterObjectDto : ConverterBase
+        {
+            public ConverterObjectDto() 
+                : base(true, null)
+            {
+
+            }
+
+            protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            {
+                UtilFramework.Assert(declarationProperty.PropertyType == obj.GetType(), "Declaring field type and object type not equal!");
+            }
+        }
+
+        private class ConverterEnum : ConverterBase
+        {
+            public ConverterEnum() 
+                : base(false, 0)
+            {
+
+            }
+
+            protected override bool IsValueDefault(object value)
+            {
+                return object.Equals((int)value, ValueDefault);
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteNumberValue((int)value);
+            }
+        }
+
+        private class ConverterEnumNullable: ConverterBase
+        {
+            public ConverterEnumNullable() 
+                : base(false, null)
+            {
+
+            }
+
+            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            {
+                writer.WriteNumberValue((int)value);
+            }
+        }
+
+        public static string Serialize(object obj)
+        {
+            JsonWriterOptions options = new JsonWriterOptions();
+            options.Indented = true;
+            string json;
+
+            ConverterObjectRoot converterObjectRoot = new ConverterObjectRoot();
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new Utf8JsonWriter(stream, options))
+                {
+                    converterObjectRoot.Serialize(null, obj, writer);
+                }
+
+                json = Encoding.UTF8.GetString(stream.ToArray());
+            }
+            return json;
+        }
+
+        public static void SerializeDebug()
+        {
+            A a = new A { X = 8, X2 = 9, Y = "Hello", B = new B { Name = "Hans" }, V = 88 };
+            a.AList = new List<B>();
+            a.AList.Add(new B { Name = "A1" });
+            a.AList.Add(new B { Name = "A2" });
+            a.Row = new Database.dbo.FrameworkScript { Id = 1, FileName = "A.txt" };
+            string json2 = UtilJson2.Serialize(a);
+        }
+
+        public static object Deserialize(string json, Type type)
+        {
+            object result = Activator.CreateInstance(type);
+            JsonDocument document = JsonDocument.Parse(json);
+            return result;
+        }
+    }
+
+    public enum MyEnum {  None = 0, Left = 1, Right = 2}
+
+    public class A
+    {
+        public MyEnum MyEnum;
+
+        public object V;
+
+        public B B;
+     
+        public int X;
+
+        public int? X2;
+
+        public string Y;
+
+        public List<B> AList;
+
+        public Database.dbo.FrameworkScript Row;
+    }
+
+    public class B
+    {
+        public string Name;
+    }
+
+    public class B2 : B
+    {
+        public string Name2;
+    }
+}

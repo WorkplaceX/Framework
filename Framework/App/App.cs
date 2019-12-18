@@ -131,6 +131,12 @@
             string jsonClient = UtilJson.Serialize(appInternal.AppJson, appInternal.TypeComponentInNamespaceList);
             UtilSession.Serialize(appInternal);
 
+            UtilStopwatch.TimeStart("SerializeSession2");
+            string json2 = UtilJson2.Serialize(appInternal);
+            UtilStopwatch.TimeStop("SerializeSession2");
+
+            // UtilJson2.SerializeDebug();
+
             return jsonClient;
         }
 

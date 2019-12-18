@@ -18,10 +18,10 @@
         /// </summary>
         public static void Serialize(AppInternal appInternal)
         {
-            UtilStopwatch.TimeStart("Serialize");
+            UtilStopwatch.TimeStart("SerializeSession");
             string json = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
             UtilServer.Session.SetString("AppSession", json);
-            UtilStopwatch.TimeStop("Serialize");
+            UtilStopwatch.TimeStop("SerializeSession");
         }
 
         /// <summary>
