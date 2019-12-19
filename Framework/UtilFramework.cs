@@ -7,6 +7,7 @@ namespace Framework
     using Framework.Server;
     using Newtonsoft.Json;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
@@ -123,7 +124,10 @@ namespace Framework
 
         internal static void Assert(bool isAssert)
         {
-            Assert(isAssert, "Assert!");
+            if (!isAssert)
+            {
+                throw new Exception("Assert!");
+            }
         }
 
         internal static string ExceptionToString(Exception exception)
@@ -332,31 +336,46 @@ namespace Framework
             return FileNameList(folderName, "*.*");
         }
 
+        private static readonly ConcurrentDictionary<Type, string> typeToNameListCache = new ConcurrentDictionary<Type, string>();
+
         /// <summary>
         /// Returns for example: "Database.dbo.FrameworkScript"
         /// </summary>
-        internal static string TypeToName(Type type)
+        /// <param name="isIncludeAssemblyName">If true, function returns for example: "Database.dbo.FrameworkScript, Framework". Use this option if used in connection with <see cref="TypeFromName(string)"/></param>
+        internal static string TypeToName(Type type, bool isIncludeAssemblyName = false)
         {
-            return type.FullName;
+            if (isIncludeAssemblyName == false)
+            {
+                return type.FullName;
+            }
+            else
+            {
+                string result = typeToNameListCache.GetOrAdd(type, (Type type) =>
+                {
+                    return type.FullName + ", " + type.Assembly.GetName().Name; // Slow
+                });
+                return result;
+            }
         }
 
         /// <summary>
         /// (TypeName, Type). Cache.
         /// </summary>
-        private static readonly Dictionary<string, Type> typeFromNameList = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, Type> typeFromNameListCache = new Dictionary<string, Type>();
 
         /// <summary>
-        /// Returns type of for example "Application.AppMain, Application".
+        /// Returns type of for example Application.AppMain" or better "Application.AppMain, Application".
         /// </summary>
         public static Type TypeFromName(string typeName)
         {
-            if (!typeFromNameList.ContainsKey(typeName))
+            if (!typeFromNameListCache.ContainsKey(typeName))
             {
                 Type type = Type.GetType(typeName);
-                typeFromNameList.TryAdd(typeName, type);
+                typeFromNameListCache.TryAdd(typeName, type);
             }
 
-            Type result = typeFromNameList[typeName];
+            Type result = typeFromNameListCache[typeName];
+            UtilFramework.Assert(result != null, "TypeName unknown!");
             return result;
         }
 
@@ -373,5 +392,10 @@ namespace Framework
             }
             return result;
         }
+
+        /// <summary>
+        /// Gets IsJson2. Enable or disable Json2 layer.
+        /// </summary>
+        public static bool IsJson2 = false;
     }
 }

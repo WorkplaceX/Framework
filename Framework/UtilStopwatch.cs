@@ -122,7 +122,7 @@
 
             Console.WriteLine("Stopwatch");
             Console.WriteLine(string.Format("CollectionId={0}/{1}; Path={2}; RequestCount={3}; PathCount={4};", collection.Id, RequestIdToStopwatchCollectionList.Count, collection.RequestPath, collection.RequestCount, pathCount));
-            foreach (var item in collection.List)
+            foreach (var item in collection.List.OrderBy(item => item.Key)) // Order by stopwatch name.
             {
                 double second = ((double)item.Value.Stopwatch.ElapsedTicks / (double)Stopwatch.Frequency) / collection.RequestCount;
                 Console.WriteLine(string.Format("Time={0:000.0}ms; Name={1}; StartCount={2};", second * 1000, item.Key, item.Value.StartCount));

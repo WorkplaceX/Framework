@@ -127,15 +127,11 @@
 
             UtilFramework.Assert(appInternal.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
-            // Serialize
+            // SerializeClient
             string jsonClient = UtilJson.Serialize(appInternal.AppJson, appInternal.TypeComponentInNamespaceList);
+
+            // SerializeSession
             UtilSession.Serialize(appInternal);
-
-            // UtilStopwatch.TimeStart("SerializeSession2");
-            // string json2 = UtilJson2.Serialize(appInternal);
-            // UtilStopwatch.TimeStop("SerializeSession2");
-
-            // UtilJson2.SerializeDebug();
 
             return jsonClient;
         }

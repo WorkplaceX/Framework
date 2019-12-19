@@ -18,10 +18,20 @@
         /// </summary>
         public static void Serialize(AppInternal appInternal)
         {
+            // SerializeSession
             UtilStopwatch.TimeStart("SerializeSession");
             string json = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-            UtilServer.Session.SetString("AppSession", json);
             UtilStopwatch.TimeStop("SerializeSession");
+            UtilServer.Session.SetString("AppSession", json);
+
+            // SerializeSession2
+            if (UtilFramework.IsJson2)
+            {
+                UtilStopwatch.TimeStart("SerializeSession2");
+                string json2 = UtilJson2.Serialize(appInternal.AppSession);
+                UtilStopwatch.TimeStop("SerializeSession2");
+                UtilServer.Session.SetString("AppSession2", json2);
+            }
         }
 
         /// <summary>
@@ -29,8 +39,9 @@
         /// </summary>
         public static void Deserialize(AppInternal appInternal)
         {
-            UtilStopwatch.TimeStart("Deserialize");
+            // DeserializeSession
             string json = UtilServer.Session.GetString("AppSession");
+            UtilStopwatch.TimeStart("DeserializeSession");
             AppSession appSession;
             if (string.IsNullOrEmpty(json))
             {
@@ -41,7 +52,19 @@
                 appSession = JsonConvert.DeserializeObject<AppSession>(json, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
             }
             appInternal.AppSession = appSession;
-            UtilStopwatch.TimeStop("Deserialize");
+            UtilStopwatch.TimeStop("DeserializeSession");
+
+            // DeserializeSession2
+            if (UtilFramework.IsJson2)
+            {
+                string json2 = UtilServer.Session.GetString("AppSession2");
+                if (!string.IsNullOrEmpty(json2))
+                {
+                    UtilStopwatch.TimeStart("DeserializeSession2");
+                    var d = UtilJson2.Deserialize(json2);
+                    UtilStopwatch.TimeStop("DeserializeSession2");
+                }
+            }
         }
 
         public class GridItem
