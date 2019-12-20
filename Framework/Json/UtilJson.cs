@@ -794,6 +794,9 @@ namespace Framework.Json
                 else
                 {
                     result = FieldInfo.GetValue(obj);
+
+                    // TypedReference typedReference = __makeref(obj);
+                    // result = FieldInfo.GetValueDirect(typedReference);
                 }
                 return result;
             }
@@ -1390,6 +1393,15 @@ namespace Framework.Json
                 writer.WritePropertyName("Value");
                 converter.Serialize(declarationProperty, value, writer);
                 writer.WriteEndObject();
+            }
+
+            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            {
+                string typeName = jsonElement.GetProperty("$typeValue").GetString();
+                Type type = UtilFramework.TypeFromName(typeName);
+                var converter = ConverterGet(type);
+                var result = converter.Deserialize(declarationProperty, jsonElement.GetProperty("Value"));
+                return result;
             }
         }
 
