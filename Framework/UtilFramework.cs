@@ -396,6 +396,6 @@ namespace Framework
         /// <summary>
         /// Gets IsJson2. Enable or disable Json2 layer.
         /// </summary>
-        public static bool IsJson2 = false;
+        public static bool IsJson2 = true;
     }
 }
