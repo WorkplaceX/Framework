@@ -54,6 +54,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets Type. Used by Angular. See also <see cref="Page"/>.
+        /// </summary>
         public string Type;
 
         public string TrackBy { get; internal set; }

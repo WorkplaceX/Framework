@@ -18,19 +18,21 @@
         /// </summary>
         public static void Serialize(AppInternal appInternal)
         {
-            // SerializeSession
-            UtilStopwatch.TimeStart("SerializeSession");
-            string json = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-            UtilStopwatch.TimeStop("SerializeSession");
-            UtilServer.Session.SetString("AppSession", json);
-
-            // SerializeSession2
-            if (UtilFramework.IsJson2)
+            if (UtilFramework.IsJson2 == false)
             {
+                // SerializeSession
+                UtilStopwatch.TimeStart("SerializeSession");
+                string jsonSession = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+                UtilStopwatch.TimeStop("SerializeSession");
+                UtilServer.Session.SetString("AppSession", jsonSession);
+            }
+            else
+            {
+                // SerializeSession
                 UtilStopwatch.TimeStart("SerializeSession2");
-                string json2 = UtilJson2.Serialize(appInternal.AppSession);
+                string jsonSession = UtilJson2.Serialize(appInternal.AppSession);
                 UtilStopwatch.TimeStop("SerializeSession2");
-                UtilServer.Session.SetString("AppSession2", json2);
+                UtilServer.Session.SetString("AppSession", jsonSession);
             }
         }
 
@@ -39,32 +41,32 @@
         /// </summary>
         public static void Deserialize(AppInternal appInternal)
         {
-            // DeserializeSession
-            string json = UtilServer.Session.GetString("AppSession");
-            UtilStopwatch.TimeStart("DeserializeSession");
+            string jsonSession = UtilServer.Session.GetString("AppSession");
+
             AppSession appSession;
-            if (string.IsNullOrEmpty(json))
+            if (string.IsNullOrEmpty(jsonSession))
             {
                 appSession = new AppSession();
             }
             else
             {
-                appSession = JsonConvert.DeserializeObject<AppSession>(json, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-            }
-            appInternal.AppSession = appSession;
-            UtilStopwatch.TimeStop("DeserializeSession");
-
-            // DeserializeSession2
-            if (UtilFramework.IsJson2)
-            {
-                string json2 = UtilServer.Session.GetString("AppSession2");
-                if (!string.IsNullOrEmpty(json2))
+                if (UtilFramework.IsJson2 == false)
                 {
+                    // DeserializeSession
+                    UtilStopwatch.TimeStart("DeserializeSession");
+                    appSession = JsonConvert.DeserializeObject<AppSession>(jsonSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+                    UtilStopwatch.TimeStop("DeserializeSession");
+                }
+                else
+                {
+                    // DeserializeSession2
                     UtilStopwatch.TimeStart("DeserializeSession2");
-                    var d = UtilJson2.Deserialize(json2);
+                    appSession = (AppSession)UtilJson2.Deserialize(jsonSession);
                     UtilStopwatch.TimeStop("DeserializeSession2");
                 }
             }
+
+            appInternal.AppSession = appSession;
         }
 
         public class GridItem

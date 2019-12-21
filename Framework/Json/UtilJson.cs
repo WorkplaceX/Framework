@@ -382,25 +382,24 @@
         /// <param name="typeInNamespaceList">Needed internally for debug, to deserialize and compare.</param> // TODO Remove
         public static string Serialize(object obj, params Type[] typeInNamespaceList)
         {
-            // SerializeClient
-            UtilStopwatch.TimeStart("SerializeClient");
-            string jsonClient = Serialize(obj, obj.GetType(), typeInNamespaceList);
-            UtilStopwatch.TimeStop("SerializeClient");
-
-            // SerializeClient2
-            if (UtilFramework.IsJson2)
+            if (UtilFramework.IsJson2 == false)
             {
+                // SerializeClient
+                UtilStopwatch.TimeStart("SerializeClient");
+                string jsonClient = Serialize(obj, obj.GetType(), typeInNamespaceList);
+                UtilStopwatch.TimeStop("SerializeClient");
+
+                return jsonClient;
+            }
+            else
+            {
+                // SerializeClient
                 UtilStopwatch.TimeStart("SerializeClient2");
-                string jsonClient2 = UtilJson2.Serialize(obj);
+                string jsonClient = UtilJson2.Serialize(obj);
                 UtilStopwatch.TimeStop("SerializeClient2");
 
-                // DeserializeClient2
-                UtilStopwatch.TimeStart("DeserializeClient2");
-                var d = UtilJson2.Deserialize(jsonClient2);
-                UtilStopwatch.TimeStop("DeserializeClient2");
+                return jsonClient;
             }
-
-            return jsonClient;
         }
 
         private static object DeserializeObjectConvert(object value, Type type)
@@ -631,12 +630,24 @@
         /// <param name="typeInNamespaceList">Additional namespaces to search for classes.</param>
         public static T Deserialize<T>(string json, params Type[] typeInNamespaceList)
         {
-            // DeserializeClient
-            UtilStopwatch.TimeStart("DeserializeClient");
-            T result = (T)Deserialize(json, typeof(T), typeInNamespaceList);
-            UtilStopwatch.TimeStop("DeserializeClient");
+            if (UtilFramework.IsJson2 == false)
+            {
+                // DeserializeClient
+                UtilStopwatch.TimeStart("DeserializeClient");
+                var result = (T)Deserialize(json, typeof(T), typeInNamespaceList);
+                UtilStopwatch.TimeStop("DeserializeClient");
+                return result;
+            }
+            else
+            {
+                // DeserializeClient
+                UtilStopwatch.TimeStart("DeserializeClient2");
+                var result = (T)UtilJson2.Deserialize(json);
+                UtilStopwatch.TimeStop("DeserializeClient2");
+                return result;
+            }
 
-            return result;
+            // UtilJson2.DebugValidateJson(result, result2);
         }
 
         private static void Assert(bool isAssert, string exceptionText)
@@ -1504,15 +1515,27 @@ namespace Framework.Json
                 json = Encoding.UTF8.GetString(stream.ToArray());
             }
 
-            if (false) // Debug
-            {
-                string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
-                object objDest = Deserialize(json);
-                string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(objDest, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
-                UtilFramework.Assert(jsonSource == jsonDest);
-            }
+            // DebugValidateJson(obj, json);
 
             return json;
+        }
+
+        /// <summary>
+        /// Validate json by deserializing it and comparing to obj.
+        /// </summary>
+        public static void DebugValidateJson(object obj, string json)
+        {
+            string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
+            object objDest = Deserialize(json);
+            string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(objDest, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
+            UtilFramework.Assert(jsonSource == jsonDest);
+        }
+
+        public static void DebugValidateJson(object source, object dest)
+        {
+            string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(source, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All });
+            string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(dest, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All });
+            UtilFramework.Assert(jsonSource == jsonDest);
         }
 
         public static object Deserialize(string json)
