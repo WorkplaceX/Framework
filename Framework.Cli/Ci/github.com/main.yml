@@ -1,21 +1,20 @@
 # Copy this file from "./Framework/Framework.Cli/Ci/github.com/.main.yml" to "./.github/workflows/main.yml"
 
 name: CI
-
-on: [push]
-
+on:
+  push:
+    branches: 
+      - master
 jobs:
   build:
-
     runs-on: ubuntu-18.04
-
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: recursive
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version '3.1.100'
+        dotnet-version: '3.1.100'
     - name: Install script
       run: ./Framework/Framework.Cli/Ci/github.com/install.sh
     - name: Build script
