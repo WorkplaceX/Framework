@@ -34,7 +34,6 @@
                 // Ubuntu show processes tool: 'htop'
                 UtilCli.ConsoleWriteLineColor("Stop server with command: 'killall -SIGKILL Application.Server node dotnet'", System.ConsoleColor.Yellow);
             }
-
         }
     }
 }

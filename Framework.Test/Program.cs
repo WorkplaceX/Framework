@@ -1,12 +1,13 @@
-﻿namespace Framework.Test
-{
-    using System;
+﻿using System;
 
+namespace Framework.Test
+{
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Run test...");
+            UnitTest.Run();
+            Console.WriteLine("Unit tests successful!");
         }
     }
 }

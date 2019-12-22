@@ -1,4 +1,7 @@
-﻿namespace Framework.Json
+﻿using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("Framework.Test")]
+
+namespace Framework.Json
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -677,7 +680,6 @@ namespace Framework.Json
     using System.Runtime.Serialization;
     using System.Text;
     using System.Text.Json;
-    using System.Linq;
 
     internal static class UtilJson2
     {
@@ -694,6 +696,7 @@ namespace Framework.Json
                 bool isComponentJson = UtilFramework.IsSubclassOf(type, typeof(ComponentJson));
                 bool isRow = UtilFramework.IsSubclassOf(type, typeof(Row));
                 bool isDto = type.Assembly == typeof(UtilFramework).Assembly; // Dto declared in UtilFramework
+                isDto = isDto || type.Namespace.StartsWith("Framework.Test"); // Dto declared in Framework.Test
                 UtilFramework.Assert(isComponentJson | isRow | isDto);
                 return new DeclarationObject(type);
             });
@@ -1384,7 +1387,7 @@ namespace Framework.Json
         }
 
         /// <summary>
-        /// Serialize an object. Declaring field type is object. Supports inheritance.
+        /// Serialize an object. Property type is object. Supports inheritance.
         /// </summary>
         private sealed class ConverterObjectValue : ConverterBase<object>
         {
@@ -1398,7 +1401,8 @@ namespace Framework.Json
             {
                 Type propertyType = value.GetType();
                 ConverterBase converter = ConverterGet(propertyType);
-                UtilFramework.Assert(converter.IsObject == false, "Field with declaring type object needs a value type!");
+                UtilFramework.Assert(converter.IsObject == false, "Property of type object needs to store a value type!");
+                UtilFramework.Assert(!(converter.GetType() == typeof(ConverterEnum) || converter.GetType() == typeof(ConverterEnumNullable)), "Enum not allowed in property of type object!"); 
                 writer.WriteStartObject();
                 writer.WriteString("$typeValue", UtilFramework.TypeToName(propertyType, true));
                 writer.WritePropertyName("Value");
@@ -1436,7 +1440,7 @@ namespace Framework.Json
         }
 
         /// <summary>
-        /// Serialize a dto object. Declaring field type and dto object type are identical.
+        /// Serialize a dto object. Property type and dto object type need to be identical.
         /// </summary>
         private sealed class ConverterObjectDto : ConverterBase
         {
@@ -1448,7 +1452,7 @@ namespace Framework.Json
 
             protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
             {
-                UtilFramework.Assert(declarationProperty.PropertyType == obj.GetType(), "Declaring field type and object type not equal!");
+                UtilFramework.Assert(declarationProperty.PropertyType == obj.GetType(), "Property type and object type not equal!");
             }
         }
 
@@ -1499,7 +1503,7 @@ namespace Framework.Json
             }
         }
 
-        private static readonly JsonWriterOptions options = new JsonWriterOptions();
+        private static readonly JsonWriterOptions options = new JsonWriterOptions() { Indented = true };
 
         public static string Serialize(object obj)
         {
@@ -1556,79 +1560,5 @@ namespace Framework.Json
 
             return result;
         }
-
-        public static void SerializeDebug()
-        {
-            var c = new AppJson();
-            c.ComponentCreate<Html>().TextHtml = "Hello";
-            var j = UtilJson2.Serialize(c);
-
-            var a = new A2 { G = 9, H = 33, List = new List<int>() };
-            a.Row = new Database.dbo.FrameworkScript { Id = 22, FileName = @"C:\Temp\Readme.txt", Date = DateTime.Now };
-            a.RowList = new List<Database.dbo.FrameworkScript>();
-            a.RowList.Add(new Database.dbo.FrameworkScript { Id = 22, FileName = @"C:\Temp\Readme.txt", Date = DateTime.Now });
-            a.RowList.Add(null);
-            a.RowList.Add(new Database.dbo.FrameworkScript { Id = 23, FileName = @"C:\Temp\Readme2.txt", Date = DateTime.Now });
-            a.List.Add(44);
-            a.List.Add(55);
-            a.MyEnum = new List<MyEnum>();
-            // a.MyEnum.Add(null);
-            a.MyEnum.Add(MyEnum.None);
-            a.MyEnum.Add(MyEnum.Left);
-
-            //A a = new A { X = 8, X2 = 9, Y = "Hello", B = new B { Name = "Hans" }, V = 88 };
-            //a.AList = new List<B>();
-            //a.AList.Add(new B { Name = "A1" });
-            //a.AList.Add(new B { Name = "A2" });
-            //a.Row = new Database.dbo.FrameworkScript { Id = 1, FileName = "A.txt" };
-            string json = UtilJson2.Serialize(a);
-            var d = Deserialize(json);
-        }
-    }
-
-    public class A2
-    {
-        public Database.dbo.FrameworkScript Row;
-
-        public List<Database.dbo.FrameworkScript> RowList;
-
-        public List<MyEnum> MyEnum;
-
-        public int G;
-
-        public int H;
-
-        public List<int> List;
-    }
-
-    public enum MyEnum {  None = 0, Left = 1, Right = 2}
-
-    public class A
-    {
-        public MyEnum MyEnum;
-
-        public object V;
-
-        public B B;
-     
-        public int X;
-
-        public int? X2;
-
-        public string Y;
-
-        public List<B> AList;
-
-        public Database.dbo.FrameworkScript Row;
-    }
-
-    public class B
-    {
-        public string Name;
-    }
-
-    public class B2 : B
-    {
-        public string Name2;
     }
 }
