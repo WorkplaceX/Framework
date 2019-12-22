@@ -76,7 +76,7 @@
             UtilServer.AppInternal = appInternal;
             appInternal.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
             string json = await UtilServer.StreamToString(context.Request.Body);
-            if (json != null) // If post
+            if (json != null && !json.Contains("EmbeddedUrl")) // If post
             {
                 appInternal.AppJson = UtilJson.Deserialize<AppJson>(json, appInternal.TypeComponentInNamespaceList);
                 appInternal.AppJson.IsSessionExpired = false;
