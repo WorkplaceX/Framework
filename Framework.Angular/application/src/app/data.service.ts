@@ -97,7 +97,7 @@ export class DataService {
       this.json.BrowserUrl = window.location.href;
       let requestUrl;
       if (this.json.EmbeddedUrl != null) {
-        requestUrl = new URL("/app.json", this.json.EmbeddedUrl).href 
+        requestUrl = new URL("/app.json?isEmbeddedUrl", this.json.EmbeddedUrl).href 
       } else {
         requestUrl = new URL("/app.json", this.json.RequestUrl).href 
       }

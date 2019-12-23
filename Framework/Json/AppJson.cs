@@ -532,24 +532,9 @@
         public string RequestUrl { get; internal set; }
 
         /// <summary>
-        /// Gets EmbeddedUrl. This value can be set by the client if running embedded in another website.
+        /// Gets EmbeddedUrl. Value used by Angular client on first app.json POST to indicate application is embedded an running on other website.
         /// </summary>
         public string EmbeddedUrl { get; internal set; }
-
-        /// <summary>
-        /// Returns true if app runs embedded in another web page. In this case make sure to have absolute paths for example to images.
-        /// </summary>
-        /// <param name="requestUrl">If running in embedded mode use returned requestUrl to form absolute path.</param>
-        public bool IsEmbedded(out string requestUrl)
-        {
-            requestUrl = null;
-            bool result = UtilFramework.StringNull(EmbeddedUrl) != null;
-            if (result)
-            {
-                requestUrl = RequestUrl;
-            }
-            return result;
-        }
 
         /// <summary>
         /// Gets or sets BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.

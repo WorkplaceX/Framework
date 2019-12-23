@@ -76,7 +76,8 @@
             UtilServer.AppInternal = appInternal;
             appInternal.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
             string json = await UtilServer.StreamToString(context.Request.Body);
-            if (json != null && !json.Contains("EmbeddedUrl")) // If post
+            bool isEmbeddedUrl = (string)context.Request.Query["isEmbeddedUrl"] == ""; // Flag set by Angular client on first app.json POST if running embedded on other website.
+            if (json != null && !isEmbeddedUrl) // If client POST
             {
                 appInternal.AppJson = UtilJson.Deserialize<AppJson>(json, appInternal.TypeComponentInNamespaceList);
                 appInternal.AppJson.IsSessionExpired = false;
@@ -104,14 +105,12 @@
                 int requestCount = appInternal.AppJson.RequestCount;
                 int responseCount = appInternal.AppSession.ResponseCount;
                 string browserUrl = appInternal.AppJson.BrowserUrl;
-                string embeddedUrl = appInternal.AppJson.EmbeddedUrl;
                 appInternal.AppJson = CreateAppJson(); // Reset
                 appInternal.AppSession = new AppSession(); // Reset
                 appInternal.AppJson.RequestCount = requestCount;
                 appInternal.AppJson.ResponseCount = responseCount;
                 appInternal.AppSession.ResponseCount = responseCount;
                 appInternal.AppJson.BrowserUrl = browserUrl;
-                appInternal.AppJson.EmbeddedUrl = embeddedUrl;
                 appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
                 appInternal.AppJson.IsInit = true;
                 appInternal.AppJson.IsSessionExpired = isSessionExpired;
