@@ -681,6 +681,8 @@ namespace Framework.Json
     using System.Text;
     using System.Text.Json;
 
+    internal class SerializeIgnoreAttribute : Attribute { }
+
     internal static class UtilJson2
     {
         /// <summary>
@@ -716,16 +718,22 @@ namespace Framework.Json
                 // Property
                 foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    DeclarationProperty declarationProperty = new DeclarationProperty(propertyInfo);
-                    PropertyList.Add(declarationProperty.PropertyName, declarationProperty);
+                    if (propertyInfo.GetCustomAttribute<SerializeIgnoreAttribute>() == null)
+                    {
+                        DeclarationProperty property = new DeclarationProperty(propertyInfo);
+                        PropertyList.Add(property.PropertyName, property);
+                    }
                 }
                 // Field
                 foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (fieldInfo.Attributes != FieldAttributes.Private)
+                    if (fieldInfo.GetCustomAttribute<SerializeIgnoreAttribute>() == null)
                     {
-                        DeclarationProperty declarationProperty = new DeclarationProperty(fieldInfo);
-                        PropertyList.Add(declarationProperty.PropertyName, declarationProperty);
+                        if (fieldInfo.Attributes != FieldAttributes.Private)
+                        {
+                            DeclarationProperty property = new DeclarationProperty(fieldInfo);
+                            PropertyList.Add(property.PropertyName, property);
+                        }
                     }
                 }
             }
@@ -740,7 +748,7 @@ namespace Framework.Json
             public Dictionary<string, DeclarationProperty> PropertyList = new Dictionary<string, DeclarationProperty>();
         }
 
-        private class DeclarationProperty
+        internal class DeclarationProperty
         {
             public DeclarationProperty(PropertyInfo propertyInfo)
             {
@@ -914,13 +922,13 @@ namespace Framework.Json
                     if (UtilFramework.IsSubclassOf(propertyType, typeof(ComponentJson))) // ComponentJson
                         result = converterObjectComponentJson;
                 else
-                    if (propertyType.Assembly == typeof(UtilFramework).Assembly) // Dto
+                    if (propertyType.Assembly == typeof(UtilFramework).Assembly || propertyType.Namespace.StartsWith("Framework.Test")) // Dto
                         result = converterObjectDto;
             UtilFramework.Assert(result != null, "Type not supported!");
             return result;
         }
 
-        private abstract class ConverterBase
+        internal abstract class ConverterBase
         {
             public ConverterBase(Type propertyType, Type propertyTypeGeneric, bool isObject, object valueDefault)
             {
@@ -943,47 +951,94 @@ namespace Framework.Json
                 return object.Equals(value, ValueDefault);
             }
 
-            protected virtual void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected virtual void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 // writer.WriteStringValue(string.Format("{0}", value));
             }
 
-            protected virtual void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            protected virtual void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
             {
                 // writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType()));
             }
 
-            private void SerializeObject(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            private bool ReferenceSerialize(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, ref ComponentJson componentJsonRoot)
             {
-                DeclarationObject declarationObject;
-                declarationObject = DeclarationObjectGet(obj.GetType());
-                writer.WriteStartObject();
-                SerializeObjectType(declarationProperty, obj, writer);
-                foreach (var item in declarationObject.PropertyList.Values)
+                bool result = false;
+                if (value is ComponentJson valueComponentJson)
                 {
-                    if (item.IsList == false)
+                    if (obj is ComponentJson objComponentJson)
                     {
-                        object value = item.ValueGet(obj);
-                        ConverterBase converter = item.Converter;
-                        if (!converter.IsValueDefault(value))
+                        if (property.PropertyName == nameof(ComponentJson.List))
                         {
-                            writer.WritePropertyName(item.PropertyName);
-                            converter.Serialize(item, value, writer);
+                            // ComponentJson.List
+                        }
+                        else
+                        {
+                            // ComponentJson.Property
+                            result = true;
                         }
                     }
                     else
                     {
-                        IList valueList = item.ValueListGet(obj);
-                        if (valueList?.Count > 0)
+                        if (componentJsonRoot == null)
                         {
-                            writer.WritePropertyName(item.PropertyName);
-                            ConverterBase converter = item.Converter;
+                            UtilFramework.Assert(valueComponentJson.Owner == null, "Referenced ComponentJson not root!");
+                            componentJsonRoot = valueComponentJson;
+                        }
+                        else
+                        {
+                            // Dto referenced ComponentJson in object gwith.
+                            result = true;
+                        }
+                    }
+
+                    if (result)
+                    {
+                        UtilFramework.Assert(valueComponentJson.Root == componentJsonRoot, "Referenced ComponentJson not in same object graph!");
+                        result = true;
+                        writer.WriteStartObject();
+                        writer.WriteNumber("$referenceId", valueComponentJson.Id);
+                        writer.WriteEndObject();
+                    }
+                }
+                return result;
+            }
+
+            private void SerializeObject(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, ComponentJson componentJsonRoot)
+            {
+                if (ReferenceSerialize(obj, property, value, writer, ref componentJsonRoot))
+                {
+                    return;
+                }
+                DeclarationObject declarationObject;
+                declarationObject = DeclarationObjectGet(value.GetType());
+                writer.WriteStartObject();
+                SerializeObjectType(property, value, writer);
+                foreach (var valueProperty in declarationObject.PropertyList.Values)
+                {
+                    if (valueProperty.IsList == false)
+                    {
+                        object propertyValue = valueProperty.ValueGet(value);
+                        ConverterBase converter = valueProperty.Converter;
+                        if (!converter.IsValueDefault(propertyValue))
+                        {
+                            writer.WritePropertyName(valueProperty.PropertyName);
+                            converter.Serialize(value, valueProperty, propertyValue, writer, componentJsonRoot);
+                        }
+                    }
+                    else
+                    {
+                        IList propertyValueList = valueProperty.ValueListGet(value);
+                        if (propertyValueList?.Count > 0)
+                        {
+                            writer.WritePropertyName(valueProperty.PropertyName);
+                            ConverterBase converter = valueProperty.Converter;
                             writer.WriteStartArray();
-                            foreach (var value in valueList)
+                            foreach (var propertyValue in propertyValueList)
                             {
-                                if (!converter.IsValueDefault(value))
+                                if (!converter.IsValueDefault(propertyValue))
                                 {
-                                    converter.Serialize(item, value, writer);
+                                    converter.Serialize(value, valueProperty, propertyValue, writer, componentJsonRoot);
                                 }
                                 else
                                 {
@@ -993,7 +1048,7 @@ namespace Framework.Json
                                     }
                                     else
                                     {
-                                        converter.Serialize(item, value, writer);
+                                        converter.Serialize(value, valueProperty, propertyValue, writer, componentJsonRoot);
                                     }
                                 }
                             }
@@ -1004,35 +1059,35 @@ namespace Framework.Json
                 writer.WriteEndObject();
             }
 
-            internal void Serialize(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            internal void Serialize(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, ComponentJson componentJsonRoot)
             {
                 if (IsObject == false)
                 {
-                    SerializeValue(declarationProperty, obj, writer);
+                    SerializeValue(obj, property, value, writer);
                 }
                 else
                 {
-                    SerializeObject(declarationProperty, obj, writer);
+                    SerializeObject(obj, property, value, writer, componentJsonRoot);
                 }
             }
 
-            protected virtual object DeserializeValue(DeclarationProperty declarationProperty, Utf8JsonReader reader)
+            protected virtual object Utf8JsonReaderDeserializeValue(object obj, DeclarationProperty property, Utf8JsonReader reader)
             {
                 throw new NotImplementedException(); // return reader.GetString();
             }
 
-            protected virtual object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected virtual object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 throw new NotImplementedException(); // return jsonElement.GetString();
             }
 
-            protected virtual string DeserializeObjectType(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected virtual string DeserializeObjectType(DeclarationProperty property, JsonElement jsonElement)
             {
                 // return jsonElement.GetProperty("$typeRoot").GetString();
                 return null;
             }
 
-            protected virtual string DeserializeObjectType(DeclarationProperty declarationProperty, Utf8JsonReader reader)
+            protected virtual string Utf8JsonReaderDeserializeObjectType(DeclarationProperty property, Utf8JsonReader reader)
             {
                 reader.Read();
                 UtilFramework.Assert(reader.TokenType == JsonTokenType.PropertyName);
@@ -1044,12 +1099,12 @@ namespace Framework.Json
                 return result;
             }
 
-            private object DeserializeObject(DeclarationProperty declarationProperty, Utf8JsonReader reader)
+            private object Utf8JsonReaderDeserializeObject(DeclarationProperty property, Utf8JsonReader reader)
             {
                 reader.Read();
                 UtilFramework.Assert(reader.TokenType == JsonTokenType.StartObject);
                 Type type = PropertyType;
-                string typeName = DeserializeObjectType(declarationProperty, reader);
+                string typeName = Utf8JsonReaderDeserializeObjectType(property, reader);
                 if (typeName != null)
                 {
                     type = UtilFramework.TypeFromName(typeName);
@@ -1059,19 +1114,58 @@ namespace Framework.Json
                 return result;
             }
 
-            private object DeserializeObject(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            private bool ReferenceDeserialize(object obj, DeclarationProperty property, JsonElement jsonElement, out object result, ComponentJson componentJsonRoot)
             {
+                bool resultReturn = false;
+                result = null;
+                if (jsonElement.TryGetProperty("$referenceId", out JsonElement jsonElementReference))
+                {
+                    int id = jsonElementReference.GetInt32();
+                    componentJsonRoot.RootReferenceList.Add((obj, property, id)); // Register reference to solve later.
+                    resultReturn = true;
+                }
+                return resultReturn;
+            }
+
+            private void DeserializeObjectComponentJsonConstructor(object obj, DeclarationProperty property, object value)
+            {
+                if (value is ComponentJson componentJson)
+                {
+                    ComponentJson owner = null;
+                    if (obj is ComponentJson && property.PropertyName == nameof(ComponentJson.List))
+                    {
+                        owner = (ComponentJson)obj;
+                    }
+                    componentJson.Constructor(owner, isDeserialize: true);
+                }
+            }
+
+            private object DeserializeObject(object obj, DeclarationProperty property, JsonElement jsonElement, ComponentJson componentJsonRoot)
+            {
+                if (ReferenceDeserialize(obj, property, jsonElement, out object result, componentJsonRoot))
+                {
+                    return result;
+                }
+
                 Type type = PropertyType;
-                string typeName = DeserializeObjectType(declarationProperty, jsonElement);
+                string typeName = DeserializeObjectType(property, jsonElement);
                 if (typeName != null)
                 {
                     type = UtilFramework.TypeFromName(typeName);
                 }
                 if (type == null)
                 {
-                    type = declarationProperty.PropertyType; // Dto
+                    type = property.PropertyType; // Dto
                 }
-                var result = FormatterServices.GetUninitializedObject(type);
+                result = FormatterServices.GetUninitializedObject(type);
+                DeserializeObjectComponentJsonConstructor(obj, property, result);
+                bool isReferenceSolve = false;
+                if (result is ComponentJson componentJson && componentJson.Owner == null)
+                {
+                    componentJsonRoot = componentJson;
+                    isReferenceSolve = true;
+                }
+
                 var declarationObject = DeclarationObjectGet(type);
 
                 // Create empty lists.
@@ -1095,7 +1189,7 @@ namespace Framework.Json
                     {
                         if (item.IsList == false)
                         {
-                            object value = item.Converter.Deserialize(item, jsonElementProperty.Value);
+                            object value = item.Converter.Deserialize(result, item, jsonElementProperty.Value, componentJsonRoot);
                             item.ValueSet(result, value);
                         }
                         else
@@ -1110,7 +1204,7 @@ namespace Framework.Json
                                 }
                                 else
                                 {
-                                    value = item.Converter.Deserialize(item, jsonElementValue);
+                                    value = item.Converter.Deserialize(result, item, jsonElementValue, componentJsonRoot);
                                 }
                                 valueList.Add(value);
                             }
@@ -1118,30 +1212,44 @@ namespace Framework.Json
                         }
                     }
                 }
+
+                if (result is ComponentJson resultComponentJson)
+                {
+                    resultComponentJson.Root.RootComponentJsonList.Add(resultComponentJson.Id, resultComponentJson);
+                }
+                if (isReferenceSolve)
+                {
+                    componentJsonRoot.RootReferenceSolve();
+                }
                 return result;
             }
 
-            internal object Deserialize(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            /// <summary>
+            /// Deserialize value or object.
+            /// </summary>
+            /// <param name="obj">Object on which property is declared.</param>
+            /// <param name="property">Property of object <paramref name="obj"/></param>
+            internal object Deserialize(object obj, DeclarationProperty property, JsonElement jsonElement, ComponentJson componentJsonRoot)
             {
                 if (IsObject == false)
                 {
-                    return DeserializeValue(declarationProperty, jsonElement);
+                    return DeserializeValue(obj, property, jsonElement);
                 }
                 else
                 {
-                    return DeserializeObject(declarationProperty, jsonElement);
+                    return DeserializeObject(obj, property, jsonElement, componentJsonRoot);
                 }
             }
 
-            internal object Deserialize(DeclarationProperty declarationProperty, Utf8JsonReader reader)
+            internal object Utf8JsonReaderDeserialize(object obj, DeclarationProperty property, Utf8JsonReader reader)
             {
                 if (IsObject == false)
                 {
-                    return DeserializeValue(declarationProperty, reader);
+                    return Utf8JsonReaderDeserializeValue(obj, property, reader);
                 }
                 else
                 {
-                    return DeserializeObject(declarationProperty, reader);
+                    return Utf8JsonReaderDeserializeObject(property, reader);
                 }
             }
 
@@ -1155,12 +1263,12 @@ namespace Framework.Json
             /// </summary>
             private readonly Type propertyTypeGeneric;
 
-            public Type PropertyTypeGeneric(DeclarationProperty declarationProperty)
+            public Type PropertyTypeGeneric(DeclarationProperty property)
             {
                 var result = propertyTypeGeneric;
                 if (result == null)
                 {
-                    result = TypeGenericList.GetOrAdd(declarationProperty.PropertyType, (Type type) => typeof(List<>).MakeGenericType(declarationProperty.PropertyType));
+                    result = TypeGenericList.GetOrAdd(property.PropertyType, (Type type) => typeof(List<>).MakeGenericType(property.PropertyType));
                 }
                 return result;
             }
@@ -1193,12 +1301,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteNumberValue((int)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetInt32();
             }
@@ -1212,12 +1320,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteNumberValue((int)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetInt32();
             }
@@ -1231,12 +1339,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteStringValue((string)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetString();
             }
@@ -1250,12 +1358,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteBooleanValue((bool)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetBoolean();
             }
@@ -1269,12 +1377,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteBooleanValue((bool)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetBoolean();
             }
@@ -1288,12 +1396,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteNumberValue((double)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetDouble();
             }
@@ -1307,12 +1415,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteNumberValue((double)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetDouble();
             }
@@ -1326,13 +1434,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 string typeName = UtilFramework.TypeToName((Type)value, true);
                 writer.WriteStringValue(typeName);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 string typeName = jsonElement.GetString();
                 var result = UtilFramework.TypeFromName(typeName);
@@ -1348,7 +1456,7 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteStartObject();
                 writer.WriteString("$typeRow", UtilFramework.TypeToName(value.GetType(), true));
@@ -1357,7 +1465,7 @@ namespace Framework.Json
                 writer.WriteEndObject();
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 string typeRowName = jsonElement.GetProperty("$typeRow").GetString();
                 Type typeRow = UtilFramework.TypeFromName(typeRowName);
@@ -1375,12 +1483,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
             {
                 writer.WriteString("$typeComponent", UtilFramework.TypeToName(obj.GetType(), true));
             }
 
-            protected override string DeserializeObjectType(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override string DeserializeObjectType(DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetProperty("$typeComponent").GetString();
             }
@@ -1397,7 +1505,7 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 Type propertyType = value.GetType();
                 ConverterBase converter = ConverterGet(propertyType);
@@ -1406,16 +1514,16 @@ namespace Framework.Json
                 writer.WriteStartObject();
                 writer.WriteString("$typeValue", UtilFramework.TypeToName(propertyType, true));
                 writer.WritePropertyName("Value");
-                converter.Serialize(declarationProperty, value, writer);
+                converter.Serialize(obj, property, value, writer, null);
                 writer.WriteEndObject();
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 string typeName = jsonElement.GetProperty("$typeValue").GetString();
                 Type type = UtilFramework.TypeFromName(typeName);
                 var converter = ConverterGet(type);
-                var result = converter.Deserialize(declarationProperty, jsonElement.GetProperty("Value"));
+                var result = converter.Deserialize(obj, property, jsonElement.GetProperty("Value"), null);
                 return result;
             }
         }
@@ -1428,12 +1536,12 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
             {
                 writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType(), true));
             }
 
-            protected override string DeserializeObjectType(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override string DeserializeObjectType(DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetProperty("$typeRoot").GetString();
             }
@@ -1450,9 +1558,9 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeObjectType(DeclarationProperty declarationProperty, object obj, Utf8JsonWriter writer)
+            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
             {
-                UtilFramework.Assert(declarationProperty.PropertyType == obj.GetType(), "Property type and object type not equal!");
+                UtilFramework.Assert(property.PropertyType == obj.GetType(), "Property type and object type not equal!");
             }
         }
 
@@ -1469,15 +1577,15 @@ namespace Framework.Json
                 return object.Equals((int)value, ValueDefault);
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteNumberValue((int)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 var resultInt = jsonElement.GetInt32();
-                var resultEnum = Enum.ToObject(declarationProperty.PropertyType, resultInt);
+                var resultEnum = Enum.ToObject(property.PropertyType, resultInt);
                 return resultEnum;
             }
         }
@@ -1490,15 +1598,15 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(DeclarationProperty declarationProperty, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
             {
                 writer.WriteNumberValue((int)value);
             }
 
-            protected override object DeserializeValue(DeclarationProperty declarationProperty, JsonElement jsonElement)
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 var resultInt = jsonElement.GetInt32();
-                var resultEnum = Enum.ToObject(UtilFramework.TypeUnderlying(declarationProperty.PropertyType), resultInt);
+                var resultEnum = Enum.ToObject(UtilFramework.TypeUnderlying(property.PropertyType), resultInt);
                 return resultEnum;
             }
         }
@@ -1513,7 +1621,7 @@ namespace Framework.Json
             {
                 using (var writer = new Utf8JsonWriter(stream, options))
                 {
-                    converterObjectRoot.Serialize(null, obj, writer);
+                    converterObjectRoot.Serialize(null, null, obj, writer, null);
                 }
 
                 json = Encoding.UTF8.GetString(stream.ToArray());
@@ -1550,12 +1658,12 @@ namespace Framework.Json
             if (isUtf8JsonReader == false)
             {
                 JsonDocument document = JsonDocument.Parse(json);
-                result = converterObjectRoot.Deserialize(null, document.RootElement);
+                result = converterObjectRoot.Deserialize(null, null, document.RootElement, null);
             }
             else
             {
                 var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json));
-                result = converterObjectRoot.Deserialize(null, reader);
+                result = converterObjectRoot.Utf8JsonReaderDeserialize(null, null, reader);
             }
 
             return result;

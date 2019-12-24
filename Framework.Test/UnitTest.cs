@@ -4,11 +4,13 @@
     using Framework.Json;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public static class UnitTest
     {
         public static void Run()
         {
+            RunComponentJson();
             {
                 A source = new A();
                 source.MyEnum = MyEnum.Left;
@@ -142,7 +144,179 @@
                 UtilFramework.Assert(dest.Row.FileName == @"C:\Temp\Readme.txt");
                 UtilFramework.Assert(dest.Row.Date ==date);
             }
+            {
+                A source = new A();
+                source.V = MyEnum.None; // TODO Serialize enum on property of type object.
+
+                // Serialize, deserialize
+                // string json = UtilJson2.Serialize(source);
+                // A dest = (A)UtilJson2.Deserialize(json);
+            }
         }
+
+        private static void RunComponentJson()
+        {
+            // ComponentJson reference in list
+            {
+                MyComponent source = new MyComponent(null);
+                var html = new Html(source) { TextHtml = "My" };
+                source.HtmlList = new List<Html>();
+                source.HtmlList.Add(html);
+                // Serialize, deserialize
+                string json = UtilJson2.Serialize(source);
+                try
+                {
+                    var dest = (MyComponent)UtilJson2.Deserialize(json);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "Reference to ComponentJson in List not supported!");
+                }
+            }
+            {
+                MyComponent source = new MyComponent(null);
+                new MyComponent(source);
+                string json = UtilJson2.Serialize(source);
+                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilFramework.Assert(dest.List.Count == 1);
+            }
+            {
+                MyComponent source = new MyComponent(null);
+                string json = UtilJson2.Serialize(source);
+                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilFramework.Assert(dest.Index == null);
+            }
+            {
+                MyComponent source = new MyComponent(null);
+                source.Index = 0;
+                string json = UtilJson2.Serialize(source);
+                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilFramework.Assert(dest.Index == 0);
+            }
+            {
+                MyComponent source = new MyComponent(null);
+                source.Index = -1;
+                string json = UtilJson2.Serialize(source);
+                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilFramework.Assert(dest.Index == -1);
+            }
+            {
+                My source = new My();
+                var myComponent1 = new MyComponent(null);
+                Html html1 = new Html(myComponent1) { TextHtml = "A" };
+                myComponent1.Dto = new Dto { Css = "A", Html = html1 };
+                var myComponent2 = new MyComponent(null);
+                Html html2 = new Html(myComponent2) { TextHtml = "B" };
+                myComponent2.Dto = new Dto { Css = "B", Html = html2 };
+                source.List.Add(myComponent1);
+                source.List.Add(myComponent2);
+
+                string json = UtilJson2.Serialize(source);
+                var dest = (My)UtilJson2.Deserialize(json);
+                dest.List[0].Dto.Html.TextHtml = "abc";
+                UtilFramework.Assert(((Html)dest.List[0].List[0]).TextHtml == "abc");
+            }
+            {
+                My source = new My();
+                var myComponent1 = new MyComponent(null);
+                Html html1 = new Html(myComponent1) { TextHtml = "A" };
+                myComponent1.Dto = new Dto { Css = "A", Html = html1 };
+                var myComponent2 = new MyComponent(null);
+                Html html2 = new Html(myComponent2) { TextHtml = "B" };
+                myComponent2.Dto = new Dto { Css = "B", Html = html2 }; 
+                var myComponent3 = new MyComponent(myComponent1);
+                source.List.Add(myComponent1);
+                source.List.Add(myComponent2);
+                source.List.Add(myComponent3); // Reference not to root!
+                try
+                {
+                    string json = UtilJson2.Serialize(source);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "Referenced ComponentJson not root!");
+                }
+            }
+            {
+                My source = new My();
+                var myComponent1 = new MyComponent(null);
+                Html html1 = new Html(myComponent1) { TextHtml = "A" };
+                myComponent1.Dto = new Dto { Css = "A", Html = html1 };
+                var myComponent2 = new MyComponent(null);
+                Html html2 = new Html(myComponent2) { TextHtml = "B" };
+                myComponent2.Dto = new Dto { Css = "B", Html = html1 }; // Reference to object in different graph
+                source.List.Add(myComponent1);
+                source.List.Add(myComponent2);
+                try
+                {
+                    string json = UtilJson2.Serialize(source);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "Referenced ComponentJson not in same object graph!");
+                }
+            }
+            {
+                var source = new MyComponent(null);
+
+                source.Html = new Html(source) { TextHtml = "Hello" };
+
+                string json = UtilJson2.Serialize(source);
+
+                UtilFramework.Assert(!json.Contains("Owner"));
+
+                var dest = (MyComponent)UtilJson2.Deserialize(json);
+
+                var htmlOne = dest.Html;
+                var htmlTwo = dest.List.OfType<Html>().First();
+
+                htmlOne.TextHtml = "K";
+                UtilFramework.Assert(htmlOne.TextHtml == htmlTwo.TextHtml);
+            }
+            // Referenced ComponentJson not in same graph
+            {
+                var source = new MyComponent(null);
+                source.Html = new Html();
+
+                try
+                {
+                    string json = UtilJson2.Serialize(source);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "Referenced ComponentJson not in same object graph!");
+                }
+            }
+        }
+    }
+
+    public class My
+    {
+        public List<MyComponent> List = new List<MyComponent>();
+    }
+
+    public class MyComponent : ComponentJson
+    {
+        public MyComponent(ComponentJson owner) 
+            : base(owner)
+        {
+
+        }
+
+        public Html Html;
+
+        public Dto Dto;
+
+        public int? Index;
+
+        public List<Html> HtmlList;
+    }
+
+    public class Dto
+    {
+        public string Css;
+
+        public Html Html;
     }
 
     public enum MyEnum { None = 0, Left = 1, Right = 2 }

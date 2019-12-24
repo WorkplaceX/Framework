@@ -10,6 +10,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using static Framework.Json.Page;
     using static Framework.Session.UtilSession;
@@ -29,30 +30,94 @@
         /// </summary>
         public ComponentJson(ComponentJson owner)
         {
-            Constructor(owner);
+            Constructor(owner, isDeserialize: false);
         }
 
-        internal void Constructor(ComponentJson owner)
+        internal void Constructor(ComponentJson owner, bool isDeserialize)
         {
-            this.Type = GetType().Name;
-            if (owner != null)
+            if (UtilFramework.IsJson2)
             {
-                if (owner.List == null)
+                this.Owner = owner;
+                if (Owner == null)
                 {
-                    owner.List = new List<ComponentJson>();
+                    this.Root = this;
+                    this.RootComponentJsonList = new Dictionary<int, ComponentJson>(); // Init list.
+                    this.RootReferenceList = new List<(object obj, UtilJson2.DeclarationProperty property, int id)>();
                 }
-                int count = 0;
-                foreach (var item in owner.List)
+                else
                 {
-                    if (item.TrackBy.StartsWith(this.Type + "-"))
+                    this.Root = owner.Root;
+                }
+                if (!isDeserialize)
+                {
+                    Root.RootIdCount += 1;
+                    this.Id = Root.RootIdCount;
+                    Root.RootComponentJsonList.Add(Id, this); // Id is not yet available if deserialize.
+                }
+            }
+
+            if (isDeserialize == false)
+            {
+                this.Type = GetType().Name;
+                if (owner != null)
+                {
+                    if (owner.List == null)
                     {
-                        count += 1;
+                        owner.List = new List<ComponentJson>();
                     }
+                    int count = 0;
+                    foreach (var item in owner.List)
+                    {
+                        if (item.TrackBy.StartsWith(this.Type + "-"))
+                        {
+                            count += 1;
+                        }
+                    }
+                    this.TrackBy = this.Type + "-" + count.ToString();
+                    owner.List.Add(this);
                 }
-                this.TrackBy = this.Type + "-" + count.ToString();
-                owner.List.Add(this);
             }
         }
+
+        [SerializeIgnore]
+        public ComponentJson Owner { get; internal set; }
+
+        [SerializeIgnore]
+        internal ComponentJson Root;
+
+        internal int RootIdCount;
+
+        /// <summary>
+        /// (Id, ComponentJson).
+        /// </summary>
+        [SerializeIgnore]
+        internal Dictionary<int, ComponentJson> RootComponentJsonList;
+
+        /// <summary>
+        /// (Object, Property, ReferenceId). Used for deserialization.
+        /// </summary>
+        [SerializeIgnore]
+        internal List<(object obj, UtilJson2.DeclarationProperty property, int id)> RootReferenceList;
+
+        /// <summary>
+        /// Solve ComponentJson references after deserialization.
+        /// </summary>
+        internal void RootReferenceSolve()
+        {
+            UtilFramework.Assert(Owner == null);
+            UtilFramework.Assert(Root == this);
+            foreach (var item in Root.RootReferenceList)
+            {
+                UtilFramework.Assert(item.property.IsList == false, "Reference to ComponentJson in List not supported!");
+                ComponentJson componentJson = Root.RootComponentJsonList[item.id];
+                item.property.ValueSet(item.obj, componentJson);
+            }
+        }
+
+        /// <summary>
+        /// Gets Id.
+        /// </summary>
+        public int Id { get; internal set; }
 
         /// <summary>
         /// Gets or sets Type. Used by Angular. See also <see cref="Page"/>.

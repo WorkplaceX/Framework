@@ -147,7 +147,6 @@
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);
-            result.Constructor(null);
             return result;
         }
 
