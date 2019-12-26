@@ -13,7 +13,6 @@ export class Grid {
   @Input() json: any
 
   ngModelChange(cell, row) {
-    cell.IsModify = true;
     cell.IsClick = true; // Show spinner
 
     // Merge

@@ -16,24 +16,19 @@
         /// <summary>
         /// Serialize session state.
         /// </summary>
-        public static void Serialize(AppInternal appInternal)
+        public static void Serialize(AppInternal appInternal, out string jsonClient)
         {
-            if (UtilFramework.IsJson2 == false)
-            {
-                // SerializeSession
-                UtilStopwatch.TimeStart("SerializeSession");
-                string jsonSession = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                UtilStopwatch.TimeStop("SerializeSession");
-                UtilServer.Session.SetString("AppSession", jsonSession);
-            }
-            else
-            {
-                // SerializeSession
-                UtilStopwatch.TimeStart("SerializeSession2");
-                string jsonSession = UtilJson2.Serialize(appInternal.AppSession);
-                UtilStopwatch.TimeStop("SerializeSession2");
-                UtilServer.Session.SetString("AppSession", jsonSession);
-            }
+            // SerializeSession
+            UtilStopwatch.TimeStart("SerializeSession");
+            string jsonSession = UtilJson.Serialize(appInternal.AppSession);
+            UtilStopwatch.TimeStop("SerializeSession");
+            UtilServer.Session.SetString("AppSession", jsonSession);
+
+            // SerializeClient
+            UtilStopwatch.TimeStart("SerializeClient");
+            jsonClient = UtilJson.Serialize(appInternal.AppJson);
+            UtilStopwatch.TimeStop("SerializeClient");
+            UtilServer.Session.SetString("JsonClient", jsonClient);
         }
 
         /// <summary>
@@ -50,20 +45,10 @@
             }
             else
             {
-                if (UtilFramework.IsJson2 == false)
-                {
-                    // DeserializeSession
-                    UtilStopwatch.TimeStart("DeserializeSession");
-                    appSession = JsonConvert.DeserializeObject<AppSession>(jsonSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                    UtilStopwatch.TimeStop("DeserializeSession");
-                }
-                else
-                {
-                    // DeserializeSession2
-                    UtilStopwatch.TimeStart("DeserializeSession2");
-                    appSession = (AppSession)UtilJson2.Deserialize(jsonSession);
-                    UtilStopwatch.TimeStop("DeserializeSession2");
-                }
+                // DeserializeSession2
+                UtilStopwatch.TimeStart("DeserializeSession");
+                appSession = (AppSession)UtilJson.Deserialize(jsonSession);
+                UtilStopwatch.TimeStop("DeserializeSession");
             }
 
             appInternal.AppSession = appSession;

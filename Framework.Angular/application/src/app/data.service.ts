@@ -122,15 +122,10 @@ export class DataService {
         requestUrl = new URL("/app.json", this.json.RequestUrl).href 
       }
 
-      let json: any = this.json;
-      if (requestJson != null) {
-         requestJson.IsRequestJson = true;
-         requestJson.RequestCount = this.json.RequestCount;
-         json = requestJson;
-      }
+      requestJson.RequestCount = this.json.RequestCount;
 
       this.httpClient.request("POST", requestUrl, {
-        body: JSON.stringify(json),
+        body: JSON.stringify(requestJson),
         withCredentials: true,
       })
       .subscribe(body => {

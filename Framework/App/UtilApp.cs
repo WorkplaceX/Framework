@@ -18,23 +18,11 @@
         /// </summary>
         public static async Task ProcessButtonAsync()
         {
-            if (UtilFramework.IsJson2)
+            var appJson = UtilServer.AppJson;
+            if (appJson.RequestJson.Command == RequestCommand.ButtonIsClick)
             {
-                var appJson = UtilServer.AppJson;
-                if (appJson.RequestJson.Command == RequestCommand.ButtonIsClick)
-                {
-                    Button button = (Button)appJson.RootComponentJsonList[appJson.RequestJson.ComponentId];
-                    await button.ComponentOwner<Page>().ButtonClickAsync(button);
-                }
-            }
-            else
-            {
-                var app = UtilServer.AppInternal;
-                foreach (Button button in app.AppJson.ComponentListAll().OfType<Button>().Where(item => item.IsClick))
-                {
-                    await button.ComponentOwner<Page>().ButtonClickAsync(button);
-                    button.IsClick = false;
-                }
+                Button button = (Button)appJson.RootComponentJsonList[appJson.RequestJson.ComponentId];
+                await button.ComponentOwner<Page>().ButtonClickAsync(button);
             }
         }
 

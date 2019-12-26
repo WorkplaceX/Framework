@@ -76,25 +76,22 @@
 
         internal void Constructor(ComponentJson owner, bool isDeserialize)
         {
-            if (UtilFramework.IsJson2)
+            this.Owner = owner;
+            if (Owner == null)
             {
-                this.Owner = owner;
-                if (Owner == null)
-                {
-                    this.Root = this;
-                    this.RootComponentJsonList = new Dictionary<int, ComponentJson>(); // Init list.
-                    this.RootReferenceList = new List<(object obj, UtilJson2.DeclarationProperty property, int id)>();
-                }
-                else
-                {
-                    this.Root = owner.Root;
-                }
-                if (!isDeserialize)
-                {
-                    Root.RootIdCount += 1;
-                    this.Id = Root.RootIdCount;
-                    Root.RootComponentJsonList.Add(Id, this); // Id is not yet available if deserialize.
-                }
+                this.Root = this;
+                this.RootComponentJsonList = new Dictionary<int, ComponentJson>(); // Init list.
+                this.RootReferenceList = new List<(object obj, UtilJson.DeclarationProperty property, int id)>();
+            }
+            else
+            {
+                this.Root = owner.Root;
+            }
+            if (!isDeserialize)
+            {
+                Root.RootIdCount += 1;
+                this.Id = Root.RootIdCount;
+                Root.RootComponentJsonList.Add(Id, this); // Id is not yet available if deserialize.
             }
 
             if (isDeserialize == false)
@@ -138,7 +135,7 @@
         /// (Object, Property, ReferenceId). Used for deserialization.
         /// </summary>
         [SerializeIgnore]
-        internal List<(object obj, UtilJson2.DeclarationProperty property, int id)> RootReferenceList;
+        internal List<(object obj, UtilJson.DeclarationProperty property, int id)> RootReferenceList;
 
         /// <summary>
         /// Solve ComponentJson references after deserialization.
@@ -582,7 +579,6 @@
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
             UtilApp.BootstrapNavbarRender();
 
-            SessionState = UtilServer.Session.GetString("Main") + "; Grid.Count=" + UtilServer.AppSession.GridSessionList.Count;
             UtilStopwatch.TimeStop("Process");
         }
 
@@ -627,11 +623,6 @@
         /// Used for example for html "body class='modal-open'" to enable vertical scroll bar.
         /// </summary>
         public bool IsBootstrapModal { get; set; }
-
-        /// <summary>
-        /// Gets SessionState. Debug server side session state.
-        /// </summary>
-        public string SessionState { get; internal set; }
 
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
@@ -680,8 +671,6 @@
         }
 
         public string TextHtml;
-
-        public bool IsClick;
     }
 
     /// <summary>
@@ -1002,8 +991,6 @@
         {
             return UtilFramework.StringNull(Text);
         }
-
-        public bool IsModify;
 
         public bool IsClick; // Show spinner
 

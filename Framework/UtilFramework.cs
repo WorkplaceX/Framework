@@ -392,10 +392,5 @@ namespace Framework
             }
             return result;
         }
-
-        /// <summary>
-        /// Gets IsJson2. Enable or disable Json2 layer.
-        /// </summary>
-        public static bool IsJson2 = true;
     }
 }

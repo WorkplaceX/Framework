@@ -383,7 +383,6 @@
                                                 gridCell.Placeholder = "New";
                                             }
                                             gridCell.ErrorParse = gridCellItem.GridCellSession.ErrorParse;
-                                            gridCell.IsModify = gridCellItem.GridCellSession.IsModify;
                                             gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
 
                                             // Lookup open, close
@@ -412,16 +411,8 @@
         private async Task ProcessGridIsClickEnumAsync()
         {
             var appJson = UtilServer.AppJson;
-            bool isProcess = true;
-            if (UtilFramework.IsJson2)
-            {
-                if (appJson.RequestJson.Command != RequestCommand.GridIsClickEnum)
-                {
-                    isProcess = false;
-                }
-            }
 
-            if (isProcess)
+            if (appJson.RequestJson.Command == RequestCommand.GridIsClickEnum)
             {
                 foreach (GridItem gridItem in UtilSession.GridItemList())
                 {
@@ -521,16 +512,7 @@
         private async Task ProcessGridSaveAsync()
         {
             var appJson = UtilServer.AppJson;
-            bool isProcess = true;
-            if (UtilFramework.IsJson2)
-            {
-                if (appJson.RequestJson.Command != RequestCommand.GridCellIsModify)
-                {
-                    isProcess = false;
-                }
-            }
-
-            if (isProcess)
+            if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify)
             {
                 // Parse user entered text
                 foreach (GridItem gridItem in UtilSession.GridItemList())
@@ -541,11 +523,7 @@
                         {
                             if (gridCellItem.GridCell != null)
                             {
-                                bool isModify = gridCellItem.GridCell.IsModify;
-                                if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id)
-                                {
-                                    isModify = true;
-                                }
+                                bool isModify = appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id;
                                 if (isModify)
                                 {
                                     Row row = null;
@@ -571,10 +549,7 @@
                                     {
                                         gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
                                         string textGet = gridCellItem.GridCell.TextGet();
-                                        if (UtilFramework.IsJson2)
-                                        {
-                                            textGet = appJson.RequestJson.GridCellText;
-                                        }
+                                        textGet = appJson.RequestJson.GridCellText;
                                         gridCellItem.GridCellSession.Text = textGet; // Set back to database selected value, once successfully saved.
                                         Grid grid = gridItem.Grid;
                                         Page page = grid.ComponentOwner<Page>();
@@ -714,16 +689,7 @@
         private async Task ProcessGridLookupOpenAsync()
         {
             var appJson = UtilServer.AppJson;
-            bool isProcess = true;
-            if (UtilFramework.IsJson2)
-            {
-                if (appJson.RequestJson.Command != RequestCommand.GridCellIsModify)
-                {
-                    isProcess = false;
-                }
-            }
-
-            if (isProcess)
+            if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify)
             {
                 foreach (GridItem gridItem in UtilSession.GridItemList())
                 {
@@ -731,19 +697,11 @@
                     {
                         foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                         {
-                            bool isModify = gridCellItem.GridCell?.IsModify == true;
-                            if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow?.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id)
-                            {
-                                isModify = true;
-                            }
+                            bool isModify = appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow?.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell?.Id;
                             if (isModify == true)
                             {
                                 gridCellItem.GridCellSession.IsLookup = true;
-                                string textGet = gridCellItem.GridCell.TextGet();
-                                if (UtilFramework.IsJson2)
-                                {
-                                    textGet = appJson.RequestJson.GridCellText;
-                                }
+                                string textGet = appJson.RequestJson.GridCellText;
                                 var query = gridItem.Grid.ComponentOwner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, textGet);
                                 if (query != null)
                                 {
@@ -761,16 +719,7 @@
         private async Task ProcessGridFilterAsync()
         {
             var appJson = UtilServer.AppJson;
-            bool isProcess = true;
-            if (UtilFramework.IsJson2)
-            {
-                if (appJson.RequestJson.Command != RequestCommand.GridCellIsModify)
-                {
-                    isProcess = false;
-                }
-            }
-
-            if (isProcess)
+            if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify)
             {
                 List<GridItem> gridItemReloadList = new List<GridItem>();
                 foreach (GridItem gridItem in UtilSession.GridItemList())
@@ -781,23 +730,12 @@
                         {
                             if (gridCellItem.GridCell != null)
                             {
-                                bool isModify = gridCellItem.GridCell.IsModify;
-                                if (UtilFramework.IsJson2)
-                                {
-                                    if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id)
-                                    {
-                                        isModify = true;
-                                    }
-                                }
+                                bool isModify = appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id;
                                 if (isModify)
                                 {
                                     gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully parsed.
                                     gridCellItem.GridCellSession.TextOld = UtilFramework.StringNull(gridCellItem.GridCellSession.Text);
-                                    string textGet = gridCellItem.GridCell.TextGet();
-                                    if (UtilFramework.IsJson2)
-                                    {
-                                        textGet = appJson.RequestJson.GridCellText;
-                                    }
+                                    string textGet = appJson.RequestJson.GridCellText;
                                     gridCellItem.GridCellSession.Text = textGet;
                                     if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
                                     {
@@ -850,16 +788,7 @@
         private async Task ProcessGridIsSortClickAsync()
         {
             var appJson = UtilServer.AppJson;
-            bool isProcess = true;
-            if (UtilFramework.IsJson2)
-            {
-                if (!(appJson.RequestJson.Command != RequestCommand.GridIsClickSort || appJson.RequestJson.Command != RequestCommand.GridIsClickConfig))
-                {
-                    isProcess = false;
-                }
-            }
-
-            if (isProcess)
+            if (appJson.RequestJson.Command == RequestCommand.GridIsClickSort || appJson.RequestJson.Command == RequestCommand.GridIsClickConfig)
             {
                 List<GridItem> gridItemReloadList = new List<GridItem>();
                 foreach (GridItem gridItem in UtilSession.GridItemList())
@@ -940,7 +869,6 @@
 
                             GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex - gridSession.OffsetColumn);
                             gridCell.Text = text;
-                            gridCell.IsModify = true;
                             gridItemLookup.Grid.GridLookupClose(gridItemList[gridIndex], true);
                             return;
                         }
@@ -952,16 +880,7 @@
         private async Task ProcessGridRowIsClick()
         {
             var appJson = UtilServer.AppJson;
-            bool isProcess = true;
-            if (UtilFramework.IsJson2)
-            {
-                if (appJson.RequestJson.Command != RequestCommand.GridIsClickRow)
-                {
-                    isProcess = false;
-                }
-            }
-
-            if (isProcess)
+            if (appJson.RequestJson.Command == RequestCommand.GridIsClickRow)
             {
                 foreach (GridItem gridItem in UtilSession.GridItemList())
                 {
