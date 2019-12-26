@@ -944,7 +944,7 @@ namespace Framework.Json
             }
         }
 
-        private static readonly JsonWriterOptions options = new JsonWriterOptions() { Indented = true };
+        private static readonly JsonWriterOptions options = new JsonWriterOptions(); // { Indented = true };
 
         public static string Serialize(object obj)
         {

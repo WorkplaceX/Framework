@@ -177,10 +177,9 @@
     /// </summary>
     public static class ComponentJsonExtension
     {
-        public static ComponentJson ComponentOwner(this ComponentJson component)
+        internal static ComponentJson ComponentOwner(this ComponentJson component)
         {
-            ComponentJson result = UtilServer.AppJson.ComponentListAll().Where(item => item.List.Contains(component)).Single();
-            return result;
+            return component.Owner;
         }
 
         /// <summary>
@@ -198,7 +197,6 @@
             } while (component != null);
             return null;
         }
-
 
         private static void ComponentListAll(ComponentJson component, List<ComponentJson> result)
         {
