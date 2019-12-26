@@ -158,7 +158,7 @@
                         {
                             buttonParent.IsDropDown = true; // Has children.
                         }
-                        BootstrapNavbarButton button = new BootstrapNavbarButton() { GridIndex = gridIndex, RowIndex = rowIndex, TextHtml = itemText, IsActive = isActive };
+                        BootstrapNavbarButton button = new BootstrapNavbarButton(null) { GridIndex = gridIndex, RowIndex = rowIndex, TextHtml = itemText, IsActive = isActive }; // TODO
                         if (buttonList == null)
                         {
                             buttonList = new List<BootstrapNavbarButton>();

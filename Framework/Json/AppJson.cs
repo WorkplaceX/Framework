@@ -62,11 +62,6 @@
     public abstract class ComponentJson
     {
         /// <summary>
-        /// Constructor for json deserialization.
-        /// </summary>
-        public ComponentJson() { }
-
-        /// <summary>
         /// Constructor to programmatically create new object.
         /// </summary>
         public ComponentJson(ComponentJson owner)
@@ -520,10 +515,8 @@
 
     public class AppJson : Page
     {
-        public AppJson() { }
-
-        public AppJson(ComponentJson owner)
-            : base(owner)
+        public AppJson()            
+            : base(null)
         {
 
         }
@@ -662,8 +655,6 @@
     /// </summary>
     public sealed class Button : ComponentJson
     {
-        public Button() { }
-
         public Button(ComponentJson owner)
             : base(owner)
         {
@@ -678,8 +669,6 @@
     /// </summary>
     public sealed class Div : ComponentJson
     {
-        public Div() { }
-
         public Div(ComponentJson owner)
             : base(owner)
         {
@@ -692,8 +681,6 @@
     /// </summary>
     public sealed class DivContainer : ComponentJson
     {
-        public DivContainer() { }
-
         public DivContainer(ComponentJson owner)
             : base(owner)
         {
@@ -707,8 +694,6 @@
     /// </summary>
     public sealed class BootstrapNavbar : ComponentJson
     {
-        public BootstrapNavbar() { }
-
         public BootstrapNavbar(ComponentJson owner)
             : base(owner)
         {
@@ -734,8 +719,6 @@
 
     public sealed class BootstrapNavbarButton : ComponentJson
     {
-        public BootstrapNavbarButton() { }
-
         public BootstrapNavbarButton(ComponentJson owner)
             : base(owner)
         {
@@ -818,8 +801,6 @@
     /// </summary>
     public sealed class Grid : ComponentJson
     {
-        public Grid() { }
-
         public Grid(ComponentJson owner)
             : base(owner)
         {
@@ -1042,8 +1023,6 @@
 
     public sealed class Html : ComponentJson
     {
-        public Html() { }
-
         public Html(ComponentJson owner)
             : base(owner)
         {
@@ -1055,11 +1034,6 @@
 
     public class Page : ComponentJson
     {
-        public Page()
-        {
-            Type = typeof(Page).Name;
-        }
-
         /// <summary>
         /// Constructor. Use method PageShowAsync(); to create new page.
         /// </summary>
