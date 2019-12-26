@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 namespace Framework
 {
     using Framework.Server;
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -14,6 +13,7 @@ namespace Framework
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using System.Text.Json;
 
     internal class UtilFramework
     {
@@ -36,7 +36,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.1.1";
+                return "v3.1.11";
             }
         }
 
@@ -164,19 +164,18 @@ namespace Framework
             object result = null;
             if (json == null)
             {
-                result = JsonConvert.DeserializeObject<T>("{}");
+                result = JsonSerializer.Deserialize<T>("{}");
             }
             else
             {
-                result = JsonConvert.DeserializeObject<T>(json);
+                result = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { AllowTrailingCommas = true });
             }
             return (T)result;
         }
 
         internal static string ConfigToJson(object config, bool isIndented)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Include };
-            string json = JsonConvert.SerializeObject(config, isIndented? Formatting.Indented : Formatting.None, settings);
+            string json = JsonSerializer.Serialize(config, config.GetType(), new JsonSerializerOptions { WriteIndented = isIndented });
             return json;
         }
 

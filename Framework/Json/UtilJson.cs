@@ -970,17 +970,21 @@ namespace Framework.Json
         /// </summary>
         public static void DebugValidateJson(object obj, string json)
         {
-            string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
-            object objDest = Deserialize(json);
-            string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(objDest, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
-            UtilFramework.Assert(jsonSource == jsonDest);
+            // Needs Newtonsoft.Json
+
+            //string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(obj, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
+            //object objDest = Deserialize(json);
+            //string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(objDest, new Newtonsoft.Json.JsonSerializerSettings() { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore });
+            //UtilFramework.Assert(jsonSource == jsonDest);
         }
 
         public static void DebugValidateJson(object source, object dest)
         {
-            string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(source, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All });
-            string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(dest, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All });
-            UtilFramework.Assert(jsonSource == jsonDest);
+            // Needs Newtonsoft.Json
+
+            //string jsonSource = Newtonsoft.Json.JsonConvert.SerializeObject(source, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All });
+            //string jsonDest = Newtonsoft.Json.JsonConvert.SerializeObject(dest, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All });
+            //UtilFramework.Assert(jsonSource == jsonDest);
         }
 
         public static object Deserialize(string json)
