@@ -10,10 +10,51 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
-    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using static Framework.Json.Page;
     using static Framework.Session.UtilSession;
+
+    internal enum RequestCommand
+    {
+        None = 0,
+
+        ButtonIsClick = 1,
+
+        GridIsClickSort = 2,
+
+        GridIsClickConfig = 3,
+
+        GridIsClickRow = 4,
+
+        GridIsClickEnum = 5,
+
+        GridCellIsModify = 6,
+    }
+
+    /// <summary>
+    /// Request sent by Angular client.
+    /// </summary>
+    internal class RequestJson
+    {
+        public RequestCommand Command { get; set; }
+
+        /// <summary>
+        /// Gets or sets Id. This is ComponentJson.Id.
+        /// </summary>
+        public int ComponentId { get; set; }
+
+        public int GridColumnId { get; set; }
+
+        public int GridRowId { get; set; }
+
+        public int GridCellId { get; set; }
+
+        public GridIsClickEnum GridIsClickEnum { get; set; }
+
+        public string GridCellText { get; set; }
+
+        public int RequestCount { get; set; }
+    }
 
     /// <summary>
     /// Json component tree. Store session state in field or property.
@@ -546,6 +587,12 @@
         }
 
         /// <summary>
+        /// Gets RequestJson. Payload of current request.
+        /// </summary>
+        [SerializeIgnore]
+        internal RequestJson RequestJson;
+
+        /// <summary>
         /// Gets or sets RequestCount. Used by client. Does not send new request while old is still pending.
         /// </summary>
         public int RequestCount { get; internal set; }
@@ -893,6 +940,9 @@
         }
     }
 
+    /// <summary>
+    /// Grid paging.
+    /// </summary>
     public enum GridIsClickEnum
     {
         None = 0,
@@ -906,6 +956,8 @@
 
     public sealed class GridColumn
     {
+        public int Id;
+
         public string Text;
 
         /// <summary>
@@ -920,6 +972,8 @@
 
     public sealed class GridRow
     {
+        public int Id;
+
         public List<GridCell> CellList;
 
         public bool IsClick;
@@ -933,6 +987,8 @@
 
     public sealed class GridCell
     {
+        public int Id;
+
         /// <summary>
         /// Gets or sets json text. When coming from client Text can be null or ""!
         /// </summary>

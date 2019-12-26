@@ -3,6 +3,8 @@
 
 namespace Framework.Json
 {
+    using Framework.Server;
+    using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using System;
@@ -400,6 +402,8 @@ namespace Framework.Json
                 UtilStopwatch.TimeStart("SerializeClient2");
                 string jsonClient = UtilJson2.Serialize(obj);
                 UtilStopwatch.TimeStop("SerializeClient2");
+
+                UtilServer.Session.SetString("JsonClient", jsonClient); // Store copy on server
 
                 return jsonClient;
             }

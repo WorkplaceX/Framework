@@ -3,6 +3,26 @@ import { HttpClient } from '@angular/common/http';
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
+export class RequestJson {
+  Command: number;
+
+  ComponentId: number;
+
+  GridColumnId: number;
+
+  GridRowId: number;
+
+  GridCellId: number;
+
+  GridCellText: string;
+
+  GridIsClickEnum : number;
+
+  RequestCount: number;
+
+  IsRequestJson: boolean;
+}
+
 export class Json {
   Name: string;
 
@@ -57,12 +77,12 @@ export class DataService {
       this.json = jsonBrowser;
       this.json.IsServerSideRendering = false;
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
-        this.json.RequestUrl = "http://localhost:50919/";
-        this.update();
+        this.json.EmbeddedUrl = "http://localhost:50919/";
+        this.update(<RequestJson> { Command: 0 });
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;
-        this.update();
+        this.update(<RequestJson> { Command: 0 });
       }
     }
   }
@@ -86,7 +106,7 @@ export class DataService {
     }
   }
 
-  public update(): void {
+  public update(requestJson: RequestJson): void {
     // RequestCount
     if (this.json.RequestCount == null) {
       this.json.RequestCount = 0;
@@ -102,8 +122,15 @@ export class DataService {
         requestUrl = new URL("/app.json", this.json.RequestUrl).href 
       }
 
+      let json: any = this.json;
+      if (requestJson != null) {
+         requestJson.IsRequestJson = true;
+         requestJson.RequestCount = this.json.RequestCount;
+         json = requestJson;
+      }
+
       this.httpClient.request("POST", requestUrl, {
-        body: JSON.stringify(this.json),
+        body: JSON.stringify(json),
         withCredentials: true,
       })
       .subscribe(body => {
@@ -115,7 +142,7 @@ export class DataService {
           this.merge(jsonResponse);
           this.json = jsonResponse;
           this.isRequestPending = false;
-          this.update(); // Process new merged request.
+          this.update(<RequestJson> { Command: 0 }); // Process new merged request.
         }
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {

@@ -16,7 +16,7 @@ import { DataService } from '../data.service';
   
   click(button){
     button.IsClick = true;
-    this.dataService.update();
+    this.dataService.update(null);
   } 
 
   trackBy(index, item) {

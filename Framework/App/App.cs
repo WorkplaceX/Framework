@@ -9,6 +9,7 @@
     using System.Linq;
     using Framework.Config;
     using System.Collections.Generic;
+    using System.Text.Json;
 
     internal class AppInternal
     {
@@ -77,10 +78,29 @@
             appInternal.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
             string json = await UtilServer.StreamToString(context.Request.Body);
             bool isEmbeddedUrl = (string)context.Request.Query["isEmbeddedUrl"] == ""; // Flag set by Angular client on first app.json POST if running embedded on other website.
+            RequestJson requestJson = null;
             if (json != null && !isEmbeddedUrl) // If client POST
             {
-                appInternal.AppJson = UtilJson.Deserialize<AppJson>(json, appInternal.TypeComponentInNamespaceList);
+                if (UtilFramework.IsJson2 && json.Contains("IsRequestJson"))
+                {
+                    requestJson = JsonSerializer.Deserialize<RequestJson>(json);
+                    json = UtilServer.Session.GetString("JsonClient");
+                }
+                if (json == null)
+                {
+                    appInternal.AppSession = new AppSession();
+                    appInternal.AppJson = CreateAppJson(); // Session expired.
+                }
+                else
+                {
+                    appInternal.AppJson = UtilJson.Deserialize<AppJson>(json, appInternal.TypeComponentInNamespaceList);
+                }
                 appInternal.AppJson.IsSessionExpired = false;
+                if (UtilFramework.IsJson2 && requestJson != null)
+                {
+                    appInternal.AppJson.RequestCount = requestJson.RequestCount;
+                    appInternal.AppJson.RequestJson = requestJson;
+                }
             }
             else
             {
@@ -119,6 +139,11 @@
 
             UtilFramework.Assert(appInternal.AppJson.ResponseCount == appInternal.AppSession.ResponseCount, "Request mismatch!");
 
+            if (appInternal.AppJson.RequestJson == null)
+            {
+                appInternal.AppJson.RequestJson = new RequestJson(); // As long as client null request are comming
+            }
+
             // Process
             await appInternal.AppJson.ProcessInternalAsync();
 
@@ -147,6 +172,7 @@
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);
+            result.RequestJson = new RequestJson();
             return result;
         }
 

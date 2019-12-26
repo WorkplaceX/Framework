@@ -1,5 +1,5 @@
 import { Input, Component } from "@angular/core";
-import { DataService } from '../data.service';
+import { DataService, RequestJson } from '../data.service';
 
 /* Grid */
 @Component({
@@ -12,7 +12,7 @@ export class Grid {
 
   @Input() json: any
 
-  ngModelChange(cell) {
+  ngModelChange(cell, row) {
     cell.IsModify = true;
     cell.IsClick = true; // Show spinner
 
@@ -26,13 +26,13 @@ export class Grid {
       this.dataService.mergeBufferText = cell.Text; // Buffer user input during pending request.
     }
 
-    this.dataService.update();
+    this.dataService.update(<RequestJson> { Command: 6, ComponentId: this.json.Id, GridRowId: row.Id, GridCellId: cell.Id, GridCellText: cell.Text });
   }
 
   focus(row) {
     if (!row.IsSelect && !row.IsClick) {
       row.IsClick = true;
-      this.dataService.update();
+      this.dataService.update(<RequestJson> { Command: 4, ComponentId: this.json.Id, GridRowId: row.Id });
     }
   }
 
@@ -40,26 +40,26 @@ export class Grid {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     if (!row.IsSelect && !row.IsClick) {
       row.IsClick = true;
-      this.dataService.update();
+      this.dataService.update(<RequestJson> { Command: 4, ComponentId: this.json.Id, GridRowId: row.Id });
     }
   }
   
   clickSort(column, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     column.IsClickSort = true;
-    this.dataService.update();
+    this.dataService.update(<RequestJson> { Command: 2, ComponentId: this.json.Id, GridColumnId: column.Id });
   }
 
   clickConfig(column, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     column.IsClickConfig = true;
-    this.dataService.update();
+    this.dataService.update(<RequestJson> { Command: 3, ComponentId: this.json.Id, GridColumnId: column.Id });
   }
 
   clickGrid(isClickEnum, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.json.IsClickEnum = isClickEnum;
-    this.dataService.update();
+    this.dataService.update(<RequestJson> { Command: 5, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
   }
 
 

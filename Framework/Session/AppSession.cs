@@ -323,11 +323,13 @@
                         var config = new UtilColumnIndexConfig(gridItem);
 
                         // Grid Header
+                        int gridColumnId = 0;
                         foreach (GridColumnItem gridColumnItem in config.ConfigList(gridItem.GridColumnItemList))
                         {
                             if (gridItem.GridSession.IsRange(config.IndexToIndexConfig(gridColumnItem.CellIndex)))
                             {
                                 GridColumn gridColumn = new GridColumn();
+                                gridColumn.Id = gridColumnId += 1;
                                 gridColumn.Text = gridColumnItem.GridColumnSession.Text;
                                 gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
                                 gridItem.Grid.ColumnList.Add(gridColumn);
@@ -335,11 +337,13 @@
                         }
 
                         // Grid Row
+                        int gridRowId = 0;
                         foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                         {
                             if (gridRowItem.GridRowSession != null)
                             {
                                 GridRow gridRow = new GridRow();
+                                gridRow.Id = gridRowId += 1;
                                 gridRow.RowEnum = gridRowItem.GridRowSession.RowEnum;
                                 gridRow.ErrorSave = gridRowItem.GridRowSession.ErrorSave;
                                 gridItem.Grid.RowList.Add(gridRow);
@@ -347,6 +351,7 @@
                                 gridRow.CellList = new List<GridCell>();
 
                                 // Grid Cell
+                                int gridCellId = 0;
                                 foreach (GridCellItem gridCellItem in config.ConfigList(gridRowItem.GridCellList))
                                 {
                                     if (gridCellItem.GridCellSession != null)
@@ -354,6 +359,7 @@
                                         if (gridItem.GridSession.IsRange(config.IndexToIndexConfig(gridCellItem.CellIndex)))
                                         {
                                             GridCell gridCell = new GridCell();
+                                            gridCell.Id = gridCellId += 1;
                                             gridRow.CellList.Add(gridCell);
                                             gridCell.Text = gridCellItem.GridCellSession.Text;
                                             
@@ -401,76 +407,94 @@
         }
 
         /// <summary>
-        /// Process GridIsClickEnum.
+        /// Process GridIsClickEnum for grid paging.
         /// </summary>
         private async Task ProcessGridIsClickEnumAsync()
         {
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            var appJson = UtilServer.AppJson;
+            bool isProcess = true;
+            if (UtilFramework.IsJson2)
             {
-                if (gridItem.Grid != null)
+                if (appJson.RequestJson.Command != RequestCommand.GridIsClickEnum)
                 {
-                    // PageLeft
-                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageLeft)
+                    isProcess = false;
+                }
+            }
+
+            if (isProcess)
+            {
+                foreach (GridItem gridItem in UtilSession.GridItemList())
+                {
+                    if (gridItem.Grid != null)
                     {
-                        gridItem.GridSession.OffsetColumn -= 1;
-                        if (gridItem.GridSession.OffsetColumn < 0)
+                        var isClickEnum = gridItem.Grid.IsClickEnum;
+                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickEnum && appJson.RequestJson.ComponentId == gridItem.Grid.Id)
                         {
-                            gridItem.GridSession.OffsetColumn = 0;
+                            isClickEnum = appJson.RequestJson.GridIsClickEnum;
                         }
-                    }
-                    // PageRight
-                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageRight)
-                    {
-                        gridItem.GridSession.OffsetColumn += 1;
-                        var config = new UtilColumnIndexConfig(gridItem);
-                        if (gridItem.GridSession.OffsetColumn > (config.Count - gridItem.GridSession.ColumnCountMax))
+                        // PageLeft
+                        if (isClickEnum == GridIsClickEnum.PageLeft)
                         {
-                            gridItem.GridSession.OffsetColumn = config.Count - gridItem.GridSession.ColumnCountMax;
+                            gridItem.GridSession.OffsetColumn -= 1;
                             if (gridItem.GridSession.OffsetColumn < 0)
                             {
                                 gridItem.GridSession.OffsetColumn = 0;
                             }
                         }
-                    }
-                    // PageUp
-                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageUp)
-                    {
-                        gridItem.GridSession.OffsetRow -= gridItem.GridSession.RowCountMaxGet();
-                        if (gridItem.GridSession.OffsetRow < 0)
+                        // PageRight
+                        if (isClickEnum == GridIsClickEnum.PageRight)
                         {
-                            gridItem.GridSession.OffsetRow = 0;
+                            gridItem.GridSession.OffsetColumn += 1;
+                            var config = new UtilColumnIndexConfig(gridItem);
+                            if (gridItem.GridSession.OffsetColumn > (config.Count - gridItem.GridSession.ColumnCountMax))
+                            {
+                                gridItem.GridSession.OffsetColumn = config.Count - gridItem.GridSession.ColumnCountMax;
+                                if (gridItem.GridSession.OffsetColumn < 0)
+                                {
+                                    gridItem.GridSession.OffsetColumn = 0;
+                                }
+                            }
                         }
-                        await GridLoadAsync(gridItem.Grid);
-                    }
-                    // PageDown
-                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.PageDown)
-                    {
-                        int rowCount = gridItem.GridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Index).Count();
-                        if (rowCount == gridItem.GridSession.RowCountMaxGet()) // Page down further on full grid only.
+                        // PageUp
+                        if (isClickEnum == GridIsClickEnum.PageUp)
                         {
-                            gridItem.GridSession.OffsetRow += gridItem.GridSession.RowCountMaxGet();
+                            gridItem.GridSession.OffsetRow -= gridItem.GridSession.RowCountMaxGet();
+                            if (gridItem.GridSession.OffsetRow < 0)
+                            {
+                                gridItem.GridSession.OffsetRow = 0;
+                            }
                             await GridLoadAsync(gridItem.Grid);
                         }
-                    }
-                    // Reload
-                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.Reload)
-                    {
-                        gridItem.GridSession.OffsetRow = 0;
-                        gridItem.GridSession.OffsetColumn = 0;
-                        await GridLoadAsync(gridItem.Grid);
-                    }
-                    // Config
-                    if (gridItem.Grid.IsClickEnum == GridIsClickEnum.Config)
-                    {
-                        if (gridItem.GridSession.TypeRow != null) // Do not show config if for example no query is defined for data grid.
+                        // PageDown
+                        if (isClickEnum == GridIsClickEnum.PageDown)
                         {
-                            Page page = gridItem.Grid.ComponentOwner<Page>();
-                            string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
-                            string configName = gridItem.Grid.ConfigName;
-                            await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                            int rowCount = gridItem.GridSession.GridRowSessionList.Where(item => item.RowEnum == GridRowEnum.Index).Count();
+                            if (rowCount == gridItem.GridSession.RowCountMaxGet()) // Page down further on full grid only.
                             {
-                                pageGridConfig.Init(tableNameCSharp, configName, null);
-                            });
+                                gridItem.GridSession.OffsetRow += gridItem.GridSession.RowCountMaxGet();
+                                await GridLoadAsync(gridItem.Grid);
+                            }
+                        }
+                        // Reload
+                        if (isClickEnum == GridIsClickEnum.Reload)
+                        {
+                            gridItem.GridSession.OffsetRow = 0;
+                            gridItem.GridSession.OffsetColumn = 0;
+                            await GridLoadAsync(gridItem.Grid);
+                        }
+                        // Config
+                        if (isClickEnum == GridIsClickEnum.Config)
+                        {
+                            if (gridItem.GridSession.TypeRow != null) // Do not show config if for example no query is defined for data grid.
+                            {
+                                Page page = gridItem.Grid.ComponentOwner<Page>();
+                                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
+                                string configName = gridItem.Grid.ConfigName;
+                                await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                                {
+                                    pageGridConfig.Init(tableNameCSharp, configName, null);
+                                });
+                            }
                         }
                     }
                 }
@@ -496,151 +520,174 @@
         /// </summary>
         private async Task ProcessGridSaveAsync()
         {
-            // Parse user entered text
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            var appJson = UtilServer.AppJson;
+            bool isProcess = true;
+            if (UtilFramework.IsJson2)
             {
-                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                if (appJson.RequestJson.Command != RequestCommand.GridCellIsModify)
                 {
-                    foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
-                    {
-                        if (gridCellItem.GridCell != null)
-                        {
-                            if (gridCellItem.GridCell.IsModify)
-                            {
-                                Row row = null;
-                                if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index)
-                                {
-                                    // Parse Update
-                                    if (gridRowItem.GridRowSession.RowUpdate == null)
-                                    {
-                                        gridRowItem.GridRowSession.RowUpdate = Data.RowCopy(gridRowItem.GridRowSession.Row);
-                                    }
-                                    row = gridRowItem.GridRowSession.RowUpdate;
-                                }
-                                if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)
-                                {
-                                    // Parse Insert
-                                    if (gridRowItem.GridRowSession.RowInsert == null)
-                                    {
-                                        gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(gridItem.GridSession.TypeRow);
-                                    }
-                                    row = gridRowItem.GridRowSession.RowInsert;
-                                }
-                                if (row != null)
-                                {
-                                    gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
-                                    gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet(); // Set back to database selected value, once successfully saved.
-                                    Grid grid = gridItem.Grid;
-                                    Page page = grid.ComponentOwner<Page>();
-                                    object valueBefore = gridCellItem.Field.PropertyInfo.GetValue(row);
-                                    bool isHandled = false;
-                                    gridCellItem.GridCellSession.ErrorParse = null;
-                                    string text = gridCellItem.GridCellSession.Text;
-                                    string errorParse = null;
-                                    try
-                                    {
-                                        if (text == null && !UtilFramework.IsNullable(gridCellItem.Field.PropertyInfo.PropertyType))
-                                        {
-                                            if (!(gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)) // Not nullable value in cell can be set back to null in new row.
-                                            {
-                                                throw new Exception("Value can not be null!");
-                                            }
-                                        }
-                                        if (text != null)
-                                        {
-                                            page.GridCellParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
-                                        }
-                                        if (!isHandled)
-                                        {
-                                            Data.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out errorParse); // Default parse user entered cell text.
-                                            gridCellItem.GridCellSession.ErrorParse = errorParse;
-                                        }
-
-                                    }
-                                    catch (Exception exception)
-                                    {
-                                        errorParse = UtilFramework.ExceptionToString(exception);
-                                        gridRowItem.GridRowSession.RowUpdate = null;
-                                        gridRowItem.GridRowSession.RowInsert = null;
-                                    }
-                                    gridCellItem.GridCellSession.ErrorParse = errorParse;
-
-                                    // Autocomplete
-                                    bool isAutocomplete = Data.CellTextParseIsAutocomplete(gridCellItem);
-                                    string fieldNameExclude = null;
-                                    if (!isAutocomplete)
-                                    {
-                                        // If method CellTextParse(); did not change underlying value do not call method CellTextFromValue(); for this field. Prevent for example autocomplete if user entered "2." to "2" for decimal value.
-                                        fieldNameExclude = gridCellItem.FieldName; 
-                                    }
-                                    ProcessGridSaveCellTextParse(page, grid, gridRowItem, row, fieldNameExclude);
-                                }
-                            }
-                            gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
-                        }
-                    }
+                    isProcess = false;
                 }
             }
 
-            // Save row to database
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            if (isProcess)
             {
-                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                // Parse user entered text
+                foreach (GridItem gridItem in UtilSession.GridItemList())
                 {
-                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index && gridRowItem.GridRowSession.RowUpdate != null)
+                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                     {
-                        // Update to database
-                        try
+                        foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                         {
-                            bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridUpdateAsync(gridItem.Grid, gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum);
-                            if (!isHandled)
+                            if (gridCellItem.GridCell != null)
                             {
-                                await Data.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum); // Default database record update
-                            }
-                            else
-                            {
-                                // Custom database record update might also have changed other fields like new primary key or UOM.
-                                List<Field> fieldList = null;
-                                GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
-                            }
-                            gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowUpdate;
-                            foreach (GridCellSession gridCellSession in gridRowItem.GridRowSession.GridCellSessionList)
-                            {
-                                gridCellSession.IsModify = false;
-                                gridCellSession.TextOld = null;
-                                gridCellSession.ErrorParse = null;
+                                bool isModify = gridCellItem.GridCell.IsModify;
+                                if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id)
+                                {
+                                    isModify = true;
+                                }
+                                if (isModify)
+                                {
+                                    Row row = null;
+                                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index)
+                                    {
+                                        // Parse Update
+                                        if (gridRowItem.GridRowSession.RowUpdate == null)
+                                        {
+                                            gridRowItem.GridRowSession.RowUpdate = Data.RowCopy(gridRowItem.GridRowSession.Row);
+                                        }
+                                        row = gridRowItem.GridRowSession.RowUpdate;
+                                    }
+                                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)
+                                    {
+                                        // Parse Insert
+                                        if (gridRowItem.GridRowSession.RowInsert == null)
+                                        {
+                                            gridRowItem.GridRowSession.RowInsert = (Row)UtilFramework.TypeToObject(gridItem.GridSession.TypeRow);
+                                        }
+                                        row = gridRowItem.GridRowSession.RowInsert;
+                                    }
+                                    if (row != null)
+                                    {
+                                        gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully saved.
+                                        string textGet = gridCellItem.GridCell.TextGet();
+                                        if (UtilFramework.IsJson2)
+                                        {
+                                            textGet = appJson.RequestJson.GridCellText;
+                                        }
+                                        gridCellItem.GridCellSession.Text = textGet; // Set back to database selected value, once successfully saved.
+                                        Grid grid = gridItem.Grid;
+                                        Page page = grid.ComponentOwner<Page>();
+                                        object valueBefore = gridCellItem.Field.PropertyInfo.GetValue(row);
+                                        bool isHandled = false;
+                                        gridCellItem.GridCellSession.ErrorParse = null;
+                                        string text = gridCellItem.GridCellSession.Text;
+                                        string errorParse = null;
+                                        try
+                                        {
+                                            if (text == null && !UtilFramework.IsNullable(gridCellItem.Field.PropertyInfo.PropertyType))
+                                            {
+                                                if (!(gridRowItem.GridRowSession.RowEnum == GridRowEnum.New)) // Not nullable value in cell can be set back to null in new row.
+                                                {
+                                                    throw new Exception("Value can not be null!");
+                                                }
+                                            }
+                                            if (text != null)
+                                            {
+                                                page.GridCellParse(grid, gridCellItem.Field.PropertyInfo.Name, gridCellItem.GridCellSession.Text, row, out isHandled); // Custom parse user entered cell text.
+                                            }
+                                            if (!isHandled)
+                                            {
+                                                Data.CellTextParse(gridCellItem.Field, gridCellItem.GridCellSession.Text, row, out errorParse); // Default parse user entered cell text.
+                                                gridCellItem.GridCellSession.ErrorParse = errorParse;
+                                            }
+
+                                        }
+                                        catch (Exception exception)
+                                        {
+                                            errorParse = UtilFramework.ExceptionToString(exception);
+                                            gridRowItem.GridRowSession.RowUpdate = null;
+                                            gridRowItem.GridRowSession.RowInsert = null;
+                                        }
+                                        gridCellItem.GridCellSession.ErrorParse = errorParse;
+
+                                        // Autocomplete
+                                        bool isAutocomplete = Data.CellTextParseIsAutocomplete(gridCellItem);
+                                        string fieldNameExclude = null;
+                                        if (!isAutocomplete)
+                                        {
+                                            // If method CellTextParse(); did not change underlying value do not call method CellTextFromValue(); for this field. Prevent for example autocomplete if user entered "2." to "2" for decimal value.
+                                            fieldNameExclude = gridCellItem.FieldName;
+                                        }
+                                        ProcessGridSaveCellTextParse(page, grid, gridRowItem, row, fieldNameExclude);
+                                    }
+                                }
+                                gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
                             }
                         }
-                        catch (Exception exception)
-                        {
-                            gridRowItem.GridRowSession.ErrorSave = UtilFramework.ExceptionToString(exception);
-                        }
-                        gridRowItem.GridRowSession.RowUpdate = null;
                     }
-                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New && gridRowItem.GridRowSession.RowInsert != null)
+                }
+
+                // Save row to database
+                foreach (GridItem gridItem in UtilSession.GridItemList())
+                {
+                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                     {
-                        // Insert to database
-                        try
+                        if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index && gridRowItem.GridRowSession.RowUpdate != null)
                         {
-                            bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridInsertAsync(gridItem.Grid, gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
-                            if (!isHandled)
+                            // Update to database
+                            try
                             {
-                                await Data.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
+                                bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridUpdateAsync(gridItem.Grid, gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum);
+                                if (!isHandled)
+                                {
+                                    await Data.UpdateAsync(gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum); // Default database record update
+                                }
+                                else
+                                {
+                                    // Custom database record update might also have changed other fields like new primary key or UOM.
+                                    List<Field> fieldList = null;
+                                    GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
+                                }
+                                gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowUpdate;
+                                foreach (GridCellSession gridCellSession in gridRowItem.GridRowSession.GridCellSessionList)
+                                {
+                                    gridCellSession.IsModify = false;
+                                    gridCellSession.TextOld = null;
+                                    gridCellSession.ErrorParse = null;
+                                }
                             }
-                            gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowInsert;
-
-                            // Load new primary key from session into data grid.
-                            List<Field> fieldList = null;
-                            GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.Row, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
-
-                            // Add new "insert row" at end of data grid.
-                            GridLoadAddRowNew(gridItem.GridIndex);
+                            catch (Exception exception)
+                            {
+                                gridRowItem.GridRowSession.ErrorSave = UtilFramework.ExceptionToString(exception);
+                            }
+                            gridRowItem.GridRowSession.RowUpdate = null;
                         }
-                        catch (Exception exception)
+                        if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.New && gridRowItem.GridRowSession.RowInsert != null)
                         {
-                            gridRowItem.GridRowSession.ErrorSave = UtilFramework.ExceptionToString(exception);
+                            // Insert to database
+                            try
+                            {
+                                bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridInsertAsync(gridItem.Grid, gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
+                                if (!isHandled)
+                                {
+                                    await Data.InsertAsync(gridRowItem.GridRowSession.RowInsert, gridItem.GridSession.DatabaseEnum);
+                                }
+                                gridRowItem.GridRowSession.Row = gridRowItem.GridRowSession.RowInsert;
+
+                                // Load new primary key from session into data grid.
+                                List<Field> fieldList = null;
+                                GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.Row, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
+
+                                // Add new "insert row" at end of data grid.
+                                GridLoadAddRowNew(gridItem.GridIndex);
+                            }
+                            catch (Exception exception)
+                            {
+                                gridRowItem.GridRowSession.ErrorSave = UtilFramework.ExceptionToString(exception);
+                            }
+                            gridRowItem.GridRowSession.RowInsert = null;
                         }
-                        gridRowItem.GridRowSession.RowInsert = null;
                     }
                 }
             }
@@ -666,22 +713,45 @@
 
         private async Task ProcessGridLookupOpenAsync()
         {
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            var appJson = UtilServer.AppJson;
+            bool isProcess = true;
+            if (UtilFramework.IsJson2)
             {
-                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                if (appJson.RequestJson.Command != RequestCommand.GridCellIsModify)
                 {
-                    foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                    isProcess = false;
+                }
+            }
+
+            if (isProcess)
+            {
+                foreach (GridItem gridItem in UtilSession.GridItemList())
+                {
+                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                     {
-                        if (gridCellItem.GridCell?.IsModify == true)
+                        foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                         {
-                            gridCellItem.GridCellSession.IsLookup = true;
-                            var query = gridItem.Grid.ComponentOwner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, gridCellItem.GridCell.TextGet());
-                            if (query != null)
+                            bool isModify = gridCellItem.GridCell?.IsModify == true;
+                            if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow?.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id)
                             {
-                                await GridLoadAsync(gridItem.Grid.GridLookup(), query); // Load lookup.
-                                gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
+                                isModify = true;
                             }
-                            return;
+                            if (isModify == true)
+                            {
+                                gridCellItem.GridCellSession.IsLookup = true;
+                                string textGet = gridCellItem.GridCell.TextGet();
+                                if (UtilFramework.IsJson2)
+                                {
+                                    textGet = appJson.RequestJson.GridCellText;
+                                }
+                                var query = gridItem.Grid.ComponentOwner<Page>().GridLookupQuery(gridItem.Grid, gridRowItem.GridRowSession.Row, gridCellItem.FieldName, textGet);
+                                if (query != null)
+                                {
+                                    await GridLoadAsync(gridItem.Grid.GridLookup(), query); // Load lookup.
+                                    gridItem.Grid.GridLookupOpen(gridItem, gridRowItem, gridCellItem);
+                                }
+                                return;
+                            }
                         }
                     }
                 }
@@ -690,114 +760,163 @@
 
         private async Task ProcessGridFilterAsync()
         {
-            List<GridItem> gridItemReloadList = new List<GridItem>();
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            var appJson = UtilServer.AppJson;
+            bool isProcess = true;
+            if (UtilFramework.IsJson2)
             {
-                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                if (appJson.RequestJson.Command != RequestCommand.GridCellIsModify)
                 {
-                    foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
-                    {
-                        if (gridCellItem.GridCell != null)
-                        {
-                            if (gridCellItem.GridCell.IsModify)
-                            {
-                                gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully parsed.
-                                gridCellItem.GridCellSession.TextOld = UtilFramework.StringNull(gridCellItem.GridCellSession.Text);
-                                gridCellItem.GridCellSession.Text = gridCellItem.GridCell.TextGet();
-                                if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
-                                {
-                                    Grid grid = gridItem.Grid;
-                                    Page page = grid.ComponentOwner<Page>();
-                                    Filter filter = new Filter();
-                                    filter.Load(gridRowItem);
-                                    gridCellItem.GridCellSession.ErrorParse = null;
-                                    string errorParse = null;
-                                    try
-                                    {
-                                        bool isHandled = false;
-                                        if (gridCellItem.GridCellSession.Text != null)
-                                        {
-                                            page.GridCellParseFilter(grid, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
-                                        }
-                                        if (isHandled == false)
-                                        {
-                                            Data.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
-                                        }
-                                        filter.Save(gridRowItem);
-                                    }
-                                    catch (Exception exception)
-                                    {
-                                        errorParse = exception.Message;
-                                    }
-                                    gridCellItem.GridCellSession.IsModify = false;
-                                    gridCellItem.GridCellSession.TextOld = null;
-                                    gridCellItem.GridCellSession.ErrorParse = errorParse;
-                                    if (!gridItemReloadList.Contains(gridItem))
-                                    {
-                                        gridItemReloadList.Add(gridItem);
-                                    }
-                                }
-                            }
-                            gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
-                        }
-                    }
+                    isProcess = false;
                 }
             }
 
-            // Grid reload from database
-            foreach (GridItem gridItem in gridItemReloadList)
+            if (isProcess)
             {
-                await GridLoadAsync(gridItem.Grid);
+                List<GridItem> gridItemReloadList = new List<GridItem>();
+                foreach (GridItem gridItem in UtilSession.GridItemList())
+                {
+                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                    {
+                        foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
+                        {
+                            if (gridCellItem.GridCell != null)
+                            {
+                                bool isModify = gridCellItem.GridCell.IsModify;
+                                if (UtilFramework.IsJson2)
+                                {
+                                    if (appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell.Id)
+                                    {
+                                        isModify = true;
+                                    }
+                                }
+                                if (isModify)
+                                {
+                                    gridCellItem.GridCellSession.IsModify = true; // Set back to null, once successfully parsed.
+                                    gridCellItem.GridCellSession.TextOld = UtilFramework.StringNull(gridCellItem.GridCellSession.Text);
+                                    string textGet = gridCellItem.GridCell.TextGet();
+                                    if (UtilFramework.IsJson2)
+                                    {
+                                        textGet = appJson.RequestJson.GridCellText;
+                                    }
+                                    gridCellItem.GridCellSession.Text = textGet;
+                                    if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Filter)
+                                    {
+                                        Grid grid = gridItem.Grid;
+                                        Page page = grid.ComponentOwner<Page>();
+                                        Filter filter = new Filter();
+                                        filter.Load(gridRowItem);
+                                        gridCellItem.GridCellSession.ErrorParse = null;
+                                        string errorParse = null;
+                                        try
+                                        {
+                                            bool isHandled = false;
+                                            if (gridCellItem.GridCellSession.Text != null)
+                                            {
+                                                page.GridCellParseFilter(grid, gridCellItem.FieldName, gridCellItem.GridCellSession.Text, filter, out isHandled); // Custom parse user entered filter text.
+                                            }
+                                            if (isHandled == false)
+                                            {
+                                                Data.CellTextParseFilter(gridCellItem.Field, gridCellItem.GridCellSession.Text, filter, out errorParse); // Default parse user entered filter text.
+                                            }
+                                            filter.Save(gridRowItem);
+                                        }
+                                        catch (Exception exception)
+                                        {
+                                            errorParse = exception.Message;
+                                        }
+                                        gridCellItem.GridCellSession.IsModify = false;
+                                        gridCellItem.GridCellSession.TextOld = null;
+                                        gridCellItem.GridCellSession.ErrorParse = errorParse;
+                                        if (!gridItemReloadList.Contains(gridItem))
+                                        {
+                                            gridItemReloadList.Add(gridItem);
+                                        }
+                                    }
+                                }
+                                gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
+                            }
+                        }
+                    }
+                }
+
+                // Grid reload from database
+                foreach (GridItem gridItem in gridItemReloadList)
+                {
+                    await GridLoadAsync(gridItem.Grid);
+                }
             }
         }
 
         private async Task ProcessGridIsSortClickAsync()
         {
-            List<GridItem> gridItemReloadList = new List<GridItem>();
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            var appJson = UtilServer.AppJson;
+            bool isProcess = true;
+            if (UtilFramework.IsJson2)
             {
-                foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                if (!(appJson.RequestJson.Command != RequestCommand.GridIsClickSort || appJson.RequestJson.Command != RequestCommand.GridIsClickConfig))
                 {
-                    if (gridColumnItem.GridColumn?.IsClickSort == true)
-                    {
-                        if (!gridItemReloadList.Contains(gridItem))
-                        {
-                            gridItemReloadList.Add(gridItem);
-                        }
-                        bool? isSort = gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort;
-                        if (isSort == null)
-                        {
-                            isSort = false;
-                        }
-                        else
-                        {
-                            isSort = !isSort;
-                        }
-                        foreach (GridColumnSession gridColumnSession in gridItem.GridSession.GridColumnSessionList)
-                        {
-                            gridColumnSession.IsSort = null;
-                        }
-                        gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
-                        gridItem.GridSession.OffsetRow = 0; // Reset paging.
-                    }
-                    if (gridColumnItem.GridColumn?.IsClickConfig == true)
-                    {
-                        Page page = gridItem.Grid.ComponentOwner<Page>();
-                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
-                        string configName = gridItem.Grid.ConfigName;
-                        string fieldName = gridColumnItem.Field.PropertyInfo.Name;
-                        await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
-                        {
-                            pageGridConfig.Init(tableNameCSharp, configName, fieldName);
-                        });
-                    }
+                    isProcess = false;
                 }
             }
 
-            // Grid reload from database
-            foreach (GridItem gridItem in gridItemReloadList)
+            if (isProcess)
             {
-                await GridLoadAsync(gridItem.Grid);
+                List<GridItem> gridItemReloadList = new List<GridItem>();
+                foreach (GridItem gridItem in UtilSession.GridItemList())
+                {
+                    foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
+                    {
+                        bool isClickSort = gridColumnItem.GridColumn?.IsClickSort == true;
+                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickSort && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridColumnId == gridColumnItem.GridColumn?.Id)
+                        {
+                            isClickSort = true;
+                        }
+                        if (isClickSort)
+                        {
+                            if (!gridItemReloadList.Contains(gridItem))
+                            {
+                                gridItemReloadList.Add(gridItem);
+                            }
+                            bool? isSort = gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort;
+                            if (isSort == null)
+                            {
+                                isSort = false;
+                            }
+                            else
+                            {
+                                isSort = !isSort;
+                            }
+                            foreach (GridColumnSession gridColumnSession in gridItem.GridSession.GridColumnSessionList)
+                            {
+                                gridColumnSession.IsSort = null;
+                            }
+                            gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
+                            gridItem.GridSession.OffsetRow = 0; // Reset paging.
+                        }
+                        bool isClickConfig = gridColumnItem.GridColumn?.IsClickConfig == true;
+                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickConfig && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridColumnId == gridColumnItem.GridColumn?.Id)
+                        {
+                            isClickConfig = true;
+                        }
+                        if (isClickConfig)
+                        {
+                            Page page = gridItem.Grid.ComponentOwner<Page>();
+                            string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(gridItem.GridSession.TypeRow);
+                            string configName = gridItem.Grid.ConfigName;
+                            string fieldName = gridColumnItem.Field.PropertyInfo.Name;
+                            await page.ComponentPageShowAsync<PageConfigGrid>(init: (PageConfigGrid pageGridConfig) =>
+                            {
+                                pageGridConfig.Init(tableNameCSharp, configName, fieldName);
+                            });
+                        }
+                    }
+                }
+
+                // Grid reload from database
+                foreach (GridItem gridItem in gridItemReloadList)
+                {
+                    await GridLoadAsync(gridItem.Grid);
+                }
             }
         }
 
@@ -832,41 +951,59 @@
 
         private async Task ProcessGridRowIsClick()
         {
-            foreach (GridItem gridItem in UtilSession.GridItemList())
+            var appJson = UtilServer.AppJson;
+            bool isProcess = true;
+            if (UtilFramework.IsJson2)
             {
-                // Get IsClick
-                int rowIndexIsClick = -1;
-                foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                if (appJson.RequestJson.Command != RequestCommand.GridIsClickRow)
                 {
-                    if (gridRowItem.GridRow?.IsClick == true)
-                    {
-                        if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index) // Do not select filter or new data row.
-                        {
-                            rowIndexIsClick = gridRowItem.RowIndex;
-                            break;
-                        }
-                    }
+                    isProcess = false;
                 }
+            }
 
-                // Set IsSelect
-                if (rowIndexIsClick != -1)
+            if (isProcess)
+            {
+                foreach (GridItem gridItem in UtilSession.GridItemList())
                 {
+                    // Get IsClick
+                    int rowIndexIsClick = -1;
                     foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                     {
-                        if (gridRowItem.GridRowSession != null) // Outgoing grid might have less rows
+                        bool isClick = gridRowItem.GridRow?.IsClick == true;
+                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickRow && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id)
                         {
-                            gridRowItem.GridRowSession.IsSelect = false;
+                            isClick = true;
+                        }
+                        if (isClick)
+                        {
+                            if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index) // Do not select filter or new data row.
+                            {
+                                rowIndexIsClick = gridRowItem.RowIndex;
+                                break;
+                            }
                         }
                     }
-                    foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+
+                    // Set IsSelect
+                    if (rowIndexIsClick != -1)
                     {
-                        if (gridRowItem.GridRowSession != null && gridRowItem.RowIndex == rowIndexIsClick) 
+                        foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                         {
-                            gridRowItem.GridRowSession.IsSelect = true;
-                            break;
+                            if (gridRowItem.GridRowSession != null) // Outgoing grid might have less rows
+                            {
+                                gridRowItem.GridRowSession.IsSelect = false;
+                            }
                         }
+                        foreach (GridRowItem gridRowItem in gridItem.GridRowList)
+                        {
+                            if (gridRowItem.GridRowSession != null && gridRowItem.RowIndex == rowIndexIsClick)
+                            {
+                                gridRowItem.GridRowSession.IsSelect = true;
+                                break;
+                            }
+                        }
+                        await gridItem.Grid.ComponentOwner<Page>().GridRowSelectedAsync(gridItem.Grid);
                     }
-                    await gridItem.Grid.ComponentOwner<Page>().GridRowSelectedAsync(gridItem.Grid);
                 }
             }
         }
