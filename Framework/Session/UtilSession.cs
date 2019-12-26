@@ -53,6 +53,20 @@
             appInternal.AppSession = appSession;
         }
 
+        public static bool Request<T>(RequestCommand command, out RequestJson requestJson, out T componentJson) where T : ComponentJson
+        {
+            bool result = false;
+            var appJson = UtilServer.AppJson;
+            requestJson = appJson.RequestJson;
+            componentJson = (T)null;
+            if (command == requestJson.Command)
+            {
+                result = true;
+                componentJson = (T)appJson.Root.RootComponentJsonList[requestJson.ComponentId];
+            }
+            return result;
+        }
+
         public class GridItem
         {
             /// <summary>

@@ -29,6 +29,8 @@
         GridIsClickEnum = 5,
 
         GridCellIsModify = 6,
+
+        BootstrapNavbarButtonIsClick = 7,
     }
 
     /// <summary>
@@ -52,6 +54,8 @@
         public GridIsClickEnum GridIsClickEnum { get; set; }
 
         public string GridCellText { get; set; }
+
+        public int BootstrapNavbarButtonId { get; set; }
 
         public int RequestCount { get; set; }
     }
@@ -715,13 +719,9 @@
         */
     }
 
-    public sealed class BootstrapNavbarButton : ComponentJson
+    public sealed class BootstrapNavbarButton
     {
-        public BootstrapNavbarButton(ComponentJson owner)
-            : base(owner)
-        {
-
-        }
+        public int Id;
 
         /// <summary>
         /// Gets or sets GridIndex. For example navigation and language buttons can be shown in the Navbar.
@@ -736,8 +736,6 @@
         public string TextHtml;
 
         public bool IsActive;
-
-        public bool IsClick;
 
         /// <summary>
         /// Gets or sets IsDropDown. True, if button has level 2 navigation.

@@ -18,6 +18,8 @@ export class RequestJson {
 
   GridIsClickEnum : number;
 
+  BootstrapNavbarButtonId: number;
+
   RequestCount: number;
 
   IsRequestJson: boolean;
