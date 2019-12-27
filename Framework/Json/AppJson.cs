@@ -10,21 +10,63 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
-    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using static Framework.Json.Page;
     using static Framework.Session.UtilSession;
+
+    internal enum RequestCommand
+    {
+        None = 0,
+
+        ButtonIsClick = 1,
+
+        GridIsClickSort = 2,
+
+        GridIsClickConfig = 3,
+
+        GridIsClickRow = 4,
+
+        GridIsClickEnum = 5,
+
+        GridCellIsModify = 6,
+
+        BootstrapNavbarButtonIsClick = 7,
+    }
+
+    /// <summary>
+    /// Request sent by Angular client.
+    /// </summary>
+    internal class RequestJson
+    {
+        public RequestCommand Command { get; set; }
+
+        /// <summary>
+        /// Gets or sets Id. This is ComponentJson.Id.
+        /// </summary>
+        public int ComponentId { get; set; }
+
+        public int GridColumnId { get; set; }
+
+        public int GridRowId { get; set; }
+
+        public int GridCellId { get; set; }
+
+        public GridIsClickEnum GridIsClickEnum { get; set; }
+
+        public string GridCellText { get; set; }
+
+        public int BootstrapNavbarButtonId { get; set; }
+
+        public int RequestCount { get; set; }
+
+        public int ResponseCount { get; set; }
+    }
 
     /// <summary>
     /// Json component tree. Store session state in field or property.
     /// </summary>
     public abstract class ComponentJson
     {
-        /// <summary>
-        /// Constructor for json deserialization.
-        /// </summary>
-        public ComponentJson() { }
-
         /// <summary>
         /// Constructor to programmatically create new object.
         /// </summary>
@@ -35,25 +77,22 @@
 
         internal void Constructor(ComponentJson owner, bool isDeserialize)
         {
-            if (UtilFramework.IsJson2)
+            this.Owner = owner;
+            if (Owner == null)
             {
-                this.Owner = owner;
-                if (Owner == null)
-                {
-                    this.Root = this;
-                    this.RootComponentJsonList = new Dictionary<int, ComponentJson>(); // Init list.
-                    this.RootReferenceList = new List<(object obj, UtilJson2.DeclarationProperty property, int id)>();
-                }
-                else
-                {
-                    this.Root = owner.Root;
-                }
-                if (!isDeserialize)
-                {
-                    Root.RootIdCount += 1;
-                    this.Id = Root.RootIdCount;
-                    Root.RootComponentJsonList.Add(Id, this); // Id is not yet available if deserialize.
-                }
+                this.Root = this;
+                this.RootComponentJsonList = new Dictionary<int, ComponentJson>(); // Init list.
+                this.RootReferenceList = new List<(object obj, UtilJson.DeclarationProperty property, int id)>();
+            }
+            else
+            {
+                this.Root = owner.Root;
+            }
+            if (!isDeserialize)
+            {
+                Root.RootIdCount += 1;
+                this.Id = Root.RootIdCount;
+                Root.RootComponentJsonList.Add(Id, this); // Id is not yet available if deserialize.
             }
 
             if (isDeserialize == false)
@@ -97,7 +136,7 @@
         /// (Object, Property, ReferenceId). Used for deserialization.
         /// </summary>
         [SerializeIgnore]
-        internal List<(object obj, UtilJson2.DeclarationProperty property, int id)> RootReferenceList;
+        internal List<(object obj, UtilJson.DeclarationProperty property, int id)> RootReferenceList;
 
         /// <summary>
         /// Solve ComponentJson references after deserialization.
@@ -144,10 +183,9 @@
     /// </summary>
     public static class ComponentJsonExtension
     {
-        public static ComponentJson ComponentOwner(this ComponentJson component)
+        internal static ComponentJson ComponentOwner(this ComponentJson component)
         {
-            ComponentJson result = UtilServer.AppJson.ComponentListAll().Where(item => item.List.Contains(component)).Single();
-            return result;
+            return component.Owner;
         }
 
         /// <summary>
@@ -165,7 +203,6 @@
             } while (component != null);
             return null;
         }
-
 
         private static void ComponentListAll(ComponentJson component, List<ComponentJson> result)
         {
@@ -482,10 +519,8 @@
 
     public class AppJson : Page
     {
-        public AppJson() { }
-
-        public AppJson(ComponentJson owner)
-            : base(owner)
+        public AppJson()            
+            : base(null)
         {
 
         }
@@ -541,9 +576,14 @@
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
             UtilApp.BootstrapNavbarRender();
 
-            SessionState = UtilServer.Session.GetString("Main") + "; Grid.Count=" + UtilServer.AppSession.GridSessionList.Count;
             UtilStopwatch.TimeStop("Process");
         }
+
+        /// <summary>
+        /// Gets RequestJson. Payload of current request.
+        /// </summary>
+        [SerializeIgnore]
+        internal RequestJson RequestJson;
 
         /// <summary>
         /// Gets or sets RequestCount. Used by client. Does not send new request while old is still pending.
@@ -580,11 +620,6 @@
         /// Used for example for html "body class='modal-open'" to enable vertical scroll bar.
         /// </summary>
         public bool IsBootstrapModal { get; set; }
-
-        /// <summary>
-        /// Gets SessionState. Debug server side session state.
-        /// </summary>
-        public string SessionState { get; internal set; }
 
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
@@ -624,8 +659,6 @@
     /// </summary>
     public sealed class Button : ComponentJson
     {
-        public Button() { }
-
         public Button(ComponentJson owner)
             : base(owner)
         {
@@ -633,8 +666,6 @@
         }
 
         public string TextHtml;
-
-        public bool IsClick;
     }
 
     /// <summary>
@@ -642,8 +673,6 @@
     /// </summary>
     public sealed class Div : ComponentJson
     {
-        public Div() { }
-
         public Div(ComponentJson owner)
             : base(owner)
         {
@@ -656,8 +685,6 @@
     /// </summary>
     public sealed class DivContainer : ComponentJson
     {
-        public DivContainer() { }
-
         public DivContainer(ComponentJson owner)
             : base(owner)
         {
@@ -671,8 +698,6 @@
     /// </summary>
     public sealed class BootstrapNavbar : ComponentJson
     {
-        public BootstrapNavbar() { }
-
         public BootstrapNavbar(ComponentJson owner)
             : base(owner)
         {
@@ -696,15 +721,9 @@
         */
     }
 
-    public sealed class BootstrapNavbarButton : ComponentJson
+    public sealed class BootstrapNavbarButton
     {
-        public BootstrapNavbarButton() { }
-
-        public BootstrapNavbarButton(ComponentJson owner)
-            : base(owner)
-        {
-
-        }
+        public int Id;
 
         /// <summary>
         /// Gets or sets GridIndex. For example navigation and language buttons can be shown in the Navbar.
@@ -719,8 +738,6 @@
         public string TextHtml;
 
         public bool IsActive;
-
-        public bool IsClick;
 
         /// <summary>
         /// Gets or sets IsDropDown. True, if button has level 2 navigation.
@@ -782,8 +799,6 @@
     /// </summary>
     public sealed class Grid : ComponentJson
     {
-        public Grid() { }
-
         public Grid(ComponentJson owner)
             : base(owner)
         {
@@ -893,6 +908,9 @@
         }
     }
 
+    /// <summary>
+    /// Grid paging.
+    /// </summary>
     public enum GridIsClickEnum
     {
         None = 0,
@@ -906,6 +924,8 @@
 
     public sealed class GridColumn
     {
+        public int Id;
+
         public string Text;
 
         /// <summary>
@@ -920,6 +940,8 @@
 
     public sealed class GridRow
     {
+        public int Id;
+
         public List<GridCell> CellList;
 
         public bool IsClick;
@@ -933,6 +955,8 @@
 
     public sealed class GridCell
     {
+        public int Id;
+
         /// <summary>
         /// Gets or sets json text. When coming from client Text can be null or ""!
         /// </summary>
@@ -946,8 +970,6 @@
         {
             return UtilFramework.StringNull(Text);
         }
-
-        public bool IsModify;
 
         public bool IsClick; // Show spinner
 
@@ -999,8 +1021,6 @@
 
     public sealed class Html : ComponentJson
     {
-        public Html() { }
-
         public Html(ComponentJson owner)
             : base(owner)
         {
@@ -1012,11 +1032,6 @@
 
     public class Page : ComponentJson
     {
-        public Page()
-        {
-            Type = typeof(Page).Name;
-        }
-
         /// <summary>
         /// Constructor. Use method PageShowAsync(); to create new page.
         /// </summary>

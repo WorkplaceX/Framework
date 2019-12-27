@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { DataService } from '../data.service';
+import { DataService, RequestJson } from '../data.service';
 
 /* BootstrapNavbar */
 @Component({
@@ -16,7 +16,7 @@ import { DataService } from '../data.service';
   
   click(button){
     button.IsClick = true;
-    this.dataService.update();
+    this.dataService.update(<RequestJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
   } 
 
   trackBy(index, item) {

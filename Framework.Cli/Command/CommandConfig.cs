@@ -175,6 +175,7 @@
                 {
                     // Set ConfigCli.json with command: ".\cli.cmd config json='{}'"
                     json = json.Trim('\"'); // Remove quotation marks at the begin and end. 
+                    json = json.Replace("'", "\""); // To use it in command prompt.
                     // Write
                     try
                     {

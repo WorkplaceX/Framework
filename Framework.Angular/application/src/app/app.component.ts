@@ -1,5 +1,5 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
-import { DataService } from './data.service';
+import { DataService, RequestJson } from './data.service';
 
 @Component({
   selector: 'app-root',
@@ -79,7 +79,7 @@ export class Button {
 
   click(){
     this.json.IsClick = true;
-    this.dataService.update();
+    this.dataService.update(<RequestJson> { Command: 1, ComponentId: this.json.Id });
   } 
 }
 

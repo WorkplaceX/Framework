@@ -135,7 +135,7 @@
         /// <summary>
         /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
         /// </summary>
-        public string AppTypeName;
+        public string AppTypeName { get; set; }
 
         /// <summary>
         /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". 

@@ -5,7 +5,6 @@
     using Framework.Json;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -16,57 +15,50 @@
         /// <summary>
         /// Serialize session state.
         /// </summary>
-        public static void Serialize(AppInternal appInternal)
+        public static void Serialize(AppInternal appInternal, out string jsonClient)
         {
-            if (UtilFramework.IsJson2 == false)
-            {
-                // SerializeSession
-                UtilStopwatch.TimeStart("SerializeSession");
-                string jsonSession = JsonConvert.SerializeObject(appInternal.AppSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                UtilStopwatch.TimeStop("SerializeSession");
-                UtilServer.Session.SetString("AppSession", jsonSession);
-            }
-            else
-            {
-                // SerializeSession
-                UtilStopwatch.TimeStart("SerializeSession2");
-                string jsonSession = UtilJson2.Serialize(appInternal.AppSession);
-                UtilStopwatch.TimeStop("SerializeSession2");
-                UtilServer.Session.SetString("AppSession", jsonSession);
-            }
+            appInternal.AppJson.RequestJson = null;
+
+            UtilStopwatch.TimeStart("Serialize");
+            UtilJson.Serialize(appInternal, out string json, out jsonClient);
+            UtilStopwatch.TimeStop("Serialize");
+            UtilServer.Session.SetString("AppInternal", json);
         }
 
         /// <summary>
         /// Deserialize session state.
         /// </summary>
-        public static void Deserialize(AppInternal appInternal)
+        public static AppInternal Deserialize()
         {
-            string jsonSession = UtilServer.Session.GetString("AppSession");
+            AppInternal result;
+            string json = UtilServer.Session.GetString("AppInternal");
 
-            AppSession appSession;
-            if (string.IsNullOrEmpty(jsonSession))
+            if (string.IsNullOrEmpty(json)) // Session expired.
             {
-                appSession = new AppSession();
+                result = new AppInternal();
+                result.AppSession = new AppSession();
             }
             else
             {
-                if (UtilFramework.IsJson2 == false)
-                {
-                    // DeserializeSession
-                    UtilStopwatch.TimeStart("DeserializeSession");
-                    appSession = JsonConvert.DeserializeObject<AppSession>(jsonSession, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                    UtilStopwatch.TimeStop("DeserializeSession");
-                }
-                else
-                {
-                    // DeserializeSession2
-                    UtilStopwatch.TimeStart("DeserializeSession2");
-                    appSession = (AppSession)UtilJson2.Deserialize(jsonSession);
-                    UtilStopwatch.TimeStop("DeserializeSession2");
-                }
+                UtilStopwatch.TimeStart("Deserialize");
+                result = (AppInternal)UtilJson.Deserialize(json);
+                UtilStopwatch.TimeStop("Deserialize");
             }
+            return result;
+        }
 
-            appInternal.AppSession = appSession;
+        public static bool Request<T>(RequestCommand command, out RequestJson requestJson, out T componentJson) where T : ComponentJson
+        {
+            bool result = false;
+            var appJson = UtilServer.AppJson;
+            requestJson = appJson.RequestJson;
+            componentJson = (T)null;
+            if (command == requestJson.Command)
+            {
+                result = true;
+                componentJson = (T)appJson.Root.RootComponentJsonList[requestJson.ComponentId];
+            }
+            return result;
         }
 
         public class GridItem

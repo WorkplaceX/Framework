@@ -9,6 +9,7 @@
     using System.Linq;
     using Framework.Config;
     using System.Collections.Generic;
+    using System.Text.Json;
 
     internal class AppInternal
     {
@@ -21,8 +22,6 @@
         /// Gets or sets AppSession. This is the application session state.
         /// </summary>
         internal AppSession AppSession { get; set; }
-
-        public Type[] TypeComponentInNamespaceList;
     }
 
     /// <summary>
@@ -72,23 +71,27 @@
         /// </summary>
         internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
         {
-            var appInternal = new AppInternal();
-            UtilServer.AppInternal = appInternal;
-            appInternal.TypeComponentInNamespaceList = TypeComponentInNamespaceList();
-            string json = await UtilServer.StreamToString(context.Request.Body);
+            string requestJsonText = await UtilServer.StreamToString(context.Request.Body);
             bool isEmbeddedUrl = (string)context.Request.Query["isEmbeddedUrl"] == ""; // Flag set by Angular client on first app.json POST if running embedded on other website.
-            if (json != null && !isEmbeddedUrl) // If client POST
-            {
-                appInternal.AppJson = UtilJson.Deserialize<AppJson>(json, appInternal.TypeComponentInNamespaceList);
-                appInternal.AppJson.IsSessionExpired = false;
-            }
-            else
+            
+            var appInternal = UtilSession.Deserialize(); // Deserialize session or init.
+            UtilServer.AppInternal = appInternal;
+
+            if (appInternal.AppJson == null)
             {
                 appInternal.AppJson = CreateAppJson();
             }
-            int requestCountAssert = appInternal.AppJson.RequestCount;
 
-            UtilSession.Deserialize(appInternal); // Deserialize session or init.
+            RequestJson requestJson = null;
+            if (requestJsonText != null && !isEmbeddedUrl) // If client POST
+            {
+                requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
+                appInternal.AppJson.RequestJson = requestJson;
+                appInternal.AppJson.RequestCount = requestJson.RequestCount;
+                appInternal.AppJson.ResponseCount = requestJson.ResponseCount;
+                appInternal.AppJson.IsSessionExpired = false;
+            }
+            int requestCountAssert = appInternal.AppJson.RequestCount;
 
             // User hit reload button in browser.
             bool isBrowserRefresh = (appInternal.AppJson.ResponseCount == 0 && appInternal.AppSession.ResponseCount > 0);
@@ -126,13 +129,10 @@
 
             UtilFramework.Assert(appInternal.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
 
-            // SerializeClient
-            string jsonClient = UtilJson.Serialize(appInternal.AppJson, appInternal.TypeComponentInNamespaceList);
+            // SerializeSession, SerializeClient
+            UtilSession.Serialize(appInternal, out string jsonClientResponse);
 
-            // SerializeSession
-            UtilSession.Serialize(appInternal);
-
-            return jsonClient;
+            return jsonClientResponse;
         }
 
         /// <summary>
@@ -147,6 +147,7 @@
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);
+            result.RequestJson = new RequestJson();
             return result;
         }
 
@@ -168,18 +169,6 @@
             {
                 appJson.IsReload = true;
             }
-        }
-
-        /// <summary>
-        /// Returns assembly and namespace to search for classes when deserializing json. (For example: "MyPage")
-        /// </summary>
-        virtual internal Type[] TypeComponentInNamespaceList()
-        {
-            var typeAppJson = UtilFramework.TypeFromName(Website.AppTypeName);
-            return (new Type[] {
-                typeAppJson, // Namespace of running application.
-                typeof(AppJson), // For example button.
-            }).Distinct().ToArray(); // Enable serialization of components in App and AppConfig namespace.
         }
     }
 }
