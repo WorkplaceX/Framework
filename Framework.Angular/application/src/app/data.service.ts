@@ -22,6 +22,8 @@ export class RequestJson {
 
   RequestCount: number;
 
+  ResponseCount: number;
+
   IsRequestJson: boolean;
 }
 
@@ -41,6 +43,8 @@ export class Json {
   SessionState: string;
 
   RequestCount: number;
+
+  ResponseCount: number;
 
   RequestUrl: string;
 
@@ -125,6 +129,7 @@ export class DataService {
       }
 
       requestJson.RequestCount = this.json.RequestCount;
+      requestJson.ResponseCount = this.json.ResponseCount;
 
       this.httpClient.request("POST", requestUrl, {
         body: JSON.stringify(requestJson),

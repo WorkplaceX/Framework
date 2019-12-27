@@ -58,6 +58,8 @@
         public int BootstrapNavbarButtonId { get; set; }
 
         public int RequestCount { get; set; }
+
+        public int ResponseCount { get; set; }
     }
 
     /// <summary>

@@ -284,17 +284,17 @@ namespace Framework.Json
                 return object.Equals(value, ValueDefault);
             }
 
-            protected virtual void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected virtual void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 // writer.WriteStringValue(string.Format("{0}", value));
             }
 
-            protected virtual void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
+            protected virtual void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 // writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType()));
             }
 
-            private bool ReferenceSerialize(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, ref ComponentJson componentJsonRoot)
+            private bool ReferenceSerialize(object obj, DeclarationProperty property, object value, ref ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 bool result = false;
                 if (value is ComponentJson valueComponentJson)
@@ -332,21 +332,34 @@ namespace Framework.Json
                         writer.WriteStartObject();
                         writer.WriteNumber("$referenceId", valueComponentJson.Id);
                         writer.WriteEndObject();
+                        if (isWriteClient == true)
+                        {
+                            // throw new Exception(); // Do not send reference to client.
+                            writerClient.WriteNullValue(); // TODO Check if reference, before calling serialize.
+                        }
                     }
                 }
                 return result;
             }
 
-            private void SerializeObject(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, ComponentJson componentJsonRoot)
+            private void SerializeObject(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
-                if (ReferenceSerialize(obj, property, value, writer, ref componentJsonRoot))
+                if (ReferenceSerialize(obj, property, value, ref componentJsonRoot, writer, writerClient, isWriteClient))
                 {
                     return;
                 }
                 DeclarationObject declarationObject;
                 declarationObject = DeclarationObjectGet(value.GetType());
+                if (isWriteClient == null && value is ComponentJson)
+                {
+                    isWriteClient = true;
+                }
                 writer.WriteStartObject();
-                SerializeObjectType(property, value, writer);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteStartObject();
+                }
+                SerializeObjectType(property, value, writer, writerClient, isWriteClient);
                 foreach (var valueProperty in declarationObject.PropertyList.Values)
                 {
                     if (valueProperty.IsList == false)
@@ -356,7 +369,11 @@ namespace Framework.Json
                         if (!converter.IsValueDefault(propertyValue))
                         {
                             writer.WritePropertyName(valueProperty.PropertyName);
-                            converter.Serialize(value, valueProperty, propertyValue, writer, componentJsonRoot);
+                            if (isWriteClient == true)
+                            {
+                                writerClient.WritePropertyName(valueProperty.PropertyName);
+                            }
+                            converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient);
                         }
                     }
                     else
@@ -365,42 +382,62 @@ namespace Framework.Json
                         if (propertyValueList?.Count > 0)
                         {
                             writer.WritePropertyName(valueProperty.PropertyName);
+                            if (isWriteClient == true)
+                            {
+                                writerClient.WritePropertyName(valueProperty.PropertyName);
+                            }
                             ConverterBase converter = valueProperty.Converter;
                             writer.WriteStartArray();
+                            if (isWriteClient == true)
+                            {
+                                writerClient.WriteStartArray();
+                            }
                             foreach (var propertyValue in propertyValueList)
                             {
                                 if (!converter.IsValueDefault(propertyValue))
                                 {
-                                    converter.Serialize(value, valueProperty, propertyValue, writer, componentJsonRoot);
+                                    converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient);
                                 }
                                 else
                                 {
                                     if (converter.ValueDefault == null)
                                     {
                                         writer.WriteNullValue(); // Serialize null
+                                        if (isWriteClient == true)
+                                        {
+                                            writerClient.WriteNullValue(); // Serialize null
+                                        }
                                     }
                                     else
                                     {
-                                        converter.Serialize(value, valueProperty, propertyValue, writer, componentJsonRoot);
+                                        converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient);
                                     }
                                 }
                             }
                             writer.WriteEndArray();
+                            if (isWriteClient == true)
+                            {
+                                writerClient.WriteEndArray();
+                            }
                         }
                     }
                 }
                 writer.WriteEndObject();
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteEndObject();
+                }
             }
 
-            internal void Serialize(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, ComponentJson componentJsonRoot)
+            internal void Serialize(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 if (IsObject == false)
                 {
-                    SerializeValue(obj, property, value, writer);
+                    SerializeValue(obj, property, value, writer, writerClient, isWriteClient);
                 }
                 else
                 {
-                    SerializeObject(obj, property, value, writer, componentJsonRoot);
+                    SerializeObject(obj, property, value, componentJsonRoot, writer, writerClient, isWriteClient);
                 }
             }
 
@@ -634,9 +671,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteNumberValue((int)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteNumberValue((int)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -653,9 +694,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteNumberValue((int)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteNumberValue((int)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -672,9 +717,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteStringValue((string)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteStringValue((string)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -691,9 +740,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteBooleanValue((bool)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteBooleanValue((bool)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -710,9 +763,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteBooleanValue((bool)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteBooleanValue((bool)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -729,9 +786,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteNumberValue((double)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteNumberValue((double)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -748,9 +809,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteNumberValue((double)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteNumberValue((double)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -767,10 +832,14 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 string typeName = UtilFramework.TypeToName((Type)value, true);
                 writer.WriteStringValue(typeName);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteStringValue(typeName);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -789,13 +858,17 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteStartObject();
                 writer.WriteString("$typeRow", UtilFramework.TypeToName(value.GetType(), true));
                 writer.WritePropertyName("Row");
                 JsonSerializer.Serialize(writer, value, value.GetType());
                 writer.WriteEndObject();
+                if (isWriteClient == true)
+                {
+                    throw new Exception(); // Do not send row to client
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -816,7 +889,7 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
+            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteString("$typeComponent", UtilFramework.TypeToName(obj.GetType(), true));
             }
@@ -838,7 +911,7 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 Type propertyType = value.GetType();
                 ConverterBase converter = ConverterGet(propertyType);
@@ -847,8 +920,12 @@ namespace Framework.Json
                 writer.WriteStartObject();
                 writer.WriteString("$typeValue", UtilFramework.TypeToName(propertyType, true));
                 writer.WritePropertyName("Value");
-                converter.Serialize(obj, property, value, writer, null);
+                converter.Serialize(obj, property, value, null, writer, writerClient, isWriteClient);
                 writer.WriteEndObject();
+                if (isWriteClient == true)
+                {
+                    throw new Exception(); // Do not use object type for client.
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -869,7 +946,7 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
+            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType(), true));
             }
@@ -891,7 +968,7 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer)
+            protected override void SerializeObjectType(DeclarationProperty property, object obj, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 UtilFramework.Assert(property.PropertyType == obj.GetType(), "Property type and object type not equal!");
             }
@@ -910,9 +987,13 @@ namespace Framework.Json
                 return object.Equals((int)value, ValueDefault);
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteNumberValue((int)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteNumberValue((int)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -931,9 +1012,13 @@ namespace Framework.Json
 
             }
 
-            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer)
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
             {
                 writer.WriteNumberValue((int)value);
+                if (isWriteClient == true)
+                {
+                    writerClient.WriteNumberValue((int)value);
+                }
             }
 
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
@@ -946,23 +1031,21 @@ namespace Framework.Json
 
         private static readonly JsonWriterOptions options = new JsonWriterOptions(); // { Indented = true };
 
-        public static string Serialize(object obj)
+        public static void Serialize(object obj, out string json, out string jsonClient)
         {
-            string json;
-
             using (var stream = new MemoryStream())
+            using (var writer = new Utf8JsonWriter(stream, options))
+            using (var streamClient = new MemoryStream())
+            using (var writerClient = new Utf8JsonWriter(streamClient, options))
             {
-                using (var writer = new Utf8JsonWriter(stream, options))
-                {
-                    converterObjectRoot.Serialize(null, null, obj, writer, null);
-                }
-
+                converterObjectRoot.Serialize(obj: null, property: null, obj, componentJsonRoot: null, writer, writerClient, isWriteClient: null);
+                writer.Flush();
+                writerClient.Flush();
                 json = Encoding.UTF8.GetString(stream.ToArray());
+                jsonClient = Encoding.UTF8.GetString(streamClient.ToArray());
             }
 
             // DebugValidateJson(obj, json);
-
-            return json;
         }
 
         /// <summary>

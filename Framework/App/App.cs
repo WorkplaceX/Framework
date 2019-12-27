@@ -71,35 +71,27 @@
         /// </summary>
         internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
         {
-            var appInternal = new AppInternal();
-            UtilServer.AppInternal = appInternal;
             string requestJsonText = await UtilServer.StreamToString(context.Request.Body);
             bool isEmbeddedUrl = (string)context.Request.Query["isEmbeddedUrl"] == ""; // Flag set by Angular client on first app.json POST if running embedded on other website.
+            
+            var appInternal = UtilSession.Deserialize(); // Deserialize session or init.
+            UtilServer.AppInternal = appInternal;
+
+            if (appInternal.AppJson == null)
+            {
+                appInternal.AppJson = CreateAppJson();
+            }
+
             RequestJson requestJson = null;
             if (requestJsonText != null && !isEmbeddedUrl) // If client POST
             {
                 requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
-                string jsonClient = UtilServer.Session.GetString("JsonClient");
-                if (jsonClient == null)
-                {
-                    appInternal.AppSession = new AppSession();
-                    appInternal.AppJson = CreateAppJson(); // Session expired.
-                }
-                else
-                {
-                    appInternal.AppJson = (AppJson)UtilJson.Deserialize(jsonClient);
-                }
-                appInternal.AppJson.IsSessionExpired = false;
-                appInternal.AppJson.RequestCount = requestJson.RequestCount;
                 appInternal.AppJson.RequestJson = requestJson;
-            }
-            else
-            {
-                appInternal.AppJson = CreateAppJson();
+                appInternal.AppJson.RequestCount = requestJson.RequestCount;
+                appInternal.AppJson.ResponseCount = requestJson.ResponseCount;
+                appInternal.AppJson.IsSessionExpired = false;
             }
             int requestCountAssert = appInternal.AppJson.RequestCount;
-
-            UtilSession.Deserialize(appInternal); // Deserialize session or init.
 
             // User hit reload button in browser.
             bool isBrowserRefresh = (appInternal.AppJson.ResponseCount == 0 && appInternal.AppSession.ResponseCount > 0);

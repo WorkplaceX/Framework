@@ -17,40 +17,34 @@
         /// </summary>
         public static void Serialize(AppInternal appInternal, out string jsonClient)
         {
-            // SerializeSession
-            UtilStopwatch.TimeStart("SerializeSession");
-            string jsonSession = UtilJson.Serialize(appInternal.AppSession);
-            UtilStopwatch.TimeStop("SerializeSession");
-            UtilServer.Session.SetString("AppSession", jsonSession);
+            appInternal.AppJson.RequestJson = null;
 
-            // SerializeClient
-            UtilStopwatch.TimeStart("SerializeClient");
-            jsonClient = UtilJson.Serialize(appInternal.AppJson);
-            UtilStopwatch.TimeStop("SerializeClient");
-            UtilServer.Session.SetString("JsonClient", jsonClient);
+            UtilStopwatch.TimeStart("Serialize");
+            UtilJson.Serialize(appInternal, out string json, out jsonClient);
+            UtilStopwatch.TimeStop("Serialize");
+            UtilServer.Session.SetString("AppInternal", json);
         }
 
         /// <summary>
         /// Deserialize session state.
         /// </summary>
-        public static void Deserialize(AppInternal appInternal)
+        public static AppInternal Deserialize()
         {
-            string jsonSession = UtilServer.Session.GetString("AppSession");
+            AppInternal result;
+            string json = UtilServer.Session.GetString("AppInternal");
 
-            AppSession appSession;
-            if (string.IsNullOrEmpty(jsonSession))
+            if (string.IsNullOrEmpty(json))
             {
-                appSession = new AppSession();
+                result = new AppInternal();
+                result.AppSession = new AppSession();
             }
             else
             {
-                // DeserializeSession2
-                UtilStopwatch.TimeStart("DeserializeSession");
-                appSession = (AppSession)UtilJson.Deserialize(jsonSession);
-                UtilStopwatch.TimeStop("DeserializeSession");
+                UtilStopwatch.TimeStart("Deserialize");
+                result = (AppInternal)UtilJson.Deserialize(json);
+                UtilStopwatch.TimeStop("Deserialize");
             }
-
-            appInternal.AppSession = appSession;
+            return result;
         }
 
         public static bool Request<T>(RequestCommand command, out RequestJson requestJson, out T componentJson) where T : ComponentJson
