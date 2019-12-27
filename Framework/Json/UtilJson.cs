@@ -867,7 +867,7 @@ namespace Framework.Json
                 writer.WriteEndObject();
                 if (isWriteClient == true)
                 {
-                    throw new Exception(); // Do not send row to client
+                    throw new Exception(); // Do not send data row to client
                 }
             }
 
@@ -924,7 +924,7 @@ namespace Framework.Json
                 writer.WriteEndObject();
                 if (isWriteClient == true)
                 {
-                    throw new Exception(); // Do not use object type for client.
+                    throw new Exception(); // Property of type object not supported for client serialization.
                 }
             }
 

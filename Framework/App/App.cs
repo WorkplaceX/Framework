@@ -122,11 +122,6 @@
 
             UtilFramework.Assert(appInternal.AppJson.ResponseCount == appInternal.AppSession.ResponseCount, "Request mismatch!");
 
-            if (appInternal.AppJson.RequestJson == null)
-            {
-                appInternal.AppJson.RequestJson = new RequestJson(); // As long as client null request are comming
-            }
-
             // Process
             await appInternal.AppJson.ProcessInternalAsync();
 

@@ -33,7 +33,7 @@
             AppInternal result;
             string json = UtilServer.Session.GetString("AppInternal");
 
-            if (string.IsNullOrEmpty(json))
+            if (string.IsNullOrEmpty(json)) // Session expired.
             {
                 result = new AppInternal();
                 result.AppSession = new AppSession();
