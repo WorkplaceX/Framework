@@ -954,11 +954,6 @@
         public bool IsClick; // Show spinner
 
         /// <summary>
-        /// Gets or sets MergeId. Used by the client to buffer user entered text during pending request.
-        /// </summary>
-        public int MergeId;
-
-        /// <summary>
         /// Gets or sets IsLookup. If true, field shows an open Lookup window.
         /// </summary>
         public bool IsLookup;

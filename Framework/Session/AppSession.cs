@@ -391,7 +391,6 @@
                                                 gridCell.Placeholder = "New";
                                             }
                                             gridCell.ErrorParse = gridCellItem.GridCellSession.ErrorParse;
-                                            gridCell.MergeId = gridCellItem.GridCellSession.MergeId;
 
                                             // Lookup open, close
                                             if (gridCellItem.GridCellSession.IsLookup == true)
@@ -605,7 +604,6 @@
                                         ProcessGridSaveCellTextParse(page, grid, gridRowItem, row, fieldNameExclude);
                                     }
                                 }
-                                gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
                             }
                         }
                     }
@@ -779,7 +777,6 @@
                                         }
                                     }
                                 }
-                                gridCellItem.GridCellSession.MergeId = gridCellItem.GridCell.MergeId;
                             }
                         }
                     }
@@ -1174,7 +1171,5 @@
         public object FilterValue;
 
         public FilterOperator FilterOperator;
-
-        public int MergeId;
     }
 }

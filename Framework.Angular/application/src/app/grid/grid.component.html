@@ -61,4 +61,5 @@
   &nbsp;&nbsp;
   <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
   <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
+  <i *ngIf="json.IsClickEnum > 0" class="fas fa-spinner fa-spin"></i>
 </div>

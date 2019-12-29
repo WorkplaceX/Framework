@@ -67,6 +67,7 @@ export class Html {
   selector: '[data-Button]',
   template: `
   <button [ngClass]="json.CssClass" (click)="click();" [innerHtml]="json.TextHtml"></button>
+  <i *ngIf="json.IsClick" class="fas fa-spinner fa-spin"></i>  
   `
 })
 export class Button {
@@ -78,7 +79,7 @@ export class Button {
   dataService: DataService;
 
   click(){
-    this.json.IsClick = true;
+    this.json.IsClick = true; // Show spinner
     this.dataService.update(<RequestJson> { Command: 1, ComponentId: this.json.Id });
   } 
 }

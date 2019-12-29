@@ -14,17 +14,6 @@ export class Grid {
 
   ngModelChange(cell, row) {
     cell.IsClick = true; // Show spinner
-
-    // Merge
-    if (cell.MergeId == null) {
-      this.dataService.mergeCount += 1;
-      cell.MergeId = this.dataService.mergeCount; // Make cell "merge ready".
-    }
-    if (this.dataService.isRequestPending == true) {
-      this.dataService.mergeBufferId = cell.MergeId;
-      this.dataService.mergeBufferText = cell.Text; // Buffer user input during pending request.
-    }
-
     this.dataService.update(<RequestJson> { Command: 6, ComponentId: this.json.Id, GridRowId: row.Id, GridCellId: cell.Id, GridCellText: cell.Text });
   }
 
@@ -60,7 +49,6 @@ export class Grid {
     this.json.IsClickEnum = isClickEnum;
     this.dataService.update(<RequestJson> { Command: 5, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
   }
-
 
   trackBy(index, item) {
     return index; // or item.id

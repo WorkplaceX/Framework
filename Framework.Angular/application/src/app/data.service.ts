@@ -69,12 +69,6 @@ export class DataService {
   
   public isRequestPending: boolean = false; // Request is in prgress.
 
-  public mergeCount: number = 0; // Make cell merge ready on first modify.
-
-  public mergeBufferId: number;
-  
-  public mergeBufferText: string; // Buffer text entered during pending request.
-
   constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any) { 
     if (this.jsonServerSideRendering != null) {
       this.json = this.jsonServerSideRendering;
@@ -92,32 +86,15 @@ export class DataService {
     }
   }
 
-  // Merge text entered by user during pending request.
-  private merge(json: any): void { 
-    if (this.mergeBufferId != null) {
-      if (json.MergeId == this.mergeBufferId) {
-        json.Text = this.mergeBufferText;
-        json.IsModify = true;
-        json.IsClick = true; // Show spinner
-        this.mergeBufferId = null;
-        this.mergeBufferText = null;
-      }
-      for (const key in json) {
-        let item = json[key];
-        if (item != null && typeof(item) == 'object') {
-            this.merge(item);
-        }
-      }
-    }
-  }
+  requestJsonQueue: RequestJson // Put latest request in queue, if waiting for pending request.
 
   public update(requestJson: RequestJson): void {
-    // RequestCount
-    if (this.json.RequestCount == null) {
-      this.json.RequestCount = 0;
-    }
-    this.json.RequestCount += 1;
     if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
+      // RequestCount
+      if (this.json.RequestCount == null) {
+        this.json.RequestCount = 0;
+      }
+      this.json.RequestCount += 1;
       this.isRequestPending = true;
       let requestUrl;
       if (this.json.EmbeddedUrl != null) {
@@ -136,14 +113,15 @@ export class DataService {
       })
       .subscribe(body => {
         let jsonResponse = <Json>body;
-        if (jsonResponse.RequestCount == this.json.RequestCount) { // Apply response if there is no newer request.
+        if (this.requestJsonQueue == null) { // Apply response if there is no newer request.
           this.json = jsonResponse;
           this.isRequestPending = false;
         } else {
-          this.merge(jsonResponse);
-          this.json = jsonResponse;
+          this.json.ResponseCount = jsonResponse.ResponseCount;
+          let requestJsonQueue = this.requestJsonQueue;
+          this.requestJsonQueue = null;
           this.isRequestPending = false;
-          this.update(<RequestJson> { Command: 0 }); // Process new merged request.
+          this.update(requestJsonQueue); // Process latest request.
         }
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {
@@ -152,6 +130,8 @@ export class DataService {
       }, error => {
         this.isRequestPending = false;
       });
+    } else {
+      this.requestJsonQueue = requestJson;
     }
   }
 }
