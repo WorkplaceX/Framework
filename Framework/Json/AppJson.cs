@@ -55,6 +55,11 @@
 
         public string GridCellText { get; set; }
 
+        /// <summary>
+        /// Gets GridCellTextIsInternal. If true, text has been set internally by look select row.
+        /// </summary>
+        public bool GridCellTextIsInternal; // TODO Command Queue
+
         public int BootstrapNavbarButtonId { get; set; }
 
         public int RequestCount { get; set; }
@@ -817,20 +822,20 @@
         public GridIsClickEnum IsClickEnum;
 
         /// <summary>
-        /// Gets or sets LookupGridIndex. If not null, this Lookup is a lookup of data grid LookupGridIndex.
+        /// Gets or sets LookupDestGridIndex. If not null, this data gird is a lookup window with destination data grid LookupDestGridIndex.
         /// </summary>
-        public int? LookupGridIndex;
+        public int? LookupDestGridIndex;
 
-        public int? LookupRowIndex;
+        public int? LookupDestRowIndex;
 
-        public int? LookupCellIndex;
+        public int? LookupDestCellIndex;
 
         /// <summary>
         /// Returns true, if grid is a Lookup grid.
         /// </summary>
         internal bool GridLookupIsOpen()
         {
-            return LookupGridIndex != null && this.ComponentOwner() is Grid;
+            return LookupDestGridIndex != null && this.ComponentOwner() is Grid;
         }
 
         /// <summary>
@@ -858,9 +863,9 @@
             int cellIndex = gridCellItem.CellIndex;
 
             Grid lookup = GridLookup();
-            lookup.LookupGridIndex = gridIndex;
-            lookup.LookupRowIndex = rowIndex;
-            lookup.LookupCellIndex = cellIndex;
+            lookup.LookupDestGridIndex = gridIndex;
+            lookup.LookupDestRowIndex = rowIndex;
+            lookup.LookupDestCellIndex = cellIndex;
 
             GridLookupClose(gridItem);
             gridCellItem.GridCellSession.IsLookup = true;
@@ -912,10 +917,6 @@
         /// Gets or sets IsSort. If false, ascending. If true descending.
         /// </summary>
         public bool? IsSort;
-
-        public bool IsClickSort;
-
-        public bool IsClickConfig;
     }
 
     public sealed class GridRow
@@ -923,8 +924,6 @@
         public int Id;
 
         public List<GridCell> CellList;
-
-        public bool IsClick;
 
         public bool IsSelect;
 
@@ -950,8 +949,6 @@
         {
             return UtilFramework.StringNull(Text);
         }
-
-        public bool IsClick; // Show spinner
 
         /// <summary>
         /// Gets or sets IsLookup. If true, field shows an open Lookup window.

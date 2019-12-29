@@ -355,9 +355,6 @@
             grid.RowList = null;
             grid.IsClickEnum = GridIsClickEnum.None;
             grid.List.Clear();
-            grid.LookupCellIndex = null;
-            grid.LookupGridIndex = null;
-            grid.LookupRowIndex = null;
         }
     }
 

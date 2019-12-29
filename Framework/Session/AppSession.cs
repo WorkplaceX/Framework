@@ -304,10 +304,30 @@
 
         public async Task GridLoadAsync(Grid grid)
         {
-            var query = grid.ComponentOwner<Page>().GridQuery(grid);
+            IQueryable query;
+            if (grid.LookupDestGridIndex == null)
+            {
+                query = grid.ComponentOwner<Page>().GridQuery(grid);
 
-            await GridLoadAsync(grid, query);
-            await GridRowSelectFirstAsync(grid);
+                await GridLoadAsync(grid, query);
+                await GridRowSelectFirstAsync(grid);
+            }
+            else
+            {
+                var gridItemList = UtilSession.GridItemList();
+                Grid gridLookup = grid;
+                Grid gridDest = gridItemList.Where(item => item.GridIndex == gridLookup.LookupDestGridIndex).First().Grid;
+                var gridItemLookup = gridItemList.Where(item => item.GridIndex == gridLookup.Index).First();
+                int gridIndex = (int)gridItemLookup.Grid.LookupDestGridIndex;
+                GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
+                string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestCellIndex);
+                GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestRowIndex, (int)gridItemLookup.Grid.LookupDestCellIndex - gridSession.OffsetColumn);
+                Row row = UtilSession.GridRowFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestRowIndex);
+                query = gridDest.ComponentOwner<Page>().GridLookupQuery(gridDest, row, fieldName, gridCell.TextGet());
+
+                await GridLoadAsync(grid, query);
+            }
+
         }
 
         /// <summary>
@@ -704,6 +724,10 @@
                         foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                         {
                             bool isModify = appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow?.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell?.Id;
+                            if (appJson.RequestJson.GridCellTextIsInternal)
+                            {
+                                isModify = false; // Do not open lookup (again) after lookup row select.
+                            }
                             if (isModify == true)
                             {
                                 gridCellItem.GridCellSession.IsLookup = true;
@@ -800,11 +824,7 @@
                 {
                     foreach (GridColumnItem gridColumnItem in gridItem.GridColumnItemList)
                     {
-                        bool isClickSort = gridColumnItem.GridColumn?.IsClickSort == true;
-                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickSort && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridColumnId == gridColumnItem.GridColumn?.Id)
-                        {
-                            isClickSort = true;
-                        }
+                        bool isClickSort = appJson.RequestJson.Command == RequestCommand.GridIsClickSort && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridColumnId == gridColumnItem.GridColumn?.Id;
                         if (isClickSort)
                         {
                             if (!gridItemReloadList.Contains(gridItem))
@@ -827,11 +847,7 @@
                             gridItem.GridSession.GridColumnSessionList[gridColumnItem.CellIndex].IsSort = isSort;
                             gridItem.GridSession.OffsetRow = 0; // Reset paging.
                         }
-                        bool isClickConfig = gridColumnItem.GridColumn?.IsClickConfig == true;
-                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickConfig && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridColumnId == gridColumnItem.GridColumn?.Id)
-                        {
-                            isClickConfig = true;
-                        }
+                        bool isClickConfig = appJson.RequestJson.Command == RequestCommand.GridIsClickConfig && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridColumnId == gridColumnItem.GridColumn?.Id;
                         if (isClickConfig)
                         {
                             Page page = gridItem.Grid.ComponentOwner<Page>();
@@ -856,26 +872,44 @@
 
         private void ProcessGridLookupRowIsClick()
         {
+            bool isClickRow = UtilSession.Request(RequestCommand.GridIsClickRow, out RequestJson requestJson, out Grid gridLookUp);
             var gridItemList = UtilSession.GridItemList();
             foreach (GridItem gridItemLookup in gridItemList)
             {
                 if (gridItemLookup.Grid?.GridLookupIsOpen() == true)
                 {
-                    foreach (GridRowItem gridRowItemLookup in gridItemLookup.GridRowList)
+                    int gridIndex = (int)gridItemLookup.Grid.LookupDestGridIndex;
+                    if (requestJson.ComponentId != gridItemLookup.Grid?.Id) // Close if not clicked into lookup grid
                     {
-                        if (gridRowItemLookup.GridRow.IsClick)
+                        // Close LookUp
+                        gridItemLookup.Grid.GridLookupClose(gridItemList[gridIndex], true);
+                        gridItemLookup.Grid.LookupDestGridIndex = null;
+                    }
+                    if (isClickRow && requestJson.ComponentId == gridItemLookup.Grid.Id) // Clicked row in lookup grid
+                    {
+                        Grid grid = UtilSession.GridFromIndex(gridIndex);
+                        GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
+                        GridRowEnum gridRowEnum = UtilSession.GridRowSessionFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestRowIndex).RowEnum;
+                        string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestCellIndex);
+                        bool isClose = false;
+                        foreach (GridRowItem gridRowItemLookup in gridItemLookup.GridRowList)
                         {
-                            int gridIndex = (int)gridItemLookup.Grid.LookupGridIndex;
-                            Grid grid = UtilSession.GridFromIndex(gridIndex);
-                            GridSession gridSession = UtilSession.GridSessionFromIndex(gridIndex);
-                            GridRowEnum gridRowEnum = UtilSession.GridRowSessionFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex).RowEnum;
-                            string fieldName = UtilSession.GridFieldNameFromCellIndex(gridIndex, (int)gridItemLookup.Grid.LookupCellIndex);
-                            string text = gridItemLookup.Grid.ComponentOwner<Page>().GridLookupRowSelected(grid, fieldName, gridRowEnum, gridRowItemLookup.GridRowSession.Row);
+                            if (requestJson.GridRowId == gridRowItemLookup.GridRow.Id && gridRowItemLookup.GridRowSession.RowEnum == GridRowEnum.Index)
+                            {
+                                string text = gridItemLookup.Grid.ComponentOwner<Page>().GridLookupRowSelected(grid, fieldName, gridRowEnum, gridRowItemLookup.GridRowSession.Row);
+                                GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestRowIndex, (int)gridItemLookup.Grid.LookupDestCellIndex - gridSession.OffsetColumn);
+                                GridRow gridRow = gridItemList[gridIndex].GridRowList[gridItemLookup.Grid.LookupDestRowIndex.Value].GridRow;
+                                UtilServer.AppJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = grid.Id, GridRowId = gridRow.Id, GridCellId = gridCell.Id, GridCellText = text, GridCellTextIsInternal = true };
+                                isClose = true;
+                                break;
+                            }
+                        }
 
-                            GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupRowIndex, (int)gridItemLookup.Grid.LookupCellIndex - gridSession.OffsetColumn);
-                            gridCell.Text = text;
+                        // Close LookUp
+                        if (isClose)
+                        {
                             gridItemLookup.Grid.GridLookupClose(gridItemList[gridIndex], true);
-                            return;
+                            gridItemLookup.Grid.LookupDestGridIndex = null;
                         }
                     }
                 }
@@ -893,11 +927,7 @@
                     int rowIndexIsClick = -1;
                     foreach (GridRowItem gridRowItem in gridItem.GridRowList)
                     {
-                        bool isClick = gridRowItem.GridRow?.IsClick == true;
-                        if (appJson.RequestJson.Command == RequestCommand.GridIsClickRow && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id)
-                        {
-                            isClick = true;
-                        }
+                        bool isClick = appJson.RequestJson.Command == RequestCommand.GridIsClickRow && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow.Id;
                         if (isClick)
                         {
                             if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index) // Do not select filter or new data row.
@@ -1158,8 +1188,6 @@
         public string ErrorParse;
 
         public bool IsModify;
-
-        public bool IsClick; // Show spinner. Used on client only!
 
         public bool IsLookup;
 

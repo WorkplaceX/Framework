@@ -15,7 +15,7 @@ import { DataService, RequestJson } from '../data.service';
   dataService: DataService;
   
   click(button){
-    button.IsClick = true;
+    button.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
   } 
 
