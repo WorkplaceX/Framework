@@ -71,63 +71,60 @@
         /// </summary>
         internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
         {
-            string requestJsonText = await UtilServer.StreamToString(context.Request.Body);
-            bool isEmbeddedUrl = (string)context.Request.Query["isEmbeddedUrl"] == ""; // Flag set by Angular client on first app.json POST if running embedded on other website.
-            
+            // DeserializeSession
             var appInternal = UtilSession.Deserialize(); // Deserialize session or init.
             UtilServer.AppInternal = appInternal;
 
-            if (appInternal.AppJson == null)
-            {
-                appInternal.AppJson = CreateAppJson();
-            }
-
-            RequestJson requestJson = null;
-            if (requestJsonText != null && !isEmbeddedUrl) // If client POST
+            // RequestJson
+            RequestJson requestJson;
+            string requestJsonText = await UtilServer.StreamToString(context.Request.Body);
+            if (requestJsonText != null)
             {
                 requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
+            }
+            else
+            {
+                requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = 1 };
+            }
+
+            bool isSessionExpired = appInternal.AppJson == null && requestJson.RequestCount > 1;
+            bool isBrowserRefresh = requestJson.RequestCount != appInternal.AppSession.RequestCount + 1; // Or BrowserTabSwitch.
+            bool isBrowserTabSwitch = requestJson.ResponseCount != appInternal.AppSession.ResponseCount;
+
+            // New Session
+            if (appInternal.AppJson == null || isBrowserRefresh || isBrowserTabSwitch)
+            {
+                appInternal.AppJson = CreateAppJson();
+                requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = requestJson.RequestCount };
                 appInternal.AppJson.RequestJson = requestJson;
-                appInternal.AppJson.RequestCount = requestJson.RequestCount;
-                appInternal.AppJson.ResponseCount = requestJson.ResponseCount;
+                appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
+                await appInternal.AppJson.InitInternalAsync();
+                if (isSessionExpired)
+                {
+                    appInternal.AppJson.IsSessionExpired = true;
+                }
+            }
+            else
+            {
                 appInternal.AppJson.IsSessionExpired = false;
             }
-            int requestCountAssert = appInternal.AppJson.RequestCount;
 
-            // User hit reload button in browser.
-            bool isBrowserRefresh = (appInternal.AppJson.ResponseCount == 0 && appInternal.AppSession.ResponseCount > 0);
-
-            // User has app open in two browser tabs.
-            bool isBrowserTabSwitch = (appInternal.AppJson.ResponseCount != appInternal.AppSession.ResponseCount);
-
-            // Session expired
-            bool isSessionExpired = (appInternal.AppSession.ResponseCount == 0 && appInternal.AppJson.ResponseCount > 0);
-
-            // Init
-            if (appInternal.AppJson.IsInit == false || isBrowserRefresh || isBrowserTabSwitch || isSessionExpired)
-            {
-                int requestCount = appInternal.AppJson.RequestCount;
-                int responseCount = appInternal.AppSession.ResponseCount;
-                string browserUrl = appInternal.AppJson.BrowserUrl;
-                appInternal.AppJson = CreateAppJson(); // Reset
-                appInternal.AppSession = new AppSession(); // Reset
-                appInternal.AppJson.RequestCount = requestCount;
-                appInternal.AppJson.ResponseCount = responseCount;
-                appInternal.AppSession.ResponseCount = responseCount;
-                appInternal.AppJson.BrowserUrl = browserUrl;
-                appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
-                appInternal.AppJson.IsInit = true;
-                appInternal.AppJson.IsSessionExpired = isSessionExpired;
-                await appInternal.AppJson.InitInternalAsync();
-            }
-
-            UtilFramework.Assert(appInternal.AppJson.ResponseCount == appInternal.AppSession.ResponseCount, "Request mismatch!");
+            // Set RequestJson
+            appInternal.AppJson.RequestJson = requestJson;
 
             // Process
             await appInternal.AppJson.ProcessInternalAsync();
 
-            RenderVersion(appInternal.AppJson); // Version tag
+            // Version tag
+            RenderVersion(appInternal.AppJson);
 
-            UtilFramework.Assert(appInternal.AppJson.RequestCount == requestCountAssert); // Incoming and outgoing RequestCount has to be identical!
+            // RequestCount
+            appInternal.AppJson.RequestCount = requestJson.RequestCount;
+            appInternal.AppSession.RequestCount = requestJson.RequestCount;
+
+            // ResponseCount
+            appInternal.AppSession.ResponseCount += 1;
+            appInternal.AppJson.ResponseCount = appInternal.AppSession.ResponseCount;
 
             // SerializeSession, SerializeClient
             UtilSession.Serialize(appInternal, out string jsonClientResponse);
@@ -147,7 +144,6 @@
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);
-            result.RequestJson = new RequestJson();
             return result;
         }
 

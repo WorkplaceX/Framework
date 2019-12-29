@@ -19,6 +19,14 @@
     /// </summary>
     internal sealed class AppSession
     {
+        /// <summary>
+        /// Gets or sets RequestCount. Managed and incremented by client only.
+        /// </summary>
+        public int RequestCount;
+
+        /// <summary>
+        /// Gets or sets ResponseCount. Managed and incremented by server only.
+        /// </summary>
         public int ResponseCount;
 
         /// <summary>
@@ -941,10 +949,6 @@
             await ProcessGridRowIsClick(); // Load for example detail grids.
             await ProcessGridLookupOpenAsync(); // Load lookup data grid.
             await ProcessGridIsClickEnumAsync();
-
-            // ResponseCount
-            appInternal.AppSession.ResponseCount += 1;
-            appInternal.AppJson.ResponseCount = ResponseCount;
         }
     }
 

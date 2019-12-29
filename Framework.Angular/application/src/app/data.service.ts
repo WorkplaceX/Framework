@@ -24,6 +24,8 @@ export class RequestJson {
 
   ResponseCount: number;
 
+  BrowserUrl: string;
+
   IsRequestJson: boolean;
 }
 
@@ -49,8 +51,6 @@ export class Json {
   RequestUrl: string;
 
   EmbeddedUrl: string;
-
-  BrowserUrl: string;
 
   IsReload: boolean;
 
@@ -84,7 +84,6 @@ export class DataService {
       this.json.IsServerSideRendering = false;
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
         this.json.EmbeddedUrl = "http://localhost:50919/";
-        this.update(<RequestJson> { Command: 0 });
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;
@@ -120,16 +119,16 @@ export class DataService {
     this.json.RequestCount += 1;
     if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
       this.isRequestPending = true;
-      this.json.BrowserUrl = window.location.href;
       let requestUrl;
       if (this.json.EmbeddedUrl != null) {
-        requestUrl = new URL("/app.json?isEmbeddedUrl", this.json.EmbeddedUrl).href 
+        requestUrl = new URL("/app.json", this.json.EmbeddedUrl).href 
       } else {
         requestUrl = new URL("/app.json", this.json.RequestUrl).href 
       }
 
       requestJson.RequestCount = this.json.RequestCount;
       requestJson.ResponseCount = this.json.ResponseCount;
+      requestJson.BrowserUrl = window.location.href;
 
       this.httpClient.request("POST", requestUrl, {
         body: JSON.stringify(requestJson),

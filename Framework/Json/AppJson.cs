@@ -60,6 +60,8 @@
         public int RequestCount { get; set; }
 
         public int ResponseCount { get; set; }
+
+        public string BrowserUrl { get; set; }
     }
 
     /// <summary>
@@ -591,14 +593,9 @@
         public int RequestCount { get; internal set; }
 
         /// <summary>
-        /// Gets or sets RequestCount. Used by server to verify incoming request matches last response.
+        /// Gets ResponseCount. Used by server to verify incoming request matches last response.
         /// </summary>
         public int ResponseCount { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets IsInit. If false, app is not initialized. Method App.Init(): is called.
-        /// </summary>
-        public bool IsInit;
 
         /// <summary>
         /// Gets IsSessionExpired. If true, session expired and application has been recycled.
@@ -635,23 +632,6 @@
         /// Gets EmbeddedUrl. Value used by Angular client on first app.json POST to indicate application is embedded an running on other website.
         /// </summary>
         public string EmbeddedUrl { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.
-        /// For example:  http://localhost:49323/config/data.txt
-        /// </summary>
-        public string BrowserUrl;
-
-        /// <summary>
-        /// Returns BrowserUrl. This value is set by the browser. It can be different from RequestUrl if application runs embeded in another webpage.
-        /// For example: http://localhost:4200/
-        /// </summary>
-        public string BrowserUrlServer()
-        {
-            Uri uri = new Uri(BrowserUrl);
-            string result = string.Format("{0}://{1}/", uri.Scheme, uri.Authority);
-            return result;
-        }
     }
 
     /// <summary>
