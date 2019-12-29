@@ -57,6 +57,12 @@
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<MetaSqlSchema>().HasNoKey();
+        }
+
         public DbSet<MetaSqlSchema> Schema { get; set; }
     }
 
