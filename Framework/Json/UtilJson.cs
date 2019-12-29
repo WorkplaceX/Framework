@@ -327,22 +327,35 @@ namespace Framework.Json
 
                     if (result)
                     {
+                        int? id = valueComponentJson.Id;
+                        if (valueComponentJson.IsRemoved)
+                        {
+                            // UtilFramework.Assert(false, string.Format("Reference to removed ComponentJson! ({0}.{1})", UtilFramework.TypeToName(obj.GetType()), property.PropertyName));
+                            id = null;
+                        }
                         UtilFramework.Assert(valueComponentJson.Root == componentJsonRoot, "Referenced ComponentJson not in same object graph!");
                         result = true;
                         writer.WriteStartObject();
-                        writer.WriteNumber("$referenceId", valueComponentJson.Id);
+                        if (id != null)
+                        {
+                            writer.WriteNumber("$referenceId", id.Value);
+                        }
+                        else
+                        {
+                            writer.WriteNull("$referenceId");
+                        }
                         writer.WriteEndObject();
                         if (isWriteClient == true)
                         {
                             // throw new Exception(); // Do not send reference to client.
-                            writerClient.WriteNullValue(); // TODO Check if reference, before calling serialize.
+                            writerClient.WriteNullValue(); // TODO Check if reference, before writing property name.
                         }
                     }
                 }
                 return result;
             }
 
-            private void SerializeObject(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
+            private void SerializeObject(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient, ref int writeClientCount)
             {
                 if (ReferenceSerialize(obj, property, value, ref componentJsonRoot, writer, writerClient, isWriteClient))
                 {
@@ -352,6 +365,11 @@ namespace Framework.Json
                 declarationObject = DeclarationObjectGet(value.GetType());
                 if (isWriteClient == null && value is ComponentJson)
                 {
+                    writeClientCount += 1;
+                    if (writeClientCount == 2)
+                    {
+                        throw new Exception("JsonClient can only have one ComponentJson graph!");
+                    }
                     isWriteClient = true;
                 }
                 writer.WriteStartObject();
@@ -359,6 +377,7 @@ namespace Framework.Json
                 {
                     writerClient.WriteStartObject();
                 }
+                int writeClientCountRoot = 0;
                 SerializeObjectType(property, value, writer, writerClient, isWriteClient);
                 foreach (var valueProperty in declarationObject.PropertyList.Values)
                 {
@@ -373,7 +392,7 @@ namespace Framework.Json
                             {
                                 writerClient.WritePropertyName(valueProperty.PropertyName);
                             }
-                            converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient);
+                            converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCountRoot);
                         }
                     }
                     else
@@ -396,7 +415,7 @@ namespace Framework.Json
                             {
                                 if (!converter.IsValueDefault(propertyValue))
                                 {
-                                    converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient);
+                                    converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCountRoot);
                                 }
                                 else
                                 {
@@ -410,7 +429,7 @@ namespace Framework.Json
                                     }
                                     else
                                     {
-                                        converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient);
+                                        converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCountRoot);
                                     }
                                 }
                             }
@@ -429,7 +448,7 @@ namespace Framework.Json
                 }
             }
 
-            internal void Serialize(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient)
+            internal void Serialize(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Utf8JsonWriter writer, Utf8JsonWriter writerClient, bool? isWriteClient, ref int writeClientCount)
             {
                 if (IsObject == false)
                 {
@@ -437,7 +456,7 @@ namespace Framework.Json
                 }
                 else
                 {
-                    SerializeObject(obj, property, value, componentJsonRoot, writer, writerClient, isWriteClient);
+                    SerializeObject(obj, property, value, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCount);
                 }
             }
 
@@ -490,8 +509,11 @@ namespace Framework.Json
                 result = null;
                 if (jsonElement.TryGetProperty("$referenceId", out JsonElement jsonElementReference))
                 {
-                    int id = jsonElementReference.GetInt32();
-                    componentJsonRoot.RootReferenceList.Add((obj, property, id)); // Register reference to solve later.
+                    if (jsonElementReference.ValueKind != JsonValueKind.Null)
+                    {
+                        int id = jsonElementReference.GetInt32();
+                        componentJsonRoot.RootReferenceList.Add((obj, property, id)); // Register reference to solve later.
+                    }
                     resultReturn = true;
                 }
                 return resultReturn;
@@ -920,7 +942,8 @@ namespace Framework.Json
                 writer.WriteStartObject();
                 writer.WriteString("$typeValue", UtilFramework.TypeToName(propertyType, true));
                 writer.WritePropertyName("Value");
-                converter.Serialize(obj, property, value, null, writer, writerClient, isWriteClient);
+                int writeClientCount = 0;
+                converter.Serialize(obj, property, value, null, writer, writerClient, isWriteClient, ref writeClientCount);
                 writer.WriteEndObject();
                 if (isWriteClient == true)
                 {
@@ -1029,7 +1052,7 @@ namespace Framework.Json
             }
         }
 
-        private static readonly JsonWriterOptions options = new JsonWriterOptions(); // { Indented = true };
+        private static readonly JsonWriterOptions options = new JsonWriterOptions() { Indented = true };
 
         public static void Serialize(object obj, out string json, out string jsonClient)
         {
@@ -1038,7 +1061,8 @@ namespace Framework.Json
             using (var streamClient = new MemoryStream())
             using (var writerClient = new Utf8JsonWriter(streamClient, options))
             {
-                converterObjectRoot.Serialize(obj: null, property: null, obj, componentJsonRoot: null, writer, writerClient, isWriteClient: null);
+                int writeClientCount = 0;
+                converterObjectRoot.Serialize(obj: null, property: null, obj, componentJsonRoot: null, writer, writerClient, isWriteClient: null, ref writeClientCount);
                 writer.Flush();
                 writerClient.Flush();
                 json = Encoding.UTF8.GetString(stream.ToArray());

@@ -113,7 +113,7 @@
             }
 
             // MemorySingleton
-            if (node.Value.GetType().BaseType == typeof(EnumerableQuery))
+            if (node.Value?.GetType().BaseType == typeof(EnumerableQuery))
             {
                 var enumerable = node.Value.GetType().GetField("_enumerable", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(node.Value);
                 if (enumerable is IListRow)

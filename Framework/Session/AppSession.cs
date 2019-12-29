@@ -307,6 +307,7 @@
             IQueryable query;
             if (grid.LookupDestGridIndex == null)
             {
+                // Normal data grid
                 query = grid.ComponentOwner<Page>().GridQuery(grid);
 
                 await GridLoadAsync(grid, query);
@@ -314,6 +315,7 @@
             }
             else
             {
+                // Lookup data grid
                 var gridItemList = UtilSession.GridItemList();
                 Grid gridLookup = grid;
                 Grid gridDest = gridItemList.Where(item => item.GridIndex == gridLookup.LookupDestGridIndex).First().Grid;
@@ -327,7 +329,6 @@
 
                 await GridLoadAsync(grid, query);
             }
-
         }
 
         /// <summary>

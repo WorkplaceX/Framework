@@ -17,10 +17,22 @@ export class Grid {
     this.dataService.update(<RequestJson> { Command: 6, ComponentId: this.json.Id, GridRowId: row.Id, GridCellId: cell.Id, GridCellText: cell.Text });
   }
 
-  focus(row) {
-    if (!row.IsSelect) {
-      this.json.IsShowSpinner = true;
+  focusoutCell: any;
+
+  focusout(cell, row) {
+    this.focusoutCell = cell;
+  }
+
+  focus(cell, row) {
+    if (this.focusoutCell != null && this.focusoutCell.IsLookup) {
+      // Close open loopup window
+      this.focusoutCell.IsShowSpinner = true;
       this.dataService.update(<RequestJson> { Command: 4, ComponentId: this.json.Id, GridRowId: row.Id });
+    } else {
+      if (!row.IsSelect) {
+        this.json.IsShowSpinner = true;
+        this.dataService.update(<RequestJson> { Command: 4, ComponentId: this.json.Id, GridRowId: row.Id });
+        }
     }
   }
 

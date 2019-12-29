@@ -16,8 +16,8 @@
                 source.MyEnum = MyEnum.Left;
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(dest.MyEnum == MyEnum.Left);
                 UtilFramework.Assert(dest.MyEnumNullable == null);
@@ -27,16 +27,16 @@
                 source.MyEnumNullable = MyEnum.None;
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
                 UtilFramework.Assert(dest.MyEnumNullable == MyEnum.None);
             }
             {
                 A source = new A();
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(!json.Contains(nameof(A.MyEnumList)));
                 UtilFramework.Assert(source.MyEnumList == null);
@@ -51,8 +51,8 @@
                 source.MyEnumList.Add(MyEnum.Right);
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(json.Contains(nameof(A.MyEnumList)));
                 UtilFramework.Assert(dest.MyEnumList[0] == MyEnum.None);
@@ -68,8 +68,8 @@
                 source.MyEnumNullableList.Add(MyEnum.Right);
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(json.Contains(nameof(A.MyEnumNullableList)));
                 UtilFramework.Assert(dest.MyEnumNullableList[0] == MyEnum.None);
@@ -86,8 +86,8 @@
                 source.IntNullableList.Add(2);
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(json.Contains(nameof(A.IntNullableList)));
                 UtilFramework.Assert(dest.IntNullableList[0] == 0);
@@ -103,8 +103,8 @@
                 source.IntList.Add(2);
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(json.Contains(nameof(A.IntList)));
                 UtilFramework.Assert(dest.IntList[0] == 0);
@@ -116,8 +116,8 @@
                 source.V = 33;
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert((int)dest.V == 33);
             }
@@ -126,8 +126,8 @@
                 source.V = "Hello";
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert((string)dest.V == "Hello");
             }
@@ -137,8 +137,8 @@
                 source.Row = new FrameworkScript { Id = 22, FileName = @"C:\Temp\Readme.txt", Date = date };
 
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
-                A dest = (A)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(json);
 
                 UtilFramework.Assert(dest.Row.Id == 22);
                 UtilFramework.Assert(dest.Row.FileName == @"C:\Temp\Readme.txt");
@@ -149,13 +149,23 @@
                 source.V = MyEnum.None; // TODO Serialize enum on property of type object.
 
                 // Serialize, deserialize
-                // string json = UtilJson2.Serialize(source);
-                // A dest = (A)UtilJson2.Deserialize(json);
+                // string json = UtilJson.Serialize(source);
+                // A dest = (A)UtilJson.Deserialize(json);
             }
         }
 
         private static void RunComponentJson()
         {
+            // Reference to removed ComponentJson
+            {
+                MyComponent source = new MyComponent(null);
+                var html = new Html(source) { TextHtml = "My" };
+                source.Html = html;
+                html.ComponentRemove();
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(dest.Html == null);
+            }
             // ComponentJson reference in list
             {
                 MyComponent source = new MyComponent(null);
@@ -163,10 +173,10 @@
                 source.HtmlList = new List<Html>();
                 source.HtmlList.Add(html);
                 // Serialize, deserialize
-                string json = UtilJson2.Serialize(source);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
                 try
                 {
-                    var dest = (MyComponent)UtilJson2.Deserialize(json);
+                    var dest = (MyComponent)UtilJson.Deserialize(json);
                 }
                 catch (Exception exception)
                 {
@@ -176,28 +186,28 @@
             {
                 MyComponent source = new MyComponent(null);
                 new MyComponent(source);
-                string json = UtilJson2.Serialize(source);
-                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(json);
                 UtilFramework.Assert(dest.List.Count == 1);
             }
             {
                 MyComponent source = new MyComponent(null);
-                string json = UtilJson2.Serialize(source);
-                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(json);
                 UtilFramework.Assert(dest.Index == null);
             }
             {
                 MyComponent source = new MyComponent(null);
                 source.Index = 0;
-                string json = UtilJson2.Serialize(source);
-                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(json);
                 UtilFramework.Assert(dest.Index == 0);
             }
             {
                 MyComponent source = new MyComponent(null);
                 source.Index = -1;
-                string json = UtilJson2.Serialize(source);
-                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(json);
                 UtilFramework.Assert(dest.Index == -1);
             }
             {
@@ -209,12 +219,21 @@
                 Html html2 = new Html(myComponent2) { TextHtml = "B" };
                 myComponent2.Dto = new Dto { Css = "B", Html = html2 };
                 source.List.Add(myComponent1);
-                source.List.Add(myComponent2);
 
-                string json = UtilJson2.Serialize(source);
-                var dest = (My)UtilJson2.Deserialize(json);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                var dest = (My)UtilJson.Deserialize(json);
                 dest.List[0].Dto.Html.TextHtml = "abc";
                 UtilFramework.Assert(((Html)dest.List[0].List[0]).TextHtml == "abc");
+
+                source.List.Add(myComponent2);
+                try
+                {
+                    UtilJson.Serialize(source, out json, out jsonClient);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "JsonClient can only have one ComponentJson graph!");
+                }
             }
             {
                 My source = new My();
@@ -225,16 +244,25 @@
                 Html html2 = new Html(myComponent2) { TextHtml = "B" };
                 myComponent2.Dto = new Dto { Css = "B", Html = html2 }; 
                 var myComponent3 = new MyComponent(myComponent1);
-                source.List.Add(myComponent1);
-                source.List.Add(myComponent2);
                 source.List.Add(myComponent3); // Reference not to root!
                 try
                 {
-                    string json = UtilJson2.Serialize(source);
+                    UtilJson.Serialize(source, out string json, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
                     UtilFramework.Assert(exception.Message == "Referenced ComponentJson not root!");
+                }
+                source.List.Remove(myComponent3);
+                source.List.Add(myComponent1);
+                source.List.Add(myComponent2);
+                try
+                {
+                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "JsonClient can only have one ComponentJson graph!");
                 }
             }
             {
@@ -245,11 +273,11 @@
                 var myComponent2 = new MyComponent(null);
                 Html html2 = new Html(myComponent2) { TextHtml = "B" };
                 myComponent2.Dto = new Dto { Css = "B", Html = html1 }; // Reference to object in different graph
-                source.List.Add(myComponent1);
                 source.List.Add(myComponent2);
+                source.List.Add(myComponent1);
                 try
                 {
-                    string json = UtilJson2.Serialize(source);
+                    UtilJson.Serialize(source, out string json, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -261,11 +289,11 @@
 
                 source.Html = new Html(source) { TextHtml = "Hello" };
 
-                string json = UtilJson2.Serialize(source);
+                UtilJson.Serialize(source, out string json, out string jsonClient);
 
                 UtilFramework.Assert(!json.Contains("Owner"));
 
-                var dest = (MyComponent)UtilJson2.Deserialize(json);
+                var dest = (MyComponent)UtilJson.Deserialize(json);
 
                 var htmlOne = dest.Html;
                 var htmlTwo = dest.List.OfType<Html>().First();
@@ -276,11 +304,11 @@
             // Referenced ComponentJson not in same graph
             {
                 var source = new MyComponent(null);
-                source.Html = new Html();
+                source.Html = new Html(null);
 
                 try
                 {
-                    string json = UtilJson2.Serialize(source);
+                    UtilJson.Serialize(source, out string json, out string jsonClient);
                 }
                 catch (Exception exception)
                 {

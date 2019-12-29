@@ -129,6 +129,9 @@
         public ComponentJson Owner { get; internal set; }
 
         [SerializeIgnore]
+        internal bool IsRemoved;
+
+        [SerializeIgnore]
         internal ComponentJson Root;
 
         internal int RootIdCount;
@@ -411,6 +414,8 @@
         public static void ComponentRemove(this ComponentJson component)
         {
             component?.ComponentOwner().List.Remove(component);
+            component.Owner = null;
+            component.IsRemoved = true;
         }
 
         /// <summary>
@@ -750,7 +755,7 @@
         /// <summary>
         /// Show bootstrap alert (on per page).
         /// </summary>
-        public static Html BootstrapAlert(this Page page, string name, string textHtml, BootstrapAlertEnum alertEnum, int index = 0)
+        public static Html BootstrapAlert(this Page page, string textHtml, BootstrapAlertEnum alertEnum, int index = 0)
         {
             string htmlTextAlert = "<div class='alert {{CssClass}}' role='alert'>{{TextHtml}}</div>";
             string cssClass = null;
@@ -772,7 +777,7 @@
                     break;
             }
             htmlTextAlert = htmlTextAlert.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
-            Html result = page.ComponentGetOrCreate<Html>(name);
+            Html result = new Html(page);
             result.TextHtml = htmlTextAlert;
             result.ComponentMove(index);
             return result;

@@ -98,11 +98,11 @@
                 requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = requestJson.RequestCount };
                 appInternal.AppJson.RequestJson = requestJson;
                 appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
-                await appInternal.AppJson.InitInternalAsync();
                 if (isSessionExpired)
                 {
                     appInternal.AppJson.IsSessionExpired = true;
                 }
+                await appInternal.AppJson.InitInternalAsync();
             }
             else
             {
