@@ -70,7 +70,7 @@
     }
 
     /// <summary>
-    /// Json component tree. Store session state in field or property.
+    /// Json component tree. Stores session state in public or internal fields and properties.
     /// </summary>
     public abstract class ComponentJson
     {
@@ -184,8 +184,6 @@
         /// Gets json list.
         /// </summary>
         public List<ComponentJson> List = new List<ComponentJson>(); // Empty list is removed by json serializer.
-
-        public string Name;
     }
 
     /// <summary>
@@ -258,95 +256,6 @@
             return result;
         }
 
-        public static ComponentJson ComponentGet(this ComponentJson owner, string name)
-        {
-            var resultList = owner.List.Where(item => item.Name == name).ToArray();
-            if (resultList.Count() > 1)
-            {
-                throw new Exception(string.Format("Component with same name exists more than once! ({0})", name));
-            }
-            return resultList.SingleOrDefault();
-        }
-
-        public static T ComponentGet<T>(this ComponentJson owner, string name) where T : ComponentJson
-        {
-            ComponentJson result = owner.ComponentGet(name);
-            if (result != null && !(result is T))
-            {
-                throw new Exception(string.Format("Component wrong type! (Name={0})", name));
-            }
-            return (T)owner.ComponentGet(name);
-        }
-
-        public static T ComponentGet<T>(this ComponentJson owner) where T : ComponentJson
-        {
-            return owner.ComponentGet<T>(typeof(T).Name);
-        }
-
-        /// <summary>
-        /// Returns child component of Type T on index.
-        /// </summary>
-        public static T ComponentGet<T>(this ComponentJson owner, int index) where T : ComponentJson
-        {
-            return owner.ComponentList<T>()[index];
-        }
-
-        /// <summary>
-        /// Returns new ComponentJson.
-        /// </summary>
-        public static T ComponentCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
-        {
-            if (UtilFramework.IsSubclassOf(typeof(T), typeof(Page)))
-            {
-                throw new Exception("Use await method ComponentPageShowAsync();");
-            }
-            T component = (T)Activator.CreateInstance(typeof(T), owner);
-            component.Name = name;
-            init?.Invoke(component);
-
-            return component; // owner.Get<T>(name); // Do not check whether component with same name exists multiple times.
-        }
-
-        public static T ComponentCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
-        {
-            return ComponentCreate<T>(owner, typeof(T).Name, init);
-        }
-
-        /// <summary>
-        /// Returns ComponentJson or creates new if not yet exists.
-        /// </summary>
-        /// <param name="init">Callback method if ComponentJson has been created new. For example to init CssClass.</param>
-        public static T ComponentGetOrCreate<T>(this ComponentJson owner, string name, Action<T> init = null) where T : ComponentJson
-        {
-            if (owner.ComponentGet(name) == null)
-            {
-                T component = (T)Activator.CreateInstance(typeof(T), owner);
-                component.Name = name;
-                init?.Invoke(component);
-            }
-            return owner.ComponentGet<T>(name);
-        }
-
-        public static T ComponentGetOrCreate<T>(this ComponentJson owner, Action<T> init = null) where T : ComponentJson
-        {
-            return ComponentGetOrCreate<T>(owner, typeof(T).Name, init);
-        }
-
-        /// <summary>
-        /// Returns ComponentJson or creates new if not yet exists.
-        /// </summary>
-        /// <param name="init">Callback method if ComponentJson has been created new. For example to init CssClass.</param>
-        public static T ComponentGetOrCreate<T>(this ComponentJson owner, int index, Action<T> init = null) where T : ComponentJson
-        {
-            int count = owner.ComponentList<T>().Count;
-            while (count - 1 < index)
-            {
-                owner.ComponentCreate<T>(init);
-                count += 1;
-            }
-            return owner.ComponentList<T>()[index];
-        }
-
         public enum PageShowEnum
         {
             None = 0,
@@ -368,27 +277,28 @@
         }
 
         /// <summary>
-        /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
+        /// Shows page or creates new one if it does not yet exist. Invokes also page init async.
         /// </summary>
-        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, string name, PageShowEnum pageShowEnum = PageShowEnum.Default, Action<T> init = null) where T : Page
+        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, T page, PageShowEnum pageShowEnum = PageShowEnum.Default, Action<T> init = null) where T : Page
         {
-            T result = null;
+            T result = page;
+            if (page != null && page.IsRemoved == false)
+            {
+                UtilFramework.Assert(page.Owner == owner, "Wrong Page.Owner!");
+            }
             if (pageShowEnum == PageShowEnum.SiblingHide)
             {
-                foreach (Page page in owner.List.OfType<Page>())
+                foreach (Page item in owner.List.OfType<Page>())
                 {
-                    page.IsHide = true; // Hide
+                    item.IsHide = true; // Hide
                 }
             }
-            if (ComponentGet(owner, name) == null)
+            if (page == null || page.IsRemoved)
             {
                 result = (T)Activator.CreateInstance(typeof(T), owner);
-                result.Name = name;
                 init?.Invoke(result);
                 await result.InitAsync();
             }
-            result = ComponentGet<T>(owner, name);
-            UtilFramework.Assert(result != null);
             result.IsHide = false; // Show
             if (pageShowEnum == PageShowEnum.SiblingRemove)
             {
@@ -401,11 +311,11 @@
         }
 
         /// <summary>
-        /// Shows page or creates new one if it does not yet exist. Similar to method ComponentGetOrCreate(); but additionally invokes page init async.
+        /// Creates new page. Invokes also page init async.
         /// </summary>
         public static Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, PageShowEnum pageShowEnum = PageShowEnum.None, Action<T> init = null) where T : Page
         {
-            return ComponentPageShowAsync<T>(owner, typeof(T).Name, pageShowEnum, init);
+            return ComponentPageShowAsync<T>(owner, null, pageShowEnum, init);
         }
 
         /// <summary>
@@ -432,26 +342,6 @@
         public static int ComponentCount(this ComponentJson component)
         {
             return component.ComponentOwner().List.Count();
-        }
-
-        /// <summary>
-        /// Remove child component if exists.
-        /// </summary>
-        public static void ComponentRemoveItem(this ComponentJson component, string name)
-        {
-            var item = component.ComponentGet(name);
-            if (item != null)
-            {
-                item.ComponentRemove();
-            }
-        }
-
-        /// <summary>
-        /// Remove child component if exists.
-        /// </summary>
-        public static void ComponentRemoveItem<T>(this ComponentJson component) where T : ComponentJson
-        {
-            component.ComponentRemoveItem(typeof(T).Name);
         }
 
         /// <summary>

@@ -20,94 +20,57 @@
 
         protected void Init(bool isHeader, bool isFooter, bool isLarge = false)
         {
+            this.DivModal = new Div(this) { CssClass = "modal" };
+            this.DivModalDialog = new Div(DivModal) { CssClass = "modal-dialog" };
+            this.DivModalContent = new Div(DivModalDialog) { CssClass = "modal-content" };
             if (isHeader)
             {
-                DivModalContent().ComponentCreate<Div>("Header").CssClass = "modal-header";
-                ButtonClose();
+                this.DivHeader = new Div(DivModalContent) { CssClass = "modal-header" };
+                ButtonClose = new Button(DivHeader) { CssClass = "close", TextHtml = "<span>&times;</span>" };
             }
-            DivModalContent().ComponentCreate<Div>("Body").CssClass = "modal-body";
+            this.DivBody = new Div(DivModalContent) { CssClass = "modal-body" };
             if (isFooter)
             {
-                DivModalContent().ComponentCreate<Div>("Footer").CssClass = "modal-footer";
+                this.DivFooter = new Div(DivModalContent) { CssClass = "modal-footer" };
             }
             if (isLarge)
             {
-                DivModalDialog().CssClass += " modal-lg";
+                DivModalDialog.CssClass += " modal-lg";
             }
         }
 
-        private Div DivModal()
-        {
-            return this.ComponentGetOrCreate<Div>((div) =>
-            {
-                div.CssClass = "modal";
-            });
-        }
+        internal Div DivModal;
 
-        private Div DivModalDialog()
-        {
-            return DivModal().ComponentGetOrCreate<Div>((div) =>
-            {
-                div.CssClass = "modal-dialog";
-            });
-        }
+        internal Div DivModalDialog;
 
-        private Div DivModalContent()
-        {
-            return DivModalDialog().ComponentGetOrCreate<Div>((div) =>
-            {
-                div.CssClass = "modal-content";
-            });
-        }
+        internal Div DivModalContent;
 
         /// <summary>
-        /// Returns header. Place for example title into this div.
+        /// Gets DivHeader. Place for example title into this div.
         /// </summary>
-        public Div DivHeader()
-        {
-            return DivModalContent().ComponentGet<Div>("Header");
-        }
+        public Div DivHeader { get; internal set; }
 
         /// <summary>
-        /// Returns body. Place content into this div.
+        /// Gets DivBody. Place content into this div.
         /// </summary>
-        public Div DivBody()
-        {
-            return DivModalContent().ComponentGet<Div>("Body");
-        }
+        public Div DivBody { get; internal set; }
 
         /// <summary>
-        /// Returns footer. Place for example close button into this div.
+        /// Gets DivFooter. Place for example close button into this div.
         /// </summary>
-        public Div DivFooter()
-        {
-            return DivModalContent().ComponentGet<Div>("Footer");
-        }
+        public Div DivFooter { get; internal set; }
 
         /// <summary>
-        /// Returns close button, if header exists. See also method Init();
+        /// Gets or sets ButtonClose. If header exists. See also method Init();
         /// </summary>
-        public Button ButtonClose()
-        {
-            Button result = null;
-            var header = DivHeader();
-            if (header != null)
-            {
-                result = header.ComponentGetOrCreate<Button>("Close", (button) =>
-                {
-                    button.CssClass = "close";
-                    button.TextHtml = "<span>&times;</span>";
-                });
-            }
-            return result;
-        }
+        internal Button ButtonClose;
 
         /// <summary>
         /// Add shadow covering application behind modal window.
         /// </summary>
         internal static void DivModalBackdropCreate(AppJson appJson)
         {
-            Div result = appJson.ComponentCreate<Div>();
+            Div result = new Div(appJson);
             result.CssClass = "modal-backdrop show";
         }
 
@@ -124,7 +87,7 @@
 
         protected internal override Task ProcessAsync()
         {
-            if (ButtonClose().IsClick)
+            if (ButtonClose.IsClick)
             {
                 this.ComponentRemove();
             }

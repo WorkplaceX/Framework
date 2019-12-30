@@ -24,7 +24,7 @@
             bool isExist = false;
             foreach (var item in app.AppJson.ComponentListAll().OfType<BootstrapModal>())
             {
-                item.ButtonClose()?.ComponentMoveLast();
+                item.ButtonClose?.ComponentMoveLast();
                 isExist = true;
             }
             if (isExist)

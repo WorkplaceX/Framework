@@ -1054,6 +1054,12 @@ namespace Framework.Json
 
         private static readonly JsonWriterOptions options = new JsonWriterOptions(); // { Indented = true };
 
+        /// <summary>
+        /// Serializes public and internal properties and fiels.
+        /// </summary>
+        /// <param name="obj">Object to serialize.</param>
+        /// <param name="json">Json stored in server session.</param>
+        /// <param name="jsonClient">Json sent to Angular client.</param>
         public static void Serialize(object obj, out string json, out string jsonClient)
         {
             using (var stream = new MemoryStream())
@@ -1094,6 +1100,11 @@ namespace Framework.Json
             //UtilFramework.Assert(jsonSource == jsonDest);
         }
 
+        /// <summary>
+        /// Deserialize server session json.
+        /// </summary>
+        /// <param name="json">Server session json.</param>
+        /// <returns>Returns deserialized session object.</returns>
         public static object Deserialize(string json)
         {
             bool isUtf8JsonReader = false; // Use JsonDocument or Utf8JsonReader

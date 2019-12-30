@@ -31,28 +31,22 @@
         protected internal override async Task InitAsync()
         {
             Init(true, false, isLarge: true);
-            DivHeader().ComponentCreate<Html>().TextHtml = "Config";
-            DivBody().ComponentCreate<Html>().TextHtml = "<h1>Config Grid</h1>";
-            GridConfigGrid();
-            DivBody().ComponentCreate<Html>().TextHtml = "<h1>Config Field</h1>";
-            GridConfigField();
+            new Html(DivHeader) { TextHtml = "Config" };
+            new Html(DivBody) { TextHtml = "<h1>Config Grid</h1>" };
+            GridConfigGrid = new Grid(DivBody);
+            new Html(DivBody) { TextHtml = "<h1>Config Field</h1>" };
+            GridConfigField = new Grid(DivBody);
 
-            await GridConfigGrid().LoadAsync();
+            await GridConfigGrid.LoadAsync();
         }
 
-        public Grid GridConfigGrid()
-        {
-            return DivBody().ComponentGetOrCreate<Grid>("ConfigGrid");
-        }
+        public Grid GridConfigGrid;
 
-        public Grid GridConfigField()
-        {
-            return DivBody().ComponentGetOrCreate<Grid>("ConfigField");
-        }
+        public Grid GridConfigField;
 
         protected internal override IQueryable GridQuery(Grid grid)
         {
-            if (grid == GridConfigGrid())
+            if (grid == GridConfigGrid)
             {
                 var result = Data.Query<FrameworkConfigGridDisplay>();
                 if (TableNameCSharp != null)
@@ -61,9 +55,9 @@
                 }
                 return result;
             }
-            if (grid == GridConfigField())
+            if (grid == GridConfigField)
             {
-                var rowSelected = (FrameworkConfigGridDisplay)GridConfigGrid().GridRowSelected();
+                var rowSelected = (FrameworkConfigGridDisplay)GridConfigGrid.GridRowSelected();
                 var result = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
                 if (FieldNameCSharp != null)
                 {
@@ -76,7 +70,7 @@
 
         protected internal override async Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
         {
-            if (grid == GridConfigGrid())
+            if (grid == GridConfigGrid)
             {
                 var rowDest = new FrameworkConfigGrid();
                 rowDest.IsExist = true;
@@ -86,7 +80,7 @@
                 Data.RowCopy(rowReload, rowNew);
                 return true;
             }
-            if (grid == GridConfigField())
+            if (grid == GridConfigField)
             {
                 throw new Exception("Can not insert field config!");
             }
@@ -95,7 +89,7 @@
 
         protected internal override async Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
         {
-            if (grid == GridConfigGrid())
+            if (grid == GridConfigGrid)
             {
                 // Insert
                 bool isInsert = false;
@@ -129,7 +123,7 @@
                 }
                 return true;
             }
-            if (grid == GridConfigField())
+            if (grid == GridConfigField)
             {
                 var rowDisplay = (FrameworkConfigFieldDisplay)rowNew;
 
@@ -196,10 +190,10 @@
 
         protected internal override async Task GridRowSelectedAsync(Grid grid)
         {
-            if (grid == GridConfigGrid())
+            if (grid == GridConfigGrid)
             {
                 var configGrid = (FrameworkConfigGridDisplay)grid.GridRowSelected();
-                await GridConfigField().LoadAsync();
+                await GridConfigField.LoadAsync();
             }
         }
     }
