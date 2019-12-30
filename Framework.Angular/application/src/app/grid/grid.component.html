@@ -1,7 +1,7 @@
-<table style="height:100%">
+<table style="height:100%" (document:mousemove)="documentMouseMove($event)" (document:mouseup)="documentMouseUp($event)" >
   <!-- Header -->
   <tr>
-    <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);" >
+    <th *ngFor="let column of json.ColumnList; trackBy trackBy" (click)="clickSort(column, $event);" style="position: relative;" >
       <div style="display:flex; white-space:nowrap;">
         <div style="flex:1; overflow:hidden;">
           <i *ngIf="column.IsSort==false" class="fas fa-caret-up colorWhite"></i>
@@ -11,6 +11,8 @@
         <div style="padding-left:2px;">
           <i *ngIf="column.IsShowSpinned" class="fas fa-spinner fa-spin colorWhite"></i>
           <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(column, $event);"></i>
+        </div>
+        <div style="cursor:col-resize; width:5px;" (mousedown)="thMouseDown($event)" >
         </div>
       </div>
     </th>
