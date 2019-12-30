@@ -98,7 +98,7 @@
                 BuildWebsiteNpm(website);
                 string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServer);
                 UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
-                UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Website/'!");
+                UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
 
                 string folderNameDist = UtilFramework.FolderNameParse(website.FolderNameDist);
                 if (folderNameDist != null)
@@ -162,7 +162,7 @@
             InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
             // Build Website(s) (npm)
-            BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Website/
+            BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
 
             UtilCli.VersionBuild(() => {
                 // Build Angular client (npm)

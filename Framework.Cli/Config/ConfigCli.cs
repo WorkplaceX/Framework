@@ -101,7 +101,7 @@
     public class ConfigCliWebsite
     {
         /// <summary>
-        /// Gets or sets FolderNameServer. For example: "Application.Server/Framework/Website/Default".
+        /// Gets or sets FolderNameServer. For example: "Application.Server/Framework/Application.Website/Default".
         /// </summary>
         public string FolderNameServer { get; set; }
 
@@ -143,7 +143,7 @@
         public string FolderNameNpmBuild { get; set; }
 
         /// <summary>
-        /// Gets or sets FolderNameDist. For example: "Website/Default/dist". Content of this folder will be copied to FolderNameServer".
+        /// Gets or sets FolderNameDist. For example: "Application.Website/Default/dist". Content of this folder will be copied to FolderNameServer".
         /// </summary>
         public string FolderNameDist { get; set; }
 

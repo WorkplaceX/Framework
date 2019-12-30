@@ -127,7 +127,7 @@
 
         public string FolderNameServerGet(string prefixRemove)
         {
-            UtilFramework.Assert(FolderNameServer != null && FolderNameServer.StartsWith("Application.Server/Framework/Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Website/'!");
+            UtilFramework.Assert(FolderNameServer != null && FolderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
             UtilFramework.Assert(FolderNameServer.StartsWith(prefixRemove));
             string result = FolderNameServer;
             result = result.Substring(prefixRemove.Length);
