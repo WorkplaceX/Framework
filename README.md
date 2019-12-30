@@ -13,11 +13,11 @@ Framework to create database applications based on Angular 6 with server side re
 * Project page: [WorkplaceX.com](http://workplacex.com)
 
 ## Folder Structure
-* Framework/ (Framework kernel doing all the heavy work)
-* Framework.Angular/ (Generic Angular application to render app.json sent by server)
-* Framework.Cli/ (C# Command line interface to build and deploy application)
-* Framework.Doc/ (Documentation images)
-* Framework.Test/ (Internal C# unit tests)
+* "Framework/" (Framework kernel doing all the heavy work)
+* "Framework.Angular/" (Generic Angular application to render app.json sent by server)
+* "Framework.Cli/" (C# Command line interface to build and deploy application)
+* "Framework.Doc/" (Documentation images)
+* "Framework.Test/" (Internal C# unit tests)
 
 ## Version
 
