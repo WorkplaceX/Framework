@@ -576,14 +576,14 @@
             UtilStopwatch.TimeStart("Process");
             await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
             await UtilApp.ProcessBootstrapNavbarAsync();
-            await UtilApp.ProcessButtonAsync(); // Button
-            UtilApp.ProcessBootstrapModal(); // Modal dialog window
 
             foreach (Page page in UtilServer.AppJson.ComponentListAll().OfType<Page>())
             {
                 await page.ProcessAsync();
             }
 
+            UtilApp.ProcessBootstrapModal(); // Modal dialog window
+            
             UtilApp.DivContainerRender();
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
             UtilApp.BootstrapNavbarRender();
@@ -656,6 +656,19 @@
         }
 
         public string TextHtml;
+
+        /// <summary>
+        /// Gets IsClick. If true, user clicked the button.
+        /// </summary>
+        [SerializeIgnore]
+        public bool IsClick
+        {
+            get
+            {
+                var requestJson = ((AppJson)Root).RequestJson;
+                return requestJson.Command == RequestCommand.ButtonIsClick && requestJson.ComponentId == Id;
+            }
+        }
     }
 
     /// <summary>
@@ -1146,11 +1159,6 @@
         /// Override this method to implement custom process at the end of the process chain. Called once every request.
         /// </summary>
         protected virtual internal Task ProcessAsync()
-        {
-            return Task.FromResult(0);
-        }
-
-        protected virtual internal Task ButtonClickAsync(Button button)
         {
             return Task.FromResult(0);
         }

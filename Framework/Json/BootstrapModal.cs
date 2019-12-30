@@ -122,13 +122,13 @@
             }
         }
 
-        protected internal override Task ButtonClickAsync(Button button)
+        protected internal override Task ProcessAsync()
         {
-            if (button == ButtonClose())
+            if (ButtonClose().IsClick)
             {
                 this.ComponentRemove();
             }
-            return base.ButtonClickAsync(button);
+            return base.ProcessAsync();
         }
     }
 }

@@ -14,19 +14,6 @@
     internal static class UtilApp
     {
         /// <summary>
-        /// Process button click.
-        /// </summary>
-        public static async Task ProcessButtonAsync()
-        {
-            var appJson = UtilServer.AppJson;
-            if (appJson.RequestJson.Command == RequestCommand.ButtonIsClick)
-            {
-                Button button = (Button)appJson.RootComponentJsonList[appJson.RequestJson.ComponentId];
-                await button.ComponentOwner<Page>().ButtonClickAsync(button);
-            }
-        }
-
-        /// <summary>
         /// Process bootstrap modal dialog window.
         /// </summary>
         public static void ProcessBootstrapModal()
