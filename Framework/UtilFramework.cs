@@ -36,7 +36,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.12.1";
+                return "v3.12.12";
             }
         }
 

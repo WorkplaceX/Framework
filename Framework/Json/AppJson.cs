@@ -191,11 +191,6 @@
     /// </summary>
     public static class ComponentJsonExtension
     {
-        internal static ComponentJson ComponentOwner(this ComponentJson component)
-        {
-            return component.Owner;
-        }
-
         /// <summary>
         /// Returns owner of type T. Searches in parent and grand parents.
         /// </summary>
@@ -203,7 +198,7 @@
         {
             do
             {
-                component = ComponentOwner(component);
+                component = component.Owner;
                 if (component is T)
                 {
                     return (T)component;
@@ -230,14 +225,6 @@
             result.Add(component);
             ComponentListAll(component, result);
             return result;
-        }
-
-        /// <summary>
-        /// Returns all child components.
-        /// </summary>
-        public static List<ComponentJson> ComponentList(this ComponentJson component)
-        {
-            return component.List;
         }
 
         /// <summary>
@@ -323,17 +310,17 @@
         /// </summary>
         public static void ComponentRemove(this ComponentJson component)
         {
-            component?.ComponentOwner().List.Remove(component);
+            component?.Owner.List.Remove(component);
             component.Owner = null;
             component.IsRemoved = true;
         }
 
         /// <summary>
-        /// Returns index of this component.
+        /// Returns index of this component in parents list.
         /// </summary>
         public static int ComponentIndex(this ComponentJson component)
         {
-            return component.ComponentOwner().List.IndexOf(component);
+            return component.Owner.List.IndexOf(component);
         }
 
         /// <summary>
@@ -341,7 +328,7 @@
         /// </summary>
         public static int ComponentCount(this ComponentJson component)
         {
-            return component.ComponentOwner().List.Count();
+            return component.Owner.List.Count();
         }
 
         /// <summary>
@@ -349,7 +336,7 @@
         /// </summary>
         public static void ComponentMove(this ComponentJson component, int index)
         {
-            var list = component?.ComponentOwner().List;
+            var list = component?.Owner.List;
             list.Remove(component);
             list.Insert(index, component);
         }
@@ -743,7 +730,7 @@
         /// </summary>
         internal bool GridLookupIsOpen()
         {
-            return LookupDestGridIndex != null && this.ComponentOwner() is Grid;
+            return LookupDestGridIndex != null && this.Owner is Grid;
         }
 
         /// <summary>
