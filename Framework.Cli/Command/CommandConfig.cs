@@ -41,7 +41,7 @@
         {
             // Input FolderNameServer
             UtilCli.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
-            Console.WriteLine("Enter FolderNameServer. For example: 'Application.Server/Framework/Website/example.com':");
+            Console.WriteLine("Enter FolderNameServer. For example: 'Application.Server/Framework/Application.Website/example.com':");
             Console.Write(">");
             string folderNameServer = Console.ReadLine();
             folderNameServer = UtilFramework.FolderNameParse(folderNameServer);
@@ -61,7 +61,7 @@
             }
 
             // Input FolderName
-            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Website/'. In this folder ci calls npm install; npm build;");
+            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Application.Website/'. In this folder ci calls npm install; npm build;");
             Console.Write(">");
             string folderNameNpmBuild = Console.ReadLine();
             folderNameNpmBuild = UtilFramework.FolderNameParse(folderNameNpmBuild);
@@ -73,7 +73,7 @@
             }
 
             // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Website/Default/dist/'. Content of this folder is copied to FolderNameServer");
+            Console.WriteLine("Enter dist folder name. For example 'Application.Website/Default/dist/'. Content of this folder is copied to FolderNameServer");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
             folderNameDist = UtilFramework.FolderNameParse(folderNameDist);

@@ -37,10 +37,10 @@
                 // POST app.json
                 if (!await Post(context, path, appSelector))
                 {
-                    // GET index.html from "Application.Server/Framework/Website/" (With server side rendering)
+                    // GET index.html from "Application.Server/Framework/Application.Website/" (With server side rendering)
                     if (!await WebsiteServerSideRenderingAsync(context, path, appSelector))
                     {
-                        // GET file from "Application.Server/Framework/Website/"
+                        // GET file from "Application.Server/Framework/Application.Website/"
                         if (!await WebsiteFileAsync(context, path, appSelector))
                         {
                             // GET Angular file from "Application.Server/Framework/Angular/browser"
@@ -80,7 +80,7 @@
         }
 
         /// <summary>
-        /// Divert request to "Application.Server/Framework/Website/"
+        /// Divert request to "Application.Server/Framework/Application.Website/"
         /// </summary>
         private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string path, AppSelector appSelector)
         {
@@ -147,9 +147,8 @@
             return indexHtml;
         }
 
-
         /// <summary>
-        /// Returns true, if file found in folder "Application.Server/Framework/Website/"
+        /// Returns true, if file found in folder "Application.Server/Framework/Application.Website/"
         /// </summary>
         private async Task<bool> WebsiteFileAsync(HttpContext context, string path, AppSelector appSelector)
         {
