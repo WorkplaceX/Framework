@@ -43,7 +43,7 @@
                         // GET file from "Application.Server/Framework/Application.Website/"
                         if (!await WebsiteFileAsync(context, path, appSelector))
                         {
-                            // GET Angular file from "Application.Server/Framework/Angular/browser"
+                            // GET Angular file from "Application.Server/Framework/Framework.Angular/browser"
                             if (!await AngularBrowserFileAsync(context, path))
                             {
                                 context.Response.StatusCode = 404; // Not found
@@ -120,7 +120,7 @@
             if (UtilServer.IsIssServer)
             {
                 // Running on IIS Server.
-                url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/Angular/server.js"; // Url of server side rendering when running on IIS Server
+                url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server.js"; // Url of server side rendering when running on IIS Server
             }
             else
             {
@@ -168,15 +168,15 @@
         }
 
         /// <summary>
-        /// Returns true, if file found in folder "Application.Server/Framework/Angular/browser".
+        /// Returns true, if file found in folder "Application.Server/Framework/Framework.Angular/browser".
         /// </summary>
         private async Task<bool> AngularBrowserFileAsync(HttpContext context, string path)
         {
-            // Fallback Application.Server/Framework/Angular/browser
+            // Fallback Application.Server/Framework/Framework.Angular/browser
             if (UtilServer.PathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Angular/browser" + path;
+                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Framework.Angular/browser" + path;
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

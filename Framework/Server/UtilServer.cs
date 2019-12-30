@@ -140,7 +140,7 @@
         /// </summary>
         public static void StartUniversalServer()
         {
-            string folderName = UtilFramework.FolderName + "Application.Server/Framework/Angular";
+            string folderName = UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular";
             string fileNameServer = folderName + "/server.js";
             if (!File.Exists(fileNameServer))
             {

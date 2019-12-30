@@ -35,7 +35,7 @@
             UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
 
             string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/";
-            string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Angular/";
+            string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/";
 
             // Copy folder
             UtilCli.FolderDelete(folderNameDest);
