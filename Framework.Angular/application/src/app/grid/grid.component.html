@@ -10,6 +10,7 @@
         </div>
         <div style="padding-left:2px;">
           <i *ngIf="column.IsShowSpinned" class="fas fa-spinner fa-spin colorWhite"></i>
+          <i *ngIf="column.Description!=null" class="fas fa-info-circle colorWhite" title="{{ column.Description }}"></i>
           <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(column, $event);"></i>
         </div>
         <div style="cursor:col-resize; width:5px;" (mousedown)="thMouseDown($event)" >

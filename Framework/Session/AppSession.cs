@@ -217,15 +217,18 @@
                 Field field = fieldList[columnSession.FieldName];
 
                 string textConfig = null;
+                string description = null;
                 bool? isVisibleConfig = null;
                 double? sortConfig = null;
                 if (fieldBuiltInList.TryGetValue(columnSession.FieldName, out var frameworkConfigFieldBuiltIn))
                 {
                     textConfig = frameworkConfigFieldBuiltIn.Text;
+                    description = frameworkConfigFieldBuiltIn.Description;
                     isVisibleConfig = frameworkConfigFieldBuiltIn.IsVisible;
                     sortConfig = frameworkConfigFieldBuiltIn.Sort;
                 }
                 columnSession.Text = namingConvention.ColumnTextInternal(typeRow, columnSession.FieldName, textConfig);
+                columnSession.Description = description;
                 columnSession.IsVisible = namingConvention.ColumnIsVisibleInternal(typeRow, columnSession.FieldName, isVisibleConfig);
                 columnSession.Sort = namingConvention.ColumnSortInternal(typeRow, columnSession.FieldName, field, sortConfig);
             }
@@ -360,6 +363,7 @@
                                 GridColumn gridColumn = new GridColumn();
                                 gridColumn.Id = gridColumnId += 1;
                                 gridColumn.Text = gridColumnItem.GridColumnSession.Text;
+                                gridColumn.Description = gridColumnItem.GridColumnSession.Description;
                                 gridColumn.IsSort = gridColumnItem.GridColumnSession.IsSort;
                                 gridItem.Grid.ColumnList.Add(gridColumn);
                             }
@@ -1125,6 +1129,11 @@
         /// Gets or sets Text. Session state for column header text.
         /// </summary>
         public string Text;
+
+        /// <summary>
+        /// Gets or sets Description. Hover with mouse over column to see tooltip window.
+        /// </summary>
+        public string Description;
 
         /// <summary>
         /// Gets or sets IsVisible. Session state indicating column is shown.

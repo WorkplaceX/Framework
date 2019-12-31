@@ -809,6 +809,11 @@
         public string Text;
 
         /// <summary>
+        /// Gets or sets Description. Hover with mouse over column information icon to see tooltip window.
+        /// </summary>
+        public string Description;
+
+        /// <summary>
         /// Gets or sets IsSort. If false, ascending. If true descending.
         /// </summary>
         public bool? IsSort;
