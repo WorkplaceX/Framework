@@ -960,22 +960,15 @@
             return Task.FromResult(false);
         }
 
-        public class ConfigResult
+        /// <summary>
+        /// Contains one query for data grid configuration and one query for data grid field configuration.
+        /// </summary>
+        public class GridConfigResult
         {
             /// <summary>
             /// Gets or sets ConfigGridQuery. Should return one record.
             /// </summary>
             public IQueryable<FrameworkConfigGridBuiltIn> ConfigGridQuery { get; set; }
-
-            /*
-
-            // Other additional possible implementations:
-            
-            public Task<FrameworkConfigGridBuiltIn> ConfigGridQueryTask { get; set; }
-
-            public FrameworkConfigGridBuiltIn ConfigGrid { get; set; }
-
-            */
 
             /// <summary>
             /// Gets or sets ConfigFieldQuery.
@@ -988,12 +981,14 @@
         /// </summary>
         /// <param name="grid">Json data grid to load.</param>
         /// <param name="tableNameCSharp">Type of row to load.</param>
-        protected virtual internal void GridQueryConfig(Grid grid, string tableNameCSharp, ConfigResult result)
+        protected virtual internal void GridQueryConfig(Grid grid, string tableNameCSharp, GridConfigResult result)
         {
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
 
-            // Example:
-            // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+            
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         /// <summary>
@@ -1012,7 +1007,7 @@
             return null; // No lookup data grid.
         }
 
-        protected virtual internal void GridLookupQueryConfig(Grid grid, ConfigResult config)
+        protected virtual internal void GridLookupQueryConfig(Grid grid, GridConfigResult config)
         {
             // Example:
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();

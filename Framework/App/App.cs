@@ -81,6 +81,7 @@
             if (requestJsonText != null)
             {
                 requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
+                requestJson.GridCellText = UtilFramework.StringNull(requestJson.GridCellText);
             }
             else
             {

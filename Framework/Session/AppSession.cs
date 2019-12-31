@@ -289,11 +289,11 @@
             Task fieldConfigLoad = Task.FromResult(0);
             if (gridSession.TypeRow != typeRow)
             {
-                Page.ConfigResult configResult = new Page.ConfigResult();
-                grid.ComponentOwner<Page>().GridQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(typeRow), configResult);
+                Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
+                grid.ComponentOwner<Page>().GridQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(typeRow), gridConfigResult);
                 // Load config into session state.
-                await GridLoadConfigAsync(grid, typeRow, configResult.ConfigGridQuery);
-                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, configResult.ConfigFieldQuery);
+                await GridLoadConfigAsync(grid, typeRow, gridConfigResult.ConfigGridQuery);
+                fieldConfigLoad = GridLoadConfigAsync(grid, typeRow, gridConfigResult.ConfigFieldQuery);
             }
 
             // Select rows and load data into session state.
@@ -638,6 +638,7 @@
                         if (gridRowItem.GridRowSession.RowEnum == GridRowEnum.Index && gridRowItem.GridRowSession.RowUpdate != null)
                         {
                             // Update to database
+                            gridRowItem.GridRowSession.ErrorSave = null;
                             try
                             {
                                 bool isHandled = await gridItem.Grid.ComponentOwner<Page>().GridUpdateAsync(gridItem.Grid, gridRowItem.GridRowSession.Row, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.DatabaseEnum);
@@ -1093,6 +1094,9 @@
 
         public int? RowCountMaxConfig;
 
+        /// <summary>
+        /// Returns number of rows to load. Default value is 10.
+        /// </summary>
         public int RowCountMaxGet()
         {
             return RowCountMaxConfig.HasValue ? RowCountMaxConfig.Value : 10; // Default value if no config.
