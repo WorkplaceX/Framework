@@ -28,7 +28,7 @@
 
         public string FieldNameCSharp { get; set; }
 
-        protected internal override async Task InitAsync()
+        public override async Task InitAsync()
         {
             Init(true, false, isLarge: true);
             new Html(DivHeader) { TextHtml = "Config" };

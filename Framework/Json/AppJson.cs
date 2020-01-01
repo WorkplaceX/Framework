@@ -925,9 +925,9 @@
         public string TypeCSharp;
 
         /// <summary>
-        /// Called once a lifetime when page is created.
+        /// Calle once a lifetime when page is created.
         /// </summary>
-        protected virtual internal Task InitAsync()
+        public virtual Task InitAsync()
         {
             return Task.FromResult(0);
         }

@@ -12,7 +12,7 @@
 
         public BootstrapModal(ComponentJson owner) : base(owner) { }
 
-        protected internal override Task InitAsync()
+        public override Task InitAsync()
         {
             Init(true, false);
             return base.InitAsync();
