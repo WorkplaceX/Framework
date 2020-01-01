@@ -788,6 +788,69 @@
         }
     }
 
+    public class Grid2 : ComponentJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Grid2(ComponentJson owner) 
+            : base( owner)
+        {
+
+        }
+
+        /// <summary>
+        /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
+        /// </summary>
+        public async Task LoadAsync()
+        {
+            if (GridData == null)
+            {
+                Page page = this.ComponentOwner<Page>();
+                IQueryable query = page.Grid2Query(this);
+                Type typeRow = query?.ElementType;
+                if (typeRow != null)
+                {
+                    // Get config grid and field query
+                    Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
+                    page.Grid2QueryConfig(this, UtilDalType.TypeRowToTableNameCSharp(typeRow), gridConfigResult);
+                    
+                    // Load config grid
+                    this.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
+                    var configGrid = ConfigGridList.Where(item => item.ConfigName == this.ConfigName).SingleOrDefault(); // LINQ to memory
+                    query = Data.QuerySkipTake(query, 0, configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value); // By default load 10 rows.
+
+                    // Load config field (Task)
+                    var configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
+
+                    // Load row (Task)
+                    var rowListTask = Data.SelectAsync(query);
+
+                    await Task.WhenAll(configFieldListTask, rowListTask); // Load config field and row in parallel
+
+                    this.ConfigFieldList = configFieldListTask.Result;
+                    this.RowList = rowListTask.Result;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property Grid.GridData.
+        /// </summary>
+        internal List<FrameworkConfigGridBuiltIn> ConfigGridList;
+
+        internal List<FrameworkConfigFieldBuiltIn> ConfigFieldList;
+
+        internal List<Row> RowList;
+
+        public string ConfigName;
+
+        /// <summary>
+        /// Gets or sets GridData. If not null, data is displayed from another grid. For example with different configuration.
+        /// </summary>
+        public Grid2 GridData;
+    }
+
     /// <summary>
     /// Grid paging.
     /// </summary>
@@ -927,7 +990,7 @@
         /// <summary>
         /// Called once a lifetime when page is created.
         /// </summary>
-        protected virtual internal Task InitAsync()
+        public virtual Task InitAsync()
         {
             return Task.FromResult(0);
         }
@@ -938,6 +1001,16 @@
         /// <param name="grid">Grid to get query to load.</param>
         /// <returns>If value null, grid has no header and rows. If value is method Data.QueryEmpty(); grid has header but no rows.</returns>
         protected virtual internal IQueryable GridQuery(Grid grid)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Returns query to load data grid. Override this method to define sql query.
+        /// </summary>
+        /// <param name="grid">Grid to get query to load.</param>
+        /// <returns>If value null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
+        protected virtual internal IQueryable Grid2Query(Grid2 grid)
         {
             return null;
         }
@@ -991,7 +1064,22 @@
             result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
 
             result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
-            
+
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
+
+        /// <summary>
+        /// Returns configuration query of data grid to load.
+        /// </summary>
+        /// <param name="grid">Json data grid to load.</param>
+        /// <param name="tableNameCSharp">Type of row to load.</param>
+        protected virtual internal void Grid2QueryConfig(Grid2 grid, string tableNameCSharp, GridConfigResult result)
+        {
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
+
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
+
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }

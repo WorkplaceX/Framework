@@ -156,6 +156,14 @@
 
         private static void RunComponentJson()
         {
+            // Reference to self
+            {
+                MyComponent source = new MyComponent(null);
+                source.Component = source;
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(dest.Component == dest);
+            }
             // Reference to removed ComponentJson
             {
                 MyComponent source = new MyComponent(null);
@@ -338,6 +346,8 @@
         public int? Index;
 
         public List<Html> HtmlList;
+
+        public MyComponent Component;
     }
 
     public class Dto
