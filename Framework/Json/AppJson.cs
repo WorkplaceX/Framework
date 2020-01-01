@@ -988,7 +988,7 @@
         public string TypeCSharp;
 
         /// <summary>
-        /// Called once a lifetime when page is created.
+        /// Calle once a lifetime when page is created.
         /// </summary>
         public virtual Task InitAsync()
         {
