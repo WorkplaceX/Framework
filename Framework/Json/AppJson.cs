@@ -184,6 +184,11 @@
         /// Gets json list.
         /// </summary>
         public List<ComponentJson> List = new List<ComponentJson>(); // Empty list is removed by json serializer.
+
+        /// <summary>
+        /// Gets or sets IsHide. If true component is not sent to client.
+        /// </summary>
+        public bool IsHide;
     }
 
     /// <summary>
@@ -703,13 +708,6 @@
         /// </summary>
         public string ConfigName;
 
-        /// <summary>
-        /// Gets or sets IsHide. If true, grid data (ColumnList and RowList) are not beeing transfered to client and back. See also method GridRender();
-        /// But owner page and its method Page.GridRowSelectedAsync(); can still found and called for example by method ProcessBootstrapNavbarAsync();
-        /// To hide other components use extension method Remove();
-        /// </summary>
-        public bool IsHide;
-
         public List<GridColumn> ColumnList;
 
         public List<GridRow> RowList;
@@ -912,12 +910,6 @@
         {
             Type = typeof(Page).Name;
         }
-
-        /// <summary>
-        /// Gets or sets IsHide. If true, component and children are still being transferred to client and back to keep state.
-        /// To hide other components use extension method Remove();
-        /// </summary>
-        public bool IsHide;
 
         /// <summary>
         /// Gets or sets TypeCSharp. Used when default property Type has been changed. Allows inheritance.

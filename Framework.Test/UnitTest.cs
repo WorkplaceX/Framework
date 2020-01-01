@@ -1,6 +1,7 @@
 ﻿namespace Framework.Test
 {
     using Database.dbo;
+    using Framework.DataAccessLayer;
     using Framework.Json;
     using System;
     using System.Collections.Generic;
@@ -156,6 +157,91 @@
 
         private static void RunComponentJson()
         {
+            // ComponentJson reference to ComponentJson do not send to client
+            {
+                MyComponent source = new MyComponent(null);
+                source.HtmlAbc = new Html(source) { TextHtml = "JK" };
+                source.MyText = "SessionValue";
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                // UtilFramework.Assert(!jsonClient.Contains("HtmlAbc")); // TODO Do not send property name to client
+                // UtilFramework.Assert(!jsonClient.Contains("SessionValue")); // TODO ClientIgnore property
+
+            }
+            // ComponentJson.IsHide
+            {
+                MyComponent source = new MyComponent(null);
+                new Html(source) { TextHtml = "X11" };
+                new Html(source) { TextHtml = "X12", IsHide = true };
+                new Html(source) { TextHtml = "X13" };
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(dest.List.Count == 3);
+                UtilFramework.Assert(jsonClient.Contains("X11"));
+                UtilFramework.Assert(!jsonClient.Contains("X12"));
+                UtilFramework.Assert(jsonClient.Contains("X13"));
+            }
+            // ComponentJson.IsHide (Dto to ComponentJson
+            {
+                My source = new My();
+                source.MyComponent = new MyComponent(null) { Id = 789, IsHide = true };
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                My dest = (My)UtilJson.Deserialize(json);
+                UtilFramework.Assert(!jsonClient.Contains("789"));
+            }
+            // ComponentJson.IsHide
+            {
+                MyComponent source = new MyComponent(null);
+                source.Html = new Html(source) { TextHtml = "My123", IsHide = true };
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(json.Contains("My123"));
+                UtilFramework.Assert(!jsonClient.Contains("My123"));
+            }
+            // ComponentJson.IsHide (Root)
+            {
+                MyComponent source = new MyComponent(null);
+                source.IsHide = true;
+                source.Html = new Html(source) { TextHtml = "My123", IsHide = true };
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(json.Contains("My123"));
+                UtilFramework.Assert(jsonClient == "");
+            }
+            // Reference to Row
+            {
+                MyComponent source = new MyComponent(null);
+                source.MyRow = new MyRow { Text = "My123", DateTime = DateTime.Now };
+                source.MyRowList = new List<Row>();
+                source.MyRowList.Add(new MyRow { Text = "My1234", DateTime = DateTime.Now });
+                source.MyRowList.Add(new MyRow { Text = "My12356", DateTime = DateTime.Now });
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(!jsonClient.Contains("My123"));
+            }
+            // Reference to Row
+            {
+                MyComponent source = new MyComponent(null);
+                source.MyRowList = new List<Row>();
+                source.MyRowList.Add(new MyRow { Text = "My1234", DateTime = DateTime.Now });
+                source.MyRowList.Add(new MyRow { Text = "My12356", DateTime = DateTime.Now });
+                UtilJson.Serialize(source, out string json, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilFramework.Assert(!jsonClient.Contains("My123"));
+            }
+            // Field of object type with Row value
+            {
+                MyComponent source = new MyComponent(null);
+                source.V = new MyRow() { Text = "Hello" };
+                try
+                {
+                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                }
+                catch (Exception exception)
+                {
+                    UtilFramework.Assert(exception.Message == "Can not send data row to client!"); // V is object declaration therefore no Row detection.
+                }
+            }
             // Reference to removed ComponentJson
             {
                 MyComponent source = new MyComponent(null);
@@ -321,6 +407,8 @@
     public class My
     {
         public List<MyComponent> List = new List<MyComponent>();
+
+        public MyComponent MyComponent;
     }
 
     public class MyComponent : ComponentJson
@@ -333,11 +421,21 @@
 
         public Html Html;
 
+        public Html HtmlAbc;
+
+        public string MyText;
+
         public Dto Dto;
 
         public int? Index;
 
         public List<Html> HtmlList;
+
+        public MyRow MyRow;
+
+        public List<Row> MyRowList;
+
+        public object V;
     }
 
     public class Dto
@@ -345,6 +443,13 @@
         public string Css;
 
         public Html Html;
+    }
+
+    public class MyRow : Row
+    {
+        public string Text { get; set; }
+
+        public DateTime DateTime { get; set; }
     }
 
     public enum MyEnum { None = 0, Left = 1, Right = 2 }
@@ -366,6 +471,5 @@
         public object V;
 
         public FrameworkScript Row;
-
     }
 }
