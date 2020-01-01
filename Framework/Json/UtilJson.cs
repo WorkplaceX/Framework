@@ -388,11 +388,20 @@ namespace Framework.Json
                         if (!converter.IsValueDefault(propertyValue))
                         {
                             writer.WritePropertyName(valueProperty.PropertyName);
-                            if (isWriteClient == true)
+                            bool? isWriteClientLocal = isWriteClient;
+                            if (UtilFramework.IsSubclassOf(valueProperty.PropertyType, typeof(Row)))
+                            {
+                                isWriteClientLocal = false; // Do not send data row to client
+                            }
+                            if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
+                            {
+                                isWriteClientLocal = false; // No list entry for hidden object.
+                            }
+                            if (isWriteClientLocal == true)
                             {
                                 writerClient.WritePropertyName(valueProperty.PropertyName);
                             }
-                            converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCountRoot);
+                            converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClientLocal, ref writeClientCountRoot);
                         }
                     }
                     else
@@ -401,40 +410,50 @@ namespace Framework.Json
                         if (propertyValueList?.Count > 0)
                         {
                             writer.WritePropertyName(valueProperty.PropertyName);
-                            if (isWriteClient == true)
+                            bool? isWriteClientLocal = isWriteClient;
+                            if (UtilFramework.IsSubclassOf(valueProperty.PropertyType, typeof(Row)))
+                            {
+                                isWriteClientLocal = false; // Do not send data row to client
+                            }
+                            if (isWriteClientLocal == true)
                             {
                                 writerClient.WritePropertyName(valueProperty.PropertyName);
                             }
                             ConverterBase converter = valueProperty.Converter;
                             writer.WriteStartArray();
-                            if (isWriteClient == true)
+                            if (isWriteClientLocal == true)
                             {
                                 writerClient.WriteStartArray();
                             }
                             foreach (var propertyValue in propertyValueList)
                             {
+                                bool? isWriteClientLocalLocal = isWriteClientLocal;
+                                if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
+                                {
+                                    isWriteClientLocalLocal = false; // No list entry for hidden object.
+                                }
                                 if (!converter.IsValueDefault(propertyValue))
                                 {
-                                    converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCountRoot);
+                                    converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClientLocalLocal, ref writeClientCountRoot);
                                 }
                                 else
                                 {
                                     if (converter.ValueDefault == null)
                                     {
                                         writer.WriteNullValue(); // Serialize null
-                                        if (isWriteClient == true)
+                                        if (isWriteClientLocalLocal == true)
                                         {
                                             writerClient.WriteNullValue(); // Serialize null
                                         }
                                     }
                                     else
                                     {
-                                        converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClient, ref writeClientCountRoot);
+                                        converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer, writerClient, isWriteClientLocalLocal, ref writeClientCountRoot);
                                     }
                                 }
                             }
                             writer.WriteEndArray();
-                            if (isWriteClient == true)
+                            if (isWriteClientLocal == true)
                             {
                                 writerClient.WriteEndArray();
                             }
@@ -889,7 +908,7 @@ namespace Framework.Json
                 writer.WriteEndObject();
                 if (isWriteClient == true)
                 {
-                    throw new Exception(); // Do not send data row to client
+                    throw new Exception("Can not send data row to client!");
                 }
             }
 
@@ -1052,7 +1071,8 @@ namespace Framework.Json
             }
         }
 
-        private static readonly JsonWriterOptions options = new JsonWriterOptions(); // { Indented = true };
+        private static readonly JsonWriterOptions options = new JsonWriterOptions { };
+        // private static readonly JsonWriterOptions options = new JsonWriterOptions { Indented = true }; // For debug only
 
         /// <summary>
         /// Serializes public and internal properties and fiels.
@@ -1068,7 +1088,12 @@ namespace Framework.Json
             using (var writerClient = new Utf8JsonWriter(streamClient, options))
             {
                 int writeClientCount = 0;
-                converterObjectRoot.Serialize(obj: null, property: null, obj, componentJsonRoot: null, writer, writerClient, isWriteClient: null, ref writeClientCount);
+                bool? isWriteClient = null;
+                if (obj is ComponentJson componentJson && componentJson.IsHide)
+                {
+                    isWriteClient = false; // If root ComponentJson.IsHide = true
+                }
+                converterObjectRoot.Serialize(obj: null, property: null, obj, componentJsonRoot: null, writer, writerClient, isWriteClient, ref writeClientCount);
                 writer.Flush();
                 writerClient.Flush();
                 json = Encoding.UTF8.GetString(stream.ToArray());
