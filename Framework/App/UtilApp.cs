@@ -190,5 +190,15 @@
                 }
             }
         }
+
+        public static void Grid2Render(AppJson appJson)
+        {
+            foreach (var grid in appJson.ComponentListAll().OfType<Grid2>())
+            {
+                Page page = grid.ComponentOwner<Page>();
+                grid.GridCellList = new List<GridCell>();
+
+            }
+        }
     }
 }

@@ -468,6 +468,7 @@
             
             UtilApp.DivContainerRender();
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
+            UtilApp.Grid2Render(this);
             UtilApp.BootstrapNavbarRender();
 
             UtilStopwatch.TimeStop("Process");
@@ -826,8 +827,31 @@
 
                     await Task.WhenAll(configFieldListTask, rowListTask); // Load config field and row in parallel
 
+                    // Load config field
                     this.ConfigFieldList = configFieldListTask.Result;
+
+                    // Load row
                     this.RowList = rowListTask.Result;
+
+                    var configFieldDictionary = this.ConfigFieldList.ToDictionary(item => (item.ConfigName, item.FieldNameCSharp), item => item);
+
+                    this.SessionColumnList = new List<Grid2SessionColumn>();
+                    AppJson appJson = page.ComponentOwner<AppJson>();
+                    var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
+                    foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(typeRow))
+                    {
+                        var field = fieldList[propertyInfo.Name];
+                        configFieldDictionary.TryGetValue((this.ConfigName, propertyInfo.Name), out FrameworkConfigFieldBuiltIn configField);
+                        NamingConvention namingConvention = appJson.NamingConventionInternal(typeRow);
+                        string text = namingConvention.ColumnTextInternal(typeRow, propertyInfo.Name, configField?.Text);
+                        bool isVisible = namingConvention.ColumnIsVisibleInternal(typeRow, propertyInfo.Name, configField?.IsVisible);
+                        double sort = namingConvention.ColumnSortInternal(typeRow, propertyInfo.Name, field, configField?.Sort);
+                        this.SessionColumnList.Add(new Grid2SessionColumn { FieldNameCSharp = field.FieldNameCSharp, Text = text, Description = configField?.Description, IsVisible = isVisible, Sort = sort, SortField = field.Sort });
+                    }
+                    this.SessionColumnList = this.SessionColumnList.
+                        Where(item => item.IsVisible == true).
+                        OrderBy(item => item.Sort).
+                        ThenBy(item => item.SortField).ToList(); // Make it deterministic if multiple columns have same Sort.
                 }
             }
         }
@@ -847,6 +871,73 @@
         /// Gets or sets GridData. If not null, data is displayed from another grid. For example with different configuration.
         /// </summary>
         public Grid2 GridData;
+
+        internal List<Grid2SessionColumn> SessionColumnList;
+
+        internal List<Grid2SessionRow> SessionRowList;
+
+        /// <summary>
+        /// Gets or sets GridCellList. See also <see cref="UtilApp.Grid2Render(AppJson)"/>
+        /// </summary>
+        internal List<GridCell> GridCellList;
+    }
+
+    internal sealed class Grid2SessionColumn
+    {
+        public string FieldNameCSharp;
+
+        public string Text;
+
+        public string Description;
+
+        public bool IsVisible;
+
+        /// <summary>
+        /// Gets or sets Sort. Order as defined in data grid field config.
+        /// </summary>
+        public double? Sort;
+
+        /// <summary>
+        /// Gets or sets SortField. Order as defined in sql database schema.
+        /// </summary>
+        public int SortField;
+
+        public bool? IsSort;
+    }
+
+    internal sealed class Grid2SessionRow
+    {
+        public int RowIndex;
+
+        public GridRowEnum GridRowEnum;
+
+        public bool IsSelect;
+    }
+
+    /// <summary>
+    /// Grid cell display.
+    /// </summary>
+    internal sealed class Grid2Cell
+    {
+        public int Id;
+
+        public int SessionColumnIndex;
+
+        public int SessionRowIndex;
+
+        public GridRowEnum GridRowEnum;
+
+        /// <summary>
+        /// Gets or sets ColumnText.
+        /// </summary>
+        public string ColumnText;
+
+        /// <summary>
+        /// Gets or sets json text.
+        /// </summary>
+        public string Text;
+
+        public bool IsSelect;
     }
 
     /// <summary>
@@ -898,7 +989,7 @@
         public int Id;
 
         /// <summary>
-        /// Gets or sets json text. When coming from client Text can be null or ""!
+        /// Gets or sets json text. Coming from client can be null or empty.
         /// </summary>
         public string Text;
 
@@ -1189,6 +1280,15 @@
         /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
         protected virtual internal string GridCellText(Grid grid, Row row, string fieldName)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string. Otherwise return empty string.</returns>
+        protected virtual internal string GridCellText(Grid2 grid, Row row, string fieldName)
         {
             return null;
         }
