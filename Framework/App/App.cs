@@ -96,6 +96,7 @@
             if (appInternal.AppJson == null || isBrowserRefresh || isBrowserTabSwitch)
             {
                 appInternal.AppJson = CreateAppJson();
+                appInternal.AppSession = new AppSession(); // Reset session data
                 requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = requestJson.RequestCount };
                 appInternal.AppJson.RequestJson = requestJson;
                 appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
