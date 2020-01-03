@@ -164,7 +164,7 @@
                 source.MyText = "SessionValue";
                 UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
-                // UtilFramework.Assert(!jsonClient.Contains("HtmlAbc")); // TODO Do not send property name to client
+                UtilFramework.Assert(!jsonClient.Contains("HtmlAbc")); // Do not send property name of ComponentJson reference to client
                 // UtilFramework.Assert(!jsonClient.Contains("SessionValue")); // TODO ClientIgnore property
 
             }

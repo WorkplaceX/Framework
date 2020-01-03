@@ -638,16 +638,29 @@ namespace Framework.Json
                     {
                         writer.SerializeStart(null, false); // Do not send data row to client.
                     }
+                    bool? isSerializeClient = null;
+                    if (converter is ConverterObjectComponentJson)
+                    {
+                        if (!(value is ComponentJson)) // Dto object references ComponentJson
+                        {
+                            if (writer.IsSerializeClient)
+                            {
+                                isSerializeClient = false; // Do not send ComponentJson reference to client.
+                            }
+                        }
+                        if (value is ComponentJson && valueProperty.PropertyName != nameof(ComponentJson.List)) // ComponentJson references ComponentJson
+                        {
+                            isSerializeClient = false; // Do not send ComponentJson reference to client.
+                        }
+                    }
+
+                    // Serialize property, list
                     if (valueProperty.IsList == false)
                     {
+                        // Serialize property
                         object propertyValue = valueProperty.ValueGet(value);
                         if (!converter.IsValueDefault(propertyValue))
                         {
-                            bool? isSerializeClient = null;
-                            if (UtilFramework.IsSubclassOf(valueProperty.PropertyType, typeof(Row)))
-                            {
-                                isSerializeClient = false; // Do not send data row to client
-                            }
                             if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
                             {
                                 isSerializeClient = false; // No list entry for hidden object.
@@ -660,6 +673,7 @@ namespace Framework.Json
                     }
                     else
                     {
+                        // Serialize list
                         IList propertyValueList = valueProperty.ValueListGet(value);
                         if (propertyValueList?.Count > 0)
                         {
@@ -667,12 +681,12 @@ namespace Framework.Json
                             writer.WriteStartArray();
                             foreach (var propertyValue in propertyValueList)
                             {
-                                bool? isSerializeClient = null;
+                                var isSerializeClientLocal = isSerializeClient;
                                 if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
                                 {
-                                    isSerializeClient = false; // No list entry for hidden object.
+                                    isSerializeClientLocal = false; // No list entry for hidden object.
                                 }
-                                writer.SerializeStart(null, isSerializeClient);
+                                writer.SerializeStart(null, isSerializeClientLocal);
                                 if (!converter.IsValueDefault(propertyValue))
                                 {
                                     converter.Serialize(value, valueProperty, propertyValue, componentJsonRoot, writer);
