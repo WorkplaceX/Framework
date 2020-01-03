@@ -14,35 +14,38 @@ namespace Framework.Json
     using System.Text;
     using System.Text.Json;
 
-    internal enum SerializeIgnoreEnum
+    internal enum SerializeEnum
     {
-        None = 0,
+        /// <summary>
+        /// Do not send property or field to client and do not store in session
+        /// </summary>
+        Ignore = 0,
 
         /// <summary>
-        /// Do not store property or field in session. Use for example for render output.
+        /// Store property or field in session.
         /// </summary>
         Session = 1,
 
         /// <summary>
-        /// Do not send property or field to client.
+        /// Send property or field to client. Use for example for render output.
         /// </summary>
         Client = 2,
 
         /// <summary>
-        /// Do not send property or field to client and do not store in session.
+        /// Send property or field to client and do store in session. Attribute can be omitted.
         /// </summary>
         Both = 3,
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    internal class SerializeIgnoreAttribute : Attribute 
+    internal class SerializeAttribute : Attribute 
     {
-        public SerializeIgnoreAttribute(SerializeIgnoreEnum serializeIgnoreEnum = SerializeIgnoreEnum.Both)
+        public SerializeAttribute(SerializeEnum serializeEnum)
         {
-            this.SerializeIgnoreEnum = serializeIgnoreEnum;
+            this.SerializeEnum = serializeEnum;
         }
 
-        public readonly SerializeIgnoreEnum SerializeIgnoreEnum;
+        public readonly SerializeEnum SerializeEnum;
     }
 
     /// <summary>
@@ -268,6 +271,7 @@ namespace Framework.Json
 
         public void Return(out string jsonSession, out string jsonClient)
         {
+            UtilFramework.Assert(serializeStack.Count == 0);
             writerSession.Flush();
             writerClient.Flush();
             jsonSession = Encoding.UTF8.GetString(streamSession.ToArray());
@@ -318,36 +322,36 @@ namespace Framework.Json
                 // Property
                 foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (SerializeIgnoreAttribute(propertyInfo.GetCustomAttribute<SerializeIgnoreAttribute>(), out bool isSerializeIgnoreSession, out bool isSerializeIgnoreClient)) // If SerializeIgnoreEnum.Both, do not add property
+                    if (SerializeAttribute(propertyInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient)) // If SerializeEnum.Both, do not add property
                     {
-                        DeclarationProperty property = new DeclarationProperty(propertyInfo, isSerializeIgnoreSession, isSerializeIgnoreClient);
+                        DeclarationProperty property = new DeclarationProperty(propertyInfo, isSerializeSession, isSerializeClient);
                         PropertyList.Add(property.PropertyName, property);
                     }
                 }
                 // Field
                 foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (SerializeIgnoreAttribute(fieldInfo.GetCustomAttribute<SerializeIgnoreAttribute>(), out bool isSerializeIgnoreSession, out bool isSerializeIgnoreClient)) // If SerializeIgnoreEnum.Both, do not add property
+                    if (SerializeAttribute(fieldInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient)) // If SerializeEnum.Both, do not add property
                     {
                         if (fieldInfo.Attributes != FieldAttributes.Private)
                         {
-                            DeclarationProperty property = new DeclarationProperty(fieldInfo, isSerializeIgnoreSession, isSerializeIgnoreClient);
+                            DeclarationProperty property = new DeclarationProperty(fieldInfo, isSerializeSession, isSerializeClient);
                             PropertyList.Add(property.PropertyName, property);
                         }
                     }
                 }
             }
 
-            private bool SerializeIgnoreAttribute(SerializeIgnoreAttribute attribute, out bool isSerializeIgnoreSession, out bool isSerializeIgnoreClient)
+            private bool SerializeAttribute(SerializeAttribute attribute, out bool isSerializeSession, out bool isSerializeClient)
             {
-                SerializeIgnoreEnum serializeIgnoreEnum = SerializeIgnoreEnum.None;
+                SerializeEnum serializeEnum = SerializeEnum.Both;
                 if (attribute != null)
                 {
-                    serializeIgnoreEnum = attribute.SerializeIgnoreEnum;
+                    serializeEnum = attribute.SerializeEnum;
                 }
-                isSerializeIgnoreSession = (serializeIgnoreEnum & SerializeIgnoreEnum.Session) > 0;
-                isSerializeIgnoreClient = (serializeIgnoreEnum & SerializeIgnoreEnum.Client) > 0;
-                return (serializeIgnoreEnum != SerializeIgnoreEnum.Both);
+                isSerializeSession = (serializeEnum & SerializeEnum.Session) > 0;
+                isSerializeClient = (serializeEnum & SerializeEnum.Client) > 0;
+                return (serializeEnum != SerializeEnum.Ignore);
             }
 
             public readonly Type Type;
@@ -362,26 +366,26 @@ namespace Framework.Json
 
         internal class DeclarationProperty
         {
-            public DeclarationProperty(PropertyInfo propertyInfo, bool isSerializeIgnoreSession, bool isSerializeIgnoreClient)
+            public DeclarationProperty(PropertyInfo propertyInfo, bool isSerializeSession, bool isSerializeClient)
             {
                 this.PropertyInfo = propertyInfo;
                 this.PropertyName = propertyInfo.Name;
                 this.PropertyType = propertyInfo.PropertyType;
-                this.IsSerializeIgnoreSession = isSerializeIgnoreSession;
-                this.IsSerializeIgnoreClient = isSerializeIgnoreClient;
+                this.IsSerializeSession = isSerializeSession;
+                this.IsSerializeClient = isSerializeClient;
 
                 Constructor(ref this.PropertyType, ref this.IsList);
 
                 this.Converter = ConverterGet(this.PropertyType);
             }
 
-            public DeclarationProperty(FieldInfo fieldInfo, bool isSerializeIgnoreSession, bool isSerializeIgnoreClient)
+            public DeclarationProperty(FieldInfo fieldInfo, bool isSerializeSession, bool isSerializeClient)
             {
                 this.FieldInfo = fieldInfo;
                 this.PropertyName = fieldInfo.Name;
                 this.PropertyType = fieldInfo.FieldType;
-                this.IsSerializeIgnoreSession = isSerializeIgnoreSession;
-                this.IsSerializeIgnoreClient = isSerializeIgnoreClient;
+                this.IsSerializeSession = isSerializeSession;
+                this.IsSerializeClient = isSerializeClient;
 
                 Constructor(ref this.PropertyType, ref this.IsList);
                 
@@ -421,9 +425,9 @@ namespace Framework.Json
             /// </summary>
             public readonly bool IsList;
 
-            public readonly bool IsSerializeIgnoreSession;
+            public readonly bool IsSerializeSession;
 
-            public readonly bool IsSerializeIgnoreClient;
+            public readonly bool IsSerializeClient;
 
             public object ValueGet(object obj)
             {
@@ -678,12 +682,12 @@ namespace Framework.Json
                         }
                     }
 
-                    // SerializeIgnoreAttribute
-                    if (valueProperty.IsSerializeIgnoreSession) 
+                    // SerializeAttribute
+                    if (valueProperty.IsSerializeSession == false) 
                     {
                         isSerializeSession = false;
                     }
-                    if (valueProperty.IsSerializeIgnoreClient)
+                    if (valueProperty.IsSerializeClient == false)
                     {
                         isSerializeClient = false;
                     }

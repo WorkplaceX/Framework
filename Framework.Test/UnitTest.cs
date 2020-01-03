@@ -176,6 +176,9 @@
 
                 UtilFramework.Assert(!jsonSession.Contains("IgnoreX"));
                 UtilFramework.Assert(!jsonClient.Contains("IgnoreX"));
+
+                UtilFramework.Assert(!jsonSession.Contains("Owner"));
+                UtilFramework.Assert(!jsonClient.Contains("Owner"));
             }
             // ComponentJson.IsHide
             {
@@ -432,13 +435,13 @@
 
         public Html HtmlAbc;
 
-        [SerializeIgnore(SerializeIgnoreEnum.Client)]
+        [Serialize(SerializeEnum.Session)]
         public string MyTextSession;
 
-        [SerializeIgnore(SerializeIgnoreEnum.Session)]
+        [Serialize(SerializeEnum.Client)]
         public string MyTextClient;
 
-        [SerializeIgnore(SerializeIgnoreEnum.Both)]
+        [Serialize(SerializeEnum.Ignore)]
         public string MyIgnore;
 
         public Dto Dto;

@@ -125,13 +125,13 @@
             }
         }
 
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         public ComponentJson Owner { get; internal set; }
 
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         internal bool IsRemoved;
 
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         internal ComponentJson Root;
 
         internal int RootIdCount;
@@ -139,13 +139,13 @@
         /// <summary>
         /// (Id, ComponentJson).
         /// </summary>
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         internal Dictionary<int, ComponentJson> RootComponentJsonList;
 
         /// <summary>
         /// (Object, Property, ReferenceId). Used for deserialization.
         /// </summary>
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         internal List<(object obj, UtilJson.DeclarationProperty property, int id)> RootReferenceList;
 
         /// <summary>
@@ -476,7 +476,7 @@
         /// <summary>
         /// Gets RequestJson. Payload of current request.
         /// </summary>
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         internal RequestJson RequestJson;
 
         /// <summary>
@@ -542,7 +542,7 @@
         /// <summary>
         /// Gets IsClick. If true, user clicked the button.
         /// </summary>
-        [SerializeIgnore]
+        [Serialize(SerializeEnum.Ignore)]
         public bool IsClick
         {
             get
