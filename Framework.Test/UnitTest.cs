@@ -161,12 +161,21 @@
             {
                 MyComponent source = new MyComponent(null);
                 source.HtmlAbc = new Html(source) { TextHtml = "JK" };
-                source.MyText = "SessionValue";
+                source.MyTextSession = "SessionValueX";
+                source.MyTextClient = "ClientValueX";
+                source.MyIgnore = "IgnoreX";
                 UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(!jsonClient.Contains("HtmlAbc")); // Do not send property name of ComponentJson reference to client
-                // UtilFramework.Assert(!jsonClient.Contains("SessionValue")); // TODO ClientIgnore property
 
+                UtilFramework.Assert(jsonSession.Contains("SessionValueX"));
+                UtilFramework.Assert(!jsonClient.Contains("SessionValueX"));
+
+                UtilFramework.Assert(!jsonSession.Contains("ClientValueX"));
+                UtilFramework.Assert(jsonClient.Contains("ClientValueX"));
+
+                UtilFramework.Assert(!jsonSession.Contains("IgnoreX"));
+                UtilFramework.Assert(!jsonClient.Contains("IgnoreX"));
             }
             // ComponentJson.IsHide
             {
@@ -423,7 +432,14 @@
 
         public Html HtmlAbc;
 
-        public string MyText;
+        [SerializeIgnore(SerializeIgnoreEnum.Client)]
+        public string MyTextSession;
+
+        [SerializeIgnore(SerializeIgnoreEnum.Session)]
+        public string MyTextClient;
+
+        [SerializeIgnore(SerializeIgnoreEnum.Both)]
+        public string MyIgnore;
 
         public Dto Dto;
 
