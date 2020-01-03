@@ -17,8 +17,8 @@
                 source.MyEnum = MyEnum.Left;
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
                 UtilFramework.Assert(dest.MyEnum == MyEnum.Left);
                 UtilFramework.Assert(dest.MyEnumNullable == null);
@@ -28,18 +28,18 @@
                 source.MyEnumNullable = MyEnum.None;
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.MyEnumNullable == MyEnum.None);
             }
             {
                 A source = new A();
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
-                UtilFramework.Assert(!json.Contains(nameof(A.MyEnumList)));
+                UtilFramework.Assert(!jsonSession.Contains(nameof(A.MyEnumList)));
                 UtilFramework.Assert(source.MyEnumList == null);
                 UtilFramework.Assert(dest.MyEnumList != null);
                 UtilFramework.Assert(dest.MyEnumList.Count == 0);
@@ -52,10 +52,10 @@
                 source.MyEnumList.Add(MyEnum.Right);
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
-                UtilFramework.Assert(json.Contains(nameof(A.MyEnumList)));
+                UtilFramework.Assert(jsonSession.Contains(nameof(A.MyEnumList)));
                 UtilFramework.Assert(dest.MyEnumList[0] == MyEnum.None);
                 UtilFramework.Assert(dest.MyEnumList[1] == MyEnum.Left);
                 UtilFramework.Assert(dest.MyEnumList[2] == MyEnum.Right);
@@ -69,10 +69,10 @@
                 source.MyEnumNullableList.Add(MyEnum.Right);
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
-                UtilFramework.Assert(json.Contains(nameof(A.MyEnumNullableList)));
+                UtilFramework.Assert(jsonSession.Contains(nameof(A.MyEnumNullableList)));
                 UtilFramework.Assert(dest.MyEnumNullableList[0] == MyEnum.None);
                 UtilFramework.Assert(dest.MyEnumNullableList[1] == MyEnum.Left);
                 UtilFramework.Assert(dest.MyEnumNullableList[2] == null);
@@ -87,10 +87,10 @@
                 source.IntNullableList.Add(2);
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
-                UtilFramework.Assert(json.Contains(nameof(A.IntNullableList)));
+                UtilFramework.Assert(jsonSession.Contains(nameof(A.IntNullableList)));
                 UtilFramework.Assert(dest.IntNullableList[0] == 0);
                 UtilFramework.Assert(dest.IntNullableList[1] == 1);
                 UtilFramework.Assert(dest.IntNullableList[2] == null);
@@ -104,10 +104,10 @@
                 source.IntList.Add(2);
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
-                UtilFramework.Assert(json.Contains(nameof(A.IntList)));
+                UtilFramework.Assert(jsonSession.Contains(nameof(A.IntList)));
                 UtilFramework.Assert(dest.IntList[0] == 0);
                 UtilFramework.Assert(dest.IntList[1] == 1);
                 UtilFramework.Assert(dest.IntList[2] == 2);
@@ -117,8 +117,8 @@
                 source.V = 33;
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
                 UtilFramework.Assert((int)dest.V == 33);
             }
@@ -127,8 +127,8 @@
                 source.V = "Hello";
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
                 UtilFramework.Assert((string)dest.V == "Hello");
             }
@@ -138,8 +138,8 @@
                 source.Row = new FrameworkScript { Id = 22, FileName = @"C:\Temp\Readme.txt", Date = date };
 
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                A dest = (A)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                A dest = (A)UtilJson.Deserialize(jsonSession);
 
                 UtilFramework.Assert(dest.Row.Id == 22);
                 UtilFramework.Assert(dest.Row.FileName == @"C:\Temp\Readme.txt");
@@ -169,12 +169,24 @@
             {
                 MyComponent source = new MyComponent(null);
                 source.HtmlAbc = new Html(source) { TextHtml = "JK" };
-                source.MyText = "SessionValue";
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
-                // UtilFramework.Assert(!jsonClient.Contains("HtmlAbc")); // TODO Do not send property name to client
-                // UtilFramework.Assert(!jsonClient.Contains("SessionValue")); // TODO ClientIgnore property
+                source.MyTextSession = "SessionValueX";
+                source.MyTextClient = "ClientValueX";
+                source.MyIgnore = "IgnoreX";
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
+                UtilFramework.Assert(!jsonClient.Contains("HtmlAbc")); // Do not send property name of ComponentJson reference to client
 
+                UtilFramework.Assert(jsonSession.Contains("SessionValueX"));
+                UtilFramework.Assert(!jsonClient.Contains("SessionValueX"));
+
+                UtilFramework.Assert(!jsonSession.Contains("ClientValueX"));
+                UtilFramework.Assert(jsonClient.Contains("ClientValueX"));
+
+                UtilFramework.Assert(!jsonSession.Contains("IgnoreX"));
+                UtilFramework.Assert(!jsonClient.Contains("IgnoreX"));
+
+                UtilFramework.Assert(!jsonSession.Contains("Owner"));
+                UtilFramework.Assert(!jsonClient.Contains("Owner"));
             }
             // ComponentJson.IsHide
             {
@@ -182,8 +194,8 @@
                 new Html(source) { TextHtml = "X11" };
                 new Html(source) { TextHtml = "X12", IsHide = true };
                 new Html(source) { TextHtml = "X13" };
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.List.Count == 3);
                 UtilFramework.Assert(jsonClient.Contains("X11"));
                 UtilFramework.Assert(!jsonClient.Contains("X12"));
@@ -193,17 +205,17 @@
             {
                 My source = new My();
                 source.MyComponent = new MyComponent(null) { Id = 789, IsHide = true };
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                My dest = (My)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                My dest = (My)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(!jsonClient.Contains("789"));
             }
             // ComponentJson.IsHide
             {
                 MyComponent source = new MyComponent(null);
                 source.Html = new Html(source) { TextHtml = "My123", IsHide = true };
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
-                UtilFramework.Assert(json.Contains("My123"));
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
+                UtilFramework.Assert(jsonSession.Contains("My123"));
                 UtilFramework.Assert(!jsonClient.Contains("My123"));
             }
             // ComponentJson.IsHide (Root)
@@ -211,9 +223,9 @@
                 MyComponent source = new MyComponent(null);
                 source.IsHide = true;
                 source.Html = new Html(source) { TextHtml = "My123", IsHide = true };
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
-                UtilFramework.Assert(json.Contains("My123"));
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
+                UtilFramework.Assert(jsonSession.Contains("My123"));
                 UtilFramework.Assert(jsonClient == "");
             }
             // Reference to Row
@@ -223,8 +235,8 @@
                 source.MyRowList = new List<Row>();
                 source.MyRowList.Add(new MyRow { Text = "My1234", DateTime = DateTime.Now });
                 source.MyRowList.Add(new MyRow { Text = "My12356", DateTime = DateTime.Now });
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(!jsonClient.Contains("My123"));
             }
             // Reference to Row
@@ -233,8 +245,8 @@
                 source.MyRowList = new List<Row>();
                 source.MyRowList.Add(new MyRow { Text = "My1234", DateTime = DateTime.Now });
                 source.MyRowList.Add(new MyRow { Text = "My12356", DateTime = DateTime.Now });
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(!jsonClient.Contains("My123"));
             }
             // Field of object type with Row value
@@ -243,7 +255,7 @@
                 source.V = new MyRow() { Text = "Hello" };
                 try
                 {
-                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                    UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -256,8 +268,8 @@
                 var html = new Html(source) { TextHtml = "My" };
                 source.Html = html;
                 html.ComponentRemove();
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                MyComponent dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                MyComponent dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.Html == null);
             }
             // ComponentJson reference in list
@@ -267,10 +279,10 @@
                 source.HtmlList = new List<Html>();
                 source.HtmlList.Add(html);
                 // Serialize, deserialize
-                UtilJson.Serialize(source, out string json, out string jsonClient);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 try
                 {
-                    var dest = (MyComponent)UtilJson.Deserialize(json);
+                    var dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 }
                 catch (Exception exception)
                 {
@@ -280,28 +292,28 @@
             {
                 MyComponent source = new MyComponent(null);
                 new MyComponent(source);
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                var dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.List.Count == 1);
             }
             {
                 MyComponent source = new MyComponent(null);
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                var dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.Index == null);
             }
             {
                 MyComponent source = new MyComponent(null);
                 source.Index = 0;
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                var dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.Index == 0);
             }
             {
                 MyComponent source = new MyComponent(null);
                 source.Index = -1;
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                var dest = (MyComponent)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyComponent)UtilJson.Deserialize(jsonSession);
                 UtilFramework.Assert(dest.Index == -1);
             }
             {
@@ -314,15 +326,15 @@
                 myComponent2.Dto = new Dto { Css = "B", Html = html2 };
                 source.List.Add(myComponent1);
 
-                UtilJson.Serialize(source, out string json, out string jsonClient);
-                var dest = (My)UtilJson.Deserialize(json);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (My)UtilJson.Deserialize(jsonSession);
                 dest.List[0].Dto.Html.TextHtml = "abc";
                 UtilFramework.Assert(((Html)dest.List[0].List[0]).TextHtml == "abc");
 
                 source.List.Add(myComponent2);
                 try
                 {
-                    UtilJson.Serialize(source, out json, out jsonClient);
+                    UtilJson.Serialize(source, out jsonSession, out jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -341,7 +353,7 @@
                 source.List.Add(myComponent3); // Reference not to root!
                 try
                 {
-                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                    UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -352,7 +364,7 @@
                 source.List.Add(myComponent2);
                 try
                 {
-                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                    UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -371,7 +383,7 @@
                 source.List.Add(myComponent1);
                 try
                 {
-                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                    UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -383,11 +395,11 @@
 
                 source.Html = new Html(source) { TextHtml = "Hello" };
 
-                UtilJson.Serialize(source, out string json, out string jsonClient);
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
 
-                UtilFramework.Assert(!json.Contains("Owner"));
+                UtilFramework.Assert(!jsonSession.Contains("Owner"));
 
-                var dest = (MyComponent)UtilJson.Deserialize(json);
+                var dest = (MyComponent)UtilJson.Deserialize(jsonSession);
 
                 var htmlOne = dest.Html;
                 var htmlTwo = dest.List.OfType<Html>().First();
@@ -402,7 +414,7 @@
 
                 try
                 {
-                    UtilJson.Serialize(source, out string json, out string jsonClient);
+                    UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
                 }
                 catch (Exception exception)
                 {
@@ -431,7 +443,14 @@
 
         public Html HtmlAbc;
 
-        public string MyText;
+        [Serialize(SerializeEnum.Session)]
+        public string MyTextSession;
+
+        [Serialize(SerializeEnum.Client)]
+        public string MyTextClient;
+
+        [Serialize(SerializeEnum.Ignore)]
+        public string MyIgnore;
 
         public Dto Dto;
 
