@@ -121,11 +121,11 @@ namespace Framework.Json
             {
                 result = serialize;
             }
-            if (result.IsSerializeSession != false && isSerializeSession != null)
+            if (isSerializeSession != null && result.IsSerializeSession != false)
             {
                 result.IsSerializeSession = isSerializeSession;
             }
-            if (result.IsSerializeClient != false && isSerializeClient != null)
+            if (isSerializeClient != null && result.IsSerializeClient != false)
             {
                 result.IsSerializeClient = isSerializeClient;
             }
@@ -633,11 +633,14 @@ namespace Framework.Json
                 SerializeObjectType(property, value, writer2);
                 foreach (var valueProperty in declarationObject.PropertyList.Values)
                 {
-                    writer2.SerializeStart(null, UtilFramework.IsSubclassOf(valueProperty.PropertyType, typeof(Row)) ? (bool?)false : null); // Do not send data row to client.
+                    ConverterBase converter = valueProperty.Converter;
+                    if (converter is ConverterObjectRow)
+                    {
+                        writer2.SerializeStart(null, false); // Do not send data row to client.
+                    }
                     if (valueProperty.IsList == false)
                     {
                         object propertyValue = valueProperty.ValueGet(value);
-                        ConverterBase converter = valueProperty.Converter;
                         if (!converter.IsValueDefault(propertyValue))
                         {
                             bool? isSerializeClient = null;
@@ -661,7 +664,6 @@ namespace Framework.Json
                         if (propertyValueList?.Count > 0)
                         {
                             writer2.WritePropertyName(valueProperty.PropertyName);
-                            ConverterBase converter = valueProperty.Converter;
                             writer2.WriteStartArray();
                             foreach (var propertyValue in propertyValueList)
                             {
@@ -691,7 +693,10 @@ namespace Framework.Json
                             writer2.WriteEndArray();
                         }
                     }
-                    writer2.SerializeEnd();
+                    if (converter is ConverterObjectRow)
+                    {
+                        writer2.SerializeEnd();
+                    }
                 }
                 writer2.WriteEndObject();
                 writer2.SerializeEnd();
