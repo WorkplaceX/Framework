@@ -20,9 +20,9 @@
             appInternal.AppJson.RequestJson = null;
 
             UtilStopwatch.TimeStart("Serialize");
-            UtilJson.Serialize(appInternal, out string json, out jsonClient);
+            UtilJson.Serialize(appInternal, out string jsonSession, out jsonClient);
             UtilStopwatch.TimeStop("Serialize");
-            UtilServer.Session.SetString("AppInternal", json);
+            UtilServer.Session.SetString("AppInternal", jsonSession);
         }
 
         /// <summary>
