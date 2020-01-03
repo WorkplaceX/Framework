@@ -109,21 +109,9 @@ namespace Framework.Json
             }
         }
 
-        public bool IsSerializeSession
-        {
-            get
-            {
-                return serializeStack.Peek().IsSerializeSession == true;
-            }
-        }
+        public bool IsSerializeSession;
 
-        public bool IsSerializeClient
-        {
-            get
-            {
-                return serializeStack.Peek().IsSerializeClient == true;
-            }
-        }
+        public bool IsSerializeClient;
 
         public void SerializeStart(bool? isSerializeSession, bool? isSerializeClient)
         {
@@ -141,11 +129,18 @@ namespace Framework.Json
                 result.IsSerializeClient = isSerializeClient;
             }
             serializeStack.Push(result);
+            IsSerializeSession = result.IsSerializeSession == true;
+            IsSerializeClient = result.IsSerializeClient == true;
         }
 
         public void SerializeEnd()
         {
             serializeStack.Pop();
+            if (serializeStack.TryPeek(out var result))
+            {
+                IsSerializeSession = result.IsSerializeSession == true;
+                IsSerializeClient = result.IsSerializeClient == true;
+            }
         }
 
         private MemoryStream streamSession;
