@@ -594,7 +594,6 @@ namespace Framework.Json
                         }
                         UtilFramework.Assert(valueComponentJson.Root == componentJsonRoot, "Referenced ComponentJson not in same object graph!");
                         result = true;
-                        writer.SerializeStart(null, false);
                         writer.WriteStartObject();
                         if (id != null)
                         {
@@ -605,13 +604,9 @@ namespace Framework.Json
                             writer.WriteNull("$referenceId");
                         }
                         writer.WriteEndObject();
-                        writer.SerializeEnd();
                         if (writer.IsSerializeClient)
                         {
-                            // throw new Exception(); // Do not send reference to client.
-                            writer.SerializeStart(false, null);
-                            writer.WriteNullValue(); // TODO Check if reference, before writing property name.
-                            writer.SerializeEnd();
+                            throw new Exception(); // Do not send reference to client.
                         }
                     }
                 }
@@ -634,11 +629,11 @@ namespace Framework.Json
                 foreach (var valueProperty in declarationObject.PropertyList.Values)
                 {
                     ConverterBase converter = valueProperty.Converter;
+                    bool? isSerializeClient = null;
                     if (converter is ConverterObjectRow)
                     {
-                        writer.SerializeStart(null, false); // Do not send data row to client.
+                        isSerializeClient = false; // Do not send data row to client.
                     }
-                    bool? isSerializeClient = null;
                     if (converter is ConverterObjectComponentJson)
                     {
                         if (!(value is ComponentJson)) // Dto object references ComponentJson
@@ -706,10 +701,6 @@ namespace Framework.Json
                             }
                             writer.WriteEndArray();
                         }
-                    }
-                    if (converter is ConverterObjectRow)
-                    {
-                        writer.SerializeEnd();
                     }
                 }
                 writer.WriteEndObject();
