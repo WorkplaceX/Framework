@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.App;
     using Framework.DataAccessLayer;
+    using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -10,7 +11,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
+    using System.Text;
     using System.Threading.Tasks;
+    using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Json.Page;
     using static Framework.Session.UtilSession;
 
@@ -31,6 +34,10 @@
         GridCellIsModify = 6,
 
         BootstrapNavbarButtonIsClick = 7,
+
+        Grid2IsClickSort = 8,
+
+        Grid2CellIsModify = 9,
     }
 
     /// <summary>
@@ -39,6 +46,10 @@
     internal class RequestJson
     {
         public RequestCommand Command { get; set; }
+
+        public int Grid2CellId { get; set; }
+
+        public string Grid2CellText { get; set; }
 
         /// <summary>
         /// Gets or sets Id. This is ComponentJson.Id.
@@ -468,7 +479,6 @@
             
             UtilApp.DivContainerRender();
             UtilServer.AppInternal.AppSession.GridRender(); // Grid render
-            UtilApp.Grid2Render(this);
             UtilApp.BootstrapNavbarRender();
 
             UtilStopwatch.TimeStop("Process");
@@ -798,6 +808,321 @@
 
         }
 
+        private void Render()
+        {
+            Page page = this.ComponentOwner<Page>();
+            CellList = new List<Grid2Cell>();
+            RowStateList = new List<Grid2RowState>();
+            StringBuilder styleColumnList = new StringBuilder();
+            int cellId = 0;
+            int rowStateId = 0;
+            // Render Filter
+            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1 });
+            foreach (var column in ColumnList)
+            {
+                styleColumnList.Append("minmax(0, 1fr) ");
+                CellList.Add(new Grid2Cell
+                {
+                    Id = cellId += 1,
+                    ColumnId = column.Id,
+                    RowStateId = rowStateId,
+                    RowEnum = GridRowEnum.Filter,
+                    ColumnText = column.ColumnText,
+                    Placeholder = "Search",
+                    IsSort = column.IsSort,
+                });
+            }
+            // Render Index
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(TypeRow);
+            int rowId = 0;
+            foreach (var row in RowList)
+            {
+                RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowId = rowId += 1 });
+                foreach (var column in ColumnList)
+                {
+                    var field = fieldList[column.FieldNameCSharp];
+                    string text = null;
+                    object value = field.PropertyInfo.GetValue(row);
+                    if (value != null)
+                    {
+                        text = page.GridCellText(this, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                        text = UtilFramework.StringNull(text);
+                        if (text == null)
+                        {
+                            text = field.FrameworkType().CellTextFromValue(value);
+                        }
+                    }
+                    CellList.Add(new Grid2Cell
+                    {
+                        Id = cellId += 1,
+                        ColumnId = column.Id,
+                        RowStateId = rowStateId,
+                        RowEnum = GridRowEnum.Index,
+                        Text = text,
+                    });
+                }
+            }
+            // Render New
+            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1 });
+            foreach (var column in ColumnList)
+            {
+                CellList.Add(new Grid2Cell
+                {
+                    Id = cellId += 1,
+                    ColumnId = column.Id,
+                    RowStateId = rowStateId,
+                    RowEnum = GridRowEnum.New,
+                    Placeholder = "New",
+                });
+            }
+            StyleColumn = styleColumnList.ToString();
+        }
+
+        private static async Task ProcessIsClickSortAsync()
+        {
+            if (UtilSession.Request<Grid2>(RequestCommand.Grid2IsClickSort, out RequestJson requestJson, out Grid2 grid))
+            {
+                Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
+                Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
+                // Reset sort on other columns
+                foreach (var item in grid.ColumnList)
+                {
+                    if (item != column)
+                    {
+                        item.IsSort = null;
+                    }
+                }
+                if (column.IsSort == null)
+                {
+                    column.IsSort = false;
+                }
+                else
+                {
+                    column.IsSort = !column.IsSort;
+                }
+                await grid.ReloadAsync();
+                grid.Render();
+            }
+        }
+
+        /// <summary>
+        /// Parse
+        /// </summary>
+        private static void ProcessCellIsModifyParse(Grid2 grid, Page page, Row rowNew, Grid2Column column, Field field, Grid2Cell cell)
+        {
+            cell.ErrorParse = null;
+            // Parse
+            try
+            {
+                // Validate
+                if (cell.Text == null)
+                {
+                    if (!UtilFramework.IsNullable(field.PropertyInfo.PropertyType))
+                    {
+                        throw new Exception("Value can not be null!");
+                    }
+                }
+                // Parse custom
+                bool isHandled = false;
+                if (cell.Text != null)
+                {
+                    page.GridCellParse(grid, column.FieldNameCSharp, cell.Text, rowNew, out isHandled); // Custom parse of user entered text.
+                }
+                // Parse default
+                if (!isHandled)
+                {
+                    Data.CellTextParse(field, cell.Text, rowNew, out string errorParse);
+                    cell.ErrorParse = errorParse;
+                }
+            }
+            catch (Exception exception)
+            {
+                cell.ErrorParse = UtilFramework.ExceptionToString(exception);
+            }
+        }
+
+        /// <summary>
+        /// Save (Update).
+        /// </summary>
+        private static async Task ProcessCellIsModifyUpdateAsync(Grid2 grid, Page page, Row row, Row rowNew, Grid2Cell cell)
+        {
+            // Save
+            try
+            {
+                bool isHandled = await page.GridUpdateAsync(grid, row, rowNew, grid.DatabaseEnum);
+                if (!isHandled)
+                {
+                    await Data.UpdateAsync(row, rowNew, grid.DatabaseEnum);
+                }
+            }
+            catch (Exception exception)
+            {
+                cell.ErrorSave = UtilFramework.ExceptionToString(exception);
+            }
+        }
+
+        /// <summary>
+        /// Save (Insert).
+        /// </summary>
+        private static async Task ProcessCellIsModifyInsertAsync(Grid2 grid, Page page, Row rowNew, Grid2Cell cell)
+        {
+            // Save
+            try
+            {
+                // Save custom
+                bool isHandled = await page.GridInsertAsync(grid,  rowNew, grid.DatabaseEnum);
+                if (!isHandled)
+                {
+                    // Save default
+                    await Data.InsertAsync(rowNew, grid.DatabaseEnum);
+                }
+            }
+            catch (Exception exception)
+            {
+                cell.ErrorSave = UtilFramework.ExceptionToString(exception);
+            }
+        }
+
+        private static void ProcessCellIsModifyErrorSaveNull(Grid2 grid, Grid2Cell cell)
+        {
+            foreach (var item in grid.CellList)
+            {
+                if (item.RowStateId == cell.RowStateId)
+                {
+                    item.ErrorSave = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns true, if row has a not solved parse error.
+        /// </summary>
+        private static bool ProcessCellIsModifyIsErrorParse(Grid2 grid, Grid2Cell cell)
+        {
+            bool result = false;
+            foreach (var item in grid.CellList)
+            {
+                if (item.RowStateId == cell.RowStateId)
+                {
+                    result = result || item.ErrorParse != null;
+                }
+            }
+            return result;
+        }
+
+        private static async Task ProcessCellIsModify()
+        {
+            if (UtilSession.Request<Grid2>(RequestCommand.Grid2CellIsModify, out RequestJson requestJson, out Grid2 grid))
+            {
+                Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
+                Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
+                var field = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow)[column.FieldNameCSharp];
+                Page page = grid.ComponentOwner<Page>();
+                cell.Text = requestJson.Grid2CellText;
+                switch (cell.RowEnum)
+                {
+                    case GridRowEnum.Filter:
+                        break;
+                    case GridRowEnum.Index:
+                        {
+                            Row row = grid.RowList[grid.RowStateList[cell.RowStateId - 1].RowId.Value - 1];
+                            Row rowNew = Data.RowCopy(row);
+                            // ErrorSave reset
+                            ProcessCellIsModifyErrorSaveNull(grid, cell);
+                            // Parse
+                            ProcessCellIsModifyParse(grid, page, rowNew, column, field, cell);
+                            if (!ProcessCellIsModifyIsErrorParse(grid, cell))
+                            {
+                                // Save
+                                await ProcessCellIsModifyUpdateAsync(grid, page, row, rowNew, cell);
+                                Data.RowCopy(rowNew, row);
+                            }
+                        }
+                        break;
+                    case GridRowEnum.New:
+                        {
+                            Row rowNew = grid.RowNew;
+                            // ErrorSave reset
+                            ProcessCellIsModifyErrorSaveNull(grid, cell);
+                            // Parse
+                            ProcessCellIsModifyParse(grid, page, rowNew, column, field, cell);
+                            if (!ProcessCellIsModifyIsErrorParse(grid, cell))
+                            {
+                                // Save
+                                await ProcessCellIsModifyInsertAsync(grid, page, rowNew, cell);
+                                if (cell.ErrorSave == null)
+                                {
+                                    grid.RowList.Add(rowNew);
+                                    foreach (var item in grid.CellList)
+                                    {
+                                        if (item.RowStateId == cell.RowStateId) // Cells in same row
+                                        {
+                                            item.RowEnum = GridRowEnum.Index; // From New to Index
+                                            item.Placeholder = null;
+                                        }
+                                    }
+                                    grid.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        throw new Exception("Enum unknown!");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Process incoming RequestJson.
+        /// </summary>
+        internal static async Task ProcessAsync()
+        {
+            // IsClickSort
+            await ProcessIsClickSortAsync();
+
+            // Grid2CellIsModify
+            await ProcessCellIsModify();
+        }
+
+        /// <summary>
+        /// TypeRow of loaded data grid.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal Type TypeRow;
+
+        /// <summary>
+        /// DatabaseEnum of loaded grid.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal DatabaseEnum DatabaseEnum;
+
+        /// <summary>
+        /// Reload rows after sort, filter. Do not load grid and field configuration.
+        /// </summary>
+        public async Task ReloadAsync()
+        {
+            Page page = this.ComponentOwner<Page>();
+            IQueryable query = page.Grid2Query(this);
+            var typeRow = query?.ElementType;
+            if (typeRow != null && typeRow == TypeRow) // Make sure grid and field configuration are correct.
+            {
+                var configGrid = ConfigGridList.Where(item => item.ConfigName == this.ConfigName).SingleOrDefault(); // LINQ to memory
+                query = Data.QuerySkipTake(query, 0, configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value); // By default load 10 rows.
+
+                // Sort
+                foreach (var column in ColumnList)
+                {
+                    if (column.IsSort != null)
+                    {
+                        query = Data.QueryOrderBy(query, column.FieldNameCSharp, column.IsSort.Value);
+                    }
+                }
+
+                // Load row
+                this.RowList = await Data.SelectAsync(query);
+            }
+        }
+
         /// <summary>
         /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
         /// </summary>
@@ -807,12 +1132,13 @@
             {
                 Page page = this.ComponentOwner<Page>();
                 IQueryable query = page.Grid2Query(this);
-                Type typeRow = query?.ElementType;
-                if (typeRow != null)
+                TypeRow = query?.ElementType;
+                DatabaseEnum = DatabaseMemoryInternal.DatabaseEnum(query);
+                if (TypeRow != null)
                 {
                     // Get config grid and field query
                     Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
-                    page.Grid2QueryConfig(this, UtilDalType.TypeRowToTableNameCSharp(typeRow), gridConfigResult);
+                    page.Grid2QueryConfig(this, UtilDalType.TypeRowToTableNameCSharp(TypeRow), gridConfigResult);
                     
                     // Load config grid
                     this.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
@@ -832,62 +1158,95 @@
 
                     // Load row
                     this.RowList = rowListTask.Result;
+                    this.RowNew = (Row)Activator.CreateInstance(TypeRow);
 
                     var configFieldDictionary = this.ConfigFieldList.ToDictionary(item => (item.ConfigName, item.FieldNameCSharp), item => item);
 
-                    this.SessionColumnList = new List<Grid2SessionColumn>();
+                    this.ColumnList = new List<Grid2Column>();
                     AppJson appJson = page.ComponentOwner<AppJson>();
-                    var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
-                    foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(typeRow))
+                    var fieldList = UtilDalType.TypeRowToFieldListDictionary(TypeRow);
+                    foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(TypeRow))
                     {
                         var field = fieldList[propertyInfo.Name];
                         configFieldDictionary.TryGetValue((this.ConfigName, propertyInfo.Name), out FrameworkConfigFieldBuiltIn configField);
-                        NamingConvention namingConvention = appJson.NamingConventionInternal(typeRow);
-                        string text = namingConvention.ColumnTextInternal(typeRow, propertyInfo.Name, configField?.Text);
-                        bool isVisible = namingConvention.ColumnIsVisibleInternal(typeRow, propertyInfo.Name, configField?.IsVisible);
-                        double sort = namingConvention.ColumnSortInternal(typeRow, propertyInfo.Name, field, configField?.Sort);
-                        this.SessionColumnList.Add(new Grid2SessionColumn { FieldNameCSharp = field.FieldNameCSharp, Text = text, Description = configField?.Description, IsVisible = isVisible, Sort = sort, SortField = field.Sort });
+                        NamingConvention namingConvention = appJson.NamingConventionInternal(TypeRow);
+                        string columnText = namingConvention.ColumnTextInternal(TypeRow, propertyInfo.Name, configField?.Text);
+                        bool isVisible = namingConvention.ColumnIsVisibleInternal(TypeRow, propertyInfo.Name, configField?.IsVisible);
+                        double sort = namingConvention.ColumnSortInternal(TypeRow, propertyInfo.Name, field, configField?.Sort);
+                        this.ColumnList.Add(new Grid2Column { 
+                            FieldNameCSharp = field.FieldNameCSharp, 
+                            ColumnText = columnText, 
+                            Description = configField?.Description, 
+                            IsVisible = isVisible, 
+                            Sort = sort, 
+                            SortField = field.Sort });
                     }
-                    this.SessionColumnList = this.SessionColumnList.
+                    this.ColumnList = this.ColumnList.
                         Where(item => item.IsVisible == true).
                         OrderBy(item => item.Sort).
                         ThenBy(item => item.SortField).ToList(); // Make it deterministic if multiple columns have same Sort.
+                    int columnId = 0;
+                    foreach (var column in this.ColumnList)
+                    {
+                        column.Id = columnId += 1;
+                    }
                 }
+                Render();
             }
         }
 
         /// <summary>
         /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property Grid.GridData.
         /// </summary>
+        [Serialize(SerializeEnum.Session)]
         internal List<FrameworkConfigGridBuiltIn> ConfigGridList;
 
+        [Serialize(SerializeEnum.Session)]
         internal List<FrameworkConfigFieldBuiltIn> ConfigFieldList;
 
+        [Serialize(SerializeEnum.Session)]
         internal List<Row> RowList;
 
+        [Serialize(SerializeEnum.Session)]
+        internal Row RowNew;
+
+        [Serialize(SerializeEnum.Session)]
         public string ConfigName;
 
         /// <summary>
         /// Gets or sets GridData. If not null, data is displayed from another grid. For example with different configuration.
         /// </summary>
+        [Serialize(SerializeEnum.Session)]
         public Grid2 GridData;
 
-        internal List<Grid2SessionColumn> SessionColumnList;
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2Column> ColumnList;
 
-        internal List<Grid2SessionRow> SessionRowList;
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2RowState> RowStateList;
 
         /// <summary>
-        /// Gets or sets GridCellList. See also <see cref="UtilApp.Grid2Render(AppJson)"/>
+        /// Gets or sets GridCellList.
         /// </summary>
-        internal List<GridCell> GridCellList;
+        internal List<Grid2Cell> CellList;
+
+        internal string StyleColumn;
     }
 
-    internal sealed class Grid2SessionColumn
+    internal sealed class Grid2Column
     {
+        public int Id;
+
         public string FieldNameCSharp;
 
-        public string Text;
+        /// <summary>
+        /// Gets or sets ColumnText. This is the header text for filter.
+        /// </summary>
+        public string ColumnText;
 
+        /// <summary>
+        /// Gets or sets Description. Shown with an information icon in header.
+        /// </summary>
         public string Description;
 
         public bool IsVisible;
@@ -903,13 +1262,17 @@
         public int SortField;
 
         public bool? IsSort;
+
+        public FilterOperator FilterOperator;
+
+        public object FilterValue;
     }
 
-    internal sealed class Grid2SessionRow
+    internal sealed class Grid2RowState
     {
-        public int RowIndex;
+        public int Id;
 
-        public GridRowEnum GridRowEnum;
+        public int? RowId; // Filter and New do not have a row.
 
         public bool IsSelect;
     }
@@ -921,14 +1284,16 @@
     {
         public int Id;
 
-        public int SessionColumnIndex;
+        [Serialize(SerializeEnum.Session)]
+        public int ColumnId;
 
-        public int SessionRowIndex;
+        [Serialize(SerializeEnum.Session)]
+        public int RowStateId;
 
-        public GridRowEnum GridRowEnum;
+        public GridRowEnum RowEnum;
 
         /// <summary>
-        /// Gets or sets ColumnText.
+        /// Gets or sets ColumnText. Header for Filter.
         /// </summary>
         public string ColumnText;
 
@@ -937,7 +1302,15 @@
         /// </summary>
         public string Text;
 
+        public string ErrorParse;
+
+        public string ErrorSave;
+
+        public string Placeholder;
+
         public bool IsSelect;
+
+        public bool? IsSort;
     }
 
     /// <summary>
@@ -1111,12 +1484,35 @@
         }
 
         /// <summary>
+        /// Override this method for custom grid save implementation. Return isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to save.</param>
+        /// <param name="row">Data row to update.</param>
+        /// <param name="rowNew">New data row to save to database.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual internal Task<bool> GridUpdateAsync(Grid2 grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        /// <summary>
         /// Override this method for custom grid save implementation. Returns isHandled.
         /// </summary>
         /// <param name="grid">Data grid to save.</param>
         /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
         /// <returns>Returns true, if custom save was handled.</returns>
         protected virtual internal Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// Override this method for custom grid save implementation. Returns isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to save.</param>
+        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual internal Task<bool> GridInsertAsync(Grid2 grid, Row rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }
@@ -1287,6 +1683,15 @@
         /// <summary>
         /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
         /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
+        protected virtual internal string Grid2CellText(Grid2 grid, Row row, string fieldName)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string. Otherwise return empty string.</returns>
         protected virtual internal string GridCellText(Grid2 grid, Row row, string fieldName)
         {
@@ -1312,6 +1717,16 @@
         /// <param name="row">Write user parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
         protected virtual internal void GridCellParse(Grid grid, string fieldName, string text, Row row, out bool isHandled)
+        {
+            isHandled = false;
+        }
+
+        /// <summary>
+        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for UOM)
+        /// </summary>
+        /// <param name="row">Write user parsed value to row.</param>
+        /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
+        protected virtual internal void GridCellParse(Grid2 grid, string fieldName, string text, Row row, out bool isHandled)
         {
             isHandled = false;
         }

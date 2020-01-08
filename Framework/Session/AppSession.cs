@@ -982,6 +982,8 @@
             await ProcessGridRowIsClick(); // Load for example detail grids.
             await ProcessGridLookupOpenAsync(); // Load lookup data grid.
             await ProcessGridIsClickEnumAsync();
+
+            await Grid2.ProcessAsync();
         }
     }
 
