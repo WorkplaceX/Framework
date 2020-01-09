@@ -905,6 +905,45 @@
             }
         }
 
+        private static void ProcessCellIsModifyWarning(Grid2 grid, Grid2Cell cell)
+        {
+            foreach (var item in grid.CellList)
+            {
+                if (item.RowStateId == cell.RowStateId)
+                {
+                    if (item.IsModified)
+                    {
+                        if (item.ErrorParse == null && item.ErrorSave == null)
+                        {
+                            item.Warning = "Not saved because of other errors!";
+                        }
+                    }
+                    else
+                    {
+                        item.Warning = null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Call after successful save.
+        /// </summary>
+        private static void ProcessCellIsModifyReset(Grid2 grid, Grid2Cell cell)
+        {
+            foreach (var item in grid.CellList)
+            {
+                if (item.RowStateId == cell.RowStateId)
+                {
+                    item.IsModified = false;
+                    item.TextOld = null;
+                    item.ErrorParse = null;
+                    item.ErrorSave = null;
+                    item.Warning = null;
+                }
+            }
+        }
+
         /// <summary>
         /// Parse
         /// </summary>
@@ -983,7 +1022,10 @@
             }
         }
 
-        private static void ProcessCellIsModifyErrorSaveNull(Grid2 grid, Grid2Cell cell)
+        /// <summary>
+        /// Reset ErrorSave on all cells on row.
+        /// </summary>
+        private static void ProcessCellIsModifyErrorSaveReset(Grid2 grid, Grid2Cell cell)
         {
             foreach (var item in grid.CellList)
             {
@@ -1010,6 +1052,26 @@
             return result;
         }
 
+        /// <summary>
+        /// Track IsModified and TextOld.
+        /// </summary>
+        private static void ProcessCellIsModifyTextOld(Grid2Cell cell, RequestJson requestJson)
+        {
+            if (cell.IsModified == false)
+            {
+                cell.IsModified = true;
+                cell.TextOld = cell.Text;
+            }
+            else
+            {
+                if (requestJson.Grid2CellText == cell.TextOld)
+                {
+                    cell.IsModified = false;
+                    cell.TextOld = null;
+                }
+            }
+        }
+
         private static async Task ProcessCellIsModify()
         {
             if (UtilSession.Request<Grid2>(RequestCommand.Grid2CellIsModify, out RequestJson requestJson, out Grid2 grid))
@@ -1018,41 +1080,60 @@
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
                 var field = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow)[column.FieldNameCSharp];
                 Page page = grid.ComponentOwner<Page>();
+
+                // Track IsModified
+                ProcessCellIsModifyTextOld(cell, requestJson);
+
                 cell.Text = requestJson.Grid2CellText;
+                cell.Warning = null;
                 switch (cell.RowEnum)
                 {
                     case GridRowEnum.Filter:
                         break;
                     case GridRowEnum.Index:
                         {
-                            Row row = grid.RowList[grid.RowStateList[cell.RowStateId - 1].RowId.Value - 1];
-                            Row rowNew = Data.RowCopy(row);
+                            Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
+                            Row row = grid.RowList[rowState.RowId.Value - 1];
+                            if (rowState.RowNew == null)
+                            {
+                                rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                                Data.RowCopy(row, rowState.RowNew);
+                            }
                             // ErrorSave reset
-                            ProcessCellIsModifyErrorSaveNull(grid, cell);
+                            ProcessCellIsModifyErrorSaveReset(grid, cell);
                             // Parse
-                            ProcessCellIsModifyParse(grid, page, rowNew, column, field, cell);
+                            ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
                             if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                             {
                                 // Save
-                                await ProcessCellIsModifyUpdateAsync(grid, page, row, rowNew, cell);
-                                Data.RowCopy(rowNew, row);
+                                await ProcessCellIsModifyUpdateAsync(grid, page, row, rowState.RowNew, cell);
+                                if (cell.ErrorSave == null)
+                                {
+                                    Data.RowCopy(rowState.RowNew, row); // Copy new Id to 
+                                    ProcessCellIsModifyReset(grid, cell);
+                                }
                             }
+                            ProcessCellIsModifyWarning(grid, cell);
                         }
                         break;
                     case GridRowEnum.New:
                         {
-                            Row rowNew = grid.RowNew;
+                            Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
+                            if (rowState.RowNew == null)
+                            {
+                                rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                            }
                             // ErrorSave reset
-                            ProcessCellIsModifyErrorSaveNull(grid, cell);
+                            ProcessCellIsModifyErrorSaveReset(grid, cell);
                             // Parse
-                            ProcessCellIsModifyParse(grid, page, rowNew, column, field, cell);
+                            ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
                             if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                             {
                                 // Save
-                                await ProcessCellIsModifyInsertAsync(grid, page, rowNew, cell);
+                                await ProcessCellIsModifyInsertAsync(grid, page, rowState.RowNew, cell);
                                 if (cell.ErrorSave == null)
                                 {
-                                    grid.RowList.Add(rowNew);
+                                    grid.RowList.Add(rowState.RowNew);
                                     foreach (var item in grid.CellList)
                                     {
                                         if (item.RowStateId == cell.RowStateId) // Cells in same row
@@ -1061,9 +1142,12 @@
                                             item.Placeholder = null;
                                         }
                                     }
-                                    grid.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                                    rowState.RowNew = null;
+                                    ProcessCellIsModifyReset(grid, cell);
+                                    grid.Render();
                                 }
                             }
+                            ProcessCellIsModifyWarning(grid, cell);
                         }
                         break;
                     default:
@@ -1158,7 +1242,6 @@
 
                     // Load row
                     this.RowList = rowListTask.Result;
-                    this.RowNew = (Row)Activator.CreateInstance(TypeRow);
 
                     var configFieldDictionary = this.ConfigFieldList.ToDictionary(item => (item.ConfigName, item.FieldNameCSharp), item => item);
 
@@ -1206,9 +1289,6 @@
 
         [Serialize(SerializeEnum.Session)]
         internal List<Row> RowList;
-
-        [Serialize(SerializeEnum.Session)]
-        internal Row RowNew;
 
         [Serialize(SerializeEnum.Session)]
         public string ConfigName;
@@ -1275,6 +1355,8 @@
         public int? RowId; // Filter and New do not have a row.
 
         public bool IsSelect;
+
+        public Row RowNew;
     }
 
     /// <summary>
@@ -1302,9 +1384,23 @@
         /// </summary>
         public string Text;
 
+        /// <summary>
+        /// Gets or sets TextOld. This is the text before save.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public string TextOld;
+
+        /// <summary>
+        /// Gets IsModified. True, if there is modified text not yet saved to the database.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public bool IsModified;
+
         public string ErrorParse;
 
         public string ErrorSave;
+
+        public string Warning;
 
         public string Placeholder;
 
