@@ -983,7 +983,7 @@
             await ProcessGridLookupOpenAsync(); // Load lookup data grid.
             await ProcessGridIsClickEnumAsync();
 
-            await Grid2.ProcessAsync();
+            await UtilGrid2.ProcessAsync();
         }
     }
 
