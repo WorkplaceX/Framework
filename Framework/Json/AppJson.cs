@@ -42,6 +42,8 @@
         Grid2IsClickEnum = 10,
 
         Grid2IsClickRow = 11,
+
+        Grid2IsClickConfig = 12,
     }
 
     /// <summary>
@@ -994,6 +996,25 @@
             }
         }
 
+        /// <summary>
+        /// User clicked column header configuration icon.
+        /// </summary>
+        private static async Task ProcessIsClickConfigAsync()
+        {
+            if (UtilSession.Request(RequestCommand.Grid2IsClickConfig, out RequestJson requestJson, out Grid2 grid))
+            {
+                Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
+                Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
+                Page page = grid.ComponentOwner<Page>();
+                
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
+                string configName = grid.ConfigName;
+                var pageConfigGrid = new PageConfigGrid(page);
+                pageConfigGrid.Init(tableNameCSharp, configName, column.FieldNameCSharp);
+                await pageConfigGrid.InitAsync();
+            }
+        }
+
         private static void ProcessCellIsModifyWarning(Grid2 grid, Grid2Cell cell)
         {
             foreach (var item in grid.CellList)
@@ -1322,6 +1343,9 @@
 
             // RowIsClick
             await ProcessRowIsClickAsync();
+
+            // RowIsClick
+            await ProcessIsClickConfigAsync();
         }
 
         /// <summary>
