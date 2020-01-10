@@ -40,6 +40,8 @@
         Grid2CellIsModify = 9,
 
         Grid2IsClickEnum = 10,
+
+        Grid2IsClickRow = 11,
     }
 
     /// <summary>
@@ -826,7 +828,7 @@
                     Id = cellId += 1,
                     ColumnId = column.Id,
                     RowStateId = rowStateId,
-                    CellEnum = Grid2CellEnum.Cell,
+                    CellEnum = Grid2CellEnum.New,
                     Placeholder = "New",
                 });
             }
@@ -878,6 +880,18 @@
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Update IsSelect flag of all cells.
+        /// </summary>
+        private void RenderRowIsSelectedUpdate()
+        {
+            foreach (var cell in CellList)
+            {
+                Grid2RowState rowState = RowStateList[cell.RowStateId - 1];
+                cell.IsSelect = rowState.IsSelect;
             }
         }
 
@@ -941,7 +955,7 @@
                         Id = cellId += 1,
                         ColumnId = column.Id,
                         RowStateId = rowStateId,
-                        CellEnum = Grid2CellEnum.Cell,
+                        CellEnum = Grid2CellEnum.Index,
                         Text = text,
                     });
                 }
@@ -975,6 +989,8 @@
                 }
                 await grid.ReloadAsync();
                 grid.Render();
+                await grid.LoadRowFirstSelect();
+                grid.RenderRowIsSelectedUpdate();
             }
         }
 
@@ -1145,6 +1161,35 @@
             }
         }
 
+        /// <summary>
+        /// User selected data row.
+        /// </summary>
+        private static async Task ProcessRowIsClickAsync()
+        {
+            if (UtilSession.Request(RequestCommand.Grid2IsClickRow, out RequestJson requestJson, out Grid2 grid))
+            {
+                Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
+                Row rowSelected = null;
+                foreach (var rowState in grid.RowStateList)
+                {
+                    if (rowState.RowEnum == GridRowEnum.Index)
+                    {
+                        rowState.IsSelect = rowState.Id == cell.RowStateId;
+                        if (rowState.IsSelect)
+                        {
+                            rowSelected = grid.RowList[rowState.RowId.Value - 1];
+                        }
+                    }
+                }
+                if (rowSelected != null)
+                {
+                    grid.RenderRowIsSelectedUpdate();
+                    Page page = grid.ComponentOwner<Page>();
+                    await page.GridRowSelectedAsync(grid, rowSelected);
+                }
+            }
+        }
+
         private static async Task ProcessCellIsModify()
         {
             if (UtilSession.Request(RequestCommand.Grid2CellIsModify, out RequestJson requestJson, out Grid2 grid))
@@ -1264,6 +1309,9 @@
 
             // IsClickEnum
             await ProcessIsClickEnum();
+
+            // RowIsClick
+            await ProcessRowIsClickAsync();
         }
 
         /// <summary>
@@ -1302,6 +1350,25 @@
 
                 // Load row
                 this.RowList = await Data.SelectAsync(query);
+            }
+        }
+
+        /// <summary>
+        /// After load, if no row in data grid is selected, select first row.
+        /// </summary>
+        public async Task LoadRowFirstSelect()
+        {
+            foreach (var cell in CellList)
+            {
+                Grid2RowState rowState = RowStateList[cell.RowStateId - 1];
+                if (rowState.RowEnum == GridRowEnum.Index) // Select data rows only.
+                {
+                    Row row = RowList[rowState.RowId.Value - 1];
+                    rowState.IsSelect = true;
+                    Page page = this.ComponentOwner<Page>();
+                    await page.GridRowSelectedAsync(this, row);
+                    break;
+                }
             }
         }
 
@@ -1372,7 +1439,10 @@
                         column.Id = columnId += 1;
                     }
                 }
+
                 Render();
+                await LoadRowFirstSelect();
+                RenderRowIsSelectedUpdate();
             }
         }
 
@@ -1470,29 +1540,34 @@
         None = 0,
 
         /// <summary>
+        /// Data grid filter cell. <see cref="GridRowEnum.Filter"/>
+        /// </summary>
+        Filter = 1,
+
+        /// <summary>
+        /// Data grid cell. <see cref="GridRowEnum.Index"/>
+        /// </summary>
+        Index = 2,
+
+        /// <summary>
+        /// Data grid cell. <see cref="GridRowEnum.New"/>
+        /// </summary>
+        New = 3,
+
+        /// <summary>
         /// Column header with IsSort.
         /// </summary>
-        HeaderColumn = 1,
-
-        /// <summary>
-        /// Data grid filter cell.
-        /// </summary>
-        Filter = 2,
-
-        /// <summary>
-        /// Data grid cell.
-        /// </summary>
-        Cell = 3,
+        HeaderColumn = 4,
 
         /// <summary>
         /// Cell label in skyscraper mode.
         /// </summary>
-        HeaderRow = 4,
+        HeaderRow = 5,
 
         /// <summary>
         /// Separator label in skyscraper mode.
         /// </summary>
-        Separator = 5,
+        Separator = 6,
     }
 
     /// <summary>
@@ -1815,6 +1890,14 @@
         /// Override this method for custom implementation. Method is called when data row has been selected. Get selected row with method grid.GridRowSelected(); and reload for example a detail data grid.
         /// </summary>
         protected virtual internal Task GridRowSelectedAsync(Grid grid)
+        {
+            return Task.FromResult(0);
+        }
+
+        /// <summary>
+        /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
+        /// </summary>
+        protected virtual internal Task GridRowSelectedAsync(Grid2 grid, Row row)
         {
             return Task.FromResult(0);
         }

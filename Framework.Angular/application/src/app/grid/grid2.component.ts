@@ -21,6 +21,13 @@ export class Grid2 {
     this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, Grid2CellId: cell.Id });
   }
 
+  focus(cell) {
+    if (cell.CellEnum==2 && !cell.IsSelect) {
+      cell.IsShowSpinner = true;
+      this.dataService.update(<RequestJson> { Command: 11, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+    }
+  }
+
   focusout(cell) {
     if (cell.TextLeave != null) {
       cell.Text = cell.TextLeave;

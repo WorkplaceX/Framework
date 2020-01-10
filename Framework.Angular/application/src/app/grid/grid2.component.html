@@ -1,7 +1,7 @@
 <div style="display:grid;" [ngStyle]="{'grid-template-columns': json.StyleColumn}">
   <div *ngFor="let cell of json.CellList; trackBy trackBy;">
-    <!-- Header -->
-    <div *ngIf="cell.CellEnum==1" style="display:flex; white-space:nowrap;" [ngClass]="{'th':cell.CellEnum==1}" (click)="clickSort(cell, $event);">
+    <!-- HeaderColumn -->
+    <div *ngIf="cell.CellEnum==4" style="display:flex; white-space:nowrap;" class="th" (click)="clickSort(cell, $event);">
       <div style="flex:1; overflow:hidden;">
         <i *ngIf="cell.IsSort==false" class="fas fa-caret-up colorWhite"></i>
         <i *ngIf="cell.IsSort==true" class="fas fa-caret-down colorWhite"></i>
@@ -16,11 +16,11 @@
       </div>
     </div>
 
-    <!-- Row -->
-    <div *ngIf="cell.CellEnum==2||cell.CellEnum==3" style="display:flex; white-space:nowrap;" class="gridRow" [ngClass]="{'gridRowFilter':cell.CellEnum==2}">
+    <!-- Row (Filter, Index, New) -->
+    <div *ngIf="cell.CellEnum==1||cell.CellEnum==2||cell.CellEnum==3" style="display:flex; white-space:nowrap;" class="gridRow" [ngClass]="{'gridRowFilter':cell.CellEnum==1, 'gridRowIsSelect':cell.IsSelect}">
       <div style="display:flex; flex-grow:1; flex-direction: column;">
-        <input *ngIf="!cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" [ngClass]="{'textAlignCenter':cell.Align==2, 'textAlignRight':cell.Align==3}" type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell, row)" (ngModelChange)="ngModelChange(cell)">
-        <input *ngIf="cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell, row)" (ngModelChange)="ngModelChange(cell)">
+        <input *ngIf="!cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" [ngClass]="{'textAlignCenter':cell.Align==2, 'textAlignRight':cell.Align==3}" type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
+        <input *ngIf="cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
         <div *ngIf="cell.Html" style="flex-grow:1; display:flex; align-items:center;" [ngClass]="{'alignSelfCenter':cell.Align==2, 'alignSelfFlexEnd':cell.Align==3}" [innerHTML]="cell.Html"></div>
       </div>
 
@@ -31,8 +31,8 @@
         <i *ngIf="cell.ErrorSave!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorSave }}"></i>
         <i *ngIf="cell.Warning!=null" class="fas fas fa-exclamation-triangle text-warning" title="{{ cell.Warning }}"></i>
         <i *ngIf="cell.IsShowSpinner" class="fas fa-spinner fa-spin colorBlack"></i>
-        <i *ngIf="cell.RowEnum==1" class="fas fa-search colorBlack" title="Search"></i>
-        <i *ngIf="cell.RowEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
+        <i *ngIf="cell.CellEnum==1" class="fas fa-search colorBlack" title="Search"></i>
+        <i *ngIf="cell.CellEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
       </div>
     </div>
 
