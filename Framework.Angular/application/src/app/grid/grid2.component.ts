@@ -21,6 +21,12 @@ export class Grid2 {
     this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, Grid2CellId: cell.Id });
   }
 
+  clickConfig(cell, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    cell.IsShowSpinned = true;
+    this.dataService.update(<RequestJson> { Command: 12, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+  }
+
   focus(cell) {
     if (cell.CellEnum==2 && !cell.IsSelect) {
       cell.IsShowSpinner = true;
