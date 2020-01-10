@@ -1280,6 +1280,7 @@
         {
             if (UtilSession.Request(RequestCommand.Grid2IsClickEnum, out RequestJson requestJson, out Grid2 grid))
             {
+                // Grid config
                 if (requestJson.GridIsClickEnum == GridIsClickEnum.Config)
                 {
                     if (grid.TypeRow != null) // Do not show config if for example no query is defined for data grid.
@@ -1292,6 +1293,15 @@
                         pageConfigGrid.Init(tableNameCSharp, configName, null);
                         await pageConfigGrid.InitAsync();
                     }
+                }
+
+                // Grid reload
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.Reload)
+                {
+                    await grid.ReloadAsync();
+                    grid.Render();
+                    await grid.LoadRowFirstSelect();
+                    grid.RenderRowIsSelectedUpdate();
                 }
             }
         }
@@ -1358,9 +1368,8 @@
         /// </summary>
         public async Task LoadRowFirstSelect()
         {
-            foreach (var cell in CellList)
+            foreach (var rowState in RowStateList)
             {
-                Grid2RowState rowState = RowStateList[cell.RowStateId - 1];
                 if (rowState.RowEnum == GridRowEnum.Index) // Select data rows only.
                 {
                     Row row = RowList[rowState.RowId.Value - 1];
