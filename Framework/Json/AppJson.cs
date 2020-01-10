@@ -38,6 +38,8 @@
         Grid2IsClickSort = 8,
 
         Grid2CellIsModify = 9,
+
+        Grid2IsClickEnum = 10,
     }
 
     /// <summary>
@@ -900,6 +902,7 @@
                     RowEnum = GridRowEnum.Filter,
                     ColumnText = column.ColumnText,
                     Placeholder = "Search",
+                    Description = column.Description,
                     IsSort = column.IsSort,
                 });
             }
@@ -940,7 +943,7 @@
 
         private static async Task ProcessIsClickSortAsync()
         {
-            if (UtilSession.Request<Grid2>(RequestCommand.Grid2IsClickSort, out RequestJson requestJson, out Grid2 grid))
+            if (UtilSession.Request(RequestCommand.Grid2IsClickSort, out RequestJson requestJson, out Grid2 grid))
             {
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
@@ -1134,7 +1137,7 @@
 
         private static async Task ProcessCellIsModify()
         {
-            if (UtilSession.Request<Grid2>(RequestCommand.Grid2CellIsModify, out RequestJson requestJson, out Grid2 grid))
+            if (UtilSession.Request(RequestCommand.Grid2CellIsModify, out RequestJson requestJson, out Grid2 grid))
             {
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
@@ -1219,6 +1222,26 @@
             }
         }
 
+        private static async Task ProcessIsClickEnum()
+        {
+            if (UtilSession.Request(RequestCommand.Grid2IsClickEnum, out RequestJson requestJson, out Grid2 grid))
+            {
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.Config)
+                {
+                    if (grid.TypeRow != null) // Do not show config if for example no query is defined for data grid.
+                    {
+                        Page page = grid.ComponentOwner<Page>();
+
+                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
+                        string configName = grid.ConfigName;
+                        var pageConfigGrid = new PageConfigGrid(page);
+                        pageConfigGrid.Init(tableNameCSharp, configName, null);
+                        await pageConfigGrid.InitAsync();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Process incoming RequestJson.
         /// </summary>
@@ -1227,8 +1250,11 @@
             // IsClickSort
             await ProcessIsClickSortAsync();
 
-            // Grid2CellIsModify
+            // CellIsModify
             await ProcessCellIsModify();
+
+            // IsClickEnum
+            await ProcessIsClickEnum();
         }
 
         /// <summary>
@@ -1477,6 +1503,8 @@
         public string Warning;
 
         public string Placeholder;
+
+        public string Description;
 
         public bool IsSelect;
 
@@ -1860,7 +1888,7 @@
         }
 
         /// <summary>
-        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// Override this method for custom implementation to convert database value to front end grid cell text. Called only if row value is not null.
         /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string. Otherwise return empty string.</returns>
         protected virtual internal string GridCellText(Grid2 grid, Row row, string fieldName)

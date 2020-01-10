@@ -28,6 +28,12 @@ export class Grid2 {
     }
   }
 
+  clickGrid(isClickEnum, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    this.json.IsShowSpinner = true;
+    this.dataService.update(<RequestJson> { Command: 10, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
+  }
+
   trackBy(index: any, item: any) {
     return index;
   }
