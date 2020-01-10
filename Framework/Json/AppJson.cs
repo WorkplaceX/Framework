@@ -177,7 +177,7 @@
         }
 
         /// <summary>
-        /// Gets Id.
+        /// Gets Id. Client sends command to server. See also <see cref="RequestJson.ComponentId"/>
         /// </summary>
         public int Id { get; internal set; }
 
@@ -811,14 +811,14 @@
         }
 
         /// <summary>
-        /// Add row new.
+        /// Add data row new.
         /// </summary>
         private void RenderRowNewAdd()
         {
             int rowStateId = RowStateList.Count;
             int cellId = CellList.Count;
-            // Render New
-            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1 });
+            // Render data row New
+            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowEnum = GridRowEnum.New });
             foreach (var column in ColumnList)
             {
                 CellList.Add(new Grid2Cell
@@ -826,7 +826,7 @@
                     Id = cellId += 1,
                     ColumnId = column.Id,
                     RowStateId = rowStateId,
-                    RowEnum = GridRowEnum.New,
+                    CellEnum = Grid2CellEnum.Cell,
                     Placeholder = "New",
                 });
             }
@@ -890,7 +890,7 @@
             int cellId = 0;
             int rowStateId = 0;
             // Render Filter
-            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1 });
+            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowEnum = GridRowEnum.Filter });
             foreach (var column in ColumnList)
             {
                 styleColumnList.Append("minmax(0, 1fr) ");
@@ -899,11 +899,21 @@
                     Id = cellId += 1,
                     ColumnId = column.Id,
                     RowStateId = rowStateId,
-                    RowEnum = GridRowEnum.Filter,
+                    CellEnum = Grid2CellEnum.HeaderColumn,
                     ColumnText = column.ColumnText,
-                    Placeholder = "Search",
                     Description = column.Description,
                     IsSort = column.IsSort,
+                });
+            }
+            foreach (var column in ColumnList)
+            {
+                CellList.Add(new Grid2Cell
+                {
+                    Id = cellId += 1,
+                    ColumnId = column.Id,
+                    RowStateId = rowStateId,
+                    CellEnum = Grid2CellEnum.Filter,
+                    Placeholder = "Search",
                 });
             }
             // Render Index
@@ -911,7 +921,7 @@
             int rowId = 0;
             foreach (var row in RowList)
             {
-                RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowId = rowId += 1 });
+                RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowId = rowId += 1, RowEnum = GridRowEnum.Index });
                 foreach (var column in ColumnList)
                 {
                     var field = fieldList[column.FieldNameCSharp];
@@ -931,7 +941,7 @@
                         Id = cellId += 1,
                         ColumnId = column.Id,
                         RowStateId = rowStateId,
-                        RowEnum = GridRowEnum.Index,
+                        CellEnum = Grid2CellEnum.Cell,
                         Text = text,
                     });
                 }
@@ -1143,19 +1153,19 @@
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
                 var field = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow)[column.FieldNameCSharp];
                 Page page = grid.ComponentOwner<Page>();
+                Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
 
                 // Track IsModified
                 ProcessCellIsModifyTextOld(cell, requestJson);
 
                 cell.Text = requestJson.Grid2CellText;
                 cell.Warning = null;
-                switch (cell.RowEnum)
+                switch (rowState.RowEnum)
                 {
                     case GridRowEnum.Filter:
                         break;
                     case GridRowEnum.Index:
                         {
-                            Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
                             Row row = grid.RowList[rowState.RowId.Value - 1];
                             if (rowState.RowNew == null)
                             {
@@ -1182,7 +1192,6 @@
                         break;
                     case GridRowEnum.New:
                         {
-                            Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
                             if (rowState.RowNew == null)
                             {
                                 rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
@@ -1203,7 +1212,7 @@
                                     {
                                         if (item.RowStateId == cell.RowStateId) // Cells in same row
                                         {
-                                            item.RowEnum = GridRowEnum.Index; // From New to Index
+                                            rowState.RowEnum = GridRowEnum.Index; // From New to Index
                                             item.Placeholder = null;
                                         }
                                     }
@@ -1402,6 +1411,9 @@
         internal string StyleColumn;
     }
 
+    /// <summary>
+    /// Not sent to client.
+    /// </summary>
     internal sealed class Grid2Column
     {
         public int Id;
@@ -1437,15 +1449,50 @@
         public object FilterValue;
     }
 
+    /// <summary>
+    /// Not sent to client.
+    /// </summary>
     internal sealed class Grid2RowState
     {
         public int Id;
 
-        public int? RowId; // Filter and New do not have a row.
+        public GridRowEnum RowEnum;
+
+        public int? RowId; // Filter does not have a data row.
 
         public bool IsSelect;
 
-        public Row RowNew;
+        public Row RowNew; // Data row to insert into database.
+    }
+
+    internal enum Grid2CellEnum
+    {
+        None = 0,
+
+        /// <summary>
+        /// Column header with IsSort.
+        /// </summary>
+        HeaderColumn = 1,
+
+        /// <summary>
+        /// Data grid filter cell.
+        /// </summary>
+        Filter = 2,
+
+        /// <summary>
+        /// Data grid cell.
+        /// </summary>
+        Cell = 3,
+
+        /// <summary>
+        /// Cell label in skyscraper mode.
+        /// </summary>
+        HeaderRow = 4,
+
+        /// <summary>
+        /// Separator label in skyscraper mode.
+        /// </summary>
+        Separator = 5,
     }
 
     /// <summary>
@@ -1453,6 +1500,9 @@
     /// </summary>
     internal sealed class Grid2Cell
     {
+        /// <summary>
+        /// Gets or sets Id. Sent back by client with <see cref="RequestJson.Grid2CellId"/>.
+        /// </summary>
         public int Id;
 
         [Serialize(SerializeEnum.Session)]
@@ -1461,7 +1511,7 @@
         [Serialize(SerializeEnum.Session)]
         public int RowStateId;
 
-        public GridRowEnum RowEnum;
+        public Grid2CellEnum CellEnum;
 
         /// <summary>
         /// Gets or sets ColumnText. Header for Filter.
