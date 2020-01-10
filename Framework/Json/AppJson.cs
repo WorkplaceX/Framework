@@ -808,6 +808,77 @@
 
         }
 
+        /// <summary>
+        /// Add row new.
+        /// </summary>
+        private void RenderRowNewAdd()
+        {
+            int rowStateId = RowStateList.Count;
+            int cellId = CellList.Count;
+            // Render New
+            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1 });
+            foreach (var column in ColumnList)
+            {
+                CellList.Add(new Grid2Cell
+                {
+                    Id = cellId += 1,
+                    ColumnId = column.Id,
+                    RowStateId = rowStateId,
+                    RowEnum = GridRowEnum.New,
+                    Placeholder = "New",
+                });
+            }
+        }
+
+        private void RenderRowUpdate(Grid2Cell cell)
+        {
+            // Get page and row
+            Page page = this.ComponentOwner<Page>();
+            Grid2RowState rowState = RowStateList[cell.RowStateId - 1];
+            Row row;
+            if (rowState.RowNew != null)
+            {
+                row = rowState.RowNew;
+            }
+            else
+            {
+                row = RowList[rowState.RowId.Value - 1];
+            }
+
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(TypeRow);
+            foreach (var item in CellList)
+            {
+                if (item.RowStateId == cell.RowStateId) // Cells on same column
+                {
+                    var column = ColumnList[item.ColumnId - 1];
+                    var field = fieldList[column.FieldNameCSharp];
+                    string text = null;
+                    object value = field.PropertyInfo.GetValue(row);
+                    if (value != null)
+                    {
+                        text = page.GridCellText(this, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                        text = UtilFramework.StringNull(text);
+                        if (text == null)
+                        {
+                            text = field.FrameworkType().CellTextFromValue(value);
+                        }
+                    }
+                    item.TextLeave = null;
+                    if (item.ErrorParse == null) // Do not change input text while it's not parsed and written to row.
+                    {
+                        if (item == cell)
+                        {
+                            item.TextLeave = UtilFramework.StringEmpty(text); // Do not change text while user modifies.
+                        }
+                        else
+                        {
+                            item.Text = text;
+                        }
+                    }
+                }
+            }
+        }
+
         private void Render()
         {
             Page page = this.ComponentOwner<Page>();
@@ -863,18 +934,7 @@
                 }
             }
             // Render New
-            RowStateList.Add(new Grid2RowState { Id = rowStateId += 1 });
-            foreach (var column in ColumnList)
-            {
-                CellList.Add(new Grid2Cell
-                {
-                    Id = cellId += 1,
-                    ColumnId = column.Id,
-                    RowStateId = rowStateId,
-                    RowEnum = GridRowEnum.New,
-                    Placeholder = "New",
-                });
-            }
+            RenderRowNewAdd();
             StyleColumn = styleColumnList.ToString();
         }
 
@@ -911,7 +971,7 @@
             {
                 if (item.RowStateId == cell.RowStateId)
                 {
-                    if (item.IsModified)
+                    if (item.IsModified && item.Text != item.TextOld)
                     {
                         if (item.ErrorParse == null && item.ErrorSave == null)
                         {
@@ -965,7 +1025,7 @@
                 bool isHandled = false;
                 if (cell.Text != null)
                 {
-                    page.GridCellParse(grid, column.FieldNameCSharp, cell.Text, rowNew, out isHandled); // Custom parse of user entered text.
+                    page.GridCellParse(grid, rowNew, column.FieldNameCSharp, cell.Text, out isHandled); // Custom parse of user entered text.
                 }
                 // Parse default
                 if (!isHandled)
@@ -1113,6 +1173,7 @@
                                     ProcessCellIsModifyReset(grid, cell);
                                 }
                             }
+                            grid.RenderRowUpdate(cell);
                             ProcessCellIsModifyWarning(grid, cell);
                         }
                         break;
@@ -1134,6 +1195,7 @@
                                 if (cell.ErrorSave == null)
                                 {
                                     grid.RowList.Add(rowState.RowNew);
+                                    rowState.RowId = grid.RowList.Count;
                                     foreach (var item in grid.CellList)
                                     {
                                         if (item.RowStateId == cell.RowStateId) // Cells in same row
@@ -1144,7 +1206,8 @@
                                     }
                                     rowState.RowNew = null;
                                     ProcessCellIsModifyReset(grid, cell);
-                                    grid.Render();
+                                    grid.RenderRowUpdate(cell);
+                                    grid.RenderRowNewAdd();
                                 }
                             }
                             ProcessCellIsModifyWarning(grid, cell);
@@ -1385,19 +1448,30 @@
         public string Text;
 
         /// <summary>
+        /// Gets or sets TextLeave. If not null, client writes TextLeave into cell if focus is lost. This prevents overriding text while user is editing cell. Can be null or empty.
+        /// </summary>
+        public string TextLeave;
+
+        /// <summary>
         /// Gets or sets TextOld. This is the text before save.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public string TextOld;
 
         /// <summary>
-        /// Gets IsModified. True, if there is modified text not yet saved to the database.
+        /// Gets IsModified. If true, user changed text.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public bool IsModified;
 
+        /// <summary>
+        /// Gets or sets ErrorParse. Text user entered could not be parsed and written to row.
+        /// </summary>
         public string ErrorParse;
 
+        /// <summary>
+        /// Gets or sets ErrorSave. Row could not be saved to the database.
+        /// </summary>
         public string ErrorSave;
 
         public string Warning;
@@ -1822,7 +1896,7 @@
         /// </summary>
         /// <param name="row">Write user parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
-        protected virtual internal void GridCellParse(Grid2 grid, string fieldName, string text, Row row, out bool isHandled)
+        protected virtual internal void GridCellParse(Grid2 grid, Row row,  string fieldName, string text, out bool isHandled)
         {
             isHandled = false;
         }

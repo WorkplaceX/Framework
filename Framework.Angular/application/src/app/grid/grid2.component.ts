@@ -21,6 +21,13 @@ export class Grid2 {
     this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, Grid2CellId: cell.Id });
   }
 
+  focusout(cell) {
+    if (cell.TextLeave != null) {
+      cell.Text = cell.TextLeave;
+      cell.TextLeave = null;
+    }
+  }
+
   trackBy(index: any, item: any) {
     return index;
   }
