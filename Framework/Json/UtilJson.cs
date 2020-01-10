@@ -501,7 +501,7 @@ namespace Framework.Json
             new KeyValuePair<Type, ConverterBase>(new ConverterIntNullable().PropertyType, new ConverterIntNullable()),
             new KeyValuePair<Type, ConverterBase>(new ConverterBoolean().PropertyType, new ConverterBoolean()),
             new KeyValuePair<Type, ConverterBase>(new ConverterBooleanNullable().PropertyType, new ConverterBooleanNullable()),
-            new KeyValuePair<Type, ConverterBase>(new ConverterDouble().PropertyType, new ConverterBoolean()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterDouble().PropertyType, new ConverterDouble()),
             new KeyValuePair<Type, ConverterBase>(new ConverterDoubleNullable().PropertyType, new ConverterDoubleNullable()),
             new KeyValuePair<Type, ConverterBase>(new ConverterString().PropertyType, new ConverterString()),
             

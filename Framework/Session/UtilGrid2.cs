@@ -102,6 +102,15 @@
                 var configGrid = grid.ConfigGridList.Where(item => item.ConfigName == grid.ConfigName).SingleOrDefault(); // LINQ to memory
                 query = Data.QuerySkipTake(query, 0, configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value); // By default load 10 rows.
 
+                // Filter
+                if (grid.FilterValueList != null)
+                {
+                    foreach (var item in grid.FilterValueList)
+                    {
+                        query = Data.QueryFilter(query, item.FieldName, item.FilterValue, item.FilterOperator);
+                    }
+                }
+
                 // Sort
                 foreach (var column in grid.ColumnList)
                 {
@@ -262,8 +271,10 @@
                     IsSort = column.IsSort,
                 });
             }
+            var filterList = new Grid2Filter(grid).TextGet();
             foreach (var column in grid.ColumnList)
             {
+                filterList.TryGetValue(column.FieldNameCSharp, out string text);
                 grid.CellList.Add(new Grid2Cell
                 {
                     Id = cellId += 1,
@@ -271,6 +282,7 @@
                     RowStateId = rowStateId,
                     CellEnum = Grid2CellEnum.Filter,
                     Placeholder = "Search",
+                    Text = text,
                 });
             }
             // Render Index
@@ -432,6 +444,38 @@
         }
 
         /// <summary>
+        /// Parse
+        /// </summary>
+        private static void ProcessCellIsModifyParseFilter(Grid2 grid, Page page, Grid2Column column, Field field, Grid2Cell cell)
+        {
+            cell.ErrorParse = null;
+            // Parse
+            try
+            {
+                bool isHandled = false;
+                if (cell.Text == null)
+                {
+                    // Remove filter
+                    new Grid2Filter(grid).Remove(column.FieldNameCSharp);
+                }
+                else
+                {
+                    // Parse custom
+                    page.GridCellParseFilter(grid, column.FieldNameCSharp, cell.Text, new Grid2Filter(grid), out isHandled); // Custom parse of user entered text.
+                    if (!isHandled)
+                    {
+                        Data.CellTextParseFilter(field, cell.Text, new Grid2Filter(grid), out string errorParse); // Parse default
+                        cell.ErrorParse = errorParse;
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                cell.ErrorParse = UtilFramework.ExceptionToString(exception);
+            }
+        }
+
+        /// <summary>
         /// Save (Update).
         /// </summary>
         private static async Task ProcessCellIsModifyUpdateAsync(Grid2 grid, Page page, Row row, Row rowNew, Grid2Cell cell)
@@ -567,73 +611,85 @@
 
                 cell.Text = requestJson.Grid2CellText;
                 cell.Warning = null;
-                switch (rowState.RowEnum)
+
+                // Parse Filter
+                if (rowState.RowEnum == GridRowEnum.Filter)
                 {
-                    case GridRowEnum.Filter:
-                        break;
-                    case GridRowEnum.Index:
+                    new Grid2Filter(grid).TextSet(column.FieldNameCSharp, cell.Text);
+                    // Parse
+                    ProcessCellIsModifyParseFilter(grid, page, column, field, cell);
+                    if (!ProcessCellIsModifyIsErrorParse(grid, cell))
+                    {
+                        // Reload
+                        await ReloadAsync(grid);
+
+                        Render(grid);
+                        await LoadRowFirstSelect(grid);
+                        RenderRowIsSelectedUpdate(grid);
+                    }
+                }
+
+                // Parse Index
+                if (rowState.RowEnum == GridRowEnum.Index)
+                {
+                    Row row = grid.RowList[rowState.RowId.Value - 1];
+                    if (rowState.RowNew == null)
+                    {
+                        rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                        Data.RowCopy(row, rowState.RowNew);
+                    }
+                    // ErrorSave reset
+                    ProcessCellIsModifyErrorSaveReset(grid, cell);
+                    // Parse
+                    ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
+                    if (!ProcessCellIsModifyIsErrorParse(grid, cell))
+                    {
+                        // Save
+                        await ProcessCellIsModifyUpdateAsync(grid, page, row, rowState.RowNew, cell);
+                        if (cell.ErrorSave == null)
                         {
-                            Row row = grid.RowList[rowState.RowId.Value - 1];
-                            if (rowState.RowNew == null)
+                            Data.RowCopy(rowState.RowNew, row); // Copy new Id to 
+                            ProcessCellIsModifyReset(grid, cell);
+                        }
+                    }
+                    RenderRowUpdate(grid, cell);
+                    ProcessCellIsModifyWarning(grid, cell);
+                }
+
+                // Parse New
+                if (rowState.RowEnum == GridRowEnum.New)
+                {
+                    if (rowState.RowNew == null)
+                    {
+                        rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                    }
+                    // ErrorSave reset
+                    ProcessCellIsModifyErrorSaveReset(grid, cell);
+                    // Parse
+                    ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
+                    if (!ProcessCellIsModifyIsErrorParse(grid, cell))
+                    {
+                        // Save
+                        await ProcessCellIsModifyInsertAsync(grid, page, rowState.RowNew, cell);
+                        if (cell.ErrorSave == null)
+                        {
+                            grid.RowList.Add(rowState.RowNew);
+                            rowState.RowId = grid.RowList.Count;
+                            foreach (var item in grid.CellList)
                             {
-                                rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
-                                Data.RowCopy(row, rowState.RowNew);
-                            }
-                            // ErrorSave reset
-                            ProcessCellIsModifyErrorSaveReset(grid, cell);
-                            // Parse
-                            ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
-                            if (!ProcessCellIsModifyIsErrorParse(grid, cell))
-                            {
-                                // Save
-                                await ProcessCellIsModifyUpdateAsync(grid, page, row, rowState.RowNew, cell);
-                                if (cell.ErrorSave == null)
+                                if (item.RowStateId == cell.RowStateId) // Cells in same row
                                 {
-                                    Data.RowCopy(rowState.RowNew, row); // Copy new Id to 
-                                    ProcessCellIsModifyReset(grid, cell);
+                                    rowState.RowEnum = GridRowEnum.Index; // From New to Index
+                                    item.Placeholder = null;
                                 }
                             }
+                            rowState.RowNew = null;
+                            ProcessCellIsModifyReset(grid, cell);
                             RenderRowUpdate(grid, cell);
-                            ProcessCellIsModifyWarning(grid, cell);
+                            RenderRowNewAdd(grid);
                         }
-                        break;
-                    case GridRowEnum.New:
-                        {
-                            if (rowState.RowNew == null)
-                            {
-                                rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
-                            }
-                            // ErrorSave reset
-                            ProcessCellIsModifyErrorSaveReset(grid, cell);
-                            // Parse
-                            ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
-                            if (!ProcessCellIsModifyIsErrorParse(grid, cell))
-                            {
-                                // Save
-                                await ProcessCellIsModifyInsertAsync(grid, page, rowState.RowNew, cell);
-                                if (cell.ErrorSave == null)
-                                {
-                                    grid.RowList.Add(rowState.RowNew);
-                                    rowState.RowId = grid.RowList.Count;
-                                    foreach (var item in grid.CellList)
-                                    {
-                                        if (item.RowStateId == cell.RowStateId) // Cells in same row
-                                        {
-                                            rowState.RowEnum = GridRowEnum.Index; // From New to Index
-                                            item.Placeholder = null;
-                                        }
-                                    }
-                                    rowState.RowNew = null;
-                                    ProcessCellIsModifyReset(grid, cell);
-                                    RenderRowUpdate(grid, cell);
-                                    RenderRowNewAdd(grid);
-                                }
-                            }
-                            ProcessCellIsModifyWarning(grid, cell);
-                        }
-                        break;
-                    default:
-                        throw new Exception("Enum unknown!");
+                    }
+                    ProcessCellIsModifyWarning(grid, cell);
                 }
             }
         }
@@ -660,10 +716,86 @@
                 // Grid reload
                 if (requestJson.GridIsClickEnum == GridIsClickEnum.Reload)
                 {
+                    // Reset filter, sort
+                    grid.FilterValueList = null;
+                    foreach (var column in grid.ColumnList)
+                    {
+                        column.IsSort = null;
+                    }
+
                     await ReloadAsync(grid);
                     Render(grid);
                     await LoadRowFirstSelect(grid);
                     RenderRowIsSelectedUpdate(grid);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Wrapper providing value store functions.
+    /// </summary>
+    public class Grid2Filter
+    {
+        internal Grid2Filter(Grid2 grid)
+        {
+            this.Grid = grid;
+        }
+
+        internal readonly Grid2 Grid;
+
+        /// <summary>
+        /// Returns filter value for field.
+        /// </summary>
+        private Grid2FilterValue FilterValue(string fieldName)
+        {
+            if (Grid.FilterValueList == null)
+            {
+                Grid.FilterValueList = new List<Grid2FilterValue>();
+            }
+            Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldName == fieldName).SingleOrDefault();
+            if (result == null)
+            {
+                result = new Grid2FilterValue(fieldName);
+                Grid.FilterValueList.Add(result);
+            }
+            return result;
+        }
+
+        public void ValueSet(string fieldName, object filterValue, FilterOperator filterOperator)
+        {
+            Grid2FilterValue result = FilterValue(fieldName);
+            result.FilterValue = filterValue;
+            result.FilterOperator = filterOperator;
+        }
+
+        internal void TextSet(string fieldName, string text)
+        {
+            Grid2FilterValue result = FilterValue(fieldName);
+            result.Text = text;
+        }
+
+        internal Dictionary<string, string> TextGet()
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            if (Grid.FilterValueList != null)
+            {
+                foreach (var item in Grid.FilterValueList)
+                {
+                    result.Add(item.FieldName, item.Text);
+                }
+            }
+            return result;
+        }
+
+        internal void Remove(string fieldName)
+        {
+            if (Grid.FilterValueList != null)
+            {
+                Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldName == fieldName).SingleOrDefault();
+                if (result != null)
+                {
+                    Grid.FilterValueList.Remove(result);
                 }
             }
         }

@@ -864,7 +864,7 @@
         /// <summary>
         /// Default parse user entered filter text. Text can be null.
         /// </summary>
-        internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse)
+        internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse) // TODO Grid2 Remove
         {
             errorParse = null;
             object filterValue = CellTextParse(field, text);
@@ -874,6 +874,21 @@
                 filterOperator = FilterOperator.Like;
             }
             filter.SetValue(field.PropertyInfo.Name, filterValue, filterOperator);
+        }
+
+        /// <summary>
+        /// Default parse user entered filter text. Text can be null.
+        /// </summary>
+        internal static void CellTextParseFilter(Field field, string text, Grid2Filter filter, out string errorParse)
+        {
+            errorParse = null;
+            object filterValue = CellTextParse(field, text);
+            FilterOperator filterOperator = FilterOperator.Equal;
+            if (field.PropertyInfo.PropertyType == typeof(string))
+            {
+                filterOperator = FilterOperator.Like;
+            }
+            filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperator);
         }
 
         /// <summary>

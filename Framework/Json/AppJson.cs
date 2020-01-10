@@ -857,7 +857,32 @@
         /// </summary>
         internal List<Grid2Cell> CellList;
 
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2FilterValue> FilterValueList;
+
         internal string StyleColumn;
+    }
+
+    /// <summary>
+    /// Stores successfully parsed filter value and operator.
+    /// </summary>
+    internal sealed class Grid2FilterValue
+    {
+        public Grid2FilterValue(string fieldName)
+        {
+            this.FieldName = fieldName;
+        }
+
+        public readonly string FieldName;
+
+        public FilterOperator FilterOperator;
+
+        public object FilterValue;
+
+        /// <summary>
+        /// Gets or sets Text of successfully parsed filter.
+        /// </summary>
+        public string Text;
     }
 
     /// <summary>
@@ -1445,6 +1470,14 @@
         /// Parse user entered cell filter text. Called only if text is not null.
         /// </summary>
         protected virtual internal void GridCellParseFilter(Grid grid, string fieldName, string text, Filter filter, out bool isHandled)
+        {
+            isHandled = false;
+        }
+
+        /// <summary>
+        /// Parse user entered cell filter text. Called only if text is not null.
+        /// </summary>
+        protected virtual internal void GridCellParseFilter(Grid2 grid, string fieldName, string text, Grid2Filter filter, out bool isHandled)
         {
             isHandled = false;
         }
