@@ -832,17 +832,23 @@
         }
 
         /// <summary>
-        /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property Grid.GridData.
+        /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property ConfigName.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         internal List<FrameworkConfigGridBuiltIn> ConfigGridList;
 
+        /// <summary>
+        /// Gets or sets ConfigFieldList. Can contain multiple configurations. See also property ConfigName.
+        /// </summary>
         [Serialize(SerializeEnum.Session)]
         internal List<FrameworkConfigFieldBuiltIn> ConfigFieldList;
 
         [Serialize(SerializeEnum.Session)]
         internal List<Row> RowList;
 
+        /// <summary>
+        /// Gets or sets ConfigName. Multiple configurations can be stored.
+        /// </summary>
         [Serialize(SerializeEnum.Session)]
         internal string ConfigName;
 
@@ -859,6 +865,9 @@
 
         [Serialize(SerializeEnum.Session)]
         internal List<Grid2FilterValue> FilterValueList;
+
+        [Serialize(SerializeEnum.Session)]
+        public int OffsetRow;
 
         internal string StyleColumn;
     }

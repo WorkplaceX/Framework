@@ -33,8 +33,8 @@
 
                 // Load config grid
                 grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
-                var configGrid = grid.ConfigGridList.Where(item => item.ConfigName == grid.ConfigName).SingleOrDefault(); // LINQ to memory
-                query = Data.QuerySkipTake(query, 0, configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value); // By default load 10 rows.
+                var configGrid = ConfigGrid(grid);
+                query = Data.QuerySkipTake(query, 0, ConfigGridRowCountMax(configGrid));
 
                 // Load config field (Task)
                 var configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
@@ -50,7 +50,7 @@
                 // Load row
                 grid.RowList = rowListTask.Result;
 
-                var configFieldDictionary = grid.ConfigFieldList.ToDictionary(item => (item.ConfigName, item.FieldNameCSharp), item => item);
+                var configFieldDictionary = ConfigField(grid);
 
                 grid.ColumnList = new List<Grid2Column>();
                 AppJson appJson = page.ComponentOwner<AppJson>();
@@ -58,7 +58,7 @@
                 foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(grid.TypeRow))
                 {
                     var field = fieldList[propertyInfo.Name];
-                    configFieldDictionary.TryGetValue((grid.ConfigName, propertyInfo.Name), out FrameworkConfigFieldBuiltIn configField);
+                    configFieldDictionary.TryGetValue(propertyInfo.Name, out FrameworkConfigFieldBuiltIn configField);
                     NamingConvention namingConvention = appJson.NamingConventionInternal(grid.TypeRow);
                     string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
                     bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
@@ -90,7 +90,33 @@
         }
 
         /// <summary>
-        /// Reload rows after sort, filter. Do not load grid and field configuration.
+        /// Returns data grid configuration record.
+        /// </summary>
+        private static FrameworkConfigGridBuiltIn ConfigGrid(Grid2 grid)
+        {
+            var result = grid.ConfigGridList.Where(item => item.ConfigName == grid.ConfigName).SingleOrDefault(); // LINQ to memory
+            return result;
+        }
+
+        /// <summary>
+        /// Returns RowCountMax rows to load.
+        /// </summary>
+        private static int ConfigGridRowCountMax(FrameworkConfigGridBuiltIn configGrid)
+        {
+            return configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
+        }
+
+        /// <summary>
+        /// Returns data grid field configuration records. (FieldName, FrameworkConfigFieldBuiltIn).
+        /// </summary>
+        private static Dictionary<string, FrameworkConfigFieldBuiltIn> ConfigField(Grid2 grid)
+        {
+            Dictionary<string, FrameworkConfigFieldBuiltIn> result = grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName).ToDictionary(item => item.FieldIdName); // LINQ to memory
+            return result;
+        }
+
+        /// <summary>
+        /// Reload and render rows after sort, filter changes. Does not load grid and field configuration from database again.
         /// </summary>
         private static async Task ReloadAsync(Grid2 grid)
         {
@@ -99,8 +125,7 @@
             var typeRow = query?.ElementType;
             if (typeRow != null && typeRow == grid.TypeRow) // Make sure grid and field configuration are correct.
             {
-                var configGrid = grid.ConfigGridList.Where(item => item.ConfigName == grid.ConfigName).SingleOrDefault(); // LINQ to memory
-                query = Data.QuerySkipTake(query, 0, configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value); // By default load 10 rows.
+                var configGrid = ConfigGrid(grid);
 
                 // Filter
                 if (grid.FilterValueList != null)
@@ -120,8 +145,16 @@
                     }
                 }
 
+                // Skip, Take
+                query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigGridRowCountMax(configGrid));
+
                 // Load row
                 grid.RowList = await Data.SelectAsync(query);
+
+                // Render
+                Render(grid);
+                await LoadRowFirstSelect(grid);
+                RenderRowIsSelectedUpdate(grid);
             }
         }
 
@@ -343,9 +376,6 @@
                     column.IsSort = !column.IsSort;
                 }
                 await ReloadAsync(grid);
-                Render(grid);
-                await LoadRowFirstSelect(grid);
-                RenderRowIsSelectedUpdate(grid);
             }
         }
 
@@ -622,10 +652,6 @@
                     {
                         // Reload
                         await ReloadAsync(grid);
-
-                        Render(grid);
-                        await LoadRowFirstSelect(grid);
-                        RenderRowIsSelectedUpdate(grid);
                     }
                 }
 
@@ -724,9 +750,30 @@
                     }
 
                     await ReloadAsync(grid);
-                    Render(grid);
-                    await LoadRowFirstSelect(grid);
-                    RenderRowIsSelectedUpdate(grid);
+                }
+
+                // Grid page up
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageUp)
+                {
+                    var configGrid = ConfigGrid(grid);
+                    grid.OffsetRow -= ConfigGridRowCountMax(configGrid);
+                    if (grid.OffsetRow < 0)
+                    {
+                        grid.OffsetRow = 0;
+                    }
+                    await ReloadAsync(grid);
+                }
+
+                // Grid page down
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageDown)
+                {
+                    var configGrid = ConfigGrid(grid);
+                    int rowCount = grid.RowList.Count;
+                    if (rowCount == configGrid.RowCountMax) // Page down further on full grid only.
+                    {
+                        grid.OffsetRow += ConfigGridRowCountMax(configGrid);
+                        await ReloadAsync(grid);
+                    }
                 }
             }
         }
