@@ -34,7 +34,7 @@
                 // Load config grid
                 grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
                 var configGrid = ConfigGrid(grid);
-                query = Data.QuerySkipTake(query, 0, ConfigGridRowCountMax(configGrid));
+                query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
 
                 // Load config field (Task)
                 var configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
@@ -50,7 +50,7 @@
                 // Load row
                 grid.RowList = rowListTask.Result;
 
-                var configFieldDictionary = ConfigField(grid);
+                var configFieldDictionary = ConfigFieldDictionary(grid);
 
                 grid.ColumnList = new List<Grid2Column>();
                 AppJson appJson = page.ComponentOwner<AppJson>();
@@ -73,10 +73,11 @@
                         SortField = field.Sort
                     });
                 }
-                grid.ColumnList = grid.ColumnList.
-                    Where(item => item.IsVisible == true).
-                    OrderBy(item => item.Sort).
-                    ThenBy(item => item.SortField).ToList(); // Make it deterministic if multiple columns have same Sort.
+                grid.ColumnList = grid.ColumnList
+                    .Where(item => item.IsVisible == true)
+                    .OrderBy(item => item.Sort)
+                    .ThenBy(item => item.SortField) // Make it deterministic if multiple columns have same Sort.
+                    .ToList(); 
                 int columnId = 0;
                 foreach (var column in grid.ColumnList)
                 {
@@ -101,17 +102,25 @@
         /// <summary>
         /// Returns RowCountMax rows to load.
         /// </summary>
-        private static int ConfigGridRowCountMax(FrameworkConfigGridBuiltIn configGrid)
+        private static int ConfigRowCountMax(FrameworkConfigGridBuiltIn configGrid)
         {
             return configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
         }
 
         /// <summary>
+        /// Returns ColumnCountMax of columns to render.
+        /// </summary>
+        public static int ConfigColumnCountMax(FrameworkConfigGridBuiltIn configGrid)
+        {
+            return 3;
+        }
+
+        /// <summary>
         /// Returns data grid field configuration records. (FieldName, FrameworkConfigFieldBuiltIn).
         /// </summary>
-        private static Dictionary<string, FrameworkConfigFieldBuiltIn> ConfigField(Grid2 grid)
+        private static Dictionary<string, FrameworkConfigFieldBuiltIn> ConfigFieldDictionary(Grid2 grid)
         {
-            Dictionary<string, FrameworkConfigFieldBuiltIn> result = grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName).ToDictionary(item => item.FieldIdName); // LINQ to memory
+            Dictionary<string, FrameworkConfigFieldBuiltIn> result = grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName).ToDictionary(item => item.FieldNameCSharp); // LINQ to memory
             return result;
         }
 
@@ -146,7 +155,7 @@
                 }
 
                 // Skip, Take
-                query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigGridRowCountMax(configGrid));
+                query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid));
 
                 // Load row
                 grid.RowList = await Data.SelectAsync(query);
@@ -204,6 +213,7 @@
         {
             int rowStateId = grid.RowStateList.Count;
             int cellId = grid.CellList.Count;
+            
             // Render data row New
             grid.RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowEnum = GridRowEnum.New });
             foreach (var column in grid.ColumnList)
@@ -288,6 +298,7 @@
             StringBuilder styleColumnList = new StringBuilder();
             int cellId = 0;
             int rowStateId = 0;
+            
             // Render Filter
             grid.RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowEnum = GridRowEnum.Filter });
             foreach (var column in grid.ColumnList)
@@ -318,6 +329,7 @@
                     Text = text,
                 });
             }
+            
             // Render Index
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
             int rowId = 0;
@@ -348,6 +360,7 @@
                     });
                 }
             }
+            
             // Render New
             RenderRowNewAdd(grid);
             grid.StyleColumn = styleColumnList.ToString();
@@ -744,6 +757,7 @@
                 {
                     // Reset filter, sort
                     grid.FilterValueList = null;
+                    grid.OffsetRow = 0;
                     foreach (var column in grid.ColumnList)
                     {
                         column.IsSort = null;
@@ -756,7 +770,7 @@
                 if (requestJson.GridIsClickEnum == GridIsClickEnum.PageUp)
                 {
                     var configGrid = ConfigGrid(grid);
-                    grid.OffsetRow -= ConfigGridRowCountMax(configGrid);
+                    grid.OffsetRow -= ConfigRowCountMax(configGrid);
                     if (grid.OffsetRow < 0)
                     {
                         grid.OffsetRow = 0;
@@ -771,9 +785,28 @@
                     int rowCount = grid.RowList.Count;
                     if (rowCount == configGrid.RowCountMax) // Page down further on full grid only.
                     {
-                        grid.OffsetRow += ConfigGridRowCountMax(configGrid);
-                        await ReloadAsync(grid);
+                        grid.OffsetRow += ConfigRowCountMax(configGrid);
                     }
+                    await ReloadAsync(grid);
+                }
+
+                // Grid page left
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageLeft)
+                {
+                    grid.OffsetColumn -= 1;
+                    if (grid.OffsetColumn < 0)
+                    {
+                        grid.OffsetColumn = 0;
+                    }
+                    await ReloadAsync(grid);
+                }
+
+                // Grid page right
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageRight)
+                {
+                    grid.OffsetColumn += 1;
+                    var configGrid = ConfigGrid(grid);
+                    await ReloadAsync(grid);
                 }
             }
         }

@@ -869,6 +869,9 @@
         [Serialize(SerializeEnum.Session)]
         public int OffsetRow;
 
+        [Serialize(SerializeEnum.Session)]
+        public int OffsetColumn;
+
         internal string StyleColumn;
     }
 
@@ -926,10 +929,6 @@
         public int SortField;
 
         public bool? IsSort;
-
-        public FilterOperator FilterOperator;
-
-        public object FilterValue;
     }
 
     /// <summary>
@@ -1044,8 +1043,14 @@
 
         public string Description;
 
+        /// <summary>
+        /// Gets or sets IsSelect. For display only. See also <see cref="Grid2RowState.IsSelect"/>
+        /// </summary>
         public bool IsSelect;
 
+        /// <summary>
+        /// Gets or sets IsSort. For display only. See also <see cref="Grid2Column.IsSort"/>
+        /// </summary>
         public bool? IsSort;
     }
 
