@@ -867,6 +867,12 @@
         internal List<Grid2FilterValue> FilterValueList;
 
         [Serialize(SerializeEnum.Session)]
+        internal string IsSortFieldName;
+
+        [Serialize(SerializeEnum.Session)]
+        internal bool IsSort;
+
+        [Serialize(SerializeEnum.Session)]
         public int OffsetRow;
 
         [Serialize(SerializeEnum.Session)]
@@ -927,12 +933,10 @@
         /// Gets or sets SortField. Order as defined in sql database schema.
         /// </summary>
         public int SortField;
-
-        public bool? IsSort;
     }
 
     /// <summary>
-    /// Not sent to client.
+    /// Keeps track of data row state. Not sent to client.
     /// </summary>
     internal sealed class Grid2RowState
     {

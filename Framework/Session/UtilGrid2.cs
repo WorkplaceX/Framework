@@ -17,6 +17,35 @@
     internal static class UtilGrid2
     {
         /// <summary>
+        /// Switch IsSort on data grid.
+        /// </summary>
+        public static void IsSortSwitch(Grid2 grid, string fieldName)
+        {
+            if (grid.IsSortFieldName == fieldName)
+            {
+                grid.IsSort = !grid.IsSort;
+            }
+            else
+            {
+                grid.IsSortFieldName = fieldName;
+                grid.IsSort = false;
+            }
+        }
+
+        /// <summary>
+        /// Returns sort order for column.
+        /// </summary>
+        public static bool? IsSort(Grid2 grid, string fieldName)
+        {
+            bool? result = null;
+            if (grid.IsSortFieldName == fieldName)
+            {
+                return grid.IsSort;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
         /// </summary>
         public static async Task LoadAsync(Grid2 grid)
@@ -146,12 +175,9 @@
                 }
 
                 // Sort
-                foreach (var column in grid.ColumnList)
+                if (grid.IsSortFieldName != null)
                 {
-                    if (column.IsSort != null)
-                    {
-                        query = Data.QueryOrderBy(query, column.FieldNameCSharp, column.IsSort.Value);
-                    }
+                    query = Data.QueryOrderBy(query, grid.IsSortFieldName, grid.IsSort);
                 }
 
                 // Skip, Take
@@ -315,7 +341,7 @@
                     CellEnum = Grid2CellEnum.HeaderColumn,
                     ColumnText = column.ColumnText,
                     Description = column.Description,
-                    IsSort = column.IsSort,
+                    IsSort = IsSort(grid, column.FieldNameCSharp),
                 });
             }
             var filterList = new Grid2Filter(grid).TextGet();
@@ -375,22 +401,9 @@
             {
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
-                // Reset sort on other columns
-                foreach (var item in grid.ColumnList)
-                {
-                    if (item != column)
-                    {
-                        item.IsSort = null;
-                    }
-                }
-                if (column.IsSort == null)
-                {
-                    column.IsSort = false;
-                }
-                else
-                {
-                    column.IsSort = !column.IsSort;
-                }
+
+                // Set sort order
+                IsSortSwitch(grid, column.FieldNameCSharp);
                 await ReloadAsync(grid);
             }
         }
@@ -776,10 +789,7 @@
                     // Reset filter, sort
                     grid.FilterValueList = null;
                     grid.OffsetRow = 0;
-                    foreach (var column in grid.ColumnList)
-                    {
-                        column.IsSort = null;
-                    }
+                    grid.IsSortFieldName = null;
 
                     await ReloadAsync(grid);
                 }
