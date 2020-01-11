@@ -229,7 +229,10 @@
             }
         }
 
-        private static void RenderRowUpdate(Grid2 grid, Grid2Cell cell)
+        /// <summary>
+        /// Refresh data row.
+        /// </summary>
+        private static void RenderRowRefresh(Grid2 grid, Grid2Cell cell)
         {
             // Get page and row
             Page page = grid.ComponentOwner<Page>();
@@ -417,7 +420,7 @@
             {
                 if (item.RowStateId == cell.RowStateId)
                 {
-                    if (item.IsModified && item.Text != item.TextOld)
+                    if (item.IsModified)
                     {
                         if (item.ErrorParse == null && item.ErrorSave == null)
                         {
@@ -591,18 +594,32 @@
         }
 
         /// <summary>
-        /// Track IsModified and TextOld.
+        /// Set Text and preserve TextOld.
         /// </summary>
-        private static void ProcessCellIsModifyTextOld(Grid2Cell cell, RequestJson requestJson)
+        private static void ProcessCellIsModifyText(Grid2Cell cell, RequestJson requestJson)
         {
-            if (cell.IsModified == false)
+            string textOld = cell.Text;
+            cell.Text = requestJson.Grid2CellText;
+            if (cell.IsModified == false && cell.Text != textOld)
             {
                 cell.IsModified = true;
-                cell.TextOld = cell.Text;
+                cell.TextOld = textOld;
             }
-            else
+            if (cell.IsModified == true && cell.Text == cell.TextOld)
             {
-                if (requestJson.Grid2CellText == cell.TextOld)
+                cell.IsModified = false;
+                cell.TextOld = null;
+            }
+        }
+
+        /// <summary>
+        /// Update IsModify flag.
+        /// </summary>
+        private static void ProcessCellIsModifyUpdate(Grid2 grid)
+        {
+            foreach (var cell in grid.CellList)
+            {
+                if (cell.IsModified && cell.Text == cell.TextOld || cell.TextLeave == cell.TextOld)
                 {
                     cell.IsModified = false;
                     cell.TextOld = null;
@@ -650,9 +667,8 @@
                 Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
 
                 // Track IsModified
-                ProcessCellIsModifyTextOld(cell, requestJson);
+                ProcessCellIsModifyText(cell, requestJson);
 
-                cell.Text = requestJson.Grid2CellText;
                 cell.Warning = null;
 
                 // Parse Filter
@@ -691,7 +707,8 @@
                             ProcessCellIsModifyReset(grid, cell);
                         }
                     }
-                    RenderRowUpdate(grid, cell);
+                    RenderRowRefresh(grid, cell); // Set Text
+                    ProcessCellIsModifyUpdate(grid); // Update IsModify
                     ProcessCellIsModifyWarning(grid, cell);
                 }
 
@@ -724,7 +741,8 @@
                             }
                             rowState.RowNew = null;
                             ProcessCellIsModifyReset(grid, cell);
-                            RenderRowUpdate(grid, cell);
+                            RenderRowRefresh(grid, cell); // Set Text
+                            ProcessCellIsModifyUpdate(grid); // Update IsModify
                             RenderRowNewAdd(grid);
                         }
                     }
