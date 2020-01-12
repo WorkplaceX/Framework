@@ -892,12 +892,30 @@
 
         public FilterOperator FilterOperator;
 
+        /// <summary>
+        /// Gets or sets FilterValue. This is the successfully parsed user input value.
+        /// </summary>
         public object FilterValue;
+
+        /// <summary>
+        /// Gets or sets IsClear. If true, filter has been cleared and is not applied.
+        /// </summary>
+        public bool IsClear;
 
         /// <summary>
         /// Gets or sets Text of successfully parsed filter.
         /// </summary>
         public string Text;
+
+        /// <summary>
+        /// Gets or sets TextLeave. If filter has user input focus, parser can not override text untill user leaves the field.
+        /// </summary>
+        public string TextLeave;
+
+        /// <summary>
+        /// Gets or sets IsFocus. If true, filter has user input focus.
+        /// </summary>
+        public bool IsFocus;
     }
 
     internal sealed class Grid2SortValue
@@ -1058,7 +1076,7 @@
         public string ColumnText;
 
         /// <summary>
-        /// Gets or sets json text.
+        /// Gets or sets json text. Can be null but never empty.
         /// </summary>
         public string Text;
 
@@ -1519,7 +1537,7 @@
         }
 
         /// <summary>
-        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for UOM)
+        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
         /// <param name="row">Write user parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
@@ -1529,11 +1547,11 @@
         }
 
         /// <summary>
-        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for UOM)
+        /// Parse user entered cell text into database value. Text can be empty but never null. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
-        /// <param name="row">Write user parsed value to row.</param>
+        /// <param name="row">Write custom parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
-        protected virtual internal void GridCellParse(Grid2 grid, Row row,  string fieldName, string text, out bool isHandled)
+        protected virtual internal void GridCellParse(Grid2 grid, Row row, string fieldName, string text, out bool isHandled, ref string errorParse)
         {
             isHandled = false;
         }
@@ -1547,9 +1565,10 @@
         }
 
         /// <summary>
-        /// Parse user entered cell filter text. Called only if text is not null.
+        /// Parse user entered cell filter text. Text can be empty but never null.
         /// </summary>
-        protected virtual internal void GridCellParseFilter(Grid2 grid, string fieldName, string text, Grid2Filter filter, out bool isHandled)
+        /// <param name="filter">Write custom parsed text to filter.</param>
+        protected virtual internal void GridCellParseFilter(Grid2 grid, string fieldName, string text, Grid2Filter filter, out bool isHandled, ref string errorParse)
         {
             isHandled = false;
         }

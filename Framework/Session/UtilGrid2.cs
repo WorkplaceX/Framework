@@ -143,7 +143,8 @@
             // Render Cell
             Page page = grid.ComponentOwner<Page>();
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
-            var filterList = new Grid2Filter(grid).TextGet();
+            var filter = new Grid2Filter(grid);
+            var filterValueList = filter.FilterValueList();
             foreach (var rowState in rowStateList)
             {
                 // Filter
@@ -167,7 +168,7 @@
                     // Filter Value
                     foreach (var column in columnList)
                     {
-                        filterList.TryGetValue(column.FieldNameCSharp, out string text);
+                        filterValueList.TryGetValue(column.FieldNameCSharp, out Grid2FilterValue filterValue);
                         var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, Grid2CellEnum.Filter), (key) => new Grid2Cell
                         {
                             ColumnId = key.Item1,
@@ -176,7 +177,11 @@
                             Placeholder = "Search"
                         });
                         grid.CellList.Add(cellLocal);
-                        cellLocal.Text = text;
+                        cellLocal.Text = filterValue?.Text;
+                        if (column.FieldNameCSharp == filterValue?.FieldNameCSharp && filterValue?.IsFocus == true)
+                        {
+                            cellLocal.TextLeave = filterValue.TextLeave;
+                        }
                         cellLocal.IsVisibleScroll = true;
                     }
                 }
@@ -323,9 +328,12 @@
             // Filter
             if (grid.FilterValueList != null)
             {
-                foreach (var item in grid.FilterValueList)
+                foreach (var filter in grid.FilterValueList)
                 {
-                    query = Data.QueryFilter(query, item.FieldNameCSharp, item.FilterValue, item.FilterOperator);
+                    if (!filter.IsClear)
+                    {
+                        query = Data.QueryFilter(query, filter.FieldNameCSharp, filter.FilterValue, filter.FilterOperator);
+                    }
                 }
             }
 
@@ -397,6 +405,7 @@
             await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
 
             grid.CellList = new List<Grid2Cell>();
+
             Render(grid);
         }
 
@@ -563,16 +572,14 @@
                 }
                 // Parse custom
                 bool isHandled = false;
-                if (cell.Text != null)
-                {
-                    page.GridCellParse(grid, rowNew, column.FieldNameCSharp, cell.Text, out isHandled); // Custom parse of user entered text.
-                }
+                string errorParse = null;
+                page.GridCellParse(grid, rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), out isHandled, ref errorParse); // Custom parse of user entered text.
                 // Parse default
                 if (!isHandled)
                 {
-                    Data.CellTextParse(field, cell.Text, rowNew, out string errorParse);
-                    cell.ErrorParse = errorParse;
+                    Data.CellTextParse(field, cell.Text, rowNew, out errorParse);
                 }
+                cell.ErrorParse = errorParse;
             }
             catch (Exception exception)
             {
@@ -589,22 +596,15 @@
             // Parse
             try
             {
+                // Parse custom
                 bool isHandled = false;
-                if (cell.Text == null)
+                string errorParse = null;
+                page.GridCellParseFilter(grid, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), new Grid2Filter(grid), out isHandled, ref errorParse); // Custom parse of user entered text.
+                if (!isHandled)
                 {
-                    // Remove filter
-                    new Grid2Filter(grid).Remove(column.FieldNameCSharp);
+                    Data.CellTextParseFilter(field, cell.Text, new Grid2Filter(grid), out errorParse); // Parse default
                 }
-                else
-                {
-                    // Parse custom
-                    page.GridCellParseFilter(grid, column.FieldNameCSharp, cell.Text, new Grid2Filter(grid), out isHandled); // Custom parse of user entered text.
-                    if (!isHandled)
-                    {
-                        Data.CellTextParseFilter(field, cell.Text, new Grid2Filter(grid), out string errorParse); // Parse default
-                        cell.ErrorParse = errorParse;
-                    }
-                }
+                cell.ErrorParse = errorParse;
             }
             catch (Exception exception)
             {
@@ -766,7 +766,8 @@
                 // Parse Filter
                 if (rowState.RowEnum == GridRowEnum.Filter)
                 {
-                    new Grid2Filter(grid).TextSet(column.FieldNameCSharp, cell.Text);
+                    new Grid2Filter(grid).TextSet(column.FieldNameCSharp, cell.Text); // Used after data grid reload to restore filter.
+
                     // Parse
                     ProcessCellIsModifyParseFilter(grid, page, column, field, cell);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
@@ -939,10 +940,6 @@
         /// </summary>
         private Grid2FilterValue FilterValue(string fieldNameCSharp)
         {
-            if (Grid.FilterValueList == null)
-            {
-                Grid.FilterValueList = new List<Grid2FilterValue>();
-            }
             Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldNameCSharp == fieldNameCSharp).SingleOrDefault();
             if (result == null)
             {
@@ -952,42 +949,48 @@
             return result;
         }
 
-        public void ValueSet(string fieldName, object filterValue, FilterOperator filterOperator)
+        /// <summary>
+        /// Set filter value on a column. If text is not equal to text user entered, it will appear as soon as user leves field.
+        /// </summary>
+        /// <param name="isClear">If true, filter is not applied.</param>
+        public void ValueSet(string fieldNameCSharp, object filterValue, FilterOperator filterOperator, string text, bool isClear = false)
         {
-            Grid2FilterValue result = FilterValue(fieldName);
+            Grid2FilterValue result = FilterValue(fieldNameCSharp);
             result.FilterValue = filterValue;
             result.FilterOperator = filterOperator;
+            if (result.IsFocus == false)
+            {
+                result.Text = text;
+            }
+            else
+            {
+                result.TextLeave = text;
+            }
+            result.IsClear = isClear;
         }
 
         internal void TextSet(string fieldNameCSharp, string text)
         {
+            Grid.FilterValueList.ForEach(item => item.IsFocus = false);
             Grid2FilterValue result = FilterValue(fieldNameCSharp);
             result.Text = text;
+            result.IsFocus = true;
         }
 
-        internal Dictionary<string, string> TextGet()
+        /// <summary>
+        /// (FieldNameCSharp, FilterValue).
+        /// </summary>
+        internal Dictionary<string, Grid2FilterValue> FilterValueList()
         {
-            Dictionary<string, string> result = new Dictionary<string, string>();
+            var result = new Dictionary<string, Grid2FilterValue>();
             if (Grid.FilterValueList != null)
             {
                 foreach (var item in Grid.FilterValueList)
                 {
-                    result.Add(item.FieldNameCSharp, item.Text);
+                    result.Add(item.FieldNameCSharp, item);
                 }
             }
             return result;
-        }
-
-        internal void Remove(string fieldName)
-        {
-            if (Grid.FilterValueList != null)
-            {
-                Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldNameCSharp == fieldName).SingleOrDefault();
-                if (result != null)
-                {
-                    Grid.FilterValueList.Remove(result);
-                }
-            }
         }
     }
 }

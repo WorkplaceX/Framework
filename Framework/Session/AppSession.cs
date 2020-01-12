@@ -652,7 +652,7 @@
                                 }
                                 else
                                 {
-                                    // Custom database record update might also have changed other fields like new primary key or UOM.
+                                    // Custom database record update might also have changed other fields like new primary key or Uom.
                                     List<Field> fieldList = null;
                                     GridLoad(gridItem.GridIndex, gridRowItem.RowIndex, gridRowItem.GridRowSession.RowUpdate, gridItem.GridSession.TypeRow, GridRowEnum.Index, ref fieldList);
                                 }

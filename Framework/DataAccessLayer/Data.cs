@@ -900,7 +900,7 @@
             {
                 filterOperator = FilterOperator.Like;
             }
-            filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperator);
+            filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperator, text, isClear: text == null);
         }
 
         /// <summary>
