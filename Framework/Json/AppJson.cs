@@ -922,7 +922,13 @@
         /// </summary>
         public string Description;
 
+        /// <summary>
+        /// Gets or sets IsVisible. If true, column is shown in data grid.
+        /// </summary>
         public bool IsVisible;
+
+        [Serialize(SerializeEnum.Ignore)]
+        public bool IsVisibleScroll;
 
         /// <summary>
         /// Gets or sets Sort. Order as defined in data grid field config.
@@ -947,6 +953,11 @@
         public int? RowId; // Filter does not have a data row.
 
         public bool IsSelect;
+
+        /// <summary>
+        /// Gets or sets IsVisibleScroll. For vertical paging (no database select).
+        /// </summary>
+        public bool IsVisibleScroll;
 
         public Row RowNew; // Data row to insert into database.
     }
@@ -1053,9 +1064,15 @@
         public bool IsSelect;
 
         /// <summary>
-        /// Gets or sets IsSort. For display only. See also <see cref="Grid2Column.IsSort"/>
+        /// Gets or sets IsSort. Display column sort triangle. See also <see cref="Grid2Column.IsSort"/>
         /// </summary>
         public bool? IsSort;
+
+        /// <summary>
+        /// Gets or sets IsVisibleScroll. If true, cell is visible in scrallable range. If false, cell is not sent to client.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public bool IsVisibleScroll;
     }
 
     /// <summary>

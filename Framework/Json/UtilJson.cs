@@ -719,6 +719,10 @@ namespace Framework.Json
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }
+                                if (propertyValue is Grid2Cell gridCell && gridCell.IsVisibleScroll == false)
+                                {
+                                    isSerializeClientLocal = false; // No list entry for hidden object.
+                                }
                                 writer.SerializeStart(isSerializeSession, isSerializeClientLocal);
                                 if (!converter.IsValueDefault(propertyValue))
                                 {

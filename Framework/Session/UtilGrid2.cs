@@ -17,9 +17,274 @@
     internal static class UtilGrid2
     {
         /// <summary>
+        /// Returns ColumnList for data grid.
+        /// </summary>
+        private static List<Grid2Column> LoadColumnList(Grid2 grid)
+        {
+            Page page = grid.ComponentOwner<Page>();
+            var configFieldDictionary = ConfigFieldDictionary(grid);
+            AppJson appJson = page.ComponentOwner<AppJson>();
+
+            var result = new List<Grid2Column>();
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
+            foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(grid.TypeRow))
+            {
+                var field = fieldList[propertyInfo.Name];
+                configFieldDictionary.TryGetValue(propertyInfo.Name, out FrameworkConfigFieldBuiltIn configField);
+                NamingConvention namingConvention = appJson.NamingConventionInternal(grid.TypeRow);
+                string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
+                bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
+                double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
+                result.Add(new Grid2Column
+                {
+                    FieldNameCSharp = field.FieldNameCSharp,
+                    ColumnText = columnText,
+                    Description = configField?.Description,
+                    IsVisible = isVisible,
+                    Sort = sort,
+                    SortField = field.Sort
+                });
+            }
+            result = result
+                .Where(item => item.IsVisible == true)
+                .OrderBy(item => item.Sort)
+                .ThenBy(item => item.SortField) // Make it deterministic if multiple columns have same Sort.
+                .ToList();
+            // Column.Id
+            int columnId = 0;
+            foreach (var item in result)
+            {
+                item.Id = columnId += 1;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns RowStateList for data grid.
+        /// </summary>
+        private static List<Grid2RowState> LoadRowStateList(Grid2 grid)
+        {
+            var result = new List<Grid2RowState>();
+            result.Add(new Grid2RowState { RowId = null, RowEnum = GridRowEnum.Filter });
+            int rowId = 0;
+            foreach (var row in grid.RowList)
+            {
+                rowId += 1;
+                result.Add(new Grid2RowState { RowId = rowId, RowEnum = GridRowEnum.Index });
+            }
+            result.Add(new Grid2RowState { RowId = null, RowEnum = GridRowEnum.New });
+            // RowState.Id
+            int count = 0;
+            foreach (var rowState in result)
+            {
+                count += 1;
+                rowState.Id = count;
+            }
+            return result;
+        }
+
+        private static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> list, TKey key, Func<TKey, TValue> valueFactory, out bool isAdded)
+        {
+            TValue result;
+            isAdded = false;
+            if (!list.TryGetValue(key, out result))
+            {
+                isAdded = true;
+                result = valueFactory(key);
+                list.Add(key, result);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Overload.
+        /// </summary>
+        private static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> list, TKey key, Func<TKey, TValue> valueFactory)
+        {
+            return list.GetOrAdd(key, valueFactory, out bool isAdded);
+        }
+
+        /// <summary>
+        /// Render Grid.CellList.
+        /// </summary>
+        /// <param name="cell">If not null, force all cells on this column to render updated text.</param>
+        private static void Render(Grid2 grid, Grid2Cell cell = null)
+        {
+            // IsVisibleScroll
+            int count = 0;
+            foreach (var column in grid.ColumnList)
+            {
+                count += 1;
+                column.IsVisibleScroll = count - 1 >= grid.OffsetColumn && count - 1 < grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid));
+            }
+            var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToList();
+            foreach (var rowState in grid.RowStateList)
+            {
+                rowState.IsVisibleScroll = true;
+            }
+            var rowStateList = grid.RowStateList.Where(item => item.IsVisibleScroll).ToList();
+
+            // CellList
+            var cellList = grid.CellList.ToDictionary(item => (item.ColumnId, item.RowStateId, item.CellEnum)); // Key (ColumnId, RowState, CellEnum)
+            grid.CellList = new List<Grid2Cell>();
+            foreach (var cellLocal in cellList.Values)
+            {
+                cellLocal.IsVisibleScroll = false;
+            }
+
+            // Render StyleColumn
+            StringBuilder styleColumnList = new StringBuilder();
+            foreach (var column in columnList)
+            {
+                styleColumnList.Append("minmax(0, 1fr) ");
+            }
+            grid.StyleColumn = styleColumnList.ToString();
+
+            // Render Cell
+            Page page = grid.ComponentOwner<Page>();
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
+            var filterList = new Grid2Filter(grid).TextGet();
+            foreach (var rowState in rowStateList)
+            {
+                // Filter
+                if (rowState.RowEnum == GridRowEnum.Filter)
+                {
+                    // Filter Header
+                    foreach (var column in columnList)
+                    {
+                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, Grid2CellEnum.HeaderColumn), (key) => new Grid2Cell
+                        {
+                            ColumnId = key.Item1,
+                            RowStateId = key.Item2,
+                            CellEnum = key.Item3,
+                            ColumnText = column.ColumnText,
+                            Description = column.Description,
+                        });
+                        grid.CellList.Add(cellLocal);
+                        cellLocal.IsSort = IsSort(grid, column.FieldNameCSharp);
+                        cellLocal.IsVisibleScroll = true;
+                    }
+                    // Filter Value
+                    foreach (var column in columnList)
+                    {
+                        filterList.TryGetValue(column.FieldNameCSharp, out string text);
+                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, Grid2CellEnum.Filter), (key) => new Grid2Cell
+                        {
+                            ColumnId = key.Item1,
+                            RowStateId = key.Item2,
+                            CellEnum = key.Item3,
+                            Placeholder = "Search"
+                        });
+                        grid.CellList.Add(cellLocal);
+                        cellLocal.Text = text;
+                        cellLocal.IsVisibleScroll = true;
+                    }
+                }
+
+                // Index
+                if (rowState.RowEnum == GridRowEnum.Index)
+                {
+                    Row row;
+                    if (rowState.RowNew != null)
+                    {
+                        row = rowState.RowNew;
+                    }
+                    else
+                    {
+                        row = grid.RowList[rowState.RowId.Value - 1];
+                    }
+                    foreach (var column in columnList)
+                    {
+                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, Grid2CellEnum.Index), (key) => new Grid2Cell
+                        {
+                            ColumnId = key.Item1,
+                            RowStateId = key.Item2,
+                            CellEnum = key.Item3,
+                        }, out bool isAdded);
+                        grid.CellList.Add(cellLocal);
+                        if (cellLocal.RowStateId == cell?.RowStateId) // Cell on same row.
+                        {
+                            isAdded = true; // Trigger Cell.Text update
+                        }
+                        if (isAdded)
+                        {
+                            var field = fieldList[column.FieldNameCSharp];
+                            string text = null;
+                            object value = field.PropertyInfo.GetValue(row);
+                            if (value != null)
+                            {
+                                text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                                text = UtilFramework.StringNull(text);
+                                if (text == null)
+                                {
+                                    text = field.FrameworkType().CellTextFromValue(value);
+                                }
+                            }
+                            if (cellLocal.ErrorParse == null) // Do not override user entered text as long as in ErrorParse mode.
+                            {
+                                if (cellLocal == cell)
+                                {
+                                    cellLocal.TextLeave = UtilFramework.StringEmpty(text); // Do not change text while user modifies.
+                                }
+                                else
+                                {
+                                    cellLocal.Text = text;
+                                }
+                            }
+                        }
+                        cellLocal.IsVisibleScroll = true;
+                    }
+                }
+
+                // New
+                if (rowState.RowEnum == GridRowEnum.New)
+                {
+                    foreach (var column in columnList)
+                    {
+                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, Grid2CellEnum.New), (key) => new Grid2Cell
+                        {
+                            ColumnId = key.Item1,
+                            RowStateId = key.Item2,
+                            CellEnum = key.Item3,
+                            Placeholder = "New",
+                        });
+                        grid.CellList.Add(cellLocal);
+                    }
+                }
+            }
+
+            // Preserve cell in ErrorParse or ErrorSave state
+            foreach (var cellLocal in cellList.Values)
+            {
+                if (cellLocal.IsVisibleScroll == false) // Cell not visible
+                {
+                    if (cellLocal.ErrorParse != null || cellLocal.ErrorSave != null || cellLocal.Warning != null)
+                    {
+                        grid.CellList.Add(cellLocal); // Preserve cell
+                    }
+                }
+            }
+
+            // Cell.Id
+            count = 0;
+            foreach (var cellLocal in grid.CellList)
+            {
+                count += 1;
+                cellLocal.Id = count;
+            }
+
+            // Cell.IsSelect
+            foreach (var cellLocal in grid.CellList)
+            {
+                Grid2RowState rowState = grid.RowStateList[cellLocal.RowStateId - 1];
+                cellLocal.IsSelect = rowState.IsSelect;
+            }
+        }
+
+        /// <summary>
         /// Switch IsSort on data grid.
         /// </summary>
-        public static void IsSortSwitch(Grid2 grid, string fieldName)
+        private static void IsSortSwitch(Grid2 grid, string fieldName)
         {
             if (grid.IsSortFieldName == fieldName)
             {
@@ -35,7 +300,7 @@
         /// <summary>
         /// Returns sort order for column.
         /// </summary>
-        public static bool? IsSort(Grid2 grid, string fieldName)
+        private static bool? IsSort(Grid2 grid, string fieldName)
         {
             bool? result = null;
             if (grid.IsSortFieldName == fieldName)
@@ -46,77 +311,105 @@
         }
 
         /// <summary>
-        /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
+        /// Load (full) with config.
+        /// </summary>
+        private static async Task LoadFullAsync(Grid2 grid, Page page, IQueryable query)
+        {
+            // Get config grid and field query
+            Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
+            page.Grid2QueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
+
+            // Load config grid
+            grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
+            var configGrid = ConfigGrid(grid);
+            query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
+
+            // Load config field (Task)
+            var configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
+
+            // Load row (Task)
+            var rowListTask = Data.SelectAsync(query);
+
+            await Task.WhenAll(configFieldListTask, rowListTask); // Load config field and row in parallel
+
+            // Load config field
+            grid.ConfigFieldList = configFieldListTask.Result;
+
+            // RowList
+            grid.RowList = rowListTask.Result;
+
+            // ColumnList
+            grid.ColumnList = LoadColumnList(grid);
+        }
+
+        /// <summary>
+        /// Load (reload)
+        /// </summary>
+        private static async Task LoadReloadAsync(Grid2 grid, IQueryable query)
+        {
+            var configGrid = ConfigGrid(grid);
+
+            // Filter
+            if (grid.FilterValueList != null)
+            {
+                foreach (var item in grid.FilterValueList)
+                {
+                    query = Data.QueryFilter(query, item.FieldName, item.FilterValue, item.FilterOperator);
+                }
+            }
+
+            // Sort
+            if (grid.IsSortFieldName != null)
+            {
+                query = Data.QueryOrderBy(query, grid.IsSortFieldName, grid.IsSort);
+            }
+
+            // Skip, Take
+            query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid));
+
+            // Load row
+            grid.RowList = await Data.SelectAsync(query);
+        }
+
+        /// <summary>
+        /// Load or reload data grid.
         /// </summary>
         public static async Task LoadAsync(Grid2 grid)
         {
             Page page = grid.ComponentOwner<Page>();
             IQueryable query = page.Grid2Query(grid);
+            Type typeRowOld = grid.TypeRow;
             grid.TypeRow = query?.ElementType;
             grid.DatabaseEnum = DatabaseMemoryInternal.DatabaseEnum(query);
-            if (grid.TypeRow != null)
+
+            if (grid.TypeRow == null)
             {
-                // Get config grid and field query
-                Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
-                page.Grid2QueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
-
-                // Load config grid
-                grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
-                var configGrid = ConfigGrid(grid);
-                query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
-
-                // Load config field (Task)
-                var configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
-
-                // Load row (Task)
-                var rowListTask = Data.SelectAsync(query);
-
-                await Task.WhenAll(configFieldListTask, rowListTask); // Load config field and row in parallel
-
-                // Load config field
-                grid.ConfigFieldList = configFieldListTask.Result;
-
-                // Load row
-                grid.RowList = rowListTask.Result;
-
-                var configFieldDictionary = ConfigFieldDictionary(grid);
-
-                grid.ColumnList = new List<Grid2Column>();
-                AppJson appJson = page.ComponentOwner<AppJson>();
-                var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
-                foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(grid.TypeRow))
-                {
-                    var field = fieldList[propertyInfo.Name];
-                    configFieldDictionary.TryGetValue(propertyInfo.Name, out FrameworkConfigFieldBuiltIn configField);
-                    NamingConvention namingConvention = appJson.NamingConventionInternal(grid.TypeRow);
-                    string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
-                    bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
-                    double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
-                    grid.ColumnList.Add(new Grid2Column
-                    {
-                        FieldNameCSharp = field.FieldNameCSharp,
-                        ColumnText = columnText,
-                        Description = configField?.Description,
-                        IsVisible = isVisible,
-                        Sort = sort,
-                        SortField = field.Sort
-                    });
-                }
-                grid.ColumnList = grid.ColumnList
-                    .Where(item => item.IsVisible == true)
-                    .OrderBy(item => item.Sort)
-                    .ThenBy(item => item.SortField) // Make it deterministic if multiple columns have same Sort.
-                    .ToList(); 
-                int columnId = 0;
-                foreach (var column in grid.ColumnList)
-                {
-                    column.Id = columnId += 1;
-                }
+                grid.ColumnList = new List<Grid2Column>(); ;
+                grid.RowList = new List<Row>();
+                grid.CellList = new List<Grid2Cell>();
+                Render(grid);
+                return;
             }
 
+            // Load full (with config) or reload
+            if (typeRowOld != query?.ElementType)
+            {
+                // ColumnList, RowList
+                await LoadFullAsync(grid, page, query);
+            }
+            else
+            {
+                // RowList
+                await LoadReloadAsync(grid, query);
+            }
+
+            // RowStateList
+            grid.RowStateList = LoadRowStateList(grid);
+
+            await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
+
+            grid.CellList = new List<Grid2Cell>();
             Render(grid);
-            await LoadRowFirstSelect(grid);
-            RenderRowIsSelectedUpdate(grid);
         }
 
         /// <summary>
@@ -139,7 +432,7 @@
         /// <summary>
         /// Returns ColumnCountMax of columns to render.
         /// </summary>
-        public static int ConfigColumnCountMax(FrameworkConfigGridBuiltIn configGrid)
+        private static int ConfigColumnCountMax(FrameworkConfigGridBuiltIn configGrid)
         {
             return 3;
         }
@@ -154,60 +447,20 @@
         }
 
         /// <summary>
-        /// Reload and render rows after sort, filter changes. Does not load grid and field configuration from database again.
-        /// </summary>
-        private static async Task ReloadAsync(Grid2 grid)
-        {
-            Page page = grid.ComponentOwner<Page>();
-            IQueryable query = page.Grid2Query(grid);
-            var typeRow = query?.ElementType;
-            if (typeRow != null && typeRow == grid.TypeRow) // Make sure grid and field configuration are correct.
-            {
-                var configGrid = ConfigGrid(grid);
-
-                // Filter
-                if (grid.FilterValueList != null)
-                {
-                    foreach (var item in grid.FilterValueList)
-                    {
-                        query = Data.QueryFilter(query, item.FieldName, item.FilterValue, item.FilterOperator);
-                    }
-                }
-
-                // Sort
-                if (grid.IsSortFieldName != null)
-                {
-                    query = Data.QueryOrderBy(query, grid.IsSortFieldName, grid.IsSort);
-                }
-
-                // Skip, Take
-                query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid));
-
-                // Load row
-                grid.RowList = await Data.SelectAsync(query);
-
-                // Render
-                Render(grid);
-                await LoadRowFirstSelect(grid);
-                RenderRowIsSelectedUpdate(grid);
-            }
-        }
-
-        /// <summary>
         /// After load, if no row in data grid is selected, select first row.
         /// </summary>
-        private static async Task LoadRowFirstSelect(Grid2 grid)
+        private static async Task RowSelectAsync(Grid2 grid, Grid2RowState rowState)
         {
-            foreach (var rowState in grid.RowStateList)
+            foreach (var item in grid.RowStateList)
             {
-                if (rowState.RowEnum == GridRowEnum.Index) // Select data rows only.
-                {
-                    Row row = grid.RowList[rowState.RowId.Value - 1];
-                    rowState.IsSelect = true;
-                    Page page = grid.ComponentOwner<Page>();
-                    await page.GridRowSelectedAsync(grid, row);
-                    break;
-                }
+                item.IsSelect = false;
+            }
+            if (rowState != null)
+            {
+                Row row = grid.RowList[rowState.RowId.Value - 1];
+                rowState.IsSelect = true;
+                Page page = grid.ComponentOwner<Page>();
+                await page.GridRowSelectedAsync(grid, row);
             }
         }
 
@@ -232,169 +485,6 @@
             await ProcessIsClickConfigAsync();
         }
 
-        /// <summary>
-        /// Add data row new.
-        /// </summary>
-        private static void RenderRowNewAdd(Grid2 grid)
-        {
-            int rowStateId = grid.RowStateList.Count;
-            int cellId = grid.CellList.Count;
-            
-            // Render data row New
-            grid.RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowEnum = GridRowEnum.New });
-            foreach (var column in grid.ColumnList)
-            {
-                grid.CellList.Add(new Grid2Cell
-                {
-                    Id = cellId += 1,
-                    ColumnId = column.Id,
-                    RowStateId = rowStateId,
-                    CellEnum = Grid2CellEnum.New,
-                    Placeholder = "New",
-                });
-            }
-        }
-
-        /// <summary>
-        /// Refresh data row.
-        /// </summary>
-        private static void RenderRowRefresh(Grid2 grid, Grid2Cell cell)
-        {
-            // Get page and row
-            Page page = grid.ComponentOwner<Page>();
-            Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
-            Row row;
-            if (rowState.RowNew != null)
-            {
-                row = rowState.RowNew;
-            }
-            else
-            {
-                row = grid.RowList[rowState.RowId.Value - 1];
-            }
-
-            var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
-            foreach (var item in grid.CellList)
-            {
-                if (item.RowStateId == cell.RowStateId) // Cells on same column
-                {
-                    var column = grid.ColumnList[item.ColumnId - 1];
-                    var field = fieldList[column.FieldNameCSharp];
-                    string text = null;
-                    object value = field.PropertyInfo.GetValue(row);
-                    if (value != null)
-                    {
-                        text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
-                        text = UtilFramework.StringNull(text);
-                        if (text == null)
-                        {
-                            text = field.FrameworkType().CellTextFromValue(value);
-                        }
-                    }
-                    item.TextLeave = null;
-                    if (item.ErrorParse == null) // Do not change input text while it's not parsed and written to row.
-                    {
-                        if (item == cell)
-                        {
-                            item.TextLeave = UtilFramework.StringEmpty(text); // Do not change text while user modifies.
-                        }
-                        else
-                        {
-                            item.Text = text;
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Update IsSelect flag of all cells.
-        /// </summary>
-        private static void RenderRowIsSelectedUpdate(Grid2 grid)
-        {
-            foreach (var cell in grid.CellList)
-            {
-                Grid2RowState rowState = grid.RowStateList[cell.RowStateId - 1];
-                cell.IsSelect = rowState.IsSelect;
-            }
-        }
-
-        private static void Render(Grid2 grid)
-        {
-            Page page = grid.ComponentOwner<Page>();
-            grid.CellList = new List<Grid2Cell>();
-            grid.RowStateList = new List<Grid2RowState>();
-            StringBuilder styleColumnList = new StringBuilder();
-            int cellId = 0;
-            int rowStateId = 0;
-            
-            // Render Filter
-            grid.RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowEnum = GridRowEnum.Filter });
-            foreach (var column in grid.ColumnList)
-            {
-                styleColumnList.Append("minmax(0, 1fr) ");
-                grid.CellList.Add(new Grid2Cell
-                {
-                    Id = cellId += 1,
-                    ColumnId = column.Id,
-                    RowStateId = rowStateId,
-                    CellEnum = Grid2CellEnum.HeaderColumn,
-                    ColumnText = column.ColumnText,
-                    Description = column.Description,
-                    IsSort = IsSort(grid, column.FieldNameCSharp),
-                });
-            }
-            var filterList = new Grid2Filter(grid).TextGet();
-            foreach (var column in grid.ColumnList)
-            {
-                filterList.TryGetValue(column.FieldNameCSharp, out string text);
-                grid.CellList.Add(new Grid2Cell
-                {
-                    Id = cellId += 1,
-                    ColumnId = column.Id,
-                    RowStateId = rowStateId,
-                    CellEnum = Grid2CellEnum.Filter,
-                    Placeholder = "Search",
-                    Text = text,
-                });
-            }
-            
-            // Render Index
-            var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
-            int rowId = 0;
-            foreach (var row in grid.RowList)
-            {
-                grid.RowStateList.Add(new Grid2RowState { Id = rowStateId += 1, RowId = rowId += 1, RowEnum = GridRowEnum.Index });
-                foreach (var column in grid.ColumnList)
-                {
-                    var field = fieldList[column.FieldNameCSharp];
-                    string text = null;
-                    object value = field.PropertyInfo.GetValue(row);
-                    if (value != null)
-                    {
-                        text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
-                        text = UtilFramework.StringNull(text);
-                        if (text == null)
-                        {
-                            text = field.FrameworkType().CellTextFromValue(value);
-                        }
-                    }
-                    grid.CellList.Add(new Grid2Cell
-                    {
-                        Id = cellId += 1,
-                        ColumnId = column.Id,
-                        RowStateId = rowStateId,
-                        CellEnum = Grid2CellEnum.Index,
-                        Text = text,
-                    });
-                }
-            }
-            
-            // Render New
-            RenderRowNewAdd(grid);
-            grid.StyleColumn = styleColumnList.ToString();
-        }
-
         private static async Task ProcessIsClickSortAsync()
         {
             if (UtilSession.Request(RequestCommand.Grid2IsClickSort, out RequestJson requestJson, out Grid2 grid))
@@ -404,7 +494,7 @@
 
                 // Set sort order
                 IsSortSwitch(grid, column.FieldNameCSharp);
-                await ReloadAsync(grid);
+                await LoadAsync(grid);
             }
         }
 
@@ -662,7 +752,8 @@
                 }
                 if (rowSelected != null)
                 {
-                    RenderRowIsSelectedUpdate(grid);
+                    Render(grid);
+                    // RenderRowIsSelectedUpdate(grid);
                     Page page = grid.ComponentOwner<Page>();
                     await page.GridRowSelectedAsync(grid, rowSelected);
                 }
@@ -693,7 +784,7 @@
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Reload
-                        await ReloadAsync(grid);
+                        await LoadAsync(grid);
                     }
                 }
 
@@ -720,7 +811,7 @@
                             ProcessCellIsModifyReset(grid, cell);
                         }
                     }
-                    RenderRowRefresh(grid, cell); // Set Text
+                    Render(grid, cell); // Set Text
                     ProcessCellIsModifyUpdate(grid); // Update IsModify
                     ProcessCellIsModifyWarning(grid, cell);
                 }
@@ -753,10 +844,13 @@
                                 }
                             }
                             rowState.RowNew = null;
+                            grid.RowStateList.Add(new Grid2RowState { Id = grid.RowStateList.Count + 1, RowEnum = GridRowEnum.New });
+
                             ProcessCellIsModifyReset(grid, cell);
-                            RenderRowRefresh(grid, cell); // Set Text
+                            Render(grid, cell); // Set Text
                             ProcessCellIsModifyUpdate(grid); // Update IsModify
-                            RenderRowNewAdd(grid);
+                            await RowSelectAsync(grid, rowState); // TODO Add to command queue
+                            Render(grid);
                         }
                     }
                     ProcessCellIsModifyWarning(grid, cell);
@@ -789,9 +883,10 @@
                     // Reset filter, sort
                     grid.FilterValueList = null;
                     grid.OffsetRow = 0;
+                    grid.OffsetColumn = 0;
                     grid.IsSortFieldName = null;
 
-                    await ReloadAsync(grid);
+                    await LoadAsync(grid);
                 }
 
                 // Grid page up
@@ -803,7 +898,7 @@
                     {
                         grid.OffsetRow = 0;
                     }
-                    await ReloadAsync(grid);
+                    await LoadAsync(grid);
                 }
 
                 // Grid page down
@@ -815,7 +910,7 @@
                     {
                         grid.OffsetRow += ConfigRowCountMax(configGrid);
                     }
-                    await ReloadAsync(grid);
+                    await LoadAsync(grid);
                 }
 
                 // Grid page left
@@ -826,15 +921,14 @@
                     {
                         grid.OffsetColumn = 0;
                     }
-                    await ReloadAsync(grid);
+                    Render(grid);
                 }
 
                 // Grid page right
                 if (requestJson.GridIsClickEnum == GridIsClickEnum.PageRight)
                 {
                     grid.OffsetColumn += 1;
-                    var configGrid = ConfigGrid(grid);
-                    await ReloadAsync(grid);
+                    Render(grid);
                 }
             }
         }
