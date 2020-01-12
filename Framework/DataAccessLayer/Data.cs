@@ -676,13 +676,25 @@
         /// <summary>
         /// Sql orderby.
         /// </summary>
-        internal static IQueryable QueryOrderBy(IQueryable query, string fieldName, bool isSort)
+        internal static IOrderedQueryable QueryOrderBy(IQueryable query, string fieldName, bool isSort)
         {
             if (isSort == true)
             {
                 fieldName += " DESC";
             }
             return query.OrderBy(fieldName);
+        }
+
+        /// <summary>
+        /// Sql orderby.
+        /// </summary>
+        internal static IOrderedQueryable QueryOrderByThenBy(IOrderedQueryable query, string fieldName, bool isSort)
+        {
+            if (isSort == true)
+            {
+                fieldName += " DESC";
+            }
+            return query.ThenBy(fieldName);
         }
 
         /// <summary>

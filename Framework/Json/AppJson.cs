@@ -867,10 +867,7 @@
         internal List<Grid2FilterValue> FilterValueList;
 
         [Serialize(SerializeEnum.Session)]
-        internal string IsSortFieldName;
-
-        [Serialize(SerializeEnum.Session)]
-        internal bool IsSort;
+        internal List<Grid2SortValue> SortValueList;
 
         [Serialize(SerializeEnum.Session)]
         public int OffsetRow;
@@ -886,12 +883,12 @@
     /// </summary>
     internal sealed class Grid2FilterValue
     {
-        public Grid2FilterValue(string fieldName)
+        public Grid2FilterValue(string fieldNameCSharp)
         {
-            this.FieldName = fieldName;
+            this.FieldNameCSharp = fieldNameCSharp;
         }
 
-        public readonly string FieldName;
+        public readonly string FieldNameCSharp;
 
         public FilterOperator FilterOperator;
 
@@ -901,6 +898,46 @@
         /// Gets or sets Text of successfully parsed filter.
         /// </summary>
         public string Text;
+    }
+
+    internal sealed class Grid2SortValue
+    {
+        public Grid2SortValue(string fieldNameCSharp)
+        {
+            this.FieldNameCSharp = fieldNameCSharp;
+        }
+
+        public readonly string FieldNameCSharp;
+
+        public bool IsSort;
+
+        public static bool? IsSortGet(Grid2 grid, string fieldNameCSharp)
+        {
+            bool? result = null;
+            var value = grid.SortValueList?.FirstOrDefault();
+            if (value != null && value.FieldNameCSharp == fieldNameCSharp)
+            {
+                result = value.IsSort;
+            }
+            return result;
+        }
+
+        public static void IsSortSwitch(Grid2 grid, string fieldNameCSharp)
+        {
+            var value = grid.SortValueList.FirstOrDefault();
+            if (value != null && value.FieldNameCSharp == fieldNameCSharp)
+            {
+                value.IsSort = !value.IsSort; // Switch order
+            }
+            else
+            {
+                grid.SortValueList.Insert(0, new Grid2SortValue(fieldNameCSharp) { IsSort = false });
+            }
+            while (grid.SortValueList.Count > 2) // Order by then order by (max two levels).
+            {
+                grid.SortValueList.RemoveAt(grid.SortValueList.Count - 1);
+            }
+        }
     }
 
     /// <summary>
@@ -1059,12 +1096,12 @@
         public string Description;
 
         /// <summary>
-        /// Gets or sets IsSelect. For display only. See also <see cref="Grid2RowState.IsSelect"/>
+        /// Gets or sets IsSelect. For display only.
         /// </summary>
         public bool IsSelect;
 
         /// <summary>
-        /// Gets or sets IsSort. Display column sort triangle. See also <see cref="Grid2Column.IsSort"/>
+        /// Gets or sets IsSort. Display column sort triangle.
         /// </summary>
         public bool? IsSort;
 

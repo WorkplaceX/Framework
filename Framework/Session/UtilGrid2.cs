@@ -161,7 +161,7 @@
                             Description = column.Description,
                         });
                         grid.CellList.Add(cellLocal);
-                        cellLocal.IsSort = IsSort(grid, column.FieldNameCSharp);
+                        cellLocal.IsSort = Grid2SortValue.IsSortGet(grid, column.FieldNameCSharp);
                         cellLocal.IsVisibleScroll = true;
                     }
                     // Filter Value
@@ -282,35 +282,6 @@
         }
 
         /// <summary>
-        /// Switch IsSort on data grid.
-        /// </summary>
-        private static void IsSortSwitch(Grid2 grid, string fieldName)
-        {
-            if (grid.IsSortFieldName == fieldName)
-            {
-                grid.IsSort = !grid.IsSort;
-            }
-            else
-            {
-                grid.IsSortFieldName = fieldName;
-                grid.IsSort = false;
-            }
-        }
-
-        /// <summary>
-        /// Returns sort order for column.
-        /// </summary>
-        private static bool? IsSort(Grid2 grid, string fieldName)
-        {
-            bool? result = null;
-            if (grid.IsSortFieldName == fieldName)
-            {
-                return grid.IsSort;
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Load (full) with config.
         /// </summary>
         private static async Task LoadFullAsync(Grid2 grid, Page page, IQueryable query)
@@ -354,14 +325,31 @@
             {
                 foreach (var item in grid.FilterValueList)
                 {
-                    query = Data.QueryFilter(query, item.FieldName, item.FilterValue, item.FilterOperator);
+                    query = Data.QueryFilter(query, item.FieldNameCSharp, item.FilterValue, item.FilterOperator);
                 }
             }
 
             // Sort
-            if (grid.IsSortFieldName != null)
+            if (grid.SortValueList != null)
             {
-                query = Data.QueryOrderBy(query, grid.IsSortFieldName, grid.IsSort);
+                IOrderedQueryable queryOrder = null;
+                bool isFirst = true;
+                foreach (var value in grid.SortValueList)
+                {
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                        queryOrder = Data.QueryOrderBy(query, value.FieldNameCSharp, value.IsSort); ;
+                    }
+                    else
+                    {
+                        queryOrder = Data.QueryOrderByThenBy(queryOrder, value.FieldNameCSharp, value.IsSort); ;
+                    }
+                }
+                if (queryOrder != null)
+                {
+                    query = queryOrder;
+                }
             }
 
             // Skip, Take
@@ -492,8 +480,8 @@
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
 
-                // Set sort order
-                IsSortSwitch(grid, column.FieldNameCSharp);
+                Grid2SortValue.IsSortSwitch(grid, column.FieldNameCSharp);
+
                 await LoadAsync(grid);
             }
         }
@@ -882,9 +870,9 @@
                 {
                     // Reset filter, sort
                     grid.FilterValueList = null;
+                    grid.SortValueList = null;
                     grid.OffsetRow = 0;
                     grid.OffsetColumn = 0;
-                    grid.IsSortFieldName = null;
 
                     await LoadAsync(grid);
                 }
@@ -949,16 +937,16 @@
         /// <summary>
         /// Returns filter value for field.
         /// </summary>
-        private Grid2FilterValue FilterValue(string fieldName)
+        private Grid2FilterValue FilterValue(string fieldNameCSharp)
         {
             if (Grid.FilterValueList == null)
             {
                 Grid.FilterValueList = new List<Grid2FilterValue>();
             }
-            Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldName == fieldName).SingleOrDefault();
+            Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldNameCSharp == fieldNameCSharp).SingleOrDefault();
             if (result == null)
             {
-                result = new Grid2FilterValue(fieldName);
+                result = new Grid2FilterValue(fieldNameCSharp);
                 Grid.FilterValueList.Add(result);
             }
             return result;
@@ -971,9 +959,9 @@
             result.FilterOperator = filterOperator;
         }
 
-        internal void TextSet(string fieldName, string text)
+        internal void TextSet(string fieldNameCSharp, string text)
         {
-            Grid2FilterValue result = FilterValue(fieldName);
+            Grid2FilterValue result = FilterValue(fieldNameCSharp);
             result.Text = text;
         }
 
@@ -984,7 +972,7 @@
             {
                 foreach (var item in Grid.FilterValueList)
                 {
-                    result.Add(item.FieldName, item.Text);
+                    result.Add(item.FieldNameCSharp, item.Text);
                 }
             }
             return result;
@@ -994,7 +982,7 @@
         {
             if (Grid.FilterValueList != null)
             {
-                Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldName == fieldName).SingleOrDefault();
+                Grid2FilterValue result = Grid.FilterValueList.Where(item => item.FieldNameCSharp == fieldName).SingleOrDefault();
                 if (result != null)
                 {
                     Grid.FilterValueList.Remove(result);
