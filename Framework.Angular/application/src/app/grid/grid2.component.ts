@@ -36,8 +36,12 @@ export class Grid2 {
 
   focusout(cell) {
     if (cell.TextLeave != null) {
-      cell.Text = cell.TextLeave;
-      cell.TextLeave = null;
+      if (cell.Text != cell.TextLeave) {
+        cell.Text = cell.TextLeave;
+        cell.TextLeave = null;
+        cell.IsShowSpinner = true;
+        this.dataService.update(<RequestJson> { Command: 13, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+      }
     }
   }
 

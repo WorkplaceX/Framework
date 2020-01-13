@@ -41,6 +41,11 @@
         Grid2IsClickRow = 11,
 
         Grid2IsClickConfig = 12,
+
+        /// <summary>
+        /// Inform server about text leave event.
+        /// </summary>
+        Grid2IsTextLeave = 13,
     }
 
     /// <summary>

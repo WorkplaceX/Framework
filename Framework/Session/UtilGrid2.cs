@@ -254,6 +254,7 @@
                             Placeholder = "New",
                         });
                         grid.CellList.Add(cellLocal);
+                        cellLocal.IsVisibleScroll = true;
                     }
                 }
             }
@@ -480,6 +481,9 @@
 
             // RowIsClick
             await ProcessIsClickConfigAsync();
+
+            // IsTextLeave
+            ProcessIsTextLeave();
         }
 
         private static async Task ProcessIsClickSortAsync()
@@ -511,6 +515,19 @@
                 var pageConfigGrid = new PageConfigGrid(page);
                 pageConfigGrid.Init(tableNameCSharp, configName, column.FieldNameCSharp);
                 await pageConfigGrid.InitAsync();
+            }
+        }
+
+        /// <summary>
+        /// Synchronize Cell.Text when user leaves field.
+        /// </summary>
+        private static void ProcessIsTextLeave()
+        {
+            if (UtilSession.Request(RequestCommand.Grid2IsTextLeave, out RequestJson requestJson, out Grid2 grid))
+            {
+                Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
+                cell.Text = cell.TextLeave;
+                cell.TextLeave = null;
             }
         }
 
