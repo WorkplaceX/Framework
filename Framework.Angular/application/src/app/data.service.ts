@@ -9,6 +9,8 @@ export class RequestJson {
   Grid2CellId: number;
 
   Grid2CellText: string;
+
+  Grid2StyleColumnList: string[];
   
   ComponentId: number;
 

@@ -45,6 +45,51 @@ export class Grid2 {
     }
   }
 
+  styleColumnList(): string[] {
+    let result: string[] = [];
+    this.json.CellList.forEach(cell => {
+      if (cell.CellEnum == 4){
+        if (cell.Width == null) {
+          result.push("minmax(0, 1fr)");
+        }
+        else {
+          result.push(cell.Width);
+        }
+      }
+    });
+    return result;
+  }
+
+  resizeCell: any;
+  resizeOffset: number;
+
+  click(event: MouseEvent) {
+    event.stopPropagation(); // Prevent sort after column resize
+  }
+
+  mouseDown(cell, event: MouseEvent): boolean {
+    event.stopPropagation();
+    this.resizeCell = cell;
+    let resizeCellElement = (<HTMLElement>event.srcElement).parentElement.parentElement;
+    this.resizeOffset = resizeCellElement.offsetWidth - event.pageX;
+    return false;
+  }
+
+  documentMouseMove(event: MouseEvent) {
+    if (this.resizeCell != null) {
+      
+      this.resizeCell.Width = this.resizeOffset + event.pageX + 'px';
+      this.json.StyleColumn = this.styleColumnList().join(" ");
+    }
+  }
+
+  documentMouseUp(event: MouseEvent) {
+    if (this.resizeCell != null) {
+      this.resizeCell = null;
+      this.dataService.update(<RequestJson> { Command: 14, ComponentId: this.json.Id, Grid2StyleColumnList: this.styleColumnList() });
+    }
+  }
+
   clickGrid(isClickEnum, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.json.IsShowSpinner = true;

@@ -134,9 +134,28 @@
 
             // Render StyleColumn
             StringBuilder styleColumnList = new StringBuilder();
+            bool isFirst = true;
+            int widthEndsWithPxCount = 0;
             foreach (var column in columnList)
             {
-                styleColumnList.Append("minmax(0, 1fr) ");
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    styleColumnList.Append(" ");
+                }
+                string width = column.Width != null ? width = column.Width : width = "minmax(0, 1fr)";
+                if (width.EndsWith("px"))
+                {
+                    widthEndsWithPxCount += 1;
+                }
+                if (columnList.Count == widthEndsWithPxCount) // Set last column to dynamic, if all columns have a fix width defined.
+                {
+                    width = "minmax(0, 1fr)";
+                }
+                styleColumnList.Append(width);
             }
             grid.StyleColumn = styleColumnList.ToString();
 
@@ -163,6 +182,7 @@
                         });
                         grid.CellList.Add(cellLocal);
                         cellLocal.IsSort = Grid2SortValue.IsSortGet(grid, column.FieldNameCSharp);
+                        cellLocal.Width = column.Width;
                         cellLocal.IsVisibleScroll = true;
                     }
                     // Filter Value
@@ -484,6 +504,9 @@
 
             // IsTextLeave
             ProcessIsTextLeave();
+
+            // StyleColumn
+            ProcessStyleColumn();
         }
 
         private static async Task ProcessIsClickSortAsync()
@@ -528,6 +551,24 @@
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
                 cell.Text = cell.TextLeave;
                 cell.TextLeave = null;
+            }
+        }
+
+        /// <summary>
+        /// Send column width to server after user resizes column.
+        /// </summary>
+        private static void ProcessStyleColumn()
+        {
+            if (UtilSession.Request(RequestCommand.Grid2StyleColumn, out RequestJson requestJson, out Grid2 grid))
+            {
+                var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToArray();
+                for (int i = 0; i < columnList.Length; i++)
+                {
+                    var column = columnList[i];
+                    var width = requestJson.Grid2StyleColumnList[i];
+                    column.Width = width;
+                }
+                Render(grid); // Update Grid.StyleColumn
             }
         }
 

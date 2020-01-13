@@ -1,4 +1,4 @@
-<div style="display:grid;" [ngStyle]="{'grid-template-columns': json.StyleColumn}">
+<div style="display:grid;" [ngStyle]="{'grid-template-columns': json.StyleColumn}" (document:mousemove)="documentMouseMove($event)" (document:mouseup)="documentMouseUp($event)">
   <div *ngFor="let cell of json.CellList; trackBy trackBy;">
     <!-- HeaderColumn -->
     <div *ngIf="cell.CellEnum==4" style="display:flex; white-space:nowrap;" class="th" (click)="clickSort(cell, $event);">
@@ -12,7 +12,8 @@
         <i *ngIf="cell.Description!=null" class="fas fa-info-circle colorWhite" title="{{ cell.Description }}"></i>
         <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
       </div>
-      <div style="cursor:col-resize; width:5px;">
+      
+      <div class="gridSplitter" style="width:5px;" (click)="click($event)" (mousedown)="mouseDown(cell, $event)">
       </div>
     </div>
 

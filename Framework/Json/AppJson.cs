@@ -46,6 +46,11 @@
         /// Inform server about text leave event.
         /// </summary>
         Grid2IsTextLeave = 13,
+
+        /// <summary>
+        /// Send css grid style property grid-template-columns to server after column resize.
+        /// </summary>
+        Grid2StyleColumn = 14,
     }
 
     /// <summary>
@@ -58,6 +63,11 @@
         public int Grid2CellId { get; set; }
 
         public string Grid2CellText { get; set; }
+
+        /// <summary>
+        /// Send visible column width list to server.
+        /// </summary>
+        public string[] Grid2StyleColumnList { get; set; }
 
         /// <summary>
         /// Gets or sets Id. This is ComponentJson.Id.
@@ -883,6 +893,9 @@
         [Serialize(SerializeEnum.Session)]
         public int OffsetColumn;
 
+        /// <summary>
+        /// Gets or sets StyleColumn. This is the css grid style attribute grid-template-columns.
+        /// </summary>
         internal string StyleColumn;
     }
 
@@ -990,7 +1003,6 @@
         /// </summary>
         public bool IsVisible;
 
-        [Serialize(SerializeEnum.Ignore)]
         public bool IsVisibleScroll;
 
         /// <summary>
@@ -1002,6 +1014,11 @@
         /// Gets or sets SortField. Order as defined in sql database schema.
         /// </summary>
         public int SortField;
+
+        /// <summary>
+        /// Gets or sets Width. This is the css grid style property grid-template-columns Width.
+        /// </summary>
+        public string Width;
     }
 
     /// <summary>
@@ -1061,7 +1078,7 @@
     }
 
     /// <summary>
-    /// Grid cell display.
+    /// Grid cell display sent to client. Unlike GridColumn a cell it is not persistent and lives only while it is IsVisibleScroll or contains ErrorParse.
     /// </summary>
     internal sealed class Grid2Cell
     {
@@ -1136,6 +1153,11 @@
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public bool IsVisibleScroll;
+
+        /// <summary>
+        /// Gets or sets Width. Used for user column resize. See also StyleColumn.
+        /// </summary>
+        public string Width;
     }
 
     /// <summary>
