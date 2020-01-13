@@ -933,8 +933,11 @@
                 // Grid page right
                 if (requestJson.GridIsClickEnum == GridIsClickEnum.PageRight)
                 {
-                    grid.OffsetColumn += 1;
-                    Render(grid);
+                    if (grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid)) < grid.ColumnList.Count)
+                    {
+                        grid.OffsetColumn += 1;
+                        Render(grid);
+                    }
                 }
             }
         }

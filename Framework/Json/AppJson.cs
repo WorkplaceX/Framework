@@ -857,6 +857,9 @@
         [Serialize(SerializeEnum.Session)]
         internal string ConfigName;
 
+        /// <summary>
+        /// Gets or sets ColumnList. Does not include hidden columns.
+        /// </summary>
         [Serialize(SerializeEnum.Session)]
         internal List<Grid2Column> ColumnList;
 
