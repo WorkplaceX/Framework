@@ -897,6 +897,23 @@
         /// Gets or sets StyleColumn. This is the css grid style attribute grid-template-columns.
         /// </summary>
         internal string StyleColumn;
+
+        /// <summary>
+        /// Gets or sets GridLookup. Reference to lookup grid for this grid.
+        /// </summary>
+        internal Grid2 GridLookup;
+
+        /// <summary>
+        /// Gets or sets GridLookupDestRowStateId. If this grid is a lookup grid, this is the destination grid data row.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public int? GridLookupDestRowStateId;
+
+        /// <summary>
+        /// Gets or sets GridLookupDestFieldNameCSharp. If this grid is a lookup grid, this is the destination grid column.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public string GridLookupDestFieldNameCSharp;
     }
 
     /// <summary>
@@ -1032,6 +1049,9 @@
 
         public int? RowId; // Filter does not have a data row.
 
+        /// <summary>
+        /// Gets or sets IsSelect. User clicked and selected this data row.
+        /// </summary>
         public bool IsSelect;
 
         /// <summary>
@@ -1039,7 +1059,10 @@
         /// </summary>
         public bool IsVisibleScroll;
 
-        public Row RowNew; // Data row to insert into database.
+        /// <summary>
+        /// Gets or sets RowNew. Data row to update (index) or insert (new) into database.
+        /// </summary>
+        public Row RowNew;
     }
 
     internal enum Grid2CellEnum
@@ -1158,6 +1181,12 @@
         /// Gets or sets Width. Used for user column resize. See also StyleColumn.
         /// </summary>
         public string Width;
+
+        /// <summary>
+        /// Gets or sets GridLookup.
+        /// </summary>
+        [Serialize(SerializeEnum.Client)]
+        public Grid2 GridLookup;
     }
 
     /// <summary>
@@ -1434,10 +1463,28 @@
             return null; // No lookup data grid.
         }
 
+        /// <summary>
+        /// Override this method to return a linq query for the lookup data grid.
+        /// </summary>
+        protected virtual internal IQueryable GridLookupQuery(Grid2 grid, Row row, string fieldName, string text)
+        {
+            return null; // No lookup data grid.
+        }
+
         protected virtual internal void GridLookupQueryConfig(Grid grid, GridConfigResult config)
         {
             // Example:
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
+
+        protected virtual internal void GridLookupQueryConfig(Grid2 grid, string tableNameCSharp, GridConfigResult result)
+        {
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         /// <summary>

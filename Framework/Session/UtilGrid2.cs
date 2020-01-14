@@ -107,7 +107,7 @@
         /// <summary>
         /// Render Grid.CellList.
         /// </summary>
-        /// <param name="cell">If not null, force all cells on this column to render updated text.</param>
+        /// <param name="cell">If not null, call method GridCellText(); for all cells on this data row.</param>
         private static void Render(Grid2 grid, Grid2Cell cell = null)
         {
             // IsVisibleScroll
@@ -166,7 +166,7 @@
             var filterValueList = filter.FilterValueList();
             foreach (var rowState in rowStateList)
             {
-                // Filter
+                // Render Filter
                 if (rowState.RowEnum == GridRowEnum.Filter)
                 {
                     // Filter Header
@@ -206,7 +206,7 @@
                     }
                 }
 
-                // Index
+                // Render Index
                 if (rowState.RowEnum == GridRowEnum.Index)
                 {
                     Row row;
@@ -258,10 +258,17 @@
                             }
                         }
                         cellLocal.IsVisibleScroll = true;
+                        if (grid.GridLookup != null)
+                        {
+                            if (grid.GridLookupDestRowStateId == rowState.Id && grid.GridLookupDestFieldNameCSharp == column.FieldNameCSharp)
+                            {
+                                cellLocal.GridLookup = grid.GridLookup; // TODO Serialize GridLookup reference to JsonClient
+                            }
+                        }
                     }
                 }
 
-                // New
+                // Render New
                 if (rowState.RowEnum == GridRowEnum.New)
                 {
                     foreach (var column in columnList)
@@ -310,19 +317,34 @@
         /// <summary>
         /// Load (full) with config.
         /// </summary>
-        private static async Task LoadFullAsync(Grid2 grid, Page page, IQueryable query)
+        private static async Task LoadFullAsync(Grid2 grid, IQueryable query, Page page, bool isGridLookup)
         {
             // Get config grid and field query
             Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
-            page.Grid2QueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
+            if (isGridLookup == false)
+            {
+                page.Grid2QueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
+            }
+            else
+            {
+                page.GridLookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(query.ElementType), gridConfigResult);
+            }
 
             // Load config grid
-            grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
+            grid.ConfigGridList = new List<FrameworkConfigGridBuiltIn>();
+            if (gridConfigResult.ConfigGridQuery != null)
+            {
+                grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
+            }
             var configGrid = ConfigGrid(grid);
             query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
 
             // Load config field (Task)
-            var configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
+            var configFieldListTask = Task.FromResult(new List<FrameworkConfigFieldBuiltIn>());
+            if (gridConfigResult.ConfigFieldQuery != null)
+            {
+                configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
+            }
 
             // Load row (Task)
             var rowListTask = Data.SelectAsync(query);
@@ -388,13 +410,8 @@
             grid.RowList = await Data.SelectAsync(query);
         }
 
-        /// <summary>
-        /// Load or reload data grid.
-        /// </summary>
-        public static async Task LoadAsync(Grid2 grid)
+        private static async Task LoadAsync(Grid2 grid, IQueryable query, Page page, bool isGridLookup)
         {
-            Page page = grid.ComponentOwner<Page>();
-            IQueryable query = page.Grid2Query(grid);
             Type typeRowOld = grid.TypeRow;
             grid.TypeRow = query?.ElementType;
             grid.DatabaseEnum = DatabaseMemoryInternal.DatabaseEnum(query);
@@ -402,6 +419,7 @@
             if (grid.TypeRow == null)
             {
                 grid.ColumnList = new List<Grid2Column>(); ;
+                grid.RowStateList = new List<Grid2RowState>();
                 grid.RowList = new List<Row>();
                 grid.CellList = new List<Grid2Cell>();
                 Render(grid);
@@ -412,7 +430,7 @@
             if (typeRowOld != query?.ElementType)
             {
                 // ColumnList, RowList
-                await LoadFullAsync(grid, page, query);
+                await LoadFullAsync(grid, query, page, isGridLookup);
             }
             else
             {
@@ -431,6 +449,16 @@
         }
 
         /// <summary>
+        /// Load or reload data grid.
+        /// </summary>
+        public static async Task LoadAsync(Grid2 grid)
+        {
+            Page page = grid.ComponentOwner<Page>();
+            IQueryable query = page.Grid2Query(grid);
+            await LoadAsync(grid, query, page, isGridLookup: false);
+        }
+
+        /// <summary>
         /// Returns data grid configuration record.
         /// </summary>
         private static FrameworkConfigGridBuiltIn ConfigGrid(Grid2 grid)
@@ -444,7 +472,7 @@
         /// </summary>
         private static int ConfigRowCountMax(FrameworkConfigGridBuiltIn configGrid)
         {
-            return configGrid.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
+            return configGrid?.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
         }
 
         /// <summary>
@@ -483,32 +511,53 @@
         }
 
         /// <summary>
+        /// User modified text, now open lookup window.
+        /// </summary>
+        private static async Task ProcessGridLookupOpenAsync(Grid2 grid, Page page, Grid2RowState rowState, Grid2Column column, Grid2Cell cell)
+        {
+            var query = page.GridLookupQuery(grid, rowState.RowNew, column.FieldNameCSharp, cell.Text);
+            if (query != null)
+            {
+                if (grid.GridLookup == null)
+                {
+                    grid.GridLookup = new Grid2(grid) { IsHide = true };
+                    grid.GridLookupDestRowStateId = rowState.Id;
+                    grid.GridLookupDestFieldNameCSharp = column.FieldNameCSharp;
+                }
+                await LoadAsync(grid.GridLookup, query, page, isGridLookup: true);
+            }
+        }
+
+        /// <summary>
         /// Process incoming RequestJson.
         /// </summary>
         public static async Task ProcessAsync()
         {
-            // IsClickSort
+            // IsClickSort (user clicked column sort)
             await ProcessIsClickSortAsync();
 
-            // CellIsModify
+            // CellIsModify (user changed text)
             await ProcessCellIsModify();
 
-            // IsClickEnum
+            // IsClickEnum (user clicked paging button)
             await ProcessIsClickEnum();
 
-            // RowIsClick
+            // RowIsClick (user clicked data row)
             await ProcessRowIsClickAsync();
 
-            // RowIsClick
+            // IsClickConfig (user clicked column configuration button)
             await ProcessIsClickConfigAsync();
 
-            // IsTextLeave
+            // IsTextLeave (user clicked tab button to leave cell)
             ProcessIsTextLeave();
 
-            // StyleColumn
+            // StyleColumn (user changed with mouse column width)
             ProcessStyleColumn();
         }
 
+        /// <summary>
+        /// User clicked column sort.
+        /// </summary>
         private static async Task ProcessIsClickSortAsync()
         {
             if (UtilSession.Request(RequestCommand.Grid2IsClickSort, out RequestJson requestJson, out Grid2 grid))
@@ -806,6 +855,9 @@
             }
         }
 
+        /// <summary>
+        /// User modified text.
+        /// </summary>
         private static async Task ProcessCellIsModify()
         {
             if (UtilSession.Request(RequestCommand.Grid2CellIsModify, out RequestJson requestJson, out Grid2 grid))
@@ -858,7 +910,10 @@
                             ProcessCellIsModifyReset(grid, cell);
                         }
                     }
-                    Render(grid, cell); // Set Text
+                    // Lookup
+                    await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+
+                    Render(grid, cell); // Call method GridCellText(); for all cells on this data row
                     ProcessCellIsModifyUpdate(grid); // Update IsModify
                     ProcessCellIsModifyWarning(grid, cell);
                 }
@@ -894,17 +949,21 @@
                             grid.RowStateList.Add(new Grid2RowState { Id = grid.RowStateList.Count + 1, RowEnum = GridRowEnum.New });
 
                             ProcessCellIsModifyReset(grid, cell);
-                            Render(grid, cell); // Set Text
                             ProcessCellIsModifyUpdate(grid); // Update IsModify
-                            await RowSelectAsync(grid, rowState); // TODO Add to command queue
+                            await RowSelectAsync(grid, rowState);
                             Render(grid);
                         }
                     }
                     ProcessCellIsModifyWarning(grid, cell);
+                    // Lookup
+                    await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
                 }
             }
         }
 
+        /// <summary>
+        /// User clicked paging button.
+        /// </summary>
         private static async Task ProcessIsClickEnum()
         {
             if (UtilSession.Request(RequestCommand.Grid2IsClickEnum, out RequestJson requestJson, out Grid2 grid))

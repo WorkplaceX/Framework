@@ -619,20 +619,16 @@
         /// <summary>
         /// Select data from database.
         /// </summary>
-        public static async Task<List<Row>> SelectAsync(IQueryable query)
+        public static Task<List<Row>> SelectAsync(IQueryable query)
         {
             UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));
 
-            var list = await query.ToDynamicListAsync();
-            List<Row> result = list.Cast<Row>().ToList();
-            return result;
+            return query.ToDynamicListAsync().ContinueWith(list => list.Result.Cast<Row>().ToList());
         }
 
-        public static async Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
+        public static Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
         {
-            var list = await SelectAsync((IQueryable)query);
-            List<TRow> result = list.Cast<TRow>().ToList();
-            return result;
+            return SelectAsync((IQueryable)query).ContinueWith(list => list.Result.Cast<TRow>().ToList());
         }
 
         internal static IQueryable QueryFilter(IQueryable query, string fieldName, object filterValue, FilterOperator filterOperator)
@@ -1613,7 +1609,14 @@
         /// </summary>
         internal static PropertyInfo[] TypeRowToPropertyInfoList(Type typeRow)
         {
-            return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            if (typeRow == null)
+            {
+                return new PropertyInfo[] { };
+            }
+            else
+            {
+                return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            }
         }
 
         internal class Field
