@@ -11,6 +11,19 @@
     {
         public static void Run()
         {
+            {
+                var source = new MyApp();
+                var myGrid = new MyGrid(source) { Text = "K7", IsHide = true };
+                var myGrid2 = new MyGrid(source) { Text = "K8", IsHide = true };
+                source.MyCell = new MyCell { MyGrid = myGrid, MyGrid2 = myGrid2, MyText = "7755" };
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyApp)UtilJson.Deserialize(jsonSession);
+
+                UtilFramework.Assert(jsonClient.Contains("K7"));
+                UtilFramework.Assert(!jsonClient.Contains("K8"));
+            }
             RunComponentJson();
             {
                 A source = new A();
@@ -422,6 +435,38 @@
                 }
             }
         }
+    }
+
+    public class MyApp : ComponentJson
+    {
+        public MyApp() 
+            : base(null)
+        {
+
+        }
+
+        public MyCell MyCell;
+    }
+
+    public class MyCell
+    {
+        public string MyText;
+
+        [Serialize(SerializeEnum.Client)]
+        public MyGrid MyGrid;
+
+        public MyGrid MyGrid2;
+    }
+
+    public class MyGrid : ComponentJson
+    {
+        public MyGrid(ComponentJson owner) 
+            : base(owner)
+        {
+
+        }
+
+        public string Text;
     }
 
     public class My
