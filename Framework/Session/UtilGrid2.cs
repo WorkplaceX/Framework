@@ -262,7 +262,7 @@
                         {
                             if (grid.GridLookupDestRowStateId == rowState.Id && grid.GridLookupDestFieldNameCSharp == column.FieldNameCSharp)
                             {
-                                cellLocal.GridLookup = grid.GridLookup; // TODO Serialize GridLookup reference to JsonClient
+                                cellLocal.GridLookup = grid.GridLookup;
                             }
                         }
                     }
@@ -317,17 +317,18 @@
         /// <summary>
         /// Load (full) with config.
         /// </summary>
-        private static async Task LoadFullAsync(Grid2 grid, IQueryable query, Page page, bool isGridLookup)
+        private static async Task LoadFullAsync(Grid2 grid, IQueryable query, Page page)
         {
+            UtilFramework.Assert(grid.TypeRow == query.ElementType);
             // Get config grid and field query
             Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
-            if (isGridLookup == false)
+            if (grid.IsGridLookup == false)
             {
                 page.Grid2QueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
             }
             else
             {
-                page.GridLookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(query.ElementType), gridConfigResult);
+                page.GridLookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
             }
 
             // Load config grid
@@ -410,7 +411,7 @@
             grid.RowList = await Data.SelectAsync(query);
         }
 
-        private static async Task LoadAsync(Grid2 grid, IQueryable query, Page page, bool isGridLookup)
+        private static async Task LoadAsync(Grid2 grid, IQueryable query, Page page)
         {
             Type typeRowOld = grid.TypeRow;
             grid.TypeRow = query?.ElementType;
@@ -422,6 +423,7 @@
                 grid.RowStateList = new List<Grid2RowState>();
                 grid.RowList = new List<Row>();
                 grid.CellList = new List<Grid2Cell>();
+                grid.GridLookup = null;
                 Render(grid);
                 return;
             }
@@ -430,7 +432,7 @@
             if (typeRowOld != query?.ElementType)
             {
                 // ColumnList, RowList
-                await LoadFullAsync(grid, query, page, isGridLookup);
+                await LoadFullAsync(grid, query, page);
             }
             else
             {
@@ -454,8 +456,70 @@
         public static async Task LoadAsync(Grid2 grid)
         {
             Page page = grid.ComponentOwner<Page>();
-            IQueryable query = page.Grid2Query(grid);
-            await LoadAsync(grid, query, page, isGridLookup: false);
+            IQueryable query;
+            if (grid.IsGridLookup == false)
+            {
+                query = page.Grid2Query(grid);
+            }
+            else
+            {
+                GridLookupToGridDest(grid, out Grid2 gridDest, out Row rowDest, out string fieldNameCSharpDest, out Grid2Cell cellDest);
+                query = page.GridLookupQuery(gridDest, rowDest, fieldNameCSharpDest, cellDest.Text);
+            }
+            await LoadAsync(grid, query, page);
+        }
+
+        /// <summary>
+        /// GridLookup to GridDest. GridDest is the destination grid to write to when user selects a row in lookup grid.
+        /// </summary>
+        private static void GridLookupToGridDest(Grid2 gridLookup, out Grid2 gridDest, out Row rowDest, out string fieldNameCSharpDest, out Grid2Cell cellDest)
+        {
+            UtilFramework.Assert(gridLookup.IsGridLookup);
+            gridDest = gridLookup.GridDest;
+            var rowStateDest = gridDest.RowStateList[gridLookup.GridLookupDestRowStateId.Value - 1];
+            rowDest = gridDest.RowList[rowStateDest.RowId.Value - 1];
+            fieldNameCSharpDest = gridLookup.GridLookupDestFieldNameCSharp;
+            var fieldNameCSharpDestLocal = fieldNameCSharpDest;
+            var columnDest = gridDest.ColumnList.Where(item => item.FieldNameCSharp == fieldNameCSharpDestLocal).Single();
+            cellDest = gridDest.CellList.Where(item => item.RowStateId == rowStateDest.Id && item.ColumnId == columnDest.Id).Single();
+        }
+
+        /// <summary>
+        /// Close lookup data grid.
+        /// </summary>
+        private static void GridLookupClose(Grid2 grid)
+        {
+            if (grid.GridLookup != null)
+            {
+                UtilFramework.Assert(grid.GridLookup.IsGridLookup);
+                GridLookupToGridDest(grid.GridLookup, out var _, out var _, out var _, out var cellDest);
+                cellDest.GridLookup = null;
+                grid.GridLookup = null;
+            }
+        }
+
+        /// <summary>
+        /// Open lookup data grid.
+        /// </summary>
+        private static void GridLookupOpen(Grid2 grid, Grid2RowState rowState, string fieldNameCSharp, Grid2Cell cell)
+        {
+            if (grid.GridLookup == null)
+            {
+                UtilFramework.Assert(cell.GridLookup == null);
+                Grid2 gridLookup = new Grid2(grid);
+                grid.GridLookup = gridLookup;
+                cell.GridLookup = gridLookup;
+
+                gridLookup.IsHide = true; // Render data grid to cell. See also property GridCell.GridLookup
+                gridLookup.IsGridLookup = true;
+                grid.GridLookup.GridDest = grid;
+                gridLookup.GridLookupDestRowStateId = rowState.Id;
+                gridLookup.GridLookupDestFieldNameCSharp = fieldNameCSharp;
+            }
+            UtilFramework.Assert(grid.GridLookup.IsGridLookup);
+            UtilFramework.Assert(grid.GridLookup.GridLookupDestRowStateId == rowState.Id && cell.RowStateId == rowState.Id);
+            UtilFramework.Assert(grid.GridLookup.GridLookupDestFieldNameCSharp == fieldNameCSharp && grid.ColumnList[cell.ColumnId - 1].FieldNameCSharp == fieldNameCSharp);
+            UtilFramework.Assert(grid.GridLookup.GridDest == grid);
         }
 
         /// <summary>
@@ -518,13 +582,8 @@
             var query = page.GridLookupQuery(grid, rowState.RowNew, column.FieldNameCSharp, cell.Text);
             if (query != null)
             {
-                if (grid.GridLookup == null)
-                {
-                    grid.GridLookup = new Grid2(grid) { IsHide = true };
-                    grid.GridLookupDestRowStateId = rowState.Id;
-                    grid.GridLookupDestFieldNameCSharp = column.FieldNameCSharp;
-                }
-                await LoadAsync(grid.GridLookup, query, page, isGridLookup: true);
+                GridLookupOpen(grid, rowState, column.FieldNameCSharp, cell);
+                await LoadAsync(grid.GridLookup, query, page);
             }
         }
 
@@ -845,12 +904,14 @@
                         }
                     }
                 }
+
+                GridLookupClose(grid);
+
                 if (rowSelected != null)
                 {
                     Render(grid);
-                    // RenderRowIsSelectedUpdate(grid);
                     Page page = grid.ComponentOwner<Page>();
-                    await page.GridRowSelectedAsync(grid, rowSelected);
+                    await page.GridRowSelectedAsync(grid, rowSelected); // Load detail data grid
                 }
             }
         }

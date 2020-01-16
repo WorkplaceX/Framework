@@ -28,7 +28,7 @@ export class Grid2 {
   }
 
   focus(cell) {
-    if (cell.CellEnum==2 && !cell.IsSelect) {
+    if (!cell.IsSelect) {
       cell.IsShowSpinner = true;
       this.dataService.update(<RequestJson> { Command: 11, ComponentId: this.json.Id, Grid2CellId: cell.Id });
     }

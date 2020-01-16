@@ -899,18 +899,29 @@
         internal string StyleColumn;
 
         /// <summary>
+        /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public bool IsGridLookup;
+
+        /// <summary>
         /// Gets or sets GridLookup. Reference to lookup grid for this grid.
         /// </summary>
         internal Grid2 GridLookup;
 
         /// <summary>
-        /// Gets or sets GridLookupDestRowStateId. If this grid is a lookup grid, this is the destination grid data row.
+        /// Gets or sets GridDest. If this data grid is a lookup grid, this is the destination data grid to write to after selection.
+        /// </summary>
+        internal Grid2 GridDest;
+
+        /// <summary>
+        /// Gets or sets GridLookupDestRowStateId. If this data grid is a lookup grid, this is the destination data row to write to after selection.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public int? GridLookupDestRowStateId;
 
         /// <summary>
-        /// Gets or sets GridLookupDestFieldNameCSharp. If this grid is a lookup grid, this is the destination grid column.
+        /// Gets or sets GridLookupDestFieldNameCSharp. If this data grid is a lookup grid, this is the destination grid column (to write to) after selection.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public string GridLookupDestFieldNameCSharp;
@@ -1162,7 +1173,7 @@
         public string Description;
 
         /// <summary>
-        /// Gets or sets IsSelect. For display only.
+        /// Gets or sets IsSelect. If true, cell belongs to selected row.
         /// </summary>
         public bool IsSelect;
 
@@ -1185,7 +1196,7 @@
         /// <summary>
         /// Gets or sets GridLookup.
         /// </summary>
-        [Serialize(SerializeEnum.Client)]
+        [Serialize(SerializeEnum.Both)] // By default, reference to ComponentJson is not sent to client. Serialize grid to client exclusively. JsonSession serializes it as reference.
         public Grid2 GridLookup;
     }
 

@@ -611,6 +611,9 @@ namespace Framework.Json
                 // writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType()));
             }
 
+            /// <summary>
+            /// Returns true if 'property' and 'value' is a reference to a ComponentJson and serializes it to jsonSession.
+            /// </summary>
             private bool ReferenceSerialize(object obj, DeclarationProperty property, object value, ref ComponentJson componentJsonRoot, Writer writer)
             {
                 bool result = false;
@@ -637,7 +640,7 @@ namespace Framework.Json
                         }
                         else
                         {
-                            // Dto referenced ComponentJson in object gwith.
+                            // Dto referenced ComponentJson in object graph.
                             result = true;
                         }
                     }
@@ -652,6 +655,7 @@ namespace Framework.Json
                         }
                         UtilFramework.Assert(valueComponentJson.Root == componentJsonRoot, "Referenced ComponentJson not in same object graph!");
                         result = true;
+                        writer.SerializeStart(null, false); // Do not serialize reference to client
                         writer.WriteStartObject();
                         if (id != null)
                         {
@@ -662,10 +666,7 @@ namespace Framework.Json
                             writer.WriteNull("$referenceId");
                         }
                         writer.WriteEndObject();
-                        if (writer.IsSerializeClient)
-                        {
-                            throw new Exception(); // Do not send reference to client.
-                        }
+                        writer.SerializeEnd();
                     }
                 }
                 return result;
@@ -673,14 +674,17 @@ namespace Framework.Json
 
             private void SerializeObject(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Writer writer)
             {
+                bool isReference = ReferenceSerialize(obj, property, value, ref componentJsonRoot, writer);
                 bool isSerializeClientExclusive = (property?.IsSerializeClientExclusive).GetValueOrDefault();
-                if (!isSerializeClientExclusive && ReferenceSerialize(obj, property, value, ref componentJsonRoot, writer))
+                if (isReference && !isSerializeClientExclusive)
                 {
                     return;
                 }
                 DeclarationObject declarationObject;
                 declarationObject = DeclarationObjectGet(value.GetType());
-                writer.SerializeStart(null, (bool?)isSerializeClientExclusive | ((value is ComponentJson) ? true : (bool?)null));
+                bool? isSerializeSessionObject = isReference && isSerializeClientExclusive ? false : (bool?)null; // Session reference has already been serialized by method ReferenceSerialize();
+                bool? isSerializeClientObject = (bool?)isSerializeClientExclusive | ((value is ComponentJson) ? true : (bool?)null); // Serialize to client if client attribute is declared on property.
+                writer.SerializeStart(isSerializeSessionObject, isSerializeClientObject);
                 writer.StackRootValidate();
 
                 writer.WriteStartObject();

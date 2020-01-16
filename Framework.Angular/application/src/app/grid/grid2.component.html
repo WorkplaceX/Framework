@@ -36,7 +36,7 @@
         <i *ngIf="cell.CellEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
       </div>
     </div>
-
+    <div data-Grid2 *ngIf="cell.GridLookup" [json]="cell.GridLookup" class="gridLookup"></div>
   </div>
 </div>
 

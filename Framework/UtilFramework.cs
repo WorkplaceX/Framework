@@ -283,6 +283,25 @@ namespace Framework
             return result.ToString();
         }
 
+        /// <summary>
+        /// Returns count of how many time 'find' has been found in 'text'.
+        /// </summary>
+        internal static int FindCount(string text, string find)
+        {
+            int result = 0;
+            int index = 0;
+            do
+            {
+                index = text.IndexOf(find, index);
+                if (index != -1)
+                {
+                    result += 1;
+                    index += find.Length;
+                }
+            } while (index != -1);
+            return result;
+        }
+
         internal static string DateTimeToString(DateTime dateTime, bool isThousand = false)
         {
             string format = "yyyy-MM-dd HH:mm:ss";

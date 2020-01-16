@@ -14,6 +14,19 @@
             {
                 var source = new MyApp();
                 var myGrid = new MyGrid(source) { Text = "K7", IsHide = true };
+                source.MyCell = new MyCell { MyGridBoth = myGrid, MyText = "7755" };
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyApp)UtilJson.Deserialize(jsonSession);
+
+                UtilFramework.Assert(UtilFramework.FindCount(jsonClient, "K7") == 1);
+                UtilFramework.Assert(UtilFramework.FindCount(jsonSession, "K7") == 1); // Ensure session stores reference
+                UtilFramework.Assert(dest.List[0] == dest.MyCell.MyGridBoth);
+            }
+            {
+                var source = new MyApp();
+                var myGrid = new MyGrid(source) { Text = "K7", IsHide = true };
                 var myGrid2 = new MyGrid(source) { Text = "K8", IsHide = true };
                 source.MyCell = new MyCell { MyGrid = myGrid, MyGrid2 = myGrid2, MyText = "7755" };
 
@@ -23,6 +36,7 @@
 
                 UtilFramework.Assert(jsonClient.Contains("K7"));
                 UtilFramework.Assert(!jsonClient.Contains("K8"));
+                UtilFramework.Assert(dest.List[1] == dest.MyCell.MyGrid2);
             }
             RunComponentJson();
             {
@@ -456,6 +470,9 @@
         public MyGrid MyGrid;
 
         public MyGrid MyGrid2;
+
+        [Serialize(SerializeEnum.Both)]
+        public MyGrid MyGridBoth;
     }
 
     public class MyGrid : ComponentJson
