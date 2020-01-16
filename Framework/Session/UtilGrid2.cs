@@ -107,7 +107,7 @@
         /// <summary>
         /// Render Grid.CellList.
         /// </summary>
-        /// <param name="cell">If not null, call method GridCellText(); for all cells on this data row.</param>
+        /// <param name="cell">If not null, method GridCellText(); is called for all cells on this data row.</param>
         private static void Render(Grid2 grid, Grid2Cell cell = null)
         {
             // IsVisibleScroll
@@ -315,7 +315,7 @@
         }
 
         /// <summary>
-        /// Load (full) with config.
+        /// Load (full) data grid with config.
         /// </summary>
         private static async Task LoadFullAsync(Grid2 grid, IQueryable query, Page page)
         {
@@ -363,7 +363,7 @@
         }
 
         /// <summary>
-        /// Load (reload)
+        /// Load (reload) data grid. Config is not loaded again.
         /// </summary>
         private static async Task LoadReloadAsync(Grid2 grid, IQueryable query)
         {
@@ -411,6 +411,9 @@
             grid.RowList = await Data.SelectAsync(query);
         }
 
+        /// <summary>
+        /// Load or reload data grid. Also first load for lookup.
+        /// </summary>
         private static async Task LoadAsync(Grid2 grid, IQueryable query, Page page)
         {
             Type typeRowOld = grid.TypeRow;
@@ -625,6 +628,7 @@
                 Grid2Column column = grid.ColumnList[cell.ColumnId - 1];
 
                 Grid2SortValue.IsSortSwitch(grid, column.FieldNameCSharp);
+                grid.OffsetRow = 0; // Page to first row after user clicked column sort.
 
                 await LoadAsync(grid);
             }
@@ -663,7 +667,7 @@
         }
 
         /// <summary>
-        /// Send column width to server after user resizes column.
+        /// Send column width to server after user resizes a column.
         /// </summary>
         private static void ProcessStyleColumn()
         {
@@ -680,7 +684,10 @@
             }
         }
 
-        private static void ProcessCellIsModifyWarning(Grid2 grid, Grid2Cell cell)
+        /// <summary>
+        /// Show warning message on cell if row could not be saved.
+        /// </summary>
+        private static void ProcessCellIsModifyWarningNotSaved(Grid2 grid, Grid2Cell cell)
         {
             foreach (var item in grid.CellList)
             {
@@ -976,7 +983,7 @@
 
                     Render(grid, cell); // Call method GridCellText(); for all cells on this data row
                     ProcessCellIsModifyUpdate(grid); // Update IsModify
-                    ProcessCellIsModifyWarning(grid, cell);
+                    ProcessCellIsModifyWarningNotSaved(grid, cell); // Not saved warning
                 }
 
                 // Parse New
@@ -1015,7 +1022,7 @@
                             Render(grid);
                         }
                     }
-                    ProcessCellIsModifyWarning(grid, cell);
+                    ProcessCellIsModifyWarningNotSaved(grid, cell);
                     // Lookup
                     await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
                 }
@@ -1073,9 +1080,10 @@
                 {
                     var configGrid = ConfigGrid(grid);
                     int rowCount = grid.RowList.Count;
-                    if (rowCount == configGrid.RowCountMax) // Page down further on full grid only.
+                    int rowCountMax = ConfigRowCountMax(configGrid);
+                    if (rowCount == rowCountMax) // Page down further on full grid only.
                     {
-                        grid.OffsetRow += ConfigRowCountMax(configGrid);
+                        grid.OffsetRow += rowCountMax;
                     }
                     await LoadAsync(grid);
                 }
