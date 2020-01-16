@@ -18,12 +18,13 @@ export class Grid2 {
   }
 
   clickSort(cell, event: MouseEvent) {
+    cell.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, Grid2CellId: cell.Id });
   }
 
   clickConfig(cell, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
-    cell.IsShowSpinned = true;
+    cell.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 12, ComponentId: this.json.Id, Grid2CellId: cell.Id });
   }
 
