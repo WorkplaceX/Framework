@@ -31,6 +31,26 @@
         GridCellIsModify = 6,
 
         BootstrapNavbarButtonIsClick = 7,
+
+        Grid2IsClickSort = 8,
+
+        Grid2CellIsModify = 9,
+
+        Grid2IsClickEnum = 10,
+
+        Grid2IsClickRow = 11,
+
+        Grid2IsClickConfig = 12,
+
+        /// <summary>
+        /// Inform server about text leave event.
+        /// </summary>
+        Grid2IsTextLeave = 13,
+
+        /// <summary>
+        /// Send css grid style property grid-template-columns to server after column resize.
+        /// </summary>
+        Grid2StyleColumn = 14,
     }
 
     /// <summary>
@@ -39,6 +59,15 @@
     internal class RequestJson
     {
         public RequestCommand Command { get; set; }
+
+        public int Grid2CellId { get; set; }
+
+        public string Grid2CellText { get; set; }
+
+        /// <summary>
+        /// Send visible column width list to server.
+        /// </summary>
+        public string[] Grid2StyleColumnList { get; set; }
 
         /// <summary>
         /// Gets or sets Id. This is ComponentJson.Id.
@@ -56,9 +85,9 @@
         public string GridCellText { get; set; }
 
         /// <summary>
-        /// Gets GridCellTextIsInternal. If true, text has been set internally by look select row.
+        /// Gets GridCellTextIsInternal. If true, text has been set internally by grid lookup select row.
         /// </summary>
-        public bool GridCellTextIsInternal; // TODO Command Queue
+        public bool GridCellTextIsLookup; // TODO Command Queue
 
         public int BootstrapNavbarButtonId { get; set; }
 
@@ -164,7 +193,7 @@
         }
 
         /// <summary>
-        /// Gets Id.
+        /// Gets Id. Client sends command to server. See also <see cref="RequestJson.ComponentId"/>
         /// </summary>
         public int Id { get; internal set; }
 
@@ -786,6 +815,391 @@
         }
     }
 
+    public class Grid2 : ComponentJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Grid2(ComponentJson owner) 
+            : base( owner)
+        {
+
+        }
+
+        /// <summary>
+        /// TypeRow of loaded data grid.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal Type TypeRow;
+
+        /// <summary>
+        /// DatabaseEnum of loaded grid.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal DatabaseEnum DatabaseEnum;
+
+        /// <summary>
+        /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
+        /// </summary>
+        public async Task LoadAsync()
+        {
+            await UtilGrid2.LoadAsync(this);
+        }
+
+        /// <summary>
+        /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property ConfigName.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal List<FrameworkConfigGridBuiltIn> ConfigGridList;
+
+        /// <summary>
+        /// Gets or sets ConfigFieldList. Can contain multiple configurations. See also property ConfigName.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal List<FrameworkConfigFieldBuiltIn> ConfigFieldList;
+
+        [Serialize(SerializeEnum.Session)]
+        internal List<Row> RowList;
+
+        /// <summary>
+        /// Gets or sets ConfigName. Multiple configurations can be stored.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal string ConfigName;
+
+        /// <summary>
+        /// Gets or sets ColumnList. Does not include hidden columns.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2Column> ColumnList;
+
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2RowState> RowStateList;
+
+        /// <summary>
+        /// Gets or sets GridCellList.
+        /// </summary>
+        internal List<Grid2Cell> CellList;
+
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2FilterValue> FilterValueList;
+
+        [Serialize(SerializeEnum.Session)]
+        internal List<Grid2SortValue> SortValueList;
+
+        [Serialize(SerializeEnum.Session)]
+        public int OffsetRow;
+
+        [Serialize(SerializeEnum.Session)]
+        public int OffsetColumn;
+
+        /// <summary>
+        /// Gets or sets StyleColumn. This is the css grid style attribute grid-template-columns.
+        /// </summary>
+        internal string StyleColumn;
+
+        /// <summary>
+        /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public bool IsGridLookup;
+
+        /// <summary>
+        /// Gets or sets GridLookup. Reference to lookup grid for this grid.
+        /// </summary>
+        internal Grid2 GridLookup;
+
+        /// <summary>
+        /// Gets or sets GridDest. If this data grid is a lookup grid, this is the destination data grid to write to after selection.
+        /// </summary>
+        internal Grid2 GridDest;
+
+        /// <summary>
+        /// Gets or sets GridLookupDestRowStateId. If this data grid is a lookup grid, this is the destination data row to write to after selection.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public int? GridLookupDestRowStateId;
+
+        /// <summary>
+        /// Gets or sets GridLookupDestFieldNameCSharp. If this data grid is a lookup grid, this is the destination grid column (to write to) after selection.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public string GridLookupDestFieldNameCSharp;
+    }
+
+    /// <summary>
+    /// Stores successfully parsed filter value and operator.
+    /// </summary>
+    internal sealed class Grid2FilterValue
+    {
+        public Grid2FilterValue(string fieldNameCSharp)
+        {
+            this.FieldNameCSharp = fieldNameCSharp;
+        }
+
+        public readonly string FieldNameCSharp;
+
+        public FilterOperator FilterOperator;
+
+        /// <summary>
+        /// Gets or sets FilterValue. This is the successfully parsed user input value.
+        /// </summary>
+        public object FilterValue;
+
+        /// <summary>
+        /// Gets or sets IsClear. If true, filter has been cleared and is not applied.
+        /// </summary>
+        public bool IsClear;
+
+        /// <summary>
+        /// Gets or sets Text of successfully parsed filter.
+        /// </summary>
+        public string Text;
+
+        /// <summary>
+        /// Gets or sets TextLeave. If filter has user input focus, parser can not override text untill user leaves the field.
+        /// </summary>
+        public string TextLeave;
+
+        /// <summary>
+        /// Gets or sets IsFocus. If true, filter has user input focus.
+        /// </summary>
+        public bool IsFocus;
+    }
+
+    internal sealed class Grid2SortValue
+    {
+        public Grid2SortValue(string fieldNameCSharp)
+        {
+            this.FieldNameCSharp = fieldNameCSharp;
+        }
+
+        public readonly string FieldNameCSharp;
+
+        public bool IsSort;
+
+        public static bool? IsSortGet(Grid2 grid, string fieldNameCSharp)
+        {
+            bool? result = null;
+            var value = grid.SortValueList?.FirstOrDefault();
+            if (value != null && value.FieldNameCSharp == fieldNameCSharp)
+            {
+                result = value.IsSort;
+            }
+            return result;
+        }
+
+        public static void IsSortSwitch(Grid2 grid, string fieldNameCSharp)
+        {
+            var value = grid.SortValueList.FirstOrDefault();
+            if (value != null && value.FieldNameCSharp == fieldNameCSharp)
+            {
+                value.IsSort = !value.IsSort; // Switch order
+            }
+            else
+            {
+                grid.SortValueList.Insert(0, new Grid2SortValue(fieldNameCSharp) { IsSort = false });
+            }
+            while (grid.SortValueList.Count > 2) // Order by then order by (max two levels).
+            {
+                grid.SortValueList.RemoveAt(grid.SortValueList.Count - 1);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Not sent to client.
+    /// </summary>
+    internal sealed class Grid2Column
+    {
+        public int Id;
+
+        public string FieldNameCSharp;
+
+        /// <summary>
+        /// Gets or sets ColumnText. This is the header text for filter.
+        /// </summary>
+        public string ColumnText;
+
+        /// <summary>
+        /// Gets or sets Description. Shown with an information icon in header.
+        /// </summary>
+        public string Description;
+
+        /// <summary>
+        /// Gets or sets IsVisible. If true, column is shown in data grid.
+        /// </summary>
+        public bool IsVisible;
+
+        public bool IsVisibleScroll;
+
+        /// <summary>
+        /// Gets or sets Sort. Order as defined in data grid field config.
+        /// </summary>
+        public double? Sort;
+
+        /// <summary>
+        /// Gets or sets SortField. Order as defined in sql database schema.
+        /// </summary>
+        public int SortField;
+
+        /// <summary>
+        /// Gets or sets Width. This is the css grid style property grid-template-columns Width.
+        /// </summary>
+        public string Width;
+    }
+
+    /// <summary>
+    /// Keeps track of data row state. Not sent to client.
+    /// </summary>
+    internal sealed class Grid2RowState
+    {
+        public int Id;
+
+        public GridRowEnum RowEnum;
+
+        public int? RowId; // Filter does not have a data row.
+
+        /// <summary>
+        /// Gets or sets IsSelect. User clicked and selected this data row.
+        /// </summary>
+        public bool IsSelect;
+
+        /// <summary>
+        /// Gets or sets IsVisibleScroll. For vertical paging (no database select).
+        /// </summary>
+        public bool IsVisibleScroll;
+
+        /// <summary>
+        /// Gets or sets RowNew. Data row to update (index) or insert (new) into database.
+        /// </summary>
+        public Row RowNew;
+    }
+
+    internal enum Grid2CellEnum
+    {
+        None = 0,
+
+        /// <summary>
+        /// Data grid filter cell. <see cref="GridRowEnum.Filter"/>
+        /// </summary>
+        Filter = 1,
+
+        /// <summary>
+        /// Data grid cell. <see cref="GridRowEnum.Index"/>
+        /// </summary>
+        Index = 2,
+
+        /// <summary>
+        /// Data grid cell. <see cref="GridRowEnum.New"/>
+        /// </summary>
+        New = 3,
+
+        /// <summary>
+        /// Column header with IsSort.
+        /// </summary>
+        HeaderColumn = 4,
+
+        /// <summary>
+        /// Cell label in skyscraper mode.
+        /// </summary>
+        HeaderRow = 5,
+
+        /// <summary>
+        /// Separator label in skyscraper mode.
+        /// </summary>
+        Separator = 6,
+    }
+
+    /// <summary>
+    /// Grid cell display sent to client. Unlike GridColumn a cell it is not persistent and lives only while it is IsVisibleScroll or contains ErrorParse.
+    /// </summary>
+    internal sealed class Grid2Cell
+    {
+        /// <summary>
+        /// Gets or sets Id. Sent back by client with <see cref="RequestJson.Grid2CellId"/>.
+        /// </summary>
+        public int Id;
+
+        [Serialize(SerializeEnum.Session)]
+        public int ColumnId;
+
+        [Serialize(SerializeEnum.Session)]
+        public int RowStateId;
+
+        public Grid2CellEnum CellEnum;
+
+        /// <summary>
+        /// Gets or sets ColumnText. Header for Filter.
+        /// </summary>
+        public string ColumnText;
+
+        /// <summary>
+        /// Gets or sets json text. Can be null but never empty.
+        /// </summary>
+        public string Text;
+
+        /// <summary>
+        /// Gets or sets TextLeave. If not null, client writes TextLeave into cell if focus is lost. This prevents overriding text while user is editing cell. Can be null or empty.
+        /// </summary>
+        public string TextLeave;
+
+        /// <summary>
+        /// Gets or sets TextOld. This is the text before save.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public string TextOld;
+
+        /// <summary>
+        /// Gets IsModified. If true, user changed text.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public bool IsModified;
+
+        /// <summary>
+        /// Gets or sets ErrorParse. Text user entered could not be parsed and written to row.
+        /// </summary>
+        public string ErrorParse;
+
+        /// <summary>
+        /// Gets or sets ErrorSave. Row could not be saved to the database.
+        /// </summary>
+        public string ErrorSave;
+
+        public string Warning;
+
+        public string Placeholder;
+
+        public string Description;
+
+        /// <summary>
+        /// Gets or sets IsSelect. If true, cell belongs to selected row.
+        /// </summary>
+        public bool IsSelect;
+
+        /// <summary>
+        /// Gets or sets IsSort. Display column sort triangle.
+        /// </summary>
+        public bool? IsSort;
+
+        /// <summary>
+        /// Gets or sets IsVisibleScroll. If true, cell is visible in scrallable range. If false, cell is not sent to client.
+        /// </summary>
+        [Serialize(SerializeEnum.Session)]
+        public bool IsVisibleScroll;
+
+        /// <summary>
+        /// Gets or sets Width. Used for user column resize. See also StyleColumn.
+        /// </summary>
+        public string Width;
+
+        /// <summary>
+        /// Gets or sets GridLookup.
+        /// </summary>
+        [Serialize(SerializeEnum.Both)] // By default, reference to ComponentJson is not sent to client. Serialize grid to client exclusively. JsonSession serializes it as reference.
+        public Grid2 GridLookup;
+    }
+
     /// <summary>
     /// Grid paging.
     /// </summary>
@@ -835,7 +1249,7 @@
         public int Id;
 
         /// <summary>
-        /// Gets or sets json text. When coming from client Text can be null or ""!
+        /// Gets or sets json text. Coming from client can be null or empty.
         /// </summary>
         public string Text;
 
@@ -935,6 +1349,16 @@
         }
 
         /// <summary>
+        /// Returns query to load data grid. Override this method to define sql query.
+        /// </summary>
+        /// <param name="grid">Grid to get query to load.</param>
+        /// <returns>If value null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
+        protected virtual internal IQueryable Grid2Query(Grid2 grid)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Override this method for custom grid save implementation. Return isHandled.
         /// </summary>
         /// <param name="grid">Data grid to save.</param>
@@ -947,12 +1371,35 @@
         }
 
         /// <summary>
+        /// Override this method for custom grid save implementation. Return isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to save.</param>
+        /// <param name="row">Data row to update.</param>
+        /// <param name="rowNew">New data row to save to database.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual internal Task<bool> GridUpdateAsync(Grid2 grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        /// <summary>
         /// Override this method for custom grid save implementation. Returns isHandled.
         /// </summary>
         /// <param name="grid">Data grid to save.</param>
         /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
         /// <returns>Returns true, if custom save was handled.</returns>
         protected virtual internal Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// Override this method for custom grid save implementation. Returns isHandled.
+        /// </summary>
+        /// <param name="grid">Data grid to save.</param>
+        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual internal Task<bool> GridInsertAsync(Grid2 grid, Row rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }
@@ -983,7 +1430,22 @@
             result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
 
             result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
-            
+
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
+
+        /// <summary>
+        /// Returns configuration query of data grid to load.
+        /// </summary>
+        /// <param name="grid">Json data grid to load.</param>
+        /// <param name="tableNameCSharp">Type of row to load.</param>
+        protected virtual internal void Grid2QueryConfig(Grid2 grid, string tableNameCSharp, GridConfigResult result)
+        {
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
+
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
+
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
@@ -997,9 +1459,25 @@
         }
 
         /// <summary>
+        /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
+        /// </summary>
+        protected virtual internal Task GridRowSelectedAsync(Grid2 grid, Row row)
+        {
+            return Task.FromResult(0);
+        }
+
+        /// <summary>
         /// Override this method to return a linq query for the lookup data grid.
         /// </summary>
         protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
+        {
+            return null; // No lookup data grid.
+        }
+
+        /// <summary>
+        /// Override this method to return a linq query for the lookup data grid.
+        /// </summary>
+        protected virtual internal IQueryable GridLookupQuery(Grid2 grid, Row row, string fieldName, string text)
         {
             return null; // No lookup data grid.
         }
@@ -1008,6 +1486,16 @@
         {
             // Example:
             // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
+
+        protected virtual internal void GridLookupQueryConfig(Grid2 grid, string tableNameCSharp, GridConfigResult result)
+        {
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
+
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         /// <summary>
@@ -1020,6 +1508,18 @@
         /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
         /// <returns>Returns text like entered by user for further processing.</returns>
         protected virtual internal string GridLookupRowSelected(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row rowLookupSelected)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Override this method to extract and return text from lookup grid row for further processing. 
+        /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
+        /// </summary>
+        /// <param name="grid">Grid on which lookup has been selected.</param>
+        /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
+        /// <returns>Returns text like entered by user for further processing.</returns>
+        protected virtual internal string GridLookupRowSelected(Grid2 grid, Row rowLookupSelected)
         {
             return null;
         }
@@ -1106,6 +1606,24 @@
         }
 
         /// <summary>
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
+        protected virtual internal string Grid2CellText(Grid2 grid, Row row, string fieldName)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Override this method for custom implementation to convert database value to front end grid cell text. Called only if row value is not null.
+        /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string. Otherwise return empty string.</returns>
+        protected virtual internal string GridCellText(Grid2 grid, Row row, string fieldName)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
         /// </summary>
         /// <param name="grid">Data grid on this page.</param>
@@ -1119,7 +1637,7 @@
         }
 
         /// <summary>
-        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for UOM)
+        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
         /// <param name="row">Write user parsed value to row.</param>
         /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
@@ -1129,9 +1647,40 @@
         }
 
         /// <summary>
+        /// Parse user entered cell text into database value. Text can be empty but never null. Write parsed value to row. (Or for example multiple fields on row for Uom)
+        /// </summary>
+        /// <param name="row">Write custom parsed value to row.</param>
+        /// <param name="isHandled">If true, framework does no further parsing of user entered text.</param>
+        protected virtual internal void GridCellParse(Grid2 grid, Row row, string fieldName, string text, out bool isHandled, ref string errorParse)
+        {
+            isHandled = false;
+        }
+
+        /// <summary>
+        /// Parse text user entered in cell and write it into parameter 'row'.
+        /// </summary>
+        /// <param name="row">Write custom parsed value to row.</param>
+        /// <param name="text">Text can be empty but is never null.</param>
+        /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
+        protected virtual internal Task<(bool isHandled, string errorParse)> GridCellParseAsync(Grid2 grid, Row row, string fieldName, string text)
+        {
+            return Task.FromResult<(bool, string)>((false, null));
+        }
+
+
+        /// <summary>
         /// Parse user entered cell filter text. Called only if text is not null.
         /// </summary>
         protected virtual internal void GridCellParseFilter(Grid grid, string fieldName, string text, Filter filter, out bool isHandled)
+        {
+            isHandled = false;
+        }
+
+        /// <summary>
+        /// Parse user entered cell filter text. Text can be empty but never null.
+        /// </summary>
+        /// <param name="filter">Write custom parsed text to filter.</param>
+        protected virtual internal void GridCellParseFilter(Grid2 grid, string fieldName, string text, Grid2Filter filter, out bool isHandled, ref string errorParse)
         {
             isHandled = false;
         }

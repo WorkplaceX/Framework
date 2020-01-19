@@ -36,7 +36,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.13.12";
+                return "v3.13.13";
             }
         }
 
@@ -281,6 +281,25 @@ namespace Framework
             }
             UtilFramework.Assert(isFind, string.Format("Text not found! ({0})", find));
             return result.ToString();
+        }
+
+        /// <summary>
+        /// Returns count of how many time 'find' has been found in 'text'.
+        /// </summary>
+        internal static int FindCount(string text, string find)
+        {
+            int result = 0;
+            int index = 0;
+            do
+            {
+                index = text.IndexOf(find, index);
+                if (index != -1)
+                {
+                    result += 1;
+                    index += find.Length;
+                }
+            } while (index != -1);
+            return result;
         }
 
         internal static string DateTimeToString(DateTime dateTime, bool isThousand = false)

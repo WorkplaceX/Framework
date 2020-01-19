@@ -115,6 +115,19 @@ app-root * th {
     background-color: $colorBlue;
     color: $colorWhite;
     border-right: 1px solid transparent;
+    font-weight: bold;
+}
+
+app-root .th { /* Grid2 */
+    cursor: pointer;
+    background-color: $colorBlue;
+    color: $colorWhite;
+    font-weight: bold;
+}
+
+app-root .gridSplitter {
+    border-right: 1px solid white;
+    cursor: col-resize; 
 }
 
 app-root * td {

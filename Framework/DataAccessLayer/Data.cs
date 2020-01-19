@@ -619,20 +619,16 @@
         /// <summary>
         /// Select data from database.
         /// </summary>
-        public static async Task<List<Row>> SelectAsync(IQueryable query)
+        public static Task<List<Row>> SelectAsync(IQueryable query)
         {
             UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));
 
-            var list = await query.ToDynamicListAsync();
-            List<Row> result = list.Cast<Row>().ToList();
-            return result;
+            return query.ToDynamicListAsync().ContinueWith(list => list.Result.Cast<Row>().ToList());
         }
 
-        public static async Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
+        public static Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
         {
-            var list = await SelectAsync((IQueryable)query);
-            List<TRow> result = list.Cast<TRow>().ToList();
-            return result;
+            return SelectAsync((IQueryable)query).ContinueWith(list => list.Result.Cast<TRow>().ToList());
         }
 
         internal static IQueryable QueryFilter(IQueryable query, string fieldName, object filterValue, FilterOperator filterOperator)
@@ -676,13 +672,25 @@
         /// <summary>
         /// Sql orderby.
         /// </summary>
-        internal static IQueryable QueryOrderBy(IQueryable query, string fieldName, bool isSort)
+        internal static IOrderedQueryable QueryOrderBy(IQueryable query, string fieldName, bool isSort)
         {
             if (isSort == true)
             {
                 fieldName += " DESC";
             }
             return query.OrderBy(fieldName);
+        }
+
+        /// <summary>
+        /// Sql orderby.
+        /// </summary>
+        internal static IOrderedQueryable QueryOrderByThenBy(IOrderedQueryable query, string fieldName, bool isSort)
+        {
+            if (isSort == true)
+            {
+                fieldName += " DESC";
+            }
+            return query.ThenBy(fieldName);
         }
 
         /// <summary>
@@ -864,7 +872,7 @@
         /// <summary>
         /// Default parse user entered filter text. Text can be null.
         /// </summary>
-        internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse)
+        internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse) // TODO Grid2 Remove
         {
             errorParse = null;
             object filterValue = CellTextParse(field, text);
@@ -874,6 +882,21 @@
                 filterOperator = FilterOperator.Like;
             }
             filter.SetValue(field.PropertyInfo.Name, filterValue, filterOperator);
+        }
+
+        /// <summary>
+        /// Default parse user entered filter text. Text can be null.
+        /// </summary>
+        internal static void CellTextParseFilter(Field field, string text, Grid2Filter filter, out string errorParse)
+        {
+            errorParse = null;
+            object filterValue = CellTextParse(field, text);
+            FilterOperator filterOperator = FilterOperator.Equal;
+            if (field.PropertyInfo.PropertyType == typeof(string))
+            {
+                filterOperator = FilterOperator.Like;
+            }
+            filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperator, text, isClear: text == null);
         }
 
         /// <summary>
@@ -1586,7 +1609,14 @@
         /// </summary>
         internal static PropertyInfo[] TypeRowToPropertyInfoList(Type typeRow)
         {
-            return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            if (typeRow == null)
+            {
+                return new PropertyInfo[] { };
+            }
+            else
+            {
+                return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            }
         }
 
         internal class Field

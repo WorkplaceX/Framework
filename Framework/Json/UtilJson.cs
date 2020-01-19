@@ -14,10 +14,16 @@ namespace Framework.Json
     using System.Text;
     using System.Text.Json;
 
+    /// <summary>
+    /// By default, properties and fields are serialized to jsonSession (for server session store) and jsonClient (for Angular client).
+    /// References to ComponentJson are not sent to client by default. But can be enabled exclusively with serialize client attribute.
+    /// If ComponentJson.IsHidden is true, it is not sent to jsonClient.
+    /// </summary>
+    [Flags]
     internal enum SerializeEnum
     {
         /// <summary>
-        /// Do not send property or field to client and do not store in session
+        /// Do not send property or field to client and do not store in session.
         /// </summary>
         Ignore = 0,
 
@@ -49,7 +55,7 @@ namespace Framework.Json
     }
 
     /// <summary>
-    /// Write session and client json.
+    /// Write session and client json. See method Return(); for jsonSession and jsonClient return values.
     /// </summary>
     internal sealed class Writer : IDisposable
     {
@@ -109,10 +115,19 @@ namespace Framework.Json
             }
         }
 
-        public bool IsSerializeSession;
+        /// <summary>
+        /// Gets IsSerializeSession. If true, writer writes to jsonSession. See also method SerializeStart();
+        /// </summary>
+        public bool IsSerializeSession { get; private set; }
 
-        public bool IsSerializeClient;
+        /// <summary>
+        /// Gets IsSerializeClient. If true, writer writes to jsonClient. See also method SerializeStart();
+        /// </summary>
+        public bool IsSerializeClient { get; private set; }
 
+        /// <summary>
+        /// Configure writer. Method SerializeStart(); has to be followed by method SerializeEnd();
+        /// </summary>
         public void SerializeStart(bool? isSerializeSession, bool? isSerializeClient)
         {
             var result = (IsSerializeSession: (bool?)null, IsSerializeClient: (bool?)null);
@@ -317,31 +332,33 @@ namespace Framework.Json
                 // Property
                 foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (SerializeAttribute(propertyInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient)) // If SerializeEnum.Both, do not add property
+                    if (SerializeAttribute(propertyInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient, out bool isAttribute)) // If SerializeEnum.Both, do not add property
                     {
-                        DeclarationProperty property = new DeclarationProperty(propertyInfo, isSerializeSession, isSerializeClient);
+                        DeclarationProperty property = new DeclarationProperty(propertyInfo, isSerializeSession, isSerializeClient, isAttribute);
                         PropertyList.Add(property.PropertyName, property);
                     }
                 }
                 // Field
                 foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (SerializeAttribute(fieldInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient)) // If SerializeEnum.Both, do not add property
+                    if (SerializeAttribute(fieldInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient, out bool isAttribute)) // If SerializeEnum.Both, do not add property
                     {
                         if (fieldInfo.Attributes != FieldAttributes.Private)
                         {
-                            DeclarationProperty property = new DeclarationProperty(fieldInfo, isSerializeSession, isSerializeClient);
+                            DeclarationProperty property = new DeclarationProperty(fieldInfo, isSerializeSession, isSerializeClient, isAttribute);
                             PropertyList.Add(property.PropertyName, property);
                         }
                     }
                 }
             }
 
-            private bool SerializeAttribute(SerializeAttribute attribute, out bool isSerializeSession, out bool isSerializeClient)
+            private bool SerializeAttribute(SerializeAttribute attribute, out bool isSerializeSession, out bool isSerializeClient, out bool isAttribute)
             {
                 SerializeEnum serializeEnum = SerializeEnum.Both;
+                isAttribute = false;
                 if (attribute != null)
                 {
+                    isAttribute = true;
                     serializeEnum = attribute.SerializeEnum;
                 }
                 isSerializeSession = (serializeEnum & SerializeEnum.Session) > 0;
@@ -361,26 +378,30 @@ namespace Framework.Json
 
         internal class DeclarationProperty
         {
-            public DeclarationProperty(PropertyInfo propertyInfo, bool isSerializeSession, bool isSerializeClient)
+            public DeclarationProperty(PropertyInfo propertyInfo, bool isSerializeSession, bool isSerializeClient, bool isAttribute)
             {
                 this.PropertyInfo = propertyInfo;
                 this.PropertyName = propertyInfo.Name;
                 this.PropertyType = propertyInfo.PropertyType;
                 this.IsSerializeSession = isSerializeSession;
                 this.IsSerializeClient = isSerializeClient;
+                this.IsAttribute = isAttribute;
+                this.IsSerializeClientExclusive = IsSerializeClient && IsAttribute;
 
                 Constructor(ref this.PropertyType, ref this.IsList);
 
                 this.Converter = ConverterGet(this.PropertyType);
             }
 
-            public DeclarationProperty(FieldInfo fieldInfo, bool isSerializeSession, bool isSerializeClient)
+            public DeclarationProperty(FieldInfo fieldInfo, bool isSerializeSession, bool isSerializeClient, bool isAttribute)
             {
                 this.FieldInfo = fieldInfo;
                 this.PropertyName = fieldInfo.Name;
                 this.PropertyType = fieldInfo.FieldType;
                 this.IsSerializeSession = isSerializeSession;
                 this.IsSerializeClient = isSerializeClient;
+                this.IsAttribute = isAttribute;
+                this.IsSerializeClientExclusive = IsSerializeClient && IsAttribute;
 
                 Constructor(ref this.PropertyType, ref this.IsList);
                 
@@ -423,6 +444,16 @@ namespace Framework.Json
             public readonly bool IsSerializeSession;
 
             public readonly bool IsSerializeClient;
+
+            /// <summary>
+            /// Gets IsSerializeClientExclusive. If true, property has client serialization attribute declared exclusively.
+            /// </summary>
+            public readonly bool IsSerializeClientExclusive;
+
+            /// <summary>
+            /// Gets IsAttribute. If true, serialize attribute is explicitly declared on this property.
+            /// </summary>
+            public readonly bool IsAttribute;
 
             public object ValueGet(object obj)
             {
@@ -501,7 +532,7 @@ namespace Framework.Json
             new KeyValuePair<Type, ConverterBase>(new ConverterIntNullable().PropertyType, new ConverterIntNullable()),
             new KeyValuePair<Type, ConverterBase>(new ConverterBoolean().PropertyType, new ConverterBoolean()),
             new KeyValuePair<Type, ConverterBase>(new ConverterBooleanNullable().PropertyType, new ConverterBooleanNullable()),
-            new KeyValuePair<Type, ConverterBase>(new ConverterDouble().PropertyType, new ConverterBoolean()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterDouble().PropertyType, new ConverterDouble()),
             new KeyValuePair<Type, ConverterBase>(new ConverterDoubleNullable().PropertyType, new ConverterDoubleNullable()),
             new KeyValuePair<Type, ConverterBase>(new ConverterString().PropertyType, new ConverterString()),
             
@@ -580,6 +611,9 @@ namespace Framework.Json
                 // writer.WriteString("$typeRoot", UtilFramework.TypeToName(obj.GetType()));
             }
 
+            /// <summary>
+            /// Returns true if 'property' and 'value' is a reference to a ComponentJson and serializes it to jsonSession.
+            /// </summary>
             private bool ReferenceSerialize(object obj, DeclarationProperty property, object value, ref ComponentJson componentJsonRoot, Writer writer)
             {
                 bool result = false;
@@ -606,7 +640,7 @@ namespace Framework.Json
                         }
                         else
                         {
-                            // Dto referenced ComponentJson in object gwith.
+                            // Dto referenced ComponentJson in object graph.
                             result = true;
                         }
                     }
@@ -621,6 +655,7 @@ namespace Framework.Json
                         }
                         UtilFramework.Assert(valueComponentJson.Root == componentJsonRoot, "Referenced ComponentJson not in same object graph!");
                         result = true;
+                        writer.SerializeStart(null, false); // Do not serialize reference to client
                         writer.WriteStartObject();
                         if (id != null)
                         {
@@ -631,10 +666,7 @@ namespace Framework.Json
                             writer.WriteNull("$referenceId");
                         }
                         writer.WriteEndObject();
-                        if (writer.IsSerializeClient)
-                        {
-                            throw new Exception(); // Do not send reference to client.
-                        }
+                        writer.SerializeEnd();
                     }
                 }
                 return result;
@@ -642,13 +674,17 @@ namespace Framework.Json
 
             private void SerializeObject(object obj, DeclarationProperty property, object value, ComponentJson componentJsonRoot, Writer writer)
             {
-                if (ReferenceSerialize(obj, property, value, ref componentJsonRoot, writer))
+                bool isReference = ReferenceSerialize(obj, property, value, ref componentJsonRoot, writer);
+                bool isSerializeClientExclusive = (property?.IsSerializeClientExclusive).GetValueOrDefault();
+                if (isReference && !isSerializeClientExclusive)
                 {
                     return;
                 }
                 DeclarationObject declarationObject;
                 declarationObject = DeclarationObjectGet(value.GetType());
-                writer.SerializeStart(null, (value is ComponentJson) ? true : (bool?)null);
+                bool? isSerializeSessionObject = isReference && isSerializeClientExclusive ? false : (bool?)null; // Session reference has already been serialized by method ReferenceSerialize();
+                bool? isSerializeClientObject = (bool?)isSerializeClientExclusive | ((value is ComponentJson) ? true : (bool?)null); // Serialize to client if client attribute is declared on property.
+                writer.SerializeStart(isSerializeSessionObject, isSerializeClientObject);
                 writer.StackRootValidate();
 
                 writer.WriteStartObject();
@@ -664,9 +700,9 @@ namespace Framework.Json
                     }
                     if (converter is ConverterObjectComponentJson)
                     {
-                        if (!(value is ComponentJson)) // Dto object references ComponentJson
+                        if (!(value is ComponentJson)) // Property references ComponentJson
                         {
-                            if (writer.IsSerializeClient)
+                            if (writer.IsSerializeClient && !valueProperty.IsSerializeClientExclusive)
                             {
                                 isSerializeClient = false; // Do not send ComponentJson reference to client.
                             }
@@ -694,7 +730,7 @@ namespace Framework.Json
                         object propertyValue = valueProperty.ValueGet(value);
                         if (!converter.IsValueDefault(propertyValue))
                         {
-                            if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
+                            if (propertyValue is ComponentJson componentJson && componentJson.IsHide && !valueProperty.IsSerializeClientExclusive)
                             {
                                 isSerializeClient = false; // No list entry for hidden object.
                             }
@@ -716,6 +752,10 @@ namespace Framework.Json
                             {
                                 var isSerializeClientLocal = isSerializeClient;
                                 if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
+                                {
+                                    isSerializeClientLocal = false; // No list entry for hidden object.
+                                }
+                                if (propertyValue is Grid2Cell gridCell && gridCell.IsVisibleScroll == false)
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }
