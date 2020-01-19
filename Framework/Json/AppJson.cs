@@ -85,9 +85,9 @@
         public string GridCellText { get; set; }
 
         /// <summary>
-        /// Gets GridCellTextIsInternal. If true, text has been set internally by look select row.
+        /// Gets GridCellTextIsInternal. If true, text has been set internally by grid lookup select row.
         /// </summary>
-        public bool GridCellTextIsInternal; // TODO Command Queue
+        public bool GridCellTextIsLookup; // TODO Command Queue
 
         public int BootstrapNavbarButtonId { get; set; }
 
@@ -1513,6 +1513,18 @@
         }
 
         /// <summary>
+        /// Override this method to extract and return text from lookup grid row for further processing. 
+        /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
+        /// </summary>
+        /// <param name="grid">Grid on which lookup has been selected.</param>
+        /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
+        /// <returns>Returns text like entered by user for further processing.</returns>
+        protected virtual internal string GridLookupRowSelected(Grid2 grid, Row rowLookupSelected)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Override this method to implement custom process at the end of the process chain. Called once every request.
         /// </summary>
         protected virtual internal Task ProcessAsync()
@@ -1638,11 +1650,23 @@
         /// Parse user entered cell text into database value. Text can be empty but never null. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
         /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
+        /// <param name="isHandled">If true, framework does no further parsing of user entered text.</param>
         protected virtual internal void GridCellParse(Grid2 grid, Row row, string fieldName, string text, out bool isHandled, ref string errorParse)
         {
             isHandled = false;
         }
+
+        /// <summary>
+        /// Parse text user entered in cell and write it into parameter 'row'.
+        /// </summary>
+        /// <param name="row">Write custom parsed value to row.</param>
+        /// <param name="text">Text can be empty but is never null.</param>
+        /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
+        protected virtual internal Task<(bool isHandled, string errorParse)> GridCellParseAsync(Grid2 grid, Row row, string fieldName, string text)
+        {
+            return Task.FromResult<(bool, string)>((false, null));
+        }
+
 
         /// <summary>
         /// Parse user entered cell filter text. Called only if text is not null.

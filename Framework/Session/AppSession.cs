@@ -730,7 +730,7 @@
                         foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
                         {
                             bool isModify = appJson.RequestJson.Command == RequestCommand.GridCellIsModify && appJson.RequestJson.ComponentId == gridItem.Grid?.Id && appJson.RequestJson.GridRowId == gridRowItem.GridRow?.Id && appJson.RequestJson.GridCellId == gridCellItem.GridCell?.Id;
-                            if (appJson.RequestJson.GridCellTextIsInternal)
+                            if (appJson.RequestJson.GridCellTextIsLookup)
                             {
                                 isModify = false; // Do not open lookup (again) after lookup row select.
                             }
@@ -905,7 +905,7 @@
                                 string text = gridItemLookup.Grid.ComponentOwner<Page>().GridLookupRowSelected(grid, fieldName, gridRowEnum, gridRowItemLookup.GridRowSession.Row);
                                 GridCell gridCell = UtilSession.GridCellFromIndex(gridIndex, (int)gridItemLookup.Grid.LookupDestRowIndex, (int)gridItemLookup.Grid.LookupDestCellIndex - gridSession.OffsetColumn);
                                 GridRow gridRow = gridItemList[gridIndex].GridRowList[gridItemLookup.Grid.LookupDestRowIndex.Value].GridRow;
-                                UtilServer.AppJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = grid.Id, GridRowId = gridRow.Id, GridCellId = gridCell.Id, GridCellText = text, GridCellTextIsInternal = true };
+                                UtilServer.AppJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = grid.Id, GridRowId = gridRow.Id, GridCellId = gridCell.Id, GridCellText = text, GridCellTextIsLookup = true };
                                 isClose = true;
                                 break;
                             }

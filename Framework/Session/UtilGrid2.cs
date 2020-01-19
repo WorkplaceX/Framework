@@ -4,6 +4,7 @@
     using Framework.DataAccessLayer;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
+    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -108,8 +109,10 @@
         /// Render Grid.CellList.
         /// </summary>
         /// <param name="cell">If not null, method GridCellText(); is called for all cells on this data row.</param>
-        private static void Render(Grid2 grid, Grid2Cell cell = null)
+        private static void Render(Grid2 grid, Grid2Cell cell = null, bool isTextLeave = true)
         {
+            UtilFramework.LogDebug(string.Format("RENDER ({0}) IsCell={1};", grid.TypeRow?.Name, cell != null));
+
             // IsVisibleScroll
             int count = 0;
             foreach (var column in grid.ColumnList)
@@ -245,9 +248,10 @@
                                     text = field.FrameworkType().CellTextFromValue(value);
                                 }
                             }
+                            cellLocal.TextLeave = null;
                             if (cellLocal.ErrorParse == null) // Do not override user entered text as long as in ErrorParse mode.
                             {
-                                if (cellLocal == cell)
+                                if (cellLocal == cell && isTextLeave)
                                 {
                                     cellLocal.TextLeave = UtilFramework.StringEmpty(text); // Do not change text while user modifies.
                                 }
@@ -446,7 +450,10 @@
             // RowStateList
             grid.RowStateList = LoadRowStateList(grid);
 
-            await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
+            if (grid.GridLookup != null) // Select for row on grid. But not lookup grid.
+            {
+                await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
+            }
 
             grid.CellList = new List<Grid2Cell>();
 
@@ -466,7 +473,7 @@
             }
             else
             {
-                GridLookupToGridDest(grid, out Grid2 gridDest, out Row rowDest, out string fieldNameCSharpDest, out Grid2Cell cellDest);
+                GridLookupToGridDest(grid, out var gridDest, out var rowDest, out string fieldNameCSharpDest, out var cellDest);
                 query = page.GridLookupQuery(gridDest, rowDest, fieldNameCSharpDest, cellDest.Text);
             }
             await LoadAsync(grid, query, page);
@@ -480,11 +487,16 @@
             UtilFramework.Assert(gridLookup.IsGridLookup);
             gridDest = gridLookup.GridDest;
             var rowStateDest = gridDest.RowStateList[gridLookup.GridLookupDestRowStateId.Value - 1];
-            rowDest = gridDest.RowList[rowStateDest.RowId.Value - 1];
+            rowDest = null;
+            if (rowStateDest.RowId != null)
+            {
+                rowDest = gridDest.RowList[rowStateDest.RowId.Value - 1];
+            }
             fieldNameCSharpDest = gridLookup.GridLookupDestFieldNameCSharp;
             var fieldNameCSharpDestLocal = fieldNameCSharpDest;
             var columnDest = gridDest.ColumnList.Where(item => item.FieldNameCSharp == fieldNameCSharpDestLocal).Single();
-            cellDest = gridDest.CellList.Where(item => item.RowStateId == rowStateDest.Id && item.ColumnId == columnDest.Id).Single();
+            var rowStateDestLocal = rowStateDest;
+            cellDest = gridDest.CellList.Where(item => item.RowStateId == rowStateDestLocal.Id && item.ColumnId == columnDest.Id).Single();
         }
 
         /// <summary>
@@ -492,6 +504,7 @@
         /// </summary>
         private static void GridLookupClose(Grid2 grid)
         {
+            UtilFramework.Assert(grid.IsGridLookup == false);
             if (grid.GridLookup != null)
             {
                 UtilFramework.Assert(grid.GridLookup.IsGridLookup);
@@ -729,7 +742,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static void ProcessCellIsModifyParse(Grid2 grid, Page page, Row rowNew, Grid2Column column, Field field, Grid2Cell cell)
+        private static async Task ProcessCellIsModifyParseAsync(Grid2 grid, Page page, Row rowNew, Grid2Column column, Field field, Grid2Cell cell)
         {
             cell.ErrorParse = null;
             // Parse
@@ -747,6 +760,12 @@
                 bool isHandled = false;
                 string errorParse = null;
                 page.GridCellParse(grid, rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), out isHandled, ref errorParse); // Custom parse of user entered text.
+                if (isHandled == false)
+                {
+                    var result = await page.GridCellParseAsync(grid, rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text));
+                    isHandled = result.isHandled;
+                    errorParse = result.errorParse;
+                }
                 // Parse default
                 if (!isHandled)
                 {
@@ -899,6 +918,7 @@
             if (UtilSession.Request(RequestCommand.Grid2IsClickRow, out RequestJson requestJson, out Grid2 grid))
             {
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
+                Grid2RowState rowStateSelected = null;
                 Row rowSelected = null;
                 foreach (var rowState in grid.RowStateList)
                 {
@@ -907,18 +927,35 @@
                         rowState.IsSelect = rowState.Id == cell.RowStateId;
                         if (rowState.IsSelect)
                         {
+                            rowStateSelected = rowState;
                             rowSelected = grid.RowList[rowState.RowId.Value - 1];
                         }
                     }
                 }
 
-                GridLookupClose(grid);
-
                 if (rowSelected != null)
                 {
-                    Render(grid);
                     Page page = grid.ComponentOwner<Page>();
-                    await page.GridRowSelectedAsync(grid, rowSelected); // Load detail data grid
+                    if (grid.IsGridLookup == false)
+                    {
+                        // Grid normal row selected
+                        GridLookupClose(grid);
+                        Render(grid);
+                        await page.GridRowSelectedAsync(grid, rowSelected); // Load detail data grid
+                    }
+                    else
+                    {
+                        // Grid lookup row selected
+                        GridLookupClose(grid.GridDest);
+                        string text = page.GridLookupRowSelected(grid, rowSelected);
+                        if (text != null)
+                        {
+                            GridLookupToGridDest(grid, out var gridDest, out var rowDest, out var _, out var cellDest);
+                            UtilServer.AppJson.RequestJson = new RequestJson { Command = RequestCommand.Grid2CellIsModify, ComponentId = gridDest.Id, Grid2CellId = cellDest.Id, Grid2CellText = text, GridCellTextIsLookup = true };
+
+                            await ProcessCellIsModify();
+                        }
+                    }
                 }
             }
         }
@@ -967,7 +1004,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
+                    await ProcessCellIsModifyParseAsync(grid, page, rowState.RowNew, column, field, cell);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
@@ -979,9 +1016,19 @@
                         }
                     }
                     // Lookup
-                    await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+                    if (!requestJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
+                    {
+                        await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+                    }
 
-                    Render(grid, cell); // Call method GridCellText(); for all cells on this data row
+                    // Do not set Cell.TextLeave if user clicked lookup row.
+                    bool isTextLeave = true;
+                    if (requestJson.GridCellTextIsLookup)
+                    {
+                        isTextLeave = false;
+                    }
+
+                    Render(grid, cell, isTextLeave); // Call method GridCellText(); for all cells on this data row
                     ProcessCellIsModifyUpdate(grid); // Update IsModify
                     ProcessCellIsModifyWarningNotSaved(grid, cell); // Not saved warning
                 }
@@ -996,7 +1043,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    ProcessCellIsModifyParse(grid, page, rowState.RowNew, column, field, cell);
+                    await ProcessCellIsModifyParseAsync(grid, page, rowState.RowNew, column, field, cell);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
@@ -1017,14 +1064,25 @@
                             grid.RowStateList.Add(new Grid2RowState { Id = grid.RowStateList.Count + 1, RowEnum = GridRowEnum.New });
 
                             ProcessCellIsModifyReset(grid, cell);
-                            ProcessCellIsModifyUpdate(grid); // Update IsModify
                             await RowSelectAsync(grid, rowState);
-                            Render(grid);
                         }
                     }
-                    ProcessCellIsModifyWarningNotSaved(grid, cell);
                     // Lookup
-                    await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+                    if (!requestJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
+                    {
+                        await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+                    }
+
+                    // Do not set Cell.TextLeave if user clicked lookup row.
+                    bool isTextLeave = true;
+                    if (requestJson.GridCellTextIsLookup)
+                    {
+                        isTextLeave = false;
+                    }
+
+                    Render(grid, cell, isTextLeave); // Call method GridCellText(); for all cells on this data row
+                    ProcessCellIsModifyUpdate(grid); // Update IsModify
+                    ProcessCellIsModifyWarningNotSaved(grid, cell); // Not saved warning
                 }
             }
         }
