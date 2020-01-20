@@ -925,6 +925,27 @@
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public string GridLookupDestFieldNameCSharp;
+
+        /// <summary>
+        /// Gets RowSelected. Currently selected row by user.
+        /// </summary>
+        [Serialize(SerializeEnum.Ignore)]
+        public Row RowSelected
+        {
+            get
+            {
+                Row result = null;
+                foreach (var rowState in RowStateList)
+                {
+                    if (rowState.IsSelect && rowState.RowEnum == GridRowEnum.Index)
+                    {
+                        result = RowList[rowState.RowId.Value - 1];
+                        break;
+                    }
+                }
+                return result;
+            }
+        }
     }
 
     /// <summary>
@@ -1496,7 +1517,7 @@
         /// <summary>
         /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
         /// </summary>
-        protected virtual internal Task GridRowSelectedAsync(Grid2 grid, Row row)
+        protected virtual internal Task GridRowSelectedAsync(Grid2 grid)
         {
             return Task.FromResult(0);
         }
@@ -1552,9 +1573,8 @@
         /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
         /// </summary>
         /// <param name="grid">Grid on which lookup has been selected.</param>
-        /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
         /// <returns>Returns text like entered by user for further processing.</returns>
-        protected virtual internal string GridLookupRowSelected(Grid2 grid, Row rowLookupSelected)
+        protected virtual internal string GridLookupRowSelected(Grid2 grid)
         {
             return null;
         }

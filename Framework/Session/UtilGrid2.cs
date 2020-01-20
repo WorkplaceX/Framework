@@ -465,7 +465,8 @@
             // RowStateList
             grid.RowStateList = LoadRowStateList(grid);
 
-            if (grid.GridLookup != null) // Select for row on grid. But not lookup grid.
+            // Select first row on data grid. But not on lookup grid.
+            if (grid.GridLookup == null) 
             {
                 await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
             }
@@ -601,7 +602,8 @@
                 Row row = grid.RowList[rowState.RowId.Value - 1];
                 rowState.IsSelect = true;
                 Page page = grid.ComponentOwner<Page>();
-                await page.GridRowSelectedAsync(grid, row);
+                UtilFramework.Assert(row == grid.RowSelected);
+                await page.GridRowSelectedAsync(grid);
             }
         }
 
@@ -933,7 +935,6 @@
             if (UtilSession.Request(RequestCommand.Grid2IsClickRow, out RequestJson requestJson, out Grid2 grid))
             {
                 Grid2Cell cell = grid.CellList[requestJson.Grid2CellId - 1];
-                Grid2RowState rowStateSelected = null;
                 Row rowSelected = null;
                 foreach (var rowState in grid.RowStateList)
                 {
@@ -942,7 +943,6 @@
                         rowState.IsSelect = rowState.Id == cell.RowStateId;
                         if (rowState.IsSelect)
                         {
-                            rowStateSelected = rowState;
                             rowSelected = grid.RowList[rowState.RowId.Value - 1];
                         }
                     }
@@ -956,13 +956,15 @@
                         // Grid normal row selected
                         GridLookupClose(grid);
                         Render(grid);
-                        await page.GridRowSelectedAsync(grid, rowSelected); // Load detail data grid
+                        UtilFramework.Assert(rowSelected == grid.RowSelected);
+                        await page.GridRowSelectedAsync(grid); // Load detail data grid
                     }
                     else
                     {
                         // Grid lookup row selected
                         GridLookupClose(grid.GridDest);
-                        string text = page.GridLookupRowSelected(grid, rowSelected);
+                        UtilFramework.Assert(rowSelected == grid.RowSelected);
+                        string text = page.GridLookupRowSelected(grid);
                         if (text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out var rowDest, out var _, out var cellDest);

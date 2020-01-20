@@ -33,18 +33,18 @@
             Init(true, false, isLarge: true);
             new Html(DivHeader) { TextHtml = "Config" };
             new Html(DivBody) { TextHtml = "<h1>Config Grid</h1>" };
-            GridConfigGrid = new Grid(DivBody);
+            GridConfigGrid = new Grid2(DivBody);
             new Html(DivBody) { TextHtml = "<h1>Config Field</h1>" };
-            GridConfigField = new Grid(DivBody);
+            GridConfigField = new Grid2(DivBody);
 
             await GridConfigGrid.LoadAsync();
         }
 
-        public Grid GridConfigGrid;
+        public Grid2 GridConfigGrid;
 
-        public Grid GridConfigField;
+        public Grid2 GridConfigField;
 
-        protected internal override IQueryable GridQuery(Grid grid)
+        protected internal override IQueryable GridQuery(Grid2 grid)
         {
             if (grid == GridConfigGrid)
             {
@@ -57,7 +57,7 @@
             }
             if (grid == GridConfigField)
             {
-                var rowSelected = (FrameworkConfigGridDisplay)GridConfigGrid.GridRowSelected();
+                var rowSelected = (FrameworkConfigGridDisplay)GridConfigGrid.RowSelected;
                 var result = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
                 if (FieldNameCSharp != null)
                 {
@@ -68,7 +68,7 @@
             return base.GridQuery(grid);
         }
 
-        protected internal override async Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
+        protected internal override async Task<bool> GridInsertAsync(Grid2 grid, Row rowNew, DatabaseEnum databaseEnum)
         {
             if (grid == GridConfigGrid)
             {
@@ -87,7 +87,7 @@
             return await base.GridInsertAsync(grid, rowNew, databaseEnum);
         }
 
-        protected internal override async Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
+        protected internal override async Task<bool> GridUpdateAsync(Grid2 grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
         {
             if (grid == GridConfigGrid)
             {
@@ -188,11 +188,11 @@
             return result;
         }
 
-        protected internal override async Task GridRowSelectedAsync(Grid grid)
+        protected internal override async Task GridRowSelectedAsync(Grid2 grid)
         {
             if (grid == GridConfigGrid)
             {
-                var configGrid = (FrameworkConfigGridDisplay)grid.GridRowSelected();
+                var configGrid = (FrameworkConfigGridDisplay)grid.RowSelected;
                 await GridConfigField.LoadAsync();
             }
         }
