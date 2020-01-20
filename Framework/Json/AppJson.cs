@@ -1198,6 +1198,41 @@
         /// </summary>
         [Serialize(SerializeEnum.Both)] // By default, reference to ComponentJson is not sent to client. Serialize grid to client exclusively. JsonSession serializes it as reference.
         public Grid2 GridLookup;
+
+        /// <summary>
+        /// Gets or sets Html. Use for example to transform plain text into a hyper link.
+        /// </summary>
+        public string Html;
+
+        /// <summary>
+        /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
+        /// </summary>
+        public bool HtmlIsEdit;
+
+        /// <summary>
+        /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
+        /// </summary>
+        public string HtmlLeft;
+
+        /// <summary>
+        /// Gets or sets HtmlRight. Use for example to render an indicator icon on the right hand side in the cell. 
+        /// </summary>
+        public string HtmlRight;
+
+        /// <summary>
+        /// Gets or sets IsReadOnly. If true, user can not edit text.
+        /// </summary>
+        public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets IsPassword. If true, user can not read text.
+        /// </summary>
+        public bool IsPassword;
+
+        /// <summary>
+        /// Gets or sets Align. Defines text allign of centent in the data grid cell.
+        /// </summary>
+        public AlignEnum Align;
     }
 
     /// <summary>
@@ -1353,7 +1388,7 @@
         /// </summary>
         /// <param name="grid">Grid to get query to load.</param>
         /// <returns>If value null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
-        protected virtual internal IQueryable Grid2Query(Grid2 grid)
+        protected virtual internal IQueryable GridQuery(Grid2 grid)
         {
             return null;
         }
@@ -1632,6 +1667,19 @@
         /// <param name="row">Data grid row if applicable for row type.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
         protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
+        {
+
+        }
+
+        /// <summary>
+        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
+        /// </summary>
+        /// <param name="grid">Data grid on this page.</param>
+        /// <param name="fieldName">Data grid column name.</param>
+        /// <param name="gridRowEnum">Data grid row type.</param>
+        /// <param name="row">Data grid row if applicable for row type.</param>
+        /// <param name="result">Returns data grid cell annotation.</param>
+        protected virtual internal void GridCellAnnotation(Grid2 grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
         {
 
         }

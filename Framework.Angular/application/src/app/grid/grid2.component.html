@@ -1,7 +1,7 @@
 <div style="display:grid;" [ngStyle]="{'grid-template-columns': json.StyleColumn}" (document:mousemove)="documentMouseMove($event)" (document:mouseup)="documentMouseUp($event)">
-  <div *ngFor="let cell of json.CellList; trackBy trackBy;">
+  <div *ngFor="let cell of json.CellList; trackBy trackBy;" style="display: flex; flex-grow:1; flex-direction: column;">
     <!-- HeaderColumn -->
-    <div *ngIf="cell.CellEnum==4" style="display:flex; white-space:nowrap;" class="th" (click)="clickSort(cell, $event);">
+    <div *ngIf="cell.CellEnum==4" style="display:flex; flex-grow:1; white-space:nowrap;" class="th" (click)="clickSort(cell, $event);">
       <div style="flex:1; overflow:hidden;">
         <i *ngIf="cell.IsSort==false" class="fas fa-caret-up colorWhite"></i>
         <i *ngIf="cell.IsSort==true" class="fas fa-caret-down colorWhite"></i>
@@ -12,13 +12,17 @@
         <i *ngIf="cell.Description!=null" class="fas fa-info-circle colorWhite" title="{{ cell.Description }}"></i>
         <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
       </div>
-      
+
       <div class="gridSplitter" style="width:5px;" (click)="click($event)" (mousedown)="mouseDown(cell, $event)">
       </div>
     </div>
 
     <!-- Row (Filter, Index, New) -->
-    <div *ngIf="cell.CellEnum==1||cell.CellEnum==2||cell.CellEnum==3" style="display:flex; white-space:nowrap;" class="gridRow" [ngClass]="{'gridRowFilter':cell.CellEnum==1, 'gridRowIsSelect':cell.IsSelect}">
+    <div *ngIf="cell.CellEnum==1||cell.CellEnum==2||cell.CellEnum==3" style="display:flex; flex-grow:1; white-space:nowrap;" class="gridRow" [ngClass]="{'gridRowFilter':cell.CellEnum==1, 'gridRowIsSelect':cell.IsSelect}">
+      <div *ngIf="cell.HtmlLeft" style="display: flex; align-items: center; margin-right: 2px;">
+        <div [innerHTML]="cell.HtmlLeft"></div>
+      </div>
+
       <div style="display:flex; flex-grow:1; flex-direction: column;">
         <input *ngIf="!cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" [ngClass]="{'textAlignCenter':cell.Align==2, 'textAlignRight':cell.Align==3}" type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
         <input *ngIf="cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
@@ -36,7 +40,11 @@
         <i *ngIf="cell.CellEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
       </div>
     </div>
-    <div data-Grid2 *ngIf="cell.GridLookup" [json]="cell.GridLookup" class="gridLookup"></div>
+
+    <!-- Lookup -->
+    <div *ngIf="cell.GridLookup">
+      <div data-Grid2 [json]="cell.GridLookup" class="gridLookup"></div>
+    </div>
   </div>
 </div>
 

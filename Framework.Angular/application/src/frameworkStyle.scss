@@ -149,3 +149,7 @@ app-root * .pointer {
 app-root * .fas {
     padding-right: 2px;
 }
+
+input::-ms-clear {
+    display: none; // IE remove X on input
+}

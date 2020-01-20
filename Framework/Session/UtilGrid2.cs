@@ -11,6 +11,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
+    using static Framework.Json.Page;
 
     /// <summary>
     /// Grid load and process.
@@ -103,6 +104,19 @@
         private static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> list, TKey key, Func<TKey, TValue> valueFactory)
         {
             return list.GetOrAdd(key, valueFactory, out bool isAdded);
+        }
+
+        private static void RenderAnnotation(Grid2 gird, Grid2Cell cell, Page page, string fieldNameCSharp, GridRowEnum rowEnum, Row row)
+        {
+            var result = new GridCellAnnotationResult();
+            page.GridCellAnnotation(gird, fieldNameCSharp, rowEnum, row, result);
+            cell.Html = UtilFramework.StringNull(result.Html);
+            cell.HtmlIsEdit = result.HtmlIsEdit;
+            cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
+            cell.HtmlRight = UtilFramework.StringNull(result.HtmlRight);
+            cell.IsReadOnly = result.IsReadOnly;
+            cell.IsPassword = result.IsPassword;
+            cell.Align = result.Align;
         }
 
         /// <summary>
@@ -260,6 +274,7 @@
                                     cellLocal.Text = text;
                                 }
                             }
+                            RenderAnnotation(grid, cellLocal, page, column.FieldNameCSharp, rowState.RowEnum, row);
                         }
                         cellLocal.IsVisibleScroll = true;
                         if (grid.GridLookup != null)
@@ -469,7 +484,7 @@
             IQueryable query;
             if (grid.IsGridLookup == false)
             {
-                query = page.Grid2Query(grid);
+                query = page.GridQuery(grid);
             }
             else
             {
@@ -560,7 +575,7 @@
         /// </summary>
         private static int ConfigColumnCountMax(FrameworkConfigGridBuiltIn configGrid)
         {
-            return 3;
+            return 5;
         }
 
         /// <summary>
