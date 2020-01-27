@@ -823,28 +823,6 @@
         }
 
         /// <summary>
-        /// Convert database value to text.
-        /// </summary>
-        internal static void CellTextFromValue(Page page, Grid grid, GridRowSession gridRowSession, Field field, GridCellSession gridCellSession, Row row)
-        {
-            if (gridRowSession.Row != null)
-            {
-                string text = null;
-                object value = field.PropertyInfo.GetValue(row);
-                if (value != null)
-                {
-                    text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
-                    text = UtilFramework.StringNull(text);
-                    if (text == null)
-                    {
-                        text = field.FrameworkType().CellTextFromValue(value);
-                    }
-                }
-                gridCellSession.Text = text;
-            }
-        }
-
-        /// <summary>
         /// Parse user entered cell and filter text. Text can be null.
         /// </summary>
         private static object CellTextParse(Field field, string text)
@@ -872,21 +850,6 @@
         /// <summary>
         /// Default parse user entered filter text. Text can be null.
         /// </summary>
-        internal static void CellTextParseFilter(Field field, string text, Filter filter, out string errorParse) // TODO Grid2 Remove
-        {
-            errorParse = null;
-            object filterValue = CellTextParse(field, text);
-            FilterOperator filterOperator = FilterOperator.Equal;
-            if (field.PropertyInfo.PropertyType == typeof(string))
-            {
-                filterOperator = FilterOperator.Like;
-            }
-            filter.SetValue(field.PropertyInfo.Name, filterValue, filterOperator);
-        }
-
-        /// <summary>
-        /// Default parse user entered filter text. Text can be null.
-        /// </summary>
         internal static void CellTextParseFilter(Field field, string text, Grid2Filter filter, out string errorParse)
         {
             errorParse = null;
@@ -897,17 +860,6 @@
                 filterOperator = FilterOperator.Like;
             }
             filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperator, text, isClear: text == null);
-        }
-
-        /// <summary>
-        /// Returns true, if no delete key has been pressed and cell has no error.
-        /// </summary>
-        internal static bool CellTextParseIsAutocomplete(GridCellItem gridCellItem)
-        {
-            bool isDelete = UtilFramework.StringEmpty(gridCellItem.GridCellSession.TextOld).Length > UtilFramework.StringEmpty(gridCellItem.GridCellSession.Text).Length;
-            bool isError = gridCellItem.GridCellSession.ErrorParse != null;
-
-            return !isDelete && !isError;
         }
     }
 

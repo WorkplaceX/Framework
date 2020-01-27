@@ -384,28 +384,6 @@
         }
 
         /// <summary>
-        /// Returns currently selected row.
-        /// </summary>
-        public static Row GridRowSelected(this Grid grid)
-        {
-            Row result = null;
-            if (grid.Index != null) // Loaded
-            {
-                int gridIndex = UtilSession.GridToIndex(grid);
-                result = UtilServer.AppInternal.AppSession.GridSessionList[gridIndex].GridRowSessionList.Where(gridRowSession => gridRowSession.IsSelect).Select(item => item.Row).FirstOrDefault();
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Returns currently selected row.
-        /// </summary>
-        public static T GridRowSelected<T>(this Grid grid) where T : Row
-        {
-            return (T)GridRowSelected(grid);
-        }
-
-        /// <summary>
         /// Add css class to ComponentJson.
         /// </summary>
         public static void CssClassAdd(this ComponentJson component, string value)
@@ -485,7 +463,7 @@
         internal async Task ProcessInternalAsync()
         {
             UtilStopwatch.TimeStart("Process");
-            await UtilServer.AppInternal.AppSession.ProcessAsync(); // Grid process
+            await UtilGrid2.ProcessAsync();
             await UtilApp.ProcessBootstrapNavbarAsync();
 
             foreach (Page page in UtilServer.AppJson.ComponentListAll().OfType<Page>())
@@ -496,7 +474,6 @@
             UtilApp.ProcessBootstrapModal(); // Modal dialog window
             
             UtilApp.DivContainerRender();
-            UtilServer.AppInternal.AppSession.GridRender(); // Grid render
             UtilApp.BootstrapNavbarRender();
 
             UtilStopwatch.TimeStop("Process");
@@ -718,113 +695,6 @@
             result.TextHtml = htmlTextAlert;
             result.ComponentMove(index);
             return result;
-        }
-    }
-
-    /// <summary>
-    /// Represents the position of a data grid in the json component tree.
-    /// </summary>
-    public sealed class Grid : ComponentJson
-    {
-        public Grid(ComponentJson owner)
-            : base(owner)
-        {
-
-        }
-
-        /// <summary>
-        /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
-        /// </summary>
-        public async Task LoadAsync()
-        {
-            await UtilServer.AppInternal.AppSession.GridLoadAsync(this);
-        }
-
-        /// <summary>
-        /// Gets Index. This is the grid session index. It's unique accross a session. Available once method LoadAsync(); has been called. See also class GridSession.
-        /// </summary>
-        public int? Index { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets ConfigName. See also sql table FrameworkConfigGrid.
-        /// </summary>
-        public string ConfigName;
-
-        public List<GridColumn> ColumnList;
-
-        public List<GridRow> RowList;
-
-        public GridIsClickEnum IsClickEnum;
-
-        /// <summary>
-        /// Gets or sets LookupDestGridIndex. If not null, this data gird is a lookup window with destination data grid LookupDestGridIndex.
-        /// </summary>
-        public int? LookupDestGridIndex;
-
-        public int? LookupDestRowIndex;
-
-        public int? LookupDestCellIndex;
-
-        /// <summary>
-        /// Returns true, if grid is a Lookup grid.
-        /// </summary>
-        internal bool GridLookupIsOpen()
-        {
-            return LookupDestGridIndex != null && this.Owner is Grid;
-        }
-
-        /// <summary>
-        /// Returns Lookup window for this data grid.
-        /// </summary>
-        internal Grid GridLookup()
-        {
-            if (List.Count == 0 || !(List[0] is Grid))
-            {
-                List.Clear();
-                new Grid(this);
-            }
-            return (Grid)List[0];
-        }
-
-        /// <summary>
-        /// Opens Lookup for this grid.
-        /// </summary>
-        internal void GridLookupOpen(GridItem gridItem, GridRowItem gridRowItem, GridCellItem gridCellItem)
-        {
-            UtilFramework.Assert(UtilSession.GridToIndex(this) == gridItem.GridIndex);
-
-            int gridIndex = UtilSession.GridToIndex(this);
-            int rowIndex = gridRowItem.RowIndex;
-            int cellIndex = gridCellItem.CellIndex;
-
-            Grid lookup = GridLookup();
-            lookup.LookupDestGridIndex = gridIndex;
-            lookup.LookupDestRowIndex = rowIndex;
-            lookup.LookupDestCellIndex = cellIndex;
-
-            GridLookupClose(gridItem);
-            gridCellItem.GridCellSession.IsLookup = true;
-        }
-
-        /// <summary>
-        /// Closes Lookup of this grid.
-        /// </summary>
-        internal void GridLookupClose(GridItem gridItem, bool isForce = false)
-        {
-            foreach (GridRowItem gridRowItem in gridItem.GridRowList)
-            {
-                foreach (GridCellItem gridCellItem in gridRowItem.GridCellList)
-                {
-                    if (gridCellItem.GridCellSession.IsLookup)
-                    {
-                        gridCellItem.GridCellSession.IsLookup = false;
-                        if (isForce)
-                        {
-                            gridCellItem.GridCellSession.IsLookupCloseForce = true;
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -1411,16 +1281,6 @@
         /// Returns query to load data grid. Override this method to define sql query.
         /// </summary>
         /// <param name="grid">Grid to get query to load.</param>
-        /// <returns>If value null, grid has no header and rows. If value is method Data.QueryEmpty(); grid has header but no rows.</returns>
-        protected virtual internal IQueryable GridQuery(Grid grid)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Returns query to load data grid. Override this method to define sql query.
-        /// </summary>
-        /// <param name="grid">Grid to get query to load.</param>
         /// <returns>If value null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
         protected virtual internal IQueryable GridQuery(Grid2 grid)
         {
@@ -1434,30 +1294,7 @@
         /// <param name="row">Data row to update.</param>
         /// <param name="rowNew">New data row to save to database.</param>
         /// <returns>Returns true, if custom save was handled.</returns>
-        protected virtual internal Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
-        {
-            return Task.FromResult(false);
-        }
-
-        /// <summary>
-        /// Override this method for custom grid save implementation. Return isHandled.
-        /// </summary>
-        /// <param name="grid">Data grid to save.</param>
-        /// <param name="row">Data row to update.</param>
-        /// <param name="rowNew">New data row to save to database.</param>
-        /// <returns>Returns true, if custom save was handled.</returns>
         protected virtual internal Task<bool> GridUpdateAsync(Grid2 grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
-        {
-            return Task.FromResult(false);
-        }
-
-        /// <summary>
-        /// Override this method for custom grid save implementation. Returns isHandled.
-        /// </summary>
-        /// <param name="grid">Data grid to save.</param>
-        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
-        /// <returns>Returns true, if custom save was handled.</returns>
-        protected virtual internal Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }
@@ -1490,21 +1327,6 @@
         }
 
         /// <summary>
-        /// Returns configuration of data grid to load.
-        /// </summary>
-        /// <param name="grid">Json data grid to load.</param>
-        /// <param name="tableNameCSharp">Type of row to load.</param>
-        protected virtual internal void GridQueryConfig(Grid grid, string tableNameCSharp, GridConfigResult result)
-        {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
-
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
-
-            // Example for static configuration:
-            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
-        }
-
-        /// <summary>
         /// Returns configuration query of data grid to load.
         /// </summary>
         /// <param name="grid">Json data grid to load.</param>
@@ -1520,14 +1342,6 @@
         }
 
         /// <summary>
-        /// Override this method for custom implementation. Method is called when data row has been selected. Get selected row with method grid.GridRowSelected(); and reload for example a detail data grid.
-        /// </summary>
-        protected virtual internal Task GridRowSelectedAsync(Grid grid)
-        {
-            return Task.FromResult(0);
-        }
-
-        /// <summary>
         /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
         /// </summary>
         protected virtual internal Task GridRowSelectedAsync(Grid2 grid)
@@ -1538,23 +1352,9 @@
         /// <summary>
         /// Override this method to return a linq query for the lookup data grid.
         /// </summary>
-        protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
-        {
-            return null; // No lookup data grid.
-        }
-
-        /// <summary>
-        /// Override this method to return a linq query for the lookup data grid.
-        /// </summary>
         protected virtual internal IQueryable GridLookupQuery(Grid2 grid, Row row, string fieldName, string text)
         {
             return null; // No lookup data grid.
-        }
-
-        protected virtual internal void GridLookupQueryConfig(Grid grid, GridConfigResult config)
-        {
-            // Example:
-            // config.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
         protected virtual internal void GridLookupQueryConfig(Grid2 grid, string tableNameCSharp, GridConfigResult result)
@@ -1565,20 +1365,6 @@
 
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
-        }
-
-        /// <summary>
-        /// Override this method to extract text from lookup grid for further processing. 
-        /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
-        /// </summary>
-        /// <param name="grid">Grid on which lookup has been selected.</param>
-        /// <param name="fieldName">Cell on which lookup has been selected</param>
-        /// <param name="gridRowEnum">Row type on which lookup has been selected (for example filter row).</param>
-        /// <param name="rowLookupSelected">Lookup row which has been selected by user.</param>
-        /// <returns>Returns text like entered by user for further processing.</returns>
-        protected virtual internal string GridLookupRowSelected(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row rowLookupSelected)
-        {
-            return null;
         }
 
         /// <summary>
@@ -1668,15 +1454,6 @@
         /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
         /// </summary>
         /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
-        protected virtual internal string GridCellText(Grid grid, Row row, string fieldName)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
-        /// </summary>
-        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
         protected virtual internal string Grid2CellText(Grid2 grid, Row row, string fieldName)
         {
             return null;
@@ -1699,32 +1476,9 @@
         /// <param name="gridRowEnum">Data grid row type.</param>
         /// <param name="row">Data grid row if applicable for row type.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
-        {
-
-        }
-
-        /// <summary>
-        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
-        /// </summary>
-        /// <param name="grid">Data grid on this page.</param>
-        /// <param name="fieldName">Data grid column name.</param>
-        /// <param name="gridRowEnum">Data grid row type.</param>
-        /// <param name="row">Data grid row if applicable for row type.</param>
-        /// <param name="result">Returns data grid cell annotation.</param>
         protected virtual internal void GridCellAnnotation(Grid2 grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
         {
 
-        }
-
-        /// <summary>
-        /// Parse user entered cell text into database value. Called only if text is not null. Write parsed value to row. (Or for example multiple fields on row for Uom)
-        /// </summary>
-        /// <param name="row">Write user parsed value to row.</param>
-        /// <param name="isHandled">If true, framework does default parsing of user entered text.</param>
-        protected virtual internal void GridCellParse(Grid grid, string fieldName, string text, Row row, out bool isHandled)
-        {
-            isHandled = false;
         }
 
         /// <summary>
@@ -1746,15 +1500,6 @@
         protected virtual internal Task<(bool isHandled, string errorParse)> GridCellParseAsync(Grid2 grid, Row row, string fieldName, string text)
         {
             return Task.FromResult<(bool, string)>((false, null));
-        }
-
-
-        /// <summary>
-        /// Parse user entered cell filter text. Called only if text is not null.
-        /// </summary>
-        protected virtual internal void GridCellParseFilter(Grid grid, string fieldName, string text, Filter filter, out bool isHandled)
-        {
-            isHandled = false;
         }
 
         /// <summary>
