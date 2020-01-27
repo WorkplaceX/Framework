@@ -6,21 +6,13 @@ declare var jsonBrowser: any; // Data from browser, sent by server on first requ
 export class RequestJson {
   Command: number;
 
-  Grid2CellId: number;
-
-  Grid2CellText: string;
-
-  Grid2StyleColumnList: string[];
-  
-  ComponentId: number;
-
-  GridColumnId: number;
-
-  GridRowId: number;
-
   GridCellId: number;
 
   GridCellText: string;
+
+  GridStyleColumnList: string[];
+  
+  ComponentId: number;
 
   GridIsClickEnum : number;
 

@@ -14,24 +14,24 @@ export class Grid {
 
   ngModelChange(cell) {
     cell.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 9, ComponentId: this.json.Id, Grid2CellId: cell.Id, Grid2CellText: cell.Text });
+    this.dataService.update(<RequestJson> { Command: 9, ComponentId: this.json.Id, GridCellId: cell.Id, GridCellText: cell.Text });
   }
 
   clickSort(cell, event: MouseEvent) {
     cell.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+    this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
 
   clickConfig(cell, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     cell.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 12, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+    this.dataService.update(<RequestJson> { Command: 12, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
 
   focus(cell) {
     if (!cell.IsSelect) {
       cell.IsShowSpinner = true;
-      this.dataService.update(<RequestJson> { Command: 11, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+      this.dataService.update(<RequestJson> { Command: 11, ComponentId: this.json.Id, GridCellId: cell.Id });
     }
   }
 
@@ -41,7 +41,7 @@ export class Grid {
         cell.Text = cell.TextLeave;
         cell.TextLeave = null;
         cell.IsShowSpinner = true;
-        this.dataService.update(<RequestJson> { Command: 13, ComponentId: this.json.Id, Grid2CellId: cell.Id });
+        this.dataService.update(<RequestJson> { Command: 13, ComponentId: this.json.Id, GridCellId: cell.Id });
       }
     }
   }
@@ -87,7 +87,7 @@ export class Grid {
   documentMouseUp(event: MouseEvent) {
     if (this.resizeCell != null) {
       this.resizeCell = null;
-      this.dataService.update(<RequestJson> { Command: 14, ComponentId: this.json.Id, Grid2StyleColumnList: this.styleColumnList() });
+      this.dataService.update(<RequestJson> { Command: 14, ComponentId: this.json.Id, GridStyleColumnList: this.styleColumnList() });
     }
   }
 

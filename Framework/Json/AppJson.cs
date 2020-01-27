@@ -12,7 +12,6 @@
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
     using static Framework.Json.Page;
-    using static Framework.Session.UtilSession;
 
     internal enum RequestCommand
     {
@@ -20,37 +19,27 @@
 
         ButtonIsClick = 1,
 
-        GridIsClickSort = 2,
-
-        GridIsClickConfig = 3,
-
-        GridIsClickRow = 4,
-
-        GridIsClickEnum = 5,
-
-        GridCellIsModify = 6,
-
         BootstrapNavbarButtonIsClick = 7,
 
-        Grid2IsClickSort = 8,
+        GridIsClickSort = 8,
 
-        Grid2CellIsModify = 9,
+        GridCellIsModify = 9,
 
-        Grid2IsClickEnum = 10,
+        GridIsClickEnum = 10,
 
-        Grid2IsClickRow = 11,
+        GridIsClickRow = 11,
 
-        Grid2IsClickConfig = 12,
+        GridIsClickConfig = 12,
 
         /// <summary>
         /// Inform server about text leave event.
         /// </summary>
-        Grid2IsTextLeave = 13,
+        GridIsTextLeave = 13,
 
         /// <summary>
         /// Send css grid style property grid-template-columns to server after column resize.
         /// </summary>
-        Grid2StyleColumn = 14,
+        GridStyleColumn = 14,
     }
 
     /// <summary>
@@ -60,29 +49,21 @@
     {
         public RequestCommand Command { get; set; }
 
-        public int Grid2CellId { get; set; }
+        public int GridCellId { get; set; }
 
-        public string Grid2CellText { get; set; }
+        public string GridCellText { get; set; }
 
         /// <summary>
         /// Send visible column width list to server.
         /// </summary>
-        public string[] Grid2StyleColumnList { get; set; }
+        public string[] GridStyleColumnList { get; set; }
 
         /// <summary>
         /// Gets or sets Id. This is ComponentJson.Id.
         /// </summary>
         public int ComponentId { get; set; }
 
-        public int GridColumnId { get; set; }
-
-        public int GridRowId { get; set; }
-
-        public int GridCellId { get; set; }
-
         public GridIsClickEnum GridIsClickEnum { get; set; }
-
-        public string GridCellText { get; set; }
 
         /// <summary>
         /// Gets GridCellTextIsInternal. If true, text has been set internally by grid lookup select row.
@@ -95,6 +76,9 @@
 
         public int ResponseCount { get; set; }
 
+        /// <summary>
+        /// Gets or sets BrowserUrl. Url shown in client.
+        /// </summary>
         public string BrowserUrl { get; set; }
     }
 
@@ -1021,7 +1005,7 @@
     internal sealed class GridCell
     {
         /// <summary>
-        /// Gets or sets Id. Sent back by client with <see cref="RequestJson.Grid2CellId"/>.
+        /// Gets or sets Id. Sent back by client with <see cref="RequestJson.GridCellId"/>.
         /// </summary>
         public int Id;
 

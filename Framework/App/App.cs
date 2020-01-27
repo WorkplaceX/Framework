@@ -82,7 +82,6 @@
             {
                 requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
                 requestJson.GridCellText = UtilFramework.StringNull(requestJson.GridCellText);
-                requestJson.Grid2CellText = UtilFramework.StringNull(requestJson.Grid2CellText);
             }
             else
             {
