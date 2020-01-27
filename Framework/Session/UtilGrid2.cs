@@ -591,7 +591,7 @@
         /// <summary>
         /// After load, if no row in data grid is selected, select first row.
         /// </summary>
-        private static async Task RowSelectAsync(Grid2 grid, Grid2RowState rowState)
+        public static async Task RowSelectAsync(Grid2 grid, Grid2RowState rowState, bool isRender = false)
         {
             foreach (var item in grid.RowStateList)
             {
@@ -604,6 +604,11 @@
                 Page page = grid.ComponentOwner<Page>();
                 UtilFramework.Assert(row == grid.RowSelected);
                 await page.GridRowSelectedAsync(grid);
+            }
+
+            if (isRender)
+            {
+                Render(grid);
             }
         }
 

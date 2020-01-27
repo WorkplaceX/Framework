@@ -625,7 +625,15 @@
         /// </summary>
         public List<int> GridIndexList = new List<int>(); // Empty list is removed by json serializer.
 
-        public List<BootstrapNavbarButton> ButtonList;
+        [Serialize(SerializeEnum.Session)]
+        internal List<BootstrapNavbarGrid> GridList = new List<BootstrapNavbarGrid>();
+
+        public void GridAdd(Grid2 grid)
+        {
+            GridList.Add(new BootstrapNavbarGrid { Grid = grid });
+        }
+
+        internal List<BootstrapNavbarButton> ButtonList;
 
         /*
         <nav class="navbar-dark bg-primary sticky-top">
@@ -635,19 +643,24 @@
         */
     }
 
-    public sealed class BootstrapNavbarButton
+    internal sealed class BootstrapNavbarGrid
+    {
+        public Grid2 Grid;
+    }
+
+    internal sealed class BootstrapNavbarButton
     {
         public int Id;
 
         /// <summary>
-        /// Gets or sets GridIndex. For example navigation and language buttons can be shown in the Navbar.
+        /// Gets or sets Grid. For example navigation and language buttons can be shown in the Navbar.
         /// </summary>
-        public int? GridIndex;
+        public Grid2 Grid;
 
         /// <summary>
-        /// RowIndex needs to be stored because unlike in the data grid sequence of buttons is different because filter row is omitted.
+        /// Gets or sets RowStateId.
         /// </summary>
-        public int RowIndex;
+        public int RowStateId;
 
         public string TextHtml;
 
