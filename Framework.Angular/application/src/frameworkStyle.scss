@@ -98,26 +98,7 @@ app-root * .colorBlack {
 }
 
 
-/* Table */
-app-root > table, app-root * table {
-    table-layout: fixed;
-    border-spacing: 1px;
-    border-collapse: collapse;
-    width: 100%;
-    border-top: 1px solid transparent;
-}
-
-app-root * th {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
-    cursor: pointer;
-    background-color: $colorBlue;
-    color: $colorWhite;
-    border-right: 1px solid transparent;
-    font-weight: bold;
-}
-
+/* Grid */
 app-root .th { /* Grid2 */
     cursor: pointer;
     background-color: $colorBlue;
@@ -128,10 +109,6 @@ app-root .th { /* Grid2 */
 app-root .gridSplitter {
     border-right: 1px solid white;
     cursor: col-resize; 
-}
-
-app-root * td {
-    padding: 0px;
 }
 
 app-root * .gridLookup {

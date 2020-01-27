@@ -28,7 +28,6 @@ export class AppComponent {
   <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
   <div data-DivContainer [ngClass]="json.CssClass" *ngIf="json.Type=='DivContainer'" [json]=json></div>
   <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>
-  <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-Grid2 [ngClass]="json.CssClass" *ngIf="json.Type=='Grid2' && !json.IsHide" [json]=json></div>
   <div data-Page [ngClass]="json.CssClass" *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
   <div data-Html style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
