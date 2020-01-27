@@ -850,7 +850,7 @@
         /// <summary>
         /// Default parse user entered filter text. Text can be null.
         /// </summary>
-        internal static void CellTextParseFilter(Field field, string text, Grid2Filter filter, out string errorParse)
+        internal static void CellTextParseFilter(Field field, string text, GridFilter filter, out string errorParse)
         {
             errorParse = null;
             object filterValue = CellTextParse(field, text);

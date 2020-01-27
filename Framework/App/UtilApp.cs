@@ -67,8 +67,8 @@
                     {
                         if (request.BootstrapNavbarButtonId == button.Id)
                         {
-                            Grid2RowState rowState = button.Grid.RowStateList[button.RowStateId - 1];
-                            await UtilGrid2.RowSelectAsync(button.Grid, rowState, isRender: true);
+                            GridRowState rowState = button.Grid.RowStateList[button.RowStateId - 1];
+                            await UtilGrid.RowSelectAsync(button.Grid, rowState, isRender: true);
                         }
                     }
                 }
@@ -104,7 +104,7 @@
         /// <param name="buttonList">List to add buttons.</param>
         /// <param name="gridSession">Grid on which to search (child) buttons.</param>
         /// <param name="findParentId">Add buttons with this parentId.</param>
-        private static void BootstrapNavbarRender(BootstrapNavbarButton buttonParent, ref List<BootstrapNavbarButton> buttonList, Grid2 grid, int? findParentId, PropertyInfo propertyInfoId, PropertyInfo propertyInfoParentId, PropertyInfo propertyInfoTextHtml, ref int buttonId)
+        private static void BootstrapNavbarRender(BootstrapNavbarButton buttonParent, ref List<BootstrapNavbarButton> buttonList, Grid grid, int? findParentId, PropertyInfo propertyInfoId, PropertyInfo propertyInfoParentId, PropertyInfo propertyInfoTextHtml, ref int buttonId)
         {
             foreach (var rowState in grid.RowStateList)
             {

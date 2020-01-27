@@ -33,18 +33,18 @@
             Init(true, false, isLarge: true);
             new Html(DivHeader) { TextHtml = "Config" };
             new Html(DivBody) { TextHtml = "<h1>Config Grid</h1>" };
-            GridConfigGrid = new Grid2(DivBody);
+            GridConfigGrid = new Grid(DivBody);
             new Html(DivBody) { TextHtml = "<h1>Config Field</h1>" };
-            GridConfigField = new Grid2(DivBody);
+            GridConfigField = new Grid(DivBody);
 
             await GridConfigGrid.LoadAsync();
         }
 
-        public Grid2 GridConfigGrid;
+        public Grid GridConfigGrid;
 
-        public Grid2 GridConfigField;
+        public Grid GridConfigField;
 
-        protected internal override IQueryable GridQuery(Grid2 grid)
+        protected internal override IQueryable GridQuery(Grid grid)
         {
             if (grid == GridConfigGrid)
             {
@@ -68,7 +68,7 @@
             return base.GridQuery(grid);
         }
 
-        protected internal override async Task<bool> GridInsertAsync(Grid2 grid, Row rowNew, DatabaseEnum databaseEnum)
+        protected internal override async Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
         {
             if (grid == GridConfigGrid)
             {
@@ -87,7 +87,7 @@
             return await base.GridInsertAsync(grid, rowNew, databaseEnum);
         }
 
-        protected internal override async Task<bool> GridUpdateAsync(Grid2 grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
+        protected internal override async Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
         {
             if (grid == GridConfigGrid)
             {
@@ -188,7 +188,7 @@
             return result;
         }
 
-        protected internal override async Task GridRowSelectedAsync(Grid2 grid)
+        protected internal override async Task GridRowSelectedAsync(Grid grid)
         {
             if (grid == GridConfigGrid)
             {

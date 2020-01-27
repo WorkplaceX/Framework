@@ -755,7 +755,7 @@ namespace Framework.Json
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }
-                                if (propertyValue is Grid2Cell gridCell && gridCell.IsVisibleScroll == false)
+                                if (propertyValue is GridCell gridCell && gridCell.IsVisibleScroll == false)
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }

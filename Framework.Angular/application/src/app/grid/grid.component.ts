@@ -3,10 +3,10 @@ import { DataService, RequestJson } from '../data.service';
 
 /* Grid */
 @Component({
-  selector: '[data-Grid2]',
-  templateUrl: './grid2.component.html'
+  selector: '[data-Grid]',
+  templateUrl: './grid.component.html'
 })
-export class Grid2 {
+export class Grid {
   constructor(private dataService: DataService){
   }
 
