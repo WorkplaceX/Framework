@@ -11,19 +11,6 @@
     using System.Collections.Generic;
     using System.Text.Json;
 
-    internal class AppInternal
-    {
-        /// <summary>
-        /// Gets or sets AppJson. This is the application root json component being transferred between server and client.
-        /// </summary>
-        public AppJson AppJson { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets AppSession. This is the application session state.
-        /// </summary>
-        internal AppSession AppSession { get; set; }
-    }
-
     /// <summary>
     /// Create AppJson or deserialize from server session. Process request. Serialize AppJson to server session and angular client.
     /// </summary>
@@ -72,8 +59,7 @@
         internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
         {
             // DeserializeSession
-            var appInternal = UtilSession.Deserialize(); // Deserialize session or init.
-            UtilServer.AppInternal = appInternal;
+            var appJson = UtilSession.Deserialize(); // Deserialize session or init.
 
             // RequestJson
             RequestJson requestJson;
@@ -88,48 +74,45 @@
                 requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = 1 };
             }
 
-            bool isSessionExpired = appInternal.AppJson == null && requestJson.RequestCount > 1;
-            bool isBrowserRefresh = requestJson.RequestCount != appInternal.AppSession.RequestCount + 1; // Or BrowserTabSwitch.
-            bool isBrowserTabSwitch = requestJson.ResponseCount != appInternal.AppSession.ResponseCount;
+            bool isSessionExpired = appJson == null && requestJson.RequestCount > 1;
+            bool isBrowserRefresh = requestJson.RequestCount != appJson?.RequestCount + 1; // Or BrowserTabSwitch.
+            bool isBrowserTabSwitch = requestJson.ResponseCount != appJson?.ResponseCount;
 
             // New Session
-            if (appInternal.AppJson == null || isBrowserRefresh || isBrowserTabSwitch)
+            if (appJson == null || isBrowserRefresh || isBrowserTabSwitch)
             {
-                appInternal.AppJson = CreateAppJson();
-                appInternal.AppSession = new AppSession(); // Reset session data
+                appJson = CreateAppJson();
                 requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = requestJson.RequestCount };
-                appInternal.AppJson.RequestJson = requestJson;
-                appInternal.AppJson.RequestUrl = UtilServer.RequestUrl();
+                appJson.RequestJson = requestJson;
+                appJson.RequestUrl = UtilServer.RequestUrl();
                 if (isSessionExpired)
                 {
-                    appInternal.AppJson.IsSessionExpired = true;
+                    appJson.IsSessionExpired = true;
                 }
-                await appInternal.AppJson.InitInternalAsync();
+                await appJson.InitInternalAsync();
             }
             else
             {
-                appInternal.AppJson.IsSessionExpired = false;
+                appJson.IsSessionExpired = false;
             }
 
             // Set RequestJson
-            appInternal.AppJson.RequestJson = requestJson;
+            appJson.RequestJson = requestJson;
 
             // Process
-            await appInternal.AppJson.ProcessInternalAsync();
+            await appJson.ProcessInternalAsync(appJson);
 
             // Version tag
-            RenderVersion(appInternal.AppJson);
+            RenderVersion(appJson);
 
             // RequestCount
-            appInternal.AppJson.RequestCount = requestJson.RequestCount;
-            appInternal.AppSession.RequestCount = requestJson.RequestCount;
+            appJson.RequestCount = requestJson.RequestCount;
 
             // ResponseCount
-            appInternal.AppSession.ResponseCount += 1;
-            appInternal.AppJson.ResponseCount = appInternal.AppSession.ResponseCount;
+            appJson.ResponseCount += 1;
 
             // SerializeSession, SerializeClient
-            UtilSession.Serialize(appInternal, out string jsonClientResponse);
+            UtilSession.Serialize(appJson, out string jsonClientResponse);
 
             return jsonClientResponse;
         }

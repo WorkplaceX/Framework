@@ -1,6 +1,5 @@
 ﻿namespace Framework.Session
 {
-    using Framework.Application;
     using Framework.Json;
     using Framework.Server;
     using Microsoft.AspNetCore.Http;
@@ -11,12 +10,12 @@
         /// <summary>
         /// Serialize session state.
         /// </summary>
-        public static void Serialize(AppInternal appInternal, out string jsonClient)
+        public static void Serialize(AppJson appJson, out string jsonClient)
         {
-            appInternal.AppJson.RequestJson = null;
+            appJson.RequestJson = null;
 
             UtilStopwatch.TimeStart("Serialize");
-            UtilJson.Serialize(appInternal, out string jsonSession, out jsonClient);
+            UtilJson.Serialize(appJson, out string jsonSession, out jsonClient);
             UtilStopwatch.TimeStop("Serialize");
             UtilServer.Session.SetString("AppInternal", jsonSession);
 
@@ -26,20 +25,15 @@
         /// <summary>
         /// Deserialize session state.
         /// </summary>
-        public static AppInternal Deserialize()
+        public static AppJson Deserialize()
         {
-            AppInternal result;
+            AppJson result = null;
             string json = UtilServer.Session.GetString("AppInternal");
 
-            if (string.IsNullOrEmpty(json)) // Session expired.
-            {
-                result = new AppInternal();
-                result.AppSession = new AppSession();
-            }
-            else
+            if (!string.IsNullOrEmpty(json)) // Not session expired.
             {
                 UtilStopwatch.TimeStart("Deserialize");
-                result = (AppInternal)UtilJson.Deserialize(json);
+                result = (AppJson)UtilJson.Deserialize(json);
                 UtilStopwatch.TimeStop("Deserialize");
             }
             return result;
@@ -48,10 +42,9 @@
         /// <summary>
         /// Returns true, if expected request has been sent by client.
         /// </summary>
-        public static bool Request<T>(RequestCommand command, out RequestJson requestJson, out T componentJson) where T : ComponentJson
+        public static bool Request<T>(AppJson appJson, RequestCommand command, out RequestJson requestJson, out T componentJson) where T : ComponentJson
         {
             bool result = false;
-            var appJson = UtilServer.AppJson;
             requestJson = appJson.RequestJson;
             componentJson = (T)null;
             if (command == requestJson.Command)

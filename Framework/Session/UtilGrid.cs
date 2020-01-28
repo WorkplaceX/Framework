@@ -4,7 +4,6 @@
     using Framework.DataAccessLayer;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
-    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,6 +11,31 @@
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Json.Page;
+
+    public enum GridRowEnum
+    {
+        None = 0,
+
+        /// <summary>
+        /// Filter row where user enters search text.
+        /// </summary>
+        Filter = 1,
+
+        /// <summary>
+        /// Data row loaded from database.
+        /// </summary>
+        Index = 2,
+
+        /// <summary>
+        /// Data row not yet inserted into database.
+        /// </summary>
+        New = 3,
+
+        /// <summary>
+        /// Data row at the end of the grid showing total.
+        /// </summary>
+        Total = 4
+    }
 
     /// <summary>
     /// Grid load and process.
@@ -628,36 +652,36 @@
         /// <summary>
         /// Process incoming RequestJson.
         /// </summary>
-        public static async Task ProcessAsync()
+        public static async Task ProcessAsync(AppJson appJson)
         {
             // IsClickSort (user clicked column sort)
-            await ProcessIsClickSortAsync();
+            await ProcessIsClickSortAsync(appJson);
 
             // CellIsModify (user changed text)
-            await ProcessCellIsModify();
+            await ProcessCellIsModify(appJson);
 
             // IsClickEnum (user clicked paging button)
-            await ProcessIsClickEnum();
+            await ProcessIsClickEnum(appJson);
 
             // RowIsClick (user clicked data row)
-            await ProcessRowIsClickAsync();
+            await ProcessRowIsClickAsync(appJson);
 
             // IsClickConfig (user clicked column configuration button)
-            await ProcessIsClickConfigAsync();
+            await ProcessIsClickConfigAsync(appJson);
 
             // IsTextLeave (user clicked tab button to leave cell)
-            ProcessIsTextLeave();
+            ProcessIsTextLeave(appJson);
 
             // StyleColumn (user changed with mouse column width)
-            ProcessStyleColumn();
+            ProcessStyleColumn(appJson);
         }
 
         /// <summary>
         /// User clicked column sort.
         /// </summary>
-        private static async Task ProcessIsClickSortAsync()
+        private static async Task ProcessIsClickSortAsync(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridIsClickSort, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickSort, out RequestJson requestJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[requestJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
@@ -672,9 +696,9 @@
         /// <summary>
         /// User clicked column header configuration icon.
         /// </summary>
-        private static async Task ProcessIsClickConfigAsync()
+        private static async Task ProcessIsClickConfigAsync(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridIsClickConfig, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickConfig, out RequestJson requestJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[requestJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
@@ -691,9 +715,9 @@
         /// <summary>
         /// Synchronize Cell.Text when user leaves field.
         /// </summary>
-        private static void ProcessIsTextLeave()
+        private static void ProcessIsTextLeave(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridIsTextLeave, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsTextLeave, out RequestJson requestJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[requestJson.GridCellId - 1];
                 cell.Text = cell.TextLeave;
@@ -704,9 +728,9 @@
         /// <summary>
         /// Send column width to server after user resizes a column.
         /// </summary>
-        private static void ProcessStyleColumn()
+        private static void ProcessStyleColumn(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridStyleColumn, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridStyleColumn, out RequestJson requestJson, out Grid grid))
             {
                 var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToArray();
                 for (int i = 0; i < columnList.Length; i++)
@@ -935,9 +959,9 @@
         /// <summary>
         /// User selected data row.
         /// </summary>
-        private static async Task ProcessRowIsClickAsync()
+        private static async Task ProcessRowIsClickAsync(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridIsClickRow, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickRow, out RequestJson requestJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[requestJson.GridCellId - 1];
                 Row rowSelected = null;
@@ -973,9 +997,9 @@
                         if (text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out var rowDest, out var _, out var cellDest);
-                            UtilServer.AppJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = text, GridCellTextIsLookup = true };
+                            appJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = text, GridCellTextIsLookup = true };
 
-                            await ProcessCellIsModify();
+                            await ProcessCellIsModify(appJson);
                         }
                     }
                 }
@@ -985,9 +1009,9 @@
         /// <summary>
         /// User modified text.
         /// </summary>
-        private static async Task ProcessCellIsModify()
+        private static async Task ProcessCellIsModify(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridCellIsModify, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridCellIsModify, out RequestJson requestJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[requestJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
@@ -1112,9 +1136,9 @@
         /// <summary>
         /// User clicked paging button.
         /// </summary>
-        private static async Task ProcessIsClickEnum()
+        private static async Task ProcessIsClickEnum(AppJson appJson)
         {
-            if (UtilSession.Request(RequestCommand.GridIsClickEnum, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickEnum, out RequestJson requestJson, out Grid grid))
             {
                 // Grid config
                 if (requestJson.GridIsClickEnum == GridIsClickEnum.Config)

@@ -1,8 +1,5 @@
 ﻿namespace Framework.Server
 {
-    using Framework.Application;
-    using Framework.Json;
-    using Framework.Session;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -204,51 +201,6 @@
                 string result = await response.Content.ReadAsStringAsync();
                 return result;
             }
-        }
-
-        /// <summary>
-        /// Gets currently processed app.
-        /// </summary>
-        public static AppInternal AppInternal
-        {
-            get
-            {
-                InstanceService instanceService = (InstanceService)UtilServer.Context.RequestServices.GetService(typeof(InstanceService));
-                return instanceService.AppInternal;
-            }
-            set
-            {
-                InstanceService instanceService = (InstanceService)UtilServer.Context.RequestServices.GetService(typeof(InstanceService));
-                UtilFramework.Assert(instanceService.AppInternal == null);
-                instanceService.AppInternal = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets AppSession. Server side session state of currently processed app.
-        /// </summary>
-        public static AppSession AppSession
-        {
-            get
-            {
-                return AppInternal.AppSession;
-            }
-        }
-
-        /// <summary>
-        /// Gets AppJson. Currently processed app.
-        /// </summary>
-        public static AppJson AppJson
-        {
-            get
-            {
-                return AppInternal.AppJson;
-            }
-        }
-
-        public class InstanceService
-        {
-            public AppInternal AppInternal;
         }
     }
 }

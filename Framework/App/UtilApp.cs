@@ -1,6 +1,5 @@
 ﻿namespace Framework.App
 {
-    using Framework.Server;
     using Framework.Json;
     using System.Threading.Tasks;
     using System.Linq;
@@ -8,29 +7,26 @@
     using System.Reflection;
     using Framework.DataAccessLayer;
     using System.Collections.Generic;
-    using static Framework.Session.UtilSession;
-    using System;
 
     internal static class UtilApp
     {
         /// <summary>
         /// Process bootstrap modal dialog window.
         /// </summary>
-        public static void ProcessBootstrapModal()
+        public static void ProcessBootstrapModal(AppJson appJson)
         {
-            var app = UtilServer.AppInternal;
-            app.AppJson.IsBootstrapModal = false;
-            BootstrapModal.DivModalBackdropRemove(app.AppJson);
+            appJson.IsBootstrapModal = false;
+            BootstrapModal.DivModalBackdropRemove(appJson);
             bool isExist = false;
-            foreach (var item in app.AppJson.ComponentListAll().OfType<BootstrapModal>())
+            foreach (var item in appJson.ComponentListAll().OfType<BootstrapModal>())
             {
                 item.ButtonClose?.ComponentMoveLast();
                 isExist = true;
             }
             if (isExist)
             {
-                app.AppJson.IsBootstrapModal = true;
-                BootstrapModal.DivModalBackdropCreate(app.AppJson);
+                appJson.IsBootstrapModal = true;
+                BootstrapModal.DivModalBackdropCreate(appJson);
             }
         }
 
@@ -52,12 +48,11 @@
         /// <summary>
         /// Process navbar button click.
         /// </summary>
-        public static async Task ProcessBootstrapNavbarAsync()
+        public static async Task ProcessBootstrapNavbarAsync(AppJson appJson)
         {
-            var app = UtilServer.AppInternal;
-            var request = app.AppJson.RequestJson;
+            var request = appJson.RequestJson;
 
-            if (UtilSession.Request(RequestCommand.BootstrapNavbarButtonIsClick, out RequestJson requestJson, out BootstrapNavbar navbar))
+            if (UtilSession.Request(appJson, RequestCommand.BootstrapNavbarButtonIsClick, out RequestJson requestJson, out BootstrapNavbar navbar))
             {
                 if (navbar.ButtonList != null)
                 {
@@ -78,10 +73,9 @@
         /// <summary>
         /// Remove non Div components from DivContainer.
         /// </summary>
-        public static void DivContainerRender()
+        public static void DivContainerRender(AppJson appJson)
         {
-            var app = UtilServer.AppInternal;
-            foreach (var divContainer in app.AppJson.ComponentListAll().OfType<DivContainer>())
+            foreach (var divContainer in appJson.ComponentListAll().OfType<DivContainer>())
             {
                 List<ComponentJson> listRemove = new List<ComponentJson>(); // Collect items to remove.
                 foreach (var item in divContainer.List)
@@ -136,11 +130,10 @@
             }
         }
 
-        public static void BootstrapNavbarRender()
+        public static void BootstrapNavbarRender(AppJson appJson)
         {
-            var app = UtilServer.AppInternal;
             int buttonId = 0; // BootstrapNavbarButton.Id
-            foreach (BootstrapNavbar navbar in app.AppJson.ComponentListAll().OfType<BootstrapNavbar>())
+            foreach (BootstrapNavbar navbar in appJson.ComponentListAll().OfType<BootstrapNavbar>())
             {
                 navbar.ButtonList = new List<BootstrapNavbarButton>();
                 foreach (var item in navbar.GridList)

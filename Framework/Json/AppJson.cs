@@ -444,21 +444,21 @@
             UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
         }
 
-        internal async Task ProcessInternalAsync()
+        internal async Task ProcessInternalAsync(AppJson appJson)
         {
             UtilStopwatch.TimeStart("Process");
-            await UtilGrid.ProcessAsync();
-            await UtilApp.ProcessBootstrapNavbarAsync();
+            await UtilGrid.ProcessAsync(appJson);
+            await UtilApp.ProcessBootstrapNavbarAsync(appJson);
 
-            foreach (Page page in UtilServer.AppJson.ComponentListAll().OfType<Page>())
+            foreach (Page page in this.ComponentListAll().OfType<Page>())
             {
                 await page.ProcessAsync();
             }
 
-            UtilApp.ProcessBootstrapModal(); // Modal dialog window
+            UtilApp.ProcessBootstrapModal(appJson); // Modal dialog window
             
-            UtilApp.DivContainerRender();
-            UtilApp.BootstrapNavbarRender();
+            UtilApp.DivContainerRender(appJson);
+            UtilApp.BootstrapNavbarRender(appJson);
 
             UtilStopwatch.TimeStop("Process");
         }
