@@ -138,13 +138,13 @@
             }
         }
 
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         public ComponentJson Owner { get; internal set; }
 
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         internal bool IsRemoved;
 
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         internal ComponentJson Root;
 
         internal int RootIdCount;
@@ -152,13 +152,13 @@
         /// <summary>
         /// (Id, ComponentJson).
         /// </summary>
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         internal Dictionary<int, ComponentJson> RootComponentJsonList;
 
         /// <summary>
         /// (Object, Property, ReferenceId). Used for deserialization.
         /// </summary>
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         internal List<(object obj, UtilJson.DeclarationProperty property, int id)> RootReferenceList;
 
         /// <summary>
@@ -466,7 +466,7 @@
         /// <summary>
         /// Gets RequestJson. Payload of current request.
         /// </summary>
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         internal RequestJson RequestJson;
 
         /// <summary>
@@ -532,7 +532,7 @@
         /// <summary>
         /// Gets IsClick. If true, user clicked the button.
         /// </summary>
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         public bool IsClick
         {
             get
@@ -796,7 +796,7 @@
         /// <summary>
         /// Gets RowSelected. Currently selected row by user.
         /// </summary>
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         public Row RowSelected
         {
             get
@@ -812,6 +812,77 @@
                 }
                 return result;
             }
+        }
+    }
+
+    /// <summary>
+    /// Wrapper providing value store functions.
+    /// </summary>
+    public class GridFilter
+    {
+        internal GridFilter(Grid grid)
+        {
+            this.Grid = grid;
+        }
+
+        internal readonly Grid Grid;
+
+        /// <summary>
+        /// Returns filter value for field.
+        /// </summary>
+        private GridFilterValue FilterValue(string fieldNameCSharp)
+        {
+            GridFilterValue result = Grid.FilterValueList.Where(item => item.FieldNameCSharp == fieldNameCSharp).SingleOrDefault();
+            if (result == null)
+            {
+                result = new GridFilterValue(fieldNameCSharp);
+                Grid.FilterValueList.Add(result);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Set filter value on a column. If text is not equal to text user entered, it will appear as soon as user leves field.
+        /// </summary>
+        /// <param name="isClear">If true, filter is not applied.</param>
+        public void ValueSet(string fieldNameCSharp, object filterValue, FilterOperator filterOperator, string text, bool isClear = false)
+        {
+            GridFilterValue result = FilterValue(fieldNameCSharp);
+            result.FilterValue = filterValue;
+            result.FilterOperator = filterOperator;
+            if (result.IsFocus == false)
+            {
+                result.Text = text;
+            }
+            else
+            {
+                result.TextLeave = text;
+            }
+            result.IsClear = isClear;
+        }
+
+        internal void TextSet(string fieldNameCSharp, string text)
+        {
+            Grid.FilterValueList.ForEach(item => item.IsFocus = false);
+            GridFilterValue result = FilterValue(fieldNameCSharp);
+            result.Text = text;
+            result.IsFocus = true;
+        }
+
+        /// <summary>
+        /// (FieldNameCSharp, FilterValue).
+        /// </summary>
+        internal Dictionary<string, GridFilterValue> FilterValueList()
+        {
+            var result = new Dictionary<string, GridFilterValue>();
+            if (Grid.FilterValueList != null)
+            {
+                foreach (var item in Grid.FilterValueList)
+                {
+                    result.Add(item.FieldNameCSharp, item);
+                }
+            }
+            return result;
         }
     }
 
@@ -1362,7 +1433,7 @@
         /// <param name="gridRowEnum">Data grid row type.</param>
         /// <param name="row">Data grid row if applicable for row type.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, GridRowEnum gridRowEnum, Row row, GridCellAnnotationResult result)
+        protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, Row row, GridCellAnnotationResult result)
         {
 
         }

@@ -12,7 +12,7 @@
     using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Json.Page;
 
-    public enum GridRowEnum
+    internal enum GridRowEnum
     {
         None = 0,
 
@@ -130,10 +130,10 @@
             return list.GetOrAdd(key, valueFactory, out bool isAdded);
         }
 
-        private static void RenderAnnotation(Grid gird, GridCell cell, Page page, string fieldNameCSharp, GridRowEnum rowEnum, Row row)
+        private static void RenderAnnotation(Grid gird, GridCell cell, Page page, string fieldNameCSharp, Row row)
         {
             var result = new GridCellAnnotationResult();
-            page.GridCellAnnotation(gird, fieldNameCSharp, rowEnum, row, result);
+            page.GridCellAnnotation(gird, fieldNameCSharp, row, result);
             cell.Html = UtilFramework.StringNull(result.Html);
             cell.HtmlIsEdit = result.HtmlIsEdit;
             cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
@@ -298,7 +298,7 @@
                                     cellLocal.Text = text;
                                 }
                             }
-                            RenderAnnotation(grid, cellLocal, page, column.FieldNameCSharp, rowState.RowEnum, row);
+                            RenderAnnotation(grid, cellLocal, page, column.FieldNameCSharp, row);
                         }
                         cellLocal.IsVisibleScroll = true;
                         if (grid.GridLookup != null)
@@ -1213,77 +1213,6 @@
                     }
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Wrapper providing value store functions.
-    /// </summary>
-    public class GridFilter
-    {
-        internal GridFilter(Grid grid)
-        {
-            this.Grid = grid;
-        }
-
-        internal readonly Grid Grid;
-
-        /// <summary>
-        /// Returns filter value for field.
-        /// </summary>
-        private GridFilterValue FilterValue(string fieldNameCSharp)
-        {
-            GridFilterValue result = Grid.FilterValueList.Where(item => item.FieldNameCSharp == fieldNameCSharp).SingleOrDefault();
-            if (result == null)
-            {
-                result = new GridFilterValue(fieldNameCSharp);
-                Grid.FilterValueList.Add(result);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Set filter value on a column. If text is not equal to text user entered, it will appear as soon as user leves field.
-        /// </summary>
-        /// <param name="isClear">If true, filter is not applied.</param>
-        public void ValueSet(string fieldNameCSharp, object filterValue, FilterOperator filterOperator, string text, bool isClear = false)
-        {
-            GridFilterValue result = FilterValue(fieldNameCSharp);
-            result.FilterValue = filterValue;
-            result.FilterOperator = filterOperator;
-            if (result.IsFocus == false)
-            {
-                result.Text = text;
-            }
-            else
-            {
-                result.TextLeave = text;
-            }
-            result.IsClear = isClear;
-        }
-
-        internal void TextSet(string fieldNameCSharp, string text)
-        {
-            Grid.FilterValueList.ForEach(item => item.IsFocus = false);
-            GridFilterValue result = FilterValue(fieldNameCSharp);
-            result.Text = text;
-            result.IsFocus = true;
-        }
-
-        /// <summary>
-        /// (FieldNameCSharp, FilterValue).
-        /// </summary>
-        internal Dictionary<string, GridFilterValue> FilterValueList()
-        {
-            var result = new Dictionary<string, GridFilterValue>();
-            if (Grid.FilterValueList != null)
-            {
-                foreach (var item in Grid.FilterValueList)
-                {
-                    result.Add(item.FieldNameCSharp, item);
-                }
-            }
-            return result;
         }
     }
 }

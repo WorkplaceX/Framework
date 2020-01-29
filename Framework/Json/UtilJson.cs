@@ -25,7 +25,7 @@ namespace Framework.Json
         /// <summary>
         /// Do not send property or field to client and do not store in session.
         /// </summary>
-        Ignore = 0,
+        None = 0,
 
         /// <summary>
         /// Store property or field in session.
@@ -363,7 +363,7 @@ namespace Framework.Json
                 }
                 isSerializeSession = (serializeEnum & SerializeEnum.Session) > 0;
                 isSerializeClient = (serializeEnum & SerializeEnum.Client) > 0;
-                return (serializeEnum != SerializeEnum.Ignore);
+                return (serializeEnum != SerializeEnum.None);
             }
 
             public readonly Type Type;
