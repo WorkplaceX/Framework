@@ -48,13 +48,20 @@
   </div>
 </div>
 
-<div class="colorBlue" [ngClass]="json.CssClass">
+<div class="colorBlue" [ngClass]="json.CssClass" onmousedown="return false;">
   <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up" (click)="clickGrid(1, $event);"></i>
   <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down" (click)="clickGrid(2, $event);"></i>
-  &nbsp;&nbsp;
+  &nbsp;
   <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left" (click)="clickGrid(3, $event);"></i>
   <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right" (click)="clickGrid(4, $event);"></i>
-  &nbsp;&nbsp;
+  &nbsp;
+  <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
+  <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
+  <i class="fas fa-th-large colorBlueHover pointer" title="Form" (click)="clickGrid(9, $event);"></i>
+  &nbsp;
+  <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
+  <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>
+  &nbsp;
   <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
   <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
   <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>

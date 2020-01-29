@@ -1212,6 +1212,20 @@
                         Render(grid);
                     }
                 }
+
+                // Grid mode table
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.ModeTable)
+                {
+                    grid.Mode = GridMode.Table;
+                    Render(grid);
+                }
+
+                // Grid mode stack
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.ModeStack)
+                {
+                    grid.Mode = GridMode.Stack;
+                    Render(grid);
+                }
             }
         }
     }

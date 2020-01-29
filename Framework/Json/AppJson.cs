@@ -813,6 +813,20 @@
                 return result;
             }
         }
+
+        [Serialize(SerializeEnum.Session)]
+        internal GridMode Mode;
+    }
+
+    /// <summary>
+    /// Data grid display mode.
+    /// </summary>
+    internal enum GridMode
+    {
+        None = 0,
+        Table = 1,
+        Stack = 2,
+        Form = 3
     }
 
     /// <summary>
@@ -1204,6 +1218,11 @@
         PageDown = 2,
         PageLeft = 3,
         PageRight = 4,
+        ModeTable=7,
+        ModeStack=8,
+        ModeForm=9,
+        ExcelDownload=10,
+        ExcelUpload=11,
         Reload = 5,
         Config = 6,
     }
