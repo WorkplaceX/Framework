@@ -682,6 +682,9 @@
         }
     }
 
+    /// <summary>
+    /// Data grid shows row as table, stack or form.
+    /// </summary>
     public class Grid : ComponentJson
     {
         /// <summary>
@@ -690,7 +693,7 @@
         public Grid(ComponentJson owner) 
             : base( owner)
         {
-
+            this.Mode = GridMode.Table;
         }
 
         /// <summary>
@@ -1074,12 +1077,12 @@
         HeaderColumn = 4,
 
         /// <summary>
-        /// Cell label in skyscraper mode.
+        /// Cell label in stack mode.
         /// </summary>
         HeaderRow = 5,
 
         /// <summary>
-        /// Separator label in skyscraper mode.
+        /// Separator label in stack mode.
         /// </summary>
         Separator = 6,
     }
@@ -1206,6 +1209,11 @@
         /// Gets or sets Align. Defines text allign of centent in the data grid cell.
         /// </summary>
         public AlignEnum Align;
+
+        /// <summary>
+        /// Gets or sets IsOdd.
+        /// </summary>
+        public bool IsOdd;
     }
 
     /// <summary>

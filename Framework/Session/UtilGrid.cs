@@ -144,36 +144,159 @@
         }
 
         /// <summary>
-        /// Render Grid.CellList.
+        /// Render HeaderColumn.
         /// </summary>
-        /// <param name="cell">If not null, method GridCellText(); is called for all cells on this data row.</param>
-        private static void Render(Grid grid, GridCell cell = null, bool isTextLeave = true)
+        private static GridCell RenderCellFilterHeaderColumn(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList)
         {
-            UtilFramework.LogDebug(string.Format("RENDER ({0}) IsCell={1};", grid.TypeRow?.Name, cell != null));
-
-            // IsVisibleScroll
-            int count = 0;
-            foreach (var column in grid.ColumnList)
+            var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.HeaderColumn), (key) => new GridCell
             {
-                count += 1;
-                column.IsVisibleScroll = count - 1 >= grid.OffsetColumn && count - 1 < grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid));
-            }
-            var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToList();
-            foreach (var rowState in grid.RowStateList)
-            {
-                rowState.IsVisibleScroll = true;
-            }
-            var rowStateList = grid.RowStateList.Where(item => item.IsVisibleScroll).ToList();
+                ColumnId = key.Item1,
+                RowStateId = key.Item2,
+                CellEnum = key.Item3,
+                ColumnText = column.ColumnText,
+                Description = column.Description,
+            });
+            grid.CellList.Add(result);
+            result.IsSort = GridSortValue.IsSortGet(grid, column.FieldNameCSharp);
+            result.Width = column.Width;
+            result.IsVisibleScroll = true;
 
-            // CellList
-            var cellList = grid.CellList.ToDictionary(item => (item.ColumnId, item.RowStateId, item.CellEnum)); // Key (ColumnId, RowState, CellEnum)
-            grid.CellList = new List<GridCell>();
-            foreach (var cellLocal in cellList.Values)
+            return result;
+        }
+
+        /// <summary>
+        /// Render HeaderRow.
+        /// </summary>
+        private static GridCell RenderCellFilterHeaderRow(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList)
+        {
+            var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.HeaderRow), (key) => new GridCell
             {
-                cellLocal.IsVisibleScroll = false;
+                ColumnId = key.Item1,
+                RowStateId = key.Item2,
+                CellEnum = key.Item3,
+                ColumnText = column.ColumnText + ":",
+            });
+            grid.CellList.Add(result);
+            result.Width = column.Width;
+            result.IsVisibleScroll = true;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Render Filter (search) value.
+        /// </summary>
+        private static GridCell RenderCellFilterValue(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList, Dictionary<string, GridFilterValue> filterValueList)
+        {
+            filterValueList.TryGetValue(column.FieldNameCSharp, out GridFilterValue filterValue);
+            var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.Filter), (key) => new GridCell
+            {
+                ColumnId = key.Item1,
+                RowStateId = key.Item2,
+                CellEnum = key.Item3,
+                Placeholder = "Search"
+            });
+            grid.CellList.Add(result);
+            result.Text = filterValue?.Text;
+            if (column.FieldNameCSharp == filterValue?.FieldNameCSharp && filterValue?.IsFocus == true)
+            {
+                result.TextLeave = filterValue.TextLeave;
+            }
+            result.IsVisibleScroll = true;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Render Cell Index.
+        /// </summary>
+        private static GridCell RenderCellIndex(Grid grid, Page page, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList, Dictionary<string, Field> fieldList, GridCell cell, bool isTextLeave)
+        {
+            Row row;
+            if (rowState.RowNew != null)
+            {
+                row = rowState.RowNew;
+            }
+            else
+            {
+                row = grid.RowList[rowState.RowId.Value - 1];
             }
 
-            // Render StyleColumn
+            var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.Index), (key) => new GridCell
+            {
+                ColumnId = key.Item1,
+                RowStateId = key.Item2,
+                CellEnum = key.Item3,
+            }, out bool isAdded);
+            grid.CellList.Add(result);
+            if (result.RowStateId == cell?.RowStateId) // Cell on same row.
+            {
+                isAdded = true; // Trigger Cell.Text update
+            }
+            if (isAdded)
+            {
+                var field = fieldList[column.FieldNameCSharp];
+                string text = null;
+                object value = field.PropertyInfo.GetValue(row);
+                if (value != null)
+                {
+                    text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = UtilFramework.StringNull(text);
+                    if (text == null)
+                    {
+                        text = field.FrameworkType().CellTextFromValue(value);
+                    }
+                }
+                result.TextLeave = null;
+                if (result.ErrorParse == null) // Do not override user entered text as long as in ErrorParse mode.
+                {
+                    if (result == cell && isTextLeave)
+                    {
+                        result.TextLeave = UtilFramework.StringEmpty(text); // Do not change text while user modifies.
+                    }
+                    else
+                    {
+                        result.Text = text;
+                    }
+                }
+                RenderAnnotation(grid, result, page, column.FieldNameCSharp, row);
+            }
+            result.IsVisibleScroll = true;
+            if (grid.GridLookup != null)
+            {
+                if (grid.GridLookupDestRowStateId == rowState.Id && grid.GridLookupDestFieldNameCSharp == column.FieldNameCSharp)
+                {
+                    result.GridLookup = grid.GridLookup;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Render new field.
+        /// </summary>
+        private static GridCell RenderCellNew(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList)
+        {
+            var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.New), (key) => new GridCell
+            {
+                ColumnId = key.Item1,
+                RowStateId = key.Item2,
+                CellEnum = key.Item3,
+                Placeholder = "New",
+            });
+            grid.CellList.Add(result);
+            result.IsVisibleScroll = true;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Render data grid in table mode.
+        /// </summary>
+        private static void RenderModeTable(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
+        {
+            // Render Grid.StyleColumn
             StringBuilder styleColumnList = new StringBuilder();
             bool isFirst = true;
             int widthEndsWithPxCount = 0;
@@ -200,7 +323,7 @@
             }
             grid.StyleColumn = styleColumnList.ToString();
 
-            // Render Cell
+            // Render Grid.CellList
             Page page = grid.ComponentOwner<Page>();
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
             var filter = new GridFilter(grid);
@@ -213,101 +336,21 @@
                     // Filter Header
                     foreach (var column in columnList)
                     {
-                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.HeaderColumn), (key) => new GridCell
-                        {
-                            ColumnId = key.Item1,
-                            RowStateId = key.Item2,
-                            CellEnum = key.Item3,
-                            ColumnText = column.ColumnText,
-                            Description = column.Description,
-                        });
-                        grid.CellList.Add(cellLocal);
-                        cellLocal.IsSort = GridSortValue.IsSortGet(grid, column.FieldNameCSharp);
-                        cellLocal.Width = column.Width;
-                        cellLocal.IsVisibleScroll = true;
+                        RenderCellFilterHeaderColumn(grid, rowState, column, cellList);
                     }
                     // Filter Value
                     foreach (var column in columnList)
                     {
-                        filterValueList.TryGetValue(column.FieldNameCSharp, out GridFilterValue filterValue);
-                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.Filter), (key) => new GridCell
-                        {
-                            ColumnId = key.Item1,
-                            RowStateId = key.Item2,
-                            CellEnum = key.Item3,
-                            Placeholder = "Search"
-                        });
-                        grid.CellList.Add(cellLocal);
-                        cellLocal.Text = filterValue?.Text;
-                        if (column.FieldNameCSharp == filterValue?.FieldNameCSharp && filterValue?.IsFocus == true)
-                        {
-                            cellLocal.TextLeave = filterValue.TextLeave;
-                        }
-                        cellLocal.IsVisibleScroll = true;
+                        RenderCellFilterValue(grid, rowState, column, cellList, filterValueList);
                     }
                 }
 
                 // Render Index
                 if (rowState.RowEnum == GridRowEnum.Index)
                 {
-                    Row row;
-                    if (rowState.RowNew != null)
-                    {
-                        row = rowState.RowNew;
-                    }
-                    else
-                    {
-                        row = grid.RowList[rowState.RowId.Value - 1];
-                    }
                     foreach (var column in columnList)
                     {
-                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.Index), (key) => new GridCell
-                        {
-                            ColumnId = key.Item1,
-                            RowStateId = key.Item2,
-                            CellEnum = key.Item3,
-                        }, out bool isAdded);
-                        grid.CellList.Add(cellLocal);
-                        if (cellLocal.RowStateId == cell?.RowStateId) // Cell on same row.
-                        {
-                            isAdded = true; // Trigger Cell.Text update
-                        }
-                        if (isAdded)
-                        {
-                            var field = fieldList[column.FieldNameCSharp];
-                            string text = null;
-                            object value = field.PropertyInfo.GetValue(row);
-                            if (value != null)
-                            {
-                                text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
-                                text = UtilFramework.StringNull(text);
-                                if (text == null)
-                                {
-                                    text = field.FrameworkType().CellTextFromValue(value);
-                                }
-                            }
-                            cellLocal.TextLeave = null;
-                            if (cellLocal.ErrorParse == null) // Do not override user entered text as long as in ErrorParse mode.
-                            {
-                                if (cellLocal == cell && isTextLeave)
-                                {
-                                    cellLocal.TextLeave = UtilFramework.StringEmpty(text); // Do not change text while user modifies.
-                                }
-                                else
-                                {
-                                    cellLocal.Text = text;
-                                }
-                            }
-                            RenderAnnotation(grid, cellLocal, page, column.FieldNameCSharp, row);
-                        }
-                        cellLocal.IsVisibleScroll = true;
-                        if (grid.GridLookup != null)
-                        {
-                            if (grid.GridLookupDestRowStateId == rowState.Id && grid.GridLookupDestFieldNameCSharp == column.FieldNameCSharp)
-                            {
-                                cellLocal.GridLookup = grid.GridLookup;
-                            }
-                        }
+                        RenderCellIndex(grid, page, rowState, column, cellList, fieldList, cell, isTextLeave);
                     }
                 }
 
@@ -316,17 +359,110 @@
                 {
                     foreach (var column in columnList)
                     {
-                        var cellLocal = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.New), (key) => new GridCell
-                        {
-                            ColumnId = key.Item1,
-                            RowStateId = key.Item2,
-                            CellEnum = key.Item3,
-                            Placeholder = "New",
-                        });
-                        grid.CellList.Add(cellLocal);
-                        cellLocal.IsVisibleScroll = true;
+                        RenderCellNew(grid, rowState, column, cellList);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Render data grid in stack mode.
+        /// </summary>
+        private static void RenderModeStack(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
+        {
+            // Render Grid.StyleColumn
+            grid.StyleColumn = "minmax(0, 1fr)";
+
+            // Render Grid.CellList
+            Page page = grid.ComponentOwner<Page>();
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
+
+            var filter = new GridFilter(grid);
+            var filterValueList = filter.FilterValueList();
+
+            int count = 0;
+            foreach (var rowState in rowStateList)
+            {
+                count += 1;
+
+                // Render Filter
+                if (rowState.RowEnum == GridRowEnum.Filter)
+                {
+                    foreach (var column in columnList)
+                    {
+                        // Filter Header
+                        RenderCellFilterHeaderColumn(grid, rowState, column, cellList);
+
+                        // Filter Value
+                        RenderCellFilterValue(grid, rowState, column, cellList, filterValueList);
+                    }
+                }
+
+                // Render Index
+                if (rowState.RowEnum == GridRowEnum.Index)
+                {
+                    foreach (var column in columnList)
+                    {
+                        // Filter Header
+                        RenderCellFilterHeaderRow(grid, rowState, column, cellList).IsOdd = count % 2 == 1;
+
+                        // Index
+                        RenderCellIndex(grid, page, rowState, column, cellList, fieldList, cell, isTextLeave).IsOdd = count % 2 == 1;
+                    }
+                }
+
+                // Render New
+                if (rowState.RowEnum == GridRowEnum.New)
+                {
+                    foreach (var column in columnList)
+                    {
+                        // Filter Header
+                        RenderCellFilterHeaderRow(grid, rowState, column, cellList);
+
+                        // Index
+                        RenderCellNew(grid, rowState, column, cellList);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Render Grid.CellList.
+        /// </summary>
+        /// <param name="cell">If not null, method GridCellText(); is called for all cells on this data row.</param>
+        private static void Render(Grid grid, GridCell cell = null, bool isTextLeave = true)
+        {
+            UtilFramework.LogDebug(string.Format("RENDER ({0}) IsCell={1};", grid.TypeRow?.Name, cell != null));
+
+            // IsVisibleScroll
+            int count = 0;
+            foreach (var column in grid.ColumnList)
+            {
+                count += 1;
+                column.IsVisibleScroll = count - 1 >= grid.OffsetColumn && count - 1 < grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid));
+            }
+            var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToList();
+            foreach (var rowState in grid.RowStateList)
+            {
+                rowState.IsVisibleScroll = true;
+            }
+            var rowStateList = grid.RowStateList.Where(item => item.IsVisibleScroll).ToList();
+
+            // Grid.CellList clear
+            var cellList = grid.CellList.ToDictionary(item => (item.ColumnId, item.RowStateId, item.CellEnum)); // Key (ColumnId, RowState, CellEnum)
+            grid.CellList = new List<GridCell>();
+            foreach (var cellLocal in cellList.Values)
+            {
+                cellLocal.IsVisibleScroll = false;
+            }
+
+            if (grid.Mode == GridMode.Table)
+            {
+                RenderModeTable(grid, columnList, rowStateList, cellList, cell, isTextLeave);
+            }
+            else
+            {
+                RenderModeStack(grid, columnList, rowStateList, cellList, cell, isTextLeave);
             }
 
             // Preserve cell in ErrorParse or ErrorSave state

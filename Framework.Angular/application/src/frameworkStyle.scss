@@ -106,6 +106,10 @@ app-root .th {
     font-weight: bold;
 }
 
+app-root .cellOdd {
+    background-color: rgb(225, 232, 235);
+}
+
 app-root .gridSplitter {
     border-right: 1px solid white;
     cursor: col-resize; 
