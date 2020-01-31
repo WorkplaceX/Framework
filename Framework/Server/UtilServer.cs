@@ -113,6 +113,7 @@
                 case ".jpg": result = "image/jpeg"; break;
                 case ".pdf": result = "application/pdf"; break;
                 case ".json": result = "application/json"; break;
+                case ".xlsx": result = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; break;
                 default:
                     result = "text/plain"; break; // Type not found!
             }

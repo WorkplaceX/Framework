@@ -270,7 +270,6 @@ namespace Framework.Json
                 writerClient.WriteString(propertyName, value);
         }
 
-
         internal void Serialize(object value)
         {
             if (IsSerializeSession)

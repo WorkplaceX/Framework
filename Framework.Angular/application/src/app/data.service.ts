@@ -55,6 +55,14 @@ export class Json {
   IsBootstrapModal: boolean;
 
   List: any;
+
+  DownloadData: string;
+
+  DownloadFileName: string;
+
+  DownloadContentType: string;
+
+  IsScrollToTop: boolean;
 }
 
 @Injectable({
@@ -86,6 +94,29 @@ export class DataService {
 
   requestJsonQueue: RequestJson // Put latest request in queue, if waiting for pending request.
 
+  private fileDownload(jsonResponse: Json) { // See also: https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+    if (jsonResponse.DownloadFileName != null) {
+      const byteCharacters = atob(jsonResponse.DownloadData);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);          
+      const blob = new Blob([byteArray], {type: jsonResponse.DownloadContentType});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = jsonResponse.DownloadFileName;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  }
+
+  private isScrollToTop(jsonResponse: Json) {
+    if (jsonResponse.IsScrollToTop) {
+      document.documentElement.scrollTop = 0;
+    }
+  }
+
   public update(requestJson: RequestJson): void {
     if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
       // RequestCount
@@ -111,6 +142,8 @@ export class DataService {
       })
       .subscribe(body => {
         let jsonResponse = <Json>body;
+        this.fileDownload(jsonResponse);
+        this.isScrollToTop(jsonResponse);
         if (this.requestJsonQueue == null) { // Apply response if there is no newer request.
           this.json = jsonResponse;
           this.isRequestPending = false;

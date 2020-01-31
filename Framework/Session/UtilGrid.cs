@@ -1362,7 +1362,204 @@
                     grid.Mode = GridMode.Stack;
                     Render(grid);
                 }
+
+                // Excel
+                if (requestJson.GridIsClickEnum == GridIsClickEnum.ExcelDownload)
+                {
+                    UtilGridExcel.Export(grid);
+                }
             }
+        }
+    }
+}
+
+namespace Framework.Session
+{
+    using DocumentFormat.OpenXml;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Spreadsheet;
+    using Framework.DataAccessLayer;
+    using Framework.Json;
+    using System;
+    using System.IO;
+    using Page = Json.Page;
+    using CellExcel = DocumentFormat.OpenXml.Spreadsheet.Cell;
+    using RowExcel = DocumentFormat.OpenXml.Spreadsheet.Row;
+    using Row = DataAccessLayer.Row;
+
+    internal static class UtilGridExcel
+    {
+        private static void ExportStyle(SpreadsheetDocument spreadsheetDocument)
+        {
+            // See also: https://stackoverflow.com/questions/11116176/cell-styles-in-openxml-spreadsheet-spreadsheetml
+
+            var stylesPart = spreadsheetDocument.WorkbookPart.AddNewPart<WorkbookStylesPart>();
+            stylesPart.Stylesheet = new Stylesheet();
+
+            // blank font list
+            stylesPart.Stylesheet.Fonts = new Fonts();
+            stylesPart.Stylesheet.Fonts.AppendChild(new Font());
+            stylesPart.Stylesheet.Fonts.Count = (uint)stylesPart.Stylesheet.Fonts.ChildElements.Count;
+
+            // White font            
+            Font font = new Font();
+            font.Append(new Color() { Rgb = "ffffff" });
+            font.Append(new Bold());
+            stylesPart.Stylesheet.Fonts.AppendChild(font);
+            stylesPart.Stylesheet.Fonts.Count = (uint)stylesPart.Stylesheet.Fonts.ChildElements.Count;
+
+            // create fills
+            stylesPart.Stylesheet.Fills = new Fills();
+
+            // create a solid red fill
+            var solidBlue = new PatternFill() { PatternType = PatternValues.Solid };
+            solidBlue.ForegroundColor = new ForegroundColor { Rgb = HexBinaryValue.FromString("FF0000FF") }; // red fill
+            solidBlue.BackgroundColor = new BackgroundColor { Indexed = 64 };
+
+            stylesPart.Stylesheet.Fills.AppendChild(new Fill { PatternFill = new PatternFill { PatternType = PatternValues.None } }); // required, reserved by Excel
+            stylesPart.Stylesheet.Fills.AppendChild(new Fill { PatternFill = new PatternFill { PatternType = PatternValues.Gray125 } }); // required, reserved by Excel
+            stylesPart.Stylesheet.Fills.AppendChild(new Fill { PatternFill = solidBlue });
+            stylesPart.Stylesheet.Fills.Count = (uint)stylesPart.Stylesheet.Fills.ChildElements.Count;
+
+            //// blank border list
+            stylesPart.Stylesheet.Borders = new Borders();
+            stylesPart.Stylesheet.Borders.AppendChild(new Border());
+            stylesPart.Stylesheet.Borders.Count = (uint)stylesPart.Stylesheet.Borders.ChildElements.Count;
+
+            //// blank cell format list
+            stylesPart.Stylesheet.CellStyleFormats = new CellStyleFormats();
+            stylesPart.Stylesheet.CellStyleFormats.AppendChild(new CellFormat());
+            stylesPart.Stylesheet.CellStyleFormats.Count = (uint)stylesPart.Stylesheet.CellStyleFormats.ChildElements.Count;
+
+            // cell format list
+            stylesPart.Stylesheet.CellFormats = new CellFormats();
+            // empty one for index 0, seems to be required
+            stylesPart.Stylesheet.CellFormats.AppendChild(new CellFormat());
+            // cell format references style format 0, font 0, border 0, fill 2 and applies the fill
+            stylesPart.Stylesheet.CellFormats.AppendChild(new CellFormat { FormatId = 0, FontId = 1, BorderId = 0, FillId = 2, ApplyFill = true });
+                // .AppendChild(new Alignment { Horizontal = HorizontalAlignmentValues.Center });
+            stylesPart.Stylesheet.CellFormats.Count = (uint)stylesPart.Stylesheet.CellFormats.ChildElements.Count;
+
+            stylesPart.Stylesheet.Save();
+        }
+
+        private static string GetExcelColumnName(int columnNumber)
+        {
+            int dividend = columnNumber;
+            string columnName = String.Empty;
+            int modulo;
+
+            while (dividend > 0)
+            {
+                modulo = (dividend - 1) % 26;
+                columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
+                dividend = (int)((dividend - modulo) / 26);
+            }
+
+            return columnName;
+        }
+
+        private static void ExportData(WorksheetPart worksheetPart, Grid grid)
+        {
+            Page page = grid.ComponentOwner<Page>();
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
+
+            var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+            var columnList = grid.ColumnList;
+
+            int rowCount = 0;
+            foreach (var rowState in grid.RowStateList)
+            {
+                rowCount += 1;
+                var rowExcel = new RowExcel() { RowIndex = (uint)rowCount };
+                sheetData.Append(rowExcel);
+
+                int columnCount = 0;
+                foreach (var column in columnList)
+                {
+                    columnCount += 1;
+                    string cellReference = GetExcelColumnName(columnCount) + rowCount;
+
+                    // Column header cell
+                    if (rowState.RowEnum == GridRowEnum.Filter)
+                    {
+                        var cell = new CellExcel() { CellReference = cellReference, DataType = CellValues.String, CellValue = new CellValue(column.ColumnText), StyleIndex = 1 };
+                        rowExcel.Append(cell);
+                    }
+
+                    // Data cell
+                    if (rowState.RowEnum == GridRowEnum.Index)
+                    {
+                        Row row;
+                        if (rowState.RowNew == null)
+                        {
+                            row = grid.RowList[rowState.RowId.Value - 1];
+                        }
+                        else
+                        {
+                            row = rowState.RowNew;
+                        }
+
+                        var field = fieldList[column.FieldNameCSharp];
+                        string text = null;
+                        object value = field.PropertyInfo.GetValue(row);
+                        if (value != null)
+                        {
+                            text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                            text = UtilFramework.StringNull(text);
+                            if (text == null)
+                            {
+                                text = field.FrameworkType().CellTextFromValue(value);
+                            }
+                        }
+                        var cell = new CellExcel() { CellReference = cellReference, DataType = CellValues.String, CellValue = new CellValue(text) };
+                        rowExcel.Append(cell);
+                    }
+                }
+            }
+        }
+
+        public static void Export(Grid grid)
+        {
+            var fileName = Path.GetTempFileName();
+            using (var spreadsheetDocument = SpreadsheetDocument.Create(fileName, SpreadsheetDocumentType.Workbook))
+            {
+                // Add a WorkbookPart to the document.
+                WorkbookPart workbookpart = spreadsheetDocument.AddWorkbookPart();
+                workbookpart.Workbook = new Workbook();
+
+                // Add a WorksheetPart to the WorkbookPart.
+                WorksheetPart worksheetPart = workbookpart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
+
+                // Add Sheets to the Workbook.
+                Sheets sheets = spreadsheetDocument.WorkbookPart.Workbook.
+                AppendChild<Sheets>(new Sheets());
+
+                // Append a new worksheet and associate it with the workbook.
+                Sheet sheet = new Sheet()
+                {
+                    Id = spreadsheetDocument.WorkbookPart.
+                    GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Data"
+                };
+                sheets.Append(sheet);
+
+                ExportStyle(spreadsheetDocument);
+                ExportData(worksheetPart, grid);
+
+                workbookpart.Workbook.Save();
+
+                // Close the document.
+                spreadsheetDocument.Close();
+            }
+
+            // Send file with app.json to download in client.
+            AppJson appJson = grid.ComponentOwner<AppJson>();
+            appJson.Download(File.ReadAllBytes(fileName), "Grid.xlsx");
+            File.Delete(fileName);
         }
     }
 }

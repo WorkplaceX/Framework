@@ -472,48 +472,82 @@
         /// <summary>
         /// Gets or sets RequestCount. Used by client. Does not send new request while old is still pending.
         /// </summary>
-        public int RequestCount { get; internal set; }
+        internal int RequestCount { get; set; }
 
         /// <summary>
         /// Gets ResponseCount. Used by server to verify incoming request matches last response.
         /// </summary>
-        public int ResponseCount { get; internal set; }
+        internal int ResponseCount { get; set; }
 
         /// <summary>
         /// Gets IsSessionExpired. If true, session expired and application has been recycled.
         /// </summary>
         public bool IsSessionExpired { get; internal set; }
 
-        public string Version { get; set; }
+        internal string Version { get; set; }
 
-        public string VersionBuild { get; set; }
+        internal string VersionBuild { get; set; }
 
-        public bool IsServerSideRendering { get; set; }
+        internal bool IsServerSideRendering { get; set; }
 
-        public string Session { get; set; }
+        internal string Session { get; set; }
 
-        public string SessionApp { get; set; }
+        internal string SessionApp { get; set; }
 
         /// <summary>
         /// Gets or sets IsModal. Indicating an object PageModal exists in the component tree. 
         /// Used for example for html "body class='modal-open'" to enable vertical scroll bar.
         /// </summary>
-        public bool IsBootstrapModal { get; set; }
+        internal bool IsBootstrapModal { get; set; }
 
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
         /// </summary>
-        public bool IsReload { get; internal set; }
+        internal bool IsReload { get; set; }
 
         /// <summary>
         /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method: UtilServer.RequestUrl();
         /// </summary>
-        public string RequestUrl { get; internal set; }
+        internal string RequestUrl { get; set; }
 
         /// <summary>
         /// Gets EmbeddedUrl. Value used by Angular client on first app.json POST to indicate application is embedded an running on other website.
         /// </summary>
-        public string EmbeddedUrl { get; internal set; }
+        internal string EmbeddedUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets DownloadData Used to send file to download to client.. See also method Convert.ToBase64String();
+        /// </summary>
+        [Serialize(SerializeEnum.Client)]
+        internal string DownloadData;
+
+        /// <summary>
+        /// Gets or sets DownloadFileName. For example Grid.xlsx
+        /// </summary>
+        [Serialize(SerializeEnum.Client)]
+        internal string DownloadFileName;
+
+        /// <summary>
+        /// Gets or sets DownloadContentType. See also method UtilServer.ContentType();
+        /// </summary>
+        [Serialize(SerializeEnum.Client)]
+        internal string DownloadContentType;
+
+        /// <summary>
+        /// Send file with app.json response to download in client.
+        /// </summary>
+        internal void Download(byte[] data, string fileName)
+        {
+            this.DownloadData = Convert.ToBase64String(data);
+            this.DownloadFileName = fileName;
+            this.DownloadContentType = UtilServer.ContentType(fileName);
+        }
+
+        /// <summary>
+        /// Gets or sets IsScrollToTop. Used for example for session expired.
+        /// </summary>
+        [Serialize(SerializeEnum.Client)]
+        internal bool IsScrollToTop;
     }
 
     /// <summary>
@@ -1222,16 +1256,60 @@
     public enum GridIsClickEnum
     {
         None = 0,
+
+        /// <summary>
+        /// Page up and load data rows from database.
+        /// </summary>
         PageUp = 1,
+
+        /// <summary>
+        /// Page down and load data rows from database.
+        /// </summary>
         PageDown = 2,
+
+        /// <summary>
+        /// Page (scroll) left and show new cells in view. No data row load from database.
+        /// </summary>
         PageLeft = 3,
+
+        /// <summary>
+        /// Page (scroll) right and show new cells in view. No data row load from database.
+        /// </summary>
         PageRight = 4,
+
+        /// <summary>
+        /// Show data grid in table mode.
+        /// </summary>
         ModeTable=7,
+
+        /// <summary>
+        /// Show data grid in stack mode.
+        /// </summary>
         ModeStack=8,
+
+        /// <summary>
+        /// Show data grid in form mode.
+        /// </summary>
         ModeForm=9,
+
+        /// <summary>
+        /// Download data rows as Excel (*.xlsx) file.
+        /// </summary>
         ExcelDownload=10,
+
+        /// <summary>
+        /// Upload data rows as Excel (*.xlsx) file.
+        /// </summary>
         ExcelUpload=11,
+
+        /// <summary>
+        /// Clear filter and reload data rows from database.
+        /// </summary>
         Reload = 5,
+
+        /// <summary>
+        /// Open data grid config dialog.
+        /// </summary>
         Config = 6,
     }
 
