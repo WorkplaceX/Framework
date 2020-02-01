@@ -103,11 +103,17 @@ export class DataService {
       }
       const byteArray = new Uint8Array(byteNumbers);          
       const blob = new Blob([byteArray], {type: jsonResponse.DownloadContentType});
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = jsonResponse.DownloadFileName;
-      link.click();
-      URL.revokeObjectURL(link.href);
+
+      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveOrOpenBlob(blob, jsonResponse.DownloadFileName); // See also: https://stackoverflow.com/questions/27463901/setting-window-location-or-window-open-in-angularjs-gives-access-is-denied-in
+      }
+      else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = jsonResponse.DownloadFileName;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }      
     }
   }
 
