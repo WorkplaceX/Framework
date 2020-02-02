@@ -87,7 +87,7 @@
                 }
                 foreach (var item in listRemove)
                 {
-                    divContainer.List.Remove(item);
+                    divContainer.ListInternal.Remove(item);
                 }
             }
         }

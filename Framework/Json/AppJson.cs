@@ -133,7 +133,7 @@
                         }
                     }
                     this.TrackBy = this.Type + "-" + count.ToString();
-                    owner.List.Add(this);
+                    owner.ListInternal.Add(this);
                 }
             }
         }
@@ -179,24 +179,37 @@
         /// <summary>
         /// Gets Id. Client sends command to server. See also <see cref="RequestJson.ComponentId"/>
         /// </summary>
-        public int Id { get; internal set; }
+        internal int Id { get; set; }
 
         /// <summary>
         /// Gets or sets Type. Used by Angular. See also <see cref="Page"/>.
         /// </summary>
-        public string Type;
+        internal string Type;
 
-        public string TrackBy { get; internal set; }
+        internal string TrackBy { get; set; }
 
         /// <summary>
         /// Gets or sets custom html style classes for this component.
         /// </summary>
         public string CssClass;
 
+        [Serialize(SerializeEnum.None)]
+        internal List<ComponentJson> ListInternal = new List<ComponentJson>(); // Empty list is removed by json serializer.
+
         /// <summary>
-        /// Gets json list.
+        /// Gets List. List of child components.
         /// </summary>
-        public List<ComponentJson> List = new List<ComponentJson>(); // Empty list is removed by json serializer.
+        public IReadOnlyList<ComponentJson> List
+        {
+            get
+            {
+                return ListInternal;
+            }
+            internal set
+            {
+                ListInternal = (List<ComponentJson>)value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets IsHide. If true component is not sent to client.
@@ -328,7 +341,7 @@
         /// </summary>
         public static void ComponentRemove(this ComponentJson component)
         {
-            component?.Owner.List.Remove(component);
+            component?.Owner.ListInternal.Remove(component);
             component.Owner = null;
             component.IsRemoved = true;
         }
@@ -338,7 +351,7 @@
         /// </summary>
         public static int ComponentIndex(this ComponentJson component)
         {
-            return component.Owner.List.IndexOf(component);
+            return component.Owner.ListInternal.IndexOf(component);
         }
 
         /// <summary>
@@ -354,7 +367,7 @@
         /// </summary>
         public static void ComponentMove(this ComponentJson component, int index)
         {
-            var list = component?.Owner.List;
+            var list = component?.Owner.ListInternal;
             list.Remove(component);
             list.Insert(index, component);
         }
@@ -365,6 +378,19 @@
         public static void ComponentMoveLast(this ComponentJson component)
         {
             component.ComponentMove(component.ComponentCount() - 1);
+        }
+
+        /// <summary>
+        /// Remove all children.
+        /// </summary>
+        public static void ComponentListClear(this ComponentJson component)
+        {
+            foreach (var item in component.ListInternal)
+            {
+                item.Owner = null;
+                item.IsRemoved = true;
+            }
+            component.ListInternal.Clear();
         }
 
         /// <summary>

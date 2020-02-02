@@ -409,7 +409,7 @@ namespace Framework.Json
 
             private void Constructor(ref Type propertyType, ref bool isList)
             {
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(List<>))
+                if (propertyType.IsGenericType && (propertyType.GetGenericTypeDefinition() == typeof(List<>) || propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)))
                 {
                     isList = true;
                     propertyType = propertyType.GetGenericArguments()[0];
