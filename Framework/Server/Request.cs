@@ -120,7 +120,8 @@
             if (UtilServer.IsIssServer)
             {
                 // Running on IIS Server.
-                url = "http://" + context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server.js"; // Url of server side rendering when running on IIS Server
+                url = context.Request.IsHttps ? "https://" : "http://";
+                url += context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server.js"; // Url of server side rendering when running on IIS Server
             }
             else
             {
@@ -137,7 +138,7 @@
             string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
             serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
             url += "?view=" + serverSideRenderView;
-            string indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST
+            string indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:50919/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
 
             // Set jsonBrowser in index.html.
             string scriptFind = "var jsonBrowser = {};";

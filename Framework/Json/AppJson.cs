@@ -573,7 +573,7 @@
         /// Gets or sets IsScrollToTop. Used for example for session expired.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
-        internal bool IsScrollToTop;
+        public bool IsScrollToTop;
     }
 
     /// <summary>
