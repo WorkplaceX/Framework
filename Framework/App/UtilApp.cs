@@ -138,19 +138,22 @@
                 navbar.ButtonList = new List<BootstrapNavbarButton>();
                 foreach (var item in navbar.GridList)
                 {
-                    var propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(item.Grid.TypeRow);
-
-                    PropertyInfo propertyInfoId = propertyInfoList.Where(item => item.Name == "Id" && item.PropertyType == typeof(int)).SingleOrDefault();
-                    PropertyInfo propertyInfoParentId = propertyInfoList.Where(item => item.Name == "ParentId" && item.PropertyType == typeof(int?)).SingleOrDefault();
-                    PropertyInfo propertyInfoTextHtml = propertyInfoList.Where(item => item.Name == "TextHtml" && item.PropertyType == typeof(string)).SingleOrDefault();
-
-                    if (propertyInfoParentId != null)
+                    if (item.Grid?.TypeRow != null)
                     {
-                        UtilFramework.Assert(propertyInfoId != null, "Row needs a column called 'Id'!");
-                    }
-                    UtilFramework.Assert(propertyInfoTextHtml != null, string.Format("Row needs a column called 'TextHtml' ({0})!", UtilDalType.TypeRowToTableNameCSharp(item.Grid.TypeRow)));
+                        var propertyInfoList = UtilDalType.TypeRowToPropertyInfoList(item.Grid.TypeRow);
 
-                    BootstrapNavbarRender(null, ref navbar.ButtonList, item.Grid, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml, ref buttonId);
+                        PropertyInfo propertyInfoId = propertyInfoList.Where(item => item.Name == "Id" && item.PropertyType == typeof(int)).SingleOrDefault();
+                        PropertyInfo propertyInfoParentId = propertyInfoList.Where(item => item.Name == "ParentId" && item.PropertyType == typeof(int?)).SingleOrDefault();
+                        PropertyInfo propertyInfoTextHtml = propertyInfoList.Where(item => item.Name == "TextHtml" && item.PropertyType == typeof(string)).SingleOrDefault();
+
+                        if (propertyInfoParentId != null)
+                        {
+                            UtilFramework.Assert(propertyInfoId != null, "Row needs a column called 'Id'!");
+                        }
+                        UtilFramework.Assert(propertyInfoTextHtml != null, string.Format("Row needs a column called 'TextHtml' ({0})!", UtilDalType.TypeRowToTableNameCSharp(item.Grid.TypeRow)));
+
+                        BootstrapNavbarRender(null, ref navbar.ButtonList, item.Grid, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml, ref buttonId);
+                    }
                 }
             }
         }
