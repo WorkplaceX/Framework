@@ -616,6 +616,24 @@
     }
 
     /// <summary>
+    /// BingMap element. See also: https://www.bingmapsportal.com/ and https://www.bing.com/api/maps/sdk/mapcontrol/isdk/
+    /// </summary>
+    public sealed class BingMap : ComponentJson
+    {
+        public BingMap(ComponentJson owner)
+            : base(owner)
+        {
+
+        }
+
+        public string Long;
+
+        public string Lat;
+
+        public string Key;
+    }
+
+    /// <summary>
     /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
     /// </summary>
     public sealed class DivContainer : ComponentJson

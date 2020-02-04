@@ -1,5 +1,7 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation, ElementRef, ViewChild, SimpleChanges } from '@angular/core';
 import { DataService, RequestJson } from './data.service';
+
+declare var scriptBingMap: any;
 
 @Component({
   selector: 'app-root',
@@ -26,6 +28,7 @@ export class AppComponent {
   template: `
   <div data-Button style="display:inline" *ngIf="json.Type=='Button'" [json]=json></div>
   <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
+  <div data-BingMap [ngClass]="json.CssClass" *ngIf="json.Type=='BingMap'" [json]=json></div>
   <div data-DivContainer [ngClass]="json.CssClass" *ngIf="json.Type=='DivContainer'" [json]=json></div>
   <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>
   <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
@@ -92,8 +95,7 @@ export class Button {
   `
 })
 export class Div {
-  @Input() json: any
-  dataService: DataService;
+  @Input() json: any;
 
   trackBy(index: any, item: any) {
     return item.TrackBy;
@@ -108,10 +110,80 @@ export class Div {
   `
 })
 export class DivContainer {
-  @Input() json: any
+  @Input() json: any;
   
   trackBy(index, item) {
     return index; // or item.id
   }
 }
-  
+
+/* BingMap */
+@Component({
+  selector: '[data-BingMap]',
+  template: `
+  <div #map id="myMap" style="height:400px;"></div>
+  <script></script>
+  `
+})
+export class BingMap {
+  constructor(dataService: DataService){
+    this.dataService = dataService;
+  }
+
+  @Input() json: any;
+  dataService: DataService;
+
+  @ViewChild('map', { static: true}) 
+  map: ElementRef;
+ 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.json.previousValue == null || changes.json.previousValue.Lat != changes.json.currentValue.Lat || changes.json.previousValue.Long != changes.json.currentValue.Long)
+    {
+      this.scriptBingMapInit();
+      scriptBingMap({ Lat: changes.json.currentValue.Lat, Long: changes.json.currentValue.Long});
+    }
+  }
+
+  scriptBingMapInit() {
+    if (document.getElementById('scriptBingMap')) {
+      return;
+    }
+
+    const script = this.dataService.document.createElement('script');
+    script.id = "scriptBingMap";
+    script.text = `
+    scriptBingMapIsInit = false;
+    scriptBingMapPos = null;
+    function scriptBingMap(pos) {
+      if (!scriptBingMapIsInit && pos == null) {
+        scriptBingMapIsInit = true;
+      }
+      if (pos != null) {
+        scriptBingMapPos = pos;
+      }
+      if (pos == null && scriptBingMapPos != null) {
+        pos = scriptBingMapPos;
+      }
+
+      if (scriptBingMapIsInit) {
+        var map = new Microsoft.Maps.Map(document.getElementById('myMap'), {});
+        map.setView({
+            center: new Microsoft.Maps.Location(pos.Lat, pos.Long),
+            mapTypeId: Microsoft.Maps.MapTypeId.aerial,            
+            zoom: 15
+        });
+				var pushpin = new Microsoft.Maps.Pushpin(map.getCenter(), null);
+        map.entities.push(pushpin);
+      }
+    }
+    `
+    this.dataService.renderer.appendChild(this.dataService.document.head, script);
+
+    const scriptApi = this.dataService.document.createElement('script');
+    
+    scriptApi.src = 'https://www.bing.com/api/maps/mapcontrol?key=' + this.json.Key + '&callback=scriptBingMap';
+    scriptApi.async = true;
+    scriptApi.defer = true;
+    this.dataService.renderer.appendChild(this.dataService.document.head, scriptApi);
+  }
+}

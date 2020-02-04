@@ -1,5 +1,6 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, Renderer2, RendererFactory2 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { DOCUMENT } from '@angular/common';
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
@@ -75,7 +76,10 @@ export class DataService {
   
   public isRequestPending: boolean = false; // Request is in prgress.
 
-  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any) { 
+  public renderer: Renderer2;
+
+  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, private rendererFactory: RendererFactory2) { 
+    this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
       this.json = this.jsonServerSideRendering;
       this.json.IsServerSideRendering = true;
