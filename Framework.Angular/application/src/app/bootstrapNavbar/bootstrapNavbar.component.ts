@@ -17,6 +17,7 @@ import { DataService, RequestJson } from '../data.service';
   click(button){
     button.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
+    return false;
   } 
 
   trackBy(index, item) {
