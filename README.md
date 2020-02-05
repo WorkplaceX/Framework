@@ -8,11 +8,12 @@ Framework to create database applications based on Angular 6 with server side re
 
 ## Getting started
 
+* Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
 * Get started with: [Application](https://github.com/WorkplaceX/Application) (Empty hello world application)
 * Documentation see: [Documentation](https://github.com/WorkplaceX/Framework/wiki) (wiki)
-* Project page: [WorkplaceX.com](http://workplacex.com)
+* Project page: [WorkplaceX.org](http://workplacex.org)
 
-## Folder Structure
+## Project Folder Structure
 * "Framework/" (Framework kernel doing all the heavy work)
 * "Framework.Angular/" (Generic Angular application to render app.json sent by server)
 * "Framework.Cli/" (C# Command line interface to build and deploy application)
@@ -24,25 +25,25 @@ Framework to create database applications based on Angular 6 with server side re
 Some versions to check:
 ```cmd
 node --version
-v8.11.3
+v12.13.0
 
 npm --version
-6.2.0
+6.12.0
 
 dotnet --version
-2.1.201
+3.1.101
 
 ng --version
-Angular CLI: 6.0.8
+Angular CLI: 8.3.15
 ```
 
 For Windows:
 ```cmd
 git --version
-git version 2.18.0.windows.1
+git version 2.21.0.windows.1
 
 $PSVersionTable.PSVersion
-Major  Minor  Build  Revision
------  -----  -----  --------
-5      1      16299  431
+Major  Minor  Patch  PreReleaseLabel BuildLabel
+-----  -----  -----  --------------- ----------
+6      2      3
 ```
