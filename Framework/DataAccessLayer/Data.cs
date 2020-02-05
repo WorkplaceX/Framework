@@ -48,6 +48,24 @@
     public static class Data // public static class UtilDal
     {
         /// <summary>
+        /// Update or insert data row.
+        /// </summary>
+        public static async Task UpsertAsync(Type typeRow, Row row, string[] fieldNameKeyList)
+        {
+            List<Row> rowList = new List<Row>();
+            rowList.Add(row);
+            await UtilDalUpsert.UpsertAsync(typeRow, rowList, fieldNameKeyList);
+        }
+
+        /// <summary>
+        /// Update or insert data row.
+        /// </summary>
+        public static async Task UpsertAsync<TRow>(TRow row, string[] fieldNameKeyList) where TRow : Row
+        {
+            await UpsertAsync(typeof(TRow), row, fieldNameKeyList);
+        }
+
+        /// <summary>
         /// Returns memory where rows are stored.
         /// </summary>
         public static IList MemoryRowList(Type typeRow, DatabaseEnum databaseEnum = DatabaseEnum.MemorySingleton)
@@ -974,9 +992,9 @@
             MERGE INTO {0} AS Target
             USING ({1}) AS Source
 	        ON NOT EXISTS(
-                SELECT ({2})
+                SELECT {2}
                 EXCEPT
-                SELECT ({3}))
+                SELECT {3})
             WHEN MATCHED THEN
 	            UPDATE SET 
                     {4}
