@@ -105,7 +105,7 @@
                 if (item.RowList.Count > 0)
                 {
                     Type typeRow = item.RowList.First().GetType();
-                    UtilDalUpsertBuiltIn.UpsertAsync(typeRow, item.RowList, item.FieldNameKeyList, item.TableNameSqlReferencePrefex, assemblyList).Wait();
+                    UtilDalUpsertBuiltIn.UpsertAsync(typeRow, item.RowList, item.FieldNameKeyList, item.TableNameSqlReferencePrefix, assemblyList).Wait();
                 }
             }
         }

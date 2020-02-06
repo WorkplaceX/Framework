@@ -229,27 +229,27 @@
             /// <summary>
             /// Constructor.
             /// </summary>
-            private DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex)
+            private DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
             {
                 this.RowList = rowList;
                 this.FieldNameKeyList = fieldNameKeyList;
-                this.TableNameSqlReferencePrefex = tableNameSqlReferencePrefex;
+                this.TableNameSqlReferencePrefix = tableNameSqlReferencePrefix;
             }
 
             /// <summary>
             /// Constructor.
             /// </summary>
-            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefex) where TRow : Row
+            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix) where TRow : Row
             {
-                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefex);
+                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix);
             }
 
             /// <summary>
             /// Constructor.
             /// </summary>
-            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefex) where TRow : Row
+            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix) where TRow : Row
             {
-                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), new string[] { fieldNameKey }, tableNameSqlReferencePrefex);
+                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), new string[] { fieldNameKey }, tableNameSqlReferencePrefix);
             }
 
             /// <summary>
@@ -263,9 +263,9 @@
             public readonly string[] FieldNameKeyList;
 
             /// <summary>
-            /// Gets TableNameSqlReferencePrefex. Used to find reference tables.
+            /// Gets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.
             /// </summary>
-            public readonly string TableNameSqlReferencePrefex;
+            public readonly string TableNameSqlReferencePrefix;
         }
 
         /// <summary>
@@ -386,6 +386,7 @@
 
         /// <summary>
         /// Override this method to add BuiltIn data rows to list. Used by cli generate command to generate CSharp code.
+        /// Note: Cli generate command is not BuiltIn table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
         protected virtual void CommandGenerateBuiltIn(List<GenerateBuiltInItem> list)
         {
@@ -394,6 +395,7 @@
 
         /// <summary>
         /// Group of BuiltIn TypeRow.
+        /// Note: Cli generate command is not BuiltIn table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
         public class GenerateBuiltInItem
         {

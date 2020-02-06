@@ -1077,7 +1077,13 @@
             public bool IsParentId;
         }
 
-        private static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, string tableNameSqlPrefix, List<Assembly> assemblyList)
+        /// <summary>
+        /// Returns list of FieldBuiltIn for TypeRow.
+        /// </summary>
+        /// <param name="typeRow">Data row type.</param>
+        /// <param name="tableNameSqlReferencePrefix">When searching for reference tables use this prefix. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
+        /// <param name="assemblyList">Find table names in these assemblies.</param>
+        private static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
         {
             List<FieldBuiltIn> result = new List<FieldBuiltIn>();
             var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
@@ -1110,7 +1116,7 @@
                     if (fieldNameSqlList.Contains(fieldNameIdSql))
                     {
                         UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-                        string tableNameWithSchemaSqlBuiltIn = tableNameSqlPrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
+                        string tableNameWithSchemaSqlBuiltIn = tableNameSqlReferencePrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
                         tableNameWithSchemaSqlBuiltIn = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameWithSchemaSqlBuiltIn);
                         var tableReferenceList = tableNameSqlList.Where(item => item.Value == tableNameWithSchemaSqlBuiltIn).ToList();
                         Type typeRowReference = tableReferenceList.SingleOrDefault().Key;
@@ -1145,10 +1151,10 @@
             return result;
         }
 
-        private static string UpsertSelect(Type typeRow, List<Row> rowList, string tableNameSqlPrefix, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, List<Assembly> assemblyList)
+        private static string UpsertSelect(Type typeRow, List<Row> rowList, string tableNameSqlReferencePrefix, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, List<Assembly> assemblyList)
         {
             StringBuilder sqlSelect = new StringBuilder();
-            var fieldBuiltInList = FieldBuiltInList(typeRow, tableNameSqlPrefix, assemblyList);
+            var fieldBuiltInList = FieldBuiltInList(typeRow, tableNameSqlReferencePrefix, assemblyList);
 
             // Row
             bool isFirstRow = true;
@@ -1227,20 +1233,20 @@
         /// <param name="typeRow">Type of rowList (can be empty).</param>
         /// <param name="rowList">Records to update.</param>
         /// <param name="fieldNameKeyList">Key fields for record identification.</param>
-        /// <param name="tableNameSqlPrefix">For example "Framework". Used to find BuiltIn reference table.</param>
+        /// <param name="tableNameSqlReferencePrefix">If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlPrefix, List<Assembly> assemblyList)
+        internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
             IsExistSet(typeRow, rowList);
 
-            var fieldNameSqlListAll = FieldBuiltInList(typeRow, tableNameSqlPrefix, assemblyList);
+            var fieldNameSqlListAll = FieldBuiltInList(typeRow, tableNameSqlReferencePrefix, assemblyList);
 
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
-                string sqlSelect = UpsertSelect(typeRow, rowListSplit, tableNameSqlPrefix, paramList, assemblyList);
+                string sqlSelect = UpsertSelect(typeRow, rowListSplit, tableNameSqlReferencePrefix, paramList, assemblyList);
 
                 // Update underlying sql table if sql view ends with "BuiltIn".
                 UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
@@ -1289,14 +1295,14 @@
             }
         }
 
-        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlPrefix, List<Assembly> assemblyList) where TRow : Row
+        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix, List<Assembly> assemblyList) where TRow : Row
         {
-            await UpsertAsync(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlPrefix, assemblyList);
+            await UpsertAsync(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix, assemblyList);
         }
 
-        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string fieldNameKey, List<Assembly> assemblyList, string tableNameSqlPrefix) where TRow : Row
+        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string fieldNameKey, List<Assembly> assemblyList, string tableNameSqlReferencePrefix) where TRow : Row
         {
-            await UpsertAsync(rowList, new string[] { fieldNameKey }, tableNameSqlPrefix, assemblyList);
+            await UpsertAsync(rowList, new string[] { fieldNameKey }, tableNameSqlReferencePrefix, assemblyList);
         }
     }
 
