@@ -1,8 +1,10 @@
 ﻿namespace Framework.Cli.Generate
 {
+    using Framework.Cli.Command;
     using Framework.DataAccessLayer;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using static Framework.Cli.Command.AppCli;
 
@@ -39,7 +41,12 @@
                 result.AppendLine(string.Format("namespace DatabaseBuiltIn.{0}", schemaNameCSharp));
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
-                bool TypeRowIsFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).First().TypeRow);
+                if (isApplication)
+                {
+                    // See also class IdNameEnumAttribute
+                    result.AppendLine(string.Format("    using System.Linq;"));
+                    result.AppendLine(string.Format("    using Framework.DataAccessLayer;"));
+                }
                 result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
                 result.AppendLine();
                 GenerateCSharpTableNameClass(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, result);
@@ -89,6 +96,10 @@
 
                 result.AppendLine(string.Format("    public static class {0}{1}", builtIn.TableNameCSharp, classNameExtension));
                 result.AppendLine(string.Format("    {{"));
+                if (isApplication)
+                {
+                    GenerateCSharpNameEnum(builtIn, result);
+                }
                 result.AppendLine(string.Format("        public static List<{0}> RowList", builtIn.TableNameCSharp));
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            get"));
@@ -99,6 +110,33 @@
                 result.AppendLine(string.Format("            }}"));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine(string.Format("    }}"));
+            }
+        }
+
+        private static void GenerateCSharpNameEnum(GenerateBuiltInItem builtIn, StringBuilder result)
+        {
+            var fieldList = UtilDalType.TypeRowToFieldList(builtIn.TypeRow);
+            var fieldId = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "Id"); // See also FieldBuiltIn.IsKey
+            var fieldIdName = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "IdName"); // See also FieldBuiltIn.IsKey
+            if (fieldIdName != null) 
+            {
+                result.Append(string.Format("        public enum IdNameEnum {{ [IdNameEnum(null)]None = 0"));
+                List<string> nameExceptList = new List<string>();
+                int count = 0;
+                foreach (Row row in builtIn.RowList)
+                {
+                    count += 1;
+                    string idName = (string)fieldIdName.PropertyInfo.GetValue(row);
+                    string nameCSharp = UtilGenerate.NameCSharp(idName, nameExceptList);
+                    result.Append(string.Format(", [IdNameEnum(\"{0}\")]{1} = {2}", idName, nameCSharp, count));
+                }
+                result.AppendLine(string.Format(" }}"));
+                result.AppendLine();
+                result.AppendLine(string.Format("        public static {0} Row(IdNameEnum value)", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("        {{"));
+                result.AppendLine(string.Format("            return RowList.Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).SingleOrDefault();"));
+                result.AppendLine(string.Format("        }}"));
+                result.AppendLine();
             }
         }
 

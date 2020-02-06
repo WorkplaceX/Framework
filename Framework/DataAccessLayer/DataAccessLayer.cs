@@ -1,6 +1,7 @@
 ﻿namespace Framework.DataAccessLayer
 {
     using System;
+    using System.Linq;
 
     /// <summary>
     /// Base class for every database row. (Table and view).
@@ -81,5 +82,33 @@
         /// Gets FrameworkTypeEnum. See also class FrameworkType.
         /// </summary>
         public readonly FrameworkTypeEnum FrameworkTypeEnum;
+    }
+
+    /// <summary>
+    /// Mapping from CSharp enum to value in sql table.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)] // Enum entry
+    public class IdNameEnumAttribute : Attribute
+    {
+        public IdNameEnumAttribute(string idName)
+        {
+            this.IdName = idName;
+        }
+
+        /// <summary>
+        /// Gets IdName. Value in sql table.
+        /// </summary>
+        public readonly string IdName;
+
+        /// <summary>
+        /// Returns IdName from enum.
+        /// </summary>
+        public static string IdNameFromEnum(Enum value)
+        {
+            var enumType = value.GetType();
+            var enumName = Enum.GetName(enumType, value);
+            var enumNameAttribute = enumType.GetField(enumName).GetCustomAttributes(false).OfType<IdNameEnumAttribute>().Single();
+            return enumNameAttribute.IdName;
+        }
     }
 }
