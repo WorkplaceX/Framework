@@ -38,7 +38,7 @@
             List<GenerateBuiltInItem> builtInlist = null;
             try
             {
-                builtInlist = appCli.CommandGenerateBuiltInListInternal();
+                builtInlist = appCli.CommandGenerateBuiltInListInternal(); // TODO cli command generate is not BuiltIn table reference aware. See also TableNameSqlReferencePrefix. Therefore Id columns can not be omitted in generate. See also class GenerateBuiltInItem and DeployDbBuiltInItem.
             }
             catch (SqlException exception)
             {

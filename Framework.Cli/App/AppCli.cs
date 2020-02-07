@@ -229,7 +229,7 @@
             /// <summary>
             /// Constructor.
             /// </summary>
-            private DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
+            internal DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
             {
                 this.RowList = rowList;
                 this.FieldNameKeyList = fieldNameKeyList;
@@ -258,6 +258,17 @@
             public readonly List<Row> RowList;
 
             /// <summary>
+            /// Add RowList to RowList.
+            /// </summary>
+            internal void RowListUnion(List<Row> rowList)
+            {
+                foreach (var item in rowList)
+                {
+                    this.RowList.Add(item);
+                }
+            }
+
+            /// <summary>
             /// Gets FieldNameKeyList. Sql unique index for upsert.
             /// </summary>
             public readonly string[] FieldNameKeyList;
@@ -266,6 +277,22 @@
             /// Gets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.
             /// </summary>
             public readonly string TableNameSqlReferencePrefix;
+
+            /// <summary>
+            /// Gets TypeRow. Based on items in RowList.
+            /// </summary>
+            public Type TypeRow
+            {
+                get
+                {
+                    var result = RowList.FirstOrDefault()?.GetType();
+                    foreach (var item in RowList)
+                    {
+                        UtilFramework.Assert(item.GetType() == result, "RowList contains mixed TypeRow!");
+                    }
+                    return result;
+                }
+            }
         }
 
         /// <summary>

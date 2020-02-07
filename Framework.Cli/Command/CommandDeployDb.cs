@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using static Framework.Cli.Command.AppCli;
 
     public class CommandDeployDb : CommandBase
     {
@@ -99,14 +100,33 @@
         private void BuiltIn()
         {
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
-            var builtInList = AppCli.CommandDeployDbBuiltInListInternal();
-            foreach (var item in builtInList)
+            var builtInSourceList = AppCli.CommandDeployDbBuiltInListInternal();
+
+            var builtInDestList = new List<DeployDbBuiltInItem>(); // List with distinct TypeRow because of IsExist column.
+
+            // Distinct TypeRow
+            foreach (var itemSource in builtInSourceList)
             {
-                if (item.RowList.Count > 0)
+                if (itemSource.RowList.Count > 0)
                 {
-                    Type typeRow = item.RowList.First().GetType();
-                    UtilDalUpsertBuiltIn.UpsertAsync(typeRow, item.RowList, item.FieldNameKeyList, item.TableNameSqlReferencePrefix, assemblyList).Wait();
+                    DeployDbBuiltInItem itemDest = builtInDestList.SingleOrDefault(item => item.TypeRow == itemSource.TypeRow);
+                    if (itemDest == null)
+                    {
+                        itemDest = new DeployDbBuiltInItem(itemSource.RowList.ToList() /* Copy */, itemSource.FieldNameKeyList.ToArray() /* Copy */, itemSource.TableNameSqlReferencePrefix);
+                    }
+                    else
+                    {
+                        UtilFramework.Assert(itemDest.FieldNameKeyList.SequenceEqual(itemSource.FieldNameKeyList), "Different FieldNameKeyList for same TypeRow!");
+                        itemDest.RowListUnion(itemSource.RowList);
+                    }
+                    builtInDestList.Add(itemDest);
                 }
+            }
+
+            // Upsert
+            foreach (var item in builtInDestList)
+            {
+                UtilDalUpsertBuiltIn.UpsertAsync(item.TypeRow, item.RowList, item.FieldNameKeyList, item.TableNameSqlReferencePrefix, assemblyList).Wait();
             }
         }
 

@@ -1022,8 +1022,9 @@
         /// <summary>
         /// Set IsExist flag to false on sql table.
         /// </summary>
-        internal static async Task UpsertIsExistAsync(Type typeRow, string fieldNameSqlIsExist = "IsExist")
+        internal static async Task UpsertIsExistAsync(Type typeRow)
         {
+            string fieldNameSqlIsExist = "IsExist";
             string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             // IsExists
@@ -1031,6 +1032,9 @@
             await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
         }
 
+        /// <summary>
+        /// Overload.
+        /// </summary>
         internal static async Task UpsertIsExistAsync<TRow>() where TRow : Row
         {
             await UpsertIsExistAsync(typeof(TRow));
@@ -1222,8 +1226,8 @@
                     field.PropertyInfo.SetValue(row, true);
                 }
 
-                // Set sql table IsExist to false.
-                UtilDalUpsert.UpsertIsExistAsync(typeRow).Wait();
+                // Set sql table IsExist to false where IsBuiltIn is true (if column exists)
+                UtilDalUpsertBuiltIn.UpsertIsExistAsync(typeRow).Wait();
             }
         }
 
@@ -1303,6 +1307,27 @@
         internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string fieldNameKey, List<Assembly> assemblyList, string tableNameSqlReferencePrefix) where TRow : Row
         {
             await UpsertAsync(rowList, new string[] { fieldNameKey }, tableNameSqlReferencePrefix, assemblyList);
+        }
+
+        /// <summary>
+        /// Set IsExist flag to false on sql table. If sql table contains IsBuiltIn column set IsExist flag to false only on IsBuiltIn data rows.
+        /// </summary>
+        internal static async Task UpsertIsExistAsync(Type typeRow)
+        {
+            var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
+            if (!fieldList.ContainsKey("IsBuiltIn"))
+            {
+                await UtilDalUpsert.UpsertIsExistAsync(typeRow);
+            }
+            else
+            {
+                string fieldNameSqlIsExist = "IsExist";
+                string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
+                bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
+                // IsExists
+                string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT) WHERE IsBuiltIn = 1", tableNameWithSchemaSql, fieldNameSqlIsExist);
+                await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
+            }
         }
     }
 
