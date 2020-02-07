@@ -2,6 +2,7 @@
 {
     using Database.dbo;
     using Framework.DataAccessLayer;
+    using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -14,6 +15,13 @@
             : base(appCli, "deployDb", "Deploy database by running sql scripts")
         {
 
+        }
+
+        private CommandOption optionDrop;
+
+        protected internal override void Register(CommandLineApplication configuration)
+        {
+            optionDrop = configuration.Option("-d|--drop", "Drop sql tables and views.", CommandOptionType.NoValue);
         }
 
         private void DeployDbExecute(string folderName, bool isFrameworkDb)
@@ -134,28 +142,48 @@
         {
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
 
-            // FolderNameDeployDb
-            string folderNameDeployDbFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDb/";
-            string folderNameDeployDbApplication = UtilFramework.FolderName + "Application.Cli/DeployDb/";
+            if (optionDrop.Value() == "on")
+            {
+                // FolderNameDeployDbInit
+                string folderNameDeployDbInitFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDbInit/";
+                string folderNameDeployDbInitApplication = UtilFramework.FolderName + "Application.Cli/DeployDbInit/";
 
-            // SqlInit
-            string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDbInit/Init.sql";
-            string sqlInit = UtilFramework.FileLoad(fileNameInit);
-            Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
+                // SqlInit DROP
+                string fileNameInitDrop = folderNameDeployDbInitApplication + "InitDrop.sql";
+                string sqlInitDrop = UtilFramework.FileLoad(fileNameInitDrop);
+                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true).Wait();
 
-            Console.WriteLine("DeployDb");
-            DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
-            DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
+                fileNameInitDrop = folderNameDeployDbInitFramework + "InitDrop.sql";
+                sqlInitDrop = UtilFramework.FileLoad(fileNameInitDrop);
+                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true).Wait();
 
-            // Populate sql tables FrameworkTable, FrameworkField.
-            Console.WriteLine("Update FrameworkTable, FrameworkField tables");
-            Meta();
+                Console.WriteLine("DeployDb drop successful!");
+            }
+            else
+            {
+                // FolderNameDeployDb
+                string folderNameDeployDbFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDb/";
+                string folderNameDeployDbApplication = UtilFramework.FolderName + "Application.Cli/DeployDb/";
 
-            // Populate sql BuiltIn tables.
-            Console.WriteLine("Update BuiltIn tables");
-            BuiltIn();
+                // SqlInit
+                string fileNameInit = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDbInit/Init.sql";
+                string sqlInit = UtilFramework.FileLoad(fileNameInit);
+                Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
-            Console.WriteLine("DeployDb successful!");
+                Console.WriteLine("DeployDb");
+                DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
+                DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
+
+                // Populate sql tables FrameworkTable, FrameworkField.
+                Console.WriteLine("Update FrameworkTable, FrameworkField tables");
+                Meta();
+
+                // Populate sql BuiltIn tables.
+                Console.WriteLine("Update BuiltIn tables");
+                BuiltIn();
+
+                Console.WriteLine("DeployDb successful!");
+            }
         }
     }
 }
