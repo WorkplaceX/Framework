@@ -2154,6 +2154,20 @@
         {
 
         }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            string result = null;
+            if (value != null)
+            {
+                result = ((Double)value).ToString(System.Globalization.CultureInfo.InvariantCulture); // value.ToString(); returns for example 9,5 instead of 9.5
+            }
+            if (value == null)
+            {
+                result = "null";
+            }
+            return result;
+        }
     }
 
     internal class FrameworkTypeVarbinary : FrameworkType
