@@ -17,10 +17,10 @@
             CommandBuild.ConfigWebServerPublish();
 
             ConfigCli configCli = ConfigCli.Load();
-            string deployAzureGitUrl = UtilFramework.StringNull(configCli.DeployAzureGitUrl); // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
+            string deployAzureGitUrl = UtilFramework.StringNull(configCli.EnvironmentGet().DeployAzureGitUrl); // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
             if (deployAzureGitUrl == null)
             {
-                UtilCli.ConsoleWriteLineColor(nameof(configCli.DeployAzureGitUrl) + " not set!", System.ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor(nameof(ConfigCliEnvironment.DeployAzureGitUrl) + " not set!", System.ConsoleColor.Green);
             }
             else
             {

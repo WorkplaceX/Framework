@@ -91,16 +91,16 @@
             website.FolderNameNpmBuild = folderNameNpmBuild;
             website.FolderNameDist = folderNameDist;
             ConfigCli configCli = ConfigCli.Load();
-            if (configCli.WebsiteList == null)
+            if (configCli.EnvironmentGet().WebsiteList == null)
             {
-                configCli.WebsiteList = new List<ConfigCliWebsite>();
+                configCli.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
             }
-            ConfigCliWebsite websiteFind = configCli.WebsiteList.Where(item => item.FolderNameServer.ToLower() == folderNameServer.ToLower()).SingleOrDefault();
+            ConfigCliWebsite websiteFind = configCli.EnvironmentGet().WebsiteList.Where(item => item.FolderNameServer.ToLower() == folderNameServer.ToLower()).SingleOrDefault();
             if (websiteFind != null)
             {
-                configCli.WebsiteList.Remove(websiteFind);
+                configCli.EnvironmentGet().WebsiteList.Remove(websiteFind);
             }
-            configCli.WebsiteList.Add(website);
+            configCli.EnvironmentGet().WebsiteList.Add(website);
 
             ConfigCli.Save(configCli);
         }
@@ -114,8 +114,8 @@
             if (UtilCli.ArgumentValue(this, argumentConnectionString, out string connectionString))
             {
                 // Write
-                configCli.ConnectionStringFramework = connectionString;
-                configCli.ConnectionStringApplication = connectionString;
+                configCli.EnvironmentGet().ConnectionStringFramework = connectionString;
+                configCli.EnvironmentGet().ConnectionStringApplication = connectionString;
                 ConfigCli.Save(configCli);
 
                 // Copy values to ConfigWebServer.json
@@ -132,13 +132,13 @@
             if (UtilCli.ArgumentValue(this, argumentConnectionStringFramework, out string connectionString))
             {
                 // Write
-                configCli.ConnectionStringFramework = connectionString;
+                configCli.EnvironmentGet().ConnectionStringFramework = connectionString;
                 ConfigCli.Save(configCli);
             }
             else
             {
                 // Read
-                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringFramework.Name + "=" + configCli.ConnectionStringFramework);
+                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringFramework.Name + "=" + configCli.EnvironmentGet().ConnectionStringFramework);
             }
         }
 
@@ -151,13 +151,13 @@
             if (UtilCli.ArgumentValue(this, argumentConnectionStringApplication, out string connectionString))
             {
                 // Write
-                configCli.ConnectionStringApplication = connectionString;
+                configCli.EnvironmentGet().ConnectionStringApplication = connectionString;
                 ConfigCli.Save(configCli);
             }
             else
             {
                 // Read
-                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringApplication.Name + "=" + configCli.ConnectionStringApplication);
+                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringApplication.Name + "=" + configCli.EnvironmentGet().ConnectionStringApplication);
             }
         }
 
@@ -195,13 +195,13 @@
                 if (UtilCli.ArgumentValue(this, argumentDeployAzureGitUrl, out string value))
                 {
                     // Write
-                    configCli.DeployAzureGitUrl = value;
+                    configCli.EnvironmentGet().DeployAzureGitUrl = value;
                     ConfigCli.Save(configCli);
                 }
                 else
                 {
                     // Read
-                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + configCli.DeployAzureGitUrl);
+                    Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + configCli.EnvironmentGet().DeployAzureGitUrl);
                 }
             }
 

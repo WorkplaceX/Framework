@@ -3,6 +3,7 @@
     using Framework.Cli.Command;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
 
     /// <summary>
     /// Configuration used by all cli commands.
@@ -10,14 +11,43 @@
     public class ConfigCli
     {
         /// <summary>
-        /// Gets or sets ConnectionStringFramework. Can be different from ConnectionStringApplication, if framework relevant tables are stored on another database.
+        /// Gets or sets EnvironmentName. This is the currently selected environment.
         /// </summary>
-        public string ConnectionStringFramework { get; set; }
+        public string EnvironmentName { get; set; }
 
         /// <summary>
-        /// Gets or sets ConnectionStringApplication. Database containing business data.
+        /// Returns EnvironmentName. This is the currently selected environment. Default is DEV.
         /// </summary>
-        public string ConnectionStringApplication { get; set; }
+        public string EnvironmentNameGet()
+        {
+            string result = EnvironmentName?.ToUpper();
+            if (UtilFramework.StringNull(result) == null)
+            {
+                result = "DEV";
+            }
+            return result;
+        }
+
+        public List<ConfigCliEnvironment> EnvironmentList { get; set; }
+
+        /// <summary>
+        /// Returns currently selected environment. Default is DEV.
+        /// </summary>
+        public ConfigCliEnvironment EnvironmentGet()
+        {
+            if (EnvironmentList == null)
+            {
+                EnvironmentList = new List<ConfigCliEnvironment>();
+            }
+            var result = EnvironmentList.SingleOrDefault(item => item.EnvironmentName?.ToUpper() == EnvironmentNameGet());
+            if (result == null)
+            {
+                result = new ConfigCliEnvironment { EnvironmentName = EnvironmentNameGet() };
+                EnvironmentList.Add(result);
+                EnvironmentName = EnvironmentNameGet();
+            }
+            return result;
+        }
 
         /// <summary>
         /// Returns ConnectionString of application or framework.
@@ -27,23 +57,13 @@
             var configCli = ConfigCli.Load();
             if (isFrameworkDb == false)
             {
-                return configCli.ConnectionStringApplication;
+                return configCli.EnvironmentGet().ConnectionStringApplication;
             }
             else
             {
-                return configCli.ConnectionStringFramework;
+                return configCli.EnvironmentGet().ConnectionStringFramework;
             }
         }
-
-        /// <summary>
-        /// Gets or sets WebsiteList. Multiple domain names can be served by one ASP.NET Core instance.
-        /// </summary>
-        public List<ConfigCliWebsite> WebsiteList { get; set; }
-
-        /// <summary>
-        /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
-        /// </summary>
-        public string DeployAzureGitUrl { get; set; }
 
         /// <summary>
         /// Gets ConfigCli.json. Used by CommandBuild. Created with default values if file does not exist.
@@ -64,7 +84,7 @@
             if (!File.Exists(FileName))
             {
                 ConfigCli configCli = new ConfigCli();
-                configCli.WebsiteList = new List<ConfigCliWebsite>();
+                configCli.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
                 appCli.InitConfigCli(configCli);
                 Save(configCli);
 
@@ -75,11 +95,11 @@
         internal static ConfigCli Load()
         {
             var result = UtilFramework.ConfigLoad<ConfigCli>(FileName);
-            if (result.WebsiteList == null)
+            if (result.EnvironmentGet().WebsiteList == null)
             {
-                result.WebsiteList = new List<ConfigCliWebsite>();
+                result.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
             }
-            foreach (var website in result.WebsiteList)
+            foreach (var website in result.EnvironmentGet().WebsiteList)
             {
                 if (website.DomainNameList == null)
                 {
@@ -93,6 +113,37 @@
         {
             UtilFramework.ConfigSave(configCli, FileName);
         }
+    }
+
+    /// <summary>
+    /// Allows definition of DEV, TEST, PROD environments in ConfigCli.json file.
+    /// </summary>
+    public class ConfigCliEnvironment
+    {
+        /// <summary>
+        /// Gets or sets Name. For example DEV, TEST or PROD.
+        /// </summary>
+        public string EnvironmentName { get; set; }
+
+        /// <summary>
+        /// Gets or sets ConnectionStringFramework. Can be different from ConnectionStringApplication, if framework relevant tables are stored on another database.
+        /// </summary>
+        public string ConnectionStringFramework { get; set; }
+
+        /// <summary>
+        /// Gets or sets ConnectionStringApplication. Database containing business data.
+        /// </summary>
+        public string ConnectionStringApplication { get; set; }
+
+        /// <summary>
+        /// Gets or sets WebsiteList. Multiple domain names can be served by one ASP.NET Core instance.
+        /// </summary>
+        public List<ConfigCliWebsite> WebsiteList { get; set; }
+
+        /// <summary>
+        /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
+        /// </summary>
+        public string DeployAzureGitUrl { get; set; }
     }
 
     /// <summary>

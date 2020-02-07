@@ -151,6 +151,7 @@
             new CommandStart(this);
             new CommandDeploy(this);
             new CommandDeployDb(this);
+            new CommandEnvironment(this);
             new CommandTest(this);
         }
 

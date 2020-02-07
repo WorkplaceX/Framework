@@ -92,7 +92,7 @@
         private static void BuildWebsite()
         {
             var configCli = ConfigCli.Load();
-            foreach (var website in configCli.WebsiteList)
+            foreach (var website in configCli.EnvironmentGet().WebsiteList)
             {
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 BuildWebsiteNpm(website);
@@ -131,12 +131,12 @@
             var configWebServer = ConfigWebServer.Load();
 
             // ConnectionString
-            configWebServer.ConnectionStringFramework = configCli.ConnectionStringFramework;
-            configWebServer.ConnectionStringApplication = configCli.ConnectionStringApplication;
+            configWebServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
+            configWebServer.ConnectionStringApplication = configCli.EnvironmentGet().ConnectionStringApplication;
 
             // Website
             configWebServer.WebsiteList.Clear();
-            foreach (var webSite in configCli.WebsiteList)
+            foreach (var webSite in configCli.EnvironmentGet().WebsiteList)
             {
                 configWebServer.WebsiteList.Add(new ConfigWebServerWebsite() {
                     FolderNameServer = webSite.FolderNameServer,

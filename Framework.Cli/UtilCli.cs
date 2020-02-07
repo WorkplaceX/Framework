@@ -329,9 +329,9 @@
         {
             string text = string.Format("{0}", value);
             var configCli = ConfigCli.Load();
-            text = ConsoleWriteLinePasswordHide(text, configCli.ConnectionStringFramework);
-            text = ConsoleWriteLinePasswordHide(text, configCli.ConnectionStringApplication);
-            text = ConsoleWriteLinePasswordHide(text, configCli.DeployAzureGitUrl);
+            text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringFramework);
+            text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringApplication);
+            text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().DeployAzureGitUrl);
             Console.WriteLine(text, color);
         }
 
