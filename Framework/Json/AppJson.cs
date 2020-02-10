@@ -45,7 +45,7 @@
     /// <summary>
     /// Request sent by Angular client.
     /// </summary>
-    internal class RequestJson
+    internal sealed class RequestJson
     {
         public RequestCommand Command { get; set; }
 
@@ -763,7 +763,7 @@
     /// <summary>
     /// Data grid shows row as table, stack or form.
     /// </summary>
-    public class Grid : ComponentJson
+    public sealed class Grid : ComponentJson
     {
         /// <summary>
         /// Constructor.
@@ -836,10 +836,10 @@
         internal List<GridSortValue> SortValueList;
 
         [Serialize(SerializeEnum.Session)]
-        public int OffsetRow;
+        internal int OffsetRow;
 
         [Serialize(SerializeEnum.Session)]
-        public int OffsetColumn;
+        internal int OffsetColumn;
 
         /// <summary>
         /// Gets or sets StyleColumn. This is the css grid style attribute grid-template-columns.
@@ -850,7 +850,7 @@
         /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        public bool IsGridLookup;
+        internal bool IsGridLookup;
 
         /// <summary>
         /// Gets or sets GridLookup. Reference to lookup grid for this grid.
@@ -866,16 +866,16 @@
         /// Gets or sets GridLookupDestRowStateId. If this data grid is a lookup grid, this is the destination data row to write to after selection.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        public int? GridLookupDestRowStateId;
+        internal int? GridLookupDestRowStateId;
 
         /// <summary>
         /// Gets or sets GridLookupDestFieldNameCSharp. If this data grid is a lookup grid, this is the destination grid column (to write to) after selection.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        public string GridLookupDestFieldNameCSharp;
+        internal string GridLookupDestFieldNameCSharp;
 
         /// <summary>
-        /// Gets RowSelected. Currently selected row by user.
+        /// Gets RowSelected. Currently selected data row by user.
         /// </summary>
         [Serialize(SerializeEnum.None)]
         public Row RowSelected
@@ -913,7 +913,7 @@
     /// <summary>
     /// Wrapper providing value store functions.
     /// </summary>
-    public class GridFilter
+    public sealed class GridFilter
     {
         internal GridFilter(Grid grid)
         {

@@ -1,9 +1,22 @@
-﻿ToDo
+﻿vNext
+-IsUseDeveloperExceptionPage on class ConfigCliEnvironment
+-Cli generate command no BuiltIn Id's to CSharp code
+-BingMap no global variables
+-New sql table FrameworkPage to register all page classes
+-Register enums like class Page
+-FrameworkConfigField multiple instances of same field
+
+ToDo
+-https://github.com/Microsoft/sql-server-samples
+-Html5 valid
+-Navigation like https://rangle.io/
+-IoC for singleton and [ThreadStatic]
+
+ToDo
 -unsplash.com Images
 -https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs
 -BootstrapExtension.BootstrapRow --> DivContainer [Ok]
--ComponentJsonExtension typeof(T).Name replace with null. Child has either name or is identified by type.
--IoC for singleton and [ThreadStatic]
+-ComponentJsonExtension typeof(T).Name replace with null. Child has either name or is identified by type. No more Name [Ok]
 -https://w3bits.com/css-dropdown-menu/ for ThemeDefault.
 -https://www.youtube.com/watch?v=moBhzSC455o (Build a Responsive Grid CSS Website Layout From Scratch)
 -Move AppSelector to ConfigFramework.json --> ConfigWebServer.json WebsiteList [Ok]
@@ -30,18 +43,16 @@ v2.1
 -Linq to shared memory queries. (services.AddSingleton) [Ok]
 
 ToDo
--Question: sealed class Grid because of OfType<Grid>(). However Page derived class is possible
--ProcessAsync
--https://github.com/Microsoft/sql-server-samples
--deploy can not be called twice. (remote azure already exists)
--Ci config json.
--Delete folder "Framework\Client\dist" on build.
+-Question: sealed class Grid because of OfType<Grid>(). However Page derived class is possible [Ok]
+-ProcessAsync [Ok]
+-deploy can not be called twice. (remote azure already exists) [Ok]
+-Ci config json. [Ok]
+-Delete folder "Framework\Client\dist" on build. [Ok]
 -Container component for tree structure.
 -Json post [Ok]
--Html5 valid
 -Universal [Ok]
 -Scss [Ok]
--Build badge for visualstudio.com https://stackoverflow.com/questions/48785274/adding-vsts-build-status-to-github-page; https://docs.microsoft.com/en-us/vsts/release-notes/2018/mar-05-vsts#share-deployment-status-using-a-badge
+-Build badge for visualstudio.com https://stackoverflow.com/questions/48785274/adding-vsts-build-status-to-github-page; https://docs.microsoft.com/en-us/vsts/release-notes/2018/mar-05-vsts#share-deployment-status-using-a-badge [Ok]
 
 Research
 -https://angular.io/api/common/NgForOf

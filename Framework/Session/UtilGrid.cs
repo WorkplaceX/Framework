@@ -1170,6 +1170,7 @@
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Reload
+                        grid.OffsetRow = 0; // Back to first row.
                         await LoadAsync(grid);
                     }
                 }
