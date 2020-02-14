@@ -341,9 +341,12 @@
         /// </summary>
         public static void ComponentRemove(this ComponentJson component)
         {
-            component?.Owner.ListInternal.Remove(component);
-            component.Owner = null;
-            component.IsRemoved = true;
+            if (component != null)
+            {
+                component?.Owner.ListInternal.Remove(component);
+                component.Owner = null;
+                component.IsRemoved = true;
+            }
         }
 
         /// <summary>
@@ -473,7 +476,7 @@
         internal async Task ProcessInternalAsync(AppJson appJson)
         {
             UtilStopwatch.TimeStart("Process");
-            await UtilGrid.ProcessAsync(appJson);
+            await UtilGrid.ProcessAsync(appJson); // Process data grid.
             await UtilApp.ProcessBootstrapNavbarAsync(appJson);
 
             foreach (Page page in this.ComponentListAll().OfType<Page>())

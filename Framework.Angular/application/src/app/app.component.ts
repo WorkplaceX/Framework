@@ -139,13 +139,16 @@ export class BingMap {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.json.previousValue == null || changes.json.previousValue.Lat != changes.json.currentValue.Lat || changes.json.previousValue.Long != changes.json.currentValue.Long)
     {
-      this.scriptBingMapInit();
-      scriptBingMap({ Lat: changes.json.currentValue.Lat, Long: changes.json.currentValue.Long});
+      if (this.dataService.json.IsServerSideRendering == false) {
+        this.scriptBingMapInit();
+        scriptBingMap({ Lat: changes.json.currentValue.Lat, Long: changes.json.currentValue.Long});
+      }
     }
   }
 
   scriptBingMapInit() {
-    if (document.getElementById('scriptBingMap')) {
+    if (this.dataService.document.getElementById('scriptBingMap')) {
+      // scriptBingMap is defined
       return;
     }
 

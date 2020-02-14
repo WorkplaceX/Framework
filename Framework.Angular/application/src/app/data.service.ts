@@ -150,8 +150,8 @@ export class DataService {
         body: JSON.stringify(requestJson),
         withCredentials: true,
       })
-      .subscribe(body => {
-        let jsonResponse = <Json>body;
+      .subscribe((data: Json) => {
+        let jsonResponse = data;
         this.fileDownload(jsonResponse);
         this.isScrollToTop(jsonResponse);
         if (this.requestJsonQueue == null) { // Apply response if there is no newer request.
@@ -166,7 +166,9 @@ export class DataService {
         }
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {
-          location.reload(true);
+          setTimeout(() => {
+            location.reload(true);
+          }, 1000); // Wait one second then reload.
         }
       }, error => {
         this.isRequestPending = false;

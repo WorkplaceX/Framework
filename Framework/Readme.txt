@@ -1,4 +1,5 @@
 ﻿vNext
+-Class View namespace organize.
 -IsUseDeveloperExceptionPage on class ConfigCliEnvironment
 -Cli generate command no BuiltIn Id's to CSharp code
 -BingMap no global variables

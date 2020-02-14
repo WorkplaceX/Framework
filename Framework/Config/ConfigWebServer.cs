@@ -12,12 +12,12 @@
     internal class ConfigWebServer
     {
         /// <summary>
-        /// Gets or sets IsServerSideRendering. By default this value is set to true. Can be changed on the deployed server for trouble shooting.
+        /// Gets or sets IsServerSideRendering. By default this value is true. Can be changed on the deployed server for trouble shooting.
         /// </summary>
         public bool IsServerSideRendering { get; set; }
 
         /// <summary>
-        /// Gets or sets IsUseDeveloperExceptionPage. By default this value is set to false. Can be changed on the deployed server for trouble shooting.
+        /// Gets or sets IsUseDeveloperExceptionPage. By default this value is false. Can be changed on the deployed server for trouble shooting.
         /// </summary>
         public bool IsUseDeveloperExceptionPage { get; set; }
 

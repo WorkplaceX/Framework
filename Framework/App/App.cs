@@ -100,7 +100,15 @@
             appJson.RequestJson = requestJson;
 
             // Process
-            await appJson.ProcessInternalAsync(appJson);
+            try
+            {
+                await appJson.ProcessInternalAsync(appJson);
+            }
+            catch (Exception exception)
+            {
+                appJson.BootstrapAlert(UtilFramework.ExceptionToString(exception), BootstrapAlertEnum.Error);
+                appJson.IsReload = true;
+            }
 
             // Version tag
             RenderVersion(appJson);
