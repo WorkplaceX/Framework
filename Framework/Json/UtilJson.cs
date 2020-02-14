@@ -478,7 +478,7 @@ namespace Framework.Json
                 UtilFramework.Assert(this.IsList == false);
                 if (PropertyInfo != null)
                 {
-                    PropertyInfo.SetValue(obj, value);
+                    PropertyInfo.SetValue(obj, value); // If exception: Is attribute [Serialize(SerializeEnum.None)] missing?
                 }
                 else
                 {

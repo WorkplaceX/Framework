@@ -670,9 +670,14 @@
         [Serialize(SerializeEnum.Session)]
         internal List<BootstrapNavbarGrid> GridList = new List<BootstrapNavbarGrid>();
 
-        public void GridAdd(Grid grid)
+        /// <summary>
+        /// Add data grid to Navbar.
+        /// </summary>
+        /// <param name="grid">Data grid with Id, ParentId and TextHtml columns.</param>
+        /// <param name="isSelectedMode">If true, currently selected row is shown on top as drop down button. Used for example for language switch.</param>
+        public void GridAdd(Grid grid, bool isSelectedMode = false)
         {
-            GridList.Add(new BootstrapNavbarGrid { Grid = grid });
+            GridList.Add(new BootstrapNavbarGrid { Grid = grid, IsSelectedMode = isSelectedMode });
         }
 
         internal List<BootstrapNavbarButton> ButtonList;
@@ -685,9 +690,28 @@
         */
     }
 
+    public class BootstrapNavbarButtonArgs
+    {
+        public BootstrapNavbar BootstrapNavbar;
+
+        public Grid Grid;
+
+        public Row Row;
+    }
+
+    public class BootstrapNavbarButtonResult
+    {
+        public string TextHtml;
+    }
+
     internal sealed class BootstrapNavbarGrid
     {
         public Grid Grid;
+
+        /// <summary>
+        /// Gets or sets IsSelectedMode. If true, currently selected row is shown on top as drop down button. Used for example for language switch.
+        /// </summary>
+        public bool IsSelectedMode;
     }
 
     internal sealed class BootstrapNavbarButton
@@ -700,7 +724,7 @@
         public Grid Grid;
 
         /// <summary>
-        /// Gets or sets RowStateId.
+        /// Gets or sets RowStateId. Can be null for example for drop down button for language. See also <see cref="BootstrapNavbarGrid.IsSelectedMode"/>
         /// </summary>
         public int RowStateId;
 
@@ -891,6 +915,27 @@
                     if (rowState.IsSelect && rowState.RowEnum == GridRowEnum.Index)
                     {
                         result = RowList[rowState.RowId.Value - 1];
+                        break;
+                    }
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets RowSelectedRowStateId. Currently selected data row by user.
+        /// </summary>
+        [Serialize(SerializeEnum.None)]
+        internal int? RowSelectedRowStateId
+        {
+            get
+            {
+                int? result = null;
+                foreach (var rowState in RowStateList)
+                {
+                    if (rowState.IsSelect && rowState.RowEnum == GridRowEnum.Index)
+                    {
+                        result = rowState.Id;
                         break;
                     }
                 }
@@ -1623,7 +1668,7 @@
         /// <summary>
         /// Returns TextHtml to display in navbar button.
         /// </summary>
-        protected virtual internal void NavbarTextHtml(BootstrapNavbar bootstrapNavbar, Grid grid, Row row, ref string result)
+        protected virtual internal void BootstrapNavbarButtonTextHtml(BootstrapNavbarButtonArgs args, BootstrapNavbarButtonResult result)
         {
 
         }
