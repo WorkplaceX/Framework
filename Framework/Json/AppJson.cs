@@ -1619,5 +1619,13 @@
         {
             isHandled = false;
         }
+
+        /// <summary>
+        /// Returns TextHtml to display in navbar button.
+        /// </summary>
+        protected virtual internal void NavbarTextHtml(BootstrapNavbar bootstrapNavbar, Grid grid, Row row, ref string result)
+        {
+
+        }
     }
 }
