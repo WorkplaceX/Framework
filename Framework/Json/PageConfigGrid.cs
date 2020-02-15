@@ -42,6 +42,12 @@
 
         public Grid GridConfigGrid;
 
+        /// <summary>
+        /// Gets GridConfigGridSelected. Master row.
+        /// </summary>
+        [Serialize(SerializeEnum.None)]
+        public FrameworkConfigGridDisplay GridConfigGridRowSelected => (FrameworkConfigGridDisplay)GridConfigGrid.RowSelected;
+
         public Grid GridConfigField;
 
         protected internal override IQueryable GridQuery(Grid grid)
@@ -57,7 +63,7 @@
             }
             if (grid == GridConfigField)
             {
-                var rowSelected = (FrameworkConfigGridDisplay)GridConfigGrid.RowSelected;
+                var rowSelected = GridConfigGridRowSelected;
                 var result = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
                 if (FieldNameCSharp != null)
                 {
@@ -70,25 +76,59 @@
 
         protected internal override async Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
         {
+            // ConfigGrid
             if (grid == GridConfigGrid)
             {
                 var rowDest = new FrameworkConfigGrid();
-                rowDest.IsExist = true;
                 Data.RowCopy(rowNew, rowDest);
+                rowDest.IsExist = true;
                 await Data.InsertAsync(rowDest);
                 var rowReload = await GridConfigGridReload(rowNew);
                 Data.RowCopy(rowReload, rowNew);
                 return true;
             }
+
+            // ConfigField
             if (grid == GridConfigField)
             {
-                throw new Exception("Can not insert field config!");
+                var rowNewDisplay = (FrameworkConfigFieldDisplay)rowNew;
+                rowNewDisplay.ConfigGridTableId = GridConfigGridRowSelected.TableId; // Master
+                rowNewDisplay.ConfigGridConfigName = GridConfigGridRowSelected.ConfigName; // Master
+
+                var rowDest = new FrameworkConfigField();
+                Data.RowCopy(rowNew, rowDest, "ConfigField");
+                if (GridConfigGridRowSelected.Id == null) // Master does not have FrameworkConfigGrid in database
+                {
+                    var rowDestConfigGrid = new FrameworkConfigGrid();
+                    Data.RowCopy(GridConfigGridRowSelected, rowDestConfigGrid);
+                    rowDestConfigGrid.IsExist = true;
+                    await Data.InsertAsync(rowDestConfigGrid);
+                    GridConfigGridRowSelected.Id = rowDestConfigGrid.Id;
+                }
+                rowDest.ConfigGridId = GridConfigGridRowSelected.Id.Value; // Master
+
+                // Lookup field
+                string fieldNameCSharp = ((FrameworkConfigFieldDisplay)rowNew).FieldFieldNameCSharp; // Text entered by user.
+                var fieldList = await Data.SelectAsync(Data.Query<FrameworkField>().Where(item => item.TableId == GridConfigGridRowSelected.TableId && item.FieldNameCSharp == fieldNameCSharp));
+                if (fieldList.Count == 0)
+                {
+                    throw new Exception("Field not found!");
+                }
+                int fieldId = fieldList.Single().Id;
+                rowDest.FieldId = fieldId;
+                rowNewDisplay.FieldId = fieldId;
+                rowDest.IsExist = true;
+                await Data.InsertAsync(rowDest);
+                var rowReload = await GridConfigFieldReload(rowNewDisplay);
+                Data.RowCopy(rowReload, rowNew);
+                return true;
             }
             return await base.GridInsertAsync(grid, rowNew, databaseEnum);
         }
 
         protected internal override async Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
         {
+            // ConfigGrid
             if (grid == GridConfigGrid)
             {
                 // Insert
@@ -102,6 +142,7 @@
                     {
                         var rowDest = new FrameworkConfigGrid();
                         Data.RowCopy(rowNew, rowDest);
+                        rowDest.IsExist = true;
                         await Data.InsertAsync(rowDest);
                         rowDisplay.Id = rowDest.Id;
                         isInsert = true;
@@ -113,6 +154,7 @@
                 {
                     var rowDest = new FrameworkConfigGrid();
                     Data.RowCopy(rowNew, rowDest);
+                    rowDest.IsExist = true;
                     await Data.UpdateAsync(rowDest);
                 }
 
@@ -123,33 +165,38 @@
                 }
                 return true;
             }
+
+            // ConfigField
             if (grid == GridConfigField)
             {
-                var rowDisplay = (FrameworkConfigFieldDisplay)rowNew;
+                var rowDisplay = (FrameworkConfigFieldDisplay)row;
+                var rowNewDisplay = (FrameworkConfigFieldDisplay)rowNew;
 
                 // ConfigGrid
-                if (rowDisplay.ConfigGridId == null)
+                if (rowNewDisplay.ConfigGridId == null)
                 {
-                    var rowDisplayReload = await GridConfigFieldReload(row);
-                    rowDisplay.ConfigGridId = rowDisplayReload.ConfigGridId;
-                    if (rowDisplay.ConfigGridId == null)
+                    var rowDisplayReload = await GridConfigFieldReload(rowDisplay); // ConfigGrid row might have been added in the meantime, if multiple ConfigField rows are in the grid.
+                    rowNewDisplay.ConfigGridId = rowDisplayReload.ConfigGridId;
+                    if (rowNewDisplay.ConfigGridId == null)
                     {
                         var rowDest = new FrameworkConfigGrid();
                         Data.RowCopy(rowNew, rowDest, "ConfigGrid");
+                        rowDest.IsExist = true;
                         await Data.InsertAsync(rowDest);
-                        rowDisplay.ConfigGridId = rowDest.Id;
+                        rowNewDisplay.ConfigGridId = rowDest.Id;
                     }
                 }
 
                 // ConfigField
-                if (rowDisplay.ConfigFieldId == null)
+                if (rowNewDisplay.ConfigFieldId == null)
                 {
                     var rowDest = new FrameworkConfigField();
                     Data.RowCopy(rowNew, rowDest, "ConfigField");
-                    rowDest.ConfigGridId = rowDisplay.ConfigGridId.Value;
-                    rowDest.FieldId = rowDisplay.FieldId;
+                    rowDest.ConfigGridId = rowNewDisplay.ConfigGridId.Value;
+                    rowDest.FieldId = rowNewDisplay.FieldId;
+                    rowDest.IsExist = true;
                     await Data.InsertAsync(rowDest);
-                    rowDisplay.ConfigFieldId = rowDest.Id;
+                    rowNewDisplay.ConfigFieldId = rowDest.Id;
                 }
                 else
                 {
@@ -160,8 +207,8 @@
 
                 // Reload
                 {
-                    var rowDisplayReload = await GridConfigFieldReload(rowNew);
-                    Data.RowCopy(rowDisplayReload, rowDisplay);
+                    var rowDisplayReload = await GridConfigFieldReload(rowNewDisplay);
+                    Data.RowCopy(rowDisplayReload, rowNewDisplay);
                 }
 
                 return true;
@@ -178,13 +225,13 @@
             return result;
         }
 
-        private async Task<FrameworkConfigFieldDisplay> GridConfigFieldReload(Row row)
+        private async Task<FrameworkConfigFieldDisplay> GridConfigFieldReload(FrameworkConfigFieldDisplay row)
         {
-            var rowDisplay = (FrameworkConfigFieldDisplay)row;
             var result = (await Data.SelectAsync(Data.Query<FrameworkConfigFieldDisplay>().Where(
-                item => item.ConfigGridTableId == rowDisplay.ConfigGridTableId &&
-                item.ConfigGridConfigName == rowDisplay.ConfigGridConfigName &&
-                item.FieldId == rowDisplay.FieldId))).Single();
+                item => item.ConfigGridTableId == row.ConfigGridTableId &&
+                item.ConfigGridConfigName == row.ConfigGridConfigName &&
+                item.FieldId == row.FieldId &&
+                item.ConfigFieldInstanceName == row.ConfigFieldInstanceName ))).Single();
             return result;
         }
 
@@ -192,7 +239,6 @@
         {
             if (grid == GridConfigGrid)
             {
-                var configGrid = (FrameworkConfigGridDisplay)grid.RowSelected;
                 await GridConfigField.LoadAsync();
             }
         }

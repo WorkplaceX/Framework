@@ -73,13 +73,14 @@ CREATE TABLE FrameworkConfigField
 	Id INT PRIMARY KEY IDENTITY,
 	ConfigGridId INT FOREIGN KEY REFERENCES FrameworkConfigGrid(Id) NOT NULL,
 	FieldId INT FOREIGN KEY REFERENCES FrameworkField(Id) NOT NULL,
+	InstanceName NVARCHAR(256), -- Same field can be defined twice. For example, once as text link and once as image.
 	Text NVARCHAR(256), -- Column header text.
 	Description NVARCHAR(256), -- Column header description.
 	IsVisible BIT,
 	IsReadOnly BIT,
 	Sort FLOAT,
 	IsExist BIT NOT NULL
-	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId)
+	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId, InstanceName)
 )
 
 GO
@@ -92,6 +93,7 @@ SELECT
 	(SELECT ConfigGridBuiltIn.IdName FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = ConfigField.ConfigGridId) AS ConfigGridIdName,
 	ConfigField.FieldId,
 	(SELECT FieldBuiltIn.IdName FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = ConfigField.FieldId) AS FieldIdName,
+	ConfigField.InstanceName,
 	/* Extension */
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkConfigGrid Grid, FrameworkTable FrameworkTable WHERE Grid.Id = ConfigField.ConfigGridId AND FrameworkTable.Id = Grid.TableId) AS TableNameCSharp,
 	(SELECT Grid.ConfigName FROM FrameworkConfigGrid Grid WHERE Grid.Id = ConfigField.ConfigGridId) AS ConfigName,
@@ -179,6 +181,7 @@ SELECT
 	ConfigField.Id AS ConfigFieldId,
 	ConfigField.ConfigGridId AS ConfigFieldConfigGridId,
 	ConfigField.FieldId AS ConfigFieldFieldId,
+	ConfigField.InstanceName AS ConfigFieldInstanceName,
 	ConfigField.Text AS ConfigFieldText,
 	ConfigField.Description AS ConfigFieldDescription,
 	ConfigField.IsVisible AS ConfigFieldIsVisible,
@@ -190,6 +193,6 @@ JOIN
 	FrameworkField Field ON	Field.TableId = ConfigGrid.TableId
 OUTER APPLY
 (
-	SELECT * FROM  FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id
+	SELECT * FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id
 ) ConfigField
 GO

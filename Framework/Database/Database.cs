@@ -17,6 +17,9 @@ namespace Database.dbo
         [SqlField("FieldId", FrameworkTypeEnum.Int)]
         public int FieldId { get; set; }
 
+        [SqlField("InstanceName", FrameworkTypeEnum.Nvarcahr)]
+        public string InstanceName { get; set; }
+
         [SqlField("Text", FrameworkTypeEnum.Nvarcahr)]
         public string Text { get; set; }
 
@@ -53,6 +56,9 @@ namespace Database.dbo
 
         [SqlField("FieldIdName", FrameworkTypeEnum.Nvarcahr)]
         public string FieldIdName { get; set; }
+
+        [SqlField("InstanceName", FrameworkTypeEnum.Nvarcahr)]
+        public string InstanceName { get; set; }
 
         [SqlField("TableNameCSharp", FrameworkTypeEnum.Nvarcahr)]
         public string TableNameCSharp { get; set; }
@@ -126,6 +132,9 @@ namespace Database.dbo
 
         [SqlField("ConfigFieldFieldId", FrameworkTypeEnum.Int)]
         public int? ConfigFieldFieldId { get; set; }
+
+        [SqlField("ConfigFieldInstanceName", FrameworkTypeEnum.Nvarcahr)]
+        public string ConfigFieldInstanceName { get; set; }
 
         [SqlField("ConfigFieldText", FrameworkTypeEnum.Nvarcahr)]
         public string ConfigFieldText { get; set; }

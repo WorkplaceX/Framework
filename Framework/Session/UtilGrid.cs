@@ -56,20 +56,28 @@
             foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(grid.TypeRow))
             {
                 var field = fieldList[propertyInfo.Name];
-                configFieldDictionary.TryGetValue(propertyInfo.Name, out FrameworkConfigFieldBuiltIn configField);
-                NamingConvention namingConvention = appJson.NamingConventionInternal(grid.TypeRow);
-                string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
-                bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
-                double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
-                result.Add(new GridColumn
+                configFieldDictionary.TryGetValue(propertyInfo.Name, out List<FrameworkConfigFieldBuiltIn> configFieldList);
+                if (configFieldList == null) // No ConfigField defined
                 {
-                    FieldNameCSharp = field.FieldNameCSharp,
-                    ColumnText = columnText,
-                    Description = configField?.Description,
-                    IsVisible = isVisible,
-                    Sort = sort,
-                    SortField = field.Sort
-                });
+                    configFieldList = new List<FrameworkConfigFieldBuiltIn>();
+                    configFieldList.Add(null);
+                }
+                foreach (var configField in configFieldList)
+                {
+                    NamingConvention namingConvention = appJson.NamingConventionInternal(grid.TypeRow);
+                    string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
+                    bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
+                    double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
+                    result.Add(new GridColumn
+                    {
+                        FieldNameCSharp = field.FieldNameCSharp,
+                        ColumnText = columnText,
+                        Description = configField?.Description,
+                        IsVisible = isVisible,
+                        Sort = sort,
+                        SortField = field.Sort
+                    });
+                }
             }
             result = result
                 .Where(item => item.IsVisible == true)
@@ -740,11 +748,19 @@
         }
 
         /// <summary>
-        /// Returns data grid field configuration records. (FieldName, FrameworkConfigFieldBuiltIn).
+        /// Returns data grid field configuration records. (FieldName, FrameworkConfigFieldBuiltIn). One FieldName can have multiple FrameworkConfigFieldBuiltIn because of InstanceName.
         /// </summary>
-        private static Dictionary<string, FrameworkConfigFieldBuiltIn> ConfigFieldDictionary(Grid grid)
+        private static Dictionary<string, List<FrameworkConfigFieldBuiltIn>> ConfigFieldDictionary(Grid grid)
         {
-            Dictionary<string, FrameworkConfigFieldBuiltIn> result = grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName).ToDictionary(item => item.FieldNameCSharp); // LINQ to memory
+            var result = new Dictionary<string, List<FrameworkConfigFieldBuiltIn>>();
+            foreach (var item in grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName)) // LINQ to memory
+            {
+                if (!result.ContainsKey(item.FieldNameCSharp))
+                {
+                    result[item.FieldNameCSharp] = new List<FrameworkConfigFieldBuiltIn>();
+                }
+                result[item.FieldNameCSharp].Add(item);
+            }
             return result;
         }
 

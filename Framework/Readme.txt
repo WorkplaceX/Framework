@@ -1,10 +1,14 @@
 ﻿vNext
--Class View namespace organize.
+-Insert ConfigField without ConfigGrid does not give a duplicate error
+-Handle Json property with getter only. Code: "Is attribute [Serialize(SerializeEnum.None)] missing?"
+-Add new grid configuration
+-IsServerSideRendering to display loading alert
+-Class View namespace organize
 -IsUseDeveloperExceptionPage on class ConfigCliEnvironment
 -Cli generate command no BuiltIn Id's to CSharp code
 -BingMap no global variables
--New sql table FrameworkPage to register all page classes
--Register enums like class Page
+-New sql table FrameworkPage to register all page classes --> use deployDb, pages might belong to different App [Ok]
+-Register enums like class Page --> use deployDb [Ok]
 -FrameworkConfigField multiple instances of same field
 
 ToDo
