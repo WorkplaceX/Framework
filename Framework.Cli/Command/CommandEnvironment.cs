@@ -34,7 +34,7 @@
             }
 
             configCli.EnvironmentGet();
-            UtilCli.ConsoleWriteLineColor(string.Format("Current EnvironmentName={0}", configCli.EnvironmentNameGet()), ConsoleColor.Green);
+            UtilCli.ConsoleWriteLineColor(string.Format("Current Environment (Name={0})", configCli.EnvironmentNameGet()), ConsoleColor.Green);
 
             ConfigCli.Save(configCli);
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
