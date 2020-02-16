@@ -653,7 +653,14 @@
             IQueryable query;
             if (grid.IsGridLookup == false)
             {
-                query = page.GridQuery(grid);
+                if (UtilFramework.IsSubclassOf(grid.GetType(), typeof(Grid<>)) == false)
+                {
+                    query = page.GridQuery(grid);
+                }
+                else
+                {
+                    query = grid.QueryInternal();
+                }
             }
             else
             {
@@ -779,7 +786,14 @@
                 rowState.IsSelect = true;
                 Page page = grid.ComponentOwner<Page>();
                 UtilFramework.Assert(row == grid.RowSelected);
-                await page.GridRowSelectedAsync(grid);
+                if (UtilFramework.IsSubclassOf(grid.GetType(), typeof(Grid<>)) == false)
+                {
+                    await page.GridRowSelectedAsync(grid);
+                }
+                else
+                {
+                    await grid.RowSelectedAsync();
+                }
             }
 
             if (isRender)
@@ -1138,7 +1152,14 @@
                         GridLookupClose(grid);
                         Render(grid);
                         UtilFramework.Assert(rowSelected == grid.RowSelected);
-                        await page.GridRowSelectedAsync(grid); // Load detail data grid
+                        if (UtilFramework.IsSubclassOf(grid.GetType(), typeof(Grid<>)) == false)
+                        {
+                            await page.GridRowSelectedAsync(grid); // Load detail data grid
+                        }
+                        else
+                        {
+                            await grid.RowSelectedAsync(); // Load detail data grid
+                        }
                     }
                     else
                     {

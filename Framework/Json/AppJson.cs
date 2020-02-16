@@ -726,11 +726,14 @@
         [Serialize(SerializeEnum.Session)]
         internal List<FrameworkConfigFieldBuiltIn> ConfigFieldList;
 
+        /// <summary>
+        /// Gets or sets RowList. Data rows loaded from database.
+        /// </summary>
         [Serialize(SerializeEnum.Session)]
         internal List<Row> RowList;
 
         /// <summary>
-        /// Gets or sets ConfigName. Multiple configurations can be stored.
+        /// Gets or sets ConfigName. Switch to select current configuration. Multiple configurations can be stored.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         internal string ConfigName;
@@ -836,6 +839,48 @@
 
         [Serialize(SerializeEnum.Session)]
         internal GridMode Mode;
+
+        internal virtual IQueryable QueryInternal()
+        {
+            return Query();
+        }
+
+        protected virtual IQueryable Query()
+        {
+            return null;
+        }
+
+        protected virtual internal Task RowSelectedAsync()
+        {
+            return Task.FromResult(0);
+        }
+    }
+
+    public class Grid<TRow> : Grid where TRow : Row
+    {
+        public Grid(ComponentJson owner) 
+            : base(owner)
+        {
+
+        }
+
+        internal override IQueryable QueryInternal()
+        {
+            return Query();
+        }
+
+        protected new virtual IQueryable<TRow> Query()
+        {
+            return Data.Query<TRow>();
+        }
+
+        public new TRow RowSelected
+        {
+            get
+            {
+                return (TRow)base.RowSelected;
+            }
+        }
     }
 
     /// <summary>
