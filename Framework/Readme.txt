@@ -1,10 +1,10 @@
 ﻿vNext
--Field UserName consistent
+-Class App.Setting to choos Bulma, Bootstrap for Modal and Alert.
 -Insert ConfigField without ConfigGrid does not give a duplicate error
 -Handle Json property with getter only. Code: "Is attribute [Serialize(SerializeEnum.None)] missing?" [Ok]
 -Add new grid configuration
 -IsServerSideRendering to display loading alert
--Class View namespace organize
+-Class View namespace organize [Ok]
 -IsUseDeveloperExceptionPage on class ConfigCliEnvironment
 -Cli generate command no BuiltIn Id's to CSharp code
 -BingMap no global variables

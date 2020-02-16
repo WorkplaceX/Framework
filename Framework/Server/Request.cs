@@ -1,6 +1,6 @@
 ﻿namespace Framework.Server
 {
-    using Framework.Application;
+    using Framework.App;
     using Framework.Config;
     using Microsoft.AspNetCore.Http;
     using System;

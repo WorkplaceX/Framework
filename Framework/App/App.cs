@@ -1,4 +1,4 @@
-﻿namespace Framework.Application
+﻿namespace Framework.App
 {
     using Framework.Json;
     using Framework.Session;
