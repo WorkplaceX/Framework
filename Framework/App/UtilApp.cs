@@ -81,14 +81,14 @@
                 List<ComponentJson> listRemove = new List<ComponentJson>(); // Collect items to remove.
                 foreach (var item in divContainer.List)
                 {
-                    if (item.GetType() != typeof(Div)) // ComponentJson.Type is not evalueted on DivComponent children!
+                    if (!(item is Div)) // ComponentJson.Type is not evalueted on DivComponent children!
                     {
                         listRemove.Add(item);
                     }
                 }
                 foreach (var item in listRemove)
                 {
-                    divContainer.ListInternal.Remove(item);
+                    item.ComponentRemove();
                 }
             }
         }

@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.DataAccessLayer;
     using Framework.Json;
+    using Framework.Json.Bootstrap;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -11,6 +12,51 @@
     {
         public static void Run()
         {
+            {
+                var source = new AppMain();
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (AppMain)UtilJson.Deserialize(jsonSession);
+            }
+            {
+                var source = new MyApp();
+                source.Div = new Div(source);
+                source.Div.ComponentRemove();
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyApp)UtilJson.Deserialize(jsonSession);
+            }
+            {
+                var source = new MyApp();
+                source.Row = new BootstrapRow(source);
+                source.Col = new BootstrapCol(source.Row);
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyApp)UtilJson.Deserialize(jsonSession);
+
+                UtilFramework.Assert(!jsonSession.Contains("PropertyReadOnly"));
+            }
+            {
+                var source = new MyApp();
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyApp)UtilJson.Deserialize(jsonSession);
+
+                UtilFramework.Assert(!jsonSession.Contains("PropertyReadOnly"));
+            }
+            {
+                var source = new MyApp(); 
+
+                // Serialize, deserialize
+                UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
+                var dest = (MyApp)UtilJson.Deserialize(jsonSession);
+
+                UtilFramework.Assert(!jsonSession.Contains("PropertyReadOnly"));
+            }
             {
                 var source = new MyApp();
                 var myGrid = new MyGrid(source) { Text = "K7", IsHide = true };
@@ -454,12 +500,20 @@
     public class MyApp : ComponentJson
     {
         public MyApp() 
-            : base(null)
+            : base(null, nameof(MyApp))
         {
 
         }
 
+        public Div Div;
+
+        public BootstrapCol Col;
+        
+        public DivContainer Row;
+
         public MyCell MyCell;
+
+        public int PropertyReadOnly => 9;
     }
 
     public class MyCell
@@ -478,7 +532,7 @@
     public class MyGrid : ComponentJson
     {
         public MyGrid(ComponentJson owner) 
-            : base(owner)
+            : base(owner, nameof(MyGrid))
         {
 
         }
@@ -496,7 +550,7 @@
     public class MyComponent : ComponentJson
     {
         public MyComponent(ComponentJson owner) 
-            : base(owner)
+            : base(owner, nameof(MyComponent))
         {
 
         }
@@ -511,7 +565,7 @@
         [Serialize(SerializeEnum.Client)]
         public string MyTextClient;
 
-        [Serialize(SerializeEnum.Ignore)]
+        [Serialize(SerializeEnum.None)]
         public string MyIgnore;
 
         public Dto Dto;
@@ -562,5 +616,18 @@
         public object V;
 
         public FrameworkScript Row;
+    }
+
+    public class AppMain : AppJson
+    {
+        public AppMain()
+        {
+            this.Row = new BootstrapRow(this);
+            this.Col = new BootstrapCol(Row);
+        }
+
+        public BootstrapRow Row;
+
+        public BootstrapCol Col;
     }
 }

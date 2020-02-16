@@ -3,14 +3,46 @@
     using Framework.DataAccessLayer;
     using System.Collections.Generic;
 
+    public class BootstrapContainer : Div
+    {
+        public BootstrapContainer(ComponentJson owner) : base(owner)
+        {
+            CssClass = "container";
+        }
+    }
+
+    public class BootstrapRow : DivContainer
+    {
+        public BootstrapRow(ComponentJson owner) : base(owner)
+        {
+            CssClass = "row";
+        }
+    }
+
+    public class BootstrapCol : Div
+    {
+        public BootstrapCol(BootstrapRow owner) : base(owner)
+        {
+            CssClass = "col";
+        }
+
+        public new BootstrapRow Owner
+        {
+            get
+            {
+                return (BootstrapRow)base.Owner;
+            }
+        }
+    }
+
     /// <summary>
     /// See also: https://getbootstrap.com/docs/4.1/components/navbar/
     /// Change background color with style "background-color: red !important".
     /// </summary>
-    public sealed class BootstrapNavbar : ComponentJson
+    public class BootstrapNavbar : ComponentJson
     {
         public BootstrapNavbar(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(BootstrapNavbar))
         {
 
         }

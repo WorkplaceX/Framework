@@ -6,7 +6,7 @@
     public sealed class BingMap : ComponentJson
     {
         public BingMap(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(BingMap))
         {
 
         }

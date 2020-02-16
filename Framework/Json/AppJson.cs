@@ -89,10 +89,11 @@
     public abstract class ComponentJson
     {
         /// <summary>
-        /// Constructor to programmatically create new object.
+        /// Constructor to programmatically create new object. Constructor is not called on client request session deserialization (GetUninitializedObject).
         /// </summary>
-        public ComponentJson(ComponentJson owner)
+        internal ComponentJson(ComponentJson owner, string type)
         {
+            this.Type = type;
             Constructor(owner, isDeserialize: false);
         }
 
@@ -118,7 +119,6 @@
 
             if (isDeserialize == false)
             {
-                this.Type = GetType().Name;
                 if (owner != null)
                 {
                     if (owner.List == null)
@@ -139,6 +139,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets Owner. This is the parent of this component.
+        /// </summary>
         [Serialize(SerializeEnum.None)]
         public ComponentJson Owner { get; internal set; }
 
@@ -172,7 +175,7 @@
             foreach (var item in Root.RootReferenceList)
             {
                 UtilFramework.Assert(item.property.IsList == false, "Reference to ComponentJson in List not supported!");
-                ComponentJson componentJson = Root.RootComponentJsonList[item.id];
+                ComponentJson componentJson = Root.RootComponentJsonList[item.id]; // Exception: Given key was not present in dictionary. Do not use method ComponentJson.ListInternal.Remove(); use method ComponentJsonExtension.ComponentRemove();
                 item.property.ValueSet(item.obj, componentJson);
             }
         }
@@ -183,7 +186,7 @@
         internal int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets Type. Used by Angular. See also <see cref="Page"/>.
+        /// Gets or sets Type. Used by Angular. Type to be rendered for derived classes. See also <see cref="Page"/>.
         /// </summary>
         internal string Type;
 
@@ -583,10 +586,10 @@
     /// <summary>
     /// Json Button. Rendered as html button element.
     /// </summary>
-    public sealed class Button : ComponentJson
+    public class Button : ComponentJson
     {
         public Button(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(Button))
         {
 
         }
@@ -609,10 +612,10 @@
     /// <summary>
     /// Json Div. Rendered as html div element.
     /// </summary>
-    public sealed class Div : ComponentJson
+    public class Div : ComponentJson
     {
         public Div(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(Div))
         {
 
         }
@@ -621,10 +624,10 @@
     /// <summary>
     /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
     /// </summary>
-    public sealed class DivContainer : ComponentJson
+    public class DivContainer : ComponentJson
     {
         public DivContainer(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(DivContainer))
         {
 
         }
@@ -680,13 +683,13 @@
     /// <summary>
     /// Data grid shows row as table, stack or form.
     /// </summary>
-    public sealed class Grid : ComponentJson
+    public class Grid : ComponentJson
     {
         /// <summary>
         /// Constructor.
         /// </summary>
         public Grid(ComponentJson owner) 
-            : base( owner)
+            : base(owner, nameof(Grid))
         {
             this.Mode = GridMode.Table;
         }
@@ -1293,10 +1296,10 @@
         Config = 6,
     }
 
-    public sealed class Html : ComponentJson
+    public class Html : ComponentJson
     {
         public Html(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(Html))
         {
 
         }
@@ -1310,9 +1313,9 @@
         /// Constructor. Use method PageShowAsync(); to create new page.
         /// </summary>
         public Page(ComponentJson owner)
-            : base(owner)
+            : base(owner, nameof(Page))
         {
-            Type = typeof(Page).Name;
+
         }
 
         /// <summary>
