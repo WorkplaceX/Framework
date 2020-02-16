@@ -332,10 +332,13 @@ namespace Framework.Json
                 // Property
                 foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    if (SerializeAttribute(propertyInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient, out bool isAttribute)) // If SerializeEnum.Both, do not add property
+                    if (propertyInfo.CanWrite) // If property has no setter do not add it.
                     {
-                        DeclarationProperty property = new DeclarationProperty(propertyInfo, isSerializeSession, isSerializeClient, isAttribute);
-                        PropertyList.Add(property.PropertyName, property);
+                        if (SerializeAttribute(propertyInfo.GetCustomAttribute<SerializeAttribute>(), out bool isSerializeSession, out bool isSerializeClient, out bool isAttribute)) // If SerializeEnum.Both, do not add property
+                        {
+                            DeclarationProperty property = new DeclarationProperty(propertyInfo, isSerializeSession, isSerializeClient, isAttribute);
+                            PropertyList.Add(property.PropertyName, property);
+                        }
                     }
                 }
                 // Field
@@ -478,7 +481,7 @@ namespace Framework.Json
                 UtilFramework.Assert(this.IsList == false);
                 if (PropertyInfo != null)
                 {
-                    PropertyInfo.SetValue(obj, value); // If exception: Is attribute [Serialize(SerializeEnum.None)] missing?
+                    PropertyInfo.SetValue(obj, value);
                 }
                 else
                 {

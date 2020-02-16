@@ -595,7 +595,6 @@
         /// <summary>
         /// Gets IsClick. If true, user clicked the button.
         /// </summary>
-        [Serialize(SerializeEnum.None)]
         public bool IsClick
         {
             get
@@ -904,7 +903,6 @@
         /// <summary>
         /// Gets RowSelected. Currently selected data row by user.
         /// </summary>
-        [Serialize(SerializeEnum.None)]
         public Row RowSelected
         {
             get
@@ -925,7 +923,6 @@
         /// <summary>
         /// Gets RowSelectedRowStateId. Currently selected data row by user.
         /// </summary>
-        [Serialize(SerializeEnum.None)]
         internal int? RowSelectedRowStateId
         {
             get
@@ -1426,11 +1423,6 @@
         {
             Type = typeof(Page).Name;
         }
-
-        /// <summary>
-        /// Gets or sets TypeCSharp. Used when default property Type has been changed. Allows inheritance.
-        /// </summary>
-        public string TypeCSharp;
 
         /// <summary>
         /// Calle once a lifetime when page is created.

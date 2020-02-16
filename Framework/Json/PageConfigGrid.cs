@@ -45,7 +45,6 @@
         /// <summary>
         /// Gets GridConfigGridSelected. Master row.
         /// </summary>
-        [Serialize(SerializeEnum.None)]
         public FrameworkConfigGridDisplay GridConfigGridRowSelected => (FrameworkConfigGridDisplay)GridConfigGrid.RowSelected;
 
         public Grid GridConfigField;

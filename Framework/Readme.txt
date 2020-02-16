@@ -1,6 +1,7 @@
 ﻿vNext
+-Field UserName consistent
 -Insert ConfigField without ConfigGrid does not give a duplicate error
--Handle Json property with getter only. Code: "Is attribute [Serialize(SerializeEnum.None)] missing?"
+-Handle Json property with getter only. Code: "Is attribute [Serialize(SerializeEnum.None)] missing?" [Ok]
 -Add new grid configuration
 -IsServerSideRendering to display loading alert
 -Class View namespace organize
