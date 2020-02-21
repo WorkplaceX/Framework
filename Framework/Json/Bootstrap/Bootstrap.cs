@@ -69,6 +69,14 @@
 
         internal List<BootstrapNavbarButton> ButtonList;
 
+        /// <summary>
+        /// Returns TextHtml to display in navbar button.
+        /// </summary>
+        protected virtual internal void ButtonTextHtml(BootstrapNavbarButtonArgs args, BootstrapNavbarButtonResult result)
+        {
+
+        }
+
         /*
         <nav class="navbar-dark bg-primary sticky-top">
         <ul style="display: flex; flex-wrap: wrap"> // Wrapp if too many li.

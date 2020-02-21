@@ -118,7 +118,7 @@
                         }
                         var args = new BootstrapNavbarButtonArgs { BootstrapNavbar = bootstrapNavbar, Grid = grid, Row = row };
                         var result = new BootstrapNavbarButtonResult { TextHtml = itemTextHtml };
-                        grid.ComponentOwner<Page>().BootstrapNavbarButtonTextHtml(args, result);
+                        bootstrapNavbar.ButtonTextHtml(args, result);
                         if (!(bootstrapNavbarGrid.IsSelectedMode && row == grid.RowSelected)) // For example for language: do not show selected language again under drop down button.
                         {
                             buttonId += 1;
@@ -169,7 +169,7 @@
                                 string textHtml = (string)propertyInfoTextHtml.GetValue(item.Grid.RowSelected);
                                 var args = new BootstrapNavbarButtonArgs { BootstrapNavbar = bootstrapNavbar, Grid = item.Grid, Row = item.Grid.RowSelected };
                                 var result = new BootstrapNavbarButtonResult { TextHtml = textHtml };
-                                item.Grid.ComponentOwner<Page>().BootstrapNavbarButtonTextHtml(args, result);
+                                bootstrapNavbar.ButtonTextHtml(args, result);
                                 buttonId += 1;
                                 var button = new BootstrapNavbarButton { Id = buttonId, Grid = item.Grid, RowStateId = item.Grid.RowSelectedRowStateId.Value, TextHtml = result.TextHtml };
                                 bootstrapNavbar.ButtonList.Add(button);

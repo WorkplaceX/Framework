@@ -1595,13 +1595,5 @@
         {
             isHandled = false;
         }
-
-        /// <summary>
-        /// Returns TextHtml to display in navbar button.
-        /// </summary>
-        protected virtual internal void BootstrapNavbarButtonTextHtml(BootstrapNavbarButtonArgs args, BootstrapNavbarButtonResult result)
-        {
-
-        }
     }
 }
