@@ -994,7 +994,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static void ProcessCellIsModifyParseFilter(Grid grid, Page page, GridColumn column, Field field, GridCell cell)
+        private static void ProcessCellIsModifyParseFilter(Grid grid, GridColumn column, Field field, GridCell cell)
         {
             cell.ErrorParse = null;
             // Parse
@@ -1019,12 +1019,12 @@
         /// <summary>
         /// Save (Update).
         /// </summary>
-        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Page page, Row row, Row rowNew, GridCell cell)
+        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row row, Row rowNew, GridCell cell)
         {
             // Save
             try
             {
-                bool isHandled = await page.GridUpdateAsync(grid, row, rowNew, grid.DatabaseEnum);
+                bool isHandled = await grid.UpdateAsyncInternal(row, rowNew, grid.DatabaseEnum);
                 if (!isHandled)
                 {
                     await Data.UpdateAsync(row, rowNew, grid.DatabaseEnum);
@@ -1203,7 +1203,7 @@
                     new GridFilter(grid).TextSet(column.FieldNameCSharp, cell.Text); // Used after data grid reload to restore filter.
 
                     // Parse
-                    ProcessCellIsModifyParseFilter(grid, page, column, field, cell);
+                    ProcessCellIsModifyParseFilter(grid, column, field, cell);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Reload
@@ -1228,7 +1228,7 @@
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
-                        await ProcessCellIsModifyUpdateAsync(grid, page, row, rowState.RowNew, cell);
+                        await ProcessCellIsModifyUpdateAsync(grid, row, rowState.RowNew, cell);
                         if (cell.ErrorSave == null)
                         {
                             Data.RowCopy(rowState.RowNew, row); // Copy new Id to 

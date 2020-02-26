@@ -842,11 +842,6 @@
 
         internal virtual IQueryable QueryInternal()
         {
-            return Query();
-        }
-
-        protected virtual IQueryable Query()
-        {
             return null;
         }
 
@@ -855,9 +850,14 @@
             return Task.FromResult(0);
         }
 
-        protected virtual internal void CellParseFilter(string fieldName, string text, GridCellParseFilterResult result)
+        protected virtual internal void CellParseFilter(string fieldNameCSharp, string text, GridCellParseFilterResult result)
         {
 
+        }
+
+        virtual internal Task<bool> UpdateAsyncInternal(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
         }
     }
 
@@ -888,7 +888,7 @@
             return Query();
         }
 
-        protected new virtual IQueryable<TRow> Query()
+        protected virtual IQueryable<TRow> Query()
         {
             if (typeof(TRow) == typeof(Row))
             {
@@ -898,6 +898,22 @@
             {
                 return Data.Query<TRow>();
             }
+        }
+
+        internal override Task<bool> UpdateAsyncInternal(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return UpdateAsync((TRow)row, (TRow)rowNew, databaseEnum);
+        }
+
+        /// <summary>
+        /// Override this method for custom grid save implementation. Return isHandled.
+        /// </summary>
+        /// <param name="row">Data row with old data to update.</param>
+        /// <param name="rowNew">New data row to save to database.</param>
+        /// <returns>Returns true, if custom save was handled. If false, framework will handle update.</returns>
+        protected virtual Task<bool> UpdateAsync(TRow row, TRow rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
         }
 
         public new TRow RowSelected
@@ -1405,18 +1421,6 @@
         protected virtual internal IQueryable GridQuery(Grid grid)
         {
             return null;
-        }
-
-        /// <summary>
-        /// Override this method for custom grid save implementation. Return isHandled.
-        /// </summary>
-        /// <param name="grid">Data grid to save.</param>
-        /// <param name="row">Data row to update.</param>
-        /// <param name="rowNew">New data row to save to database.</param>
-        /// <returns>Returns true, if custom save was handled.</returns>
-        protected virtual internal Task<bool> GridUpdateAsync(Grid grid, Row row, Row rowNew, DatabaseEnum databaseEnum)
-        {
-            return Task.FromResult(false);
         }
 
         /// <summary>
