@@ -561,7 +561,7 @@
             {
                 foreach (var filter in grid.FilterValueList)
                 {
-                    if (!filter.IsClear)
+                    if (!filter.IsClear && !(filter.FilterOperator == FilterOperator.None))
                     {
                         query = Data.QueryFilter(query, filter.FieldNameCSharp, filter.FilterValue, filter.FilterOperator);
                     }
@@ -1001,10 +1001,10 @@
             try
             {
                 // Parse custom
-                bool isHandled = false;
-                string errorParse = null;
-                page.GridCellParseFilter(grid, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), new GridFilter(grid), out isHandled, ref errorParse); // Custom parse of user entered text.
-                if (!isHandled)
+                GridCellParseFilterResult result = new GridCellParseFilterResult(new GridFilter(grid));
+                grid.CellParseFilter(column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
+                string errorParse = result.ErrorParse;
+                if (!result.IsHandled)
                 {
                     Data.CellTextParseFilter(field, cell.Text, new GridFilter(grid), out errorParse); // Parse default
                 }

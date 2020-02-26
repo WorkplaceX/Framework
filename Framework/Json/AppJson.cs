@@ -854,6 +854,25 @@
         {
             return Task.FromResult(0);
         }
+
+        protected virtual internal void CellParseFilter(string fieldName, string text, GridCellParseFilterResult result)
+        {
+
+        }
+    }
+
+    public class GridCellParseFilterResult
+    {
+        public GridCellParseFilterResult(GridFilter gridFilter)
+        {
+            this.GridFilter = gridFilter;
+        }
+
+        public readonly GridFilter GridFilter;
+
+        public bool IsHandled;
+
+        public string ErrorParse;
     }
 
     public class Grid<TRow> : Grid where TRow : Row
@@ -871,7 +890,14 @@
 
         protected new virtual IQueryable<TRow> Query()
         {
-            return Data.Query<TRow>();
+            if (typeof(TRow) == typeof(Row))
+            {
+                return null; // Data.QueryEmpty<TRow>(); is not possible since class Row has no TableNameSql defined.
+            }
+            else
+            {
+                return Data.Query<TRow>();
+            }
         }
 
         public new TRow RowSelected
@@ -1585,15 +1611,6 @@
         protected virtual internal Task<(bool isHandled, string errorParse)> GridCellParseAsync(Grid grid, Row row, string fieldName, string text)
         {
             return Task.FromResult<(bool, string)>((false, null));
-        }
-
-        /// <summary>
-        /// Parse user entered cell filter text. Text can be empty but never null.
-        /// </summary>
-        /// <param name="filter">Write custom parsed text to filter.</param>
-        protected virtual internal void GridCellParseFilter(Grid grid, string fieldName, string text, GridFilter filter, out bool isHandled, ref string errorParse)
-        {
-            isHandled = false;
         }
     }
 }
