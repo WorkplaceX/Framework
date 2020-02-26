@@ -840,11 +840,18 @@
         [Serialize(SerializeEnum.Session)]
         internal GridMode Mode;
 
+        /// <summary>
+        /// Returns query to load data grid. Override this method to define sql query.
+        /// </summary>
+        /// <returns>If return value is null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
         internal virtual IQueryable QueryInternal()
         {
             return null;
         }
 
+        /// <summary>
+        /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
+        /// </summary>
         protected virtual internal Task RowSelectedAsync()
         {
             return Task.FromResult(0);
@@ -1414,16 +1421,6 @@
         }
 
         /// <summary>
-        /// Returns query to load data grid. Override this method to define sql query.
-        /// </summary>
-        /// <param name="grid">Grid to get query to load.</param>
-        /// <returns>If value null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
-        protected virtual internal IQueryable GridQuery(Grid grid)
-        {
-            return null;
-        }
-
-        /// <summary>
         /// Override this method for custom grid save implementation. Returns isHandled.
         /// </summary>
         /// <param name="grid">Data grid to save.</param>
@@ -1463,14 +1460,6 @@
 
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
-        }
-
-        /// <summary>
-        /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
-        /// </summary>
-        protected virtual internal Task GridRowSelectedAsync(Grid grid)
-        {
-            return Task.FromResult(0);
         }
 
         /// <summary>
