@@ -107,7 +107,7 @@
             await this.ComponentOwner<PageConfigGrid>().GridConfigField.LoadAsync();
         }
 
-        protected override async Task<bool> UpdateAsync(FrameworkConfigGridDisplay row, FrameworkConfigGridDisplay rowNew, DatabaseEnum databaseEnum)
+        protected override async Task UpdateAsync(FrameworkConfigGridDisplay row, FrameworkConfigGridDisplay rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
             // Insert
             bool isInsert = false;
@@ -140,10 +140,11 @@
                 var rowDisplayReload = await Reload(rowNew);
                 Data.RowCopy(rowDisplayReload, rowNew);
             }
-            return true;
+
+            result.IsHandled = true;
         }
 
-        protected override async Task<bool> InsertAsync(FrameworkConfigGridDisplay rowNew, DatabaseEnum databaseEnum)
+        protected override async Task InsertAsync(FrameworkConfigGridDisplay rowNew, DatabaseEnum databaseEnum, InsertResult result)
         {
             var rowDest = new FrameworkConfigGrid();
             Data.RowCopy(rowNew, rowDest);
@@ -151,7 +152,8 @@
             await Data.InsertAsync(rowDest);
             var rowReload = await Reload(rowNew);
             Data.RowCopy(rowReload, rowNew);
-            return true;
+
+            result.IsHandled = true;
         }
     }
 
@@ -199,7 +201,7 @@
             return result;
         }
 
-        protected override async Task<bool> UpdateAsync(FrameworkConfigFieldDisplay row, FrameworkConfigFieldDisplay rowNew, DatabaseEnum databaseEnum)
+        protected override async Task UpdateAsync(FrameworkConfigFieldDisplay row, FrameworkConfigFieldDisplay rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
             // ConfigGrid
             if (rowNew.ConfigGridId == null)
@@ -240,10 +242,10 @@
                 Data.RowCopy(rowDisplayReload, rowNew);
             }
 
-            return true;
+            result.IsHandled = true;
         }
 
-        protected override async Task<bool> InsertAsync(FrameworkConfigFieldDisplay rowNew, DatabaseEnum databaseEnum)
+        protected override async Task InsertAsync(FrameworkConfigFieldDisplay rowNew, DatabaseEnum databaseEnum, InsertResult result)
         {
             rowNew.ConfigGridTableId = GridConfigGridRowSelected.TableId; // Master
             rowNew.ConfigGridConfigName = GridConfigGridRowSelected.ConfigName; // Master
@@ -274,7 +276,8 @@
             await Data.InsertAsync(rowDest);
             var rowReload = await Reload(rowNew);
             Data.RowCopy(rowReload, rowNew);
-            return true;
+
+            result.IsHandled = true;
         }
     }
 }

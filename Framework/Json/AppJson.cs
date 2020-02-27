@@ -84,7 +84,7 @@
     }
 
     /// <summary>
-    /// Json component tree. Stores session state in public or internal fields and properties.
+    /// Application component tree. Tree is serialized and deserialized for every client request. Stores session state in public or internal fields and properties.
     /// </summary>
     public abstract class ComponentJson
     {
@@ -857,19 +857,29 @@
             return Task.FromResult(0);
         }
 
-        protected virtual internal void CellParseFilter(string fieldNameCSharp, string text, GridCellParseFilterResult result)
+        protected virtual internal void CellParseFilter(string fieldName, string text, GridCellParseFilterResult result)
         {
 
         }
 
-        virtual internal Task<bool> UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        public class UpdateResult
         {
-            return Task.FromResult(false);
+            public bool IsHandled;
         }
 
-        virtual internal Task<bool> InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum)
+        virtual internal Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(0);
+        }
+
+        public class InsertResult
+        {
+            public bool IsHandled;
+        }
+
+        virtual internal Task InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum, InsertResult result)
+        {
+            return Task.FromResult(0);
         }
 
         virtual internal string CellTextInternal(Row row, string fieldName)
@@ -879,7 +889,7 @@
 
         virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
         {
-            result.IsHandled = false;
+
         }
 
         virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
@@ -958,7 +968,7 @@
             public CellAnnotationAlignEnum Align;
         }
 
-        virtual internal void CellAnnotationInternal(string fieldName, Row row, CellAnnotationResult result)
+        virtual internal void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
         {
 
         }
@@ -982,27 +992,32 @@
         /// <summary>
         /// Returns configuration query of data grid to load.
         /// </summary>
-        /// <param name="tableNameCSharp">Type of row to load.</param>
-        protected virtual internal void QueryConfig(string tableNameCSharp, QueryConfigResult result)
+        /// <param name="tableName">TableName as declared in CSharp code. Type of row to load.</param>
+        protected virtual internal void QueryConfig(string tableName, QueryConfigResult result)
         {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
 
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
 
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
 
-        virtual internal IQueryable LookupQueryInternal(Row row, string fieldNameCSharp, string text)
+        virtual internal IQueryable LookupQueryInternal(Row row, string fieldName, string text)
         {
             return null; // No lookup data grid.
         }
 
-        protected virtual internal void LookupQueryConfig(Grid gridLookup, string tableNameCSharp, QueryConfigResult result)
+        /// <summary>
+        /// Returns configuration query of lookup data grid to load.
+        /// </summary>
+        /// <param name="gridLookup">Lookup data grid for which to load the configuration.</param>
+        /// <param name="tableName">TableName as declared in CSharp code.</param>
+        protected virtual internal void LookupQueryConfig(Grid gridLookup, string tableName, QueryConfigResult result)
         {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == gridLookup.ConfigName);
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
 
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == gridLookup.ConfigName);
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
 
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
@@ -1059,9 +1074,9 @@
             }
         }
 
-        internal override Task<bool> UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        internal override Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
-            return UpdateAsync((TRow)row, (TRow)rowNew, databaseEnum);
+            return UpdateAsync((TRow)row, (TRow)rowNew, databaseEnum, result);
         }
 
         /// <summary>
@@ -1070,14 +1085,14 @@
         /// <param name="row">Data row with old data to update.</param>
         /// <param name="rowNew">New data row to save to database.</param>
         /// <returns>Returns true, if custom save was handled. If false, framework will handle update.</returns>
-        protected virtual Task<bool> UpdateAsync(TRow row, TRow rowNew, DatabaseEnum databaseEnum)
+        protected virtual Task UpdateAsync(TRow row, TRow rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(0);
         }
 
-        internal override Task<bool> InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum)
+        internal override Task InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum, InsertResult result)
         {
-            return InsertAsync((TRow)rowNew, databaseEnum);
+            return InsertAsync((TRow)rowNew, databaseEnum, result);
         }
 
         /// <summary>
@@ -1085,11 +1100,14 @@
         /// </summary>
         /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
         /// <returns>Returns true, if custom save was handled.</returns>
-        protected virtual Task<bool> InsertAsync(TRow rowNew, DatabaseEnum databaseEnum)
+        protected virtual Task InsertAsync(TRow rowNew, DatabaseEnum databaseEnum, InsertResult result)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(0);
         }
 
+        /// <summary>
+        /// Gets RowSelected. Currently selected data row by user.
+        /// </summary>
         public new TRow RowSelected
         {
             get
@@ -1145,34 +1163,34 @@
             return Task.FromResult(0);
         }
 
-        internal override void CellAnnotationInternal(string fieldName, Row row, CellAnnotationResult result)
+        internal override void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
         {
-            CellAnnotation(fieldName, (TRow)row, result);
+            CellAnnotation((TRow)row, fieldName, result);
         }
 
         /// <summary>
         /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
         /// </summary>
-        /// <param name="fieldNameCSharp">Data grid column name.</param>
         /// <param name="row">Data grid row if applicable for row type.</param>
+        /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual void CellAnnotation(string fieldNameCSharp, TRow row, CellAnnotationResult result)
+        protected virtual void CellAnnotation(TRow row, string fieldName, CellAnnotationResult result)
         {
 
         }
 
-        internal override IQueryable LookupQueryInternal(Row row, string fieldNameCSharp, string text)
+        internal override IQueryable LookupQueryInternal(Row row, string fieldName, string text)
         {
-            return LookupQuery((TRow)row, fieldNameCSharp, text);
+            return LookupQuery((TRow)row, fieldName, text);
         }
 
         /// <summary>
         /// Override this method to return a linq query for the lookup data grid.
         /// </summary>
         /// <param name="row">Row user is editing.</param>
-        /// <param name="fieldNameCSharp">Field user is editing.</param>
+        /// <param name="fieldName">FieldName as declared in CSharp code. Field user is editing.</param>
         /// <param name="text">Text user entered.</param>
-        protected virtual IQueryable LookupQuery(TRow row, string fieldNameCSharp, string text)
+        protected virtual IQueryable LookupQuery(TRow row, string fieldName, string text)
         {
             return null; // No lookup data grid.
         }

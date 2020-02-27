@@ -140,7 +140,7 @@
         private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, Row row)
         {
             var result = new Grid.CellAnnotationResult();
-            grid.CellAnnotationInternal(fieldNameCSharp, row, result);
+            grid.CellAnnotationInternal(row, fieldNameCSharp, result);
             cell.Html = UtilFramework.StringNull(result.Html);
             cell.HtmlIsEdit = result.HtmlIsEdit;
             cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
@@ -702,7 +702,7 @@
             if (grid.GridLookup == null)
             {
                 UtilFramework.Assert(cell.GridLookup == null);
-                Grid gridLookup = new Grid(grid);
+                Grid gridLookup = new Grid<Row>(grid);
                 grid.GridLookup = gridLookup;
                 cell.GridLookup = gridLookup;
 
@@ -1004,8 +1004,9 @@
             // Save
             try
             {
-                bool isHandled = await grid.UpdateInternalAsync(row, rowNew, grid.DatabaseEnum);
-                if (!isHandled)
+                Grid.UpdateResult result = new Grid.UpdateResult();
+                await grid.UpdateInternalAsync(row, rowNew, grid.DatabaseEnum, result);
+                if (!result.IsHandled)
                 {
                     await Data.UpdateAsync(row, rowNew, grid.DatabaseEnum);
                 }
@@ -1025,8 +1026,9 @@
             try
             {
                 // Save custom
-                bool isHandled = await grid.InsertInternalAsync(rowNew, grid.DatabaseEnum);
-                if (!isHandled)
+                Grid.InsertResult result = new Grid.InsertResult();
+                await grid.InsertInternalAsync(rowNew, grid.DatabaseEnum, result);
+                if (!result.IsHandled)
                 {
                     // Save default
                     await Data.InsertAsync(rowNew, grid.DatabaseEnum);
