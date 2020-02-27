@@ -47,9 +47,8 @@
         /// </summary>
         private static List<GridColumn> LoadColumnList(Grid grid)
         {
-            Page page = grid.ComponentOwner<Page>();
             var configFieldDictionary = ConfigFieldDictionary(grid);
-            AppJson appJson = page.ComponentOwner<AppJson>();
+            AppJson appJson = grid.ComponentOwner<AppJson>();
 
             var result = new List<GridColumn>();
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
@@ -218,7 +217,7 @@
         /// <summary>
         /// Render Cell Index.
         /// </summary>
-        private static GridCell RenderCellIndex(Grid grid, Page page, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList, Dictionary<string, Field> fieldList, GridCell cell, bool isTextLeave)
+        private static GridCell RenderCellIndex(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList, Dictionary<string, Field> fieldList, GridCell cell, bool isTextLeave)
         {
             Row row;
             if (rowState.RowNew != null)
@@ -332,7 +331,6 @@
             grid.StyleColumn = styleColumnList.ToString();
 
             // Render Grid.CellList
-            Page page = grid.ComponentOwner<Page>();
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
             var filter = new GridFilter(grid);
             var filterValueList = filter.FilterValueList();
@@ -358,7 +356,7 @@
                 {
                     foreach (var column in columnList)
                     {
-                        RenderCellIndex(grid, page, rowState, column, cellList, fieldList, cell, isTextLeave);
+                        RenderCellIndex(grid, rowState, column, cellList, fieldList, cell, isTextLeave);
                     }
                 }
 
@@ -382,7 +380,6 @@
             grid.StyleColumn = "minmax(0, 1fr)";
 
             // Render Grid.CellList
-            Page page = grid.ComponentOwner<Page>();
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
 
             var filter = new GridFilter(grid);
@@ -415,7 +412,7 @@
                         RenderCellFilterHeaderRow(grid, rowState, column, cellList).IsOdd = count % 2 == 1;
 
                         // Index
-                        RenderCellIndex(grid, page, rowState, column, cellList, fieldList, cell, isTextLeave).IsOdd = count % 2 == 1;
+                        RenderCellIndex(grid, rowState, column, cellList, fieldList, cell, isTextLeave).IsOdd = count % 2 == 1;
                     }
                 }
 
@@ -776,7 +773,6 @@
             {
                 Row row = grid.RowList[rowState.RowId.Value - 1];
                 rowState.IsSelect = true;
-                Page page = grid.ComponentOwner<Page>();
                 UtilFramework.Assert(row == grid.RowSelected);
                 await grid.RowSelectedAsync();
             }
