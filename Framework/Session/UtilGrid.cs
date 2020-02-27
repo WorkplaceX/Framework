@@ -658,7 +658,7 @@
             else
             {
                 GridLookupToGridDest(grid, out var gridDest, out var rowDest, out string fieldNameCSharpDest, out var cellDest);
-                query = page.GridLookupQuery(gridDest, rowDest, fieldNameCSharpDest, cellDest.Text);
+                query = gridDest.LookupQueryInternal(rowDest, fieldNameCSharpDest, cellDest.Text);
             }
             await LoadAsync(grid, query, page);
         }
@@ -793,7 +793,7 @@
         /// </summary>
         private static async Task ProcessGridLookupOpenAsync(Grid grid, Page page, GridRowState rowState, GridColumn column, GridCell cell)
         {
-            var query = page.GridLookupQuery(grid, rowState.RowNew, column.FieldNameCSharp, cell.Text);
+            var query = grid.LookupQueryInternal(rowState.RowNew, column.FieldNameCSharp, cell.Text);
             if (query != null)
             {
                 GridLookupOpen(grid, rowState, column.FieldNameCSharp, cell);

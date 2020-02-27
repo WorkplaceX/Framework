@@ -992,6 +992,11 @@
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
         }
+
+        virtual internal IQueryable LookupQueryInternal(Row row, string fieldNameCSharp, string text)
+        {
+            return null; // No lookup data grid.
+        }
     }
 
     public class GridCellParseFilterResult
@@ -1112,7 +1117,7 @@
         /// <param name="row">Write custom parsed value to row.</param>
         /// <param name="text">Text can be empty but is never null.</param>
         /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
-        protected virtual internal Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
+        protected virtual Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
         {
             result.IsHandled = false;
             result.ErrorParse = null;
@@ -1133,6 +1138,22 @@
         protected virtual void CellAnnotation(string fieldNameCSharp, TRow row, CellAnnotationResult result)
         {
 
+        }
+
+        internal override IQueryable LookupQueryInternal(Row row, string fieldNameCSharp, string text)
+        {
+            return LookupQuery((TRow)row, fieldNameCSharp, text);
+        }
+
+        /// <summary>
+        /// Override this method to return a linq query for the lookup data grid.
+        /// </summary>
+        /// <param name="row">Row user is editing.</param>
+        /// <param name="fieldNameCSharp">Field user is editing.</param>
+        /// <param name="text">Text user entered.</param>
+        protected virtual IQueryable LookupQuery(TRow row, string fieldNameCSharp, string text)
+        {
+            return null; // No lookup data grid.
         }
     }
 
@@ -1622,14 +1643,6 @@
         public virtual Task InitAsync()
         {
             return Task.FromResult(0);
-        }
-
-        /// <summary>
-        /// Override this method to return a linq query for the lookup data grid.
-        /// </summary>
-        protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
-        {
-            return null; // No lookup data grid.
         }
 
         protected virtual internal void GridLookupQueryConfig(Grid grid, string tableNameCSharp, Grid.QueryConfigResult result)
