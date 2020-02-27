@@ -862,7 +862,12 @@
 
         }
 
-        virtual internal Task<bool> UpdateAsyncInternal(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        virtual internal Task<bool> UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        virtual internal Task<bool> InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }
@@ -907,7 +912,7 @@
             }
         }
 
-        internal override Task<bool> UpdateAsyncInternal(Row row, Row rowNew, DatabaseEnum databaseEnum)
+        internal override Task<bool> UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum)
         {
             return UpdateAsync((TRow)row, (TRow)rowNew, databaseEnum);
         }
@@ -919,6 +924,21 @@
         /// <param name="rowNew">New data row to save to database.</param>
         /// <returns>Returns true, if custom save was handled. If false, framework will handle update.</returns>
         protected virtual Task<bool> UpdateAsync(TRow row, TRow rowNew, DatabaseEnum databaseEnum)
+        {
+            return Task.FromResult(false);
+        }
+
+        internal override Task<bool> InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum)
+        {
+            return InsertAsync((TRow)rowNew, databaseEnum);
+        }
+
+        /// <summary>
+        /// Override this method for custom grid save implementation. Returns isHandled.
+        /// </summary>
+        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
+        /// <returns>Returns true, if custom save was handled.</returns>
+        protected virtual Task<bool> InsertAsync(TRow rowNew, DatabaseEnum databaseEnum)
         {
             return Task.FromResult(false);
         }
@@ -1418,17 +1438,6 @@
         public virtual Task InitAsync()
         {
             return Task.FromResult(0);
-        }
-
-        /// <summary>
-        /// Override this method for custom grid save implementation. Returns isHandled.
-        /// </summary>
-        /// <param name="grid">Data grid to save.</param>
-        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
-        /// <returns>Returns true, if custom save was handled.</returns>
-        protected virtual internal Task<bool> GridInsertAsync(Grid grid, Row rowNew, DatabaseEnum databaseEnum)
-        {
-            return Task.FromResult(false);
         }
 
         /// <summary>

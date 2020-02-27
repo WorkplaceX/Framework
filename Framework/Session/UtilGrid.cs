@@ -1010,7 +1010,7 @@
             // Save
             try
             {
-                bool isHandled = await grid.UpdateAsyncInternal(row, rowNew, grid.DatabaseEnum);
+                bool isHandled = await grid.UpdateInternalAsync(row, rowNew, grid.DatabaseEnum);
                 if (!isHandled)
                 {
                     await Data.UpdateAsync(row, rowNew, grid.DatabaseEnum);
@@ -1031,7 +1031,7 @@
             try
             {
                 // Save custom
-                bool isHandled = await page.GridInsertAsync(grid, rowNew, grid.DatabaseEnum);
+                bool isHandled = await grid.InsertInternalAsync(rowNew, grid.DatabaseEnum);
                 if (!isHandled)
                 {
                     // Save default
