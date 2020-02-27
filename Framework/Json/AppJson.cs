@@ -872,13 +872,26 @@
             return Task.FromResult(false);
         }
 
-        /// <summary>
-        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
-        /// </summary>
-        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string. Otherwise return empty</returns>
         virtual internal string CellTextInternal(Row row, string fieldName)
         {
             return null;
+        }
+
+        virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
+        {
+            result.IsHandled = false;
+        }
+
+        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        {
+            return Task.FromResult(0);
+        }
+
+        public class CellParseResult
+        {
+            public bool IsHandled;
+
+            public string ErrorParse;
         }
     }
 
@@ -972,6 +985,39 @@
         protected virtual string CellText(TRow row, string fieldName)
         {
             return null;
+        }
+
+        internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
+        {
+            CellParse((TRow)row, fieldName, text, result);
+        }
+
+        /// <summary>
+        /// Parse user entered cell text into database value. Text can be empty but never null. Write parsed value to row. (Or for example multiple fields on row for Uom)
+        /// </summary>
+        /// <param name="row">Write custom parsed value to row.</param>
+        /// <param name="isHandled">If true, framework does no further parsing of user entered text.</param>
+        protected virtual void CellParse(TRow row, string fieldName, string text, CellParseResult result)
+        {
+            result.IsHandled = false;
+        }
+
+        internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        {
+            return CellParseAsync((TRow)row, fieldName, text, result);
+        }
+
+        /// <summary>
+        /// Parse text user entered in cell and write it into parameter 'row'.
+        /// </summary>
+        /// <param name="row">Write custom parsed value to row.</param>
+        /// <param name="text">Text can be empty but is never null.</param>
+        /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
+        protected virtual internal Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
+        {
+            result.IsHandled = false;
+            result.ErrorParse = null;
+            return Task.FromResult(0);
         }
     }
 
@@ -1606,27 +1652,6 @@
         protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, Row row, GridCellAnnotationResult result)
         {
 
-        }
-
-        /// <summary>
-        /// Parse user entered cell text into database value. Text can be empty but never null. Write parsed value to row. (Or for example multiple fields on row for Uom)
-        /// </summary>
-        /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="isHandled">If true, framework does no further parsing of user entered text.</param>
-        protected virtual internal void GridCellParse(Grid grid, Row row, string fieldName, string text, out bool isHandled, ref string errorParse)
-        {
-            isHandled = false;
-        }
-
-        /// <summary>
-        /// Parse text user entered in cell and write it into parameter 'row'.
-        /// </summary>
-        /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="text">Text can be empty but is never null.</param>
-        /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
-        protected virtual internal Task<(bool isHandled, string errorParse)> GridCellParseAsync(Grid grid, Row row, string fieldName, string text)
-        {
-            return Task.FromResult<(bool, string)>((false, null));
         }
     }
 }

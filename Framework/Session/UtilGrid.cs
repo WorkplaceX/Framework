@@ -940,7 +940,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static async Task ProcessCellIsModifyParseAsync(Grid grid, Page page, Row rowNew, GridColumn column, Field field, GridCell cell)
+        private static async Task ProcessCellIsModifyParseAsync(Grid grid, Row rowNew, GridColumn column, Field field, GridCell cell)
         {
             cell.ErrorParse = null;
             // Parse
@@ -955,21 +955,20 @@
                     }
                 }
                 // Parse custom
-                bool isHandled = false;
-                string errorParse = null;
-                page.GridCellParse(grid, rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), out isHandled, ref errorParse); // Custom parse of user entered text.
-                if (isHandled == false)
+                Grid.CellParseResult result = new Grid.CellParseResult();
+                grid.CellParseInternal(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
+                if (result.IsHandled == false)
                 {
-                    var result = await page.GridCellParseAsync(grid, rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text));
-                    isHandled = result.isHandled;
-                    errorParse = result.errorParse;
+                    await grid.CellParseInternalAsync(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result);
                 }
                 // Parse default
-                if (!isHandled)
+                if (!result.IsHandled)
                 {
-                    Data.CellTextParse(field, cell.Text, rowNew, out errorParse);
+                    Data.CellTextParse(field, cell.Text, rowNew, out string errorParse);
+                    result.IsHandled = true;
+                    result.ErrorParse = errorParse;
                 }
-                cell.ErrorParse = errorParse;
+                cell.ErrorParse = result.ErrorParse;
             }
             catch (Exception exception)
             {
@@ -1203,7 +1202,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, page, rowState.RowNew, column, field, cell);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowNew, column, field, cell);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
@@ -1242,7 +1241,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, page, rowState.RowNew, column, field, cell);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowNew, column, field, cell);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
