@@ -504,7 +504,7 @@
         /// <summary>
         /// Load (full) data grid with config.
         /// </summary>
-        private static async Task LoadFullAsync(Grid grid, IQueryable query, Page page)
+        private static async Task LoadFullAsync(Grid grid, IQueryable query)
         {
             UtilFramework.Assert(grid.TypeRow == query.ElementType);
             // Get config grid and field query
@@ -515,7 +515,7 @@
             }
             else
             {
-                page.GridLookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), queryConfigResult);
+                grid.LookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), queryConfigResult);
             }
 
             // Load config grid
@@ -601,7 +601,7 @@
         /// <summary>
         /// Load or reload data grid. Also first load for lookup.
         /// </summary>
-        private static async Task LoadAsync(Grid grid, IQueryable query, Page page)
+        private static async Task LoadAsync(Grid grid, IQueryable query)
         {
             Type typeRowOld = grid.TypeRow;
             grid.TypeRow = query?.ElementType;
@@ -622,7 +622,7 @@
             if (typeRowOld != query?.ElementType)
             {
                 // ColumnList, RowList
-                await LoadFullAsync(grid, query, page);
+                await LoadFullAsync(grid, query);
             }
             else
             {
@@ -649,7 +649,6 @@
         /// </summary>
         public static async Task LoadAsync(Grid grid)
         {
-            Page page = grid.ComponentOwner<Page>();
             IQueryable query;
             if (grid.IsGridLookup == false)
             {
@@ -660,7 +659,7 @@
                 GridLookupToGridDest(grid, out var gridDest, out var rowDest, out string fieldNameCSharpDest, out var cellDest);
                 query = gridDest.LookupQueryInternal(rowDest, fieldNameCSharpDest, cellDest.Text);
             }
-            await LoadAsync(grid, query, page);
+            await LoadAsync(grid, query);
         }
 
         /// <summary>
@@ -791,13 +790,13 @@
         /// <summary>
         /// User modified text, now open lookup window.
         /// </summary>
-        private static async Task ProcessGridLookupOpenAsync(Grid grid, Page page, GridRowState rowState, GridColumn column, GridCell cell)
+        private static async Task ProcessGridLookupOpenAsync(Grid grid, GridRowState rowState, GridColumn column, GridCell cell)
         {
             var query = grid.LookupQueryInternal(rowState.RowNew, column.FieldNameCSharp, cell.Text);
             if (query != null)
             {
                 GridLookupOpen(grid, rowState, column.FieldNameCSharp, cell);
-                await LoadAsync(grid.GridLookup, query, page);
+                await LoadAsync(grid.GridLookup, query);
             }
         }
 
@@ -1024,7 +1023,7 @@
         /// <summary>
         /// Save (Insert).
         /// </summary>
-        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Page page, Row rowNew, GridCell cell)
+        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row rowNew, GridCell cell)
         {
             // Save
             try
@@ -1130,7 +1129,6 @@
 
                 if (rowSelected != null)
                 {
-                    Page page = grid.ComponentOwner<Page>();
                     if (grid.IsGridLookup == false)
                     {
                         // Grid normal row selected
@@ -1144,7 +1142,7 @@
                         // Grid lookup row selected
                         GridLookupClose(grid.GridDest);
                         UtilFramework.Assert(rowSelected == grid.RowSelected);
-                        string text = page.GridLookupRowSelected(grid);
+                        string text = grid.GridDest.LookupRowSelected(grid);
                         if (text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out var rowDest, out var _, out var cellDest);
@@ -1167,7 +1165,6 @@
                 GridCell cell = grid.CellList[requestJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
                 var field = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow)[column.FieldNameCSharp];
-                Page page = grid.ComponentOwner<Page>();
                 GridRowState rowState = grid.RowStateList[cell.RowStateId - 1];
 
                 // Track IsModified
@@ -1216,7 +1213,7 @@
                     // Lookup
                     if (!requestJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
                     {
-                        await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+                        await ProcessGridLookupOpenAsync(grid, rowState, column, cell);
                     }
 
                     // Do not set Cell.TextLeave if user clicked lookup row.
@@ -1245,7 +1242,7 @@
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
-                        await ProcessCellIsModifyInsertAsync(grid, page, rowState.RowNew, cell);
+                        await ProcessCellIsModifyInsertAsync(grid, rowState.RowNew, cell);
                         if (cell.ErrorSave == null)
                         {
                             grid.RowList.Add(rowState.RowNew);
@@ -1268,7 +1265,7 @@
                     // Lookup
                     if (!requestJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
                     {
-                        await ProcessGridLookupOpenAsync(grid, page, rowState, column, cell);
+                        await ProcessGridLookupOpenAsync(grid, rowState, column, cell);
                     }
 
                     // Do not set Cell.TextLeave if user clicked lookup row.

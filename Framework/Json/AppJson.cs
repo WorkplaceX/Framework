@@ -997,6 +997,27 @@
         {
             return null; // No lookup data grid.
         }
+
+        protected virtual internal void LookupQueryConfig(Grid gridLookup, string tableNameCSharp, QueryConfigResult result)
+        {
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == gridLookup.ConfigName);
+
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == gridLookup.ConfigName);
+
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
+
+        /// <summary>
+        /// Override this method to extract and return text from lookup grid row for further processing. 
+        /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
+        /// </summary>
+        /// <param name="gridLookup">Grid on which lookup has been selected.</param>
+        /// <returns>Returns text like entered by user for further processing.</returns>
+        protected virtual internal string LookupRowSelected(Grid gridLookup)
+        {
+            return null;
+        }
     }
 
     public class GridCellParseFilterResult
@@ -1643,27 +1664,6 @@
         public virtual Task InitAsync()
         {
             return Task.FromResult(0);
-        }
-
-        protected virtual internal void GridLookupQueryConfig(Grid grid, string tableNameCSharp, Grid.QueryConfigResult result)
-        {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
-
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
-
-            // Example for static configuration:
-            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
-        }
-
-        /// <summary>
-        /// Override this method to extract and return text from lookup grid row for further processing. 
-        /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
-        /// </summary>
-        /// <param name="grid">Grid on which lookup has been selected.</param>
-        /// <returns>Returns text like entered by user for further processing.</returns>
-        protected virtual internal string GridLookupRowSelected(Grid grid)
-        {
-            return null;
         }
 
         /// <summary>
