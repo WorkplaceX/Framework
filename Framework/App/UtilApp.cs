@@ -32,6 +32,19 @@
         }
 
         /// <summary>
+        /// User clicked home button for example on navbar.
+        /// </summary>
+        public static Task ProcessHomeIsClickAsync(AppJson appJson)
+        {
+            if (UtilSession.Request(appJson, RequestCommand.HomeIsClick, out RequestJson requestJson, out ComponentJson component))
+            {
+                // User clicked home button
+            }
+
+            return Task.FromResult(0);
+        }
+
+        /// <summary>
         /// Returns all button recursively.
         /// </summary>
         private static void ProcessBootstrapNavbarButtonListAll(List<BootstrapNavbarButton> buttonList, List<BootstrapNavbarButton> result)

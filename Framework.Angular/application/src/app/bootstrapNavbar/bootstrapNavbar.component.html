@@ -1,5 +1,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <a class="navbar-brand" href="#" [innerHtml]="json.BrandTextHtml"></a>
+  <a class="navbar-brand" href="#" (click)="clickHome()">
+    <span [innerHtml]="json.BrandTextHtml"></span>
+    <span *ngIf="json.IsShowSpinner">
+      &nbsp;<i class="fas fa-spinner fa-spin text-white" *ngIf="json.IsShowSpinner"></i>
+    </span>
+  </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>

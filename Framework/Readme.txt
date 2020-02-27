@@ -1,5 +1,6 @@
 ﻿vNext
--Class App.Setting to choos Bulma, Bootstrap for Modal and Alert.
+-Html snipped
+-Class App.Setting to choose Bulma, Bootstrap for Modal and Alert.
 -Insert ConfigField without ConfigGrid does not give a duplicate error
 -Handle Json property with getter only. Code: "Is attribute [Serialize(SerializeEnum.None)] missing?" [Ok]
 -Add new grid configuration
@@ -10,7 +11,7 @@
 -BingMap no global variables
 -New sql table FrameworkPage to register all page classes --> use deployDb, pages might belong to different App [Ok]
 -Register enums like class Page --> use deployDb [Ok]
--FrameworkConfigField multiple instances of same field
+-FrameworkConfigField multiple instances of same field [Ok]
 
 ToDo
 -https://github.com/Microsoft/sql-server-samples

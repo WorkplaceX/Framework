@@ -41,6 +41,11 @@
         /// Send css grid style property grid-template-columns to server after column resize.
         /// </summary>
         GridStyleColumn = 14,
+
+        /// <summary>
+        /// User clicked home button for example on navbar.
+        /// </summary>
+        HomeIsClick = 15,
     }
 
     /// <summary>
@@ -480,6 +485,7 @@
         internal async Task ProcessInternalAsync(AppJson appJson)
         {
             UtilStopwatch.TimeStart("Process");
+            await UtilApp.ProcessHomeIsClickAsync(appJson);
             await UtilGrid.ProcessAsync(appJson); // Process data grid.
             await UtilApp.ProcessBootstrapNavbarAsync(appJson);
 

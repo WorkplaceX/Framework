@@ -14,11 +14,17 @@ import { DataService, RequestJson } from '../data.service';
   @Input() json: any
   dataService: DataService;
   
-  click(button){
+  click(button) {
     button.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
     return false;
-  } 
+  }
+
+  clickHome() {
+    this.json.IsShowSpinner = true;
+    this.dataService.update(<RequestJson> { Command: 15, ComponentId: this.json.Id });
+    return false;
+  }
 
   trackBy(index, item) {
     return index; // or item.id
