@@ -871,6 +871,15 @@
         {
             return Task.FromResult(false);
         }
+
+        /// <summary>
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string. Otherwise return empty</returns>
+        virtual internal string CellTextInternal(Row row, string fieldName)
+        {
+            return null;
+        }
     }
 
     public class GridCellParseFilterResult
@@ -949,6 +958,20 @@
             {
                 return (TRow)base.RowSelected;
             }
+        }
+
+        internal override string CellTextInternal(Row row, string fieldName)
+        {
+            return CellText((TRow)row, fieldName);
+        }
+
+        /// <summary>
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// </summary>
+        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
+        protected virtual string CellText(TRow row, string fieldName)
+        {
+            return null;
         }
     }
 
@@ -1570,15 +1593,6 @@
             /// Gets or sets Align. Defines text allign of centent in the data grid cell.
             /// </summary>
             public AlignEnum Align;
-        }
-
-        /// <summary>
-        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
-        /// </summary>
-        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
-        protected virtual internal string GridCellText(Grid grid, Row row, string fieldName)
-        {
-            return null;
         }
 
         /// <summary>

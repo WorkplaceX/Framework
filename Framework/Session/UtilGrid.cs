@@ -248,7 +248,7 @@
                 object value = field.PropertyInfo.GetValue(row);
                 if (value != null)
                 {
-                    text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = grid.CellTextInternal(row, field.PropertyInfo.Name); // Custom convert database value to cell text.
                     text = UtilFramework.StringNull(text);
                     if (text == null)
                     {
@@ -1478,7 +1478,6 @@ namespace Framework.Session
 
         private static void ExportData(WorksheetPart worksheetPart, Grid grid)
         {
-            Page page = grid.ComponentOwner<Page>();
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
 
             var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
@@ -1523,7 +1522,7 @@ namespace Framework.Session
                         object value = field.PropertyInfo.GetValue(row);
                         if (value != null)
                         {
-                            text = page.GridCellText(grid, row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                            text = grid.CellTextInternal(row, field.FieldNameCSharp); // Custom convert database value to cell text.
                             text = UtilFramework.StringNull(text);
                             if (text == null)
                             {
