@@ -138,10 +138,10 @@
             return list.GetOrAdd(key, valueFactory, out bool isAdded);
         }
 
-        private static void RenderAnnotation(Grid gird, GridCell cell, Page page, string fieldNameCSharp, Row row)
+        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, Row row)
         {
-            var result = new GridCellAnnotationResult();
-            page.GridCellAnnotation(gird, fieldNameCSharp, row, result);
+            var result = new Grid.CellAnnotationResult();
+            grid.CellAnnotationInternal(fieldNameCSharp, row, result);
             cell.Html = UtilFramework.StringNull(result.Html);
             cell.HtmlIsEdit = result.HtmlIsEdit;
             cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
@@ -267,7 +267,7 @@
                         result.Text = text;
                     }
                 }
-                RenderAnnotation(grid, result, page, column.FieldNameCSharp, row);
+                RenderAnnotation(grid, result, column.FieldNameCSharp, row);
             }
             result.IsVisibleScroll = true;
             if (grid.GridLookup != null)

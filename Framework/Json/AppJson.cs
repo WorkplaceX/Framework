@@ -893,6 +893,75 @@
 
             public string ErrorParse;
         }
+
+        public enum CellAnnotationAlignEnum
+        {
+            /// <summary>
+            /// None.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Align text left.
+            /// </summary>
+            Left = 1,
+
+            /// <summary>
+            /// Align data grid cell text in center .
+            /// </summary>
+            Center = 2,
+
+            /// <summary>
+            /// Align data grid cell text right.
+            /// </summary>
+            Right = 3,
+        }
+
+        /// <summary>
+        /// Provides additional annotation information for a data grid cell.
+        /// </summary>
+        public class CellAnnotationResult
+        {
+            /// <summary>
+            /// Gets or sets Html. Use for example to transform plain text into a hyper link. For empty html set "&nbsp;" to keep the layout consistent with none empty html fields.
+            /// </summary>
+            public string Html;
+
+            /// <summary>
+            /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
+            /// </summary>
+            public bool HtmlIsEdit;
+
+            /// <summary>
+            /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
+            /// </summary>
+            public string HtmlLeft;
+
+            /// <summary>
+            /// Gets or sets HtmlRight. Use for example to render an indicator icon on the right hand side in the cell. 
+            /// </summary>
+            public string HtmlRight;
+
+            /// <summary>
+            /// Gets or sets IsReadOnly. If true, user can not edit text.
+            /// </summary>
+            public bool IsReadOnly;
+
+            /// <summary>
+            /// Gets or sets IsPassword. If true, user can not read text.
+            /// </summary>
+            public bool IsPassword;
+
+            /// <summary>
+            /// Gets or sets Align. Defines text allign of centent in the data grid cell.
+            /// </summary>
+            public CellAnnotationAlignEnum Align;
+        }
+
+        virtual internal void CellAnnotationInternal(string fieldName, Row row, CellAnnotationResult result)
+        {
+
+        }
     }
 
     public class GridCellParseFilterResult
@@ -1018,6 +1087,22 @@
             result.IsHandled = false;
             result.ErrorParse = null;
             return Task.FromResult(0);
+        }
+
+        internal override void CellAnnotationInternal(string fieldName, Row row, CellAnnotationResult result)
+        {
+            CellAnnotation(fieldName, (TRow)row, result);
+        }
+
+        /// <summary>
+        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
+        /// </summary>
+        /// <param name="fieldNameCSharp">Data grid column name.</param>
+        /// <param name="row">Data grid row if applicable for row type.</param>
+        /// <param name="result">Returns data grid cell annotation.</param>
+        protected virtual void CellAnnotation(string fieldNameCSharp, TRow row, CellAnnotationResult result)
+        {
+
         }
     }
 
@@ -1408,7 +1493,7 @@
         /// <summary>
         /// Gets or sets Align. Defines text allign of centent in the data grid cell.
         /// </summary>
-        public AlignEnum Align;
+        public Grid.CellAnnotationAlignEnum Align;
 
         /// <summary>
         /// Gets or sets IsOdd.
@@ -1575,83 +1660,6 @@
         protected virtual internal Task ProcessAsync()
         {
             return Task.FromResult(0);
-        }
-
-        public enum AlignEnum
-        {
-            /// <summary>
-            /// None.
-            /// </summary>
-            None = 0,
-
-            /// <summary>
-            /// Align text left.
-            /// </summary>
-            Left = 1,
-
-            /// <summary>
-            /// Align data grid cell text in center .
-            /// </summary>
-            Center = 2,
-
-            /// <summary>
-            /// Align data grid cell text right.
-            /// </summary>
-            Right = 3,
-        }
-
-        /// <summary>
-        /// Provides additional annotation information for a data grid cell.
-        /// </summary>
-        public class GridCellAnnotationResult
-        {
-            /// <summary>
-            /// Gets or sets Html. Use for example to transform plain text into a hyper link. For empty html set "&nbsp;" to keep the layout consistent with none empty html fields.
-            /// </summary>
-            public string Html;
-
-            /// <summary>
-            /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
-            /// </summary>
-            public bool HtmlIsEdit;
-
-            /// <summary>
-            /// Gets or sets HtmlLeft. Use for example to render an image on the left hand side in the cell.
-            /// </summary>
-            public string HtmlLeft;
-
-            /// <summary>
-            /// Gets or sets HtmlRight. Use for example to render an indicator icon on the right hand side in the cell. 
-            /// </summary>
-            public string HtmlRight;
-
-            /// <summary>
-            /// Gets or sets IsReadOnly. If true, user can not edit text.
-            /// </summary>
-            public bool IsReadOnly;
-
-            /// <summary>
-            /// Gets or sets IsPassword. If true, user can not read text.
-            /// </summary>
-            public bool IsPassword;
-
-            /// <summary>
-            /// Gets or sets Align. Defines text allign of centent in the data grid cell.
-            /// </summary>
-            public AlignEnum Align;
-        }
-
-        /// <summary>
-        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
-        /// </summary>
-        /// <param name="grid">Data grid on this page.</param>
-        /// <param name="fieldName">Data grid column name.</param>
-        /// <param name="gridRowEnum">Data grid row type.</param>
-        /// <param name="row">Data grid row if applicable for row type.</param>
-        /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual internal void GridCellAnnotation(Grid grid, string fieldName, Row row, GridCellAnnotationResult result)
-        {
-
         }
     }
 }
