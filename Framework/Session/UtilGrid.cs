@@ -508,30 +508,30 @@
         {
             UtilFramework.Assert(grid.TypeRow == query.ElementType);
             // Get config grid and field query
-            Page.GridConfigResult gridConfigResult = new Page.GridConfigResult();
+            Grid.QueryConfigResult queryConfigResult = new Grid.QueryConfigResult();
             if (grid.IsGridLookup == false)
             {
-                page.GridQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
+                grid.QueryConfig(UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), queryConfigResult);
             }
             else
             {
-                page.GridLookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), gridConfigResult);
+                page.GridLookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), queryConfigResult);
             }
 
             // Load config grid
             grid.ConfigGridList = new List<FrameworkConfigGridBuiltIn>();
-            if (gridConfigResult.ConfigGridQuery != null)
+            if (queryConfigResult.ConfigGridQuery != null)
             {
-                grid.ConfigGridList = await Data.SelectAsync(gridConfigResult.ConfigGridQuery);
+                grid.ConfigGridList = await Data.SelectAsync(queryConfigResult.ConfigGridQuery);
             }
             var configGrid = ConfigGrid(grid);
             query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
 
             // Load config field (Task)
             var configFieldListTask = Task.FromResult(new List<FrameworkConfigFieldBuiltIn>());
-            if (gridConfigResult.ConfigFieldQuery != null)
+            if (queryConfigResult.ConfigFieldQuery != null)
             {
-                configFieldListTask = Data.SelectAsync(gridConfigResult.ConfigFieldQuery);
+                configFieldListTask = Data.SelectAsync(queryConfigResult.ConfigFieldQuery);
             }
 
             // Load row (Task)

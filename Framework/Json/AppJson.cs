@@ -962,6 +962,36 @@
         {
 
         }
+
+        /// <summary>
+        /// Contains one query for data grid configuration and one query for data grid field configuration.
+        /// </summary>
+        public class QueryConfigResult
+        {
+            /// <summary>
+            /// Gets or sets ConfigGridQuery. Should return one record.
+            /// </summary>
+            public IQueryable<FrameworkConfigGridBuiltIn> ConfigGridQuery { get; set; }
+
+            /// <summary>
+            /// Gets or sets ConfigFieldQuery.
+            /// </summary>
+            public IQueryable<FrameworkConfigFieldBuiltIn> ConfigFieldQuery { get; set; }
+        }
+
+        /// <summary>
+        /// Returns configuration query of data grid to load.
+        /// </summary>
+        /// <param name="tableNameCSharp">Type of row to load.</param>
+        protected virtual internal void QueryConfig(string tableNameCSharp, QueryConfigResult result)
+        {
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
+
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
+
+            // Example for static configuration:
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+        }
     }
 
     public class GridCellParseFilterResult
@@ -1595,37 +1625,6 @@
         }
 
         /// <summary>
-        /// Contains one query for data grid configuration and one query for data grid field configuration.
-        /// </summary>
-        public class GridConfigResult
-        {
-            /// <summary>
-            /// Gets or sets ConfigGridQuery. Should return one record.
-            /// </summary>
-            public IQueryable<FrameworkConfigGridBuiltIn> ConfigGridQuery { get; set; }
-
-            /// <summary>
-            /// Gets or sets ConfigFieldQuery.
-            /// </summary>
-            public IQueryable<FrameworkConfigFieldBuiltIn> ConfigFieldQuery { get; set; }
-        }
-
-        /// <summary>
-        /// Returns configuration query of data grid to load.
-        /// </summary>
-        /// <param name="grid">Json data grid to load.</param>
-        /// <param name="tableNameCSharp">Type of row to load.</param>
-        protected virtual internal void GridQueryConfig(Grid grid, string tableNameCSharp, GridConfigResult result)
-        {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
-
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
-
-            // Example for static configuration:
-            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
-        }
-
-        /// <summary>
         /// Override this method to return a linq query for the lookup data grid.
         /// </summary>
         protected virtual internal IQueryable GridLookupQuery(Grid grid, Row row, string fieldName, string text)
@@ -1633,7 +1632,7 @@
             return null; // No lookup data grid.
         }
 
-        protected virtual internal void GridLookupQueryConfig(Grid grid, string tableNameCSharp, GridConfigResult result)
+        protected virtual internal void GridLookupQueryConfig(Grid grid, string tableNameCSharp, Grid.QueryConfigResult result)
         {
             result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableNameCSharp && item.ConfigName == grid.ConfigName);
 
