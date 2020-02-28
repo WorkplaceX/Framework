@@ -89,7 +89,7 @@
     }
 
     /// <summary>
-    /// Application component tree. Tree is serialized and deserialized for every client request. Stores session state in public or internal fields and properties.
+    /// Application component tree. Tree is serialized and deserialized for every client request. Stores session state from public and internal fields and properties.
     /// </summary>
     public abstract class ComponentJson
     {

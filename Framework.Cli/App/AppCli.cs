@@ -238,17 +238,21 @@
             }
 
             /// <summary>
-            /// Constructor.
+            /// Constructor for DeployDbBuiltInItem.
             /// </summary>
-            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix) where TRow : Row
+            /// <param name="fieldNameKeyList">For example (UserId, RoleId).</param>
+            /// <param name="tableNameSqlReferencePrefix">Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
+            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix = null) where TRow : Row
             {
                 return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix);
             }
 
             /// <summary>
-            /// Constructor.
+            /// Constructor for DeployDbBuiltInItem.
             /// </summary>
-            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix) where TRow : Row
+            /// <param name="fieldNameKey">For example Name.</param>
+            /// <param name="tableNameSqlReferencePrefix">Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
+            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix = null) where TRow : Row
             {
                 return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), new string[] { fieldNameKey }, tableNameSqlReferencePrefix);
             }
@@ -456,9 +460,9 @@
             }
 
             /// <summary>
-            /// Constructor for Application.
+            /// Constructor for GenerateBuiltInItem.
             /// </summary>
-            /// <param name="isApplication">If true, RowList will be available at runtime. If false, RowList will be generated into cli.</param>
+            /// <param name="isApplication">If true, RowList will be available at runtime. If false, RowList will be generated into cli only. If row contains IdName column, IdNameEnum enum is also generated.</param>
             public static GenerateBuiltInItem Create<TRow>(List<TRow> rowList, bool isApplication = false) where TRow : Row
             {
                 return new GenerateBuiltInItem(isApplication, typeof(TRow), rowList.Cast<Row>().ToList());
