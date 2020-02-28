@@ -1148,7 +1148,7 @@
         /// <param name="isHandled">If true, framework does no further parsing of user entered text.</param>
         protected virtual void CellParse(TRow row, string fieldName, string text, CellParseResult result)
         {
-            result.IsHandled = false;
+
         }
 
         internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
@@ -1164,8 +1164,6 @@
         /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
         protected virtual Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
         {
-            result.IsHandled = false;
-            result.ErrorParse = null;
             return Task.FromResult(0);
         }
 

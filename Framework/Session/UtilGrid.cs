@@ -959,6 +959,10 @@
                 // Parse default
                 if (!result.IsHandled)
                 {
+                    if (result.ErrorParse != null)
+                    {
+                        throw new Exception("ErrorParse has been set without IsHandled!"); // Custom parse workflow!
+                    }
                     Data.CellTextParse(field, cell.Text, rowNew, out string errorParse);
                     result.IsHandled = true;
                     result.ErrorParse = errorParse;

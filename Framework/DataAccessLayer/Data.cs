@@ -212,7 +212,7 @@
                     }
                     if (isPrimaryKey == false)
                     {
-                        throw new Exception("No primary key defined!");
+                        throw new Exception("No primary key defined!"); // Did you set result.IsHandled?
                     }
                 }
                 else
@@ -856,9 +856,8 @@
         {
             errorParse = null;
             object value = CellTextParse(field, text);
-            bool isPrevent = false;
             bool isNullable = UtilFramework.IsNullable(field.PropertyInfo.PropertyType); // Do not write value to row if type is not nullable but text is null.
-            isPrevent = (text == null) && !isNullable;
+            bool isPrevent = (text == null) && !isNullable;
             if (!isPrevent)
             {
                 field.PropertyInfo.SetValue(row, value);
