@@ -1882,6 +1882,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Convert value to CSharp code. Value can be null.
+        /// </summary>
         protected virtual internal string ValueToCSharp(object value)
         {
             string result = null;
