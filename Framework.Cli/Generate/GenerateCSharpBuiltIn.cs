@@ -40,6 +40,7 @@
                 }
                 result.AppendLine(string.Format("namespace DatabaseBuiltIn.{0}", schemaNameCSharp));
                 result.AppendLine(string.Format("{{"));
+                result.AppendLine(string.Format("    using System;")); // Used for method Guid.Parse();
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
                 if (isApplication)
                 {

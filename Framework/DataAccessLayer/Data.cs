@@ -3,7 +3,6 @@
     using Framework.Config;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
-    using Framework.Session;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using System;
@@ -17,7 +16,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
-    using static Framework.Session.UtilSession;
+    using System.Globalization;
 
     /// <summary>
     /// Linq to database or linq to memory.
@@ -1944,6 +1943,16 @@
             : base(FrameworkTypeEnum.Uniqueidentifier, "uniqueidentifier", 36, typeof(Guid), DbType.Guid, false)
         {
 
+        }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            string result = "null";
+            if (value is Guid guid)
+            {
+                result = $"Guid.Parse(\"{guid.ToString(null, CultureInfo.InvariantCulture)}\")";
+            }
+            return result;
         }
     }
 
