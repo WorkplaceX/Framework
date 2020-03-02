@@ -151,11 +151,11 @@
                 // SqlInit DROP
                 string fileNameInitDrop = folderNameDeployDbInitApplication + "InitDrop.sql";
                 string sqlInitDrop = UtilFramework.FileLoad(fileNameInitDrop);
-                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true).Wait();
+                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true, isExceptionContinue: true).Wait();
 
                 fileNameInitDrop = folderNameDeployDbInitFramework + "InitDrop.sql";
                 sqlInitDrop = UtilFramework.FileLoad(fileNameInitDrop);
-                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true).Wait();
+                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true, isExceptionContinue: true).Wait();
 
                 Console.WriteLine("DeployDb drop successful!");
             }
