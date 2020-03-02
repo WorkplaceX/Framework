@@ -1981,24 +1981,84 @@
 
         }
 
-        protected internal override string CellTextFromValue(object value)
+        public static string CellTextFromValue(DateTime value, bool isTime = true)
         {
             string result = null;
             if (value != null)
             {
-                result = ((DateTime)value).ToString("dd.MM.yyyy");
+                if (isTime == false)
+                {
+                    result = value.ToString("yyyy-MM-dd");
+                }
+                else
+                {
+                    result = value.ToString("yyyy-MM-dd HH:mm:ss");
+                }
             }
             return result;
         }
 
-        protected internal override object CellTextParse(string text)
+        public static DateTime? CellTextParse(string text, bool isTime = true)
         {
-            object result = null;
+            DateTime? result = null;
             if (text != null)
             {
-                result = DateTime.ParseExact(text, "d.M.yyyy", null); // Parse for example: "1.1.2000".
+                if (isTime)
+                {
+                    if (!text.Contains(":"))
+                    {
+                        isTime = false;
+                    }
+                }
+
+                if (text.Contains("-"))
+                {
+                    if (isTime == false)
+                    {
+                        result = DateTime.ParseExact(text, "yyyy-M-d", CultureInfo.InvariantCulture); // Parse for example: "2000-01-31".
+                    }
+                    else
+                    {
+                        result = DateTime.ParseExact(text, "yyyy-M-d hh:mm", CultureInfo.InvariantCulture); // Parse for example: "2000-01-31 13:15".
+                    }
+                }
+                else
+                {
+                    if (text.Contains("."))
+                    {
+                        if (isTime == false)
+                        {
+                            result = DateTime.ParseExact(text, "d.M.yyyy", CultureInfo.InvariantCulture); // Parse for example: "31.1.2000".
+                        }
+                        else
+                        {
+                            result = DateTime.ParseExact(text, "d.M.yyyy hh:mm", CultureInfo.InvariantCulture); // Parse for example: "31.1.2000 13:15".
+                        }
+                    }
+                    else
+                    {
+                        if (isTime == false)
+                        {
+                            result = DateTime.ParseExact(text, "M/d/yyyy", CultureInfo.InvariantCulture); // Parse for example: "1/31/2000".
+                        }
+                        else
+                        {
+                            result = DateTime.ParseExact(text, "M/d/yyyy hh:mm", CultureInfo.InvariantCulture); // Parse for example: "1/31/2000 13:15".
+                        }
+                    }
+                }
             }
             return result;
+        }
+
+        protected internal override string CellTextFromValue(object value)
+        {
+            return FrameworkTypeDatetime.CellTextFromValue((DateTime)value);
+        }
+
+        protected internal override object CellTextParse(string text)
+        {
+            return FrameworkTypeDatetime.CellTextParse(text);
         }
     }
 
@@ -2009,6 +2069,16 @@
         {
 
         }
+
+        protected internal override string CellTextFromValue(object value)
+        {
+            return FrameworkTypeDatetime.CellTextFromValue((DateTime)value);
+        }
+
+        protected internal override object CellTextParse(string text)
+        {
+            return FrameworkTypeDatetime.CellTextParse(text);
+        }
     }
 
     internal class FrameworkTypeDate : FrameworkType
@@ -2017,6 +2087,16 @@
             : base(FrameworkTypeEnum.Date, "date", 40, typeof(DateTime), DbType.Date, false)
         {
 
+        }
+
+        protected internal override string CellTextFromValue(object value)
+        {
+            return FrameworkTypeDatetime.CellTextFromValue((DateTime)value, isTime: false);
+        }
+
+        protected internal override object CellTextParse(string text)
+        {
+            return FrameworkTypeDatetime.CellTextParse(text, isTime: false);
         }
     }
 
