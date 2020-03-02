@@ -103,12 +103,30 @@
         /// <summary>
         /// Returns IdName from enum.
         /// </summary>
-        public static string IdNameFromEnum(Enum value)
+        public static string IdNameFromEnum(Enum idEnum)
         {
-            var enumType = value.GetType();
-            var enumName = Enum.GetName(enumType, value);
+            var enumType = idEnum.GetType();
+            var enumName = Enum.GetName(enumType, idEnum);
             var enumNameAttribute = enumType.GetField(enumName).GetCustomAttributes(false).OfType<IdNameEnumAttribute>().Single();
             return enumNameAttribute.IdName;
+        }
+
+        /// <summary>
+        /// Returns enum from IdName.
+        /// </summary>
+        public static TEnum IdNameToEnum<TEnum>(string idName) where TEnum : Enum
+        {
+            TEnum result = default(TEnum);
+            foreach (var item in Enum.GetValues(typeof(TEnum)))
+            {
+                string idNameLocal = IdNameFromEnum((TEnum)item);
+                if (idNameLocal == idName)
+                {
+                    result = (TEnum)item;
+                    break;
+                }
+            }
+            return result;
         }
     }
 }

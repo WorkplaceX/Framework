@@ -20,6 +20,7 @@ ToDo
 -IoC for singleton and [ThreadStatic]
 
 ToDo
+-pixy.org Images
 -unsplash.com Images
 -https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs
 -BootstrapExtension.BootstrapRow --> DivContainer [Ok]
@@ -28,23 +29,23 @@ ToDo
 -https://www.youtube.com/watch?v=moBhzSC455o (Build a Responsive Grid CSS Website Layout From Scratch)
 -Move AppSelector to ConfigFramework.json --> ConfigWebServer.json WebsiteList [Ok]
 -SSL [Ok]
--Load Grid with null query no error
--Remove not used grids from AppSession
+-Load Grid with null query no error [Ok]
+-Remove not used grids from AppSession [Ok]
 -Show session size on AppJson
 -Component Version
 -Cli show node version, npm version --> build.sh [Ok]
--Build version UtilFramework.VersionBuild recover after build failure
+-Build version UtilFramework.VersionBuild recover after build failure [Ok]
 -Search password in logs [Ok]
 -App root (<data-app>) two times in index.html
 -Use string instead of removing property (Warning! Type not supported by framework.)
 -Rename Generate.cs to Database.cs [Ok]
--ComponentJson sealed classes internal constructor.
+-ComponentJson sealed classes internal constructor. [Ok]
 -Nuget package for Framework and FrameworkCli. And npm for Framework/Client
--Rename GridCell.Text to GridCell.T
+-Rename GridCell.Text to GridCell.T [Ok]
 -Visual Code support with workspace and run
 -Parse index.html for Snippet and inject with Snippet json component
 -Angular template url to html file in Application folder. New component Custom1
--Activator.CreateInstance replace with linq activator performance https://stackoverflow.com/questions/4432026/activator-createinstance-performance-alternative
+-Activator.CreateInstance replace with linq activator performance https://stackoverflow.com/questions/4432026/activator-createinstance-performance-alternative [Ok]
 
 v2.1
 -Linq to shared memory queries. (services.AddSingleton) [Ok]
