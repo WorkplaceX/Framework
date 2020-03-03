@@ -2051,6 +2051,18 @@
             return result;
         }
 
+        public static string ValueToCSharpUtil(object value)
+        {
+            var result = "null";
+            if (value != null)
+            {
+                DateTime dateTime = (DateTime)value;
+                string dateTimeString = dateTime.ToString("yyyy-MM-dd HH:mmm", CultureInfo.InvariantCulture);
+                result = $"DateTime.Parse(\"{dateTimeString}\", CultureInfo.InvariantCulture)";
+            }
+            return result;
+        }
+
         protected internal override string CellTextFromValue(object value)
         {
             return FrameworkTypeDatetime.CellTextFromValue((DateTime)value);
@@ -2059,6 +2071,11 @@
         protected internal override object CellTextParse(string text)
         {
             return FrameworkTypeDatetime.CellTextParse(text);
+        }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            return FrameworkTypeDatetime.ValueToCSharpUtil(value);
         }
     }
 
@@ -2079,6 +2096,11 @@
         {
             return FrameworkTypeDatetime.CellTextParse(text);
         }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            return FrameworkTypeDatetime.ValueToCSharpUtil(value);
+        }
     }
 
     internal class FrameworkTypeDate : FrameworkType
@@ -2097,6 +2119,11 @@
         protected internal override object CellTextParse(string text)
         {
             return FrameworkTypeDatetime.CellTextParse(text, isTime: false);
+        }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            return FrameworkTypeDatetime.ValueToCSharpUtil(value);
         }
     }
 

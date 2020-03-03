@@ -42,6 +42,7 @@
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System;")); // Used for method Guid.Parse();
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
+                result.AppendLine(string.Format("    using System.Globalization;")); // Used for property CultureInfo.InvariantCulture;
                 if (isApplication)
                 {
                     // See also class IdNameEnumAttribute
