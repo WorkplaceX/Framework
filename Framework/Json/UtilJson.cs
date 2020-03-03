@@ -537,6 +537,8 @@ namespace Framework.Json
             new KeyValuePair<Type, ConverterBase>(new ConverterBooleanNullable().PropertyType, new ConverterBooleanNullable()),
             new KeyValuePair<Type, ConverterBase>(new ConverterDouble().PropertyType, new ConverterDouble()),
             new KeyValuePair<Type, ConverterBase>(new ConverterDoubleNullable().PropertyType, new ConverterDoubleNullable()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterDateTime().PropertyType, new ConverterDateTime()),
+            new KeyValuePair<Type, ConverterBase>(new ConverterDateTimeNullable().PropertyType, new ConverterDateTimeNullable()),
             new KeyValuePair<Type, ConverterBase>(new ConverterString().PropertyType, new ConverterString()),
             
             // Special types
@@ -1155,6 +1157,44 @@ namespace Framework.Json
             protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
             {
                 return jsonElement.GetDouble();
+            }
+        }
+
+        private sealed class ConverterDateTime : ConverterBase<DateTime>
+        {
+            public ConverterDateTime()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Writer writer)
+            {
+                writer.WriteStringValue(UtilFramework.DateTimeToText((DateTime)value));
+            }
+
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
+            {
+                return UtilFramework.DateTimeFromText(jsonElement.GetString());
+            }
+        }
+
+        private sealed class ConverterDateTimeNullable : ConverterBase<DateTime?>
+        {
+            public ConverterDateTimeNullable()
+                : base(false)
+            {
+
+            }
+
+            protected override void SerializeValue(object obj, DeclarationProperty property, object value, Writer writer)
+            {
+                writer.WriteStringValue(UtilFramework.DateTimeToText((DateTime?)value));
+            }
+
+            protected override object DeserializeValue(object obj, DeclarationProperty property, JsonElement jsonElement)
+            {
+                return UtilFramework.DateTimeFromText(jsonElement.GetString());
             }
         }
 

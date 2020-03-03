@@ -9,6 +9,7 @@ namespace Framework
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -36,7 +37,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.24.4";
+                return "v3.24.5";
             }
         }
 
@@ -317,6 +318,9 @@ namespace Framework
             return result;
         }
 
+        /// <summary>
+        /// Used for cli and stopwatch. See also method DateTimeToText();
+        /// </summary>
         internal static string DateTimeToString(DateTime dateTime, bool isThousand = false)
         {
             string format = "yyyy-MM-dd HH:mm:ss";
@@ -422,6 +426,82 @@ namespace Framework
                     result.Add(new List<T>());
                 }
                 result[result.Count - 1].Add(list[i]);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Used for row data.
+        /// </summary>
+        internal static DateTime? DateTimeFromText(string text, bool isTime = true)
+        {
+            DateTime? result = null;
+            if (text != null)
+            {
+                if (isTime)
+                {
+                    if (!text.Contains(":"))
+                    {
+                        isTime = false;
+                    }
+                }
+
+                if (text.Contains("-"))
+                {
+                    if (isTime == false)
+                    {
+                        result = DateTime.ParseExact(text, "yyyy-M-d", CultureInfo.InvariantCulture); // Parse for example: "2000-01-31".
+                    }
+                    else
+                    {
+                        result = DateTime.ParseExact(text, "yyyy-M-d hh:mm", CultureInfo.InvariantCulture); // Parse for example: "2000-01-31 13:15".
+                    }
+                }
+                else
+                {
+                    if (text.Contains("."))
+                    {
+                        if (isTime == false)
+                        {
+                            result = DateTime.ParseExact(text, "d.M.yyyy", CultureInfo.InvariantCulture); // Parse for example: "31.1.2000".
+                        }
+                        else
+                        {
+                            result = DateTime.ParseExact(text, "d.M.yyyy hh:mm", CultureInfo.InvariantCulture); // Parse for example: "31.1.2000 13:15".
+                        }
+                    }
+                    else
+                    {
+                        if (isTime == false)
+                        {
+                            result = DateTime.ParseExact(text, "M/d/yyyy", CultureInfo.InvariantCulture); // Parse for example: "1/31/2000".
+                        }
+                        else
+                        {
+                            result = DateTime.ParseExact(text, "M/d/yyyy hh:mm", CultureInfo.InvariantCulture); // Parse for example: "1/31/2000 13:15".
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Used for row data.
+        /// </summary>
+        internal static string DateTimeToText(DateTime? value, bool isTime = true)
+        {
+            string result = null;
+            if (value != null)
+            {
+                if (isTime == false)
+                {
+                    result = ((DateTime)value).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    result = ((DateTime)value).ToString("yyyy-MM-dd hh:mm", CultureInfo.InvariantCulture);
+                }
             }
             return result;
         }

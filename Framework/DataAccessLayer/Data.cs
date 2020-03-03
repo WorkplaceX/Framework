@@ -1986,69 +1986,14 @@
             string result = null;
             if (value != null)
             {
-                if (isTime == false)
-                {
-                    result = value.ToString("yyyy-MM-dd");
-                }
-                else
-                {
-                    result = value.ToString("yyyy-MM-dd HH:mm:ss");
-                }
+                result = UtilFramework.DateTimeToText(value, isTime);
             }
             return result;
         }
 
         public static DateTime? CellTextParse(string text, bool isTime = true)
         {
-            DateTime? result = null;
-            if (text != null)
-            {
-                if (isTime)
-                {
-                    if (!text.Contains(":"))
-                    {
-                        isTime = false;
-                    }
-                }
-
-                if (text.Contains("-"))
-                {
-                    if (isTime == false)
-                    {
-                        result = DateTime.ParseExact(text, "yyyy-M-d", CultureInfo.InvariantCulture); // Parse for example: "2000-01-31".
-                    }
-                    else
-                    {
-                        result = DateTime.ParseExact(text, "yyyy-M-d hh:mm", CultureInfo.InvariantCulture); // Parse for example: "2000-01-31 13:15".
-                    }
-                }
-                else
-                {
-                    if (text.Contains("."))
-                    {
-                        if (isTime == false)
-                        {
-                            result = DateTime.ParseExact(text, "d.M.yyyy", CultureInfo.InvariantCulture); // Parse for example: "31.1.2000".
-                        }
-                        else
-                        {
-                            result = DateTime.ParseExact(text, "d.M.yyyy hh:mm", CultureInfo.InvariantCulture); // Parse for example: "31.1.2000 13:15".
-                        }
-                    }
-                    else
-                    {
-                        if (isTime == false)
-                        {
-                            result = DateTime.ParseExact(text, "M/d/yyyy", CultureInfo.InvariantCulture); // Parse for example: "1/31/2000".
-                        }
-                        else
-                        {
-                            result = DateTime.ParseExact(text, "M/d/yyyy hh:mm", CultureInfo.InvariantCulture); // Parse for example: "1/31/2000 13:15".
-                        }
-                    }
-                }
-            }
-            return result;
+            return UtilFramework.DateTimeFromText(text, isTime);
         }
 
         public static string ValueToCSharpUtil(object value)
@@ -2057,7 +2002,7 @@
             if (value != null)
             {
                 DateTime dateTime = (DateTime)value;
-                string dateTimeString = dateTime.ToString("yyyy-MM-dd HH:mmm", CultureInfo.InvariantCulture);
+                string dateTimeString = UtilFramework.DateTimeToText(dateTime);
                 result = $"DateTime.Parse(\"{dateTimeString}\", CultureInfo.InvariantCulture)";
             }
             return result;
