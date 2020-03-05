@@ -1173,9 +1173,9 @@
         }
 
         /// <summary>
-        /// Override this method to provide additional custom annotation information for a data grid cell. This information is provided on every render request.
+        /// Override this method to provide additional custom annotation information for a data grid cell. Annotation is updated for every cell on same row when user changes text in one cell.
         /// </summary>
-        /// <param name="row">Data grid row if applicable for row type.</param>
+        /// <param name="row">Data grid row.</param>
         /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
         protected virtual void CellAnnotation(TRow row, string fieldName, CellAnnotationResult result)
