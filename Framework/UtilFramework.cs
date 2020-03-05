@@ -319,7 +319,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Used for cli and stopwatch. See also method DateTimeToText();
+        /// Used for cli and stopwatch. Resolution seconds or milliseconds. See also method DateTimeToText();
         /// </summary>
         internal static string DateTimeToString(DateTime dateTime, bool isThousand = false)
         {
@@ -487,7 +487,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Used for row data.
+        /// Used for row data. Resolution minutes.
         /// </summary>
         internal static string DateTimeToText(DateTime? value, bool isTime = true)
         {
