@@ -631,7 +631,7 @@
             grid.RowStateList = LoadRowStateList(grid);
 
             // Select first row on data grid. But not on lookup grid.
-            if (grid.GridLookup == null) 
+            if (grid.IsGridLookup == false) 
             {
                 await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
             }
