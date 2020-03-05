@@ -699,6 +699,11 @@
         /// </summary>
         private static void GridLookupOpen(Grid grid, GridRowState rowState, string fieldNameCSharp, GridCell cell)
         {
+            if (grid.GridLookup?.GridLookupDestFieldNameCSharp != fieldNameCSharp)
+            {
+                GridLookupClose(grid); // User changed the column focus on same row without closing lookup data grid
+            }
+
             if (grid.GridLookup == null)
             {
                 UtilFramework.Assert(cell.GridLookup == null);
