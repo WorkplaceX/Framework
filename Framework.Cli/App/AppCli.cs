@@ -462,7 +462,7 @@
             /// <summary>
             /// Constructor for GenerateBuiltInItem.
             /// </summary>
-            /// <param name="isApplication">If true, RowList will be available at runtime. If false, RowList will be generated into cli only. If row contains IdName column, IdNameEnum enum is also generated.</param>
+            /// <param name="isApplication">If true, RowList will be available at runtime as BuiltIn CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
             public static GenerateBuiltInItem Create<TRow>(List<TRow> rowList, bool isApplication = false) where TRow : Row
             {
                 return new GenerateBuiltInItem(isApplication, typeof(TRow), rowList.Cast<Row>().ToList());
