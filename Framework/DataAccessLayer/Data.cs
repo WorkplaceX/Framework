@@ -2257,7 +2257,9 @@
 
         protected internal override string CellTextFromValue(object value)
         {
-            return UtilFramework.IntToText(((byte[])value).Length) + " bytes";
+            return null;
+
+            // return UtilFramework.IntToText(((byte[])value).Length) + " bytes"; // When user changes this text it gets saved to db.
 
             // return Convert.ToBase64String((byte[])value);
         }
