@@ -967,7 +967,7 @@
                 {
                     UtilFramework.Assert(requestJson.GridCellTextBase64.StartsWith("data:application/octet-stream;base64,"));
                     var data = System.Convert.FromBase64String(requestJson.GridCellTextBase64.Substring("data:application/octet-stream;base64,".Length));
-                    grid.CellParseFileUploadInternal(rowNew, column.FieldNameCSharp, null, data, result);
+                    grid.CellParseFileUploadInternal(rowNew, column.FieldNameCSharp, requestJson.GridCellTextBase64FileName, data, result);
                 }
                 // Parse default
                 if (!result.IsHandled)

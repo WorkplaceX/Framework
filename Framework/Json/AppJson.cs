@@ -65,6 +65,11 @@
         public string GridCellTextBase64 { get; set; }
 
         /// <summary>
+        /// Gets or sets GridCellTextBase64. Contains file name from user uploaded file.
+        /// </summary>
+        public string GridCellTextBase64FileName { get; set; }
+
+        /// <summary>
         /// Send visible column width list to server.
         /// </summary>
         public string[] GridStyleColumnList { get; set; }
@@ -461,6 +466,16 @@
             return new NamingConvention();
         }
 
+        /// <summary>
+        /// Browser requests file to download. For this method no session data is available. Session is not deserialized.
+        /// </summary>
+        /// <param name="fileName">For example: Readme.txt</param>
+        /// <returns>Returns data or null, if not found.</returns>
+        protected internal virtual Task<byte[]> FileDownload(string fileName)
+        {
+            return Task.FromResult((byte[])null);
+        }
+
         private NamingConvention namingConventionFramework;
 
         private NamingConvention namingConventionApp;
@@ -580,7 +595,7 @@
         /// <summary>
         /// Send file with app.json response to download in client.
         /// </summary>
-        internal void Download(byte[] data, string fileName)
+        internal void Download(byte[] data, string fileName) // Used for Excel export.
         {
             this.DownloadData = Convert.ToBase64String(data);
             this.DownloadFileName = fileName;

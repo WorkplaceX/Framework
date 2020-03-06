@@ -13,6 +13,8 @@ export class RequestJson {
 
   GridCellTextBase64: string;
 
+  GridCellTextBase64FileName: string;
+
   GridStyleColumnList: string[];
   
   ComponentId: number;

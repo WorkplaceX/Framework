@@ -56,7 +56,7 @@
         /// <summary>
         /// Returns JsonClient. Create AppJson and process request.
         /// </summary>
-        internal async Task<string> CreateAppAndProcessAsync(HttpContext context)
+        internal async Task<string> CreateAppJsonAndProcessAsync(HttpContext context)
         {
             // DeserializeSession
             var appJson = UtilSession.Deserialize(); // Deserialize session or init.
@@ -128,7 +128,7 @@
         /// <summary>
         /// Create new AppJson component for this session.
         /// </summary>
-        private AppJson CreateAppJson()
+        public AppJson CreateAppJson()
         {
             Type type = UtilFramework.TypeFromName(Website.AppTypeName);
             if (type == null)

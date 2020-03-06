@@ -51,7 +51,7 @@ export class Grid {
         var base64data = reader.result;                
         console.log(base64data);
         cellFileUpload.IsShowSpinner = true;
-        dataService.update(<RequestJson> { Command: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data });
+        dataService.update(<RequestJson> { Command: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file.name });
     }
   }  
 
