@@ -15,6 +15,7 @@ namespace Framework
     using System.Reflection;
     using System.Text;
     using System.Text.Json;
+    using System.Web;
 
     internal class UtilFramework
     {
@@ -86,6 +87,7 @@ namespace Framework
         /// <returns>Returns for example "Default/index.html"</returns>
         public static string FolderNameParse(string folderName, string path)
         {
+            path = HttpUtility.UrlDecode(path); // For example "Hello%20World.pdf"
             string result = FolderNameParse(folderName);
             path = UtilFramework.StringEmpty(path);
             if (path.StartsWith("/") || path.StartsWith("\""))
@@ -258,6 +260,10 @@ namespace Framework
         internal static bool IsNullable(Type type)
         {
             if (type == typeof(string))
+            {
+                return true;
+            }
+            if (type == typeof(byte[]))
             {
                 return true;
             }
