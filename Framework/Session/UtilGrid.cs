@@ -957,10 +957,10 @@
                 }
                 // Parse custom
                 Grid.CellParseResult result = new Grid.CellParseResult();
-                grid.CellParseTextInternal(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
+                grid.CellParseInternal(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
                 if (result.IsHandled == false)
                 {
-                    await grid.CellParseTextInternalAsync(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result);
+                    await grid.CellParseInternalAsync(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result);
                 }
                 // Parse custom (FileUpload)
                 if (requestJson.GridCellTextBase64 != null)

@@ -37,7 +37,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.26.0";
+                return "v3.26.1";
             }
         }
 
@@ -504,6 +504,14 @@ namespace Framework
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Returns value as text with thousands separator.
+        /// </summary>
+        internal static string IntToText(int value)
+        {
+            return string.Format("{0:N0}", value);
         }
     }
 }

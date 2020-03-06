@@ -913,12 +913,12 @@
             return null;
         }
 
-        virtual internal void CellParseTextInternal(Row row, string fieldName, string text, CellParseResult result)
+        virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
         {
 
         }
 
-        virtual internal Task CellParseTextInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
         {
             return Task.FromResult(0);
         }
@@ -1172,9 +1172,9 @@
             return null;
         }
 
-        internal override void CellParseTextInternal(Row row, string fieldName, string text, CellParseResult result)
+        internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
         {
-            CellParseText((TRow)row, fieldName, text, result);
+            CellParse((TRow)row, fieldName, text, result);
         }
 
         /// <summary>
@@ -1184,14 +1184,14 @@
         /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
         /// <param name="text">User entered text. It can be empty but never null.</param>
         /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParseText(TRow row, string fieldName, string text, CellParseResult result)
+        protected virtual void CellParse(TRow row, string fieldName, string text, CellParseResult result)
         {
 
         }
 
-        internal override Task CellParseTextInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
         {
-            return CellParseTextAsync((TRow)row, fieldName, text, result);
+            return CellParseAsync((TRow)row, fieldName, text, result);
         }
 
         /// <summary>
@@ -1200,7 +1200,7 @@
         /// <param name="row">Write custom parsed value to row.</param>
         /// <param name="text">Text can be empty but is never null.</param>
         /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
-        protected virtual Task CellParseTextAsync(TRow row, string fieldName, string text, CellParseResult result)
+        protected virtual Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
         {
             return Task.FromResult(0);
         }

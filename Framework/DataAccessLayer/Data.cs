@@ -2254,6 +2254,25 @@
         {
 
         }
+
+        protected internal override string CellTextFromValue(object value)
+        {
+            return UtilFramework.IntToText(((byte[])value).Length) + " bytes";
+
+            // return Convert.ToBase64String((byte[])value);
+        }
+
+        protected internal override object CellTextParse(string text)
+        {
+            throw new Exception("Can not parse binary!");
+
+            // object result = null;
+            // if (text != null)
+            // {
+            //     return Encoding.Unicode.GetBytes(text);
+            // }
+            // return result;
+        }
     }
 
     internal class SqlTypeSqlvariant : FrameworkType
