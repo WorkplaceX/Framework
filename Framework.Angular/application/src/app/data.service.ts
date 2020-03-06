@@ -11,6 +11,8 @@ export class RequestJson {
 
   GridCellText: string;
 
+  GridCellTextBase64: string;
+
   GridStyleColumnList: string[];
   
   ComponentId: number;

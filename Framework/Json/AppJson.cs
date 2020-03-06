@@ -60,6 +60,11 @@
         public string GridCellText { get; set; }
 
         /// <summary>
+        /// Gets or sets GridCellTextBase64. Contains from user uploaded file data.
+        /// </summary>
+        public string GridCellTextBase64 { get; set; }
+
+        /// <summary>
         /// Send visible column width list to server.
         /// </summary>
         public string[] GridStyleColumnList { get; set; }
@@ -893,20 +898,31 @@
             return null;
         }
 
-        virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
+        virtual internal void CellParseTextInternal(Row row, string fieldName, string text, CellParseResult result)
         {
 
         }
 
-        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        virtual internal Task CellParseTextInternalAsync(Row row, string fieldName, string text, CellParseResult result)
         {
             return Task.FromResult(0);
         }
 
+        virtual internal void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResult result)
+        {
+
+        }
+
         public class CellParseResult
         {
+            /// <summary>
+            /// Gets or sets IsHandled. If true, framework does no further parsing of user entered text.
+            /// </summary>
             public bool IsHandled;
 
+            /// <summary>
+            /// Gets or sets ErrorParse. For example: User entered text is not a number.
+            /// </summary>
             public string ErrorParse;
         }
 
@@ -967,6 +983,11 @@
             /// Gets or sets IsPassword. If true, user can not read text.
             /// </summary>
             public bool IsPassword;
+
+            /// <summary>
+            /// Gets or sets IsFileUpload. If true, user can upload cell text (data) with file upload.
+            /// </summary>
+            public bool IsFileUpload;
 
             /// <summary>
             /// Gets or sets Align. Defines text allign of centent in the data grid cell.
@@ -1136,24 +1157,26 @@
             return null;
         }
 
-        internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
+        internal override void CellParseTextInternal(Row row, string fieldName, string text, CellParseResult result)
         {
-            CellParse((TRow)row, fieldName, text, result);
+            CellParseText((TRow)row, fieldName, text, result);
         }
 
         /// <summary>
-        /// Parse user entered cell text into database value. Text can be empty but never null. Write parsed value to row. (Or for example multiple fields on row for Uom)
+        /// Parse user entered text and assign it row. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
         /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="isHandled">If true, framework does no further parsing of user entered text.</param>
-        protected virtual void CellParse(TRow row, string fieldName, string text, CellParseResult result)
+        /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
+        /// <param name="text">User entered text. It can be empty but never null.</param>
+        /// <param name="result">Set result.IsHandled to true.</param>
+        protected virtual void CellParseText(TRow row, string fieldName, string text, CellParseResult result)
         {
 
         }
 
-        internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        internal override Task CellParseTextInternalAsync(Row row, string fieldName, string text, CellParseResult result)
         {
-            return CellParseAsync((TRow)row, fieldName, text, result);
+            return CellParseTextAsync((TRow)row, fieldName, text, result);
         }
 
         /// <summary>
@@ -1162,9 +1185,26 @@
         /// <param name="row">Write custom parsed value to row.</param>
         /// <param name="text">Text can be empty but is never null.</param>
         /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
-        protected virtual Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
+        protected virtual Task CellParseTextAsync(TRow row, string fieldName, string text, CellParseResult result)
         {
             return Task.FromResult(0);
+        }
+
+        internal override void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResult result)
+        {
+            CellParseFileUpload((TRow)row, fieldName, fileName, data, result);
+        }
+
+        /// <summary>
+        /// Parse user uploaded file and assign it to row.
+        /// </summary>
+        /// <param name="row">Write custom parsed value to row.</param>
+        /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
+        /// <param name="data">From user uploaded file.</param>
+        /// <param name="result">Set result.IsHandled to true.</param>
+        protected virtual void CellParseFileUpload(TRow row, string fieldName, string fileName, byte[] data, CellParseResult result)
+        {
+
         }
 
         internal override void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
@@ -1588,6 +1628,11 @@
         /// Gets or sets Align. Defines text allign of centent in the data grid cell.
         /// </summary>
         public Grid.CellAnnotationAlignEnum Align;
+
+        /// <summary>
+        /// Gets or sets IsFileUpload. If true, user can upload cell text (data) with file upload.
+        /// </summary>
+        public bool IsFileUpload;
 
         /// <summary>
         /// Gets or sets IsOdd.

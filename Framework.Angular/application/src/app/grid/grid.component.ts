@@ -1,4 +1,4 @@
-import { Input, Component } from "@angular/core";
+import { Input, Component, ViewChild, ElementRef } from "@angular/core";
 import { DataService, RequestJson } from '../data.service';
 
 /* Grid */
@@ -10,7 +10,9 @@ export class Grid {
   constructor(private dataService: DataService){
   }
 
-  @Input() json: any
+  @Input() json: any;
+
+  @ViewChild('inputFileUpload', {static: false}) inputFileUpload: ElementRef<HTMLElement>;
 
   ngModelChange(cell) {
     cell.IsShowSpinner = true;
@@ -27,6 +29,31 @@ export class Grid {
     cell.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 12, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
+
+  private cellFileUpload: any;
+
+  clickFileUpload(cell, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    this.cellFileUpload = cell;
+    this.inputFileUpload.nativeElement.click();
+  }
+
+  changeInputFileUpload(files: FileList) {
+    const file = files.item(0);
+
+    const cellFileUpload = this.cellFileUpload;
+    const dataService = this.dataService;
+    const json = this.json;
+
+    var reader = new FileReader();
+    reader.readAsDataURL(file.slice()); 
+    reader.onloadend = function() {
+        var base64data = reader.result;                
+        console.log(base64data);
+        cellFileUpload.IsShowSpinner = true;
+        dataService.update(<RequestJson> { Command: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data });
+    }
+  }  
 
   focus(cell) {
     if (!cell.IsSelect) {

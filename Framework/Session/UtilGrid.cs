@@ -148,6 +148,7 @@
             cell.IsReadOnly = result.IsReadOnly;
             cell.IsPassword = result.IsPassword;
             cell.Align = result.Align;
+            cell.IsFileUpload = result.IsFileUpload;
         }
 
         /// <summary>
@@ -940,7 +941,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static async Task ProcessCellIsModifyParseAsync(Grid grid, Row rowNew, GridColumn column, Field field, GridCell cell)
+        private static async Task ProcessCellIsModifyParseAsync(Grid grid, Row rowNew, GridColumn column, Field field, GridCell cell, RequestJson requestJson)
         {
             cell.ErrorParse = null;
             // Parse
@@ -956,10 +957,17 @@
                 }
                 // Parse custom
                 Grid.CellParseResult result = new Grid.CellParseResult();
-                grid.CellParseInternal(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
+                grid.CellParseTextInternal(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
                 if (result.IsHandled == false)
                 {
-                    await grid.CellParseInternalAsync(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result);
+                    await grid.CellParseTextInternalAsync(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result);
+                }
+                // Parse custom (FileUpload)
+                if (requestJson.GridCellTextBase64 != null)
+                {
+                    UtilFramework.Assert(requestJson.GridCellTextBase64.StartsWith("data:application/octet-stream;base64,"));
+                    var data = System.Convert.FromBase64String(requestJson.GridCellTextBase64.Substring("data:application/octet-stream;base64,".Length));
+                    grid.CellParseFileUploadInternal(rowNew, column.FieldNameCSharp, null, data, result);
                 }
                 // Parse default
                 if (!result.IsHandled)
@@ -1206,7 +1214,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowNew, column, field, cell);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowNew, column, field, cell, requestJson);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
@@ -1245,7 +1253,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowNew, column, field, cell);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowNew, column, field, cell, requestJson);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save

@@ -45,6 +45,7 @@
         <i *ngIf="cell.IsShowSpinner" class="fas fa-spinner fa-spin colorBlack"></i>
         <i *ngIf="cell.CellEnum==1" class="fas fa-search colorBlack" title="Search"></i>
         <i *ngIf="cell.CellEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
+        <i *ngIf="cell.IsFileUpload" class="fas fa-file-upload colorBlack" style="cursor:pointer;" (click)="clickFileUpload(cell, $event);"></i>
       </div>
     </div>
 
@@ -54,6 +55,8 @@
     </div>
   </div>
 </div>
+
+<input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event.target.files)">
 
 <div class="colorBlue gridClick" [ngClass]="json.CssClass" onmousedown="return false;">
   <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up" (click)="clickGrid(1, $event);"></i>
