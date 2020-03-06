@@ -322,7 +322,7 @@
 
             // FrameworkConfigFieldBuiltIn
             {
-                var item = DeployDbBuiltInItem.Create(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList, new string[] { "ConfigGridId", "FieldId" }, "Framework");
+                var item = DeployDbBuiltInItem.Create(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" }, "Framework");
                 result.Add(item);
 
                 // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.

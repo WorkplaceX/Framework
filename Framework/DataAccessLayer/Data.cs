@@ -1307,7 +1307,7 @@
                 // string sqlDebug = Data.ExecuteParamDebug(sqlUpsert, paramList);
 
                 // Upsert
-                await Data.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb);
+                await Data.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb); // See also method AppCli.CommandGenerateBuiltIn();
             }
         }
 
@@ -2272,6 +2272,16 @@
             //     return Encoding.Unicode.GetBytes(text);
             // }
             // return result;
+        }
+
+        protected internal override string ValueToCSharp(object value)
+        {
+            string result = "null";
+            if (value != null)
+            {
+                result = $"Convert.FromBase64String(\"{Convert.ToBase64String(((byte[])value))}\")";
+            }
+            return result;
         }
     }
 
