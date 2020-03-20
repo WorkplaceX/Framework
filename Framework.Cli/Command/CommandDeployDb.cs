@@ -113,7 +113,7 @@
             var builtInDestList = new List<DeployDbBuiltInItem>(); // List with distinct TypeRow because of IsExist column.
 
             // Distinct TypeRow
-            foreach (var itemSource in builtInSourceList)
+            foreach (var itemSource in builtInSourceList.Result)
             {
                 if (itemSource.RowList.Count > 0)
                 {

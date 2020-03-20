@@ -217,7 +217,7 @@
         /// <summary>
         /// Override this method to add BuiltIn data rows to list. Used by cli deployDb command to deploy BuiltIn rows to database.
         /// </summary>
-        protected virtual void CommandDeployDbBuiltIn(List<DeployDbBuiltInItem> list)
+        protected virtual void CommandDeployDbBuiltIn(DeployDbBuiltInResult result)
         {
 
         }
@@ -225,12 +225,12 @@
         /// <summary>
         /// Group of BuiltIn TypeRow.
         /// </summary>
-        public class DeployDbBuiltInItem
+        internal class DeployDbBuiltInItem
         {
             /// <summary>
             /// Constructor.
             /// </summary>
-            internal DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
+            public DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
             {
                 this.RowList = rowList;
                 this.FieldNameKeyList = fieldNameKeyList;
@@ -303,42 +303,64 @@
         /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
-        protected internal List<DeployDbBuiltInItem> CommandDeployDbBuiltInListInternal()
+        protected internal DeployDbBuiltInResult CommandDeployDbBuiltInListInternal()
         {
-            var result = new List<DeployDbBuiltInItem>();
+            var result = new DeployDbBuiltInResult();
 
             // FrameworkConfigGridBuiltIn
             {
-                var item = DeployDbBuiltInItem.Create(FrameworkConfigGridBuiltInTableFrameworkCli.RowList, new string[] { "TableId", "ConfigName" }, "Framework");
-                result.Add(item);
+                var rowList = FrameworkConfigGridBuiltInTableFrameworkCli.RowList;
 
                 // Read FrameworkConfigGridBuiltIn.RowListList from Application.Cli project.
                 string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigGridBuiltInTableApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInTableFrameworkCli.RowList));
-                var rowList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
-                item.RowList.AddRange(rowList);
+                var rowApplicationCliList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
+                rowList.AddRange(rowApplicationCliList);
+
+                result.Add(rowList, new string[] { "TableId", "ConfigName" }, "Framework");
             }
 
             // FrameworkConfigFieldBuiltIn
             {
-                var item = DeployDbBuiltInItem.Create(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" }, "Framework");
-                result.Add(item);
+                var rowList = FrameworkConfigFieldBuiltInTableFrameworkCli.RowList;
 
                 // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
                 string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigFieldBuiltInTableApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList));
-                var rowList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
-                item.RowList.AddRange(rowList);
+                var rowApplicationCliList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
+                rowList.AddRange(rowApplicationCliList);
+
+                result.Add(rowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" }, "Framework");
             }
 
             // Application (custom) BuiltIn data rows to deploy to database.
-            var list = new List<DeployDbBuiltInItem>();
-            CommandDeployDbBuiltIn(list);
-            result.AddRange(list);
+            CommandDeployDbBuiltIn(result);
 
             return result;
+        }
+
+        public class DeployDbBuiltInResult
+        {
+            internal DeployDbBuiltInResult()
+            {
+                this.Result = new List<DeployDbBuiltInItem>();
+            }
+
+            internal List<DeployDbBuiltInItem> Result;
+
+            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix = null) where TRow : Row
+            {
+                var result = DeployDbBuiltInItem.Create<TRow>(rowList, fieldNameKeyList, tableNameSqlReferencePrefix);
+                Result.Add(result);
+            }
+
+            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix = null) where TRow : Row
+            {
+                var result = DeployDbBuiltInItem.Create<TRow>(rowList, fieldNameKey, tableNameSqlReferencePrefix);
+                Result.Add(result);
+            }
         }
 
         /// <summary>
