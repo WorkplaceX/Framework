@@ -1,5 +1,6 @@
 ﻿namespace Framework.Cli.Command
 {
+    using Framework.Cli.Config;
     using Framework.Cli.Generate;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
@@ -14,18 +15,28 @@
 
         private CommandOption optionFramework;
 
+        private CommandOption optionSilent;
+
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionFramework = configuration.Option("-f|--framework", "Generate CSharp code for framework (internal use only)", CommandOptionType.NoValue);
-        }
-
-        private void ArgumentGenerate()
-        {
+            optionSilent = configuration.Option("-s|--silent", "No command line user interaction.", CommandOptionType.NoValue);
         }
 
         protected internal override void Execute()
         {
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+
+            ConfigCli configCli = ConfigCli.Load();
+            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
+
+            if (optionSilent.Value() != "on")
+            {
+                if (UtilCli.ConsoleReadYesNo("Generate?") == false)
+                {
+                    return;
+                }
+            }
 
             bool isFrameworkDb = optionFramework.Value() == "on";
             if (Script.Run(isFrameworkDb, AppCli))

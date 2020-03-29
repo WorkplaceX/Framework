@@ -33,11 +33,16 @@
                 }
             }
 
-            configCli.EnvironmentGet();
-            UtilCli.ConsoleWriteLineColor(string.Format("Current Environment (Name={0})", configCli.EnvironmentNameGet()), ConsoleColor.Green);
+            configCli.EnvironmentGet(); // Get or init
+            ConsoleWriteLineCurrentEnvironment(configCli);
 
             ConfigCli.Save(configCli);
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+        }
+
+        public static void ConsoleWriteLineCurrentEnvironment(ConfigCli configCli)
+        {
+            UtilCli.ConsoleWriteLineColor(string.Format("Current Environment (Name={0})", configCli.EnvironmentNameGet()), ConsoleColor.Green);
         }
     }
 }

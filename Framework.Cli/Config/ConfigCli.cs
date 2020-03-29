@@ -31,7 +31,7 @@
         public List<ConfigCliEnvironment> EnvironmentList { get; set; }
 
         /// <summary>
-        /// Returns currently selected environment. Default is DEV.
+        /// Returns currently selected environment. Default is DEV. Adds new environment if none exists.
         /// </summary>
         public ConfigCliEnvironment EnvironmentGet()
         {

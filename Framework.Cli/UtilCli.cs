@@ -360,6 +360,20 @@
         }
 
         /// <summary>
+        /// Wait for user interaction.
+        /// </summary>
+        internal static bool ConsoleReadYesNo(string text)
+        {
+            string consoleReadLine;
+            do
+            {
+                Console.Write(text + " [y/n] ");
+                consoleReadLine = Console.ReadLine().ToUpper();
+            } while (!(consoleReadLine == "Y" || consoleReadLine == "N"));
+            return consoleReadLine == "Y";
+        }
+
+        /// <summary>
         /// Write to stderr.
         /// </summary>
         internal static void ConsoleWriteLineError(object value)

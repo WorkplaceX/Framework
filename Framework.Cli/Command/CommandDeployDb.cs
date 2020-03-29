@@ -1,6 +1,7 @@
 ﻿namespace Framework.Cli.Command
 {
     using Database.dbo;
+    using Framework.Cli.Config;
     using Framework.DataAccessLayer;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
@@ -19,9 +20,12 @@
 
         private CommandOption optionDrop;
 
+        private CommandOption optionSilent;
+
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionDrop = configuration.Option("-d|--drop", "Drop sql tables and views.", CommandOptionType.NoValue);
+            optionSilent = configuration.Option("-s|--silent", "No command line user interaction.", CommandOptionType.NoValue);
         }
 
         private void DeployDbExecute(string folderName, bool isFrameworkDb)
@@ -141,6 +145,17 @@
         protected internal override void Execute()
         {
             CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+
+            ConfigCli configCli = ConfigCli.Load();
+            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
+
+            if (optionSilent.Value() != "on")
+            {
+                if (UtilCli.ConsoleReadYesNo("DeployDb?") == false)
+                {
+                    return;
+                }
+            }
 
             if (optionDrop.Value() == "on")
             {
