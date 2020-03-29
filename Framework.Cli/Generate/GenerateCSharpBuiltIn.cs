@@ -1,14 +1,12 @@
 ﻿namespace Framework.Cli.Generate
 {
-    using Framework.Cli.Command;
     using Framework.DataAccessLayer;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
     using static Framework.Cli.Command.AppCli;
 
-    public static class NamingConventionBuiltIn
+    internal static class NamingConventionBuiltIn
     {
         public static bool TableNameIsBuiltIn(string tableNameCSharp)
         {
@@ -16,7 +14,7 @@
         }
     }
 
-    public class GenerateCSharpBuiltIn
+    internal class GenerateCSharpBuiltIn
     {
         /// <summary>
         /// Generate CSharp namespace for every database schema.

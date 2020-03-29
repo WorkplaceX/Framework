@@ -35,10 +35,10 @@
             UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
 
             // Read BuiltIn data from database and save (*.cs) files.
-            List<GenerateBuiltInItem> builtInlist = null;
+            GenerateBuiltInResult generateBuiltInResult = null;
             try
             {
-                builtInlist = appCli.CommandGenerateBuiltInListInternal(); // TODO cli command generate is not BuiltIn table reference aware. See also TableNameSqlReferencePrefix. Therefore Id columns can not be omitted in generate. See also class GenerateBuiltInItem and DeployDbBuiltInItem.
+                generateBuiltInResult = appCli.CommandGenerateBuiltInListInternal(); // TODO cli command generate is not BuiltIn table reference aware. See also TableNameSqlReferencePrefix. Therefore Id columns can not be omitted in generate. See also class GenerateBuiltInItem and DeployDbBuiltInItem.
             }
             catch (SqlException exception)
             {
@@ -46,10 +46,10 @@
                 string message = string.Format("Read BuiltIn data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
                 UtilCli.ConsoleWriteLineColor(message, ConsoleColor.Red);
             }
-            if (builtInlist != null)
+            if (generateBuiltInResult != null)
             {
-                new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: builtInlist);
-                new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: builtInlist);
+                new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: generateBuiltInResult.Result);
+                new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: generateBuiltInResult.Result);
                 if (isFrameworkDb == false)
                 {
                     UtilFramework.FileSave(UtilFramework.FolderName + "Application.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);

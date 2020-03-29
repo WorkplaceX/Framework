@@ -366,9 +366,9 @@
         /// <summary>
         /// Returns BuiltIn rows to generate CSharp code.
         /// </summary>
-        protected internal List<GenerateBuiltInItem> CommandGenerateBuiltInListInternal()
+        protected internal GenerateBuiltInResult CommandGenerateBuiltInListInternal()
         {
-            var result = new List<GenerateBuiltInItem>();
+            var result = new GenerateBuiltInResult();
 
             // FrameworkConfigGridBuiltIn
             {
@@ -377,24 +377,24 @@
                 // Framework (.\cli.cmd generate -f)
                 {
                     var rowFilterList = rowList.Where(item => typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Framework.
-                    result.Add(new GenerateBuiltInItem(
+                    result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigGridBuiltIn),
                         rowList: rowFilterList.ToList<Row>()
-                    ));
+                    );
                 }
                 // Application (.\cli.cmd generate)
                 {
                     List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
                     var typeRowList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
                     var rowFilterList = rowList.Where(item => !typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp) && typeRowList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Application.
-                    result.Add(new GenerateBuiltInItem(
+                    result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigGridBuiltIn),
                         rowList: rowFilterList.ToList<Row>()
-                    ));
+                    );
                 }
             }
 
@@ -407,12 +407,12 @@
                     var fieldNameCSharpList = UtilDalType.FieldNameCSharpFromTypeRowList(typeRowIsFrameworkDbList);
                     var rowFilterList = rowList.Where(item => typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter FrameworkDb.
                     rowFilterList = rowList.Where(item => fieldNameCSharpList.Contains(new Tuple<string, string>(item.TableNameCSharp, item.FieldNameCSharp))).ToList(); // Filter FieldNameCSharp declared in Framework assembly.
-                    result.Add(new GenerateBuiltInItem(
+                    result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigFieldBuiltIn),
                         rowList: rowFilterList.ToList<Row>()
-                    ));
+                    );
                 }
                 // Application (.\cli.cmd generate)
                 {
@@ -421,19 +421,17 @@
                     var fieldNameCSharpList = UtilDalType.FieldNameCSharpFromTypeRowList(typeRowList);
                     var rowFilterList = rowList.Where(item => !typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp) && typeRowList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Application.
                     rowFilterList = rowList.Where(item => fieldNameCSharpList.Contains(new Tuple<string, string>(item.TableNameCSharp, item.FieldNameCSharp))).ToList(); // Filter FieldNameCSharp declared in Application assembly.
-                    result.Add(new GenerateBuiltInItem(
+                    result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigFieldBuiltIn),
                         rowList: rowFilterList.ToList<Row>()
-                    ));
+                    );
                 }
             }
 
             // Application (custom) BuiltIn data rows to generate CSharp code from.
-            var list = new List<GenerateBuiltInItem>();
-            CommandGenerateBuiltIn(list);
-            result.AddRange(list); // Combine FrameworkConfig with Application.
+            CommandGenerateBuiltIn(result);
 
             return result;
         }
@@ -442,7 +440,7 @@
         /// Override this method to add BuiltIn data rows to list. Used by cli generate command to generate CSharp code.
         /// Note: Cli generate command is not BuiltIn table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
-        protected virtual void CommandGenerateBuiltIn(List<GenerateBuiltInItem> list)
+        protected virtual void CommandGenerateBuiltIn(GenerateBuiltInResult result)
         {
 
         }
@@ -451,7 +449,7 @@
         /// Group of BuiltIn TypeRow.
         /// Note: Cli generate command is not BuiltIn table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
-        public class GenerateBuiltInItem
+        internal class GenerateBuiltInItem
         {
             /// <summary>
             /// Constructor for Framework and Application.
@@ -519,6 +517,35 @@
             /// Gets RowList. Items need to be all of same TypeRow.
             /// </summary>
             public readonly List<Row> RowList;
+        }
+
+        /// <summary>
+        /// Return from database loaded BuiltIn rows to generate CSharp code.
+        /// </summary>
+        public class GenerateBuiltInResult
+        {
+            internal GenerateBuiltInResult()
+            {
+                this.Result = new List<GenerateBuiltInItem>();
+            }
+
+            internal List<GenerateBuiltInItem> Result;
+
+            internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, List<Row> rowList)
+            {
+                var result = new GenerateBuiltInItem(isFrameworkDb, isApplication, typeRow, rowList);
+                Result.Add(result);
+            }
+
+            /// <summary>
+            /// Add from database loaded BuiltIn rows to generate CSharp code.
+            /// </summary>
+            /// <param name="isApplication">If true, RowList will be available at runtime as BuiltIn CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
+            public void Add<TRow>(List<TRow> rowList, bool isApplication = false) where TRow : Row
+            {
+                var result = GenerateBuiltInItem.Create(rowList, isApplication);
+                Result.Add(result);
+            }
         }
     }
 }
