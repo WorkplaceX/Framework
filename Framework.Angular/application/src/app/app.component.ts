@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { DataService } from './data.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,11 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'application';
+
+  constructor(public dataService: DataService){
+  }
+
+  trackBy(index: any, item: any) {
+    return item.TrackBy;
+  }
 }
