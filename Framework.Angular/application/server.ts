@@ -8,9 +8,16 @@ import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 
+import * as url from 'url'; // Framework: Enable SSR POST
+import * as querystring from 'querystring'; // Framework: Enable SSR POST
+import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
+
 // The Express app is exported so that it can be used by serverless Functions.
 export function app() {
   const server = express();
+
+  server.use(bodyParser.json()); // Framework: Enable SSR POST  
+
   const distFolder = join(process.cwd(), 'dist/application/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
@@ -31,7 +38,24 @@ export function app() {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-    res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
+    res.send("Angular Universal Server Side Rendering. Converts json to html. Use POST method."); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+  });
+
+  // Framework: Enable SSR POST
+  server.post('*', (req, res) => {
+    let view = querystring.parse(url.parse(req.originalUrl).query).view as string;
+    console.log("View=", view);
+    res.render(view,     
+      {
+        req: req,
+        res: res,
+        providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
+          {
+            provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
+          }
+        ]
+      },
+    );
   });
 
   return server;
