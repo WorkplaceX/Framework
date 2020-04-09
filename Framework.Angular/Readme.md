@@ -1,10 +1,10 @@
-# Angular 8 Client Application
+# Angular 9 Client Application
 
 ## Version Check
 ```cmd
 node --version # v12.13.0
 npm --version # 6.12.0
-ng --version # Angular CLI: 8.3.15
+ng --version # Angular CLI: 9.1.1
 npm list -g --depth 0 # List globally installed packages
 ```
 
@@ -12,25 +12,36 @@ npm list -g --depth 0 # List globally installed packages
 Create new application with Angular CLI.
 ```cmd
 ng new application
-ng add @nguniversal/express-engine --clientProject application
+ng add @nguniversal/express-engine
 ```
 
 ## Modify file package.json
-Add "--outputHashing=none" and "--progress=false"
+Add "--outputHashing=none --progress=false"
 
 ## Modify file server.ts
 See source code tag: "// Framework: Enable SSR POST"
 
 ## Build and Start
 ```cmd
-npm run build:client-and-server-bundles
+npm run build:ssr # Output dist/ folder
 npm run start
+npm run serve:ssr # Use POST method
 ```
 
 ## Add Data Service
 ```cmd
 ng generate service data
 ```
+
+## Add Framework Component
+```cmd
+ng generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
+ng generate component grid --skip-import --inlineStyle=true --skipTests=true
+ng generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
+```
+
+## Add Framework Style
+Add new file frameworkStyle.scss and link it in styles.scss with @import "frameworkStyle"
 
 * Add HttpClient
 
