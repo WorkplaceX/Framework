@@ -34,7 +34,7 @@
             UtilCli.Npm(folderName, "install --loglevel error"); // Angular install. --loglevel error prevent writing to STDERROR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
             UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
 
-            string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/";
+            string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/application/";
             string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/";
 
             // Copy folder
@@ -44,7 +44,7 @@
             UtilFramework.Assert(Directory.Exists(folderNameDest));
 
             // Copy styles.css to frameworkStyle.css
-            UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
+            // UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
         }
 
         /// <summary>

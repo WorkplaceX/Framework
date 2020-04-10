@@ -77,7 +77,7 @@ export class DataService {
 
   public json: Json = new Json();
 
-  public VersionBuild: string = "Build (WorkplaceX=v3.28.1; Commit=3456c71; Pc=DEVPC; Time=2020-04-09 12:57:03 (UTC);)"; /* VersionBuild */
+  public VersionBuild: string = "Build (local)"; /* VersionBuild */
 
   public isRequestPending: boolean = false; // Request is in prgress.
 

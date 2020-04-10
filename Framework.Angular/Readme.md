@@ -33,6 +33,8 @@ npm run serve:ssr # Use POST method
 ng generate service data
 ```
 
+* Add HttpClient
+
 ## Add Framework Component
 ```cmd
 ng generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
@@ -43,7 +45,20 @@ ng generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTes
 ## Add Framework Style
 Add new file frameworkStyle.scss and link it in styles.scss with @import "frameworkStyle"
 
-* Add HttpClient
+## Server Side Rendering (Universal)
+### Running in Angular Environment
+Start with npm run serve:ssr
+* http://localhost:4000 (GET)
+* cwd=Framework\Framework.Angular\application
+### Running in Visual Studio
+When running in IIS Express or as Application external node is started. See also method StartUniversalServer();
+* http://localhost:4000/ (GET)
+* http://localhost:4000/?view=Application.Website%2fDefault%2findex.html (POST)
+* cwd=Application.Server\Framework
+### Running on IIS
+* http://localhost:8080/Framework/Framework.Angular/server/main.js (GET)
+* http://localhost:8080/Framework/Framework.Angular/server/main.js?view=Application.Website%2fDefault%2findex.html (POST)
+* cwd=Framework\Framework.Angular\server
 
 # Run on local IIS Server
 In order to run application on local IIS server install:

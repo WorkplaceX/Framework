@@ -18,7 +18,18 @@ export function app() {
 
   server.use(bodyParser.json()); // Framework: Enable SSR POST  
 
-  const distFolder = join(process.cwd(), 'dist/application/browser');
+  var distFolder = join(process.cwd(), 'dist/application/browser');
+  
+  // Framework: Enable SSR POST  
+  // Running in Visual Studio
+  const processCwd = process.cwd().split("\\").join("/"); // Rplace all
+  if (processCwd.endsWith("Application.Server/Framework")) {
+    distFolder = ".";
+  } // Running on IIS
+  if (processCwd.endsWith("Framework/Framework.Angular/server")) {
+    distFolder = "../../"
+  }
+
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -38,7 +49,7 @@ export function app() {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-    res.send("Angular Universal Server Side Rendering. Converts json to html. Use POST method."); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+    res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
   });
 
   // Framework: Enable SSR POST
