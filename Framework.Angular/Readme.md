@@ -45,6 +45,15 @@ ng generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTes
 ## Add Framework Style
 Add new file frameworkStyle.scss and link it in styles.scss with @import "frameworkStyle"
 
+## Application.Website
+* Create new folder src/Application.Website
+* Add it to .gitignore /src/Application.Website
+### Modify angular.json
+* Replace "sourceRoot": "src", with "sourceRoot": "src/Application.Website/Default",
+* Replace "index": "src/index.html", with "index": "src/Application.Website/Default/index.html",
+* Remove "src/favicon.ico",
+* Replace "src/assets" with "src/Application.Website/Default"
+
 ## Server Side Rendering (Universal)
 ### Running in Angular Environment
 Start with npm run serve:ssr

@@ -182,6 +182,11 @@
             return isValue;
         }
 
+        /// <summary>
+        /// Copy folder.
+        /// </summary>
+        /// <param name="searchPattern">For example: "*.*"</param>
+        /// <param name="isAllDirectory">If true, includes subdirectories.</param>
         internal static void FolderCopy(string folderNameSource, string folderNameDest, string searchPattern, bool isAllDirectory)
         {
             var source = new DirectoryInfo(folderNameSource);
@@ -396,6 +401,27 @@
                     provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, null);
                     return writer.ToString();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Create new text file.
+        /// </summary>
+        public static void FileCreate(string fileName, string text = null)
+        {
+            FolderCreate(fileName);
+            File.WriteAllText(fileName, text);
+        }
+
+        /// <summary>
+        /// Rename file.
+        /// </summary>
+        public static void FileRename(string fileNameSource, string fileNameDest)
+        {
+            if (fileNameSource != fileNameDest)
+            {
+                FileCopy(fileNameSource, fileNameDest);
+                File.Delete(fileNameSource);
             }
         }
     }

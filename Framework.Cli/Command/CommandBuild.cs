@@ -30,21 +30,46 @@
         /// </summary>
         private static void BuildAngular()
         {
-            string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
-            UtilCli.Npm(folderName, "install --loglevel error"); // Angular install. --loglevel error prevent writing to STDERROR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
-            UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
+            // Copy folder Application.Website
+            {
+                // Delete folder Application.Website
+                string folderNameApplicationWebSite = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website";
+                UtilCli.FolderDelete(folderNameApplicationWebSite);
+                UtilFramework.Assert(!Directory.Exists(folderNameApplicationWebSite));
 
-            string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/application/";
-            string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/";
+                // Copy CustomComponent
+                string folderNameSource = UtilFramework.FolderName + "Application.Website/CustomComponent/";
+                string folderNameDest = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/CustomComponent/";
+                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
 
-            // Copy folder
-            UtilCli.FolderDelete(folderNameDest);
-            UtilFramework.Assert(!Directory.Exists(folderNameDest));
-            UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
-            UtilFramework.Assert(Directory.Exists(folderNameDest));
+                // Create empty index.html file
+                UtilCli.FileCreate(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Default/index.html");
 
-            // Copy styles.css to frameworkStyle.css
-            // UtilCli.FileCopy(folderNameDest + "browser/styles.css", folderNameDest + "browser/frameworkStyle.css"); // Angular styles.css imports frameworkStyle.css
+                // Ensure folder exists now
+                UtilFramework.Assert(Directory.Exists(folderNameApplicationWebSite));
+            }
+
+            // Build SSR
+            {
+                string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
+                UtilCli.Npm(folderName, "install --loglevel error"); // Angular install. --loglevel error prevent writing to STDERROR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
+                UtilCli.Npm(folderName, "run build:ssr"); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/dist
+            }
+
+            // Copy output dist folder
+            {
+                string folderNameSource = UtilFramework.FolderName + "Framework/Framework.Angular/application/dist/application/";
+                string folderNameDest = UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/";
+
+                // Copy folder
+                UtilCli.FolderDelete(folderNameDest);
+                UtilFramework.Assert(!Directory.Exists(folderNameDest));
+                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+                UtilFramework.Assert(Directory.Exists(folderNameDest));
+
+                // Rename styles.css to frameworkStyle.css
+                UtilCli.FileRename(UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/browser/styles.css", UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/browser/frameworkStyle.css");
+            }
         }
 
         /// <summary>
