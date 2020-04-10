@@ -1,0 +1,8 @@
+// Your variable overrides
+$body-color: #888;
+$enable-rounded: false;
+$enable-shadows: true;
+$enable-gradients: true;
+$enable-responsive-font-sizes: true;
+
+@import "node_modules/bootstrap/scss/bootstrap";

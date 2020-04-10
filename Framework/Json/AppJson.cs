@@ -1756,4 +1756,21 @@
             return Task.FromResult(0);
         }
     }
+
+    /// <summary>
+    /// Custom component. For example footer component.
+    /// </summary>
+    public class Custom01 : ComponentJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Custom01(ComponentJson owner) 
+            : base(owner, nameof(Custom01))
+        {
+
+        }
+
+        public string TextHtml;
+    }
 }
