@@ -23,15 +23,15 @@
         /// <summary>
         /// Run npm command.
         /// </summary>
-        internal static void Npm(string workingDirectory, string arguments)
+        internal static void Npm(string workingDirectory, string arguments, bool isRedirectStdErr = false)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments);
+                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments, isRedirectStdErr: isRedirectStdErr);
             }
             else
             {
-                UtilCli.Start(workingDirectory, "npm", arguments);
+                UtilCli.Start(workingDirectory, "npm", arguments, isRedirectStdErr: isRedirectStdErr);
             }
         }
 
@@ -56,15 +56,21 @@
             var process = Process.Start(info);
             if (isWait)
             {
-                process.WaitForExit();
                 if (isRedirectStdErr)
                 {
-                    string errorText = process.StandardError.ReadToEnd();
+                    // process.WaitForExit(); // Might hang
+                    string errorText = process.StandardError.ReadToEnd(); // Waits for process to exit
+                    UtilFramework.Assert(process.HasExited);
                     if (!string.IsNullOrEmpty(errorText))
                     {
                         UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
                         UtilCli.ConsoleWriteLinePassword(errorText, ConsoleColor.DarkGreen); // Log DarkGreen because it is not treated like an stderr output.
                     }
+                }
+                else
+                {
+                    process.WaitForExit();
+                    UtilFramework.Assert(process.HasExited);
                 }
                 if (process.ExitCode != 0)
                 {
@@ -337,6 +343,9 @@
             text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringFramework);
             text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringApplication);
             text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().DeployAzureGitUrl);
+
+            text = text.Replace("{", "{{").Replace("}", "}}"); // Console.Write("{", ConsoleColor.Green); throws exception "Input string was not in a correct format". // TODO Bug report
+
             Console.WriteLine(text, color);
         }
 
