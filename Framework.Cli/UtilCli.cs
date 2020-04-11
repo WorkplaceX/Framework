@@ -60,6 +60,7 @@
                 {
                     // process.WaitForExit(); // Might hang
                     string errorText = process.StandardError.ReadToEnd(); // Waits for process to exit
+                    process.WaitForExit();
                     UtilFramework.Assert(process.HasExited);
                     if (!string.IsNullOrEmpty(errorText))
                     {
