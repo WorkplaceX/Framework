@@ -53,29 +53,32 @@
                 info.RedirectStandardError = true; // Do not write to stderr.
             }
             // info.UseShellExecute = true;
-            var process = Process.Start(info);
-            if (isWait)
+
+            using (var process = Process.Start(info))
             {
-                if (isRedirectStdErr)
+                if (isWait)
                 {
-                    // process.WaitForExit(); // Might hang
-                    string errorText = process.StandardError.ReadToEnd(); // Waits for process to exit
-                    process.WaitForExit();
-                    UtilFramework.Assert(process.HasExited);
-                    if (!string.IsNullOrEmpty(errorText))
+                    if (isRedirectStdErr)
                     {
-                        UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
-                        UtilCli.ConsoleWriteLinePassword(errorText, ConsoleColor.DarkGreen); // Log DarkGreen because it is not treated like an stderr output.
+                        // process.WaitForExit(); // Can hang. For example Angular 9.1.1 build:ssr (May be when std buffer is full)
+                        string errorText = process.StandardError.ReadToEnd(); // Waits for process to exit.
+                        process.WaitForExit(); // Used for Ubuntu. Otherwise HasExited is not (yet) true.
+                        UtilFramework.Assert(process.HasExited);
+                        if (!string.IsNullOrEmpty(errorText))
+                        {
+                            UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
+                            UtilCli.ConsoleWriteLinePassword(errorText, ConsoleColor.DarkGreen); // Log DarkGreen because it is not treated like an stderr output.
+                        }
                     }
-                }
-                else
-                {
-                    process.WaitForExit();
-                    UtilFramework.Assert(process.HasExited);
-                }
-                if (process.ExitCode != 0)
-                {
-                    throw new Exception("Script failed!");
+                    else
+                    {
+                        process.WaitForExit();
+                        UtilFramework.Assert(process.HasExited);
+                    }
+                    if (process.ExitCode != 0)
+                    {
+                        throw new Exception("Script failed!");
+                    }
                 }
             }
 
@@ -246,7 +249,7 @@
                     throw new Exception(string.Format("Could not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
                 }
             }
-            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName));
+            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Could not delete folder! ({0}", folderName));
         }
 
         internal static bool FolderNameExist(string folderName)
