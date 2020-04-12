@@ -8,7 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { GridComponent } from './grid/grid.component';
 import { BootstrapNavbarComponent } from './bootstrap-navbar/bootstrap-navbar.component';
-import { Custom01Component } from 'src/Application.Website/CustomComponent/custom01.component';
+import { Custom01Component } from 'src/Application.Website/Shared/CustomComponent/custom01.component';
 
 @NgModule({
   declarations: [
