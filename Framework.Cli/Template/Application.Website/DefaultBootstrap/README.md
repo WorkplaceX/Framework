@@ -7,9 +7,9 @@ Install
 npm install
 ```
 
-Build to "dist/" folder:
+Build to "dist/" folder with watch:
 ```cmd
-npm run build
+npm run build -- --watch
 ```
 
 Start dev server (with hot reload)
@@ -17,4 +17,11 @@ Start dev server (with hot reload)
 npm run start
 ```
 
-Note: This is just the raw site without frameworkStyle.css and angular link available.
+## Packages
+* webpack, webpack-cli (Webpack)
+* html-webpack-plugin, html-loader (index.html)
+* file-loader (*.png)
+* style-loader, css-loader, sass-loader, node-sass, postcss-loader, autoprefixer (*.scss) see also: Bootstrap
+* mini-css-extract-plugin (Extracts CSS into separate files)
+* webpack-dev-server (Dev server)
+

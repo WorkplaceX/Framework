@@ -1,26 +1,13 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // Prevent webpack from adding (*.scss) to (*.js) file.
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin'); // Minify (*.css) file.
-var HtmlWebpackExcludeAssetsPlugin = require('html-webpack-exclude-assets-plugin'); // Prevent webpack from modifying index.html by adding (*.css).
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin') // Used for index.html
+const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // Extracts CSS into separate files
 
 module.exports = [{
-  mode: 'development',
-  context: __dirname + "/src",
-  entry: './main.js',
   output: {
-    filename: 'bundle.js'
+    path: path.resolve(__dirname, 'dist'), /* Output */
   },
   module: {
     rules: [
-      {
-        test: /\.scss$/,
-        use: [
-          MiniCssExtractPlugin.loader, // creates style nodes from JS strings
-          "css-loader", // translates CSS into CommonJS
-          "sass-loader" // compiles Sass to CSS, using Node Sass by default
-        ]
-      },      
-
       {
         test: /\.html$/,
         use: [{
@@ -29,43 +16,47 @@ module.exports = [{
       },
 
       {
-        test: /style.css$/,
-        use: [{
-          loader: 'file-loader',
-          options: {name: '[path][name].[ext]'}
-        }],
-      },
-
-      {
         test: /\.(png|jpg|gif|ico)$/,
         use: [{
           loader: 'file-loader',
-          options: {name: '[path][name].[ext]'}
-        }]
+          options: {
+          context: 'src',
+          name: '[path][name].[ext]',
+        }}]
       },
 
+      // See also: https://getbootstrap.com/docs/4.4/getting-started/webpack/
       {
-        test: /\bootstrap.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'], 
+        test: /\.(scss)$/,
+        use: [{
+          loader: 'style-loader', // inject CSS to page
+        },
+          MiniCssExtractPlugin.loader, { // Extracts CSS into separate files. See also: https://webpack.js.org/plugins/mini-css-extract-plugin/
+          loader: 'css-loader', // translates CSS into CommonJS modules
+        }, {
+          loader: 'postcss-loader', // Run postcss actions
+          options: {
+            plugins: function () { // postcss plugins, can be exported to postcss.config.js
+              return [
+                require('autoprefixer')
+              ];
+            }
+          }
+        }, {
+          loader: 'sass-loader' // compiles Sass to CSS
+        }]
       },
-  ]},
+    ]
+  },
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: './index.html',
-      excludeAssets: [/.css/]
+      template: './src/index.html', /* Input */
+      filename: './index.html' /* Output */
     }),
 
     new MiniCssExtractPlugin({
-      filename: "bootstrap.min.css",
+      filename: "main.css", /* Output */
     }),
-  
-    new HtmlWebpackExcludeAssetsPlugin(),
   ],
-
-  optimization: {
-    minimizer: [
-        new OptimizeCSSAssetsPlugin(),
-    ]
-  },  
 }];
