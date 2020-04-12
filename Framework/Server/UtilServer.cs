@@ -138,8 +138,8 @@
         /// </summary>
         public static void StartUniversalServer()
         {
-            string folderName = UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular";
-            string fileNameServer = folderName + "/server.js";
+            string folderName = UtilFramework.FolderName + "Application.Server/Framework/";
+            string fileNameServer = folderName + "Framework.Angular/server/main.js";
             if (!File.Exists(fileNameServer))
             {
                 throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer));
@@ -151,7 +151,7 @@
             {
                 info.FileName = "node";
             }
-            info.Arguments = "server.js";
+            info.Arguments = "Framework.Angular/server/main.js";
             info.UseShellExecute = true; // Open additional node window.
             info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
             Process.Start(info);

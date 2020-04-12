@@ -1,19 +1,22 @@
-import { Component, Input } from "@angular/core";
+import { Component, OnInit, Input } from '@angular/core';
 import { DataService, RequestJson } from '../data.service';
 
 /* BootstrapNavbar */
 @Component({
   selector: '[data-BootstrapNavbar]',
-  templateUrl: './bootstrapNavbar.component.html'
+  templateUrl: './bootstrap-navbar.component.html',
+  styles: [
+  ]
 })
-  export class BootstrapNavbar {
-    constructor(dataService: DataService){
-    this.dataService = dataService;
+export class BootstrapNavbarComponent implements OnInit {
+
+  constructor(private dataService: DataService) { }
+
+  ngOnInit(): void {
   }
-  
+
   @Input() json: any
-  dataService: DataService;
-  
+
   click(button) {
     button.IsShowSpinner = true;
     this.dataService.update(<RequestJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
@@ -30,4 +33,3 @@ import { DataService, RequestJson } from '../data.service';
     return index; // or item.id
   }  
 }
-  

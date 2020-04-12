@@ -1,36 +1,8 @@
-import { Injectable, Inject, Renderer2, RendererFactory2 } from '@angular/core';
+import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DOCUMENT } from '@angular/common';
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
-
-export class RequestJson {
-  Command: number;
-
-  GridCellId: number;
-
-  GridCellText: string;
-
-  GridCellTextBase64: string;
-
-  GridCellTextBase64FileName: string;
-
-  GridStyleColumnList: string[];
-  
-  ComponentId: number;
-
-  GridIsClickEnum : number;
-
-  BootstrapNavbarButtonId: number;
-
-  RequestCount: number;
-
-  ResponseCount: number;
-
-  BrowserUrl: string;
-
-  IsRequestJson: boolean;
-}
 
 export class Json {
   Name: string;
@@ -70,19 +42,50 @@ export class Json {
   IsScrollToTop: boolean;
 }
 
+export class RequestJson {
+  Command: number;
+
+  GridCellId: number;
+
+  GridCellText: string;
+
+  GridCellTextBase64: string;
+
+  GridCellTextBase64FileName: string;
+
+  GridStyleColumnList: string[];
+  
+  ComponentId: number;
+
+  GridIsClickEnum : number;
+
+  BootstrapNavbarButtonId: number;
+
+  RequestCount: number;
+
+  ResponseCount: number;
+
+  BrowserUrl: string;
+
+  IsRequestJson: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
+
   public json: Json = new Json();
-  
+
   public VersionBuild: string = "Build (local)"; /* VersionBuild */
-  
+
   public isRequestPending: boolean = false; // Request is in prgress.
 
-  public renderer: Renderer2;
+  requestJsonQueue: RequestJson // Put latest request in queue, if waiting for pending request.
 
-  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, private rendererFactory: RendererFactory2) { 
+  public renderer: Renderer2; // Used for BingMap
+
+  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, rendererFactory: RendererFactory2) { 
     this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
       this.json = this.jsonServerSideRendering;
@@ -99,8 +102,6 @@ export class DataService {
       }
     }
   }
-
-  requestJsonQueue: RequestJson // Put latest request in queue, if waiting for pending request.
 
   private fileDownload(jsonResponse: Json) { // See also: https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
     if (jsonResponse.DownloadFileName != null) {

@@ -23,15 +23,15 @@
         /// <summary>
         /// Run npm command.
         /// </summary>
-        internal static void Npm(string workingDirectory, string arguments)
+        internal static void Npm(string workingDirectory, string arguments, bool isRedirectStdErr = false)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments);
+                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments, isRedirectStdErr: isRedirectStdErr);
             }
             else
             {
-                UtilCli.Start(workingDirectory, "npm", arguments);
+                UtilCli.Start(workingDirectory, "npm", arguments, isRedirectStdErr: isRedirectStdErr);
             }
         }
 
@@ -53,22 +53,32 @@
                 info.RedirectStandardError = true; // Do not write to stderr.
             }
             // info.UseShellExecute = true;
-            var process = Process.Start(info);
-            if (isWait)
+
+            using (var process = Process.Start(info))
             {
-                process.WaitForExit();
-                if (isRedirectStdErr)
+                if (isWait)
                 {
-                    string errorText = process.StandardError.ReadToEnd();
-                    if (!string.IsNullOrEmpty(errorText))
+                    if (isRedirectStdErr)
                     {
-                        UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
-                        UtilCli.ConsoleWriteLinePassword(errorText, ConsoleColor.DarkGreen); // Log DarkGreen because it is not treated like an stderr output.
+                        // process.WaitForExit(); // Can hang. For example Angular 9.1.1 build:ssr (May be when std buffer is full)
+                        string errorText = process.StandardError.ReadToEnd(); // Waits for process to exit.
+                        process.WaitForExit(); // Used for Ubuntu. Otherwise HasExited is not (yet) true.
+                        UtilFramework.Assert(process.HasExited);
+                        if (!string.IsNullOrEmpty(errorText))
+                        {
+                            UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process StdErr (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.DarkGreen); // Write stderr to stdout.
+                            UtilCli.ConsoleWriteLinePassword(errorText, ConsoleColor.DarkGreen); // Log DarkGreen because it is not treated like an stderr output.
+                        }
                     }
-                }
-                if (process.ExitCode != 0)
-                {
-                    throw new Exception("Script failed!");
+                    else
+                    {
+                        process.WaitForExit();
+                        UtilFramework.Assert(process.HasExited);
+                    }
+                    if (process.ExitCode != 0)
+                    {
+                        throw new Exception("Script failed!");
+                    }
                 }
             }
 
@@ -182,6 +192,11 @@
             return isValue;
         }
 
+        /// <summary>
+        /// Copy folder.
+        /// </summary>
+        /// <param name="searchPattern">For example: "*.*"</param>
+        /// <param name="isAllDirectory">If true, includes subdirectories.</param>
         internal static void FolderCopy(string folderNameSource, string folderNameDest, string searchPattern, bool isAllDirectory)
         {
             var source = new DirectoryInfo(folderNameSource);
@@ -234,7 +249,7 @@
                     throw new Exception(string.Format("Could not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
                 }
             }
-            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName));
+            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Could not delete folder! ({0}", folderName));
         }
 
         internal static bool FolderNameExist(string folderName)
@@ -332,6 +347,9 @@
             text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringFramework);
             text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringApplication);
             text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().DeployAzureGitUrl);
+
+            text = text.Replace("{", "{{").Replace("}", "}}"); // Console.Write("{", ConsoleColor.Green); throws exception "Input string was not in a correct format". // TODO Bug report
+
             Console.WriteLine(text, color);
         }
 
@@ -396,6 +414,27 @@
                     provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, null);
                     return writer.ToString();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Create new text file.
+        /// </summary>
+        public static void FileCreate(string fileName, string text = null)
+        {
+            FolderCreate(fileName);
+            File.WriteAllText(fileName, text);
+        }
+
+        /// <summary>
+        /// Rename file.
+        /// </summary>
+        public static void FileRename(string fileNameSource, string fileNameDest)
+        {
+            if (fileNameSource != fileNameDest)
+            {
+                FileCopy(fileNameSource, fileNameDest);
+                File.Delete(fileNameSource);
             }
         }
     }

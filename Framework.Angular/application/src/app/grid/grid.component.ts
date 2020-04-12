@@ -1,13 +1,18 @@
-import { Input, Component, ViewChild, ElementRef } from "@angular/core";
+import { Component, OnInit, ViewChild, Input, ElementRef } from '@angular/core';
 import { DataService, RequestJson } from '../data.service';
 
 /* Grid */
 @Component({
   selector: '[data-Grid]',
-  templateUrl: './grid.component.html'
+  templateUrl: './grid.component.html',
+  styles: [
+  ]
 })
-export class Grid {
-  constructor(private dataService: DataService){
+export class GridComponent implements OnInit {
+
+  constructor(private dataService: DataService) { }
+
+  ngOnInit(): void {
   }
 
   @Input() json: any;

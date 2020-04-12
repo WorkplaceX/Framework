@@ -147,7 +147,7 @@
             {
                 // Running on IIS Server.
                 url = context.Request.IsHttps ? "https://" : "http://";
-                url += context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server.js"; // Url of server side rendering when running on IIS Server
+                url += context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server/main.js"; // Url of server side rendering when running on IIS Server
             }
             else
             {

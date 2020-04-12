@@ -1,87 +1,95 @@
-/**
- * *** NOTE ON IMPORTING FROM ANGULAR AND NGUNIVERSAL IN THIS FILE ***
- *
- * If your application uses third-party dependencies, you'll need to
- * either use Webpack or the Angular CLI's `bundleDependencies` feature
- * in order to adequately package them for use on the server without a
- * node_modules directory.
- *
- * However, due to the nature of the CLI's `bundleDependencies`, importing
- * Angular in this file will create a different instance of Angular than
- * the version in the compiled application code. This leads to unavoidable
- * conflicts. Therefore, please do not explicitly import from @angular or
- * @nguniversal in this file. You can export any needed resources
- * from your application's main.server.ts file, as seen below with the
- * import for `ngExpressEngine`.
- */
-
 import 'zone.js/dist/zone-node';
 
+import { ngExpressEngine } from '@nguniversal/express-engine';
 import * as express from 'express';
-import {join} from 'path';
-import * as fs from 'fs';
-import * as url from 'url';
-import * as querystring from 'querystring';
+import { join } from 'path';
 
+import { AppServerModule } from './src/main.server';
+import { APP_BASE_HREF } from '@angular/common';
+import { existsSync } from 'fs';
+
+import * as url from 'url'; // Framework: Enable SSR POST
+import * as querystring from 'querystring'; // Framework: Enable SSR POST
 import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
 
-// Express server
-const app = express();
+// The Express app is exported so that it can be used by serverless Functions.
+export function app() {
+  const server = express();
 
-app.use(bodyParser.json()); // Framework: Enable SSR POST
+  server.use(bodyParser.json()); // Framework: Enable SSR POST  
 
-const PORT = process.env.PORT || 4000;
-const DIST_FOLDER = join(process.cwd(), 'dist/browser');
-var VIEW_FOLDER = DIST_FOLDER; // Framework: Enable change of index.html view
-if (!fs.existsSync(VIEW_FOLDER)) {
-  VIEW_FOLDER = join(process.cwd(), '../') // Framework: running on IIS
+  var distFolder = join(process.cwd(), 'dist/application/browser');
+  
+  // Framework: Enable SSR POST  
+  // Running in Visual Studio
+  const processCwd = process.cwd().split("\\").join("/"); // Rplace all
+  if (processCwd.endsWith("Application.Server/Framework")) {
+    distFolder = ".";
+  } // Running on IIS
+  if (processCwd.endsWith("Framework/Framework.Angular/server")) {
+    distFolder = "../../"
+  }
+
+  const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
+
+  // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
+  server.engine('html', ngExpressEngine({
+    bootstrap: AppServerModule,
+  }));
+
+  server.set('view engine', 'html');
+  server.set('views', distFolder);
+
+  // Example Express Rest API endpoints
+  // server.get('/api/**', (req, res) => { });
+  // Serve static files from /browser
+  server.get('*.*', express.static(distFolder, {
+    maxAge: '1y'
+  }));
+
+  // All regular routes use the Universal engine
+  server.get('*', (req, res) => {
+    res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+  });
+
+  // Framework: Enable SSR POST
+  server.post('*', (req, res) => {
+    let view = querystring.parse(url.parse(req.originalUrl).query).view as string;
+    console.log("View=", view);
+    res.render(view,     
+      {
+        req: req,
+        res: res,
+        providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
+          {
+            provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
+          }
+        ]
+      },
+    );
+  });
+
+  return server;
 }
-console.log("VIEW_FOLDER=", VIEW_FOLDER);
 
-// * NOTE :: leave this as require() since this file is built Dynamically from webpack
-const {AppServerModuleNgFactory, LAZY_MODULE_MAP, ngExpressEngine, provideModuleMap} = require('./dist/server/main');
+function run() {
+  const port = process.env.PORT || 4000;
 
-// Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
-app.engine('html', ngExpressEngine({
-  bootstrap: AppServerModuleNgFactory,
-  providers: [
-    provideModuleMap(LAZY_MODULE_MAP)
-  ]
-}));
+  // Start up the Node server
+  const server = app();
+  server.listen(port, () => {
+    console.log(`Node Express server listening on http://localhost:${port}`);
+  });
+}
 
-app.set('view engine', 'html');
-app.set('views', VIEW_FOLDER);
+// Webpack will replace 'require' with '__webpack_require__'
+// '__non_webpack_require__' is a proxy to Node 'require'
+// The below code is to ensure that the server is run only when not requiring the bundle.
+declare const __non_webpack_require__: NodeRequire;
+const mainModule = __non_webpack_require__.main;
+const moduleFilename = mainModule && mainModule.filename || '';
+if (moduleFilename === __filename || moduleFilename.includes('iisnode')) {
+  run();
+}
 
-// Example Express Rest API endpoints
-// app.get('/api/**', (req, res) => { });
-// Serve static files from /browser
-app.get('*.*', express.static(DIST_FOLDER, {
-  maxAge: '1y'
-}));
-
-// All regular routes use the Universal engine
-app.get('*', (req, res) => {
-  res.send("Angular Universal Server Side Rendering. Converts json to html. Use POST method."); // res.render('index', { req }); // Framework: Enable SSR POST
-});
-
-// Framework: Enable SSR POST
-app.post('*', (req, res) => {
-  let view = querystring.parse(url.parse(req.originalUrl).query).view as string;
-  console.log("View=", view);
-  res.render(view,     
-    {
-      req: req,
-      res: res,
-      providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
-        {
-          provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
-        }
-      ]
-    },
-  );
-});
-
-// Start up the Node server
-app.listen(PORT, () => {
-  console.log(`Node Express server listening on http://localhost:${PORT}`);
-});
+export * from './src/main.server';

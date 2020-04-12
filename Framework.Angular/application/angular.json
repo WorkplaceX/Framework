@@ -11,21 +11,20 @@
         }
       },
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "src/Application.Website/Default",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/browser",
-            "index": "src/index.html",
+            "outputPath": "dist/application/browser",
+            "index": "src/Application.Website/Default/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": false,
+            "aot": true,
             "assets": [
-              "src/favicon.ico",
-              "src/assets"
+              "src/Application.Website/Default"
             ],
             "styles": [
               "src/styles.scss"
@@ -45,7 +44,6 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -126,12 +124,13 @@
         "server": {
           "builder": "@angular-devkit/build-angular:server",
           "options": {
-            "outputPath": "dist/server",
-            "main": "src/main.server.ts",
+            "outputPath": "dist/application/server",
+            "main": "server.ts",
             "tsConfig": "tsconfig.server.json"
           },
           "configurations": {
             "production": {
+              "outputHashing": "media",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -139,11 +138,34 @@
                 }
               ],
               "sourceMap": false,
-              "optimization": {
-                "scripts": false,
-                "styles": true
-              }
+              "optimization": true
             }
+          }
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "options": {
+            "browserTarget": "application:build",
+            "serverTarget": "application:server"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "application:build:production",
+              "serverTarget": "application:server:production"
+            }
+          }
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "browserTarget": "application:build:production",
+            "serverTarget": "application:server:production",
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {}
           }
         }
       }
