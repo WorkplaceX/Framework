@@ -66,9 +66,6 @@
                 UtilFramework.Assert(!Directory.Exists(folderNameDest));
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
                 UtilFramework.Assert(Directory.Exists(folderNameDest));
-
-                // Rename styles.css to frameworkStyle.css
-                UtilCli.FileRename(UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/browser/styles.css", UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/browser/frameworkStyle.css");
             }
         }
 
