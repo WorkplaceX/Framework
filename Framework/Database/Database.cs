@@ -277,8 +277,8 @@ namespace Database.dbo
         public bool IsExist { get; set; }
     }
 
-    [SqlTable("dbo", "FrameworkScript")]
-    public class FrameworkScript : Row
+    [SqlTable("dbo", "FrameworkDeployDb")]
+    public class FrameworkDeployDb : Row
     {
         [SqlField("Id", true, FrameworkTypeEnum.Int)]
         public int Id { get; set; }

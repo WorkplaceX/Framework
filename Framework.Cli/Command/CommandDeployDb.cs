@@ -28,19 +28,31 @@
             optionSilent = configuration.Option("-s|--silent", "No command line user interaction.", CommandOptionType.NoValue);
         }
 
+        /// <summary>
+        /// Returns true if fileName ends with Drop.sql
+        /// </summary>
+        private bool IsFileNameDrop(string fileName)
+        {
+            return fileName.ToLower().EndsWith("drop.sql");
+        }
+
+        /// <summary>
+        /// Execute (*.sql) scripts.
+        /// </summary>
         private void DeployDbExecute(string folderName, bool isFrameworkDb)
         {
-            // SELECT FrameworkScript
-            var task = Data.SelectAsync(Data.Query<FrameworkScript>());
-            task.Wait();
-            var rowList = task.Result;
+            // SELECT FrameworkDeployDb
+            var rowList = Data.Select(Data.Query<FrameworkDeployDb>());
 
             // FileNameList. For example "Framework/Framework.Cli/DeployDb/Config.sql"
             List<string> fileNameList = new List<string>();
             foreach (string fileName in UtilFramework.FileNameList(folderName, "*.sql"))
             {
                 UtilFramework.Assert(fileName.ToLower().StartsWith(UtilFramework.FolderName.ToLower()));
-                fileNameList.Add(fileName.Substring(UtilFramework.FolderName.Length));
+                if (!IsFileNameDrop(fileName))
+                {
+                    fileNameList.Add(fileName.Substring(UtilFramework.FolderName.Length));
+                }
             }
 
             fileNameList = fileNameList.OrderBy(item => item).ToList();
@@ -52,8 +64,41 @@
                     Console.WriteLine(string.Format("Execute {0}", fileNameFull));
                     string sql = UtilFramework.FileLoad(fileNameFull);
                     Data.ExecuteNonQueryAsync(sql, null, isFrameworkDb, commandTimeout: 0).Wait();
-                    FrameworkScript row = new FrameworkScript() { FileName = fileName, Date = DateTime.UtcNow };
+                    FrameworkDeployDb row = new FrameworkDeployDb() { FileName = fileName, Date = DateTime.UtcNow };
                     Data.InsertAsync(row).Wait();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute (*Drop.sql) scripts.
+        /// </summary>
+        private void DeployDbDropExecute(string folderName, bool isFrameworkDb)
+        {
+            // FileNameList. For example "Framework/Framework.Cli/DeployDb/Config.sql"
+            List<string> fileNameList = new List<string>();
+            foreach (string fileName in UtilFramework.FileNameList(folderName, "*.sql"))
+            {
+                UtilFramework.Assert(fileName.ToLower().StartsWith(UtilFramework.FolderName.ToLower()));
+                if (IsFileNameDrop(fileName))
+                {
+                    fileNameList.Add(fileName.Substring(UtilFramework.FolderName.Length));
+                }
+            }
+
+            fileNameList = fileNameList.OrderByDescending(item => item).ToList(); // Reverse
+            foreach (string fileName in fileNameList)
+            {
+                string fileNameFull = UtilFramework.FolderName + fileName;
+                Console.WriteLine(string.Format("Execute {0}", fileNameFull));
+                string sql = UtilFramework.FileLoad(fileNameFull);
+                try
+                {
+                    Data.ExecuteNonQueryAsync(sql, null, isFrameworkDb, commandTimeout: 0).Wait();
+                }
+                catch
+                {
+                    UtilCli.ConsoleWriteLineColor("Already dropped or drop failed!", ConsoleColor.DarkYellow);
                 }
             }
         }
@@ -159,18 +204,13 @@
 
             if (optionDrop.Value() == "on")
             {
-                // FolderNameDeployDbInit
-                string folderNameDeployDbInitFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDbInit/";
-                string folderNameDeployDbInitApplication = UtilFramework.FolderName + "Application.Cli/DeployDbInit/";
+                // FolderNameDeployDb
+                string folderNameDeployDbFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDb/";
+                string folderNameDeployDbApplication = UtilFramework.FolderName + "Application.Cli/DeployDb/";
 
-                // SqlInit DROP
-                string fileNameInitDrop = folderNameDeployDbInitApplication + "InitDrop.sql";
-                string sqlInitDrop = UtilFramework.FileLoad(fileNameInitDrop);
-                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true, isExceptionContinue: true).Wait();
-
-                fileNameInitDrop = folderNameDeployDbInitFramework + "InitDrop.sql";
-                sqlInitDrop = UtilFramework.FileLoad(fileNameInitDrop);
-                Data.ExecuteNonQueryAsync(sqlInitDrop, null, isFrameworkDb: true, isExceptionContinue: true).Wait();
+                Console.WriteLine("DeployDbDrop");
+                DeployDbDropExecute(folderNameDeployDbApplication, isFrameworkDb: false);
+                DeployDbDropExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
 
                 Console.WriteLine("DeployDb drop successful!");
             }

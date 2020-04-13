@@ -1,7 +1,7 @@
 ﻿IF NOT EXISTS(SELECT * FROM sys.tables WHERE name = 'FrameworkScript')
-CREATE TABLE FrameworkScript /* Contains list of all executed sql script files in "SqlScript/" folders. */
+CREATE TABLE FrameworkDeployDb /* Contains list of all executed sql script files in "DeployDb/" folders. */
 (
 	Id INT PRIMARY KEY IDENTITY,
-	FileName NVARCHAR(256) NOT NULL UNIQUE, -- For example "Framework/Framework.Cli/SqlScript/Config.sql"
+	FileName NVARCHAR(256) NOT NULL UNIQUE, -- For example "Framework/Framework.Cli/DeployDb/Config.sql"
 	Date DATETIME2, -- Date and time when script run
 )

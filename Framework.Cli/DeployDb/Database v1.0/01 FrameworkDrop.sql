@@ -1,6 +1,4 @@
-﻿/* For debug only! Reset DEV database */
-
-/* Framework */
+﻿/* Framework */
 DROP VIEW FrameworkConfigFieldDisplay
 DROP VIEW FrameworkConfigGridDisplay
 DROP VIEW FrameworkConfigFieldBuiltIn
@@ -11,4 +9,5 @@ DROP VIEW FrameworkFieldBuiltIn
 DROP TABLE FrameworkField
 DROP VIEW FrameworkTableBuiltIn
 DROP TABLE FrameworkTable
-DROP TABLE FrameworkScript
+
+DROP TABLE FrameworkDeployDb

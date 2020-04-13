@@ -50,7 +50,7 @@
         {
             get
             {
-                return typeof(FrameworkScript).Assembly;
+                return typeof(FrameworkDeployDb).Assembly;
             }
         }
 
