@@ -161,7 +161,7 @@
         /// </summary>
         public string FolderNameServerGet(ConfigCliEnvironment configCliEnvironment)
         {
-            return string.Format("Application.Server/Framework/Application.Website/Website{0:00}/", configCliEnvironment.WebsiteList.IndexOf(this) + 1);
+            return string.Format("Application.Server/Framework/Application.Website/Master{0:00}/", configCliEnvironment.WebsiteList.IndexOf(this) + 1);
         }
 
         public List<ConfigCliWebsiteDomain> DomainNameList { get; set; }

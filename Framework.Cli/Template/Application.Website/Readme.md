@@ -1,4 +1,4 @@
 # Website Templates
-* DefaultBootstrap/ (Simple website template with Bootstrap)
-* DefaultEmpty/ (Simple empty website template)
+* MasterBootstrap/ (Simple master website template with Bootstrap)
+* MasterEmpty/ (Simple empty master website template)
 * Shared/ (Shared between all websites. Custom components and frameworkStyle.scss)

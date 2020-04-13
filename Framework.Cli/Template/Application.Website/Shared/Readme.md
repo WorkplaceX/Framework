@@ -1,3 +1,3 @@
 # Shared
-* frameworkStyle.scss (can be referenced by websites)
-* CustomComponent/ (Available in all websites)
+* frameworkStyle.scss (can be referenced by master website)
+* CustomComponent/ (Available in all master websites)

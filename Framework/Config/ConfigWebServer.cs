@@ -130,7 +130,7 @@
         /// </summary>
         public string FolderNameServerGet(ConfigWebServer configWebServer, string prefixRemove)
         {
-            string result = string.Format("Application.Server/Framework/Application.Website/Website{0:00}/", configWebServer.WebsiteList.IndexOf(this) + 1);
+            string result = string.Format("Application.Server/Framework/Application.Website/Master{0:00}/", configWebServer.WebsiteList.IndexOf(this) + 1);
             UtilFramework.Assert(result.StartsWith(prefixRemove));
             result = result.Substring(prefixRemove.Length);
             return result;
