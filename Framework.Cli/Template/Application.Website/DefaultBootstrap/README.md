@@ -21,7 +21,7 @@ npm run start
 * webpack, webpack-cli (Webpack)
 * html-webpack-plugin, html-loader (index.html)
 * file-loader (*.png)
-* style-loader, css-loader, sass-loader, node-sass, postcss-loader, autoprefixer (*.scss) see also: Bootstrap
+* style-loader, css-loader, sass-loader, node-sass, postcss-loader, autoprefixer (*.scss) See also: https://getbootstrap.com/docs/4.4/getting-started/webpack/
 * mini-css-extract-plugin (Extracts CSS into separate files)
 * webpack-dev-server (Dev server)
 
