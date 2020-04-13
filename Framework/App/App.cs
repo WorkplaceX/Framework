@@ -26,9 +26,9 @@
             var config = ConfigWebServer.Load();
             foreach (var website in config.WebsiteList)
             {
-                foreach (string domainName in website.DomainNameList)
+                foreach (var item in website.DomainNameList)
                 {
-                    if (domainName == requestDomainName)
+                    if (item.DomainName == requestDomainName)
                     {
                         result.Add(website);
                     }
@@ -46,12 +46,18 @@
             }
 
             this.Website = result.Single();
+            this.AppTypeName = Website.DomainNameList.Where(item => item.DomainName == requestDomainName).Single().AppTypeName;
         }
 
         /// <summary>
         /// Gets Website. This is the currently requested Website.
         /// </summary>
         public readonly ConfigWebServerWebsite Website;
+
+        /// <summary>
+        /// Gets AppTypeName. This is the currently requested App.
+        /// </summary>
+        public readonly string AppTypeName;
 
         /// <summary>
         /// Returns JsonClient. Create AppJson and process request.
@@ -130,10 +136,10 @@
         /// </summary>
         public AppJson CreateAppJson()
         {
-            Type type = UtilFramework.TypeFromName(Website.AppTypeName);
+            Type type = UtilFramework.TypeFromName(AppTypeName);
             if (type == null)
             {
-                throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigWebServer.json ({0})", Website.AppTypeName));
+                throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigWebServer.json ({0})", AppTypeName));
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);

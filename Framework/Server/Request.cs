@@ -104,7 +104,7 @@
             string fileName = UtilFramework.FolderNameParse(folderName, path);
             if (File.Exists(fileName))
             {
-                if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.Website.AppTypeName) != null)
+                if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.AppTypeName) != null)
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
                     string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector);

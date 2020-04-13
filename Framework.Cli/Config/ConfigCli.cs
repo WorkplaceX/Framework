@@ -103,7 +103,7 @@
             {
                 if (website.DomainNameList == null)
                 {
-                    website.DomainNameList = new List<string>();
+                    website.DomainNameList = new List<ConfigCliWebsiteDomain>();
                 }
             }
             return result;
@@ -124,6 +124,11 @@
         /// Gets or sets Name. For example DEV, TEST or PROD.
         /// </summary>
         public string EnvironmentName { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions.
+        /// </summary>
+        public bool IsUseDeveloperExceptionPage { get; set; }
 
         /// <summary>
         /// Gets or sets ConnectionStringFramework. Can be different from ConnectionStringApplication, if framework relevant tables are stored on another database.
@@ -156,10 +161,7 @@
         /// </summary>
         public string FolderNameServer { get; set; }
 
-        /// <summary>
-        /// Gets or sets DomainNameList. For example "example.com".
-        /// </summary>
-        public List<string> DomainNameList { get; set; }
+        public List<ConfigCliWebsiteDomain> DomainNameList { get; set; }
 
         public string DomainNameListToString()
         {
@@ -167,8 +169,9 @@
             bool isFirst = true;
             if (DomainNameList != null)
             {
-                foreach (string domainName in DomainNameList)
+                foreach (var item in DomainNameList)
                 {
+                    string domainName = item.DomainName;
                     if (isFirst)
                     {
                         isFirst = false;
@@ -184,11 +187,6 @@
         }
 
         /// <summary>
-        /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
-        /// </summary>
-        public string AppTypeName { get; set; }
-
-        /// <summary>
         /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". 
         /// </summary>
         public string FolderNameNpmBuild { get; set; }
@@ -202,6 +200,19 @@
         /// Gets or sets Git repo if "external" website is in an other git repo.
         /// </summary>
         public ConfigCliWebsiteGit Git { get; set; }
+    }
+
+    /// <summary>
+    /// Mapping DomainName to AppTypeName.
+    /// </summary>
+    public class ConfigCliWebsiteDomain
+    {
+        public string DomainName { get; set; }
+
+        /// <summary>
+        /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
+        /// </summary>
+        public string AppTypeName { get; set; }
     }
 
     public class ConfigCliWebsiteGit

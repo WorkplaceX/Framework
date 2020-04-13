@@ -152,6 +152,10 @@
             var configCli = ConfigCli.Load();
             var configWebServer = ConfigWebServer.Load();
 
+            // Environment
+            configWebServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
+            configWebServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
+
             // ConnectionString
             configWebServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
             configWebServer.ConnectionStringApplication = configCli.EnvironmentGet().ConnectionStringApplication;
@@ -160,10 +164,11 @@
             configWebServer.WebsiteList.Clear();
             foreach (var webSite in configCli.EnvironmentGet().WebsiteList)
             {
-                configWebServer.WebsiteList.Add(new ConfigWebServerWebsite() {
+                configWebServer.WebsiteList.Add(new ConfigWebServerWebsite()
+                {
                     FolderNameServer = webSite.FolderNameServer,
-                    AppTypeName = webSite.AppTypeName,
-                    DomainNameList = webSite.DomainNameList.Select(item => item).ToList() });
+                    DomainNameList = webSite.DomainNameList.Select(item => new ConfigWebServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
+                });
             }
 
             ConfigWebServer.Save(configWebServer);

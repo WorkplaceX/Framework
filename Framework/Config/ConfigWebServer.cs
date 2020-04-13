@@ -12,14 +12,19 @@
     internal class ConfigWebServer
     {
         /// <summary>
+        /// Gets or sets EnvironmentName. For example DEV, TEST or PROD.
+        /// </summary>
+        public string EnvironmentName { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions.
+        /// </summary>
+        public bool IsUseDeveloperExceptionPage { get; set; }
+
+        /// <summary>
         /// Gets or sets IsServerSideRendering. By default this value is true. Can be changed on the deployed server for trouble shooting.
         /// </summary>
         public bool IsServerSideRendering { get; set; }
-
-        /// <summary>
-        /// Gets or sets IsUseDeveloperExceptionPage. By default this value is false. Can be changed on the deployed server for trouble shooting.
-        /// </summary>
-        public bool IsUseDeveloperExceptionPage { get; set; }
 
         /// <summary>
         /// Gets or sets ConnectionStringFramework. This value is copied from ConfigCli.ConnectionStringFramework by cli build command.
@@ -106,7 +111,7 @@
             {
                 if (website.DomainNameList == null)
                 {
-                    website.DomainNameList = new List<string>();
+                    website.DomainNameList = new List<ConfigWebServerWebsiteDomain>();
                 }
             }
             return result;
@@ -134,14 +139,19 @@
             return result;
         }
 
+        public List<ConfigWebServerWebsiteDomain> DomainNameList { get; set; }
+    }
+
+    /// <summary>
+    /// DomainName to AppTypeName.
+    /// </summary>
+    internal class ConfigWebServerWebsiteDomain
+    {
+        public string DomainName { get; set; }
+
         /// <summary>
         /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
         /// </summary>
         public string AppTypeName { get; set; }
-
-        /// <summary>
-        /// Gets or sets DomainNameList. For example (example.com) or empty for default website.
-        /// </summary>
-        public List<string> DomainNameList { get; set; }
     }
 }

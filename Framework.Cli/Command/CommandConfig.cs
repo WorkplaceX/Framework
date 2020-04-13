@@ -86,8 +86,11 @@
             // Add Website
             ConfigCliWebsite website = new ConfigCliWebsite();
             website.FolderNameServer = folderNameServer;
-            website.DomainNameList = new List<string>() { domainName };
-            website.AppTypeName = appTypeName;
+            if (website.DomainNameList == null)
+            {
+                website.DomainNameList = new List<ConfigCliWebsiteDomain>();
+            }
+            website.DomainNameList.Add(new ConfigCliWebsiteDomain() { DomainName = domainName, AppTypeName = appTypeName });
             website.FolderNameNpmBuild = folderNameNpmBuild;
             website.FolderNameDist = folderNameDist;
             ConfigCli configCli = ConfigCli.Load();
