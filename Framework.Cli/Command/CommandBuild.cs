@@ -37,9 +37,9 @@
                 UtilCli.FolderDelete(folderNameApplicationWebSite);
                 UtilFramework.Assert(!Directory.Exists(folderNameApplicationWebSite));
 
-                // Copy Shared (CustomComponent and frameworkStyle.scss)
-                string folderNameSource = UtilFramework.FolderName + "Application.Website/Shared/";
-                string folderNameDest = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Shared/";
+                // Copy folder CustomComponent
+                string folderNameSource = UtilFramework.FolderName + "Application.Website/Shared/CustomComponent/";
+                string folderNameDest = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Shared/CustomComponent/";
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
 
                 // Create empty index.html file

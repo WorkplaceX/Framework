@@ -23,15 +23,15 @@
         /// <summary>
         /// Run npm command.
         /// </summary>
-        internal static void Npm(string workingDirectory, string arguments, bool isRedirectStdErr = false)
+        internal static void Npm(string workingDirectory, string arguments, bool isWait = true, bool isRedirectStdErr = false)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments, isRedirectStdErr: isRedirectStdErr);
+                UtilCli.Start(workingDirectory, "cmd", "/c npm.cmd " + arguments, isWait: isWait, isRedirectStdErr: isRedirectStdErr);
             }
             else
             {
-                UtilCli.Start(workingDirectory, "npm", arguments, isRedirectStdErr: isRedirectStdErr);
+                UtilCli.Start(workingDirectory, "npm", arguments, isWait: isWait, isRedirectStdErr: isRedirectStdErr);
             }
         }
 
@@ -364,16 +364,20 @@
             }
             else
             {
-                ConsoleColor foregroundColor = Console.ForegroundColor;
                 Console.ForegroundColor = color.Value;
-                try
-                {
-                    Console.WriteLine(value);
-                }
-                finally
-                {
-                    Console.ForegroundColor = foregroundColor;
-                }
+                Console.WriteLine(value);
+                Console.ResetColor();
+
+                // ConsoleColor foregroundColor = Console.ForegroundColor;
+                // Console.ForegroundColor = color.Value;
+                // try
+                // {
+                //     Console.WriteLine(value);
+                // }
+                // finally
+                // {
+                //     Console.ForegroundColor = foregroundColor;
+                // }
             }
         }
 
