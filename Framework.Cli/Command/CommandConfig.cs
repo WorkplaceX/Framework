@@ -39,13 +39,6 @@
 
         private void ArgumentWebsite()
         {
-            // Input FolderNameServer
-            UtilCli.ConsoleWriteLineColor("Add (include) a website", ConsoleColor.Yellow);
-            Console.WriteLine("Enter FolderNameServer. For example: 'Application.Server/Framework/Application.Website/example.com':");
-            Console.Write(">");
-            string folderNameServer = Console.ReadLine();
-            folderNameServer = UtilFramework.FolderNameParse(folderNameServer);
-
             // Input DomainName
             Console.WriteLine("Enter domain name. For example: 'example.com' or empty for default website:");
             Console.Write(">");
@@ -85,7 +78,6 @@
 
             // Add Website
             ConfigCliWebsite website = new ConfigCliWebsite();
-            website.FolderNameServer = folderNameServer;
             if (website.DomainNameList == null)
             {
                 website.DomainNameList = new List<ConfigCliWebsiteDomain>();
@@ -97,11 +89,6 @@
             if (configCli.EnvironmentGet().WebsiteList == null)
             {
                 configCli.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
-            }
-            ConfigCliWebsite websiteFind = configCli.EnvironmentGet().WebsiteList.Where(item => item.FolderNameServer.ToLower() == folderNameServer.ToLower()).SingleOrDefault();
-            if (websiteFind != null)
-            {
-                configCli.EnvironmentGet().WebsiteList.Remove(websiteFind);
             }
             configCli.EnvironmentGet().WebsiteList.Add(website);
 

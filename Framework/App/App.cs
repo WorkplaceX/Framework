@@ -23,8 +23,8 @@
         {
             List<ConfigWebServerWebsite> result = new List<ConfigWebServerWebsite>();
             string requestDomainName = UtilServer.RequestDomainName();
-            var config = ConfigWebServer.Load();
-            foreach (var website in config.WebsiteList)
+            this.ConfigWebServer = ConfigWebServer.Load();
+            foreach (var website in ConfigWebServer.WebsiteList)
             {
                 foreach (var item in website.DomainNameList)
                 {
@@ -48,6 +48,11 @@
             this.Website = result.Single();
             this.AppTypeName = Website.DomainNameList.Where(item => item.DomainName == requestDomainName).Single().AppTypeName;
         }
+
+        /// <summary>
+        /// Gets ConfigWebServer. Currently loaded config.
+        /// </summary>
+        public readonly ConfigWebServer ConfigWebServer;
 
         /// <summary>
         /// Gets Website. This is the currently requested Website.

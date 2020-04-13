@@ -157,9 +157,12 @@
     public class ConfigCliWebsite
     {
         /// <summary>
-        /// Gets or sets FolderNameServer. For example: "Application.Server/Framework/Application.Website/Default".
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Website01/".
         /// </summary>
-        public string FolderNameServer { get; set; }
+        public string FolderNameServerGet(ConfigCliEnvironment configCliEnvironment)
+        {
+            return string.Format("Application.Server/Framework/Application.Website/Website{0:00}/", configCliEnvironment.WebsiteList.IndexOf(this) + 1);
+        }
 
         public List<ConfigCliWebsiteDomain> DomainNameList { get; set; }
 

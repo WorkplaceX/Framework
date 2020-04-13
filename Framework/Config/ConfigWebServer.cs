@@ -126,15 +126,12 @@
     internal class ConfigWebServerWebsite
     {
         /// <summary>
-        /// Gets or sets FolderNameServer. For example: "Application.Server\Framework\Website\Default".
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Website01/".
         /// </summary>
-        public string FolderNameServer { get; set; }
-
-        public string FolderNameServerGet(string prefixRemove)
+        public string FolderNameServerGet(ConfigWebServer configWebServer, string prefixRemove)
         {
-            UtilFramework.Assert(FolderNameServer != null && FolderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
-            UtilFramework.Assert(FolderNameServer.StartsWith(prefixRemove));
-            string result = FolderNameServer;
+            string result = string.Format("Application.Server/Framework/Application.Website/Website{0:00}/", configWebServer.WebsiteList.IndexOf(this) + 1);
+            UtilFramework.Assert(result.StartsWith(prefixRemove));
             result = result.Substring(prefixRemove.Length);
             return result;
         }

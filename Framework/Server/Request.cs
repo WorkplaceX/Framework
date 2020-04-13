@@ -91,7 +91,7 @@
             bool result = false;
 
             // FolderNameServer
-            string folderNameServer = appSelector.Website.FolderNameServerGet("Application.Server/");
+            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigWebServer, "Application.Server/");
 
             // FolderName
             string folderName = UtilServer.FolderNameContentRoot() + folderNameServer;
@@ -159,7 +159,7 @@
             string jsonClient = await appSelector.CreateAppJsonAndProcessAsync(context);  // Process (For first server side rendering)
 
             // Server side rendering POST.
-            string folderNameServer = appSelector.Website.FolderNameServerGet("Application.Server/Framework/");
+            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigWebServer, "Application.Server/Framework/");
 
             string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
             serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
@@ -188,7 +188,7 @@
             if (UtilServer.PathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet("Application.Server/"), path);
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigWebServer, "Application.Server/"), path);
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

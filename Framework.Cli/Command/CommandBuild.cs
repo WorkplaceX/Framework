@@ -114,11 +114,12 @@
         private static void BuildWebsite()
         {
             var configCli = ConfigCli.Load();
-            foreach (var website in configCli.EnvironmentGet().WebsiteList)
+            var configCliEnvironment = configCli.EnvironmentGet();
+            foreach (var website in configCliEnvironment.WebsiteList)
             {
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 BuildWebsiteNpm(website);
-                string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServer);
+                string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServerGet(configCliEnvironment));
                 UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
                 UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
 
@@ -166,7 +167,6 @@
             {
                 configWebServer.WebsiteList.Add(new ConfigWebServerWebsite()
                 {
-                    FolderNameServer = webSite.FolderNameServer,
                     DomainNameList = webSite.DomainNameList.Select(item => new ConfigWebServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
                 });
             }
