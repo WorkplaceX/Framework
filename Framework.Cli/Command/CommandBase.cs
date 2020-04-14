@@ -2,7 +2,7 @@
 {
     using Microsoft.Extensions.CommandLineUtils;
 
-    public class CommandBase
+    internal class CommandBase
     {
         public CommandBase(AppCli appCli, string name, string description)
         {

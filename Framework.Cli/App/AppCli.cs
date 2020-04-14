@@ -144,7 +144,7 @@
         /// <summary>
         /// Override to register new commands.
         /// </summary>
-        protected virtual void RegisterCommand()
+        internal virtual void RegisterCommand()
         {
             new CommandConfig(this);
             new CommandGenerate(this);
