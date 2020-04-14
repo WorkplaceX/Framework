@@ -13,7 +13,7 @@
     internal class CommandStart : CommandBase
     {
         public CommandStart(AppCli appCli)
-            : base(appCli, "start", "Start server and open browser")
+            : base(appCli, "start", "Start server and open client in browser")
         {
 
         }
