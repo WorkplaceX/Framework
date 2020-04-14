@@ -4,7 +4,10 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
 
-    public class CommandEnvironment : CommandBase
+    /// <summary>
+    /// Cli environment command.
+    /// </summary>
+    internal class CommandEnvironment : CommandBase
     {
         public CommandEnvironment(AppCli appCli)
             : base(appCli, "env", "Select current environment to use for all cli commands")

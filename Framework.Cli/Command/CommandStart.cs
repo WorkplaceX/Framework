@@ -10,7 +10,7 @@
     /// <summary>
     /// Cli start command.
     /// </summary>
-    public class CommandStart : CommandBase
+    internal class CommandStart : CommandBase
     {
         public CommandStart(AppCli appCli)
             : base(appCli, "start", "Start server and open browser")
@@ -69,7 +69,7 @@
         }
     }
 
-    public class FileSync
+    internal class FileSync
     {
         /// <summary>
         /// (FolderNameSource, FolderNameDest).

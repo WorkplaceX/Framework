@@ -4,12 +4,12 @@
     using System;
     using System.Collections.Generic;
     using Microsoft.Data.SqlClient;
-    using static Framework.Cli.Command.AppCli;
+    using static Framework.Cli.AppCli;
 
     /// <summary>
     /// Generate CSharp code for database tables.
     /// </summary>
-    public static class Script
+    internal static class Script
     {
         /// <summary>
         /// Script to generate CSharp code. Returns true, if succsesful.

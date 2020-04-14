@@ -5,9 +5,11 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
 
-    public class CommandConfig : CommandBase
+    /// <summary>
+    /// Cli config command.
+    /// </summary>
+    internal class CommandConfig : CommandBase
     {
         public CommandConfig(AppCli appCli)
             : base(appCli, "config", "Read and write configuration")

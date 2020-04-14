@@ -1,7 +1,8 @@
-﻿namespace Framework.Cli.Command
+﻿namespace Framework.Cli
 {
     using Database.dbo;
     using DatabaseBuiltIn.dbo;
+    using Framework.Cli.Command;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
     using Framework.DataAccessLayer;

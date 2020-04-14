@@ -10,7 +10,7 @@
     /// <summary>
     /// Cli build command.
     /// </summary>
-    public class CommandBuild : CommandBase
+    internal class CommandBuild : CommandBase
     {
         public CommandBuild(AppCli appCli)
             : base(appCli, "build", "Build Angular client and .NET server")

@@ -7,7 +7,7 @@
     /// <summary>
     /// Meta information to generate CSharp code.
     /// </summary>
-    public class MetaCSharp
+    internal class MetaCSharp
     {
         /// <summary>
         /// Constructor.
@@ -63,7 +63,7 @@
         public readonly List<MetaCSharpSchema> List = new List<MetaCSharpSchema>();
     }
 
-    public class MetaCSharpSchema
+    internal class MetaCSharpSchema
     {
         public MetaSqlSchema Schema { get; set; }
 

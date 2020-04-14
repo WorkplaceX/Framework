@@ -8,9 +8,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using static Framework.Cli.Command.AppCli;
+    using static Framework.Cli.AppCli;
 
-    public class CommandDeployDb : CommandBase
+    /// <summary>
+    /// Cli deployDb command.
+    /// </summary>
+    internal class CommandDeployDb : CommandBase
     {
         public CommandDeployDb(AppCli appCli)
             : base(appCli, "deployDb", "Deploy database by running sql scripts")

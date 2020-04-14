@@ -5,7 +5,10 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
 
-    public class CommandGenerate : CommandBase
+    /// <summary>
+    /// Cli generate command to generate CSharp code.
+    /// </summary>
+    internal class CommandGenerate : CommandBase
     {
         public CommandGenerate(AppCli appCli)
             : base(appCli, "generate", "Generate CSharp code classes from database schema")

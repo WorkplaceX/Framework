@@ -8,7 +8,7 @@
     /// <summary>
     /// Meta information about sql schema.
     /// </summary>
-    public class MetaSql
+    internal class MetaSql
     {
         /// <summary>
         /// Constructor runs Schema.sql.
@@ -40,7 +40,7 @@
     /// <summary>
     /// DbContext used to query database schema.
     /// </summary>
-    public class MetaSqlDbContext : DbContext
+    internal class MetaSqlDbContext : DbContext
     {
         public MetaSqlDbContext(bool isFrameworkDb)
         {

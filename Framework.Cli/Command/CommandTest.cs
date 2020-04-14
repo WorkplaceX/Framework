@@ -3,9 +3,9 @@
     using System.Runtime.InteropServices;
 
     /// <summary>
-    /// Cli start command.
+    /// Cli test command to run unit tests.
     /// </summary>
-    public class CommandTest : CommandBase
+    internal class CommandTest : CommandBase
     {
         public CommandTest(AppCli appCli)
             : base(appCli, "test", "Run unit tests")

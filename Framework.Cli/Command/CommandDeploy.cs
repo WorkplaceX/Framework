@@ -2,7 +2,10 @@
 {
     using Framework.Cli.Config;
 
-    public class CommandDeploy : CommandBase
+    /// <summary>
+    /// Cli deploy command.
+    /// </summary>
+    internal class CommandDeploy : CommandBase
     {
         public CommandDeploy(AppCli appCli)
             : base(appCli, "deploy", "Deploy app to Azure git")

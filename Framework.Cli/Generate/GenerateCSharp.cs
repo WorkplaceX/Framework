@@ -9,7 +9,7 @@
     /// <summary>
     /// Generate CSharp code.
     /// </summary>
-    public class CSharpGenerate
+    internal class CSharpGenerate
     {
         public CSharpGenerate(MetaCSharp metaCSharp)
         {

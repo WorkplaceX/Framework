@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using static Framework.Cli.Command.AppCli;
+    using static Framework.Cli.AppCli;
 
     internal static class NamingConventionBuiltIn
     {
