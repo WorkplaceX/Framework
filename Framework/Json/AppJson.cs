@@ -1228,35 +1228,54 @@
 
         internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
         {
-            return CellParseAsync((TRow)row, fieldName, text, result);
+            return CellParseAsync(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, result);
         }
 
         /// <summary>
         /// Parse text user entered in cell and write it into parameter 'row'.
         /// </summary>
-        /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="text">Text can be empty but is never null.</param>
-        /// <returns>Return isHandled. If true, framework does no further parsing of user entered text.</returns>
-        protected virtual Task CellParseAsync(TRow row, string fieldName, string text, CellParseResult result)
+        /// <param name="result">Return isHandled. If true, framework does no further parsing of user entered text.</param>
+        /// <returns></returns>
+        protected virtual Task CellParseAsync(CellParseArgs args, CellParseResult result)
         {
             return Task.FromResult(0);
         }
 
         internal override void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResult result)
         {
-            CellParseFileUpload((TRow)row, fieldName, fileName, data, result);
+            CellParseFileUpload(new CellParseFileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data }, result);
         }
 
         /// <summary>
         /// Parse user uploaded file and assign it to row.
         /// </summary>
-        /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
-        /// <param name="data">From user uploaded file.</param>
         /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParseFileUpload(TRow row, string fieldName, string fileName, byte[] data, CellParseResult result)
+        protected virtual void CellParseFileUpload(CellParseFileUploadArgs args, CellParseResult result)
         {
 
+        }
+
+        public class CellParseFileUploadArgs
+        {
+            /// <summary>
+            /// Gets Row.  Write custom parsed value to row.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// Gets FieldName. As declared in CSharp code. Data grid column name.
+            /// </summary>
+            public string FieldName { get; internal set; }
+
+            /// <summary>
+            /// Gets FileName. User uploaded file.
+            /// </summary>
+            public string FileName { get; internal set; }
+
+            /// <summary>
+            /// Gets Data. From user uploaded file.
+            /// </summary>
+            public byte[] Data { get; internal set; }
         }
 
         internal override void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
