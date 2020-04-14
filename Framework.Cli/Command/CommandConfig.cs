@@ -86,11 +86,11 @@
             website.FolderNameNpmBuild = folderNameNpmBuild;
             website.FolderNameDist = folderNameDist;
             ConfigCli configCli = ConfigCli.Load();
-            if (configCli.EnvironmentGet().WebsiteList == null)
+            if (configCli.WebsiteList == null)
             {
-                configCli.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
+                configCli.WebsiteList = new List<ConfigCliWebsite>();
             }
-            configCli.EnvironmentGet().WebsiteList.Add(website);
+            configCli.WebsiteList.Add(website);
 
             ConfigCli.Save(configCli);
         }

@@ -114,12 +114,11 @@
         private static void BuildWebsite()
         {
             var configCli = ConfigCli.Load();
-            var configCliEnvironment = configCli.EnvironmentGet();
-            foreach (var website in configCliEnvironment.WebsiteList)
+            foreach (var website in configCli.WebsiteList)
             {
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 BuildWebsiteNpm(website);
-                string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServerGet(configCliEnvironment));
+                string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServerGet(configCli));
                 UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
                 UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
 
@@ -163,11 +162,11 @@
 
             // Website
             configWebServer.WebsiteList.Clear();
-            foreach (var webSite in configCli.EnvironmentGet().WebsiteList)
+            foreach (var webSite in configCli.WebsiteList)
             {
                 configWebServer.WebsiteList.Add(new ConfigWebServerWebsite()
                 {
-                    DomainNameList = webSite.DomainNameList.Select(item => new ConfigWebServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
+                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigWebServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
                 });
             }
 

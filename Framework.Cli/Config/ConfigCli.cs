@@ -50,6 +50,11 @@
         }
 
         /// <summary>
+        /// Gets or sets WebsiteList. Multiple domain names can be served by one ASP.NET Core instance.
+        /// </summary>
+        public List<ConfigCliWebsite> WebsiteList { get; set; }
+
+        /// <summary>
         /// Returns ConnectionString of application or framework.
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
@@ -84,7 +89,7 @@
             if (!File.Exists(FileName))
             {
                 ConfigCli configCli = new ConfigCli();
-                configCli.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
+                configCli.WebsiteList = new List<ConfigCliWebsite>();
                 appCli.InitConfigCli(configCli);
                 Save(configCli);
 
@@ -95,11 +100,11 @@
         internal static ConfigCli Load()
         {
             var result = UtilFramework.ConfigLoad<ConfigCli>(FileName);
-            if (result.EnvironmentGet().WebsiteList == null)
+            if (result.WebsiteList == null)
             {
-                result.EnvironmentGet().WebsiteList = new List<ConfigCliWebsite>();
+                result.WebsiteList = new List<ConfigCliWebsite>();
             }
-            foreach (var website in result.EnvironmentGet().WebsiteList)
+            foreach (var website in result.WebsiteList)
             {
                 if (website.DomainNameList == null)
                 {
@@ -141,11 +146,6 @@
         public string ConnectionStringApplication { get; set; }
 
         /// <summary>
-        /// Gets or sets WebsiteList. Multiple domain names can be served by one ASP.NET Core instance.
-        /// </summary>
-        public List<ConfigCliWebsite> WebsiteList { get; set; }
-
-        /// <summary>
         /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
         /// </summary>
         public string DeployAzureGitUrl { get; set; }
@@ -159,11 +159,29 @@
         /// <summary>
         /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Website01/".
         /// </summary>
-        public string FolderNameServerGet(ConfigCliEnvironment configCliEnvironment)
+        public string FolderNameServerGet(ConfigCli configCli)
         {
-            return string.Format("Application.Server/Framework/Application.Website/Master{0:00}/", configCliEnvironment.WebsiteList.IndexOf(this) + 1);
+            return string.Format("Application.Server/Framework/Application.Website/Master{0:00}/", configCli.WebsiteList.IndexOf(this) + 1);
         }
 
+        /// <summary>
+        /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". 
+        /// </summary>
+        public string FolderNameNpmBuild { get; set; }
+
+        /// <summary>
+        /// Gets or sets FolderNameDist. For example: "Application.Website/Default/dist". Content of this folder will be copied to FolderNameServer".
+        /// </summary>
+        public string FolderNameDist { get; set; }
+
+        /// <summary>
+        /// Gets or sets Git repo if "external" website is in an other git repo.
+        /// </summary>
+        public ConfigCliWebsiteGit Git { get; set; }
+
+        /// <summary>
+        /// Gets DomainNameList. Domains mapped to this master website.
+        /// </summary>
         public List<ConfigCliWebsiteDomain> DomainNameList { get; set; }
 
         public string DomainNameListToString()
@@ -188,21 +206,6 @@
             }
             return result;
         }
-
-        /// <summary>
-        /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". 
-        /// </summary>
-        public string FolderNameNpmBuild { get; set; }
-
-        /// <summary>
-        /// Gets or sets FolderNameDist. For example: "Application.Website/Default/dist". Content of this folder will be copied to FolderNameServer".
-        /// </summary>
-        public string FolderNameDist { get; set; }
-
-        /// <summary>
-        /// Gets or sets Git repo if "external" website is in an other git repo.
-        /// </summary>
-        public ConfigCliWebsiteGit Git { get; set; }
     }
 
     /// <summary>
@@ -210,6 +213,14 @@
     /// </summary>
     public class ConfigCliWebsiteDomain
     {
+        /// <summary>
+        /// Gets or sets EnvironmentName. This is the currently selected environment.
+        /// </summary>
+        public string EnvironmentName { get; set; }
+
+        /// <summary>
+        /// Gets or sets DomainName. For example "localhost".
+        /// </summary>
         public string DomainName { get; set; }
 
         /// <summary>

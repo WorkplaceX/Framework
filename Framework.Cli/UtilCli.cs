@@ -246,10 +246,10 @@
                 }
                 catch (IOException exception)
                 {
-                    throw new Exception(string.Format("Could not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
+                    throw new Exception(string.Format("Can not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
                 }
             }
-            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Could not delete folder! ({0}", folderName));
+            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Can not delete folder! ({0}", folderName));
         }
 
         internal static bool FolderNameExist(string folderName)
