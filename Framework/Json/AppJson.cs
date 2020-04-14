@@ -888,17 +888,12 @@
 
         }
 
-        public class UpdateResult
-        {
-            public bool IsHandled;
-        }
-
         virtual internal Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
             return Task.FromResult(0);
         }
 
-        public class InsertResult
+        public class UpdateResult
         {
             public bool IsHandled;
         }
@@ -906,6 +901,11 @@
         virtual internal Task InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum, InsertResult result)
         {
             return Task.FromResult(0);
+        }
+
+        public class InsertResult
+        {
+            public bool IsHandled;
         }
 
         virtual internal string CellTextInternal(Row row, string fieldName)
@@ -1118,33 +1118,55 @@
 
         internal override Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)
         {
-            return UpdateAsync((TRow)row, (TRow)rowNew, databaseEnum, result);
+            return UpdateAsync(new UpdateArgs { Row = (TRow)row, RowNew = (TRow)rowNew, DatabaseEnum = databaseEnum }, result);
         }
 
         /// <summary>
         /// Override this method for custom grid save implementation. Return isHandled.
         /// </summary>
-        /// <param name="row">Data row with old data to update.</param>
-        /// <param name="rowNew">New data row to save to database.</param>
-        /// <returns>Returns true, if custom save was handled. If false, framework will handle update.</returns>
-        protected virtual Task UpdateAsync(TRow row, TRow rowNew, DatabaseEnum databaseEnum, UpdateResult result)
+        /// <param name="result">Returns true, if custom save was handled. If false, framework will handle update.</param>
+        protected virtual Task UpdateAsync(UpdateArgs args, UpdateResult result)
         {
             return Task.FromResult(0);
         }
 
+        public class UpdateArgs
+        {
+            /// <summary>
+            /// Data row witch old data to update.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// New data row to save to database.
+            /// </summary>
+            public TRow RowNew { get; internal set; }
+
+            public DatabaseEnum DatabaseEnum { get; internal set; }
+        }
+
         internal override Task InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum, InsertResult result)
         {
-            return InsertAsync((TRow)rowNew, databaseEnum, result);
+            return InsertAsync(new InsertArgs { RowNew = (TRow)rowNew, DatabaseEnum = databaseEnum }, result);
         }
 
         /// <summary>
         /// Override this method for custom grid save implementation. Returns isHandled.
         /// </summary>
-        /// <param name="rowNew">Data row to insert. Set new primary key on this row.</param>
-        /// <returns>Returns true, if custom save was handled.</returns>
-        protected virtual Task InsertAsync(TRow rowNew, DatabaseEnum databaseEnum, InsertResult result)
+        /// <param name="result">Returns true, if custom save was handled.</param>
+        protected virtual Task InsertAsync(InsertArgs args, InsertResult result)
         {
             return Task.FromResult(0);
+        }
+
+        public class InsertArgs
+        {
+            /// <summary>
+            /// Data row to insert. Set new primary key on this row.
+            /// </summary>
+            public TRow RowNew { get; internal set; }
+
+            public DatabaseEnum DatabaseEnum { get; internal set; }
         }
 
         /// <summary>
@@ -1174,19 +1196,34 @@
 
         internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
         {
-            CellParse((TRow)row, fieldName, text, result);
+            CellParse(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, result);
         }
 
         /// <summary>
         /// Parse user entered text and assign it row. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
-        /// <param name="row">Write custom parsed value to row.</param>
-        /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
-        /// <param name="text">User entered text. It can be empty but never null.</param>
         /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParse(TRow row, string fieldName, string text, CellParseResult result)
+        protected virtual void CellParse(CellParseArgs args, CellParseResult result)
         {
 
+        }
+
+        public class CellParseArgs
+        {
+            /// <summary>
+            /// Write custom parsed value to row.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// FieldName as declared in CSharp code. Data grid column name.
+            /// </summary>
+            public string FieldName { get; internal set; }
+
+            /// <summary>
+            /// User entered text. It can be empty but never null.
+            /// </summary>
+            public string Text { get; internal set; }
         }
 
         internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
@@ -1224,18 +1261,29 @@
 
         internal override void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
         {
-            CellAnnotation((TRow)row, fieldName, result);
+            CellAnnotation(new CellAnnotationArgs { Row = (TRow)row, FieldName = fieldName }, result);
         }
 
         /// <summary>
         /// Override this method to provide additional custom annotation information for a data grid cell. Annotation is updated for every cell on same row when user changes text in one cell.
         /// </summary>
-        /// <param name="row">Data grid row.</param>
-        /// <param name="fieldName">FieldName as declared in CSharp code. Data grid column name.</param>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual void CellAnnotation(TRow row, string fieldName, CellAnnotationResult result)
+        protected virtual void CellAnnotation(CellAnnotationArgs args, CellAnnotationResult result)
         {
 
+        }
+
+        public class CellAnnotationArgs
+        {
+            /// <summary>
+            /// Data grid row.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// FieldName as declared in CSharp code. Data grid column name.
+            /// </summary>
+            public string FieldName { get; internal set; }
         }
 
         internal override IQueryable LookupQueryInternal(Row row, string fieldName, string text)

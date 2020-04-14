@@ -602,6 +602,17 @@
         }
 
         /// <summary>
+        /// Copy data row. Source and dest need not to be of same type. Only cells available on
+        /// both records are copied.
+        /// </summary>
+        public static TRow RowCopy<TRow>(Row row, string fieldNameSourcePrefix = null) where TRow : Row
+        {
+            TRow result = (TRow)(object)UtilFramework.TypeToObject(typeof(TRow));
+            RowCopy(row, result, fieldNameSourcePrefix);
+            return result;
+        }
+
+        /// <summary>
         /// Returns true, if rows are identical.
         /// </summary>
         internal static bool RowEqual(Row rowA, Row rowB)
@@ -1869,7 +1880,7 @@
             if (text != null)
             {
                 Type type = UtilFramework.TypeUnderlying(ValueType);
-                result = Convert.ChangeType(text, type);
+                result = Convert.ChangeType(text, type, CultureInfo.InvariantCulture);
             }
             return result;
         }
