@@ -13,8 +13,8 @@
         protected internal override void Execute()
         {
             // Make sure deploy has latest ConfigCli.json data.
-            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
-            CommandBuild.ConfigWebServerPublish();
+            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
+            CommandBuild.ConfigServerPublish();
 
             ConfigCli configCli = ConfigCli.Load();
             string deployAzureGitUrl = UtilFramework.StringNull(configCli.EnvironmentGet().DeployAzureGitUrl); // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"

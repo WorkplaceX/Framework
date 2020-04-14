@@ -70,14 +70,14 @@
         }
 
         /// <summary>
-        /// Copy ConfigWebServer.json to publish folder.
+        /// Copy ConfigServer.json to publish folder.
         /// </summary>
-        internal static void ConfigWebServerPublish()
+        internal static void ConfigServerPublish()
         {
             string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.1/publish/";
 
-            string fileNameSource = UtilFramework.FolderName + "ConfigWebServer.json";
-            string fileNameDest = folderNamePublish + "ConfigWebServer.json";
+            string fileNameSource = UtilFramework.FolderName + "ConfigServer.json";
+            string fileNameDest = folderNamePublish + "ConfigServer.json";
             UtilCli.FileCopy(fileNameSource, fileNameDest);
         }
 
@@ -91,7 +91,7 @@
             UtilCli.DotNet(folderName, "publish"); // Use publish instead to build.
             UtilFramework.Assert(Directory.Exists(folderNamePublish), "Deploy failed!");
 
-            ConfigWebServerPublish();
+            ConfigServerPublish();
         }
 
         /// <summary>
@@ -144,48 +144,48 @@
         }
 
         /// <summary>
-        /// Copy from file ConfigCli.json to ConfigWebServer.json
+        /// Copy from file ConfigCli.json to ConfigServer.json
         /// </summary>
-        private static void BuildConfigWebServer()
+        private static void BuildConfigServer()
         {
-            Console.WriteLine("Copy runtime specific values from ConfigCli to ConfigWebServer"); // There is also other values not needed for runtime like DeployAzureGitUrl.
+            Console.WriteLine("Copy runtime specific values from ConfigCli to ConfigServer"); // There is also other values not needed for runtime like DeployAzureGitUrl.
             var configCli = ConfigCli.Load();
-            var configWebServer = ConfigWebServer.Load();
+            var configServer = ConfigServer.Load();
 
             // Environment
-            configWebServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
-            configWebServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
+            configServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
+            configServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
 
             // ConnectionString
-            configWebServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
-            configWebServer.ConnectionStringApplication = configCli.EnvironmentGet().ConnectionStringApplication;
+            configServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
+            configServer.ConnectionStringApplication = configCli.EnvironmentGet().ConnectionStringApplication;
 
             // Website
-            configWebServer.WebsiteList.Clear();
+            configServer.WebsiteList.Clear();
             foreach (var webSite in configCli.WebsiteList)
             {
-                configWebServer.WebsiteList.Add(new ConfigWebServerWebsite()
+                configServer.WebsiteList.Add(new ConfigServerWebsite()
                 {
-                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigWebServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
+                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
                 });
             }
 
-            ConfigWebServer.Save(configWebServer);
+            ConfigServer.Save(configServer);
         }
 
-        internal static void InitConfigWebServer(AppCli appCli)
+        internal static void InitConfigServer(AppCli appCli)
         {
             // Init config
             ConfigCli.Init(appCli);
-            ConfigWebServer.Init();
+            ConfigServer.Init();
 
             // Config
-            BuildConfigWebServer();
+            BuildConfigServer();
         }
 
         protected internal override void Execute()
         {
-            InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+            InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
 
             // Build Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/

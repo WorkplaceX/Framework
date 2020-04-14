@@ -284,7 +284,7 @@
             {
                 base.OnConfiguring(optionsBuilder);
 
-                optionsBuilder.UseSqlServer(ConfigWebServer.ConnectionString(isFrameworkDb: false));
+                optionsBuilder.UseSqlServer(ConfigServer.ConnectionString(isFrameworkDb: false));
                 // optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 // optionsBuilder.ReplaceService<IModelCacheKeyFactory, ModelCacheKeyFactory>();
             }
@@ -306,10 +306,10 @@
         /// </summary>
         internal static DbContextInternal DbContextInternalCreate(Type typeRow, bool isQuery)
         {
-            string connectionString = ConfigWebServer.ConnectionString(typeRow);
+            string connectionString = ConfigServer.ConnectionString(typeRow);
             if (connectionString == null)
             {
-                throw new Exception("ConnectionString is null! (See also file: ConfigWebServer.json)"); // Run command ".\cli.cmd config ConnectionString=..."
+                throw new Exception("ConnectionString is null! (See also file: ConfigServer.json)"); // Run command ".\cli.cmd config ConnectionString=..."
             }
 
             if (UtilDalType.TypeRowIsTableNameSql(typeRow) == false)
@@ -392,7 +392,7 @@
         {
             var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-            string connectionString = ConfigWebServer.ConnectionString(isFrameworkDb);
+            string connectionString = ConfigServer.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
@@ -435,7 +435,7 @@
         internal static async Task<List<List<Dictionary<string, object>>>> ExecuteReaderMultipleAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList = null, bool isFrameworkDb = false)
         {
             List<List<Dictionary<string, object>>> result = new List<List<Dictionary<string, object>>>();
-            string connectionString = ConfigWebServer.ConnectionString(isFrameworkDb);
+            string connectionString = ConfigServer.ConnectionString(isFrameworkDb);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();

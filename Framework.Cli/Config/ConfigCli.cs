@@ -82,7 +82,7 @@
         }
 
         /// <summary>
-        /// Init default file ConfigCli.json and ConfigWebServer.json
+        /// Init default file ConfigCli.json and ConfigServer.json
         /// </summary>
         internal static void Init(AppCli appCli)
         {
@@ -93,7 +93,7 @@
                 appCli.InitConfigCli(configCli);
                 Save(configCli);
 
-                CommandBuild.InitConfigWebServer(appCli);
+                CommandBuild.InitConfigServer(appCli);
             }
         }
 

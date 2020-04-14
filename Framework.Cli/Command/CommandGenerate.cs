@@ -25,7 +25,7 @@
 
         protected internal override void Execute()
         {
-            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
 
             ConfigCli configCli = ConfigCli.Load();
             CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);

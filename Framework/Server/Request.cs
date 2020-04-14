@@ -31,7 +31,7 @@
                     path += "index.html";
                 }
 
-                // Get current website request from "ConfigWebServer.json"
+                // Get current website request from "ConfigServer.json"
                 AppSelector appSelector = new AppSelector();
 
                 // POST app.json
@@ -91,7 +91,7 @@
             bool result = false;
 
             // FolderNameServer
-            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigWebServer, "Application.Server/");
+            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/");
 
             // FolderName
             string folderName = UtilServer.FolderNameContentRoot() + folderNameServer;
@@ -104,7 +104,7 @@
             string fileName = UtilFramework.FolderNameParse(folderName, path);
             if (File.Exists(fileName))
             {
-                if (fileName.EndsWith(".html") && ConfigWebServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.AppTypeName) != null)
+                if (fileName.EndsWith(".html") && ConfigServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.AppTypeName) != null)
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
                     string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector);
@@ -159,7 +159,7 @@
             string jsonClient = await appSelector.CreateAppJsonAndProcessAsync(context);  // Process (For first server side rendering)
 
             // Server side rendering POST.
-            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigWebServer, "Application.Server/Framework/");
+            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/Framework/");
 
             string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
             serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
@@ -188,7 +188,7 @@
             if (UtilServer.PathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigWebServer, "Application.Server/"), path);
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/"), path);
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

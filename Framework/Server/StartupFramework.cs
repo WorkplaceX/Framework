@@ -33,13 +33,13 @@
 
             if (UtilServer.IsIssServer == false)
             {
-                if (ConfigWebServer.Load().IsServerSideRendering)
+                if (ConfigServer.Load().IsServerSideRendering)
                 {
                     UtilServer.StartUniversalServer();
                 }
             }
 
-            if (ConfigWebServer.Load().IsUseDeveloperExceptionPage)
+            if (ConfigServer.Load().IsUseDeveloperExceptionPage)
             {
                 applicationBuilder.UseDeveloperExceptionPage();
             }

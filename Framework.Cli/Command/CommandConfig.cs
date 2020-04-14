@@ -96,7 +96,7 @@
         }
 
         /// <summary>
-        /// Write config ConnectionStringFramework and ConnectionStringApplication to ConfigCli.json and ConfigWebServer.json.
+        /// Write config ConnectionStringFramework and ConnectionStringApplication to ConfigCli.json and ConfigServer.json.
         /// </summary>
         private void ArgumentConnectionString()
         {
@@ -108,8 +108,8 @@
                 configCli.EnvironmentGet().ConnectionStringApplication = connectionString;
                 ConfigCli.Save(configCli);
 
-                // Copy values to ConfigWebServer.json
-                CommandBuild.InitConfigWebServer(AppCli); // Update ConfigWebServer.json 
+                // Copy values to ConfigServer.json
+                CommandBuild.InitConfigServer(AppCli); // Update ConfigServer.json 
             }
         }
 
@@ -156,7 +156,7 @@
             ConfigCli.Init(AppCli);
             ConfigCli configCli = ConfigCli.Load();
 
-            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
 
             // Command "json"
             if (UtilCli.ArgumentValueIsExist(this, argumentJson))

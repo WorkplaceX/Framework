@@ -21,10 +21,10 @@
         /// </summary>
         public AppSelector()
         {
-            List<ConfigWebServerWebsite> result = new List<ConfigWebServerWebsite>();
+            List<ConfigServerWebsite> result = new List<ConfigServerWebsite>();
             string requestDomainName = UtilServer.RequestDomainName();
-            this.ConfigWebServer = ConfigWebServer.Load();
-            foreach (var website in ConfigWebServer.WebsiteList)
+            this.ConfigServer = ConfigServer.Load();
+            foreach (var website in ConfigServer.WebsiteList)
             {
                 foreach (var item in website.DomainNameList)
                 {
@@ -38,11 +38,11 @@
             // Make sure Website has been found
             if (result.Count == 0)
             {
-                throw new Exception(string.Format("Website not found! See also: ConfigWebServer.json ({0})", requestDomainName));
+                throw new Exception(string.Format("Website not found! See also: ConfigServer.json ({0})", requestDomainName));
             }
             if (result.Count > 1)
             {
-                throw new Exception(string.Format("More than one website found! See also: ConfigWebServer.json ({0})", requestDomainName));
+                throw new Exception(string.Format("More than one website found! See also: ConfigServer.json ({0})", requestDomainName));
             }
 
             this.Website = result.Single();
@@ -50,14 +50,14 @@
         }
 
         /// <summary>
-        /// Gets ConfigWebServer. Currently loaded config.
+        /// Gets ConfigServer. Currently loaded config.
         /// </summary>
-        public readonly ConfigWebServer ConfigWebServer;
+        public readonly ConfigServer ConfigServer;
 
         /// <summary>
         /// Gets Website. This is the currently requested Website.
         /// </summary>
-        public readonly ConfigWebServerWebsite Website;
+        public readonly ConfigServerWebsite Website;
 
         /// <summary>
         /// Gets AppTypeName. This is the currently requested App.
@@ -144,7 +144,7 @@
             Type type = UtilFramework.TypeFromName(AppTypeName);
             if (type == null)
             {
-                throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigWebServer.json ({0})", AppTypeName));
+                throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigServer.json ({0})", AppTypeName));
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);

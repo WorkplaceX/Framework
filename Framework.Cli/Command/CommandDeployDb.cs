@@ -189,7 +189,7 @@
 
         protected internal override void Execute()
         {
-            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
 
             ConfigCli configCli = ConfigCli.Load();
             CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
@@ -210,7 +210,7 @@
 
                 Console.WriteLine("DeployDbDrop");
                 DeployDbDropExecute(folderNameDeployDbApplication, isFrameworkDb: false);
-                DeployDbDropExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
+                DeployDbDropExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
 
                 Console.WriteLine("DeployDb drop successful!");
             }
@@ -226,7 +226,7 @@
                 Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
                 Console.WriteLine("DeployDb");
-                DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigWebServer.json
+                DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
 
                 // Populate sql tables FrameworkTable, FrameworkField.

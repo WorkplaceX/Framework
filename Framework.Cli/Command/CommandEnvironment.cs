@@ -37,7 +37,7 @@
             ConsoleWriteLineCurrentEnvironment(configCli);
 
             ConfigCli.Save(configCli);
-            CommandBuild.InitConfigWebServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigWebServer.json.
+            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
         }
 
         public static void ConsoleWriteLineCurrentEnvironment(ConfigCli configCli)
