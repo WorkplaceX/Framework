@@ -1,10 +1,10 @@
 {
-  "name": "DefaultEmpty",
+  "name": "master-empty",
   "license": "MIT",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode=production",
     "start": "webpack-dev-server"
   },
   "devDependencies": {
