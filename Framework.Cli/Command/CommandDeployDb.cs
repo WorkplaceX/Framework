@@ -45,7 +45,7 @@
         private void DeployDbExecute(string folderName, bool isFrameworkDb)
         {
             // SELECT FrameworkDeployDb
-            var rowList = Data.Select(Data.Query<FrameworkDeployDb>());
+            var rowList = Data.Query<FrameworkDeployDb>().QueryExecute();
 
             // FileNameList. For example "Framework/Framework.Cli/DeployDb/Config.sql"
             List<string> fileNameList = new List<string>();

@@ -521,7 +521,7 @@
             grid.ConfigGridList = new List<FrameworkConfigGridBuiltIn>();
             if (queryConfigResult.ConfigGridQuery != null)
             {
-                grid.ConfigGridList = await Data.SelectAsync(queryConfigResult.ConfigGridQuery);
+                grid.ConfigGridList = await queryConfigResult.ConfigGridQuery.QueryExecuteAsync();
             }
             var configGrid = ConfigGrid(grid);
             query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
@@ -530,11 +530,11 @@
             var configFieldListTask = Task.FromResult(new List<FrameworkConfigFieldBuiltIn>());
             if (queryConfigResult.ConfigFieldQuery != null)
             {
-                configFieldListTask = Data.SelectAsync(queryConfigResult.ConfigFieldQuery);
+                configFieldListTask = queryConfigResult.ConfigFieldQuery.QueryExecuteAsync();
             }
 
             // Load row (Task)
-            var rowListTask = Data.SelectAsync(query);
+            var rowListTask = query.QueryExecuteAsync();
 
             await Task.WhenAll(configFieldListTask, rowListTask); // Load config field and row in parallel
 
@@ -594,7 +594,7 @@
             query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid));
 
             // Load row
-            grid.RowList = await Data.SelectAsync(query);
+            grid.RowList = await query.QueryExecuteAsync();
         }
 
         /// <summary>

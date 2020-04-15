@@ -52,19 +52,19 @@
         private async Task<FrameworkConfigGridDisplay> GridConfigGridReload(Row row)
         {
             var rowDisplay = (FrameworkConfigGridDisplay)row;
-            var result = (await Data.SelectAsync(Data.Query<FrameworkConfigGridDisplay>().Where(
+            var result = (await Data.Query<FrameworkConfigGridDisplay>().Where(
                 item => item.TableId == rowDisplay.TableId && 
-                item.ConfigName == rowDisplay.ConfigName))).Single();
+                item.ConfigName == rowDisplay.ConfigName).QueryExecuteAsync()).Single();
             return result;
         }
 
         private async Task<FrameworkConfigFieldDisplay> GridConfigFieldReload(FrameworkConfigFieldDisplay row)
         {
-            var result = (await Data.SelectAsync(Data.Query<FrameworkConfigFieldDisplay>().Where(
+            var result = (await Data.Query<FrameworkConfigFieldDisplay>().Where(
                 item => item.ConfigGridTableId == row.ConfigGridTableId &&
                 item.ConfigGridConfigName == row.ConfigGridConfigName &&
                 item.FieldId == row.FieldId &&
-                item.ConfigFieldInstanceName == row.ConfigFieldInstanceName ))).Single();
+                item.ConfigFieldInstanceName == row.ConfigFieldInstanceName).QueryExecuteAsync()).Single();
             return result;
         }
     }
@@ -83,9 +83,9 @@
 
         private async Task<FrameworkConfigGridDisplay> Reload(FrameworkConfigGridDisplay row)
         {
-            var result = (await Data.SelectAsync(Data.Query<FrameworkConfigGridDisplay>().Where(
+            var result = (await Data.Query<FrameworkConfigGridDisplay>().Where(
                 item => item.TableId == row.TableId &&
-                item.ConfigName == row.ConfigName))).Single();
+                item.ConfigName == row.ConfigName).QueryExecuteAsync()).Single();
             return result;
         }
 
@@ -182,11 +182,11 @@
 
         private async Task<FrameworkConfigFieldDisplay> Reload(FrameworkConfigFieldDisplay row)
         {
-            var result = (await Data.SelectAsync(Data.Query<FrameworkConfigFieldDisplay>().Where(
+            var result = (await Data.Query<FrameworkConfigFieldDisplay>().Where(
                 item => item.ConfigGridTableId == row.ConfigGridTableId &&
                 item.ConfigGridConfigName == row.ConfigGridConfigName &&
                 item.FieldId == row.FieldId &&
-                item.ConfigFieldInstanceName == row.ConfigFieldInstanceName))).Single();
+                item.ConfigFieldInstanceName == row.ConfigFieldInstanceName).QueryExecuteAsync()).Single();
             return result;
         }
 
@@ -264,7 +264,7 @@
 
             // Lookup field
             string fieldNameCSharp = ((FrameworkConfigFieldDisplay)args.RowNew).FieldFieldNameCSharp; // Text entered by user.
-            var fieldList = await Data.SelectAsync(Data.Query<FrameworkField>().Where(item => item.TableId == GridConfigGridRowSelected.TableId && item.FieldNameCSharp == fieldNameCSharp));
+            var fieldList = await Data.Query<FrameworkField>().Where(item => item.TableId == GridConfigGridRowSelected.TableId && item.FieldNameCSharp == fieldNameCSharp).QueryExecuteAsync();
             if (fieldList.Count == 0)
             {
                 throw new Exception("Field not found!");

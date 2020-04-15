@@ -643,41 +643,25 @@
         }
 
         /// <summary>
-        /// Select data from database.
+        /// Execute query and select data from database.
         /// </summary>
-        public static List<Row> Select(IQueryable query)
+        public static List<Row> QueryExecute(this IQueryable query)
         {
             return query.ToDynamicList().Cast<Row>().ToList();
         }
 
         /// <summary>
-        /// Select data from database.
+        /// Execute query and select data from database.
         /// </summary>
-        public static List<Row> SelectExecute(this IQueryable query)
-        {
-            return query.ToDynamicList().Cast<Row>().ToList();
-        }
-
-        /// <summary>
-        /// Select data from database.
-        /// </summary>
-        public static List<TRow> Select<TRow>(IQueryable<TRow> query) where TRow : Row
+        public static List<TRow> QueryExecute<TRow>(this IQueryable<TRow> query) where TRow : Row
         {
             return query.ToDynamicList().Cast<TRow>().ToList();
         }
 
         /// <summary>
-        /// Select data from database.
+        /// Execute query and select data from database.
         /// </summary>
-        public static List<TRow> SelectExecute<TRow>(this IQueryable<TRow> query) where TRow : Row
-        {
-            return query.ToDynamicList().Cast<TRow>().ToList();
-        }
-
-        /// <summary>
-        /// Select data from database.
-        /// </summary>
-        public static Task<List<Row>> SelectAsync(IQueryable query)
+        public static Task<List<Row>> QueryExecuteAsync(this IQueryable query)
         {
             UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));
 
@@ -685,23 +669,11 @@
         }
 
         /// <summary>
-        /// Select data from database.
+        /// Execute query and select data from database.
         /// </summary>
-        public static Task<List<Row>> SelectExecuteAsync(this IQueryable query)
+        public static Task<List<TRow>> QueryExecuteAsync<TRow>(this IQueryable<TRow> query) where TRow : Row
         {
-            UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));
-
-            return query.ToDynamicListAsync().ContinueWith(list => list.Result.Cast<Row>().ToList());
-        }
-
-        public static Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
-        {
-            return SelectAsync((IQueryable)query).ContinueWith(list => list.Result.Cast<TRow>().ToList());
-        }
-
-        public static Task<List<TRow>> SelectExecuteAsync<TRow>(this IQueryable<TRow> query) where TRow : Row
-        {
-            return SelectAsync((IQueryable)query).ContinueWith(list => list.Result.Cast<TRow>().ToList());
+            return ((IQueryable)query).QueryExecuteAsync().ContinueWith(list => list.Result.Cast<TRow>().ToList());
         }
 
         internal static IQueryable QueryFilter(IQueryable query, string fieldName, object filterValue, FilterOperator filterOperator)
