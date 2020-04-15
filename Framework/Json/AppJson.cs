@@ -3,7 +3,6 @@
     using Database.dbo;
     using Framework.App;
     using Framework.DataAccessLayer;
-    using Framework.Json.Bootstrap;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -12,7 +11,6 @@
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
-    using static Framework.Json.Page;
 
     internal enum RequestCommand
     {
@@ -913,22 +911,22 @@
             return null;
         }
 
-        virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
+        virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResultInternal result)
         {
 
         }
 
-        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResultInternal result)
         {
             return Task.FromResult(0);
         }
 
-        virtual internal void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResult result)
+        virtual internal void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
         {
 
         }
 
-        public class CellParseResult
+        internal class CellParseResultInternal
         {
             /// <summary>
             /// Gets or sets IsHandled. If true, framework does no further parsing of user entered text.
@@ -939,6 +937,17 @@
             /// Gets or sets ErrorParse. For example: User entered text is not a number.
             /// </summary>
             public string ErrorParse;
+
+            public static Grid<TRow>.CellParseResult Convert<TRow>(CellParseResultInternal value, TRow row) where TRow : Row
+            {
+                return new Grid<TRow>.CellParseResult { Row = row, ErrorParse = value.ErrorParse, IsHandled = value.IsHandled };
+            }
+
+            public static void Convert<TRow>(Grid<TRow>.CellParseResult value, ref CellParseResultInternal result) where TRow : Row
+            {
+                result.ErrorParse = value.ErrorParse;
+                result.IsHandled = value.IsHandled;
+            }
         }
 
         public enum CellAnnotationAlignEnum
@@ -1068,12 +1077,31 @@
         /// <summary>
         /// Override this method to extract and return text from lookup grid row for further processing. 
         /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
-        /// </summary>
-        /// <param name="gridLookup">Grid on which lookup has been selected.</param>
-        /// <returns>Returns text like entered by user for further processing.</returns>
-        protected virtual internal string LookupRowSelected(Grid gridLookup)
+        /// <param name="result">Returns text like entered by user for further processing.</param>
+        protected virtual internal void LookupRowSelected(LookupRowSelectedArgs args, LookupRowSelectedResult result)
         {
-            return null;
+
+        }
+
+        public class LookupRowSelectedArgs
+        {
+            /// <summary>
+            /// Gets RowSelected. This is the row which has been clicked by the user in the lookup window.
+            /// </summary>
+            public Row RowSelected { get; internal set; }
+
+            /// <summary>
+            /// Gets FieldName. This is the FieldName for which the lookup window is open.
+            /// </summary>
+            public string FieldName { get; internal set; }
+        }
+
+        public class LookupRowSelectedResult
+        {
+            /// <summary>
+            /// Gets or sets Text. Like the text entered by user for further processing.
+            /// </summary>
+            public string Text { get; set; }
         }
     }
 
@@ -1194,9 +1222,11 @@
             return null;
         }
 
-        internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResult result)
+        internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResultInternal result)
         {
-            CellParse(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, result);
+            var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
+            CellParse(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
+            CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>
@@ -1226,9 +1256,29 @@
             public string Text { get; internal set; }
         }
 
-        internal override Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResult result)
+        public class CellParseResult
         {
-            return CellParseAsync(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, result);
+            /// <summary>
+            /// Write custom parsed value to row.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// Gets or sets IsHandled. If true, framework does no further parsing of user entered text.
+            /// </summary>
+            public bool IsHandled;
+
+            /// <summary>
+            /// Gets or sets ErrorParse. For example: User entered text is not a number.
+            /// </summary>
+            public string ErrorParse;
+        }
+
+        internal override async Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResultInternal result)
+        {
+            var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
+            await CellParseAsync(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
+            CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>
@@ -1241,9 +1291,11 @@
             return Task.FromResult(0);
         }
 
-        internal override void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResult result)
+        internal override void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
         {
-            CellParseFileUpload(new CellParseFileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data }, result);
+            var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
+            CellParseFileUpload(new CellParseFileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data }, resultLocal);
+            CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>

@@ -10,6 +10,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
+    using static Framework.Json.Grid;
     using static Framework.Json.Page;
 
     internal enum GridRowEnum
@@ -956,7 +957,7 @@
                     }
                 }
                 // Parse custom
-                Grid.CellParseResult result = new Grid.CellParseResult();
+                Grid.CellParseResultInternal result = new Grid.CellParseResultInternal();
                 grid.CellParseInternal(rowNew, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
                 if (result.IsHandled == false)
                 {
@@ -1157,11 +1158,13 @@
                         // Grid lookup row selected
                         GridLookupClose(grid.GridDest);
                         UtilFramework.Assert(rowSelected == grid.RowSelected);
-                        string text = grid.GridDest.LookupRowSelected(grid);
-                        if (text != null)
+                        LookupRowSelectedArgs args = new LookupRowSelectedArgs { RowSelected = grid.RowSelected, FieldName = grid.GridLookupDestFieldNameCSharp };
+                        LookupRowSelectedResult result = new LookupRowSelectedResult();
+                        grid.GridDest.LookupRowSelected(args, result);
+                        if (result.Text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out var rowDest, out var _, out var cellDest);
-                            appJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = text, GridCellTextIsLookup = true };
+                            appJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true };
 
                             await ProcessCellIsModify(appJson);
                         }

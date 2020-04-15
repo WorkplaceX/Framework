@@ -653,7 +653,23 @@
         /// <summary>
         /// Select data from database.
         /// </summary>
+        public static List<Row> SelectExecute(this IQueryable query)
+        {
+            return query.ToDynamicList().Cast<Row>().ToList();
+        }
+
+        /// <summary>
+        /// Select data from database.
+        /// </summary>
         public static List<TRow> Select<TRow>(IQueryable<TRow> query) where TRow : Row
+        {
+            return query.ToDynamicList().Cast<TRow>().ToList();
+        }
+
+        /// <summary>
+        /// Select data from database.
+        /// </summary>
+        public static List<TRow> SelectExecute<TRow>(this IQueryable<TRow> query) where TRow : Row
         {
             return query.ToDynamicList().Cast<TRow>().ToList();
         }
@@ -668,7 +684,22 @@
             return query.ToDynamicListAsync().ContinueWith(list => list.Result.Cast<Row>().ToList());
         }
 
+        /// <summary>
+        /// Select data from database.
+        /// </summary>
+        public static Task<List<Row>> SelectExecuteAsync(this IQueryable query)
+        {
+            UtilFramework.LogDebug(string.Format("SELECT ({0})", query.ElementType.Name));
+
+            return query.ToDynamicListAsync().ContinueWith(list => list.Result.Cast<Row>().ToList());
+        }
+
         public static Task<List<TRow>> SelectAsync<TRow>(IQueryable<TRow> query) where TRow : Row
+        {
+            return SelectAsync((IQueryable)query).ContinueWith(list => list.Result.Cast<TRow>().ToList());
+        }
+
+        public static Task<List<TRow>> SelectExecuteAsync<TRow>(this IQueryable<TRow> query) where TRow : Row
         {
             return SelectAsync((IQueryable)query).ContinueWith(list => list.Result.Cast<TRow>().ToList());
         }

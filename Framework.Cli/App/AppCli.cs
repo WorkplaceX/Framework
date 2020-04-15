@@ -249,16 +249,6 @@
             }
 
             /// <summary>
-            /// Constructor for DeployDbBuiltInItem.
-            /// </summary>
-            /// <param name="fieldNameKey">For example Name.</param>
-            /// <param name="tableNameSqlReferencePrefix">Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
-            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix = null) where TRow : Row
-            {
-                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), new string[] { fieldNameKey }, tableNameSqlReferencePrefix);
-            }
-
-            /// <summary>
             /// Gets RowList. Items have to be all of same TypeRow.
             /// </summary>
             public readonly List<Row> RowList;
@@ -359,8 +349,41 @@
 
             public void Add<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix = null) where TRow : Row
             {
-                var result = DeployDbBuiltInItem.Create<TRow>(rowList, fieldNameKey, tableNameSqlReferencePrefix);
-                Result.Add(result);
+                Add(rowList, new string[] { fieldNameKey }, tableNameSqlReferencePrefix);
+            }
+
+            /// <summary>
+            /// Add hierarchical list with Id and ParentId column.
+            /// </summary>
+            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, string tableNameSqlReferencePrefix = null) where TRow : Row
+            {
+                List<TRow> rowLevelList = null;
+                while (OrderByHierarchical(rowList, idSelector, parentIdSelector, sortSelector, ref rowLevelList)) // Step through all levels.
+                {
+                    Add<TRow>(rowLevelList, fieldNameKeyList, tableNameSqlReferencePrefix);
+                }
+            }
+
+            /// <summary>
+            /// Overload.
+            /// </summary>
+            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, string tableNameSqlReferencePrefix = null) where TRow : Row
+            {
+                Add(rowList, new string[] { fieldNameKey }, idSelector, parentIdSelector, sortSelector, tableNameSqlReferencePrefix);
+            }
+
+            private static bool OrderByHierarchical<TRow>(List<TRow> rowAllList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, ref List<TRow> rowLevelList) where TRow : Row
+            {
+                if (rowLevelList == null)
+                {
+                    rowLevelList = rowAllList.Where(item => parentIdSelector(item) == null).ToList();
+                }
+                else
+                {
+                    var idList = rowLevelList.Select(item => (int?)idSelector(item)).ToList();
+                    rowLevelList = rowAllList.Where(item => idList.Contains(parentIdSelector(item))).OrderBy(item => sortSelector(item)).ToList();
+                }
+                return rowLevelList.Count() != 0;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿IF NOT EXISTS(SELECT * FROM sys.tables WHERE name = 'FrameworkScript')
+﻿IF NOT EXISTS(SELECT * FROM sys.tables WHERE name = 'FrameworkDeployDb')
 CREATE TABLE FrameworkDeployDb /* Contains list of all executed sql script files in "DeployDb/" folders. */
 (
 	Id INT PRIMARY KEY IDENTITY,
