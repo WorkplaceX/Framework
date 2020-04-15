@@ -1307,18 +1307,44 @@
 
         internal override IQueryable LookupQueryInternal(Row row, string fieldName, string text)
         {
-            return LookupQuery((TRow)row, fieldName, text);
+            LookupQueryResult result = new LookupQueryResult();
+            LookupQuery(new LookupQueryArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, result);
+            return result.Query;
         }
 
         /// <summary>
         /// Override this method to return a linq query for the lookup data grid.
         /// </summary>
-        /// <param name="row">Row user is editing.</param>
-        /// <param name="fieldName">FieldName as declared in CSharp code. Field user is editing.</param>
-        /// <param name="text">Text user entered.</param>
-        protected virtual IQueryable LookupQuery(TRow row, string fieldName, string text)
+        /// <param name="result">Returns query for lookup window.</param>
+        protected virtual void LookupQuery(LookupQueryArgs args, LookupQueryResult result)
         {
-            return null; // No lookup data grid.
+
+        }
+
+        public class LookupQueryArgs
+        {
+            /// <summary>
+            /// Gets Row. This is the row user is editing.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// Gets FieldName. As declared in CSharp code. This is the field the user is editing.
+            /// </summary>
+            public string FieldName { get; internal set; }
+
+            /// <summary>
+            /// Gets Text. This is the text the user entered.
+            /// </summary>
+            public string Text { get; set; }
+        }
+
+        public class LookupQueryResult
+        {
+            /// <summary>
+            /// Gets or sets Query. This is the query for the lookup window.
+            /// </summary>
+            public IQueryable Query { get; set; }
         }
     }
 
