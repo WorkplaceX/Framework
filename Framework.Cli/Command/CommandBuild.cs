@@ -42,8 +42,8 @@
                 string folderNameDest = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Shared/CustomComponent/";
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
 
-                // Create empty index.html file
-                UtilCli.FileCreate(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Default/index.html");
+                // Copy empty index.html file
+                UtilCli.FileCopy(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/index.html", UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Default/index.html");
 
                 // Ensure folder exists now
                 UtilFramework.Assert(Directory.Exists(folderNameApplicationWebSite));
