@@ -32,7 +32,7 @@
 
             if (optionSilent.Value() != "on")
             {
-                if (UtilCli.ConsoleReadYesNo("Generate?") == false)
+                if (UtilCli.ConsoleReadYesNo(string.Format("Generate CSharp code from {0} database?", configCli.EnvironmentName)) == false)
                 {
                     return;
                 }

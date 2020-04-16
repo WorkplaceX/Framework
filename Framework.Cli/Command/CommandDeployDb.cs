@@ -171,7 +171,7 @@
 
             if (optionSilent.Value() != "on")
             {
-                if (UtilCli.ConsoleReadYesNo("DeployDb?") == false)
+                if (UtilCli.ConsoleReadYesNo(string.Format("Deploy to {0} database?", configCli.EnvironmentName)) == false)
                 {
                     return;
                 }
