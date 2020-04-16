@@ -1269,8 +1269,6 @@
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
-            IsExistSet(typeRow, rowList);
-
             var fieldNameSqlListAll = FieldBuiltInList(typeRow, tableNameSqlReferencePrefix, assemblyList);
 
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
@@ -1330,25 +1328,43 @@
         /// </summary>
         internal class UpsertItem
         {
+            private UpsertItem(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
+            {
+                this.TypeRow = typeRow;
+                this.RowList = rowList;
+                this.FieldNameKeyList = fieldNameKeyList;
+                this.TableNameSqlReferencePrefix = tableNameSqlReferencePrefix;
+
+                foreach (var item in RowList)
+                {
+                    UtilFramework.Assert(item.GetType() == TypeRow);
+                }
+            }
+
+            public static UpsertItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
+            {
+                return new UpsertItem(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix);
+            }
+
             /// <summary>
             /// Gets or sets TypeRow.
             /// </summary>
-            public Type TypeRow { get; set; }
+            public readonly Type TypeRow;
 
             /// <summary>
             /// Gets or sets RowList. Rows to insert or update.
             /// </summary>
-            public List<Row> RowList { get; set; }
+            public readonly List<Row> RowList;
 
             /// <summary>
-            /// Gets or sets FieldNameKeyList. Key fields for record identification.
+            /// Gets or sets FieldNameKeyList. Sql unique index for upsert to identify record. For example (UserId, RoleId).
             /// </summary>
-            public string[] FieldNameKeyList { get; set; }
+            public readonly string[] FieldNameKeyList;
 
             /// <summary>
-            /// Gets or sets TableNameSqlReferencePrefix. If value is for example Login, column UserIdName is referenced to table LoginUserBuiltIn if exists.
+            /// Gets or sets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column UserIdName is referenced to table LoginUserBuiltIn if exists.
             /// </summary>
-            public string TableNameSqlReferencePrefix { get; set; }
+            public readonly string TableNameSqlReferencePrefix;
         }
 
         /// <summary>

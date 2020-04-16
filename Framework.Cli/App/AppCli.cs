@@ -224,74 +224,6 @@
         }
 
         /// <summary>
-        /// Group of BuiltIn TypeRow.
-        /// </summary>
-        internal class DeployDbBuiltInItem
-        {
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public DeployDbBuiltInItem(List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
-            {
-                this.RowList = rowList;
-                this.FieldNameKeyList = fieldNameKeyList;
-                this.TableNameSqlReferencePrefix = tableNameSqlReferencePrefix;
-            }
-
-            /// <summary>
-            /// Constructor for DeployDbBuiltInItem.
-            /// </summary>
-            /// <param name="fieldNameKeyList">For example (UserId, RoleId).</param>
-            /// <param name="tableNameSqlReferencePrefix">Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
-            public static DeployDbBuiltInItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix = null) where TRow : Row
-            {
-                return new DeployDbBuiltInItem(rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix);
-            }
-
-            /// <summary>
-            /// Gets RowList. Items have to be all of same TypeRow.
-            /// </summary>
-            public readonly List<Row> RowList;
-
-            /// <summary>
-            /// Add RowList to RowList.
-            /// </summary>
-            internal void RowListUnion(List<Row> rowList)
-            {
-                foreach (var item in rowList)
-                {
-                    this.RowList.Add(item);
-                }
-            }
-
-            /// <summary>
-            /// Gets FieldNameKeyList. Sql unique index for upsert.
-            /// </summary>
-            public readonly string[] FieldNameKeyList;
-
-            /// <summary>
-            /// Gets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.
-            /// </summary>
-            public readonly string TableNameSqlReferencePrefix;
-
-            /// <summary>
-            /// Gets TypeRow. Based on items in RowList.
-            /// </summary>
-            public Type TypeRow
-            {
-                get
-                {
-                    var result = RowList.FirstOrDefault()?.GetType();
-                    foreach (var item in RowList)
-                    {
-                        UtilFramework.Assert(item.GetType() == result, "RowList contains mixed TypeRow!");
-                    }
-                    return result;
-                }
-            }
-        }
-
-        /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
         protected internal DeployDbBuiltInResult CommandDeployDbBuiltInListInternal()
@@ -336,14 +268,14 @@
         {
             internal DeployDbBuiltInResult()
             {
-                this.Result = new List<DeployDbBuiltInItem>();
+                this.Result = new List<UtilDalUpsertBuiltIn.UpsertItem>();
             }
 
-            internal List<DeployDbBuiltInItem> Result;
+            internal List<UtilDalUpsertBuiltIn.UpsertItem> Result;
 
             public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix = null) where TRow : Row
             {
-                var result = DeployDbBuiltInItem.Create<TRow>(rowList, fieldNameKeyList, tableNameSqlReferencePrefix);
+                var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, tableNameSqlReferencePrefix);
                 Result.Add(result);
             }
 

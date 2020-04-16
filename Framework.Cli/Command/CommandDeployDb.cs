@@ -148,13 +148,8 @@
                         fieldBuiltIn.IsExist = true;
                     }
                 }
-                
-                var upsertItem = new UtilDalUpsertBuiltIn.UpsertItem {
-                    TypeRow = typeof(FrameworkFieldBuiltIn),
-                    RowList = rowList.Cast<Row>().ToList(),
-                    FieldNameKeyList = new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) },
-                    TableNameSqlReferencePrefix = "Framework" 
-                };
+
+                var upsertItem = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, "Framework");
                 UtilDalUpsertBuiltIn.UpsertAsync(upsertItem, AppCli.AssemblyList()).Wait();
             }
         }
@@ -164,22 +159,10 @@
         /// </summary>
         private void BuiltIn()
         {
-            List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
             var builtInList = AppCli.CommandDeployDbBuiltInListInternal();
+            List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
 
-            List<UtilDalUpsertBuiltIn.UpsertItem> upsertList = new List<UtilDalUpsertBuiltIn.UpsertItem>();
-            foreach (var item in builtInList.Result)
-            {
-                upsertList.Add(new UtilDalUpsertBuiltIn.UpsertItem { 
-                    TypeRow = item.TypeRow, 
-                    RowList = item.RowList, 
-                    FieldNameKeyList = item.FieldNameKeyList, 
-                    TableNameSqlReferencePrefix = 
-                    item.TableNameSqlReferencePrefix 
-                });
-            }
-
-            UtilDalUpsertBuiltIn.UpsertAsync(upsertList, assemblyList).Wait();
+            UtilDalUpsertBuiltIn.UpsertAsync(builtInList.Result, assemblyList).Wait();
         }
 
         protected internal override void Execute()
