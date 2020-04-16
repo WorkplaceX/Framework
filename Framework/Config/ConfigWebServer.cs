@@ -83,26 +83,28 @@
         }
 
         /// <summary>
-        /// Init default file ConfigServer.json
+        /// Returns default ConfigServer.json
         /// </summary>
-        internal static void Init()
+        private static ConfigServer Init()
         {
-            if (!File.Exists(FileName))
-            {
-                ConfigServer configServer = new ConfigServer();
-                configServer.IsServerSideRendering = true;
-                configServer.WebsiteList = new List<ConfigServerWebsite>();
-                Save(configServer);
-            }
+            ConfigServer result = new ConfigServer();
+            result.IsServerSideRendering = true;
+            result.WebsiteList = new List<ConfigServerWebsite>();
+            return result;
         }
 
         internal static ConfigServer Load()
         {
-            if (!File.Exists(FileName))
+            ConfigServer result;
+            if (File.Exists(FileName))
             {
-                throw new Exception(string.Format("File not fount! Try to run cli build command first ({0})", FileName));
+                result = UtilFramework.ConfigLoad<ConfigServer>(FileName);
             }
-            var result = UtilFramework.ConfigLoad<ConfigServer>(FileName);
+            else
+            {
+                result = Init();
+            }
+
             if (result.WebsiteList == null)
             {
                 result.WebsiteList = new List<ConfigServerWebsite>();

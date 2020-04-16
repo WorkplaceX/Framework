@@ -5,6 +5,7 @@
     using Framework.Cli.Command;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
+    using Framework.Config;
     using Framework.DataAccessLayer;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
@@ -198,15 +199,31 @@
         }
 
         /// <summary>
+        /// Copy ConfigCli.json to ConfigServer.json and validate ConnectionString exists.
+        /// </summary>
+        private void ConfigToServer()
+        {
+            ConfigCli.ConfigToServer();
+            var configCli = ConfigCli.Load();
+            var environment = configCli.EnvironmentGet();
+            if (environment.ConnectionStringFramework == null || environment.ConnectionStringFramework == null)
+            {
+                UtilCli.ConsoleWriteLineColor(string.Format("No ConnectionString for {0}! Use cli command config to set.", environment.EnvironmentName), ConsoleColor.Yellow);
+            }
+        }
+
+        /// <summary>
         /// Run command line interface.
         /// </summary>
         public void Run(string[] args)
         {
             Title(args);
-
             try
             {
+                ConfigCli.Init(this);
+                ConfigCli.Save(ConfigCli.Load()); // Reset ConfigCli.json
                 commandLineApplication.Execute(args);
+                ConfigToServer(); // Copy new values from ConfigCli.json to ConfigServer.json
             }
             catch (Exception exception) // For example unrecognized option
             {

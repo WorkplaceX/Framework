@@ -111,7 +111,7 @@
         /// <summary>
         /// Build all Websites. For example: "WebsiteDefault/"
         /// </summary>
-        private static void BuildWebsite()
+        private void BuildWebsite()
         {
             var configCli = ConfigCli.Load();
             foreach (var website in configCli.WebsiteList)
@@ -143,50 +143,8 @@
             }
         }
 
-        /// <summary>
-        /// Copy from file ConfigCli.json to ConfigServer.json
-        /// </summary>
-        private static void BuildConfigServer()
-        {
-            Console.WriteLine("Copy runtime specific values from ConfigCli to ConfigServer"); // There is also other values not needed for runtime like DeployAzureGitUrl.
-            var configCli = ConfigCli.Load();
-            var configServer = ConfigServer.Load();
-
-            // Environment
-            configServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
-            configServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
-
-            // ConnectionString
-            configServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
-            configServer.ConnectionStringApplication = configCli.EnvironmentGet().ConnectionStringApplication;
-
-            // Website
-            configServer.WebsiteList.Clear();
-            foreach (var webSite in configCli.WebsiteList)
-            {
-                configServer.WebsiteList.Add(new ConfigServerWebsite()
-                {
-                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
-                });
-            }
-
-            ConfigServer.Save(configServer);
-        }
-
-        internal static void InitConfigServer(AppCli appCli)
-        {
-            // Init config
-            ConfigCli.Init(appCli);
-            ConfigServer.Init();
-
-            // Config
-            BuildConfigServer();
-        }
-
         protected internal override void Execute()
         {
-            InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
-
             // Build Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
 

@@ -27,7 +27,6 @@
 
         protected internal override void Execute()
         {
-            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
             if (optionWatch.Value() == "on")
             {
                 string folderNameAngular = UtilFramework.FolderName + "Framework/Framework.Angular/application/";

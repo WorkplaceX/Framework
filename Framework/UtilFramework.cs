@@ -190,12 +190,28 @@ namespace Framework
             return (T)result;
         }
 
+        /// <summary>
+        /// Write (*.json) file, if modified.
+        /// </summary>
         internal static void ConfigSave(object config, string fileName)
         {
             string json = ConfigToJson(config, isIndented: true);
-            File.WriteAllText(fileName, json);
 
-            Console.WriteLine(string.Format("Config saved to ({0})", fileName));
+            bool isModified = true;
+            if (File.Exists(fileName))
+            {
+                string jsonOld = File.ReadAllText(fileName);
+                if (jsonOld == json)
+                {
+                    isModified = false;
+                }
+            }
+
+            if (isModified)
+            {
+                File.WriteAllText(fileName, json);
+                Console.WriteLine(string.Format("Config saved to ({0})", fileName));
+            }
         }
 
         /// <summary>

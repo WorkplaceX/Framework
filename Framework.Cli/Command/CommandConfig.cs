@@ -36,11 +36,14 @@
             argumentConnectionString = configuration.Argument("connectionString", "Set same database ConnectionString for Framework and Application.");
             argumentConnectionStringFramework = configuration.Argument("connectionStringFramework", "Get or set database ConnectionString for Framework.");
             argumentConnectionStringApplication = configuration.Argument("connectionStringApplication", "Get or set database ConnectionString for Application.");
-            argumentWebsite = configuration.Argument("website", "Add (include) a website to ci build.");
+            argumentWebsite = configuration.Argument("website", "Add (include) a master website to ci build.");
         }
 
         private void ArgumentWebsite()
         {
+            ConfigCli configCli = ConfigCli.Load();
+            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
+
             // Input DomainName
             Console.WriteLine("Enter domain name. For example: 'example.com' or empty for default website:");
             Console.Write(">");
@@ -52,11 +55,11 @@
             string appTypeName = Console.ReadLine();
             if (Type.GetType(appTypeName) == null)
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Type not found! ({0})", appTypeName), ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(string.Format("Type not found! ({0})", appTypeName), ConsoleColor.Yellow);
             }
 
             // Input FolderName
-            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Application.Website/'. In this folder ci calls npm install; npm build;");
+            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Application.Website/Master/'. In this folder ci calls npm install; npm build;");
             Console.Write(">");
             string folderNameNpmBuild = Console.ReadLine();
             folderNameNpmBuild = UtilFramework.FolderNameParse(folderNameNpmBuild);
@@ -64,7 +67,7 @@
             string folderNameNpmBuildCheck = UtilFramework.FolderName + folderNameNpmBuild;
             if (!Directory.Exists(folderNameNpmBuildCheck))
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Yellow);
             }
 
             // Input FolderNameDist
@@ -75,23 +78,16 @@
             string folderNameDistCheck = UtilFramework.FolderName + folderNameDist;
             if (!Directory.Exists(folderNameDistCheck))
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameDist), ConsoleColor.Red);
+                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameDist), ConsoleColor.Yellow);
             }
 
             // Add Website
             ConfigCliWebsite website = new ConfigCliWebsite();
-            if (website.DomainNameList == null)
-            {
-                website.DomainNameList = new List<ConfigCliWebsiteDomain>();
-            }
-            website.DomainNameList.Add(new ConfigCliWebsiteDomain() { DomainName = domainName, AppTypeName = appTypeName });
+            website.DomainNameList = new List<ConfigCliWebsiteDomain>();
+            website.DomainNameList.Add(new ConfigCliWebsiteDomain() { EnvironmentName = configCli.EnvironmentNameGet(), DomainName = domainName, AppTypeName = appTypeName });
             website.FolderNameNpmBuild = folderNameNpmBuild;
             website.FolderNameDist = folderNameDist;
-            ConfigCli configCli = ConfigCli.Load();
-            if (configCli.WebsiteList == null)
-            {
-                configCli.WebsiteList = new List<ConfigCliWebsite>();
-            }
+
             configCli.WebsiteList.Add(website);
 
             ConfigCli.Save(configCli);
@@ -109,9 +105,6 @@
                 configCli.EnvironmentGet().ConnectionStringFramework = connectionString;
                 configCli.EnvironmentGet().ConnectionStringApplication = connectionString;
                 ConfigCli.Save(configCli);
-
-                // Copy values to ConfigServer.json
-                CommandBuild.InitConfigServer(AppCli); // Update ConfigServer.json 
             }
         }
 
@@ -155,10 +148,8 @@
 
         protected internal override void Execute()
         {
-            ConfigCli.Init(AppCli);
             ConfigCli configCli = ConfigCli.Load();
-
-            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
+            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
 
             // Command "json"
             if (UtilCli.ArgumentValueIsExist(this, argumentJson))
@@ -195,33 +186,38 @@
                     // Read
                     Console.WriteLine(argumentDeployAzureGitUrl.Name + "=" + configCli.EnvironmentGet().DeployAzureGitUrl);
                 }
+                return;
             }
 
             // Command "connectionString"
             if (UtilCli.ArgumentValueIsExist(this, argumentConnectionString))
             {
                 ArgumentConnectionString();
+                return;
             }
 
             // Command "connectionStringFramework"
             if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringFramework))
             {
                 ArgumentConnectionStringFramework();
+                return;
             }
 
             // Command "connectionStringApplication"
             if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringApplication))
             {
                 ArgumentConnectionStringApplication();
+                return;
             }
 
             // Command "website"
             if (UtilCli.ArgumentValueIsExist(this, argumentWebsite))
             {
                 ArgumentWebsite();
+                return;
             }
 
-            // Read
+            // Print ConfigCli.json to screen
             {
                 configCli = ConfigCli.Load();
                 Console.WriteLine();

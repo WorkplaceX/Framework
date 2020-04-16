@@ -22,10 +22,8 @@
             argumentName = configuration.Argument("name", "Get or set current environment name (dev, test, prod)");
         }
 
-
         protected internal override void Execute()
         {
-            ConfigCli.Init(AppCli);
             ConfigCli configCli = ConfigCli.Load();
 
             if (UtilCli.ArgumentValueIsExist(this, argumentName))
@@ -40,7 +38,6 @@
             ConsoleWriteLineCurrentEnvironment(configCli);
 
             ConfigCli.Save(configCli);
-            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
         }
 
         public static void ConsoleWriteLineCurrentEnvironment(ConfigCli configCli)

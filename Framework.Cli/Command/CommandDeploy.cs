@@ -15,8 +15,6 @@
 
         protected internal override void Execute()
         {
-            // Make sure deploy has latest ConfigCli.json data.
-            CommandBuild.InitConfigServer(AppCli); // Copy ConnectionString from ConfigCli.json to ConfigServer.json.
             CommandBuild.ConfigServerPublish();
 
             ConfigCli configCli = ConfigCli.Load();

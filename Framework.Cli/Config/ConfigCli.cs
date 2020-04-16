@@ -1,6 +1,8 @@
 ﻿namespace Framework.Cli.Config
 {
     using Framework.Cli.Command;
+    using Framework.Config;
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -82,24 +84,25 @@
         }
 
         /// <summary>
-        /// Init default file ConfigCli.json and ConfigServer.json
+        /// Create default ConfigCli.json file.
         /// </summary>
-        internal static void Init(AppCli appCli)
+        public static void Init(AppCli appCli)
         {
             if (!File.Exists(FileName))
             {
                 ConfigCli configCli = new ConfigCli();
+                configCli.EnvironmentName = configCli.EnvironmentNameGet();
                 configCli.WebsiteList = new List<ConfigCliWebsite>();
                 appCli.InitConfigCli(configCli);
-                Save(configCli);
-
-                CommandBuild.InitConfigServer(appCli);
+                UtilFramework.ConfigSave(configCli, FileName);
             }
         }
 
         internal static ConfigCli Load()
         {
             var result = UtilFramework.ConfigLoad<ConfigCli>(FileName);
+
+            result.EnvironmentName = result.EnvironmentNameGet(); // Init DEV if necessary
             if (result.WebsiteList == null)
             {
                 result.WebsiteList = new List<ConfigCliWebsite>();
@@ -117,6 +120,36 @@
         internal static void Save(ConfigCli configCli)
         {
             UtilFramework.ConfigSave(configCli, FileName);
+        }
+
+        /// <summary>
+        /// Copy from file ConfigCli.json to ConfigServer.json
+        /// </summary>
+        public static void ConfigToServer()
+        {
+            // Console.WriteLine("Copy runtime specific values from ConfigCli to ConfigServer"); // There is also other values not needed for runtime like DeployAzureGitUrl.
+            var configCli = ConfigCli.Load();
+            var configServer = ConfigServer.Load();
+
+            // Environment
+            configServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
+            configServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
+
+            // ConnectionString
+            configServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
+            configServer.ConnectionStringApplication = configCli.EnvironmentGet().ConnectionStringApplication;
+
+            // Website
+            configServer.WebsiteList.Clear();
+            foreach (var webSite in configCli.WebsiteList)
+            {
+                configServer.WebsiteList.Add(new ConfigServerWebsite()
+                {
+                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
+                });
+            }
+
+            ConfigServer.Save(configServer);
         }
     }
 
@@ -170,7 +203,7 @@
         public string FolderNameNpmBuild { get; set; }
 
         /// <summary>
-        /// Gets or sets FolderNameDist. For example: "Application.Website/Default/dist". Content of this folder will be copied to FolderNameServer".
+        /// Gets or sets FolderNameDist. For example: "Application.Website/Default/dist". Content of this folder will be copied to "Application.Server/Framework/Application.Website/Master01".
         /// </summary>
         public string FolderNameDist { get; set; }
 
