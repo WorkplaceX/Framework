@@ -29,7 +29,6 @@
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
-            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
 
             if (optionSilent.Value() != "on")
             {

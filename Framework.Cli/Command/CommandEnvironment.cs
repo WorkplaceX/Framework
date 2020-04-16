@@ -25,6 +25,7 @@
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
+            string environmentNameOld = configCli.EnvironmentName;
 
             if (UtilCli.ArgumentValueIsExist(this, argumentName))
             {
@@ -35,7 +36,11 @@
             }
 
             configCli.EnvironmentGet(); // Get or init
-            ConsoleWriteLineCurrentEnvironment(configCli);
+
+            if (configCli.EnvironmentName != environmentNameOld)
+            {
+                ConsoleWriteLineCurrentEnvironment(configCli);
+            }
 
             ConfigCli.Save(configCli);
         }

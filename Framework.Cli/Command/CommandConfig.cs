@@ -42,7 +42,6 @@
         private void ArgumentWebsite()
         {
             ConfigCli configCli = ConfigCli.Load();
-            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
 
             // Input DomainName
             Console.WriteLine("Enter domain name. For example: 'example.com' or empty for default website:");
@@ -149,7 +148,6 @@
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
-            CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
 
             // Command "json"
             if (UtilCli.ArgumentValueIsExist(this, argumentJson))

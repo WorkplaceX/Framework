@@ -206,7 +206,7 @@
             ConfigCli.ConfigToServer();
             var configCli = ConfigCli.Load();
             var environment = configCli.EnvironmentGet();
-            if (environment.ConnectionStringFramework == null || environment.ConnectionStringFramework == null)
+            if (UtilFramework.StringNull(environment.ConnectionStringFramework) == null || UtilFramework.StringNull(environment.ConnectionStringFramework) == null)
             {
                 UtilCli.ConsoleWriteLineColor(string.Format("No ConnectionString for {0}! Use cli command config to set.", environment.EnvironmentName), ConsoleColor.Yellow);
             }
@@ -221,7 +221,10 @@
             try
             {
                 ConfigCli.Init(this);
-                ConfigCli.Save(ConfigCli.Load()); // Reset ConfigCli.json
+                var configCli = ConfigCli.Load();
+                ConfigCli.Save(configCli); // Reset ConfigCli.json
+                ConfigCli.ConfigToServer();
+                CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
                 commandLineApplication.Execute(args);
                 ConfigToServer(); // Copy new values from ConfigCli.json to ConfigServer.json
             }
