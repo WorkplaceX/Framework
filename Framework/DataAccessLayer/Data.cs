@@ -1069,7 +1069,7 @@
 
     internal class UtilDalUpsertBuiltIn
     {
-        public class FieldBuiltIn
+        private class FieldBuiltIn
         {
             /// <summary>
             /// Gets or sets Field. See also method UtilDalType.TypeRowToFieldList();
@@ -1265,7 +1265,7 @@
         /// <param name="fieldNameKeyList">Key fields for record identification.</param>
         /// <param name="tableNameSqlReferencePrefix">If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
+        private static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
@@ -1325,20 +1325,78 @@
             }
         }
 
-        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix, List<Assembly> assemblyList) where TRow : Row
+        /// <summary>
+        /// List of rows to insert or update.
+        /// </summary>
+        internal class UpsertItem
         {
-            await UpsertAsync(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix, assemblyList);
+            /// <summary>
+            /// Gets or sets TypeRow.
+            /// </summary>
+            public Type TypeRow { get; set; }
+
+            /// <summary>
+            /// Gets or sets RowList. Rows to insert or update.
+            /// </summary>
+            public List<Row> RowList { get; set; }
+
+            /// <summary>
+            /// Gets or sets FieldNameKeyList. Key fields for record identification.
+            /// </summary>
+            public string[] FieldNameKeyList { get; set; }
+
+            /// <summary>
+            /// Gets or sets TableNameSqlReferencePrefix. If value is for example Login, column UserIdName is referenced to table LoginUserBuiltIn if exists.
+            /// </summary>
+            public string TableNameSqlReferencePrefix { get; set; }
         }
 
-        internal static async Task UpsertAsync<TRow>(List<TRow> rowList, string fieldNameKey, List<Assembly> assemblyList, string tableNameSqlReferencePrefix) where TRow : Row
+        /// <summary>
+        /// Sql merge into for BuiltIn.
+        /// </summary>
+        /// <param name="upsertList">List of rows to insert or update.</param>
+        /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
+        internal static async Task UpsertAsync(List<UpsertItem> upsertList, List<Assembly> assemblyList)
         {
-            await UpsertAsync(rowList, new string[] { fieldNameKey }, tableNameSqlReferencePrefix, assemblyList);
+            // Group by TypeRow
+            Dictionary<Type, List<Row>> typeRowToRowList = new Dictionary<Type, List<Row>>();
+            foreach (var item in upsertList)
+            {
+                if (!typeRowToRowList.ContainsKey(item.TypeRow))
+                {
+                    typeRowToRowList[item.TypeRow] = new List<Row>();
+                }
+                typeRowToRowList[item.TypeRow].AddRange(item.RowList);
+            }
+
+            foreach (var item in typeRowToRowList)
+            {
+                Type typeRow = item.Key;
+                List<Row> rowList = item.Value;
+         
+                // IsExistSet
+                IsExistSet(typeRow, rowList); // One call for hierarchical BuiltIn which needs multiple upsert.
+
+                // Upsert
+                foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
+                {
+                    await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameKeyList, itemUpsert.TableNameSqlReferencePrefix, assemblyList);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Overload.
+        /// </summary>
+        internal static Task UpsertAsync(UpsertItem upsertList, List<Assembly> assemblyList)
+        {
+            return UpsertAsync(new List<UpsertItem>(new UpsertItem[] { upsertList }), assemblyList);
         }
 
         /// <summary>
         /// Set IsExist flag to false on sql table. If sql table contains IsBuiltIn column set IsExist flag to false only on IsBuiltIn data rows.
         /// </summary>
-        internal static async Task UpsertIsExistAsync(Type typeRow)
+        private static async Task UpsertIsExistAsync(Type typeRow)
         {
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
             if (!fieldList.ContainsKey("IsBuiltIn"))

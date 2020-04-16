@@ -147,10 +147,15 @@
                         fieldBuiltIn.FieldNameSql = field.FieldNameSql;
                         fieldBuiltIn.IsExist = true;
                     }
-                    // break;
                 }
-                UtilDalUpsert.UpsertIsExistAsync<FrameworkFieldBuiltIn>().Wait();
-                UtilDalUpsertBuiltIn.UpsertAsync<FrameworkFieldBuiltIn>(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, "Framework", AppCli.AssemblyList()).Wait();
+                
+                var upsertItem = new UtilDalUpsertBuiltIn.UpsertItem {
+                    TypeRow = typeof(FrameworkFieldBuiltIn),
+                    RowList = rowList.Cast<Row>().ToList(),
+                    FieldNameKeyList = new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) },
+                    TableNameSqlReferencePrefix = "Framework" 
+                };
+                UtilDalUpsertBuiltIn.UpsertAsync(upsertItem, AppCli.AssemblyList()).Wait();
             }
         }
 
@@ -160,34 +165,21 @@
         private void BuiltIn()
         {
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
-            var builtInSourceList = AppCli.CommandDeployDbBuiltInListInternal();
+            var builtInList = AppCli.CommandDeployDbBuiltInListInternal();
 
-            var builtInDestList = new List<DeployDbBuiltInItem>(); // List with distinct TypeRow because of IsExist column.
-
-            // Distinct TypeRow
-            foreach (var itemSource in builtInSourceList.Result)
+            List<UtilDalUpsertBuiltIn.UpsertItem> upsertList = new List<UtilDalUpsertBuiltIn.UpsertItem>();
+            foreach (var item in builtInList.Result)
             {
-                if (itemSource.RowList.Count > 0)
-                {
-                    DeployDbBuiltInItem itemDest = builtInDestList.SingleOrDefault(item => item.TypeRow == itemSource.TypeRow);
-                    if (itemDest == null)
-                    {
-                        itemDest = new DeployDbBuiltInItem(itemSource.RowList.ToList() /* Copy */, itemSource.FieldNameKeyList.ToArray() /* Copy */, itemSource.TableNameSqlReferencePrefix);
-                    }
-                    else
-                    {
-                        UtilFramework.Assert(itemDest.FieldNameKeyList.SequenceEqual(itemSource.FieldNameKeyList), "Different FieldNameKeyList for same TypeRow!");
-                        itemDest.RowListUnion(itemSource.RowList);
-                    }
-                    builtInDestList.Add(itemDest);
-                }
+                upsertList.Add(new UtilDalUpsertBuiltIn.UpsertItem { 
+                    TypeRow = item.TypeRow, 
+                    RowList = item.RowList, 
+                    FieldNameKeyList = item.FieldNameKeyList, 
+                    TableNameSqlReferencePrefix = 
+                    item.TableNameSqlReferencePrefix 
+                });
             }
 
-            // Upsert
-            foreach (var item in builtInDestList)
-            {
-                UtilDalUpsertBuiltIn.UpsertAsync(item.TypeRow, item.RowList, item.FieldNameKeyList, item.TableNameSqlReferencePrefix, assemblyList).Wait();
-            }
+            UtilDalUpsertBuiltIn.UpsertAsync(upsertList, assemblyList).Wait();
         }
 
         protected internal override void Execute()
