@@ -408,23 +408,6 @@
                 textWriter.WriteLine(value);
             }
         }
-        /// <summary>
-        /// Returns list of text chunks with max length of 80.
-        /// </summary>
-        private static List<string> EscapeCSharpStringSplit(string text)
-        {
-            List<string> result = new List<string>();
-            int index = 0;
-            int chunkLengthMax = 80;
-            do
-            {
-                int length = Math.Min(chunkLengthMax, text.Length - index);
-                string textChunk = text.Substring(index, length);
-                index += length;
-                result.Add(textChunk);
-            } while (index != text.Length);
-            return result;
-        }
 
         /// <summary>
         /// Returns text escaped as CSharp code. Handles special characters.
@@ -433,7 +416,7 @@
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("\"");
-            var textList = EscapeCSharpStringSplit(text); // Because of line break after 80 characters!
+            var textList = UtilFramework.SplitChunk(text); // Because of line break after 80 characters!
             using (var writer = new StringWriter(CultureInfo.InvariantCulture))
             {
                 using (var provider = CodeDomProvider.CreateProvider("CSharp"))

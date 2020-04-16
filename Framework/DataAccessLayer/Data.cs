@@ -2369,7 +2369,26 @@
             string result = "null";
             if (value != null)
             {
-                result = $"Convert.FromBase64String(\"{Convert.ToBase64String(((byte[])value))}\")";
+                string text = Convert.ToBase64String(((byte[])value));
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.Append("Convert.FromBase64String(");
+                var textList = UtilFramework.SplitChunk(text, 320);
+                bool isFirst = true;
+                foreach (var item in textList)
+                {
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        stringBuilder.AppendLine(" +");
+                        stringBuilder.Append("                ");
+                    }
+                    stringBuilder.Append($"\"{item}\"");
+                }
+                stringBuilder.Append(")");
+                result = stringBuilder.ToString();
             }
             return result;
         }

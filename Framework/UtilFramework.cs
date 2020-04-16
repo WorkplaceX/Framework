@@ -535,5 +535,22 @@ namespace Framework
         {
             return string.Format("{0:N0}", value);
         }
+
+        /// <summary>
+        /// Returns list of text chunks with max length of 80.
+        /// </summary>
+        public static List<string> SplitChunk(string text, int lengthChunkMax = 80)
+        {
+            List<string> result = new List<string>();
+            int index = 0;
+            do
+            {
+                int length = Math.Min(lengthChunkMax, text.Length - index);
+                string textChunk = text.Substring(index, length);
+                index += length;
+                result.Add(textChunk);
+            } while (index != text.Length);
+            return result;
+        }
     }
 }
