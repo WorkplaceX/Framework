@@ -6,9 +6,12 @@
     using System;
     using System.CodeDom;
     using System.CodeDom.Compiler;
+    using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Text;
 
     internal static class UtilCli
     {
@@ -405,20 +408,51 @@
                 textWriter.WriteLine(value);
             }
         }
+        /// <summary>
+        /// Returns list of text chunks with max length of 80.
+        /// </summary>
+        private static List<string> EscapeCSharpStringSplit(string text)
+        {
+            List<string> result = new List<string>();
+            int index = 0;
+            int chunkLengthMax = 80;
+            do
+            {
+                int length = Math.Min(chunkLengthMax, text.Length - index);
+                string textChunk = text.Substring(index, length);
+                index += length;
+                result.Add(textChunk);
+            } while (index != text.Length);
+            return result;
+        }
 
         /// <summary>
         /// Returns text escaped as CSharp code. Handles special characters.
         /// </summary>
         public static string EscapeCSharpString(string text)
         {
-            using (var writer = new StringWriter())
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append("\"");
+            var textList = EscapeCSharpStringSplit(text); // Because of line break after 80 characters!
+            using (var writer = new StringWriter(CultureInfo.InvariantCulture))
             {
                 using (var provider = CodeDomProvider.CreateProvider("CSharp"))
                 {
-                    provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, null);
-                    return writer.ToString();
+                    foreach (var item in textList)
+                    {
+                        provider.GenerateCodeFromExpression(new CodePrimitiveExpression(item), writer, null); // Does a line break after 80 characters by default!
+                        string textCSharp = writer.ToString();
+                        UtilFramework.Assert(textCSharp.StartsWith("\""));
+                        UtilFramework.Assert(textCSharp.EndsWith("\""));
+                        textCSharp = textCSharp.Substring(1, textCSharp.Length - 2); // Remove quotation marks.
+                        stringBuilder.Append(textCSharp);
+                        writer.GetStringBuilder().Clear(); // Reset writer for next chunk.
+                    }
                 }
             }
+            stringBuilder.Append("\"");
+            string result = stringBuilder.ToString();
+            return result;
         }
 
         /// <summary>
