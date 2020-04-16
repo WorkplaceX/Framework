@@ -200,16 +200,16 @@
                 string sqlInit = UtilFramework.FileLoad(fileNameInit);
                 Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
-                Console.WriteLine("DeployDb");
+                UtilCli.ConsoleWriteLineColor("DeployDb run (*.sql) scripts", ConsoleColor.Green);
                 DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
 
                 // Populate sql tables FrameworkTable, FrameworkField.
-                Console.WriteLine("Update FrameworkTable, FrameworkField tables");
+                UtilCli.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
                 Meta();
 
                 // Populate sql BuiltIn tables.
-                Console.WriteLine("Update BuiltIn tables");
+                UtilCli.ConsoleWriteLineColor("Update BuiltIn tables", ConsoleColor.Green);
                 BuiltIn();
 
                 Console.WriteLine("DeployDb successful!");
