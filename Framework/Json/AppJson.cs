@@ -1129,19 +1129,42 @@
 
         internal override IQueryable QueryInternal()
         {
-            return Query();
-        }
-
-        protected virtual IQueryable<TRow> Query()
-        {
+            QueryArgs args = new QueryArgs();
             if (typeof(TRow) == typeof(Row))
             {
-                return null; // Data.QueryEmpty<TRow>(); is not possible since class Row has no TableNameSql defined.
+                args.Query = null; // Data.QueryEmpty<TRow>(); is not possible since class Row has no TableNameSql defined.
             }
             else
             {
-                return Data.Query<TRow>();
+                args.Query = Data.Query<TRow>();
             }
+            QueryResult result = new QueryResult();
+            Query(args, result);
+            return result.Query;
+        }
+
+        /// <summary>
+        /// Returns query to load data grid.
+        /// </summary>
+        protected virtual void Query(QueryArgs args, QueryResult result)
+        {
+            result.Query = args.Query; // Default query.
+        }
+
+        public class QueryArgs
+        {
+            /// <summary>
+            /// Gets Query. This is the default query.
+            /// </summary>
+            public IQueryable<TRow> Query { get; internal set; }
+        }
+
+        public class QueryResult
+        {
+            /// <summary>
+            /// Gets or sets Query. Query used to load data grid.
+            /// </summary>
+            public IQueryable<TRow> Query { get; set; }
         }
 
         internal override Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)

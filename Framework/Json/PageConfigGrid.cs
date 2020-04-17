@@ -89,14 +89,12 @@
             return result;
         }
 
-        protected override IQueryable<FrameworkConfigGridDisplay> Query()
+        protected override void Query(QueryArgs args, QueryResult result)
         {
-            var result = base.Query();
             if (TableNameCSharp != null)
             {
-                result = result.Where(item => item.TableNameCSharp == TableNameCSharp && item.ConfigName == ConfigName);
+                result.Query = args.Query.Where(item => item.TableNameCSharp == TableNameCSharp && item.ConfigName == ConfigName);
             }
-            return result;
         }
 
         /// <summary>
@@ -190,15 +188,14 @@
             return result;
         }
 
-        protected override IQueryable<FrameworkConfigFieldDisplay> Query()
+        protected override void Query(QueryArgs args, QueryResult result)
         {
             var rowSelected = GridConfigGridRowSelected;
-            var result = base.Query().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
+            result.Query = args.Query.Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
             if (FieldNameCSharp != null)
             {
-                result = result.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
+                result.Query = result.Query.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
             }
-            return result;
         }
 
         protected override async Task UpdateAsync(UpdateArgs args, UpdateResult result)
