@@ -938,12 +938,12 @@
             /// </summary>
             public string ErrorParse;
 
-            public static Grid<TRow>.CellParseResult Convert<TRow>(CellParseResultInternal value, TRow row) where TRow : Row
+            public static Grid<TRow>.ParseResult Convert<TRow>(CellParseResultInternal value, TRow row) where TRow : Row
             {
-                return new Grid<TRow>.CellParseResult { Row = row, ErrorParse = value.ErrorParse, IsHandled = value.IsHandled };
+                return new Grid<TRow>.ParseResult { Row = row, ErrorParse = value.ErrorParse, IsHandled = value.IsHandled };
             }
 
-            public static void Convert<TRow>(Grid<TRow>.CellParseResult value, ref CellParseResultInternal result) where TRow : Row
+            public static void Convert<TRow>(Grid<TRow>.ParseResult value, ref CellParseResultInternal result) where TRow : Row
             {
                 result.ErrorParse = value.ErrorParse;
                 result.IsHandled = value.IsHandled;
@@ -973,10 +973,15 @@
             Right = 3,
         }
 
+        virtual internal void CellAnnotationInternal(GridRowEnum rowEnum, Row row, string fieldName, AnnotationResult result)
+        {
+
+        }
+
         /// <summary>
         /// Provides additional annotation information for a data grid cell.
         /// </summary>
-        public class CellAnnotationResult
+        public class AnnotationResult
         {
             /// <summary>
             /// Gets or sets Html. Use for example to transform plain text into a hyper link. For empty html set "&nbsp;" to keep the layout consistent with none empty html fields.
@@ -1014,14 +1019,14 @@
             public bool IsFileUpload;
 
             /// <summary>
+            /// Gets or sets Placeholder. Shown as gray text when edit field is empty. For example: "Street" or "Search".
+            /// </summary>
+            public string PlaceHolder;
+
+            /// <summary>
             /// Gets or sets Align. Defines text allign of centent in the data grid cell.
             /// </summary>
             public CellAnnotationAlignEnum Align;
-        }
-
-        virtual internal void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
-        {
-
         }
 
         /// <summary>
@@ -1256,7 +1261,7 @@
         /// Parse user entered text and assign it row. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
         /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParse(CellParseArgs args, CellParseResult result)
+        protected virtual void CellParse(CellParseArgs args, ParseResult result)
         {
 
         }
@@ -1279,7 +1284,7 @@
             public string Text { get; internal set; }
         }
 
-        public class CellParseResult
+        public class ParseResult
         {
             /// <summary>
             /// Write custom parsed value to row.
@@ -1309,7 +1314,7 @@
         /// </summary>
         /// <param name="result">Return isHandled. If true, framework does no further parsing of user entered text.</param>
         /// <returns></returns>
-        protected virtual Task CellParseAsync(CellParseArgs args, CellParseResult result)
+        protected virtual Task CellParseAsync(CellParseArgs args, ParseResult result)
         {
             return Task.FromResult(0);
         }
@@ -1317,7 +1322,7 @@
         internal override void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
         {
             var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
-            CellParseFileUpload(new CellParseFileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data }, resultLocal);
+            CellParseFileUpload(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data }, resultLocal);
             CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
@@ -1325,12 +1330,12 @@
         /// Parse user uploaded file and assign it to row.
         /// </summary>
         /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParseFileUpload(CellParseFileUploadArgs args, CellParseResult result)
+        protected virtual void CellParseFileUpload(FileUploadArgs args, ParseResult result)
         {
 
         }
 
-        public class CellParseFileUploadArgs
+        public class FileUploadArgs
         {
             /// <summary>
             /// Gets Row.  Write custom parsed value to row.
@@ -1353,24 +1358,38 @@
             public byte[] Data { get; internal set; }
         }
 
-        internal override void CellAnnotationInternal(Row row, string fieldName, CellAnnotationResult result)
+        internal override void CellAnnotationInternal(GridRowEnum rowEnum, Row row, string fieldName, AnnotationResult result)
         {
-            CellAnnotation(new CellAnnotationArgs { Row = (TRow)row, FieldName = fieldName }, result);
+            var args = new AnnotationArgs { Row = (TRow)row, FieldName = fieldName };
+
+            if (rowEnum == GridRowEnum.Index)
+            {
+                CellAnnotationRow(args, result);
+            }
+            else
+            {
+                args.IsFilter = rowEnum == GridRowEnum.Filter;
+                args.IsNew = rowEnum == GridRowEnum.New;
+                CellAnnotation(args, result);
+            }
         }
 
         /// <summary>
         /// Override this method to provide additional custom annotation information for a data grid cell. Annotation is updated for every cell on same row when user changes text in one cell.
         /// </summary>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual void CellAnnotation(CellAnnotationArgs args, CellAnnotationResult result)
+        protected virtual void CellAnnotationRow(AnnotationArgs args, AnnotationResult result)
         {
 
         }
 
-        public class CellAnnotationArgs
+        /// <summary>
+        /// Annotation for data row.
+        /// </summary>
+        public class AnnotationArgs
         {
             /// <summary>
-            /// Data grid row.
+            /// Data grid row. Null, if filter or new data row.
             /// </summary>
             public TRow Row { get; internal set; }
 
@@ -1378,6 +1397,25 @@
             /// FieldName as declared in CSharp code. Data grid column name.
             /// </summary>
             public string FieldName { get; internal set; }
+
+            /// <summary>
+            /// Gets IsFilter. If true, annotation is for filter row.
+            /// </summary>
+            public bool IsFilter { get; internal set; }
+
+            /// <summary>
+            /// Gets or sets IsNew. If true, annotation is for new row.
+            /// </summary>
+            public bool IsNew { get; internal set; }
+        }
+
+        /// <summary>
+        /// Override this method to provide annotation information for data grid cell in filter and new row.
+        /// </summary>
+        /// <param name="result">Returns data grid cell annotation.</param>
+        protected virtual void CellAnnotation(AnnotationArgs args, AnnotationResult result)
+        {
+
         }
 
         internal override IQueryable LookupQueryInternal(Row row, string fieldName, string text)

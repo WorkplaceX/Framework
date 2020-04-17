@@ -135,13 +135,13 @@
         /// </summary>
         private static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> list, TKey key, Func<TKey, TValue> valueFactory)
         {
-            return list.GetOrAdd(key, valueFactory, out bool isAdded);
+            return list.GetOrAdd(key, valueFactory, out bool _);
         }
 
-        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, Row row)
+        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, GridRowEnum rowEnum, Row row)
         {
-            var result = new Grid.CellAnnotationResult();
-            grid.CellAnnotationInternal(row, fieldNameCSharp, result);
+            var result = new Grid.AnnotationResult();
+            grid.CellAnnotationInternal(rowEnum, row, fieldNameCSharp, result);
             cell.Html = UtilFramework.StringNull(result.Html);
             cell.HtmlIsEdit = result.HtmlIsEdit;
             cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
@@ -150,6 +150,10 @@
             cell.IsPassword = result.IsPassword;
             cell.Align = result.Align;
             cell.IsFileUpload = result.IsFileUpload;
+            if (result.PlaceHolder != null)
+            {
+                cell.Placeholder = result.PlaceHolder; // Override default "Search", "New"
+            }
         }
 
         /// <summary>
@@ -204,7 +208,7 @@
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
                 Placeholder = "Search"
-            });
+            }, out bool isAdded);
             grid.CellList.Add(result);
             result.Text = filterValue?.Text;
             if (column.FieldNameCSharp == filterValue?.FieldNameCSharp && filterValue?.IsFocus == true)
@@ -212,6 +216,11 @@
                 result.TextLeave = filterValue.TextLeave;
             }
             result.IsVisibleScroll = true;
+
+            if (isAdded)
+            {
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null);
+            }
 
             return result;
         }
@@ -268,7 +277,6 @@
                         result.Text = text;
                     }
                 }
-                RenderAnnotation(grid, result, column.FieldNameCSharp, row);
             }
             result.IsVisibleScroll = true;
             if (grid.GridLookup != null)
@@ -277,6 +285,11 @@
                 {
                     result.GridLookup = grid.GridLookup;
                 }
+            }
+
+            if (isAdded)
+            {
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, row);
             }
 
             return result;
@@ -293,9 +306,14 @@
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
                 Placeholder = "New",
-            });
+            }, out bool isAdded);
             grid.CellList.Add(result);
             result.IsVisibleScroll = true;
+
+            if (isAdded)
+            {
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null);
+            }
 
             return result;
         }
