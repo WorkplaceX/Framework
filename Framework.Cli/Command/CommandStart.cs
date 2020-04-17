@@ -1,8 +1,10 @@
 ﻿namespace Framework.Cli.Command
 {
+    using Framework.Cli.Config;
     using Microsoft.Extensions.CommandLineUtils;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -27,33 +29,40 @@
 
         protected internal override void Execute()
         {
+            // Build angular client
+            if (!UtilCli.FolderNameExist(UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/"))
+            {
+                var commandBuild = new CommandBuild(AppCli);
+                UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
+                commandBuild.Execute();
+            }
+
             if (UtilCli.OptionGet(optionWatch))
             {
+                ConfigCli configCli = ConfigCli.Load();
+
+                var website = configCli.WebsiteList.First(item => item.FolderNameDist != null); // TODO choose if multiple
+                
+                string folderNameNpmBuilt = UtilFramework.FolderName + website.FolderNameNpmBuild;
+                string folderNameDist = UtilFramework.FolderName + website.FolderNameDist;
+                
                 string folderNameAngular = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
-                string folderNameWebsiteDefault = UtilFramework.FolderName + "Application.Website/Default/"; // TODO choose if multiple
                 string folderNameCustomComponent = UtilFramework.FolderName + "Application.Website/Shared/CustomComponent/";
 
                 UtilCli.ConsoleWriteLineColor("Port: http://localhost:4200/", System.ConsoleColor.Green);
-                UtilCli.ConsoleWriteLineColor("Website: " + folderNameWebsiteDefault, System.ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor("Website: " + folderNameNpmBuilt, System.ConsoleColor.Green);
                 UtilCli.ConsoleWriteLineColor("CustomComponent: " + folderNameCustomComponent, System.ConsoleColor.Green);
                 UtilCli.ConsoleWriteLineColor("Framework: " + folderNameAngular, System.ConsoleColor.Green);
 
                 FileSync fileSync = new FileSync();
-                fileSync.AddFolder(folderNameWebsiteDefault + "dist/", folderNameAngular + "src/Application.Website/Default/");
+                fileSync.AddFolder(folderNameDist, folderNameAngular + "src/Application.Website/Default/"); // TODO
                 fileSync.AddFolder(folderNameCustomComponent, folderNameAngular + "src/Application.Website/Shared/CustomComponent/");
 
-                UtilCli.Npm(folderNameWebsiteDefault, "run build -- --watch", isWait: false);
+                UtilCli.Npm(folderNameNpmBuilt, "run build -- --watch", isWait: false);
                 UtilCli.Npm(folderNameAngular, "start", isWait: true);
             }
             else
             {
-                if (!UtilCli.FolderNameExist(UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/"))
-                {
-                    var commandBuild = new CommandBuild(AppCli);
-                    UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
-                    commandBuild.Execute();
-                }
-
                 string folderName = UtilFramework.FolderName + @"Application.Server/";
                 UtilCli.VersionBuild(() =>
                 {

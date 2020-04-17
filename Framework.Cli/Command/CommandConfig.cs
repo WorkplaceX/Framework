@@ -70,7 +70,7 @@
             }
 
             // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Application.Website/Default/dist/'. Content of this folder is copied to FolderNameServer");
+            Console.WriteLine("Enter dist folder name. For example 'Application.Website/MasterDefault/dist/'. Content of this folder is copied to FolderNameServer");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
             folderNameDist = UtilFramework.FolderNameParse(folderNameDist);

@@ -203,7 +203,7 @@
         public string FolderNameNpmBuild { get; set; }
 
         /// <summary>
-        /// Gets or sets FolderNameDist. For example: "Application.Website/Default/dist". Content of this folder will be copied to "Application.Server/Framework/Application.Website/Master01".
+        /// Gets or sets FolderNameDist. For example: "Application.Website/MasterDefault/dist". Content of this folder will be copied to "Application.Server/Framework/Application.Website/Master01".
         /// </summary>
         public string FolderNameDist { get; set; }
 
