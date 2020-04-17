@@ -27,7 +27,7 @@
 
         protected internal override void Execute()
         {
-            if (optionWatch.Value() == "on")
+            if (UtilCli.OptionGet(optionWatch))
             {
                 string folderNameAngular = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
                 string folderNameWebsiteDefault = UtilFramework.FolderName + "Application.Website/Default/"; // TODO choose if multiple
@@ -50,7 +50,7 @@
                 if (!UtilCli.FolderNameExist(UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/"))
                 {
                     var commandBuild = new CommandBuild(AppCli);
-                    commandBuild.IsOptionClientOnly = true;
+                    UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
                     commandBuild.Execute();
                 }
 

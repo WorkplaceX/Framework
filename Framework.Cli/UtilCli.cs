@@ -16,6 +16,31 @@
     internal static class UtilCli
     {
         /// <summary>
+        /// Returns CommandOption flag.
+        /// </summary>
+        public static bool OptionGet(CommandOption option)
+        {
+            return option?.Value() == "on" == true;
+        }
+
+        /// <summary>
+        /// Sets CommandOption flag.
+        /// </summary>
+        public static void OptionSet(ref CommandOption option, bool value)
+        {
+            if (option == null)
+            {
+                option = new CommandOption("--null", CommandOptionType.NoValue); // For example if command calls command and options is not registered.
+            }
+            option.Values.Clear();
+            if (value)
+            {
+                option.Values.Add("on");
+            }
+            UtilFramework.Assert(OptionGet(option) == value);
+        }
+
+        /// <summary>
         /// Run dotnet command.
         /// </summary>
         internal static void DotNet(string workingDirectory, string arguments, bool isWait = true)

@@ -18,16 +18,11 @@
 
         }
 
-        private CommandOption optionClientOnly;
-
-        /// <summary>
-        /// Gets or sets IsOptionClientOnly. Can be used by other commands. For example command start.
-        /// </summary>
-        internal bool IsOptionClientOnly;
+        internal CommandOption OptionClientOnly;
 
         protected internal override void Register(CommandLineApplication configuration)
         {
-            optionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
+            OptionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
         }
 
         /// <summary>
@@ -157,7 +152,7 @@
                 // Build Angular client (npm)
                 BuildAngular();
 
-                if (!(optionClientOnly?.Value() == "on" || IsOptionClientOnly))
+                if (UtilCli.OptionGet(OptionClientOnly) == false)
                 {
                     // Build .NET Core server (dotnet)
                     BuildServer();

@@ -177,7 +177,7 @@
                 }
             }
 
-            if (optionDrop.Value() == "on")
+            if (UtilCli.OptionGet(optionDrop))
             {
                 // FolderNameDeployDb
                 string folderNameDeployDbFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDb/";

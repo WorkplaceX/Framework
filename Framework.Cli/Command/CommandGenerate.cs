@@ -38,7 +38,7 @@
                 }
             }
 
-            bool isFrameworkDb = optionFramework.Value() == "on";
+            bool isFrameworkDb = UtilCli.OptionGet(optionFramework);
             if (Script.Run(isFrameworkDb, AppCli))
             {
                 Console.WriteLine("Generate successful!");
