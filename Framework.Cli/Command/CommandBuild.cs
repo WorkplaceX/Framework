@@ -157,7 +157,7 @@
                 // Build Angular client (npm)
                 BuildAngular();
 
-                if (!(optionClientOnly.Value() == "on" || IsOptionClientOnly))
+                if (!(optionClientOnly?.Value() == "on" || IsOptionClientOnly))
                 {
                     // Build .NET Core server (dotnet)
                     BuildServer();

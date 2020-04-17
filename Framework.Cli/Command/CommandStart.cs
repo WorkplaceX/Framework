@@ -47,7 +47,7 @@
             }
             else
             {
-                if (!UtilCli.FolderNameExist(UtilFramework.FolderName + "/Framework/Framework.Angular/"))
+                if (!UtilCli.FolderNameExist(UtilFramework.FolderName + "Application.Server/Framework/Framework.Angular/"))
                 {
                     var commandBuild = new CommandBuild(AppCli);
                     commandBuild.IsOptionClientOnly = true;
