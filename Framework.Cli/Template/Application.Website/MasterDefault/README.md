@@ -1,6 +1,6 @@
 # Hello World Website
 
-Minimal web page with Bootstrap 4 and Webpack 4 dev server with hot reload.
+Minimal web page with Bootstrap 4, Fontawesome 5, and Webpack 4 including dev server with hot reload.
 
 Install
 ```cmd
