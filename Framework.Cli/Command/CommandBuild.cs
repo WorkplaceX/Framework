@@ -20,6 +20,11 @@
 
         private CommandOption optionClientOnly;
 
+        /// <summary>
+        /// Gets or sets IsOptionClientOnly. Can be used by other commands. For example command start.
+        /// </summary>
+        internal bool IsOptionClientOnly;
+
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
@@ -109,7 +114,7 @@
         }
 
         /// <summary>
-        /// Build all Websites. For example: "WebsiteDefault/"
+        /// Build all master Websites. For example: "Application.Website/MasterDefault"
         /// </summary>
         private void BuildWebsite()
         {
@@ -145,14 +150,14 @@
 
         protected internal override void Execute()
         {
-            // Build Website(s) (npm) includes for example Bootstrap
+            // Build master Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
 
             UtilCli.VersionBuild(() => {
                 // Build Angular client (npm)
                 BuildAngular();
 
-                if (!(optionClientOnly.Value() == "on"))
+                if (!(optionClientOnly.Value() == "on" || IsOptionClientOnly))
                 {
                     // Build .NET Core server (dotnet)
                     BuildServer();
