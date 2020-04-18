@@ -921,7 +921,7 @@
             return Task.FromResult(0);
         }
 
-        virtual internal void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
+        virtual internal void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
         {
 
         }
@@ -1253,7 +1253,7 @@
         internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResultInternal result)
         {
             var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
-            CellParse(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
+            CellParse(new ParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
             CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
@@ -1261,12 +1261,12 @@
         /// Parse user entered text and assign it row. Write parsed value to row. (Or for example multiple fields on row for Uom)
         /// </summary>
         /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParse(CellParseArgs args, ParseResult result)
+        protected virtual void CellParse(ParseArgs args, ParseResult result)
         {
 
         }
 
-        public class CellParseArgs
+        public class ParseArgs
         {
             /// <summary>
             /// Write custom parsed value to row.
@@ -1305,7 +1305,7 @@
         internal override async Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResultInternal result)
         {
             var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
-            await CellParseAsync(new CellParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
+            await CellParseAsync(new ParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
             CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
@@ -1314,15 +1314,15 @@
         /// </summary>
         /// <param name="result">Return isHandled. If true, framework does no further parsing of user entered text.</param>
         /// <returns></returns>
-        protected virtual Task CellParseAsync(CellParseArgs args, ParseResult result)
+        protected virtual Task CellParseAsync(ParseArgs args, ParseResult result)
         {
             return Task.FromResult(0);
         }
 
-        internal override void CellParseFileUploadInternal(Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
+        internal override void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
         {
             var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
-            CellParseFileUpload(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data }, resultLocal);
+            CellParseFileUpload(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data, IsNew = rowEnum == GridRowEnum.New }, resultLocal);
             CellParseResultInternal.Convert(resultLocal, ref result);
         }
 
@@ -1356,6 +1356,11 @@
             /// Gets Data. From user uploaded file.
             /// </summary>
             public byte[] Data { get; internal set; }
+
+            /// <summary>
+            /// Gets IsNew. If true, file upload is for new row.
+            /// </summary>
+            public bool IsNew { get; internal set; }
         }
 
         internal override void CellAnnotationInternal(GridRowEnum rowEnum, Row row, string fieldName, AnnotationResult result)
@@ -1404,7 +1409,7 @@
             public bool IsFilter { get; internal set; }
 
             /// <summary>
-            /// Gets or sets IsNew. If true, annotation is for new row.
+            /// Gets IsNew. If true, annotation is for new row.
             /// </summary>
             public bool IsNew { get; internal set; }
         }
