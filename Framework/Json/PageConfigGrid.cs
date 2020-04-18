@@ -109,17 +109,17 @@
         {
             // Insert
             bool isInsert = false;
-            if (args.RowNew.Id == null)
+            if (args.Row.Id == null)
             {
-                var rowReload = await Reload(args.Row);
-                args.RowNew.Id = rowReload.Id;
-                if (args.RowNew.Id == null)
+                var rowReload = await Reload(args.RowOld);
+                args.Row.Id = rowReload.Id;
+                if (args.Row.Id == null)
                 {
                     var rowDest = new FrameworkConfigGrid();
-                    Data.RowCopy(args.RowNew, rowDest);
+                    Data.RowCopy(args.Row, rowDest);
                     rowDest.IsExist = true;
                     await Data.InsertAsync(rowDest);
-                    args.RowNew.Id = rowDest.Id;
+                    args.Row.Id = rowDest.Id;
                     isInsert = true;
                 }
             }
@@ -128,15 +128,15 @@
             if (isInsert == false)
             {
                 var rowDest = new FrameworkConfigGrid();
-                Data.RowCopy(args.RowNew, rowDest);
+                Data.RowCopy(args.Row, rowDest);
                 rowDest.IsExist = true;
                 await Data.UpdateAsync(rowDest);
             }
 
             // Reload
             {
-                var rowDisplayReload = await Reload(args.RowNew);
-                Data.RowCopy(rowDisplayReload, args.RowNew);
+                var rowDisplayReload = await Reload(args.Row);
+                Data.RowCopy(rowDisplayReload, args.Row);
             }
 
             result.IsHandled = true;
@@ -145,11 +145,11 @@
         protected override async Task InsertAsync(InsertArgs args, InsertResult result)
         {
             var rowDest = new FrameworkConfigGrid();
-            Data.RowCopy(args.RowNew, rowDest);
+            Data.RowCopy(args.Row, rowDest);
             rowDest.IsExist = true;
             await Data.InsertAsync(rowDest);
-            var rowReload = await Reload(args.RowNew);
-            Data.RowCopy(rowReload, args.RowNew);
+            var rowReload = await Reload(args.Row);
+            Data.RowCopy(rowReload, args.Row);
 
             result.IsHandled = true;
         }
@@ -201,42 +201,42 @@
         protected override async Task UpdateAsync(UpdateArgs args, UpdateResult result)
         {
             // ConfigGrid
-            if (args.RowNew.ConfigGridId == null)
+            if (args.Row.ConfigGridId == null)
             {
-                var rowDisplayReload = await Reload(args.Row); // ConfigGrid row might have been added in the meantime, if multiple ConfigField rows are in the grid.
-                args.RowNew.ConfigGridId = rowDisplayReload.ConfigGridId;
-                if (args.RowNew.ConfigGridId == null)
+                var rowDisplayReload = await Reload(args.RowOld); // ConfigGrid row might have been added in the meantime, if multiple ConfigField rows are in the grid.
+                args.Row.ConfigGridId = rowDisplayReload.ConfigGridId;
+                if (args.Row.ConfigGridId == null)
                 {
                     var rowDest = new FrameworkConfigGrid();
-                    Data.RowCopy(args.RowNew, rowDest, "ConfigGrid");
+                    Data.RowCopy(args.Row, rowDest, "ConfigGrid");
                     rowDest.IsExist = true;
                     await Data.InsertAsync(rowDest);
-                    args.RowNew.ConfigGridId = rowDest.Id;
+                    args.Row.ConfigGridId = rowDest.Id;
                 }
             }
 
             // ConfigField
-            if (args.RowNew.ConfigFieldId == null)
+            if (args.Row.ConfigFieldId == null)
             {
                 var rowDest = new FrameworkConfigField();
-                Data.RowCopy(args.RowNew, rowDest, "ConfigField");
-                rowDest.ConfigGridId = args.RowNew.ConfigGridId.Value;
-                rowDest.FieldId = args.RowNew.FieldId;
+                Data.RowCopy(args.Row, rowDest, "ConfigField");
+                rowDest.ConfigGridId = args.Row.ConfigGridId.Value;
+                rowDest.FieldId = args.Row.FieldId;
                 rowDest.IsExist = true;
                 await Data.InsertAsync(rowDest);
-                args.RowNew.ConfigFieldId = rowDest.Id;
+                args.Row.ConfigFieldId = rowDest.Id;
             }
             else
             {
                 var rowDest = new FrameworkConfigField();
-                Data.RowCopy(args.RowNew, rowDest, "ConfigField");
+                Data.RowCopy(args.Row, rowDest, "ConfigField");
                 await Data.UpdateAsync(rowDest);
             }
 
             // Reload
             {
-                var rowDisplayReload = await Reload(args.RowNew);
-                Data.RowCopy(rowDisplayReload, args.RowNew);
+                var rowDisplayReload = await Reload(args.Row);
+                Data.RowCopy(rowDisplayReload, args.Row);
             }
 
             result.IsHandled = true;
@@ -244,11 +244,11 @@
 
         protected override async Task InsertAsync(InsertArgs args, InsertResult result)
         {
-            args.RowNew.ConfigGridTableId = GridConfigGridRowSelected.TableId; // Master
-            args.RowNew.ConfigGridConfigName = GridConfigGridRowSelected.ConfigName; // Master
+            args.Row.ConfigGridTableId = GridConfigGridRowSelected.TableId; // Master
+            args.Row.ConfigGridConfigName = GridConfigGridRowSelected.ConfigName; // Master
 
             var rowDest = new FrameworkConfigField();
-            Data.RowCopy(args.RowNew, rowDest, "ConfigField");
+            Data.RowCopy(args.Row, rowDest, "ConfigField");
             if (GridConfigGridRowSelected.Id == null) // Master does not have FrameworkConfigGrid in database
             {
                 var rowDestConfigGrid = new FrameworkConfigGrid();
@@ -260,7 +260,7 @@
             rowDest.ConfigGridId = GridConfigGridRowSelected.Id.Value; // Master
 
             // Lookup field
-            string fieldNameCSharp = ((FrameworkConfigFieldDisplay)args.RowNew).FieldFieldNameCSharp; // Text entered by user.
+            string fieldNameCSharp = ((FrameworkConfigFieldDisplay)args.Row).FieldFieldNameCSharp; // Text entered by user.
             var fieldList = await Data.Query<FrameworkField>().Where(item => item.TableId == GridConfigGridRowSelected.TableId && item.FieldNameCSharp == fieldNameCSharp).QueryExecuteAsync();
             if (fieldList.Count == 0)
             {
@@ -268,11 +268,11 @@
             }
             int fieldId = fieldList.Single().Id;
             rowDest.FieldId = fieldId;
-            args.RowNew.FieldId = fieldId;
+            args.Row.FieldId = fieldId;
             rowDest.IsExist = true;
             await Data.InsertAsync(rowDest);
-            var rowReload = await Reload(args.RowNew);
-            Data.RowCopy(rowReload, args.RowNew);
+            var rowReload = await Reload(args.Row);
+            Data.RowCopy(rowReload, args.Row);
 
             result.IsHandled = true;
         }

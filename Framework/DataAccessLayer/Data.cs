@@ -808,38 +808,38 @@
         /// <summary>
         /// Update data record on database.
         /// </summary>
-        public static async Task UpdateAsync(Row row, Row rowNew, DatabaseEnum databaseEnum = DatabaseEnum.Database)
+        public static async Task UpdateAsync(Row rowOld, Row row, DatabaseEnum databaseEnum = DatabaseEnum.Database)
         {
-            UtilFramework.LogDebug(string.Format("UPDATE ({0})", row.GetType().Name));
+            UtilFramework.LogDebug(string.Format("UPDATE ({0})", rowOld.GetType().Name));
 
-            UtilFramework.Assert(row.GetType() == rowNew.GetType());
-            // if (Data.RowEqual(row, rowNew) == false) // See also: EntityState.Modified
+            UtilFramework.Assert(rowOld.GetType() == row.GetType());
+            // if (Data.RowEqual(rowOld, row) == false) // See also: EntityState.Modified
             {
                 switch (databaseEnum)
                 {
                     case DatabaseEnum.Database:
                         {
-                            row = Data.RowCopy(row); // Prevent modifications on SetValues(rowNew);
-                            DbContext dbContext = Data.DbContextInternalCreate(row.GetType(), isQuery: false);
-                            var tracking = dbContext.Attach(row);
-                            tracking.CurrentValues.SetValues(rowNew);
-                            tracking.State = EntityState.Modified; // Update also if row and rowNew are equal.
+                            rowOld = Data.RowCopy(rowOld); // Prevent modifications on SetValues(row);
+                            DbContext dbContext = Data.DbContextInternalCreate(rowOld.GetType(), isQuery: false);
+                            var tracking = dbContext.Attach(rowOld);
+                            tracking.CurrentValues.SetValues(row);
+                            tracking.State = EntityState.Modified; // Update also if rowOld and row are equal.
                             int count = await dbContext.SaveChangesAsync(); // Override method GridUpdateAsync(); for sql view.
                             UtilFramework.Assert(count == 1, "Update failed!");
                             break;
                         }
                     case DatabaseEnum.MemorySingleton:
                         {
-                            var rowList = Data.MemoryRowList(row.GetType(), databaseEnum);
-                            PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(row.GetType()).First(); // Assume first field is primary key.
-                            object idNew = propertyInfo.GetValue(row);
+                            var rowList = Data.MemoryRowList(rowOld.GetType(), databaseEnum);
+                            PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(rowOld.GetType()).First(); // Assume first field is primary key.
+                            object idNew = propertyInfo.GetValue(rowOld);
                             int updateCount = 0;
                             foreach (Row rowMemory in rowList.Cast<Row>())
                             {
                                 object id = propertyInfo.GetValue(rowMemory);
                                 if (object.Equals(id, idNew))
                                 {
-                                    Data.RowCopy(rowNew, rowMemory);
+                                    Data.RowCopy(row, rowMemory);
                                     updateCount += 1;
                                 }
                             }

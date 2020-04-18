@@ -886,7 +886,7 @@
 
         }
 
-        virtual internal Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)
+        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResult result)
         {
             return Task.FromResult(0);
         }
@@ -896,7 +896,7 @@
             public bool IsHandled;
         }
 
-        virtual internal Task InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum, InsertResult result)
+        virtual internal Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResult result)
         {
             return Task.FromResult(0);
         }
@@ -1172,9 +1172,9 @@
             public IQueryable<TRow> Query { get; set; }
         }
 
-        internal override Task UpdateInternalAsync(Row row, Row rowNew, DatabaseEnum databaseEnum, UpdateResult result)
+        internal override Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResult result)
         {
-            return UpdateAsync(new UpdateArgs { Row = (TRow)row, RowNew = (TRow)rowNew, DatabaseEnum = databaseEnum }, result);
+            return UpdateAsync(new UpdateArgs { RowOld = (TRow)rowOld, Row = (TRow)row, DatabaseEnum = databaseEnum }, result);
         }
 
         /// <summary>
@@ -1189,21 +1189,21 @@
         public class UpdateArgs
         {
             /// <summary>
-            /// Data row witch old data to update.
+            /// Gets RowOld. Data row with old data to update.
             /// </summary>
-            public TRow Row { get; internal set; }
+            public TRow RowOld { get; internal set; }
 
             /// <summary>
             /// New data row to save to database.
             /// </summary>
-            public TRow RowNew { get; internal set; }
+            public TRow Row { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
 
-        internal override Task InsertInternalAsync(Row rowNew, DatabaseEnum databaseEnum, InsertResult result)
+        internal override Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResult result)
         {
-            return InsertAsync(new InsertArgs { RowNew = (TRow)rowNew, DatabaseEnum = databaseEnum }, result);
+            return InsertAsync(new InsertArgs { Row = (TRow)row, DatabaseEnum = databaseEnum }, result);
         }
 
         /// <summary>
@@ -1218,9 +1218,9 @@
         public class InsertArgs
         {
             /// <summary>
-            /// Data row to insert. Set new primary key on this row.
+            /// Gets Row. Data row to insert. Set new primary key on this row.
             /// </summary>
-            public TRow RowNew { get; internal set; }
+            public TRow Row { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
@@ -1692,9 +1692,9 @@
         public bool IsVisibleScroll;
 
         /// <summary>
-        /// Gets or sets RowNew. Data row to update (index) or insert (new) into database.
+        /// Gets or sets Row. Data row to update (index) or insert (new) into database.
         /// </summary>
-        public Row RowNew;
+        public Row Row;
     }
 
     internal enum GridCellEnum

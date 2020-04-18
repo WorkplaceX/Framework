@@ -231,9 +231,9 @@
         private static GridCell RenderCellIndex(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList, Dictionary<string, Field> fieldList, GridCell cell, bool isTextLeave)
         {
             Row row;
-            if (rowState.RowNew != null)
+            if (rowState.Row != null)
             {
-                row = rowState.RowNew;
+                row = rowState.Row;
             }
             else
             {
@@ -813,7 +813,7 @@
         /// </summary>
         private static async Task ProcessGridLookupOpenAsync(Grid grid, GridRowState rowState, GridColumn column, GridCell cell)
         {
-            var query = grid.LookupQueryInternal(rowState.RowNew, column.FieldNameCSharp, cell.Text);
+            var query = grid.LookupQueryInternal(rowState.Row, column.FieldNameCSharp, cell.Text);
             if (query != null)
             {
                 GridLookupOpen(grid, rowState, column.FieldNameCSharp, cell);
@@ -1035,16 +1035,16 @@
         /// <summary>
         /// Save (Update).
         /// </summary>
-        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row row, Row rowNew, GridCell cell)
+        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row rowOld, Row row, GridCell cell)
         {
             // Save
             try
             {
                 Grid.UpdateResult result = new Grid.UpdateResult();
-                await grid.UpdateInternalAsync(row, rowNew, grid.DatabaseEnum, result);
+                await grid.UpdateInternalAsync(rowOld, row, grid.DatabaseEnum, result);
                 if (!result.IsHandled)
                 {
-                    await Data.UpdateAsync(row, rowNew, grid.DatabaseEnum);
+                    await Data.UpdateAsync(rowOld, row, grid.DatabaseEnum);
                 }
             }
             catch (Exception exception)
@@ -1056,18 +1056,18 @@
         /// <summary>
         /// Save (Insert).
         /// </summary>
-        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row rowNew, GridCell cell)
+        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row row, GridCell cell)
         {
             // Save
             try
             {
                 // Save custom
                 Grid.InsertResult result = new Grid.InsertResult();
-                await grid.InsertInternalAsync(rowNew, grid.DatabaseEnum, result);
+                await grid.InsertInternalAsync(row, grid.DatabaseEnum, result);
                 if (!result.IsHandled)
                 {
                     // Save default
-                    await Data.InsertAsync(rowNew, grid.DatabaseEnum);
+                    await Data.InsertAsync(row, grid.DatabaseEnum);
                 }
             }
             catch (Exception exception)
@@ -1227,22 +1227,22 @@
                 if (rowState.RowEnum == GridRowEnum.Index)
                 {
                     Row row = grid.RowList[rowState.RowId.Value - 1];
-                    if (rowState.RowNew == null)
+                    if (rowState.Row == null)
                     {
-                        rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
-                        Data.RowCopy(row, rowState.RowNew);
+                        rowState.Row = (Row)Activator.CreateInstance(grid.TypeRow);
+                        Data.RowCopy(row, rowState.Row);
                     }
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.RowNew, column, field, cell, requestJson);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, requestJson);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
-                        await ProcessCellIsModifyUpdateAsync(grid, row, rowState.RowNew, cell);
+                        await ProcessCellIsModifyUpdateAsync(grid, row, rowState.Row, cell);
                         if (cell.ErrorSave == null)
                         {
-                            Data.RowCopy(rowState.RowNew, row); // Copy new Id to 
+                            Data.RowCopy(rowState.Row, row); // Copy new Id to 
                             ProcessCellIsModifyReset(grid, cell);
                         }
                     }
@@ -1267,21 +1267,21 @@
                 // Parse New
                 if (rowState.RowEnum == GridRowEnum.New)
                 {
-                    if (rowState.RowNew == null)
+                    if (rowState.Row == null)
                     {
-                        rowState.RowNew = (Row)Activator.CreateInstance(grid.TypeRow);
+                        rowState.Row = (Row)Activator.CreateInstance(grid.TypeRow);
                     }
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.RowNew, column, field, cell, requestJson);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, requestJson);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
-                        await ProcessCellIsModifyInsertAsync(grid, rowState.RowNew, cell);
+                        await ProcessCellIsModifyInsertAsync(grid, rowState.Row, cell);
                         if (cell.ErrorSave == null)
                         {
-                            grid.RowList.Add(rowState.RowNew);
+                            grid.RowList.Add(rowState.Row);
                             rowState.RowId = grid.RowList.Count;
                             foreach (var item in grid.CellList)
                             {
@@ -1291,7 +1291,7 @@
                                     item.Placeholder = null;
                                 }
                             }
-                            rowState.RowNew = null;
+                            rowState.Row = null;
                             grid.RowStateList.Add(new GridRowState { Id = grid.RowStateList.Count + 1, RowEnum = GridRowEnum.New });
 
                             ProcessCellIsModifyReset(grid, cell);
@@ -1540,13 +1540,13 @@ namespace Framework.Session
                     if (rowState.RowEnum == GridRowEnum.Index)
                     {
                         Row row;
-                        if (rowState.RowNew == null)
+                        if (rowState.Row == null)
                         {
                             row = grid.RowList[rowState.RowId.Value - 1];
                         }
                         else
                         {
-                            row = rowState.RowNew;
+                            row = rowState.Row;
                         }
 
                         var field = fieldList[column.FieldNameCSharp];
