@@ -118,6 +118,10 @@
 
             public readonly Type TypeRow;
 
+            /// <summary>
+            /// Gets IsQuery. If true, EF Core DbQuery is used otherwise DbSet.
+            /// DbQuery is used for SELECT. DbSet for INSERT, UPDATE and DELETE.
+            /// </summary>
             public readonly bool IsQuery;
 
             public override int GetHashCode()
@@ -150,7 +154,7 @@
 
             /// <summary>
             /// Gets IsQuery. If true, EF Core DbQuery is used otherwise DbSet.
-            /// DbQuery is used for select. DbSet for insert, update and delete.
+            /// DbQuery is used for SELECT. DbSet for INSERT, UPDATE and DELETE.
             /// </summary>
             public readonly bool IsQuery;
 
