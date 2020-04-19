@@ -886,24 +886,44 @@
 
         }
 
-        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResult result)
+        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
             return Task.FromResult(0);
         }
 
-        public class UpdateResult
+        internal class UpdateResultInternal
         {
             public bool IsHandled;
+
+            public static Grid<TRow>.UpdateResult Convert<TRow>(UpdateResultInternal value, TRow row) where TRow : Row
+            {
+                return new Grid<TRow>.UpdateResult { Row = row, IsHandled = value.IsHandled };
+            }
+
+            public static void Convert<TRow>(Grid<TRow>.UpdateResult value, ref UpdateResultInternal result) where TRow : Row
+            {
+                result.IsHandled = value.IsHandled;
+            }
         }
 
-        virtual internal Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResult result)
+        virtual internal Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResultInternal result)
         {
             return Task.FromResult(0);
         }
 
-        public class InsertResult
+        internal class InsertResultInternal
         {
             public bool IsHandled;
+
+            public static Grid<TRow>.InsertResult Convert<TRow>(InsertResultInternal value, TRow row) where TRow : Row
+            {
+                return new Grid<TRow>.InsertResult { Row = row, IsHandled = value.IsHandled };
+            }
+
+            public static void Convert<TRow>(Grid<TRow>.InsertResult value, ref InsertResultInternal result) where TRow : Row
+            {
+                result.IsHandled = value.IsHandled;
+            }
         }
 
         virtual internal string CellTextInternal(Row row, string fieldName)
@@ -911,22 +931,22 @@
             return null;
         }
 
-        virtual internal void CellParseInternal(Row row, string fieldName, string text, CellParseResultInternal result)
+        virtual internal void CellParseInternal(Row row, string fieldName, string text, ParseResultInternal result)
         {
 
         }
 
-        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResultInternal result)
+        virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, ParseResultInternal result)
         {
             return Task.FromResult(0);
         }
 
-        virtual internal void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
+        virtual internal void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
         {
 
         }
 
-        internal class CellParseResultInternal
+        internal class ParseResultInternal
         {
             /// <summary>
             /// Gets or sets IsHandled. If true, framework does no further parsing of user entered text.
@@ -938,12 +958,12 @@
             /// </summary>
             public string ErrorParse;
 
-            public static Grid<TRow>.ParseResult Convert<TRow>(CellParseResultInternal value, TRow row) where TRow : Row
+            public static Grid<TRow>.ParseResult Convert<TRow>(ParseResultInternal value, TRow row) where TRow : Row
             {
                 return new Grid<TRow>.ParseResult { Row = row, ErrorParse = value.ErrorParse, IsHandled = value.IsHandled };
             }
 
-            public static void Convert<TRow>(Grid<TRow>.ParseResult value, ref CellParseResultInternal result) where TRow : Row
+            public static void Convert<TRow>(Grid<TRow>.ParseResult value, ref ParseResultInternal result) where TRow : Row
             {
                 result.ErrorParse = value.ErrorParse;
                 result.IsHandled = value.IsHandled;
@@ -1172,9 +1192,11 @@
             public IQueryable<TRow> Query { get; set; }
         }
 
-        internal override Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResult result)
+        internal override async Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
-            return UpdateAsync(new UpdateArgs { RowOld = (TRow)rowOld, Row = (TRow)row, DatabaseEnum = databaseEnum }, result);
+            UpdateResult resultLocal = UpdateResultInternal.Convert(result, (TRow)row);
+            await UpdateAsync(new UpdateArgs { RowOld = (TRow)rowOld, Row = (TRow)row, DatabaseEnum = databaseEnum }, resultLocal);
+            UpdateResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>
@@ -1194,16 +1216,31 @@
             public TRow RowOld { get; internal set; }
 
             /// <summary>
-            /// New data row to save to database.
+            /// Gets Row. New data row to save to database.
             /// </summary>
             public TRow Row { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
 
-        internal override Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResult result)
+        public class UpdateResult
         {
-            return InsertAsync(new InsertArgs { Row = (TRow)row, DatabaseEnum = databaseEnum }, result);
+            /// <summary>
+            /// Gets or sets IsHandled. If true, framework does not update data row.
+            /// </summary>
+            public bool IsHandled;
+
+            /// <summary>
+            /// Gets Row. New data row to save to database.
+            /// </summary>
+            public TRow Row { get; internal set; }
+        }
+
+        internal override async Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResultInternal result)
+        {
+            InsertResult resultLocal = InsertResultInternal.Convert(result, (TRow)row);
+            await InsertAsync(new InsertArgs { Row = (TRow)row, DatabaseEnum = databaseEnum }, resultLocal);
+            InsertResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>
@@ -1223,6 +1260,19 @@
             public TRow Row { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
+        }
+
+        public class InsertResult
+        {
+            /// <summary>
+            /// Gets or sets IsHandled. If true, framework does not insert data row.
+            /// </summary>
+            public bool IsHandled;
+
+            /// <summary>
+            /// Gets Row. Data row to insert. Set new primary key on this row.
+            /// </summary>
+            public TRow Row { get; internal set; }
         }
 
         /// <summary>
@@ -1250,11 +1300,11 @@
             return null;
         }
 
-        internal override void CellParseInternal(Row row, string fieldName, string text, CellParseResultInternal result)
+        internal override void CellParseInternal(Row row, string fieldName, string text, ParseResultInternal result)
         {
-            var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
+            var resultLocal = ParseResultInternal.Convert(result, (TRow)row);
             CellParse(new ParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
-            CellParseResultInternal.Convert(resultLocal, ref result);
+            ParseResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>
@@ -1302,11 +1352,11 @@
             public string ErrorParse;
         }
 
-        internal override async Task CellParseInternalAsync(Row row, string fieldName, string text, CellParseResultInternal result)
+        internal override async Task CellParseInternalAsync(Row row, string fieldName, string text, ParseResultInternal result)
         {
-            var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
+            var resultLocal = ParseResultInternal.Convert(result, (TRow)row);
             await CellParseAsync(new ParseArgs { Row = (TRow)row, FieldName = fieldName, Text = text }, resultLocal);
-            CellParseResultInternal.Convert(resultLocal, ref result);
+            ParseResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>
@@ -1319,11 +1369,11 @@
             return Task.FromResult(0);
         }
 
-        internal override void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, CellParseResultInternal result)
+        internal override void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
         {
-            var resultLocal = CellParseResultInternal.Convert(result, (TRow)row);
+            var resultLocal = ParseResultInternal.Convert(result, (TRow)row);
             CellParseFileUpload(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data, IsNew = rowEnum == GridRowEnum.New }, resultLocal);
-            CellParseResultInternal.Convert(resultLocal, ref result);
+            ParseResultInternal.Convert(resultLocal, ref result);
         }
 
         /// <summary>

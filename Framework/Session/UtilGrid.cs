@@ -975,7 +975,7 @@
                     }
                 }
                 // Parse custom
-                Grid.CellParseResultInternal result = new Grid.CellParseResultInternal();
+                Grid.ParseResultInternal result = new Grid.ParseResultInternal();
                 grid.CellParseInternal(row, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result); // Custom parse of user entered text.
                 if (result.IsHandled == false)
                 {
@@ -1040,7 +1040,7 @@
             // Save
             try
             {
-                Grid.UpdateResult result = new Grid.UpdateResult();
+                Grid.UpdateResultInternal result = new Grid.UpdateResultInternal();
                 await grid.UpdateInternalAsync(rowOld, row, grid.DatabaseEnum, result);
                 if (!result.IsHandled)
                 {
@@ -1062,7 +1062,7 @@
             try
             {
                 // Save custom
-                Grid.InsertResult result = new Grid.InsertResult();
+                Grid.InsertResultInternal result = new Grid.InsertResultInternal();
                 await grid.InsertInternalAsync(row, grid.DatabaseEnum, result);
                 if (!result.IsHandled)
                 {
