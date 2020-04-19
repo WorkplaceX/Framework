@@ -827,9 +827,11 @@
                             DbContext dbContext = Data.DbContextInternalCreate(rowOld.GetType(), isQuery: false);
                             var tracking = dbContext.Attach(rowOld);
                             tracking.CurrentValues.SetValues(row);
-                            tracking.State = EntityState.Modified; // Update also if rowOld and row are equal.
-                            int count = await dbContext.SaveChangesAsync(); // Override method GridUpdateAsync(); for sql view.
-                            UtilFramework.Assert(count == 1, "Update failed!");
+                            if (tracking.State == EntityState.Modified)
+                            {
+                                int count = await dbContext.SaveChangesAsync(); // Override method GridUpdateAsync(); for sql view.
+                                UtilFramework.Assert(count == 1, "Update failed!");
+                            }
                             break;
                         }
                     case DatabaseEnum.MemorySingleton:

@@ -562,6 +562,9 @@
             // RowList
             grid.RowList = rowListTask.Result;
 
+            // Truncate
+            grid.TruncateInternal(grid.RowList);
+
             // ColumnList
             grid.ColumnList = LoadColumnList(grid);
         }
@@ -613,6 +616,10 @@
 
             // Load row
             grid.RowList = await query.QueryExecuteAsync();
+
+            // Trunctae
+            grid.TruncateInternal(grid.RowList);
+
         }
 
         /// <summary>
@@ -1051,6 +1058,9 @@
             {
                 cell.ErrorSave = UtilFramework.ExceptionToString(exception);
             }
+
+            // Truncate
+            grid.TruncateInternal(new List<Row>(new Row[] { row }));
         }
 
         /// <summary>
@@ -1074,6 +1084,9 @@
             {
                 cell.ErrorSave = UtilFramework.ExceptionToString(exception);
             }
+
+            // Truncate
+            grid.TruncateInternal(new List<Row>(new Row[] { row }));
         }
 
         /// <summary>

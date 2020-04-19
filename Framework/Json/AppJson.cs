@@ -874,6 +874,14 @@
         }
 
         /// <summary>
+        /// Override this method to reduce session state size. Truncate big data cells in grid. Typically, big data cells are opened individually on a separate page.
+        /// </summary>
+        internal virtual void TruncateInternal(List<Row> rowList)
+        {
+
+        }
+
+        /// <summary>
         /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
         /// </summary>
         protected virtual internal Task RowSelectedAsync()
@@ -1164,6 +1172,7 @@
                 args.Query = Data.Query<TRow>();
             }
             QueryResult result = new QueryResult();
+            result.Query = args.Query; // Default query
             Query(args, result);
             return result.Query;
         }
@@ -1173,7 +1182,7 @@
         /// </summary>
         protected virtual void Query(QueryArgs args, QueryResult result)
         {
-            result.Query = args.Query; // Default query.
+
         }
 
         public class QueryArgs
@@ -1190,6 +1199,27 @@
             /// Gets or sets Query. Query used to load data grid.
             /// </summary>
             public IQueryable<TRow> Query { get; set; }
+        }
+
+        internal override void TruncateInternal(List<Row> rowList)
+        {
+            Truncate(new TruncateArgs { RowList = rowList.Cast<TRow>().ToList() });
+        }
+
+        /// <summary>
+        /// Override this method to reduce session state size. Truncate big data cells in grid. Typically, big data cells are opened individually on a separate page.
+        /// </summary>
+        protected virtual void Truncate(TruncateArgs args)
+        {
+
+        }
+
+        public class TruncateArgs
+        {
+            /// <summary>
+            /// Gets RowList. Truncate big data cells on these rows to reduce session state size.
+            /// </summary>
+            public List<TRow> RowList { get; internal set; }
         }
 
         internal override async Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResultInternal result)
