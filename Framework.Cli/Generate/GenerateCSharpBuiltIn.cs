@@ -72,7 +72,7 @@
                 }
 
                 // Use one "Database" and "DatabaseBuiltIn" namespace for Framework and Application
-                string classNameExtension = "Table"; // See also method CommandDeployDbBuiltInListInternal();
+                string classNameExtension = ""; // "Table"; // See also method CommandDeployDbBuiltInListInternal();
 
                 // Framework, Application
                 if (isFrameworkDb)
@@ -132,7 +132,7 @@
                 }
                 result.AppendLine(string.Format(" }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static {0} Row(IdNameEnum value)", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("        public static {0} Row(this IdNameEnum value)", builtIn.TableNameCSharp));
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            return RowList.Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).SingleOrDefault();"));
                 result.AppendLine(string.Format("        }}"));
