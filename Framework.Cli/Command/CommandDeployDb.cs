@@ -149,6 +149,8 @@
                     }
                 }
 
+                rowList = rowList.OrderBy(item => item.TableIdName).ThenBy(item => item.FieldNameCSharp).ToList();
+
                 var upsertItem = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, "Framework");
                 UtilDalUpsertBuiltIn.UpsertAsync(upsertItem, AppCli.AssemblyList()).Wait();
             }
