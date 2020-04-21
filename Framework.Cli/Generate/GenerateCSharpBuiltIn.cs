@@ -137,9 +137,14 @@
                 result.AppendLine(string.Format("            return RowList.Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).SingleOrDefault();"));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static IdNameEnum IdName(string idName)"));
+                result.AppendLine(string.Format("        public static IdNameEnum IdName(string value)"));
                 result.AppendLine(string.Format("        {{"));
-                result.AppendLine(string.Format("            return IdNameEnumAttribute.IdNameToEnum<IdNameEnum>(idName);"));
+                result.AppendLine(string.Format("            return IdNameEnumAttribute.IdNameToEnum<IdNameEnum>(value);"));
+                result.AppendLine(string.Format("        }}"));
+                result.AppendLine();
+                result.AppendLine(string.Format("        public static string IdName(this IdNameEnum value)"));
+                result.AppendLine(string.Format("        {{"));
+                result.AppendLine(string.Format("            return IdNameEnumAttribute.IdNameFromEnum(value);"));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
             }
