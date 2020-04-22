@@ -18,7 +18,7 @@
         /// <summary>
         /// Returns CommandOption flag.
         /// </summary>
-        public static bool OptionGet(CommandOption option)
+        public static bool OptionGet(this CommandOption option)
         {
             return option?.Value() == "on" == true;
         }

@@ -30,7 +30,7 @@
         {
             ConfigCli configCli = ConfigCli.Load();
 
-            if (optionSilent.Value() != "on")
+            if (optionSilent.OptionGet() == false && configCli.EnvironmentNameGet() != "DEV")
             {
                 if (UtilCli.ConsoleReadYesNo(string.Format("Generate CSharp code from {0} database?", configCli.EnvironmentName)) == false)
                 {
@@ -38,7 +38,7 @@
                 }
             }
 
-            bool isFrameworkDb = UtilCli.OptionGet(optionFramework);
+            bool isFrameworkDb = optionFramework.OptionGet();
             if (Script.Run(isFrameworkDb, AppCli))
             {
                 Console.WriteLine("Generate successful!");

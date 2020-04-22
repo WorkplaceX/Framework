@@ -46,6 +46,7 @@
                     // See also class IdNameEnumAttribute
                     result.AppendLine(string.Format("    using System.Linq;"));
                     result.AppendLine(string.Format("    using Framework.DataAccessLayer;"));
+                    result.AppendLine(string.Format("    using Framework.DataAccessLayer.BuiltIn;"));
                 }
                 result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
                 result.AppendLine();

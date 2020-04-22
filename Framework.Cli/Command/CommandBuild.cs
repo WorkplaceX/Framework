@@ -152,7 +152,7 @@
                 // Build Angular client (npm)
                 BuildAngular();
 
-                if (UtilCli.OptionGet(OptionClientOnly) == false)
+                if (OptionClientOnly.OptionGet() == false)
                 {
                     // Build .NET Core server (dotnet)
                     BuildServer();

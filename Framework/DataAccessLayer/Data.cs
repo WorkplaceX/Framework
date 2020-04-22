@@ -2377,23 +2377,16 @@
             {
                 string text = Convert.ToBase64String(((byte[])value));
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.Append("Convert.FromBase64String(");
+                String.Join(null, "", "");
+                stringBuilder.Append("Convert.FromBase64String(String.Join(null, \"\"");
                 var textList = UtilFramework.SplitChunk(text, 320);
-                bool isFirst = true;
                 foreach (var item in textList)
                 {
-                    if (isFirst)
-                    {
-                        isFirst = false;
-                    }
-                    else
-                    {
-                        stringBuilder.AppendLine(" +");
-                        stringBuilder.Append("                ");
-                    }
+                    stringBuilder.AppendLine(",");
+                    stringBuilder.Append("                ");
                     stringBuilder.Append($"\"{item}\"");
                 }
-                stringBuilder.Append(")");
+                stringBuilder.Append("))");
                 result = stringBuilder.ToString();
             }
             return result;

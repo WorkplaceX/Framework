@@ -171,7 +171,7 @@
         {
             ConfigCli configCli = ConfigCli.Load();
 
-            if (optionSilent.Value() != "on")
+            if (optionSilent.OptionGet() == false && configCli.EnvironmentNameGet() != "DEV")
             {
                 if (UtilCli.ConsoleReadYesNo(string.Format("Deploy to {0} database?", configCli.EnvironmentName)) == false)
                 {
@@ -179,7 +179,7 @@
                 }
             }
 
-            if (UtilCli.OptionGet(optionDrop))
+            if (optionDrop.OptionGet())
             {
                 // FolderNameDeployDb
                 string folderNameDeployDbFramework = UtilFramework.FolderName + "Framework/Framework.Cli/DeployDb/";

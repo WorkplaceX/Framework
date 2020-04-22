@@ -37,7 +37,7 @@
                 commandBuild.Execute();
             }
 
-            if (UtilCli.OptionGet(optionWatch))
+            if (optionWatch.OptionGet())
             {
                 ConfigCli configCli = ConfigCli.Load();
 
