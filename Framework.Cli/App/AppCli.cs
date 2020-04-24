@@ -252,13 +252,13 @@
 
             // FrameworkConfigGridBuiltIn
             {
-                var rowList = FrameworkConfigGridBuiltInTableFrameworkCli.RowList;
+                var rowList = FrameworkConfigGridBuiltInFrameworkCli.RowList;
 
                 // Read FrameworkConfigGridBuiltIn.RowListList from Application.Cli project.
                 string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigGridBuiltInApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInTableFrameworkCli.RowList));
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInFrameworkCli.RowList));
                 var rowApplicationCliList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
@@ -267,13 +267,13 @@
 
             // FrameworkConfigFieldBuiltIn
             {
-                var rowList = FrameworkConfigFieldBuiltInTableFrameworkCli.RowList;
+                var rowList = FrameworkConfigFieldBuiltInFrameworkCli.RowList;
 
                 // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
                 string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigFieldBuiltInApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInTableFrameworkCli.RowList));
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInFrameworkCli.RowList));
                 var rowApplicationCliList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 

@@ -233,6 +233,19 @@ namespace Database.dbo
         public bool? IsExist { get; set; }
     }
 
+    [SqlTable("dbo", "FrameworkDeployDb")]
+    public class FrameworkDeployDb : Row
+    {
+        [SqlField("Id", true, FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("FileName", FrameworkTypeEnum.Nvarcahr)]
+        public string FileName { get; set; }
+
+        [SqlField("Date", FrameworkTypeEnum.Datetime2)]
+        public DateTime? Date { get; set; }
+    }
+
     [SqlTable("dbo", "FrameworkField")]
     public class FrameworkField : Row
     {
@@ -275,19 +288,6 @@ namespace Database.dbo
 
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }
-    }
-
-    [SqlTable("dbo", "FrameworkDeployDb")]
-    public class FrameworkDeployDb : Row
-    {
-        [SqlField("Id", true, FrameworkTypeEnum.Int)]
-        public int Id { get; set; }
-
-        [SqlField("FileName", FrameworkTypeEnum.Nvarcahr)]
-        public string FileName { get; set; }
-
-        [SqlField("Date", FrameworkTypeEnum.Datetime2)]
-        public DateTime? Date { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkTable")]

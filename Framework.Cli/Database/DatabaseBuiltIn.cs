@@ -2,10 +2,12 @@
 
 namespace DatabaseBuiltIn.dbo
 {
+    using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using Database.dbo;
 
-    public static class FrameworkConfigGridBuiltInTableFrameworkCli
+    public static class FrameworkConfigGridBuiltInFrameworkCli
     {
         public static List<FrameworkConfigGridBuiltIn> RowList
         {
@@ -19,7 +21,7 @@ namespace DatabaseBuiltIn.dbo
         }
     }
 
-    public static class FrameworkConfigFieldBuiltInTableFrameworkCli
+    public static class FrameworkConfigFieldBuiltInFrameworkCli
     {
         public static List<FrameworkConfigFieldBuiltIn> RowList
         {
@@ -31,7 +33,7 @@ namespace DatabaseBuiltIn.dbo
                 result.Add(new FrameworkConfigFieldBuiltIn() { Id = 3, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 44, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigFieldIsReadOnly", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigFieldIsReadOnly", Text = "Readonly", Description = "Readonly", IsVisible = null, IsReadOnly = null, Sort = null, IsExist = true });
                 result.Add(new FrameworkConfigFieldBuiltIn() { Id = 4, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 43, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigFieldIsVisible", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigFieldIsVisible", Text = "Visible", Description = null, IsVisible = null, IsReadOnly = null, Sort = null, IsExist = true });
                 result.Add(new FrameworkConfigFieldBuiltIn() { Id = 5, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 45, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigFieldSort", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigFieldSort", Text = "Sort", Description = null, IsVisible = null, IsReadOnly = null, Sort = null, IsExist = true });
-                result.Add(new FrameworkConfigFieldBuiltIn() { Id = 6, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 41, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigFieldText", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigFieldText", Text = "Text", Description = null, IsVisible = null, IsReadOnly = null, Sort = null, IsExist = false });
+                result.Add(new FrameworkConfigFieldBuiltIn() { Id = 6, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 41, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigFieldText", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigFieldText", Text = "Text", Description = null, IsVisible = null, IsReadOnly = null, Sort = null, IsExist = true });
                 result.Add(new FrameworkConfigFieldBuiltIn() { Id = 7, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 30, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigGridConfigName", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigGridConfigName", Text = null, Description = null, IsVisible = false, IsReadOnly = null, Sort = null, IsExist = true });
                 result.Add(new FrameworkConfigFieldBuiltIn() { Id = 8, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 31, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigGridIsExist", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigGridIsExist", Text = null, Description = null, IsVisible = false, IsReadOnly = null, Sort = null, IsExist = true });
                 result.Add(new FrameworkConfigFieldBuiltIn() { Id = 9, ConfigGridId = 1, ConfigGridIdName = "dbo.FrameworkConfigFieldDisplay; ", FieldId = 28, FieldIdName = "dbo.FrameworkConfigFieldDisplay; ConfigGridTableIdName", InstanceName = null, TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, FieldNameCSharp = "ConfigGridTableIdName", Text = null, Description = null, IsVisible = false, IsReadOnly = null, Sort = null, IsExist = true });
