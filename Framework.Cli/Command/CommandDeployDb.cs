@@ -161,7 +161,7 @@
         /// </summary>
         private void BuiltIn()
         {
-            var builtInList = AppCli.CommandDeployDbBuiltInListInternal();
+            var builtInList = AppCli.CommandDeployDbBuiltInInternal();
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
 
             UtilDalUpsertBuiltIn.UpsertAsync(builtInList.Result, assemblyList).Wait();

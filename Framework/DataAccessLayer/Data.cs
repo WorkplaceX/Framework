@@ -649,7 +649,7 @@
         /// <summary>
         /// Execute query and select data from database.
         /// </summary>
-        public static List<Row> QueryExecute(this IQueryable query)
+        internal static List<Row> QueryExecute(this IQueryable query)
         {
             return query.ToDynamicList().Cast<Row>().ToList();
         }
@@ -657,8 +657,9 @@
         /// <summary>
         /// Execute query and select data from database.
         /// </summary>
-        public static List<TRow> QueryExecute<TRow>(this IQueryable<TRow> query) where TRow : Row
+        internal static List<TRow> QueryExecute<TRow>(this IQueryable<TRow> query) where TRow : Row
         {
+            var d = query.ToList();
             return query.ToDynamicList().Cast<TRow>().ToList();
         }
 
@@ -1075,7 +1076,7 @@
 
     internal class UtilDalUpsertBuiltIn
     {
-        private class FieldBuiltIn
+        internal class FieldBuiltIn
         {
             /// <summary>
             /// Gets or sets Field. See also method UtilDalType.TypeRowToFieldList();
@@ -1119,7 +1120,7 @@
         /// <param name="typeRow">Data row type.</param>
         /// <param name="tableNameSqlReferencePrefix">When searching for reference tables use this prefix. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
         /// <param name="assemblyList">Find table names in these assemblies.</param>
-        private static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
+        internal static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
         {
             List<FieldBuiltIn> result = new List<FieldBuiltIn>();
             var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
@@ -1353,24 +1354,24 @@
             }
 
             /// <summary>
-            /// Gets or sets TypeRow.
+            /// Gets TypeRow.
             /// </summary>
             public readonly Type TypeRow;
 
             /// <summary>
-            /// Gets or sets RowList. Rows to insert or update.
+            /// Gets RowList. Rows to insert or update.
             /// </summary>
             public readonly List<Row> RowList;
 
             /// <summary>
-            /// Gets or sets FieldNameKeyList. Sql unique index for upsert to identify record. For example (UserId, RoleId).
+            /// Gets FieldNameKeyList. Sql unique index for upsert to identify record. For example (UserId, RoleId).
             /// </summary>
             public readonly string[] FieldNameKeyList;
 
             /// <summary>
-            /// Gets or sets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column UserIdName is referenced to table LoginUserBuiltIn if exists.
+            /// Gets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column (UserIdName or MailUserIdName) is referenced to table LoginUserBuiltIn if exists.
             /// </summary>
-            public readonly string TableNameSqlReferencePrefix;
+            public string TableNameSqlReferencePrefix { get; internal set; }
         }
 
         /// <summary>
@@ -1480,20 +1481,20 @@
         }
 
         /// <summary>
-        /// Return (TypeRow, TableNameCSharp), if declared in Framework assembly.
+        /// Returns TybleNameCSharp declared in assembly.
         /// </summary>
-        /// <param name="tableNameCSharpList">For example "dbo.FrameworkScript"</param>
-        internal static Dictionary<Type, string> TypeRowIsFrameworkDbFromTableNameCSharpList(List<string> tableNameCSharpList)
+        /// <returns>(TypeRow, TybleNameCSharp)</returns>
+        internal static Dictionary<Type, string> TableNameCSharpList(params Assembly[] assemblyList)
         {
             var result = new Dictionary<Type, string>();
-            foreach (Type type in typeof(Data).Assembly.GetTypes())
+            foreach (Assembly assembly in assemblyList)
             {
-                if (type.IsSubclassOf(typeof(Row))) // TypeRow
+                foreach (Type type in assembly.GetTypes())
                 {
-                    Type typeRow = type;
-                    string tableNameCSharp = TypeRowToTableNameCSharp(typeRow);
-                    if (tableNameCSharpList.Contains(tableNameCSharp))
+                    if (type.IsSubclassOf(typeof(Row))) // TypeRow
                     {
+                        Type typeRow = type;
+                        string tableNameCSharp = TypeRowToTableNameCSharp(typeRow);
                         result.Add(typeRow, tableNameCSharp);
                     }
                 }
@@ -1673,20 +1674,20 @@
         }
 
         /// <summary>
-        /// Returns (TableNameCSharp, FieldNameCSharp) from typeRowList. See also method TypeRowFromTableNameCSharpList.
+        /// Returns FieldNameCSharp declared in assembly.
         /// </summary>
-        /// <param name="typeRowList">(TypeRow, TableNameCSharp).</param>
-        internal static List<Tuple<string, string>> FieldNameCSharpFromTypeRowList(Dictionary<Type, string> typeRowList)
+        /// <returns>(TableNameCSharp, FieldNameCSharp)</returns>
+        internal static List<(string, string)> FieldNameCSharpList(params Assembly[] assemblyList)
         {
-            var result = new List<Tuple<string, string>>();
-            foreach (var item in typeRowList)
+            var result = new List<(string, string)>();
+            foreach (var item in TableNameCSharpList(assemblyList))
             {
                 Type typeRow = item.Key;
                 string tableNameCSharp = item.Value;
                 var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
                 foreach (var field in fieldList)
                 {
-                    result.Add(new Tuple<string, string>(tableNameCSharp, field.FieldNameCSharp));
+                    result.Add((tableNameCSharp, field.FieldNameCSharp));
                 }
             }
             return result;

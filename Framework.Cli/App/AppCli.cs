@@ -246,7 +246,7 @@
         /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
-        protected internal DeployDbBuiltInResult CommandDeployDbBuiltInListInternal()
+        internal DeployDbBuiltInResult CommandDeployDbBuiltInInternal()
         {
             var result = new DeployDbBuiltInResult();
 
@@ -262,7 +262,7 @@
                 var rowApplicationCliList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
-                result.Add(rowList, new string[] { "TableId", "ConfigName" }, "Framework");
+                result.Add(rowList, new string[] { "TableId", "ConfigName" });
             }
 
             // FrameworkConfigFieldBuiltIn
@@ -277,11 +277,24 @@
                 var rowApplicationCliList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
-                result.Add(rowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" }, "Framework");
+                result.Add(rowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" });
             }
 
-            // Application (custom) BuiltIn data rows to deploy to database.
+            // Application (custom) BuiltIn data rows to deploy to database
             CommandDeployDbBuiltIn(result);
+
+            // Copy TableNameSqlReferencePrefix from GenerateBuiltIn to DeployDbBuiltIn
+            var resultGenerate = new GenerateBuiltInResult();
+            CommandGenerateBuiltIn(resultGenerate);
+            var tableNameSqlReferencePrefixList = resultGenerate.TableNameSqlReferencePrefixList;
+            foreach (var item in result.Result)
+            {
+                if (tableNameSqlReferencePrefixList.ContainsKey(item.TypeRow))
+                {
+                    UtilFramework.Assert(item.TableNameSqlReferencePrefix == null);
+                    item.TableNameSqlReferencePrefix = tableNameSqlReferencePrefixList[item.TypeRow];
+                }
+            }
 
             return result;
         }
@@ -295,35 +308,35 @@
 
             internal List<UtilDalUpsertBuiltIn.UpsertItem> Result;
 
-            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix = null) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList) where TRow : Row
             {
-                var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, tableNameSqlReferencePrefix);
+                var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, tableNameSqlReferencePrefix: null); // For TableNameSqlReferencePrefix definition see also class GenerateBuiltInResult.
                 Result.Add(result);
             }
 
-            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, string tableNameSqlReferencePrefix = null) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, string fieldNameKey) where TRow : Row
             {
-                Add(rowList, new string[] { fieldNameKey }, tableNameSqlReferencePrefix);
+                Add(rowList, new string[] { fieldNameKey });
             }
 
             /// <summary>
             /// Add hierarchical list with Id and ParentId column.
             /// </summary>
-            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, string tableNameSqlReferencePrefix = null) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
             {
                 List<TRow> rowLevelList = null;
                 while (OrderByHierarchical(rowList, idSelector, parentIdSelector, sortSelector, ref rowLevelList)) // Step through all levels.
                 {
-                    Add<TRow>(rowLevelList, fieldNameKeyList, tableNameSqlReferencePrefix);
+                    Add<TRow>(rowLevelList, fieldNameKeyList);
                 }
             }
 
             /// <summary>
             /// Overload.
             /// </summary>
-            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, string tableNameSqlReferencePrefix = null) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
             {
-                Add(rowList, new string[] { fieldNameKey }, idSelector, parentIdSelector, sortSelector, tableNameSqlReferencePrefix);
+                Add(rowList, new string[] { fieldNameKey }, idSelector, parentIdSelector, sortSelector);
             }
 
             private static bool OrderByHierarchical<TRow>(List<TRow> rowAllList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, ref List<TRow> rowLevelList) where TRow : Row
@@ -344,66 +357,72 @@
         /// <summary>
         /// Returns BuiltIn rows to generate CSharp code.
         /// </summary>
-        protected internal GenerateBuiltInResult CommandGenerateBuiltInListInternal()
+        internal GenerateBuiltInResult CommandGenerateBuiltInListInternal()
         {
             var result = new GenerateBuiltInResult();
 
+            var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(typeof(Data).Assembly); // TableNameCSharp declared in Framework assembly.
+            var tableNameCSharpApplicationList = UtilDalType.TableNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase); // TableNameCSharp declared in Application assembly.
+            var fieldNameCSharpFrameworkList = UtilDalType.FieldNameCSharpList(typeof(Data).Assembly).Select(item => item.Item1 + "/" + item.Item2); // FieldNameCSharp declared in Framework assembly
+            var fieldNameCSharpApplicationList = UtilDalType.FieldNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase).Select(item => item.Item1 + "/" + item.Item2); // FieldNameCSharp declared in Framework assembly
+
             // FrameworkConfigGridBuiltIn
             {
-                var rowList = Data.Query<FrameworkConfigGridBuiltIn>().OrderBy(item => item.IdName).ToList<FrameworkConfigGridBuiltIn>();
-                var typeRowIsFrameworkDbList = UtilDalType.TypeRowIsFrameworkDbFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
+                var rowList = Data.Query<FrameworkConfigGridBuiltIn>();
+                
                 // Framework (.\cli.cmd generate -f)
                 {
-                    var rowFilterList = rowList.Where(item => typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Framework.
+                    var rowFilterList = rowList.Where(item => tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter Framework.
+                    rowFilterList = rowFilterList.OrderBy(item => item.IdName);
                     result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigGridBuiltIn),
-                        rowList: rowFilterList.ToList<Row>()
+                        query: rowFilterList,
+                        tableNameSqlReferencePrefix: "Framework"
                     );
                 }
                 // Application (.\cli.cmd generate)
                 {
-                    List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
-                    var typeRowList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
-                    var rowFilterList = rowList.Where(item => !typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp) && typeRowList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Application.
+                    var rowFilterList = rowList.Where(item => !tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp) && tableNameCSharpApplicationList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter (not Framework and Application).
+                    rowFilterList = rowFilterList.OrderBy(item => item.IdName);
                     result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigGridBuiltIn),
-                        rowList: rowFilterList.ToList<Row>()
+                        query: rowFilterList,
+                        tableNameSqlReferencePrefix: "Framework"
                     );
                 }
             }
 
             // FrameworkConfigFieldBuiltIn
             {
-                var rowList = Data.Query<FrameworkConfigFieldBuiltIn>().OrderBy(item => item.FieldIdName).ToList<FrameworkConfigFieldBuiltIn>();
-                var typeRowIsFrameworkDbList = UtilDalType.TypeRowIsFrameworkDbFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList()); // TableNameCSharp declared in Framework assembly.
+                var rowList = Data.Query<FrameworkConfigFieldBuiltIn>();
                 // Framework (.\cli.cmd generate -f)
                 {
-                    var fieldNameCSharpList = UtilDalType.FieldNameCSharpFromTypeRowList(typeRowIsFrameworkDbList);
-                    var rowFilterList = rowList.Where(item => typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter FrameworkDb.
-                    rowFilterList = rowList.Where(item => fieldNameCSharpList.Contains(new Tuple<string, string>(item.TableNameCSharp, item.FieldNameCSharp))).ToList(); // Filter FieldNameCSharp declared in Framework assembly.
+                    var rowFilterList = rowList.Where(item => tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter FrameworkDb.
+                    rowFilterList = rowList.Where(item => fieldNameCSharpFrameworkList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Framework assembly.
+                    rowFilterList = rowFilterList.OrderBy(item => item.FieldIdName);
                     result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigFieldBuiltIn),
-                        rowList: rowFilterList.ToList<Row>()
+                        query: rowFilterList,
+                        tableNameSqlReferencePrefix: "Framework"
                     );
                 }
                 // Application (.\cli.cmd generate)
                 {
-                    List<Assembly> assemblyList = new List<Assembly>(new Assembly[] { AssemblyApplication, AssemblyApplicationDatabase });
-                    var typeRowList = UtilDalType.TypeRowFromTableNameCSharpList(rowList.Select(item => item.TableNameCSharp).ToList(), assemblyList); // TableNameCSharp declared in Application assembly.
-                    var fieldNameCSharpList = UtilDalType.FieldNameCSharpFromTypeRowList(typeRowList);
-                    var rowFilterList = rowList.Where(item => !typeRowIsFrameworkDbList.ContainsValue(item.TableNameCSharp) && typeRowList.ContainsValue(item.TableNameCSharp)).ToList(); // Filter Application.
-                    rowFilterList = rowList.Where(item => fieldNameCSharpList.Contains(new Tuple<string, string>(item.TableNameCSharp, item.FieldNameCSharp))).ToList(); // Filter FieldNameCSharp declared in Application assembly.
+                    var rowFilterList = rowList.Where(item => !tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp) && tableNameCSharpApplicationList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter (not Framework and Application).
+                    rowFilterList = rowList.Where(item => fieldNameCSharpApplicationList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Application assembly.
+                    rowFilterList = rowFilterList.OrderBy(item => item.FieldIdName);
                     result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
                         typeRow: typeof(FrameworkConfigFieldBuiltIn),
-                        rowList: rowFilterList.ToList<Row>()
+                        query: rowFilterList,
+                        tableNameSqlReferencePrefix: "Framework"
                     );
                 }
             }
@@ -432,27 +451,23 @@
             /// <summary>
             /// Constructor for Framework and Application.
             /// </summary>
-            internal GenerateBuiltInItem(bool isFrameworkDb, bool isApplication, Type typeRow, List<Row> rowList)
+            internal GenerateBuiltInItem(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query, string tableNameSqlReferencePrefix)
             {
                 this.IsFrameworkDb = isFrameworkDb;
                 this.IsApplication = isApplication;
                 this.TypeRow = typeRow;
-                this.RowList = rowList;
+                this.Query = query;
+                this.TableNameSqlReferencePrefix = tableNameSqlReferencePrefix;
                 UtilDalType.TypeRowToTableNameSql(TypeRow, out string schemaNameSql, out string tableNameSql);
                 this.SchemaNameCSharp = UtilDalType.TypeRowToSchemaNameCSharp(TypeRow);
                 this.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharpWithoutSchema(TypeRow);
-
-                foreach (var row in RowList)
-                {
-                    UtilFramework.Assert(row.GetType() == TypeRow);
-                }
             }
 
             /// <summary>
             /// Constructor for Application.
             /// </summary>
-            private GenerateBuiltInItem(bool isApplication, Type typeRow, List<Row> rowList) 
-                : this(false, isApplication, typeRow, rowList)
+            private GenerateBuiltInItem(bool isApplication, Type typeRow, IQueryable<Row> query, string tableNameSqlReferencePrefix) 
+                : this(false, isApplication, typeRow, query, tableNameSqlReferencePrefix)
             {
 
             }
@@ -461,9 +476,9 @@
             /// Constructor for GenerateBuiltInItem.
             /// </summary>
             /// <param name="isApplication">If true, RowList will be available at runtime as BuiltIn CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
-            public static GenerateBuiltInItem Create<TRow>(List<TRow> rowList, bool isApplication = false) where TRow : Row
+            public static GenerateBuiltInItem Create<TRow>(IQueryable<TRow> query, bool isApplication = false, string tableNameSqlReferencePrefix = null) where TRow : Row
             {
-                return new GenerateBuiltInItem(isApplication, typeof(TRow), rowList.Cast<Row>().ToList());
+                return new GenerateBuiltInItem(isApplication, typeof(TRow), query.Cast<Row>(), tableNameSqlReferencePrefix);
             }
 
             /// <summary>
@@ -492,9 +507,30 @@
             public readonly string TableNameCSharp;
 
             /// <summary>
+            /// Gets Query. Items need to be all of same TypeRow.
+            /// </summary>
+            public readonly IQueryable<Row> Query;
+
+            /// <summary>
+            /// Gets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column (UserIdName or MailUserIdName) is referenced to table LoginUserBuiltIn if exists.
+            /// </summary>
+            public readonly string TableNameSqlReferencePrefix;
+
+            /// <summary>
             /// Gets RowList. Items need to be all of same TypeRow.
             /// </summary>
-            public readonly List<Row> RowList;
+            public List<Row> RowList
+            {
+                get
+                {
+                    List<Row> result = Query.QueryExecute();
+                    foreach (var item in result)
+                    {
+                        UtilFramework.Assert(item.GetType() == TypeRow);
+                    }
+                    return result;
+                }
+            }
         }
 
         /// <summary>
@@ -509,20 +545,49 @@
 
             internal List<GenerateBuiltInItem> Result;
 
-            internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, List<Row> rowList)
+            internal Dictionary<Type, string> TableNameSqlReferencePrefixList
             {
-                var result = new GenerateBuiltInItem(isFrameworkDb, isApplication, typeRow, rowList);
-                Result.Add(result);
+                get
+                {
+                    var result = new Dictionary<Type, string>();
+                    foreach (var item in Result)
+                    {
+                        if (result.ContainsKey(item.TypeRow))
+                        {
+                            UtilFramework.Assert(result[item.TypeRow] == item.TableNameSqlReferencePrefix);
+                        }
+                        else
+                        {
+                            result.Add(item.TypeRow, item.TableNameSqlReferencePrefix);
+                        }
+                    }
+                    return result;
+                }
+            }
+
+            private void ResultAdd(GenerateBuiltInItem value)
+            {
+                foreach (var item in Result.Where(item => item.TypeRow == value.TypeRow))
+                {
+                    UtilFramework.Assert(item.TableNameSqlReferencePrefix == value.TableNameSqlReferencePrefix, string.Format("Inconsistent TableNameSqlReferencePrefix! ({0}; {1}; {2})", UtilFramework.TypeToName(value.TypeRow), value.TableNameSqlReferencePrefix, item.TableNameSqlReferencePrefix));
+                }
+                Result.Add(value);
+            }
+
+            internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query, string tableNameSqlReferencePrefix)
+            {
+                var result = new GenerateBuiltInItem(isFrameworkDb, isApplication, typeRow, query, tableNameSqlReferencePrefix);
+                ResultAdd(result);
             }
 
             /// <summary>
             /// Add from database loaded BuiltIn rows to generate CSharp code.
             /// </summary>
             /// <param name="isApplication">If true, RowList will be available at runtime as BuiltIn CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
-            public void Add<TRow>(List<TRow> rowList, bool isApplication = false) where TRow : Row
+            public void Add<TRow>(IQueryable<TRow> query, bool isApplication = false, string tableNameSqlReferencePrefix = null) where TRow : Row
             {
-                var result = GenerateBuiltInItem.Create(rowList, isApplication);
-                Result.Add(result);
+                var result = GenerateBuiltInItem.Create(query, isApplication, tableNameSqlReferencePrefix);
+                ResultAdd(result);
             }
         }
     }

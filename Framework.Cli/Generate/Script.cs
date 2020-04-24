@@ -5,6 +5,8 @@
     using System.Collections.Generic;
     using Microsoft.Data.SqlClient;
     using static Framework.Cli.AppCli;
+    using Framework.DataAccessLayer;
+    using System.Linq;
 
     /// <summary>
     /// Generate CSharp code for database tables.
@@ -48,6 +50,7 @@
             }
             if (generateBuiltInResult != null)
             {
+                Run(generateBuiltInResult, appCli);
                 new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: generateBuiltInResult.Result);
                 new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: generateBuiltInResult.Result);
                 if (isFrameworkDb == false)
@@ -64,6 +67,39 @@
             }
 
             return isSuccessful;
+        }
+
+        /// <summary>
+        /// Console log table relation.
+        /// </summary>
+        private static void Run(GenerateBuiltInResult generateBuiltInResult, AppCli appCli)
+        {
+            bool isFirst = true;
+            List<string> result = new List<string>();
+            foreach (var item in generateBuiltInResult.Result)
+            {
+                var fieldList = UtilDalUpsertBuiltIn.FieldBuiltInList(item.TypeRow, item.TableNameSqlReferencePrefix, appCli.AssemblyList(true, true));
+                foreach (var field in fieldList)
+                {
+                    if (field.IsId)
+                    {
+                        UtilDalType.TypeRowToTableNameSql(item.TypeRow, out string schemaNameSql, out string tableNameSql);
+                        UtilDalType.TypeRowToTableNameSql(field.TypeRowReference, out string schemaNameSqlReference, out string tableNameSqlReference);
+
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                            Console.WriteLine("BuiltIn Table Relation");
+                        }
+                        result.Add(string.Format("[{0}].[{1}].[{2}] --> [{3}].[{4}]", schemaNameSql, tableNameSql, field.FieldNameIdSql, schemaNameSqlReference, tableNameSqlReference));
+                    }
+                }
+            }
+
+            foreach (var item in result.Distinct().OrderBy(item => item))
+            {
+                Console.WriteLine(item);
+            }
         }
     }
 }
