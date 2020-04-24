@@ -7,7 +7,10 @@ namespace Framework.Test
         static void Main(string[] args)
         {
             UnitTest.Run();
+
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Unit tests successful!");
+            Console.ResetColor();
         }
     }
 }

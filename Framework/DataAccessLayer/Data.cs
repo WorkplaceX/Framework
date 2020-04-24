@@ -1115,6 +1115,42 @@
         }
 
         /// <summary>
+        /// Returns reference table.
+        /// </summary>
+        private static Type TypeRowReference(Type typeRow, string fieldNameIdSql, string tableNameSqlReferencePrefix, Dictionary<Type, (string SchemaNameSql, string TableNameSql)> tableNameWithSchemaSqlList)
+        {
+            // TypeRow
+            UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
+
+            // Field
+            UtilFramework.Assert(fieldNameIdSql.EndsWith("Id"));
+            var fieldNameWithoutId = new UtilFramework.CamelCase(fieldNameIdSql.Substring(0, fieldNameIdSql.Length - "Id".Length));
+
+            // Reference
+            if (tableNameSqlReferencePrefix == null)
+            {
+                tableNameSqlReferencePrefix = "";
+            }
+            var tableReferenceList = tableNameWithSchemaSqlList.Where(item => item.Value.SchemaNameSql == schemaNameSql); // Filter Schema
+            tableReferenceList = tableReferenceList.Where(item => item.Value.TableNameSql.StartsWith(tableNameSqlReferencePrefix)); // Filter tableNameSqlReferencePrefix
+            tableReferenceList = tableReferenceList.Where(item => fieldNameWithoutId.EndsWith(item.Value.TableNameSql.Substring(tableNameSqlReferencePrefix.Length)));
+
+            // Result
+            Type result = null;
+            var tableReference = tableReferenceList.SingleOrDefault().Value;
+            if (tableReference != default(ValueTuple<string, string>))
+            {
+                tableReference.TableNameSql += "BuiltIn";
+                result = tableNameWithSchemaSqlList.Where(item => item.Value == tableReference).SingleOrDefault().Key;
+                if (result == null)
+                {
+                    throw new Exception(string.Format("Referenced sql view not found! ([{0}].[{1}])", tableReference.SchemaNameSql, tableReference.TableNameSql));
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns list of FieldBuiltIn for TypeRow.
         /// </summary>
         /// <param name="typeRow">Data row type.</param>
@@ -1125,7 +1161,7 @@
             List<FieldBuiltIn> result = new List<FieldBuiltIn>();
             var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
             var fieldNameSqlList = fieldList.Select(item => item.FieldNameSql).ToList();
-            var tableNameSqlList = UtilDalType.TableNameSqlList(assemblyList);
+            var tableNameWithSchemaSqlList = UtilDalType.TableNameWithSchemaSqlList(assemblyList);
 
             // Populate result
             foreach (var field in fieldList)
@@ -1153,10 +1189,9 @@
                     if (fieldNameSqlList.Contains(fieldNameIdSql))
                     {
                         UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-                        string tableNameWithSchemaSqlBuiltIn = tableNameSqlReferencePrefix + fieldNameSql.Substring(0, fieldNameSql.Length - "IdName".Length) + "BuiltIn"; // Reference table
-                        tableNameWithSchemaSqlBuiltIn = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameWithSchemaSqlBuiltIn);
-                        var tableReferenceList = tableNameSqlList.Where(item => item.Value == tableNameWithSchemaSqlBuiltIn).ToList();
-                        Type typeRowReference = tableReferenceList.SingleOrDefault().Key;
+                        // Find reference table
+                        Type typeRowReference = TypeRowReference(typeRow, fieldNameIdSql, tableNameSqlReferencePrefix, tableNameWithSchemaSqlList);
+
                         bool isParentId = false;
                         if (fieldNameSql == "ParentIdName") // BuiltIn naming convention.
                         {
@@ -1477,7 +1512,7 @@
         /// </summary>
         internal static bool TypeRowIsFrameworkDb(Type typeRow)
         {
-            return typeRow.GetTypeInfo().Assembly == typeof(Data).Assembly; // Type is declared in Framework assembly.
+            return typeRow.GetTypeInfo().Assembly == UtilFramework.AssemblyFramework; // Type is declared in Framework assembly.
         }
 
         /// <summary>
@@ -1611,6 +1646,21 @@
         }
 
         /// <summary>
+        /// Returns (TypeRow, TableNameWithSchemaSql) list.
+        /// </summary>
+        internal static Dictionary<Type, (string SchemaNameSql, string TableNameSql)> TableNameWithSchemaSqlList(List<Assembly> assemblyList)
+        {
+            var result = new Dictionary<Type, (string SchemaNameSql, string TableNameSql)>();
+            List<Type> typeRowList = TypeRowList(assemblyList);
+            foreach (Type typeRow in typeRowList)
+            {
+                TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
+                result.Add(typeRow, (schemaNameSql, tableNameSql));
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Returns true, if typeRow contains sql information.
         /// </summary>
         internal static bool TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql)
@@ -1677,9 +1727,9 @@
         /// Returns FieldNameCSharp declared in assembly.
         /// </summary>
         /// <returns>(TableNameCSharp, FieldNameCSharp)</returns>
-        internal static List<(string, string)> FieldNameCSharpList(params Assembly[] assemblyList)
+        internal static List<(string TableNameCSharp, string FieldNameCSharp)> FieldNameCSharpList(params Assembly[] assemblyList)
         {
-            var result = new List<(string, string)>();
+            var result = new List<(string TableNameCSharp, string FieldNameCSharp)>();
             foreach (var item in TableNameCSharpList(assemblyList))
             {
                 Type typeRow = item.Key;

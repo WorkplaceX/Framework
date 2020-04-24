@@ -41,7 +41,7 @@
             bool isFrameworkDb = optionFramework.OptionGet();
             if (Script.Run(isFrameworkDb, AppCli))
             {
-                Console.WriteLine("Generate successful!");
+                UtilCli.ConsoleWriteLineColor("Generate successful!", ConsoleColor.Green);
             }
         }
     }

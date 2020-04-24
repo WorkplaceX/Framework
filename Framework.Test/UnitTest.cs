@@ -13,6 +13,46 @@
         public static void Run()
         {
             {
+                UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("AbcDef");
+                UtilFramework.Assert(camelCase.TextList[0] == "Abc");
+                UtilFramework.Assert(camelCase.TextList[1] == "Def");
+            }
+            {
+                UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("abcDef");
+                UtilFramework.Assert(camelCase.TextList[0] == "abc");
+                UtilFramework.Assert(camelCase.TextList[1] == "Def");
+            }
+            {
+                UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("AbcDefCSharp");
+                UtilFramework.Assert(camelCase.TextList[0] == "Abc");
+                UtilFramework.Assert(camelCase.TextList[1] == "Def");
+                UtilFramework.Assert(camelCase.TextList[2] == "CSharp");
+                UtilFramework.Assert(camelCase.EndsWith("DefCSharp"));
+                UtilFramework.Assert(camelCase.EndsWith("cDefCSharp") == false);
+                UtilFramework.Assert(camelCase.EndsWith("AbcDefCSharp"));
+                UtilFramework.Assert(camelCase.EndsWith("AbcDefCSharpCar") == false);
+                UtilFramework.Assert(camelCase.EndsWith("CarAbcDefCSharp") == false);
+                UtilFramework.Assert(camelCase.EndsWith("") == true);
+            }
+            {
+                UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("AbcDefCSharp");
+                UtilFramework.Assert(camelCase.StartsWith("Abc"));
+                UtilFramework.Assert(camelCase.StartsWith("AbcDef"));
+                UtilFramework.Assert(camelCase.StartsWith("AbcDefCSharp"));
+                UtilFramework.Assert(camelCase.StartsWith("AbcDefCShar") == false);
+                UtilFramework.Assert(camelCase.StartsWith("AbcDefCSharpLk") == false);
+                UtilFramework.Assert(camelCase.StartsWith("LkAbcDefCSharp") == false);
+                UtilFramework.Assert(camelCase.StartsWith(""));
+            }
+            {
+                UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("ImageFileId");
+                UtilFramework.Assert(camelCase.EndsWith("FileId"));
+            }
+            { 
+                UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("ImagEFileId");
+                UtilFramework.Assert(camelCase.EndsWith("FileId") == false);
+            }
+            {
                 var source = new AppMain();
 
                 // Serialize, deserialize
@@ -31,7 +71,7 @@
             {
                 var source = new MyApp();
                 source.Row = new BootstrapRow(source);
-                source.Col = new BootstrapCol(source.Row);
+                source.Col = new BootstrapCol((BootstrapRow)source.Row);
 
                 // Serialize, deserialize
                 UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
@@ -208,7 +248,7 @@
             {
                 var date = DateTime.Now;
                 A source = new A();
-                source.Row = new FrameworkScript { Id = 22, FileName = @"C:\Temp\Readme.txt", Date = date };
+                source.Row = new FrameworkDeployDb { Id = 22, FileName = @"C:\Temp\Readme.txt", Date = date };
 
                 // Serialize, deserialize
                 UtilJson.Serialize(source, out string jsonSession, out string jsonClient);
@@ -615,7 +655,7 @@
 
         public object V;
 
-        public FrameworkScript Row;
+        public FrameworkDeployDb Row;
     }
 
     public class AppMain : AppJson

@@ -5,12 +5,10 @@
     using Framework.Cli.Command;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
-    using Framework.Config;
     using Framework.DataAccessLayer;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
 
@@ -52,7 +50,7 @@
         {
             get
             {
-                return typeof(FrameworkDeployDb).Assembly;
+                return UtilFramework.AssemblyFramework;
             }
         }
 
@@ -176,7 +174,7 @@
                     command.Register(configuration);
                     configuration.OnExecute(() =>
                     {
-                        UtilCli.ConsoleWriteLineColor($"Execute Framework Cli Command ({command.Name})", ConsoleColor.Yellow);
+                        UtilCli.ConsoleWriteLineColor($"Execute Framework Cli Command ({command.Name})", ConsoleColor.Green);
                         command.Execute();
                         return 0;
                     });
@@ -361,10 +359,10 @@
         {
             var result = new GenerateBuiltInResult();
 
-            var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(typeof(Data).Assembly); // TableNameCSharp declared in Framework assembly.
+            var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(AssemblyFramework); // TableNameCSharp declared in Framework assembly.
             var tableNameCSharpApplicationList = UtilDalType.TableNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase); // TableNameCSharp declared in Application assembly.
-            var fieldNameCSharpFrameworkList = UtilDalType.FieldNameCSharpList(typeof(Data).Assembly).Select(item => item.Item1 + "/" + item.Item2); // FieldNameCSharp declared in Framework assembly
-            var fieldNameCSharpApplicationList = UtilDalType.FieldNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase).Select(item => item.Item1 + "/" + item.Item2); // FieldNameCSharp declared in Framework assembly
+            var fieldNameCSharpFrameworkList = UtilDalType.FieldNameCSharpList(AssemblyFramework).Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp); // FieldNameCSharp declared in Framework assembly
+            var fieldNameCSharpApplicationList = UtilDalType.FieldNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase).Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp); // FieldNameCSharp declared in Framework assembly
 
             // FrameworkConfigGridBuiltIn
             {

@@ -189,7 +189,7 @@
                 DeployDbDropExecute(folderNameDeployDbApplication, isFrameworkDb: false);
                 DeployDbDropExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
 
-                Console.WriteLine("DeployDb drop successful!");
+                UtilCli.ConsoleWriteLineColor("DeployDb drop successful!", ConsoleColor.Green);
             }
             else
             {
@@ -214,7 +214,7 @@
                 UtilCli.ConsoleWriteLineColor("Update BuiltIn tables", ConsoleColor.Green);
                 BuiltIn();
 
-                Console.WriteLine("DeployDb successful!");
+                UtilCli.ConsoleWriteLineColor("DeployDb successful!", ConsoleColor.Green);
             }
         }
     }

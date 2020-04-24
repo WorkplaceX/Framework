@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Framework
 {
+    using Database.dbo;
     using Framework.Server;
     using System;
     using System.Collections.Concurrent;
@@ -38,7 +39,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.31.6";
+                return "v3.31.7";
             }
         }
 
@@ -551,6 +552,116 @@ namespace Framework
                 result.Add(textChunk);
             } while (index != text.Length);
             return result;
+        }
+
+        /// <summary>
+        /// Gets FrameworkAssembly. See also class AppCli. There is AssemblyFramework, AssemblyFrameworkCli, AssemblyApplication, AssemblyApplicationCli and AssemblyApplicationDatabase.
+        /// </summary>
+        public static Assembly AssemblyFramework
+        {
+            get
+            {
+                return typeof(FrameworkDeployDb).Assembly;
+            }
+        }
+
+        /// <summary>
+        /// Split text in camel case blocks.
+        /// </summary>
+        public class CamelCase
+        {
+            public CamelCase(string text)
+            {
+                this.Text = text;
+                this.TextList = new List<string>();
+
+                // Index
+                List<int> indexList = new List<int>();
+                bool? isUpper = null;
+                for (int index = 0; index < Text.Length; index++)
+                {
+                    Char c = Text[index];
+                    if ((Char.IsUpper(c) && isUpper == false) || isUpper == null)
+                    {
+                        indexList.Add(index);
+                    }
+                    else
+                    {
+                        indexList[indexList.Count - 1] = indexList[indexList.Count - 1] + 1;
+                    }
+                    isUpper = Char.IsUpper(c);
+                }
+
+                // Split
+                int indexPrevious = 0;
+                foreach (var index in indexList)
+                {
+                    TextList.Add(Text.Substring(indexPrevious, index - indexPrevious + 1));
+                    indexPrevious = index + 1;
+                }
+            }
+
+            public bool StartsWith(CamelCase value)
+            {
+                bool result = true;
+                for (int i = 0; i < value.TextList.Count; i++)
+                {
+                    if (TextList.Count - 1 >= i)
+                    {
+                        if (value.TextList[i] != TextList[i])
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        result = false;
+                        break;
+                    }
+                }
+                return result;
+            }
+
+            public bool StartsWith(string value)
+            {
+                return StartsWith(new CamelCase(value));
+            }
+
+            public bool EndsWith(CamelCase value)
+            {
+                bool result = true;
+                int indexValue = value.TextList.Count - 1;
+                int index = TextList.Count - 1;
+                for (int i = indexValue; i >= 0; i--)
+                {
+                    if (index >= 0 && indexValue >= 0)
+                    {
+                        if (value.TextList[indexValue] != TextList[index])
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        result = false;
+                        break;
+                    }
+                    indexValue--;
+                    index--;
+                }
+                return result;
+            }
+
+            public bool EndsWith(string value)
+            {
+                return EndsWith(new CamelCase(value));
+            }
+
+            public readonly string Text;
+
+            public readonly List<string> TextList;
         }
     }
 }
