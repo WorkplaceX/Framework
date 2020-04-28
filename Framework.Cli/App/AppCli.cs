@@ -246,7 +246,10 @@
         /// </summary>
         internal DeployDbBuiltInResult CommandDeployDbBuiltInInternal()
         {
-            var result = new DeployDbBuiltInResult();
+            var generateBuiltInResult = CommandGenerateBuiltInListInternal();
+            CommandGenerateBuiltIn(generateBuiltInResult);
+
+            var result = new DeployDbBuiltInResult(generateBuiltInResult);
 
             // FrameworkConfigGridBuiltIn
             {
@@ -281,34 +284,35 @@
             // Application (custom) BuiltIn data rows to deploy to database
             CommandDeployDbBuiltIn(result);
 
-            // Copy TableNameSqlReferencePrefix from GenerateBuiltIn to DeployDbBuiltIn
-            var resultGenerate = new GenerateBuiltInResult();
-            CommandGenerateBuiltIn(resultGenerate);
-            var tableNameSqlReferencePrefixList = resultGenerate.TableNameSqlReferencePrefixList;
-            foreach (var item in result.Result)
-            {
-                if (tableNameSqlReferencePrefixList.ContainsKey(item.TypeRow))
-                {
-                    UtilFramework.Assert(item.TableNameSqlReferencePrefix == null);
-                    item.TableNameSqlReferencePrefix = tableNameSqlReferencePrefixList[item.TypeRow];
-                }
-            }
-
             return result;
         }
 
         public class DeployDbBuiltInResult
         {
-            internal DeployDbBuiltInResult()
+            internal DeployDbBuiltInResult(GenerateBuiltInResult generateBuiltInResult)
             {
+                this.GenerateBuiltInResult = generateBuiltInResult;
+                this.TableNameSqlReferencePrefixList = GenerateBuiltInResult.TableNameSqlReferencePrefixList;
                 this.Result = new List<UtilDalUpsertBuiltIn.UpsertItem>();
             }
+
+            internal readonly GenerateBuiltInResult GenerateBuiltInResult;
+
+            internal readonly Dictionary<Type, string> TableNameSqlReferencePrefixList;
 
             internal List<UtilDalUpsertBuiltIn.UpsertItem> Result;
 
             public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList) where TRow : Row
             {
-                var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, tableNameSqlReferencePrefix: null); // For TableNameSqlReferencePrefix definition see also class GenerateBuiltInResult.
+                // TableNameSqlReferencePrefix from GenerateBuiltIn to DeployDbBuiltIn
+                string tableNameSqlReferencePrefix = null;
+                if (TableNameSqlReferencePrefixList.ContainsKey(typeof(TRow)))
+                {
+                    tableNameSqlReferencePrefix = TableNameSqlReferencePrefixList[typeof(TRow)];
+                }
+
+                var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, tableNameSqlReferencePrefix);
+
                 Result.Add(result);
             }
 

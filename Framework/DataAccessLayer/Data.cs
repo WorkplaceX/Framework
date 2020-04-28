@@ -824,15 +824,21 @@
                 {
                     case DatabaseEnum.Database:
                         {
-                            rowOld = Data.RowCopy(rowOld); // Prevent modifications on SetValues(row);
+                            var rowOldLocal = Data.RowCopy(rowOld); // Prevent modifications on SetValues(row);
                             DbContext dbContext = Data.DbContextInternalCreate(rowOld.GetType(), isQuery: false);
-                            var tracking = dbContext.Attach(rowOld);
+                            var tracking = dbContext.Attach(rowOldLocal);
                             tracking.CurrentValues.SetValues(row);
                             if (tracking.State == EntityState.Modified)
                             {
-                                int count = await dbContext.SaveChangesAsync(); // Override method GridUpdateAsync(); for sql view.
-                                UtilFramework.Assert(count == 1, "Update failed!");
+                                // Called by data grid.
                             }
+                            if (tracking.State == EntityState.Unchanged)
+                            {
+                                // Called by method Data.UpdateAsync(); for table.
+                                tracking.State = EntityState.Modified; 
+                            }
+                            int count = await dbContext.SaveChangesAsync(); // Override method GridUpdateAsync(); for sql view.
+                            UtilFramework.Assert(count == 1, "Update failed!");
                             break;
                         }
                     case DatabaseEnum.MemorySingleton:

@@ -21,7 +21,8 @@
 
         internal bool ColumnIsVisibleInternal(Type typeRow, string fieldName, bool? isVisibleConfig)
         {
-            bool isVisibleDefault = !fieldName.EndsWith("Id");
+            var fieldNameCamelCase = new UtilFramework.CamelCase(fieldName);
+            bool isVisibleDefault = !fieldNameCamelCase.EndsWith("Id") && !fieldNameCamelCase.EndsWith("IdName");
             var result = ColumnIsVisible(typeRow, fieldName, isVisibleDefault, isVisibleConfig);
             return result;
         }
