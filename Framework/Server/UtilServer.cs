@@ -100,7 +100,7 @@
         public static string ContentType(string fileName)
         {
             // ContentType
-            string fileNameExtension = Path.GetExtension(fileName);
+            string fileNameExtension = UtilFramework.FileNameExtension(fileName);
             string result; // https://www.sitepoint.com/web-foundations/mime-types-complete-list/
             switch (fileNameExtension)
             {
@@ -175,7 +175,7 @@
         }
 
         /// <summary>
-        /// Returns true, if request is a FileName. Otherwise request is a FolderName.
+        /// Returns true, if request or response path is a FileName. Otherwise path is a FolderName.
         /// </summary>
         public static bool PathIsFileName(string path)
         {

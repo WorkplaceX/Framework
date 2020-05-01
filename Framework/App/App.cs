@@ -67,7 +67,44 @@
         /// <summary>
         /// Returns JsonClient. Create AppJson and process request.
         /// </summary>
-        internal async Task<string> CreateAppJsonAndProcessAsync(HttpContext context)
+        internal async Task<string> ProcessAsync(HttpContext context, AppJson appJson)
+        {
+            if (appJson == null)
+            {
+                // Create AppJson with session data.
+                appJson = await CreateAppJsonSession(context);
+            }
+
+            // Process
+            try
+            {
+                await appJson.ProcessInternalAsync(appJson);
+            }
+            catch (Exception exception)
+            {
+                appJson.BootstrapAlert(UtilFramework.ExceptionToString(exception), BootstrapAlertEnum.Error);
+                appJson.IsReload = true;
+            }
+
+            // Version tag
+            RenderVersion(appJson);
+
+            // RequestCount
+            appJson.RequestCount = appJson.RequestJson.RequestCount;
+
+            // ResponseCount
+            appJson.ResponseCount += 1;
+
+            // SerializeSession, SerializeClient
+            UtilSession.Serialize(appJson, out string jsonClientResponse);
+
+            return jsonClientResponse;
+        }
+
+        /// <summary>
+        /// Create AppJson with session data.
+        /// </summary>
+        internal async Task<AppJson> CreateAppJsonSession(HttpContext context)
         {
             // DeserializeSession
             var appJson = UtilSession.Deserialize(); // Deserialize session or init.
@@ -110,34 +147,11 @@
             // Set RequestJson
             appJson.RequestJson = requestJson;
 
-            // Process
-            try
-            {
-                await appJson.ProcessInternalAsync(appJson);
-            }
-            catch (Exception exception)
-            {
-                appJson.BootstrapAlert(UtilFramework.ExceptionToString(exception), BootstrapAlertEnum.Error);
-                appJson.IsReload = true;
-            }
-
-            // Version tag
-            RenderVersion(appJson);
-
-            // RequestCount
-            appJson.RequestCount = requestJson.RequestCount;
-
-            // ResponseCount
-            appJson.ResponseCount += 1;
-
-            // SerializeSession, SerializeClient
-            UtilSession.Serialize(appJson, out string jsonClientResponse);
-
-            return jsonClientResponse;
+            return appJson;
         }
 
         /// <summary>
-        /// Create new AppJson component for this session.
+        /// Create AppJson without session data.
         /// </summary>
         public AppJson CreateAppJson()
         {

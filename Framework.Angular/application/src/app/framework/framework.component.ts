@@ -59,10 +59,37 @@ export class Page {
 /* Html */
 @Component({
   selector: '[data-Html]',
-  template: `<div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="json.TextHtml"></div>`
+  template: `<i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>  
+  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="json.TextHtml" (click)="click($event);" ></div>`
 })
 export class Html {
   @Input() json: any
+
+  constructor(private dataService: DataService){
+  }
+
+  @ViewChild('div')
+  div: ElementRef;
+
+  click(event: MouseEvent){
+    this.json.IsShowSpinner = true;
+    var element = event.srcElement;
+    do {
+      if (element instanceof HTMLAnchorElement) {
+        var anchor = <HTMLAnchorElement>element;
+        if (anchor.classList.contains("linkPost")) {
+          event.preventDefault();
+          this.dataService.update(<RequestJson> { Command: 16, ComponentId: this.json.Id, LinkPostPath: anchor.pathname });
+        }
+        break;
+      }
+      if (element instanceof HTMLElement) {
+        element = (<HTMLElement>element).parentElement;
+      } else {
+        break;
+      }
+    } while (element != this.div.nativeElement && element != null)
+  } 
 }
 
 /* Button */

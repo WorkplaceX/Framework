@@ -39,7 +39,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 8.3.15
 
-                return "v3.31.7";
+                return "v3.32.0";
             }
         }
 
@@ -563,6 +563,15 @@ namespace Framework
             {
                 return typeof(FrameworkDeployDb).Assembly;
             }
+        }
+
+        /// <summary>
+        /// Returns for example: ".jpg".
+        /// </summary>
+        public static string FileNameExtension(string fileName)
+        {
+            var result = StringNull(Path.GetExtension(fileName));
+            return result;
         }
 
         /// <summary>

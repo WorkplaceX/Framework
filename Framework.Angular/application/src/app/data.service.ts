@@ -1,10 +1,13 @@
 import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, Location } from '@angular/common';
+
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
 export class Json {
+  Id: number;
+
   Name: string;
 
   Version: string;
@@ -40,6 +43,8 @@ export class Json {
   DownloadContentType: string;
 
   IsScrollToTop: boolean;
+
+  LinkPostPath: string;
 }
 
 export class RequestJson {
@@ -68,6 +73,10 @@ export class RequestJson {
   BrowserUrl: string;
 
   IsRequestJson: boolean;
+
+  LinkPostPath: string;
+
+  LinkPostPathIsBackwardForward: boolean;
 }
 
 @Injectable({
@@ -85,7 +94,7 @@ export class DataService {
 
   public renderer: Renderer2; // Used for BingMap
 
-  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, rendererFactory: RendererFactory2) { 
+  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, rendererFactory: RendererFactory2, private location: Location) { 
     this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
       this.json = this.jsonServerSideRendering;
@@ -172,8 +181,11 @@ export class DataService {
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {
           setTimeout(() => {
-            location.reload(true);
+            window.location.reload(true);
           }, 1000); // Wait one second then reload.
+        }
+        if (this.json.LinkPostPath != null) {
+          this.location.go(this.json.LinkPostPath, "", this.json.LinkPostPath); // Put path into state because Angular does not handle traling slash in location.
         }
       }, error => {
         this.isRequestPending = false;

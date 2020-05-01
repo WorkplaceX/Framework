@@ -45,6 +45,17 @@
         }
 
         /// <summary>
+        /// User clicked internal link. Instead of GET and download Angular again a POST command is sent.
+        /// </summary>
+        public static async Task ProcessLinkPostAsync(AppJson appJson)
+        {
+            if (UtilSession.Request(appJson, RequestCommand.LinkPost, out RequestJson requestJson, out ComponentJson component))
+            {
+                await appJson.FileDownloadSessionInternalAsync(requestJson.LinkPostPath, requestJson.LinkPostPathIsBackwardForward);
+            }
+        }
+
+        /// <summary>
         /// Returns all button recursively.
         /// </summary>
         private static void ProcessBootstrapNavbarButtonListAll(List<BootstrapNavbarButton> buttonList, List<BootstrapNavbarButton> result)

@@ -2,6 +2,8 @@
 {
     using Framework.App;
     using Framework.Config;
+    using Framework.Json;
+    using Framework.Session;
     using Microsoft.AspNetCore.Http;
     using System;
     using System.IO;
@@ -24,12 +26,8 @@
 
                 UtilServer.Cors();
 
-                // Path init
+                // Request path
                 string path = context.Request.Path;
-                if (UtilServer.PathIsFileName(path) == false)
-                {
-                    path += "index.html";
-                }
 
                 // Get current website request from "ConfigServer.json"
                 AppSelector appSelector = new AppSelector();
@@ -38,7 +36,7 @@
                 if (!await Post(context, path, appSelector))
                 {
                     // GET index.html from "Application.Server/Framework/Application.Website/" (With server side rendering)
-                    if (!await WebsiteServerSideRenderingAsync(context, path, appSelector))
+                    if (!await WebsiteServerSideRenderingAsync(context, path, appSelector, null))
                     {
                         // GET file from "Application.Server/Framework/Application.Website/"
                         if (!await WebsiteFileAsync(context, path, appSelector))
@@ -47,7 +45,7 @@
                             if (!await AngularBrowserFileAsync(context, path))
                             {
                                 // GET file from database.
-                                if (!await FileDownload(context, path, appSelector))
+                                if (!await FileDownloadAsync(context, path, appSelector))
                                 {
                                     context.Response.StatusCode = 404; // Not found
                                 }
@@ -73,7 +71,7 @@
             bool result = false;
             if (path == "/app.json")
             {
-                string jsonClient = await appSelector.CreateAppJsonAndProcessAsync(context); // Process (Client http post)
+                string jsonClient = await appSelector.ProcessAsync(context, null); // Process (Client http post)
                 context.Response.ContentType = UtilServer.ContentType(path);
                 
                 await context.Response.WriteAsync(jsonClient);
@@ -86,7 +84,7 @@
         /// <summary>
         /// Divert request to "Application.Server/Framework/Application.Website/"
         /// </summary>
-        private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string path, AppSelector appSelector)
+        private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string path, AppSelector appSelector, AppJson appJson)
         {
             bool result = false;
 
@@ -100,14 +98,21 @@
                 throw new Exception(string.Format("Folder does not exis! Make sure cli build did run. ({0})", folderName));
             }
 
+            // Index.html
+            string pathIndexHtml = path;
+            if (!UtilServer.PathIsFileName(path))
+            {
+                pathIndexHtml += "index.html";
+            }
+
             // FileName
-            string fileName = UtilFramework.FolderNameParse(folderName, path);
+            string fileName = UtilFramework.FolderNameParse(folderName, pathIndexHtml);
             if (File.Exists(fileName))
             {
                 if (fileName.EndsWith(".html") && ConfigServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.AppTypeName) != null)
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
-                    string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector);
+                    string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector, appJson);
                     await context.Response.WriteAsync(htmlIndex);
                     result = true;
                 }
@@ -116,23 +121,48 @@
         }
 
         /// <summary>
-        /// Browser request file to download.
+        /// Browser GET request to download file.
         /// </summary>
-        private static async Task<bool> FileDownload(HttpContext context, string path, AppSelector appSelector)
+        private static async Task<bool> FileDownloadAsync(HttpContext context, string path, byte[] data)
         {
             bool result = false;
-            if (UtilServer.PathIsFileName(path))
+            if (data != null)
             {
+                UtilFramework.Assert(data != null);
                 string fileName = UtilFramework.FolderNameParse(null, path);
-                var app = appSelector.CreateAppJson();
-                byte[] data = await app.FileDownload(fileName);
-                if (data != null)
-                {
-                    context.Response.ContentType = UtilServer.ContentType(fileName);
-                    await context.Response.Body.WriteAsync(data, 0, data.Length);
+                context.Response.ContentType = UtilServer.ContentType(fileName);
+                await context.Response.Body.WriteAsync(data, 0, data.Length);
+                result = true;
+            }
+            return result;
+        }
 
-                    result = true;
+        /// <summary>
+        /// Browser request to download file or subpage.
+        /// </summary>
+        private static async Task<bool> FileDownloadAsync(HttpContext context, string path, AppSelector appSelector)
+        {
+            bool result;
+            var appJson = appSelector.CreateAppJson(); // Without deserialize session.
+            var fileDownloadResult = await appJson.FileDownloadInternalAsync(path);
+            if (fileDownloadResult.IsSession)
+            {
+                var appJsonSession = await appSelector.CreateAppJsonSession(context); // With deserialize session.
+                var fileDownloadSessionResult = await appJsonSession.FileDownloadSessionInternalAsync(path, false);
+                if (fileDownloadSessionResult.IsPage)
+                {
+                    result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
                 }
+                else
+                {
+                    // File download with session
+                    result = await FileDownloadAsync(context, path, fileDownloadSessionResult.Data);
+                }
+            }
+            else
+            {
+                // File download without session
+                result = await FileDownloadAsync(context, path, fileDownloadResult.Data);
             }
             return result;
         }
@@ -140,7 +170,7 @@
         /// <summary>
         /// Render first html GET request.
         /// </summary>
-        private static async Task<string> WebsiteServerSideRenderingAsync(HttpContext context, AppSelector appSelector)
+        private static async Task<string> WebsiteServerSideRenderingAsync(HttpContext context, AppSelector appSelector, AppJson appJson)
         {
             string url;
             if (UtilServer.IsIssServer)
@@ -156,7 +186,7 @@
             }
 
             // Process AppJson
-            string jsonClient = await appSelector.CreateAppJsonAndProcessAsync(context);  // Process (For first server side rendering)
+            string jsonClient = await appSelector.ProcessAsync(context, appJson); // Process (For first server side rendering)
 
             // Server side rendering POST.
             string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/Framework/");

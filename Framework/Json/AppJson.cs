@@ -44,6 +44,11 @@
         /// User clicked home button for example on navbar.
         /// </summary>
         HomeIsClick = 15,
+
+        /// <summary>
+        /// User clicked an internal link. For example: "/contact/". Instead of GET and download Angular again a POST command is sent to the server.
+        /// </summary>
+        LinkPost = 16,
     }
 
     /// <summary>
@@ -94,6 +99,16 @@
         /// Gets or sets BrowserUrl. Url shown in client.
         /// </summary>
         public string BrowserUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets LinkPost. For internal link. For example: "/contact/".
+        /// </summary>
+        public string LinkPostPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets LinkPostPathIsBackwardForward. True, if user clicked browser backward or forward button.
+        /// </summary>
+        public bool LinkPostPathIsBackwardForward { get; set; }
     }
 
     /// <summary>
@@ -464,14 +479,103 @@
             return new NamingConvention();
         }
 
-        /// <summary>
-        /// Browser requests file to download. For this method no session data is available. Session is not deserialized.
-        /// </summary>
-        /// <param name="fileName">For example: Readme.txt</param>
-        /// <returns>Returns data or null, if not found.</returns>
-        protected internal virtual Task<byte[]> FileDownload(string fileName)
+        internal async Task<FileDownloadResult> FileDownloadInternalAsync(string path)
         {
-            return Task.FromResult((byte[])null);
+            var args = new FileDownloadArgs(path);
+            FileDownloadResult result = new FileDownloadResult();
+            await FileDownloadAsync(args, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Browser requests file or subpage to download. Inside this method no session data is available. Used for example to download a public available (*.pdf) file.
+        /// </summary>
+        protected internal virtual Task FileDownloadAsync(FileDownloadArgs args, FileDownloadResult result)
+        {
+            return Task.FromResult(0);
+        }
+
+        public class FileDownloadArgs
+        {
+            internal FileDownloadArgs(string path)
+            {
+                this.Path = path;
+                if (UtilServer.PathIsFileName(path))
+                {
+                    this.FileName = UtilFramework.FolderNameParse(null, path);
+                    this.FileNameExtension = UtilFramework.FileNameExtension(FileName);
+                }
+            }
+
+            /// <summary>
+            /// Gets Path. For example: "/Readme.txt" or "/contact/". Or "/", if user clicked browser back button.
+            /// </summary>
+            public string Path { get; private set; }
+
+            /// <summary>
+            /// Gets FileName. For example: "Readme.txt". Is null, if path is for example: "/contact/".
+            /// </summary>
+            public string FileName { get; private set; }
+
+            /// <summary>
+            /// Gets FileNameExtension. For example: ".txt".
+            /// </summary>
+            public string FileNameExtension { get; private set; }
+        }
+
+        public class FileDownloadResult
+        {
+            /// <summary>
+            /// Gets or sets IsSession. If true, method FileDownloadSessionAsync(); with session data available is called next.
+            /// </summary>
+            public bool IsSession { get; set; }
+
+            /// <summary>
+            /// Gets or sets Data. If not null, this is the file data sent to the browser to download.
+            /// </summary>
+            public byte[] Data;
+        }
+
+        internal async Task<FileDownloadSessionResult> FileDownloadSessionInternalAsync(string path, bool isBackwardForward)
+        {
+            var args = new FileDownloadArgs(path);
+            var result = new FileDownloadSessionResult();
+            result.Path = args.Path;
+            await FileDownloadSessionAsync(args, result);
+            if (result.IsPage)
+            {
+                if (!isBackwardForward)
+                {
+                    LinkPostPath = result.Path;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Browser requests file or subpage to download. Inside this method session data is available. Used for example to download a not public available (*.pdf) file.
+        /// </summary>
+        protected internal virtual Task FileDownloadSessionAsync(FileDownloadArgs args, FileDownloadSessionResult result)
+        {
+            return Task.FromResult(0);
+        }
+
+        public class FileDownloadSessionResult
+        {
+            /// <summary>
+            /// Gets or sets IsPage. If true, requested url is a page. If false (and Data not null) requested url is a file.
+            /// </summary>
+            public bool IsPage { get; set; }
+
+            /// <summary>
+            /// Gets or sets Data. If not null, this is the file data sent to the browser to download.
+            /// </summary>
+            public byte[] Data;
+
+            /// <summary>
+            /// Gets or sets Path. For example: "/contact/" or "/signin/", if redirected.
+            /// </summary>
+            public string Path { get; set; }
         }
 
         private NamingConvention namingConventionFramework;
@@ -504,6 +608,7 @@
         {
             UtilStopwatch.TimeStart("Process");
             await UtilApp.ProcessHomeIsClickAsync(appJson);
+            await UtilApp.ProcessLinkPostAsync(appJson); // Link POST instead of GET.
             await UtilGrid.ProcessAsync(appJson); // Process data grid.
             await UtilApp.ProcessBootstrapNavbarAsync(appJson);
 
@@ -577,6 +682,12 @@
         /// </summary>
         [Serialize(SerializeEnum.Client)]
         internal string DownloadData;
+
+        /// <summary>
+        /// Gets or sets LinkPostPath. If not null, this is the new navigation path. For example: "/contact/" or "/signin/", if redirected.
+        /// </summary>
+        [Serialize(SerializeEnum.Client)]
+        internal string LinkPostPath;
 
         /// <summary>
         /// Gets or sets DownloadFileName. For example Grid.xlsx
