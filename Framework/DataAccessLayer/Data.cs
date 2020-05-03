@@ -1418,6 +1418,11 @@
             public readonly string[] FieldNameKeyList;
 
             public readonly List<Reference> ReferenceList;
+
+            /// <summary>
+            /// Gets IsDeployed. True, if RowList is deployed to database.
+            /// </summary>
+            public bool IsDeployed { get; internal set; }
         }
 
         /// <summary>
@@ -1427,6 +1432,8 @@
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
         internal static async Task UpsertAsync(List<UpsertItem> upsertList, List<Assembly> assemblyList)
         {
+            upsertList = upsertList.Where(item => item.IsDeployed == false).ToList();
+
             // Group by TypeRow
             Dictionary<Type, List<Row>> typeRowToRowList = new Dictionary<Type, List<Row>>();
             foreach (var item in upsertList)
@@ -1451,6 +1458,12 @@
                 {
                     await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameKeyList, itemUpsert.ReferenceList, assemblyList);
                 }
+            }
+
+            // Set IsDeployed
+            foreach (var item in upsertList)
+            {
+                item.IsDeployed = true;
             }
         }
 

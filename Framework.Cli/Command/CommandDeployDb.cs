@@ -109,7 +109,7 @@
         /// <summary>
         /// Populate sql tables FrameworkTable, FrameworkField with assembly typeRow.
         /// </summary>
-        private void Meta()
+        private void Meta(DeployDbBuiltInResult result)
         {
             var assemblyList = AppCli.AssemblyList(isIncludeApp: true);
             List<Type> typeRowList = UtilDalType.TypeRowList(assemblyList);
@@ -127,8 +127,7 @@
                     }
                     table.IsExist = true;
                 }
-                UtilDalUpsert.UpsertIsExistAsync<FrameworkTable>().Wait();
-                UtilDalUpsert.UpsertAsync(rowList, nameof(FrameworkTable.TableNameCSharp)).Wait();
+                result.Add(rowList, nameof(FrameworkTable.TableNameCSharp));
             }
 
             // Field
@@ -152,13 +151,7 @@
 
                 rowList = rowList.OrderBy(item => item.TableIdName).ThenBy(item => item.FieldNameCSharp).ToList();
 
-                // Reference
-                var generateBuiltInResult = new GenerateBuiltInResult(assemblyList);
-                generateBuiltInResult.AddReference<FrameworkField, FrameworkTable>(nameof(FrameworkField.TableId));
-                var referenceList = generateBuiltInResult.ResultReference;
-
-                var upsertItem = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, referenceList);
-                UtilDalUpsertBuiltIn.UpsertAsync(upsertItem, AppCli.AssemblyList()).Wait();
+                result.Add(rowList, nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp));
             }
         }
 
@@ -167,10 +160,19 @@
         /// </summary>
         private void BuiltIn()
         {
-            var builtInList = AppCli.CommandDeployDbBuiltInInternal();
+            var generateBuiltInResult = AppCli.CommandGenerateBuiltInInternal();
+            var deployDbResult = new DeployDbBuiltInResult(generateBuiltInResult);
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
 
-            UtilDalUpsertBuiltIn.UpsertAsync(builtInList.Result, assemblyList).Wait();
+            // Populate sql tables FrameworkTable, FrameworkField.
+            UtilCli.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
+            Meta(deployDbResult);
+            UtilDalUpsertBuiltIn.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
+
+            // Populate sql BuiltIn tables.
+            UtilCli.ConsoleWriteLineColor("Update BuiltIn tables", ConsoleColor.Green);
+            AppCli.CommandDeployDbBuiltInInternal(deployDbResult);
+            UtilDalUpsertBuiltIn.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
         }
 
         protected internal override void Execute()
@@ -212,12 +214,6 @@
                 DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
 
-                // Populate sql tables FrameworkTable, FrameworkField.
-                UtilCli.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
-                Meta();
-
-                // Populate sql BuiltIn tables.
-                UtilCli.ConsoleWriteLineColor("Update BuiltIn tables", ConsoleColor.Green);
                 BuiltIn();
 
                 UtilCli.ConsoleWriteLineColor("DeployDb successful!", ConsoleColor.Green);

@@ -246,12 +246,8 @@
         /// <summary>
         /// Returns BuiltIn rows to deploy to sql database.
         /// </summary>
-        internal DeployDbBuiltInResult CommandDeployDbBuiltInInternal()
+        internal void CommandDeployDbBuiltInInternal(DeployDbBuiltInResult result)
         {
-            var generateBuiltInResult = CommandGenerateBuiltInInternal();
-
-            var result = new DeployDbBuiltInResult(generateBuiltInResult);
-
             // FrameworkConfigGridBuiltIn
             {
                 var rowList = FrameworkConfigGridBuiltInFrameworkCli.RowList;
@@ -282,10 +278,8 @@
                 result.Add(rowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" });
             }
 
-            // Application (custom) BuiltIn data rows to deploy to database
+            // Add application (custom) BuiltIn data rows to deploy to database
             CommandDeployDbBuiltIn(result);
-
-            return result;
         }
 
         public class DeployDbBuiltInResult
@@ -300,12 +294,29 @@
 
             internal List<UtilDalUpsertBuiltIn.UpsertItem> Result;
 
-            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, params string[] fieldNameKeyList) where TRow : Row
             {
                 // Reference from GenerateBuiltIn to DeployDbBuiltIn
                 var referenceFilterList = GenerateBuiltInResult.ResultReference.Where(item => item.TypeRowBuiltIn == typeof(TRow)).ToList();
 
+                // Make sure reference tables are deployed.
+                foreach (var item in referenceFilterList)
+                {
+                    if (item.TypeRowReferenceBuiltIn != typeof(TRow)) // Exclude hierarchical reference
+                    {
+                        int referenceCount = Result.Count(itemLocal => itemLocal.TypeRow == item.TypeRowReferenceBuiltIn || itemLocal.TypeRow == item.TypeRowReference);
+                        UtilFramework.Assert(referenceCount > 0, string.Format("Reference table not yet deployed! ({0})", UtilDalType.TypeRowToTableNameCSharp(item.TypeRowReferenceBuiltIn)));
+                    }
+                }
+
+                // Result
                 var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, referenceFilterList);
+
+                // Make sure table is not already added.
+                if (Result.Count > 0 && Result[^1].TypeRow != result.TypeRow) // Do not test ist previous is identical (because of hierarchical reference calling this method multiple times).
+                {
+                    UtilFramework.Assert(Result.Count(item => item.TypeRow == result.TypeRow) == 0, string.Format("Table already added! ({0})", UtilDalType.TypeRowToTableNameCSharp(result.TypeRow)));
+                }
 
                 Result.Add(result);
             }
@@ -356,6 +367,9 @@
         internal GenerateBuiltInResult CommandGenerateBuiltInInternal()
         {
             var result = new GenerateBuiltInResult(AssemblyList(true, true));
+
+            // Do not generate CSharp code for table FrameworkTable and FrameworkField. Add reference for deoplyDb.
+            result.AddReference<FrameworkField, FrameworkTable>(nameof(FrameworkFieldBuiltIn.TableId));
 
             var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(AssemblyFramework); // TableNameCSharp declared in Framework assembly.
             var tableNameCSharpApplicationList = UtilDalType.TableNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase); // TableNameCSharp declared in Application assembly.
