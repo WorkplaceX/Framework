@@ -73,7 +73,7 @@
                 }
 
                 // Use one "Database" and "DatabaseBuiltIn" namespace for Framework and Application
-                string classNameExtension = ""; // "Table"; // See also method CommandDeployDbBuiltInListInternal();
+                string classNameExtension = ""; // "Table"; // See also method CommandDeployDbBuiltInInternal();
 
                 // Framework, Application
                 if (isFrameworkDb)

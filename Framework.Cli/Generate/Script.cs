@@ -39,7 +39,7 @@
             GenerateBuiltInResult generateBuiltInResult = null;
             try
             {
-                generateBuiltInResult = appCli.CommandGenerateBuiltInListInternal();
+                generateBuiltInResult = appCli.CommandGenerateBuiltInInternal();
             }
             catch (SqlException exception)
             {
@@ -77,7 +77,7 @@
             List<string> result = new List<string>();
             foreach (var item in generateBuiltInResult.Result)
             {
-                var fieldList = UtilDalUpsertBuiltIn.FieldBuiltInList(item.TypeRow, item.TableNameSqlReferencePrefix, appCli.AssemblyList(true, true));
+                var fieldList = UtilDalUpsertBuiltIn.FieldBuiltInList(item.TypeRow, generateBuiltInResult.ResultReference);
                 foreach (var field in fieldList)
                 {
                     if (field.IsId)

@@ -111,7 +111,8 @@
         /// </summary>
         private void Meta()
         {
-            List<Type> typeRowList = UtilDalType.TypeRowList(AppCli.AssemblyList(isIncludeApp: true));
+            var assemblyList = AppCli.AssemblyList(isIncludeApp: true);
+            List<Type> typeRowList = UtilDalType.TypeRowList(assemblyList);
             // Table
             {
                 List<FrameworkTable> rowList = new List<FrameworkTable>();
@@ -151,7 +152,12 @@
 
                 rowList = rowList.OrderBy(item => item.TableIdName).ThenBy(item => item.FieldNameCSharp).ToList();
 
-                var upsertItem = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, "Framework");
+                // Reference
+                var generateBuiltInResult = new GenerateBuiltInResult(assemblyList);
+                generateBuiltInResult.AddReference<FrameworkField, FrameworkTable>(nameof(FrameworkField.TableId));
+                var referenceList = generateBuiltInResult.ResultReference;
+
+                var upsertItem = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, new string[] { nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp) }, referenceList);
                 UtilDalUpsertBuiltIn.UpsertAsync(upsertItem, AppCli.AssemblyList()).Wait();
             }
         }

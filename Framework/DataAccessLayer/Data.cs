@@ -1113,61 +1113,79 @@
             /// Gets or sets TypeRowReference. Referenced table (or view) containing field "Id" and "Name". For example view "FrameworkTableBuiltIn".
             /// </summary>
             public Type TypeRowReference;
-
-            /// <summary>
-            /// Gets or sets IsParentId. Hierarchical sql.
-            /// </summary>
-            public bool IsParentId;
         }
 
         /// <summary>
-        /// Returns reference table.
+        /// Returns BuiltIn reference table.
         /// </summary>
-        private static Type TypeRowReference(Type typeRow, string fieldNameIdSql, string tableNameSqlReferencePrefix, Dictionary<Type, (string SchemaNameSql, string TableNameSql)> tableNameWithSchemaSqlList)
+        /// <param name="typeRow">BuiltIn table.</param>
+        private static Type TypeRowReferenceBuiltIn(Type typeRow, string fieldNameIdSql, List<Reference> referenceList)
         {
-            // TypeRow
-            UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-
-            // Field
-            UtilFramework.Assert(fieldNameIdSql.EndsWith("Id"));
-            var fieldNameWithoutId = new UtilFramework.CamelCase(fieldNameIdSql.Substring(0, fieldNameIdSql.Length - "Id".Length));
-
-            // Reference
-            if (tableNameSqlReferencePrefix == null)
-            {
-                tableNameSqlReferencePrefix = "";
-            }
-            var tableReferenceList = tableNameWithSchemaSqlList.Where(item => item.Value.SchemaNameSql == schemaNameSql); // Filter Schema
-            tableReferenceList = tableReferenceList.Where(item => item.Value.TableNameSql.StartsWith(tableNameSqlReferencePrefix)); // Filter tableNameSqlReferencePrefix
-            tableReferenceList = tableReferenceList.Where(item => fieldNameWithoutId.EndsWith(item.Value.TableNameSql.Substring(tableNameSqlReferencePrefix.Length)));
-
-            // Result
-            Type result = null;
-            var tableReference = tableReferenceList.SingleOrDefault().Value;
-            if (tableReference != default(ValueTuple<string, string>))
-            {
-                tableReference.TableNameSql += "BuiltIn";
-                result = tableNameWithSchemaSqlList.Where(item => item.Value == tableReference).SingleOrDefault().Key;
-                if (result == null)
-                {
-                    throw new Exception(string.Format("Referenced sql view not found! ([{0}].[{1}])", tableReference.SchemaNameSql, tableReference.TableNameSql));
-                }
-            }
+            var result = referenceList.SingleOrDefault(item => item.TypeRowBuiltIn == typeRow && item.FieldNameIdSql == fieldNameIdSql)?.TypeRowReferenceBuiltIn;
             return result;
+        }
+
+        /// <summary>
+        /// Defines a reference table.
+        /// </summary>
+        internal class Reference
+        {
+            public Reference(Type typeRow, string fieldNameIdCSharp, string fieldNameIdSql, Type typeRowBuiltIn, string fieldNameIdNameCSharp, string fieldNameIdNameSql, Type typeRowReference, Type typeRowReferenceBuiltIn)
+            {
+                TypeRow = typeRow;
+                FieldNameIdCSharp = fieldNameIdCSharp;
+                FieldNameIdSql = fieldNameIdSql;
+                TypeRowBuiltIn = typeRowBuiltIn;
+                FieldNameIdNameCSharp = fieldNameIdNameCSharp;
+                FieldNameIdNameSql = fieldNameIdNameSql;
+                TypeRowReference = typeRowReference;
+                TypeRowReferenceBuiltIn = typeRowReferenceBuiltIn;
+            }
+
+            /// <summary>
+            /// Gets TypeRow. For example: "LoginUserRole"
+            /// </summary>
+            public readonly Type TypeRow;
+
+            /// <summary>
+            /// Gets FieldNameIdCSharp. For example: "UserId"
+            /// </summary>
+            public readonly string FieldNameIdCSharp;
+
+            public readonly string FieldNameIdSql;
+
+            /// <summary>
+            /// Gets TypeRowBuiltIn. For example: "LoginUserRoleBuiltIn".
+            /// </summary>
+            public readonly Type TypeRowBuiltIn;
+
+            /// <summary>
+            /// Gets FieldNameIdNameCSharp. For example "UserIdName".
+            /// </summary>
+            public readonly string FieldNameIdNameCSharp;
+
+            public readonly string FieldNameIdNameSql;
+
+            /// <summary>
+            /// Gets TypeRowReference. For example: "LoginUser"
+            /// </summary>
+            public readonly Type TypeRowReference;
+
+            /// <summary>
+            /// Gets TypeRowReferenceBuiltIn. For example: "LoginUserBuiltIn"
+            /// </summary>
+            public readonly Type TypeRowReferenceBuiltIn;
         }
 
         /// <summary>
         /// Returns list of FieldBuiltIn for TypeRow.
         /// </summary>
         /// <param name="typeRow">Data row type.</param>
-        /// <param name="tableNameSqlReferencePrefix">When searching for reference tables use this prefix. If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
-        /// <param name="assemblyList">Find table names in these assemblies.</param>
-        internal static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
+        internal static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, List<Reference> referenceList)
         {
             List<FieldBuiltIn> result = new List<FieldBuiltIn>();
             var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
             var fieldNameSqlList = fieldList.Select(item => item.FieldNameSql).ToList();
-            var tableNameWithSchemaSqlList = UtilDalType.TableNameWithSchemaSqlList(assemblyList);
 
             // Populate result
             foreach (var field in fieldList)
@@ -1196,14 +1214,8 @@
                     {
                         UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
                         // Find reference table
-                        Type typeRowReference = TypeRowReference(typeRow, fieldNameIdSql, tableNameSqlReferencePrefix, tableNameWithSchemaSqlList);
+                        Type typeRowReference = TypeRowReferenceBuiltIn(typeRow, fieldNameIdSql, referenceList);
 
-                        bool isParentId = false;
-                        if (fieldNameSql == "ParentIdName") // BuiltIn naming convention.
-                        {
-                            isParentId = true;
-                            typeRowReference = typeRow;
-                        }
                         if (typeRowReference != null)
                         {
                             List<string> propertyNameList = UtilDalType.TypeRowToPropertyInfoList(typeRowReference).Select(item => item.Name).ToList();
@@ -1213,14 +1225,12 @@
                                 fieldBuiltIn.IsIdName = true;
                                 fieldBuiltIn.TypeRowReference = typeRowReference;
                                 fieldBuiltIn.FieldNameIdSql = fieldNameIdSql;
-                                fieldBuiltIn.IsParentId = isParentId;
 
                                 // Id
                                 var fieldBuiltInId = result.Where(item => item.Field.FieldNameSql == fieldNameIdSql).Single();
                                 fieldBuiltInId.IsId = true;
                                 fieldBuiltInId.TypeRowReference = typeRowReference;
                                 fieldBuiltInId.FieldNameIdSql = fieldNameIdSql;
-                                fieldBuiltInId.IsParentId = isParentId;
                             }
                         }
                     }
@@ -1229,10 +1239,10 @@
             return result;
         }
 
-        private static string UpsertSelect(Type typeRow, List<Row> rowList, string tableNameSqlReferencePrefix, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, List<Assembly> assemblyList)
+        private static string UpsertSelect(Type typeRow, List<Row> rowList, List<Reference> referenceList, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
         {
             StringBuilder sqlSelect = new StringBuilder();
-            var fieldBuiltInList = FieldBuiltInList(typeRow, tableNameSqlReferencePrefix, assemblyList);
+            var fieldBuiltInList = FieldBuiltInList(typeRow, referenceList);
 
             // Row
             bool isFirstRow = true;
@@ -1311,18 +1321,17 @@
         /// <param name="typeRow">Type of rowList (can be empty).</param>
         /// <param name="rowList">Records to update.</param>
         /// <param name="fieldNameKeyList">Key fields for record identification.</param>
-        /// <param name="tableNameSqlReferencePrefix">If value is for example Login, column UserIdName would be referenced to table LoginUserBuiltIn if exists.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        private static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix, List<Assembly> assemblyList)
+        private static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, List<Reference> referenceList, List<Assembly> assemblyList)
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
-            var fieldNameSqlListAll = FieldBuiltInList(typeRow, tableNameSqlReferencePrefix, assemblyList);
+            var fieldNameSqlListAll = FieldBuiltInList(typeRow, referenceList);
 
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
-                string sqlSelect = UpsertSelect(typeRow, rowListSplit, tableNameSqlReferencePrefix, paramList, assemblyList);
+                string sqlSelect = UpsertSelect(typeRow, rowListSplit, referenceList, paramList);
 
                 // Update underlying sql table if sql view ends with "BuiltIn".
                 UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
@@ -1376,12 +1385,12 @@
         /// </summary>
         internal class UpsertItem
         {
-            private UpsertItem(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
+            private UpsertItem(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, List<Reference> referenceList)
             {
                 this.TypeRow = typeRow;
                 this.RowList = rowList;
                 this.FieldNameKeyList = fieldNameKeyList;
-                this.TableNameSqlReferencePrefix = tableNameSqlReferencePrefix;
+                this.ReferenceList = referenceList;
 
                 foreach (var item in RowList)
                 {
@@ -1389,9 +1398,9 @@
                 }
             }
 
-            public static UpsertItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, string tableNameSqlReferencePrefix)
+            public static UpsertItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, List<Reference> referenceList)
             {
-                return new UpsertItem(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, tableNameSqlReferencePrefix);
+                return new UpsertItem(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, referenceList);
             }
 
             /// <summary>
@@ -1409,10 +1418,7 @@
             /// </summary>
             public readonly string[] FieldNameKeyList;
 
-            /// <summary>
-            /// Gets TableNameSqlReferencePrefix. Used to find reference tables. If value is for example Login, column (UserIdName or MailUserIdName) is referenced to table LoginUserBuiltIn if exists.
-            /// </summary>
-            public string TableNameSqlReferencePrefix { get; internal set; }
+            public readonly List<Reference> ReferenceList;
         }
 
         /// <summary>
@@ -1444,7 +1450,7 @@
                 // Upsert
                 foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
                 {
-                    await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameKeyList, itemUpsert.TableNameSqlReferencePrefix, assemblyList);
+                    await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameKeyList, itemUpsert.ReferenceList, assemblyList);
                 }
             }
         }
