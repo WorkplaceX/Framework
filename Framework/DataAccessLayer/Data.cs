@@ -928,11 +928,11 @@
 
     internal class UtilDalUpsert
     {
-        internal static string UpsertFieldNameToCsvList(string[] fieldNameList, string prefix)
+        internal static string UpsertFieldNameToCsvList(string[] fieldNameSqlList, string prefix)
         {
             string result = null;
             bool isFirst = true;
-            foreach (string fieldName in fieldNameList)
+            foreach (string fieldName in fieldNameSqlList)
             {
                 if (isFirst)
                 {
@@ -947,11 +947,11 @@
             return result;
         }
 
-        internal static string UpsertFieldNameToAssignList(string[] fieldNameList, string prefixTarget, string prefixSource)
+        internal static string UpsertFieldNameToAssignList(string[] fieldNameSqlList, string prefixTarget, string prefixSource)
         {
             string result = null;
             bool isFirst = true;
-            foreach (string fieldName in fieldNameList)
+            foreach (string fieldName in fieldNameSqlList)
             {
                 if (isFirst)
                 {
@@ -1319,9 +1319,9 @@
         /// </summary>
         /// <param name="typeRow">Type of rowList (can be empty).</param>
         /// <param name="rowList">Records to update.</param>
-        /// <param name="fieldNameKeyList">Key fields for record identification.</param>
+        /// <param name="fieldNameSqlKeyList">Key fields for record identification.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        private static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, List<Reference> referenceList, List<Assembly> assemblyList)
+        private static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList, List<Assembly> assemblyList)
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
@@ -1346,8 +1346,8 @@
                     .Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false && item.IsKey == false && fieldDestList.ContainsKey(item.Field.FieldNameCSharp))
                     .Select(item => item.Field.FieldNameSql).ToArray();
 
-                string fieldNameKeySourceList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameKeyList, "Source.");
-                string fieldNameKeyTargetList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameKeyList, "Target.");
+                string fieldNameKeySourceList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameSqlKeyList, "Source.");
+                string fieldNameKeyTargetList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameSqlKeyList, "Target.");
                 string fieldNameAssignList = UtilDalUpsert.UpsertFieldNameToAssignList(fieldNameSqlList, "Target.", "Source.");
                 string fieldNameInsertList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameSqlList, null);
                 string fieldNameValueList = UtilDalUpsert.UpsertFieldNameToCsvList(fieldNameSqlList, "Source.");
@@ -1384,11 +1384,11 @@
         /// </summary>
         internal class UpsertItem
         {
-            private UpsertItem(Type typeRow, List<Row> rowList, string[] fieldNameKeyList, List<Reference> referenceList)
+            private UpsertItem(Type typeRow, List<Row> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList)
             {
                 this.TypeRow = typeRow;
                 this.RowList = rowList;
-                this.FieldNameKeyList = fieldNameKeyList;
+                this.FieldNameSqlKeyList = fieldNameSqlKeyList;
                 this.ReferenceList = referenceList;
 
                 foreach (var item in RowList)
@@ -1397,9 +1397,9 @@
                 }
             }
 
-            public static UpsertItem Create<TRow>(List<TRow> rowList, string[] fieldNameKeyList, List<Reference> referenceList)
+            public static UpsertItem Create<TRow>(List<TRow> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList)
             {
-                return new UpsertItem(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameKeyList, referenceList);
+                return new UpsertItem(typeof(TRow), rowList.Cast<Row>().ToList(), fieldNameSqlKeyList, referenceList);
             }
 
             /// <summary>
@@ -1413,9 +1413,9 @@
             public readonly List<Row> RowList;
 
             /// <summary>
-            /// Gets FieldNameKeyList. Sql unique index for upsert to identify record. For example (UserId, RoleId).
+            /// Gets FieldNameSqlKeyList. Sql unique index for upsert to identify record. For example (UserId, RoleId).
             /// </summary>
-            public readonly string[] FieldNameKeyList;
+            public readonly string[] FieldNameSqlKeyList;
 
             public readonly List<Reference> ReferenceList;
 
@@ -1456,7 +1456,7 @@
                 // Upsert
                 foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
                 {
-                    await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameKeyList, itemUpsert.ReferenceList, assemblyList);
+                    await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList, assemblyList);
                 }
             }
 

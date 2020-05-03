@@ -260,7 +260,7 @@
                 var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
-                result.Add(rowList, new string[] { "TableId", "ConfigName" });
+                result.Add(rowList);
             }
 
             // FrameworkConfigFieldIntegrate
@@ -275,7 +275,7 @@
                 var rowApplicationCliList = (List<FrameworkConfigFieldIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
-                result.Add(rowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" });
+                result.Add(rowList);
             }
 
             // Add application (custom) Integrate data rows to deploy to database
@@ -294,23 +294,37 @@
 
             internal List<UtilDalUpsertIntegrate.UpsertItem> Result;
 
-            public void Add<TRow>(List<TRow> rowList, params string[] fieldNameKeyList) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList) where TRow : Row
             {
+                Type typeRow = typeof(TRow);
+
                 // Reference from GenerateIntegrate to DeployDbIntegrate
                 var referenceFilterList = GenerateIntegrateResult.ResultReference.Where(item => item.TypeRowIntegrate == typeof(TRow)).ToList();
 
                 // Make sure reference tables are deployed.
                 foreach (var item in referenceFilterList)
                 {
-                    if (item.TypeRowReferenceIntegrate != typeof(TRow)) // Exclude hierarchical reference
+                    if (item.TypeRowReferenceIntegrate != typeRow) // Exclude hierarchical reference
                     {
                         int referenceCount = Result.Count(itemLocal => itemLocal.TypeRow == item.TypeRowReferenceIntegrate || itemLocal.TypeRow == item.TypeRowReference);
                         UtilFramework.Assert(referenceCount > 0, string.Format("Reference table not yet deployed! ({0})", UtilDalType.TypeRowToTableNameCSharp(item.TypeRowReferenceIntegrate)));
                     }
                 }
 
+                // Key from GenerateIntegrate
+                var typeRowUnderlying = typeRow;
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                if (tableNameCSharp.EndsWith("Integrate"))
+                {
+                    string tableNameCSharpUnderlying = tableNameCSharp.Substring(0, tableNameCSharp.Length - "Integrate".Length);
+                    typeRowUnderlying = GenerateIntegrateResult.TableNameCSharpList.SingleOrDefault(item => item.Value == tableNameCSharpUnderlying).Key;
+                    UtilFramework.Assert(typeRowUnderlying != null, string.Format("Use underlying sql table! ({0})", tableNameCSharp));
+                }
+                UtilFramework.Assert(GenerateIntegrateResult.ResultKey.ContainsKey(typeRowUnderlying), string.Format("TypRow not unique key defined! ({0})", tableNameCSharp));
+                var fieldNameCSharpKeyList = GenerateIntegrateResult.ResultKey[typeRowUnderlying];
+
                 // Result
-                var result = UtilDalUpsertIntegrate.UpsertItem.Create(rowList, fieldNameKeyList, referenceFilterList);
+                var result = UtilDalUpsertIntegrate.UpsertItem.Create(rowList, fieldNameCSharpKeyList, referenceFilterList);
 
                 // Make sure table is not already added.
                 if (Result.Count > 0 && Result[^1].TypeRow != result.TypeRow) // Do not test ist previous is identical (because of hierarchical reference calling this method multiple times).
@@ -321,29 +335,16 @@
                 Result.Add(result);
             }
 
-            public void Add<TRow>(List<TRow> rowList, string fieldNameKey) where TRow : Row
-            {
-                Add(rowList, new string[] { fieldNameKey });
-            }
-
             /// <summary>
             /// Add hierarchical list with Id and ParentId column.
             /// </summary>
-            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
             {
                 List<TRow> rowLevelList = null;
                 while (OrderByHierarchical(rowList, idSelector, parentIdSelector, sortSelector, ref rowLevelList)) // Step through all levels.
                 {
-                    Add<TRow>(rowLevelList, fieldNameKeyList);
+                    Add<TRow>(rowLevelList);
                 }
-            }
-
-            /// <summary>
-            /// Overload.
-            /// </summary>
-            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
-            {
-                Add(rowList, new string[] { fieldNameKey }, idSelector, parentIdSelector, sortSelector);
             }
 
             private static bool OrderByHierarchical<TRow>(List<TRow> rowAllList, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector, ref List<TRow> rowLevelList) where TRow : Row
@@ -368,7 +369,10 @@
         {
             var result = new GenerateIntegrateResult(AssemblyList(true, true));
 
+            result.AddKey<FrameworkTable>(nameof(FrameworkTable.TableNameCSharp));
+
             // Do not generate CSharp code for table FrameworkTable and FrameworkField. Add reference for deoplyDb.
+            result.AddKey<FrameworkField>(nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp));
             result.AddReference<FrameworkField, FrameworkTable>(nameof(FrameworkFieldIntegrate.TableId));
 
             var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(AssemblyFramework); // TableNameCSharp declared in Framework assembly.
@@ -402,6 +406,7 @@
                         query: rowFilterList
                     );
                 }
+                result.AddKey<FrameworkConfigGrid>(nameof(FrameworkConfigGrid.TableId), nameof(FrameworkConfigGrid.ConfigName));
                 result.AddReference<FrameworkConfigGrid, FrameworkTable>(nameof(FrameworkConfigGrid.TableId));
             }
 
@@ -432,6 +437,7 @@
                         query: rowFilterList
                     );
                 }
+                result.AddKey<FrameworkConfigField>(nameof(FrameworkConfigField.ConfigGridId), nameof(FrameworkConfigField.FieldId), nameof(FrameworkConfigField.InstanceName));
                 result.AddReference<FrameworkConfigField, FrameworkConfigGrid>(nameof(FrameworkConfigField.ConfigGridId));
                 result.AddReference<FrameworkConfigField, FrameworkField>(nameof(FrameworkConfigField.FieldId));
             }
@@ -562,6 +568,11 @@
 
             internal readonly List<UtilDalUpsertIntegrate.Reference> ResultReference = new List<UtilDalUpsertIntegrate.Reference>();
 
+            /// <summary>
+            /// (TypeRow, FieldNameCSharp).
+            /// </summary>
+            internal readonly Dictionary<Type, string[]> ResultKey = new Dictionary<Type, string[]>();
+
             private void ResultAdd(GenerateIntegrateItem value)
             {
                 Result.Add(value);
@@ -581,6 +592,26 @@
             {
                 var result = GenerateIntegrateItem.Create(this, query, isApplication);
                 ResultAdd(result);
+            }
+
+            /// <summary>
+            /// Add unique key.
+            /// </summary>
+            public void AddKey<TRow>(params string[] fieldNameKeyList) where TRow : Row
+            {
+                Type typeRow = typeof(TRow);
+
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                UtilFramework.Assert(!tableNameCSharp.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying sql table! ({0})", tableNameCSharp));
+
+                if (ResultKey.ContainsKey(typeof(TRow)))
+                {
+                    UtilFramework.Assert(ResultKey[typeRow].SequenceEqual(fieldNameKeyList), string.Format("TypeRow added with different FieldNameKeyList! ({0})", UtilDalType.TypeRowToTableNameCSharp(typeRow)));
+                }
+                else
+                {
+                    ResultKey.Add(typeRow, fieldNameKeyList);
+                }
             }
 
             /// <summary>
@@ -605,11 +636,11 @@
                 // Row
                 {
                     Type typeRow = typeof(TRow);
-                    string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    UtilFramework.Assert(!tableName.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying table! ({0})", tableName));
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    UtilFramework.Assert(!tableNameCSharp.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying sql table! ({0})", tableNameCSharp));
 
                     var fieldId = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.FieldNameCSharp == fieldNameIdCSharp).FirstOrDefault();
-                    UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableName, fieldNameIdCSharp));
+                    UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableNameCSharp, fieldNameIdCSharp));
 
                     typeRowResult = typeRow;
                     fieldNameIdCSharpResult = fieldId.FieldNameCSharp;
@@ -619,8 +650,8 @@
                 // Row Integrate
                 {
                     Type typeRow = typeof(TRow);
-                    string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableName + "Integrate").SingleOrDefault();
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableNameCSharp + "Integrate").SingleOrDefault();
                     Type typeRowIntegrate = tableIntegrate.Key;
                     string tableNameIntegrate = tableIntegrate.Value;
                     UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! ({0})", tableNameIntegrate));
@@ -639,11 +670,11 @@
                 // Row Reference
                 {
                     Type typeRow = typeof(TRowReference);
-                    string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    UtilFramework.Assert(!tableName.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying table! ({0})", tableName));
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    UtilFramework.Assert(!tableNameCSharp.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying sql table! ({0})", tableNameCSharp));
 
                     var fieldId = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.FieldNameCSharp == "Id").FirstOrDefault();
-                    UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableName, "Id"));
+                    UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableNameCSharp, "Id"));
 
                     typeRowReferenceResult = typeRow;
                 }
@@ -651,8 +682,8 @@
                 // Row Reference Integrate
                 {
                     Type typeRow = typeof(TRowReference);
-                    string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableName + "Integrate").SingleOrDefault();
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                    var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableNameCSharp + "Integrate").SingleOrDefault();
                     Type typeRowIntegrate = tableIntegrate.Key;
                     string tableNameIntegrate = tableIntegrate.Value;
                     UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! ({0})", tableNameIntegrate));

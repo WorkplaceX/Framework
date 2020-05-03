@@ -127,7 +127,7 @@
                     }
                     table.IsExist = true;
                 }
-                result.Add(rowList, nameof(FrameworkTable.TableNameCSharp));
+                result.Add(rowList);
             }
 
             // Field
@@ -152,7 +152,7 @@
 
                 rowList = rowList.OrderBy(item => item.TableIdName).ThenBy(item => item.FieldNameCSharp).ToList();
 
-                result.Add(rowList, nameof(FrameworkField.TableId), nameof(FrameworkField.FieldNameCSharp));
+                result.Add(rowList);
             }
         }
 
