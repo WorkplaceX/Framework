@@ -155,6 +155,7 @@
 
         private static void GenerateCSharpRowIntegrate(GenerateIntegrateItem integrateItem, StringBuilder result)
         {
+            var fieldNameIdCSharpReferenceList = integrateItem.Owner.ResultReference.Where(item => item.TypeRowIntegrate == integrateItem.TypeRow).Select(item => item.FieldNameIdCSharp).ToList();
             var fieldList = UtilDalType.TypeRowToFieldList(integrateItem.TypeRow);
             foreach (Row row in integrateItem.RowList)
             {
@@ -171,6 +172,13 @@
                         result.Append(", ");
                     }
                     object value = field.PropertyInfo.GetValue(row);
+                    if (fieldNameIdCSharpReferenceList.Contains(field.FieldNameCSharp) || (fieldNameIdCSharpReferenceList.Count() > 0 && field.FieldNameCSharp == "Id"))
+                    {
+                        UtilFramework.Assert(value == null || value.GetType() == typeof(int));
+
+                        // Unlike IdName, Id can change from database to database.
+                        value = 0;
+                    }
                     GenerateCSharpRowIntegrateField(field, value, result);
                 }
                 result.Append(" },");

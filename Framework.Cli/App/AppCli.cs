@@ -329,7 +329,7 @@
             /// <summary>
             /// Add hierarchical list with Id and ParentId column.
             /// </summary>
-            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, string[] fieldNameKeyList, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
             {
                 List<TRow> rowLevelList = null;
                 while (OrderByHierarchical(rowList, idSelector, parentIdSelector, sortSelector, ref rowLevelList)) // Step through all levels.
@@ -341,12 +341,12 @@
             /// <summary>
             /// Overload.
             /// </summary>
-            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
+            public void Add<TRow>(List<TRow> rowList, string fieldNameKey, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector) where TRow : Row
             {
                 Add(rowList, new string[] { fieldNameKey }, idSelector, parentIdSelector, sortSelector);
             }
 
-            private static bool OrderByHierarchical<TRow>(List<TRow> rowAllList, Func<TRow, int> idSelector, Func<TRow, int?> parentIdSelector, Func<TRow, object> sortSelector, ref List<TRow> rowLevelList) where TRow : Row
+            private static bool OrderByHierarchical<TRow>(List<TRow> rowAllList, Func<TRow, object> idSelector, Func<TRow, object> parentIdSelector, Func<TRow, object> sortSelector, ref List<TRow> rowLevelList) where TRow : Row
             {
                 if (rowLevelList == null)
                 {
@@ -354,7 +354,7 @@
                 }
                 else
                 {
-                    var idList = rowLevelList.Select(item => (int?)idSelector(item)).ToList();
+                    var idList = rowLevelList.Select(item => idSelector(item)).ToList();
                     rowLevelList = rowAllList.Where(item => idList.Contains(parentIdSelector(item))).OrderBy(item => sortSelector(item)).ToList();
                 }
                 return rowLevelList.Count() != 0;
@@ -460,8 +460,9 @@
             /// <summary>
             /// Constructor for Framework and Application.
             /// </summary>
-            internal GenerateIntegrateItem(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
+            internal GenerateIntegrateItem(GenerateIntegrateResult owner, bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
             {
+                this.Owner = owner;
                 this.IsFrameworkDb = isFrameworkDb;
                 this.IsApplication = isApplication;
                 this.TypeRow = typeRow;
@@ -474,8 +475,8 @@
             /// <summary>
             /// Constructor for Application.
             /// </summary>
-            private GenerateIntegrateItem(bool isApplication, Type typeRow, IQueryable<Row> query) 
-                : this(false, isApplication, typeRow, query)
+            private GenerateIntegrateItem(GenerateIntegrateResult owner, bool isApplication, Type typeRow, IQueryable<Row> query) 
+                : this(owner, false, isApplication, typeRow, query)
             {
 
             }
@@ -484,10 +485,15 @@
             /// Constructor for GenerateIntegrateItem.
             /// </summary>
             /// <param name="isApplication">If true, RowList will be available at runtime as Integrate CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
-            public static GenerateIntegrateItem Create<TRow>(IQueryable<TRow> query, bool isApplication = false) where TRow : Row
+            public static GenerateIntegrateItem Create<TRow>(GenerateIntegrateResult owner, IQueryable<TRow> query, bool isApplication = false) where TRow : Row
             {
-                return new GenerateIntegrateItem(isApplication, typeof(TRow), query.Cast<Row>());
+                return new GenerateIntegrateItem(owner, isApplication, typeof(TRow), query.Cast<Row>());
             }
+
+            /// <summary>
+            /// Gets Owner.
+            /// </summary>
+            public readonly GenerateIntegrateResult Owner;
 
             /// <summary>
             /// Gets IsFrameworkDb. If true, RowList is generated into Framework library (internal use only). If false, RowList is generated into Application library.
@@ -563,7 +569,7 @@
 
             internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
             {
-                var result = new GenerateIntegrateItem(isFrameworkDb, isApplication, typeRow, query);
+                var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query);
                 ResultAdd(result);
             }
 
@@ -573,7 +579,7 @@
             /// <param name="isApplication">If true, RowList will be available at runtime as Integrate CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
             public void Add<TRow>(IQueryable<TRow> query, bool isApplication = false) where TRow : Row
             {
-                var result = GenerateIntegrateItem.Create(query, isApplication);
+                var result = GenerateIntegrateItem.Create(this, query, isApplication);
                 ResultAdd(result);
             }
 
