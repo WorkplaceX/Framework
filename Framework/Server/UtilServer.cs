@@ -184,6 +184,24 @@
         }
 
         /// <summary>
+        /// Returns for example: "/cms/install/"
+        /// </summary>
+        /// <param name="pathBase">For example: "/cms/".</param>
+        /// <param name="path">For example: "/install/".</param>
+        public static string Path(string pathBase, string path)
+        {
+            if (!pathBase.EndsWith("/"))
+            {
+                pathBase += "/";
+            }
+            if (path.StartsWith("/"))
+            {
+                path = path.Substring("/".Length);
+            }
+            return pathBase + path;
+        }
+
+        /// <summary>
         /// Post to json url.
         /// </summary>
         public static async Task<string> WebPost(string url, string json)
