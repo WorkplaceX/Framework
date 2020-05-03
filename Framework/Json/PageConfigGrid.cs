@@ -196,6 +196,7 @@
             {
                 result.Query = result.Query.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
             }
+            result.Query = result.Query.OrderBy(item => item.FieldFieldSort);
         }
 
         protected override async Task UpdateAsync(UpdateArgs args, UpdateResult result)

@@ -145,6 +145,7 @@
                         fieldIntegrate.TableIdName = tableNameCSharp;
                         fieldIntegrate.FieldNameCSharp = field.PropertyInfo.Name;
                         fieldIntegrate.FieldNameSql = field.FieldNameSql;
+                        fieldIntegrate.Sort = field.Sort;
                         fieldIntegrate.IsExist = true;
                     }
                 }

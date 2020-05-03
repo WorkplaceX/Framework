@@ -21,6 +21,7 @@ CREATE TABLE FrameworkField /* Used for configuration. Contains all in source co
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL ,
 	FieldNameCSharp NVARCHAR(256) NOT NULL,
 	FieldNameSql NVARCHAR(256), -- Can be null for calculated columns.
+	Sort INT NOT NULL, -- See also method UtilDalType.TypeRowToFieldList();
 	IsExist BIT NOT NULL
 	INDEX IX_FrameworkField UNIQUE (TableId, FieldNameCSharp)
 )
@@ -35,6 +36,7 @@ SELECT
 	(SELECT TableIntegrate.IdName FROM FrameworkTableIntegrate TableIntegrate WHERE TableIntegrate.Id = Field.TableId) AS TableIdName,
 	Field.FieldNameCSharp,
 	Field.FieldNameSql,
+	Field.Sort,
 	Field.IsExist
 FROM
 	FrameworkField Field
@@ -176,6 +178,7 @@ SELECT
 	Field.TableId AS FieldTableId,
 	Field.FieldNameCSharp AS FieldFieldNameCSharp,
 	Field.FieldNameSql AS FieldFieldNameSql,
+	Field.Sort AS FieldFieldSort,
 	Field.IsExist AS FieldIsExist,
 	/* ConfigField */
 	ConfigField.Id AS ConfigFieldId,

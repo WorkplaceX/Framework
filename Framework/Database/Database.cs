@@ -72,6 +72,9 @@ namespace Database.dbo
         [SqlField("FieldFieldNameSql", FrameworkTypeEnum.Nvarcahr)]
         public string FieldFieldNameSql { get; set; }
 
+        [SqlField("FieldFieldSort", FrameworkTypeEnum.Int)]
+        public int FieldFieldSort { get; set; }
+
         [SqlField("FieldIsExist", FrameworkTypeEnum.Bit)]
         public bool FieldIsExist { get; set; }
 
@@ -261,6 +264,9 @@ namespace Database.dbo
         [SqlField("FieldNameSql", FrameworkTypeEnum.Nvarcahr)]
         public string FieldNameSql { get; set; }
 
+        [SqlField("Sort", FrameworkTypeEnum.Int)]
+        public int Sort { get; set; }
+
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }
     }
@@ -285,6 +291,9 @@ namespace Database.dbo
 
         [SqlField("FieldNameSql", FrameworkTypeEnum.Nvarcahr)]
         public string FieldNameSql { get; set; }
+
+        [SqlField("Sort", FrameworkTypeEnum.Int)]
+        public int Sort { get; set; }
 
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }

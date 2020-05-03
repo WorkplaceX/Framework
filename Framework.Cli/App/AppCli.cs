@@ -585,7 +585,7 @@
             /// <param name="fieldNameId">For example: "UserId".</param>
             public void AddReference<TRow, TRowReference>(string fieldNameId) where TRow : Row where TRowReference : Row
             {
-                string fieldNameCSharpId = fieldNameId;
+                string fieldNameIdCSharp = fieldNameId;
 
                 Type typeRowResult;
                 string fieldNameIdCSharpResult;
@@ -602,8 +602,8 @@
                     string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                     UtilFramework.Assert(!tableName.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying table! ({0})", tableName));
 
-                    var fieldId = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.FieldNameCSharp == fieldNameCSharpId).FirstOrDefault();
-                    UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableName, fieldNameCSharpId));
+                    var fieldId = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.FieldNameCSharp == fieldNameIdCSharp).FirstOrDefault();
+                    UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableName, fieldNameIdCSharp));
 
                     typeRowResult = typeRow;
                     fieldNameIdCSharpResult = fieldId.FieldNameCSharp;
@@ -619,11 +619,11 @@
                     string tableNameIntegrate = tableIntegrate.Value;
                     UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! ({0})", tableNameIntegrate));
 
-                    var fieldIntegrateId = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameCSharpId).FirstOrDefault();
-                    UtilFramework.Assert(fieldIntegrateId != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameCSharpId));
+                    var fieldIntegrateId = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameIdCSharp).FirstOrDefault();
+                    UtilFramework.Assert(fieldIntegrateId != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameIdCSharp));
 
-                    var fieldIntegrateIdName = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameCSharpId + "Name").FirstOrDefault();
-                    UtilFramework.Assert(fieldIntegrateIdName != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameCSharpId + "Name"));
+                    var fieldIntegrateIdName = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameIdCSharp + "Name").FirstOrDefault();
+                    UtilFramework.Assert(fieldIntegrateIdName != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameIdCSharp + "Name"));
 
                     typeRowIntegrateResult = typeRowIntegrate;
                     fieldNameIdNameCSharpResult = fieldIntegrateIdName.FieldNameCSharp;
