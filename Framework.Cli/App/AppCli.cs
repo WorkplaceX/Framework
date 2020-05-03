@@ -86,9 +86,11 @@
         /// <returns>List of assemblies.</returns>
         public List<Assembly> AssemblyList(bool isIncludeApp = false, bool isIncludeFrameworkCli = false)
         {
-            List<Assembly> result = new List<Assembly>();
-            result.Add(AssemblyFramework);
-            result.Add(AssemblyApplicationDatabase);
+            List<Assembly> result = new List<Assembly>
+            {
+                AssemblyFramework,
+                AssemblyApplicationDatabase
+            };
             if (isIncludeApp)
             {
                 result.Add(AssemblyApplication);
@@ -450,7 +452,7 @@
                 this.IsApplication = isApplication;
                 this.TypeRow = typeRow;
                 this.Query = query;
-                UtilDalType.TypeRowToTableNameSql(TypeRow, out string schemaNameSql, out string tableNameSql);
+                UtilDalType.TypeRowToTableNameSql(TypeRow, out _, out _);
                 this.SchemaNameCSharp = UtilDalType.TypeRowToSchemaNameCSharp(TypeRow);
                 this.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharpWithoutSchema(TypeRow);
             }

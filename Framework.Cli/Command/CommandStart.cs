@@ -89,15 +89,17 @@
         /// <summary>
         /// (FolderNameSource, FolderNameDest).
         /// </summary>
-        private Dictionary<string, string> folderNameList = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> folderNameList = new Dictionary<string, string>();
 
         public void AddFolder(string folderNameSource, string folderNameDest)
         {
             folderNameList.Add(folderNameSource, folderNameDest);
-            var watcher = new FileSystemWatcher();
-            watcher.Path = folderNameSource;
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
-            watcher.Filter = "*.*";
+            var watcher = new FileSystemWatcher
+            {
+                Path = folderNameSource,
+                NotifyFilter = NotifyFilters.LastWrite,
+                Filter = "*.*"
+            };
             watcher.Changed += Changed;
             watcher.EnableRaisingEvents = true;
         }

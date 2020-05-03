@@ -36,7 +36,7 @@
         /// </summary>
         public static Task ProcessHomeIsClickAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.HomeIsClick, out RequestJson requestJson, out ComponentJson component))
+            if (UtilSession.Request(appJson, RequestCommand.HomeIsClick, out _, out ComponentJson _))
             {
                 // User clicked home button
             }
@@ -49,7 +49,7 @@
         /// </summary>
         public static async Task ProcessLinkPostAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.LinkPost, out RequestJson requestJson, out ComponentJson component))
+            if (UtilSession.Request(appJson, RequestCommand.LinkPost, out RequestJson requestJson, out ComponentJson _))
             {
                 await appJson.FileDownloadSessionInternalAsync(requestJson.LinkPostPath, requestJson.LinkPostPathIsBackwardForward);
             }
@@ -76,8 +76,7 @@
         public static async Task ProcessBootstrapNavbarAsync(AppJson appJson)
         {
             var request = appJson.RequestJson;
-
-            if (UtilSession.Request(appJson, RequestCommand.BootstrapNavbarButtonIsClick, out RequestJson requestJson, out BootstrapNavbar navbar))
+            if (UtilSession.Request(appJson, RequestCommand.BootstrapNavbarButtonIsClick, out _, out BootstrapNavbar navbar))
             {
                 if (navbar.ButtonList != null)
                 {

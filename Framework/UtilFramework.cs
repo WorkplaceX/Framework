@@ -95,7 +95,7 @@ namespace Framework
             {
                 path = path.Substring(1);
             }
-            result = result + path;
+            result += path;
             return result;
         }
 
@@ -165,7 +165,7 @@ namespace Framework
 
         internal static T ConfigFromJson<T>(string json)
         {
-            object result = null;
+            object result;
             if (json == null)
             {
                 result = JsonSerializer.Deserialize<T>("{}");
@@ -185,9 +185,8 @@ namespace Framework
 
         internal static T ConfigLoad<T>(string fileName)
         {
-            object result = null;
             string json = UtilFramework.FileLoad(fileName);
-            result = ConfigFromJson<T>(json);
+            object result = ConfigFromJson<T>(json);
             return (T)result;
         }
 
@@ -448,7 +447,7 @@ namespace Framework
                 {
                     result.Add(new List<T>());
                 }
-                result[result.Count - 1].Add(list[i]);
+                result[^1].Add(list[i]);
             }
             return result;
         }
@@ -596,7 +595,7 @@ namespace Framework
                     }
                     else
                     {
-                        indexList[indexList.Count - 1] = indexList[indexList.Count - 1] + 1;
+                        indexList[^1] = indexList[^1] + 1;
                     }
                     isUpper = Char.IsUpper(c);
                 }

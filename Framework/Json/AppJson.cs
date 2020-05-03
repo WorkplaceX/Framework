@@ -284,8 +284,10 @@
         /// </summary>
         public static List<ComponentJson> ComponentListAll(this ComponentJson component)
         {
-            List<ComponentJson> result = new List<ComponentJson>();
-            result.Add(component);
+            List<ComponentJson> result = new List<ComponentJson>
+            {
+                component
+            };
             ComponentListAll(component, result);
             return result;
         }
@@ -539,8 +541,10 @@
         internal async Task<FileDownloadSessionResult> FileDownloadSessionInternalAsync(string path, bool isBackwardForward)
         {
             var args = new FileDownloadArgs(path);
-            var result = new FileDownloadSessionResult();
-            result.Path = args.Path;
+            var result = new FileDownloadSessionResult
+            {
+                Path = args.Path
+            };
             await FileDownloadSessionAsync(args, result);
             if (result.IsPage)
             {
@@ -808,8 +812,10 @@
                     break;
             }
             htmlTextAlert = htmlTextAlert.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
-            Html result = new Html(page);
-            result.TextHtml = htmlTextAlert;
+            Html result = new Html(page)
+            {
+                TextHtml = htmlTextAlert
+            };
             result.ComponentMove(index);
             return result;
         }
@@ -1282,8 +1288,10 @@
             {
                 args.Query = Data.Query<TRow>();
             }
-            QueryResult result = new QueryResult();
-            result.Query = args.Query; // Default query
+            QueryResult result = new QueryResult
+            {
+                Query = args.Query // Default query
+            };
             Query(args, result);
             return result.Query;
         }

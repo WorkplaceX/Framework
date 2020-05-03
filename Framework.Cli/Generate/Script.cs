@@ -49,7 +49,7 @@
             }
             if (generateBuiltInResult != null)
             {
-                Run(generateBuiltInResult, appCli);
+                Run(generateBuiltInResult);
                 new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: generateBuiltInResult.Result);
                 new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: generateBuiltInResult.Result);
                 if (isFrameworkDb == false)
@@ -71,7 +71,7 @@
         /// <summary>
         /// Console log BuiltIn table relation.
         /// </summary>
-        private static void Run(GenerateBuiltInResult generateBuiltInResult, AppCli appCli)
+        private static void Run(GenerateBuiltInResult generateBuiltInResult)
         {
             bool isFirst = true;
             List<string> result = new List<string>();

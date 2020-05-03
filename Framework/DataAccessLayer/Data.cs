@@ -51,8 +51,10 @@
         /// </summary>
         public static async Task UpsertAsync(Type typeRow, Row row, string[] fieldNameKeyList)
         {
-            List<Row> rowList = new List<Row>();
-            rowList.Add(row);
+            List<Row> rowList = new List<Row>
+            {
+                row
+            };
             await UtilDalUpsert.UpsertAsync(typeRow, rowList, fieldNameKeyList);
         }
 
@@ -397,34 +399,32 @@
             var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             string connectionString = ConfigServer.ConnectionString(isFrameworkDb);
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            using SqlConnection sqlConnection = new SqlConnection(connectionString);
+            sqlConnection.Open();
+            foreach (string sqlItem in sqlList)
             {
-                sqlConnection.Open();
-                foreach (string sqlItem in sqlList)
+                SqlCommand sqlCommand = new SqlCommand(sqlItem, sqlConnection);
+                if (commandTimeout.HasValue)
                 {
-                    SqlCommand sqlCommand = new SqlCommand(sqlItem, sqlConnection);
-                    if (commandTimeout.HasValue)
+                    sqlCommand.CommandTimeout = commandTimeout.Value;
+                }
+                if (paramList?.Count > 0)
+                {
+                    sqlCommand.Parameters.AddRange(paramList.Select(item => item.SqlParameter).ToArray());
+                }
+                try
+                {
+                    await sqlCommand.ExecuteNonQueryAsync();
+                }
+                catch (Exception exception)
+                {
+                    if (isExceptionContinue)
                     {
-                        sqlCommand.CommandTimeout = commandTimeout.Value;
+                        Console.WriteLine(exception.Message);
                     }
-                    if (paramList?.Count > 0)
+                    else
                     {
-                        sqlCommand.Parameters.AddRange(paramList.Select(item => item.SqlParameter).ToArray());
-                    }
-                    try
-                    {
-                        await sqlCommand.ExecuteNonQueryAsync();
-                    }
-                    catch (Exception exception)
-                    {
-                        if (isExceptionContinue)
-                        {
-                            Console.WriteLine(exception.Message);
-                        }
-                        else
-                        {
-                            throw exception;
-                        }
+                        throw exception;
                     }
                 }
             }
@@ -448,29 +448,27 @@
                 {
                     sqlCommand.Parameters.AddRange(paramList.Select(item => item.SqlParameter).ToArray());
                 }
-                using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync())
+                using SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                while (sqlDataReader.HasRows)
                 {
-                    while (sqlDataReader.HasRows)
+                    var rowList = new List<Dictionary<string, object>>();
+                    result.Add(rowList);
+                    while (sqlDataReader.Read())
                     {
-                        var rowList = new List<Dictionary<string, object>>();
-                        result.Add(rowList);
-                        while (sqlDataReader.Read())
+                        var row = new Dictionary<string, object>();
+                        rowList.Add(row);
+                        for (int i = 0; i < sqlDataReader.FieldCount; i++)
                         {
-                            var row = new Dictionary<string, object>();
-                            rowList.Add(row);
-                            for (int i = 0; i < sqlDataReader.FieldCount; i++)
+                            string columnName = sqlDataReader.GetName(i);
+                            object value = sqlDataReader.GetValue(i);
+                            if (value == DBNull.Value)
                             {
-                                string columnName = sqlDataReader.GetName(i);
-                                object value = sqlDataReader.GetValue(i);
-                                if (value == DBNull.Value)
-                                {
-                                    value = null;
-                                }
-                                row.Add(columnName, value);
+                                value = null;
                             }
+                            row.Add(columnName, value);
                         }
-                        sqlDataReader.NextResult();
                     }
+                    sqlDataReader.NextResult();
                 }
             }
             return result;
@@ -659,7 +657,6 @@
         /// </summary>
         internal static List<TRow> QueryExecute<TRow>(this IQueryable<TRow> query) where TRow : Row
         {
-            var d = query.ToList();
             return query.ToDynamicList().Cast<TRow>().ToList();
         }
 
@@ -1190,8 +1187,10 @@
             // Populate result
             foreach (var field in fieldList)
             {
-                FieldBuiltIn fieldBuiltIn = new FieldBuiltIn();
-                fieldBuiltIn.Field = field;
+                FieldBuiltIn fieldBuiltIn = new FieldBuiltIn
+                {
+                    Field = field
+                };
                 result.Add(fieldBuiltIn);
             }
 
@@ -1602,9 +1601,8 @@
         /// </summary>
         internal static string TypeRowToTableNameCSharp(Type typeRow)
         {
-            string result = null;
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
-            result = UtilFramework.TypeToName(typeRow);
+            string result = UtilFramework.TypeToName(typeRow);
             UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "DatabaseCalculated".
             result = result.Substring("Database.".Length); // Remove "DatabaseFramework" namespace.
             return result;
@@ -2446,7 +2444,7 @@
                 foreach (var item in textList)
                 {
                     stringBuilder.AppendLine(",");
-                    stringBuilder.Append("                ");
+                    stringBuilder.Append("                    ");
                     stringBuilder.Append($"\"{item}\"");
                 }
                 stringBuilder.Append("))");

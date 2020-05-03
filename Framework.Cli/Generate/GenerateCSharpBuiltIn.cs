@@ -105,8 +105,10 @@
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            get"));
                 result.AppendLine(string.Format("            {{"));
-                result.AppendLine(string.Format("                var result = new List<{0}>();", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("                var result = new List<{0}>", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("                {{", builtIn.TableNameCSharp));
                 GenerateCSharpRowBuiltIn(builtIn, result);
+                result.AppendLine(string.Format("                }};", builtIn.TableNameCSharp));
                 result.AppendLine(string.Format("                return result;"));
                 result.AppendLine(string.Format("            }}"));
                 result.AppendLine(string.Format("        }}"));
@@ -156,13 +158,12 @@
             var fieldList = UtilDalType.TypeRowToFieldList(builtInItem.TypeRow);
             foreach (Row row in builtInItem.RowList)
             {
-                result.Append(string.Format("                result.Add(new {0}()", builtInItem.TableNameCSharp));
+                result.Append(string.Format("                    new {0} {{", builtInItem.TableNameCSharp));
                 bool isFirst = true;
                 foreach (var field in fieldList)
                 {
                     if (isFirst)
                     {
-                        result.Append(" { ");
                         isFirst = false;
                     }
                     else
@@ -172,11 +173,7 @@
                     object value = field.PropertyInfo.GetValue(row);
                     GenerateCSharpRowBuiltInField(field, value, result);
                 }
-                if (isFirst == false)
-                {
-                    result.Append(" }");
-                }
-                result.Append(");");
+                result.Append(" },");
                 result.AppendLine();
             }
         }

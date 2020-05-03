@@ -71,10 +71,12 @@
             string time = UtilFramework.DateTimeToString(DateTime.Now);
             UtilCli.ConsoleWriteLinePassword(string.Format("### {4} Process Begin (FileName={1}; Arguments={2}; IsWait={3}; WorkingDirectory={0};)", workingDirectory, fileName, arguments, isWait, time), ConsoleColor.Green);
 
-            ProcessStartInfo info = new ProcessStartInfo();
-            info.WorkingDirectory = workingDirectory;
-            info.FileName = fileName;
-            info.Arguments = arguments;
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                WorkingDirectory = workingDirectory,
+                FileName = fileName,
+                Arguments = arguments
+            };
             if (isRedirectStdErr)
             {
                 info.RedirectStandardError = true; // Do not write to stderr.
@@ -117,11 +119,13 @@
         /// </summary>
         internal static string StartStdout(string workingDirectory, string fileName, string arguments)
         {
-            ProcessStartInfo info = new ProcessStartInfo();
-            info.WorkingDirectory = workingDirectory;
-            info.FileName = fileName;
-            info.Arguments = arguments;
-            info.RedirectStandardOutput = true; // Do not write to stdout.
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                WorkingDirectory = workingDirectory,
+                FileName = fileName,
+                Arguments = arguments,
+                RedirectStandardOutput = true // Do not write to stdout.
+            };
             var process = Process.Start(info);
             process.WaitForExit();
             string result = process.StandardOutput.ReadToEnd();
@@ -427,10 +431,8 @@
         /// </summary>
         internal static void ConsoleWriteLineError(object value)
         {
-            using (TextWriter textWriter = Console.Error)
-            {
-                textWriter.WriteLine(value);
-            }
+            using TextWriter textWriter = Console.Error;
+            textWriter.WriteLine(value);
         }
 
         /// <summary>
@@ -443,18 +445,16 @@
             var textList = UtilFramework.SplitChunk(text); // Because of line break after 80 characters!
             using (var writer = new StringWriter(CultureInfo.InvariantCulture))
             {
-                using (var provider = CodeDomProvider.CreateProvider("CSharp"))
+                using var provider = CodeDomProvider.CreateProvider("CSharp");
+                foreach (var item in textList)
                 {
-                    foreach (var item in textList)
-                    {
-                        provider.GenerateCodeFromExpression(new CodePrimitiveExpression(item), writer, null); // Does a line break after 80 characters by default!
-                        string textCSharp = writer.ToString();
-                        UtilFramework.Assert(textCSharp.StartsWith("\""));
-                        UtilFramework.Assert(textCSharp.EndsWith("\""));
-                        textCSharp = textCSharp.Substring(1, textCSharp.Length - 2); // Remove quotation marks.
-                        stringBuilder.Append(textCSharp);
-                        writer.GetStringBuilder().Clear(); // Reset writer for next chunk.
-                    }
+                    provider.GenerateCodeFromExpression(new CodePrimitiveExpression(item), writer, null); // Does a line break after 80 characters by default!
+                    string textCSharp = writer.ToString();
+                    UtilFramework.Assert(textCSharp.StartsWith("\""));
+                    UtilFramework.Assert(textCSharp.EndsWith("\""));
+                    textCSharp = textCSharp[1..^1]; // Remove quotation marks.
+                    stringBuilder.Append(textCSharp);
+                    writer.GetStringBuilder().Clear(); // Reset writer for next chunk.
                 }
             }
             stringBuilder.Append("\"");

@@ -79,9 +79,8 @@
         /// </summary>
         public static string RequestUrl()
         {
-            string result = null;
             HttpContext context = Context;
-            result = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
+            string result = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
             // result = string.Format("{0}://{1}{2}", context.Request.Scheme, context.Request.Host.Value, context.Request.Path); // Returns also path. For example: "http://localhost:49323/config/data.txt"
             return result;
         }
@@ -144,9 +143,11 @@
             {
                 throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer));
             }
-            ProcessStartInfo info = new ProcessStartInfo();
-            info.WorkingDirectory = folderName;
-            info.FileName = "node.exe";
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                WorkingDirectory = folderName,
+                FileName = "node.exe"
+            };
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 info.FileName = "node";
@@ -187,21 +188,19 @@
         /// </summary>
         public static async Task<string> WebPost(string url, string json)
         {
-            using (HttpClient client = new HttpClient())
+            using HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+            try
             {
-                HttpResponseMessage response;
-                try
-                {
-                    response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
-                }
-                catch (HttpRequestException exception)
-                {
-                    throw new Exception(string.Format("Http request failed! ({0})", url), exception);
-                }
-                response.EnsureSuccessStatusCode();
-                string result = await response.Content.ReadAsStringAsync();
-                return result;
+                response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
             }
+            catch (HttpRequestException exception)
+            {
+                throw new Exception(string.Format("Http request failed! ({0})", url), exception);
+            }
+            response.EnsureSuccessStatusCode();
+            string result = await response.Content.ReadAsStringAsync();
+            return result;
         }
     }
 }

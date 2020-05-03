@@ -59,8 +59,10 @@
                 configFieldDictionary.TryGetValue(propertyInfo.Name, out List<FrameworkConfigFieldBuiltIn> configFieldList);
                 if (configFieldList == null) // No ConfigField defined
                 {
-                    configFieldList = new List<FrameworkConfigFieldBuiltIn>();
-                    configFieldList.Add(null);
+                    configFieldList = new List<FrameworkConfigFieldBuiltIn>
+                    {
+                        null
+                    };
                 }
                 foreach (var configField in configFieldList)
                 {
@@ -98,8 +100,10 @@
         /// </summary>
         private static List<GridRowState> LoadRowStateList(Grid grid)
         {
-            var result = new List<GridRowState>();
-            result.Add(new GridRowState { RowId = null, RowEnum = GridRowEnum.Filter });
+            var result = new List<GridRowState>
+            {
+                new GridRowState { RowId = null, RowEnum = GridRowEnum.Filter }
+            };
             int rowId = 0;
             foreach (var row in grid.RowList)
             {
@@ -119,9 +123,8 @@
 
         private static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> list, TKey key, Func<TKey, TValue> valueFactory, out bool isAdded)
         {
-            TValue result;
             isAdded = false;
-            if (!list.TryGetValue(key, out result))
+            if (!list.TryGetValue(key, out TValue result))
             {
                 isAdded = true;
                 result = valueFactory(key);
@@ -1194,7 +1197,7 @@
                         grid.GridDest.LookupRowSelected(args, result);
                         if (result.Text != null)
                         {
-                            GridLookupToGridDest(grid, out var gridDest, out var rowDest, out var _, out var cellDest);
+                            GridLookupToGridDest(grid, out var gridDest, out _, out _, out var cellDest);
                             appJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true };
 
                             await ProcessCellIsModify(appJson);
@@ -1456,10 +1459,11 @@ namespace Framework.Session
             // See also: https://stackoverflow.com/questions/11116176/cell-styles-in-openxml-spreadsheet-spreadsheetml
 
             var stylesPart = spreadsheetDocument.WorkbookPart.AddNewPart<WorkbookStylesPart>();
-            stylesPart.Stylesheet = new Stylesheet();
-
-            // blank font list
-            stylesPart.Stylesheet.Fonts = new Fonts();
+            stylesPart.Stylesheet = new Stylesheet
+            {
+                // blank font list
+                Fonts = new Fonts()
+            };
             stylesPart.Stylesheet.Fonts.AppendChild(new Font());
             stylesPart.Stylesheet.Fonts.Count = (uint)stylesPart.Stylesheet.Fonts.ChildElements.Count;
 
