@@ -1,7 +1,7 @@
 ﻿namespace Framework.Cli
 {
     using Database.dbo;
-    using DatabaseBuiltIn.dbo;
+    using DatabaseIntegrate.dbo;
     using Framework.Cli.Command;
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
@@ -236,81 +236,81 @@
         }
 
         /// <summary>
-        /// Override this method to add BuiltIn data rows to list. Used by cli deployDb command to deploy BuiltIn rows to database.
+        /// Override this method to add Integrate data rows to list. Used by cli deployDb command to deploy Integrate rows to database.
         /// </summary>
-        protected virtual void CommandDeployDbBuiltIn(DeployDbBuiltInResult result)
+        protected virtual void CommandDeployDbIntegrate(DeployDbIntegrateResult result)
         {
 
         }
 
         /// <summary>
-        /// Returns BuiltIn rows to deploy to sql database.
+        /// Returns Integrate rows to deploy to sql database.
         /// </summary>
-        internal void CommandDeployDbBuiltInInternal(DeployDbBuiltInResult result)
+        internal void CommandDeployDbIntegrateInternal(DeployDbIntegrateResult result)
         {
-            // FrameworkConfigGridBuiltIn
+            // FrameworkConfigGridIntegrate
             {
-                var rowList = FrameworkConfigGridBuiltInFrameworkCli.RowList;
+                var rowList = FrameworkConfigGridIntegrateFrameworkCli.RowList;
 
-                // Read FrameworkConfigGridBuiltIn.RowListList from Application.Cli project.
-                string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigGridBuiltInApplicationCli"; // See also method GenerateCSharpTableNameClass();
+                // Read FrameworkConfigGridIntegrate.RowListList from Application.Cli project.
+                string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridBuiltInFrameworkCli.RowList));
-                var rowApplicationCliList = (List<FrameworkConfigGridBuiltIn>)propertyInfo.GetValue(null);
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridIntegrateFrameworkCli.RowList));
+                var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
                 result.Add(rowList, new string[] { "TableId", "ConfigName" });
             }
 
-            // FrameworkConfigFieldBuiltIn
+            // FrameworkConfigFieldIntegrate
             {
-                var rowList = FrameworkConfigFieldBuiltInFrameworkCli.RowList;
+                var rowList = FrameworkConfigFieldIntegrateFrameworkCli.RowList;
 
-                // Read FrameworkConfigFieldBuiltInCli.List from Application.Cli project.
-                string nameCli = "DatabaseBuiltIn.dbo.FrameworkConfigFieldBuiltInApplicationCli"; // See also method GenerateCSharpTableNameClass();
+                // Read FrameworkConfigFieldIntegrateCli.List from Application.Cli project.
+                string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateApplicationCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldBuiltInFrameworkCli.RowList));
-                var rowApplicationCliList = (List<FrameworkConfigFieldBuiltIn>)propertyInfo.GetValue(null);
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldIntegrateFrameworkCli.RowList));
+                var rowApplicationCliList = (List<FrameworkConfigFieldIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
                 result.Add(rowList, new string[] { "ConfigGridId", "FieldId", "InstanceName" });
             }
 
-            // Add application (custom) BuiltIn data rows to deploy to database
-            CommandDeployDbBuiltIn(result);
+            // Add application (custom) Integrate data rows to deploy to database
+            CommandDeployDbIntegrate(result);
         }
 
-        public class DeployDbBuiltInResult
+        public class DeployDbIntegrateResult
         {
-            internal DeployDbBuiltInResult(GenerateBuiltInResult generateBuiltInResult)
+            internal DeployDbIntegrateResult(GenerateIntegrateResult generateIntegrateResult)
             {
-                this.GenerateBuiltInResult = generateBuiltInResult;
-                this.Result = new List<UtilDalUpsertBuiltIn.UpsertItem>();
+                this.GenerateIntegrateResult = generateIntegrateResult;
+                this.Result = new List<UtilDalUpsertIntegrate.UpsertItem>();
             }
 
-            internal readonly GenerateBuiltInResult GenerateBuiltInResult;
+            internal readonly GenerateIntegrateResult GenerateIntegrateResult;
 
-            internal List<UtilDalUpsertBuiltIn.UpsertItem> Result;
+            internal List<UtilDalUpsertIntegrate.UpsertItem> Result;
 
             public void Add<TRow>(List<TRow> rowList, params string[] fieldNameKeyList) where TRow : Row
             {
-                // Reference from GenerateBuiltIn to DeployDbBuiltIn
-                var referenceFilterList = GenerateBuiltInResult.ResultReference.Where(item => item.TypeRowBuiltIn == typeof(TRow)).ToList();
+                // Reference from GenerateIntegrate to DeployDbIntegrate
+                var referenceFilterList = GenerateIntegrateResult.ResultReference.Where(item => item.TypeRowIntegrate == typeof(TRow)).ToList();
 
                 // Make sure reference tables are deployed.
                 foreach (var item in referenceFilterList)
                 {
-                    if (item.TypeRowReferenceBuiltIn != typeof(TRow)) // Exclude hierarchical reference
+                    if (item.TypeRowReferenceIntegrate != typeof(TRow)) // Exclude hierarchical reference
                     {
-                        int referenceCount = Result.Count(itemLocal => itemLocal.TypeRow == item.TypeRowReferenceBuiltIn || itemLocal.TypeRow == item.TypeRowReference);
-                        UtilFramework.Assert(referenceCount > 0, string.Format("Reference table not yet deployed! ({0})", UtilDalType.TypeRowToTableNameCSharp(item.TypeRowReferenceBuiltIn)));
+                        int referenceCount = Result.Count(itemLocal => itemLocal.TypeRow == item.TypeRowReferenceIntegrate || itemLocal.TypeRow == item.TypeRowReference);
+                        UtilFramework.Assert(referenceCount > 0, string.Format("Reference table not yet deployed! ({0})", UtilDalType.TypeRowToTableNameCSharp(item.TypeRowReferenceIntegrate)));
                     }
                 }
 
                 // Result
-                var result = UtilDalUpsertBuiltIn.UpsertItem.Create(rowList, fieldNameKeyList, referenceFilterList);
+                var result = UtilDalUpsertIntegrate.UpsertItem.Create(rowList, fieldNameKeyList, referenceFilterList);
 
                 // Make sure table is not already added.
                 if (Result.Count > 0 && Result[^1].TypeRow != result.TypeRow) // Do not test ist previous is identical (because of hierarchical reference calling this method multiple times).
@@ -362,23 +362,23 @@
         }
 
         /// <summary>
-        /// Returns BuiltIn rows to generate CSharp code.
+        /// Returns Integrate rows to generate CSharp code.
         /// </summary>
-        internal GenerateBuiltInResult CommandGenerateBuiltInInternal()
+        internal GenerateIntegrateResult CommandGenerateIntegrateInternal()
         {
-            var result = new GenerateBuiltInResult(AssemblyList(true, true));
+            var result = new GenerateIntegrateResult(AssemblyList(true, true));
 
             // Do not generate CSharp code for table FrameworkTable and FrameworkField. Add reference for deoplyDb.
-            result.AddReference<FrameworkField, FrameworkTable>(nameof(FrameworkFieldBuiltIn.TableId));
+            result.AddReference<FrameworkField, FrameworkTable>(nameof(FrameworkFieldIntegrate.TableId));
 
             var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(AssemblyFramework); // TableNameCSharp declared in Framework assembly.
             var tableNameCSharpApplicationList = UtilDalType.TableNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase); // TableNameCSharp declared in Application assembly.
             var fieldNameCSharpFrameworkList = UtilDalType.FieldNameCSharpList(AssemblyFramework).Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp); // FieldNameCSharp declared in Framework assembly
             var fieldNameCSharpApplicationList = UtilDalType.FieldNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase).Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp); // FieldNameCSharp declared in Framework assembly
 
-            // FrameworkConfigGridBuiltIn
+            // FrameworkConfigGridIntegrate
             {
-                var rowList = Data.Query<FrameworkConfigGridBuiltIn>();
+                var rowList = Data.Query<FrameworkConfigGridIntegrate>();
                 
                 // Framework (.\cli.cmd generate -f)
                 {
@@ -387,7 +387,7 @@
                     result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigGridBuiltIn),
+                        typeRow: typeof(FrameworkConfigGridIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -398,16 +398,16 @@
                     result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigGridBuiltIn),
+                        typeRow: typeof(FrameworkConfigGridIntegrate),
                         query: rowFilterList
                     );
                 }
                 result.AddReference<FrameworkConfigGrid, FrameworkTable>(nameof(FrameworkConfigGrid.TableId));
             }
 
-            // FrameworkConfigFieldBuiltIn
+            // FrameworkConfigFieldIntegrate
             {
-                var rowList = Data.Query<FrameworkConfigFieldBuiltIn>();
+                var rowList = Data.Query<FrameworkConfigFieldIntegrate>();
                 // Framework (.\cli.cmd generate -f)
                 {
                     var rowFilterList = rowList.Where(item => tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter FrameworkDb.
@@ -416,7 +416,7 @@
                     result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigFieldBuiltIn),
+                        typeRow: typeof(FrameworkConfigFieldIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -428,7 +428,7 @@
                     result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigFieldBuiltIn),
+                        typeRow: typeof(FrameworkConfigFieldIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -436,31 +436,31 @@
                 result.AddReference<FrameworkConfigField, FrameworkField>(nameof(FrameworkConfigField.FieldId));
             }
 
-            // Application (custom) BuiltIn data rows to generate CSharp code from.
-            CommandGenerateBuiltIn(result);
+            // Application (custom) Integrate data rows to generate CSharp code from.
+            CommandGenerateIntegrate(result);
 
             return result;
         }
 
         /// <summary>
-        /// Override this method to add BuiltIn data rows to list. Used by cli generate command to generate CSharp code.
-        /// Note: Cli generate command is not BuiltIn table reference aware. Data is generated in CSharp code as it is.
+        /// Override this method to add Integrate data rows to list. Used by cli generate command to generate CSharp code.
+        /// Note: Cli generate command is not Integrate table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
-        protected virtual void CommandGenerateBuiltIn(GenerateBuiltInResult result)
+        protected virtual void CommandGenerateIntegrate(GenerateIntegrateResult result)
         {
 
         }
 
         /// <summary>
-        /// Group of BuiltIn TypeRow.
-        /// Note: Cli generate command is not BuiltIn table reference aware. Data is generated in CSharp code as it is.
+        /// Group of Integrate TypeRow.
+        /// Note: Cli generate command is not Integrate table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
-        internal class GenerateBuiltInItem
+        internal class GenerateIntegrateItem
         {
             /// <summary>
             /// Constructor for Framework and Application.
             /// </summary>
-            internal GenerateBuiltInItem(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
+            internal GenerateIntegrateItem(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
             {
                 this.IsFrameworkDb = isFrameworkDb;
                 this.IsApplication = isApplication;
@@ -474,19 +474,19 @@
             /// <summary>
             /// Constructor for Application.
             /// </summary>
-            private GenerateBuiltInItem(bool isApplication, Type typeRow, IQueryable<Row> query) 
+            private GenerateIntegrateItem(bool isApplication, Type typeRow, IQueryable<Row> query) 
                 : this(false, isApplication, typeRow, query)
             {
 
             }
 
             /// <summary>
-            /// Constructor for GenerateBuiltInItem.
+            /// Constructor for GenerateIntegrateItem.
             /// </summary>
-            /// <param name="isApplication">If true, RowList will be available at runtime as BuiltIn CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
-            public static GenerateBuiltInItem Create<TRow>(IQueryable<TRow> query, bool isApplication = false) where TRow : Row
+            /// <param name="isApplication">If true, RowList will be available at runtime as Integrate CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
+            public static GenerateIntegrateItem Create<TRow>(IQueryable<TRow> query, bool isApplication = false) where TRow : Row
             {
-                return new GenerateBuiltInItem(isApplication, typeof(TRow), query.Cast<Row>());
+                return new GenerateIntegrateItem(isApplication, typeof(TRow), query.Cast<Row>());
             }
 
             /// <summary>
@@ -537,43 +537,43 @@
         }
 
         /// <summary>
-        /// Return from database loaded BuiltIn rows to generate CSharp code.
+        /// Return from database loaded Integrate rows to generate CSharp code.
         /// </summary>
-        public class GenerateBuiltInResult
+        public class GenerateIntegrateResult
         {
-            internal GenerateBuiltInResult(List<Assembly> assemblyList)
+            internal GenerateIntegrateResult(List<Assembly> assemblyList)
             {
                 AssemblyList = assemblyList;
                 TableNameCSharpList = UtilDalType.TableNameCSharpList(AssemblyList.ToArray());
-                Result = new List<GenerateBuiltInItem>();
+                Result = new List<GenerateIntegrateItem>();
             }
 
             internal readonly List<Assembly> AssemblyList;
 
             internal readonly Dictionary<Type, string> TableNameCSharpList;
 
-            internal List<GenerateBuiltInItem> Result;
+            internal List<GenerateIntegrateItem> Result;
 
-            internal readonly List<UtilDalUpsertBuiltIn.Reference> ResultReference = new List<UtilDalUpsertBuiltIn.Reference>();
+            internal readonly List<UtilDalUpsertIntegrate.Reference> ResultReference = new List<UtilDalUpsertIntegrate.Reference>();
 
-            private void ResultAdd(GenerateBuiltInItem value)
+            private void ResultAdd(GenerateIntegrateItem value)
             {
                 Result.Add(value);
             }
 
             internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
             {
-                var result = new GenerateBuiltInItem(isFrameworkDb, isApplication, typeRow, query);
+                var result = new GenerateIntegrateItem(isFrameworkDb, isApplication, typeRow, query);
                 ResultAdd(result);
             }
 
             /// <summary>
-            /// Add from database loaded BuiltIn rows to generate CSharp code.
+            /// Add from database loaded Integrate rows to generate CSharp code.
             /// </summary>
-            /// <param name="isApplication">If true, RowList will be available at runtime as BuiltIn CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
+            /// <param name="isApplication">If true, RowList will be available at runtime as Integrate CSharp code with additional IdEnum if row contains IdName column. If false, RowList will be generated into cli as CSharp code only.</param>
             public void Add<TRow>(IQueryable<TRow> query, bool isApplication = false) where TRow : Row
             {
-                var result = GenerateBuiltInItem.Create(query, isApplication);
+                var result = GenerateIntegrateItem.Create(query, isApplication);
                 ResultAdd(result);
             }
 
@@ -590,17 +590,17 @@
                 Type typeRowResult;
                 string fieldNameIdCSharpResult;
                 string fieldNameIdSqlResult;
-                Type typeRowBuiltInResult;
+                Type typeRowIntegrateResult;
                 string fieldNameIdNameCSharpResult;
                 string fieldNameIdNameSqlResult;
                 Type typeRowReferenceResult;
-                Type typeRowReferenceBuiltInResult;
+                Type typeRowReferenceIntegrateResult;
 
                 // Row
                 {
                     Type typeRow = typeof(TRow);
                     string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    UtilFramework.Assert(!tableName.EndsWith("BuiltIn"), string.Format("Do not add BuiltIn. Use underlying table! ({0})", tableName));
+                    UtilFramework.Assert(!tableName.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying table! ({0})", tableName));
 
                     var fieldId = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.FieldNameCSharp == fieldNameCSharpId).FirstOrDefault();
                     UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableName, fieldNameCSharpId));
@@ -610,31 +610,31 @@
                     fieldNameIdSqlResult = fieldId.FieldNameSql;
                 }
 
-                // Row BuiltIn
+                // Row Integrate
                 {
                     Type typeRow = typeof(TRow);
                     string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    var tableBuiltIn = TableNameCSharpList.Where(item => item.Value == tableName + "BuiltIn").SingleOrDefault();
-                    Type typeRowBuiltIn = tableBuiltIn.Key;
-                    string tableNameBuiltIn = tableBuiltIn.Value;
-                    UtilFramework.Assert(tableNameBuiltIn != null, string.Format("BuiltIn not found! ({0})", tableNameBuiltIn));
+                    var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableName + "Integrate").SingleOrDefault();
+                    Type typeRowIntegrate = tableIntegrate.Key;
+                    string tableNameIntegrate = tableIntegrate.Value;
+                    UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! ({0})", tableNameIntegrate));
 
-                    var fieldBuiltInId = UtilDalType.TypeRowToFieldList(typeRowBuiltIn).Where(item => item.FieldNameCSharp == fieldNameCSharpId).FirstOrDefault();
-                    UtilFramework.Assert(fieldBuiltInId != null, string.Format("Field not found! ({0}.{1})", tableNameBuiltIn, fieldNameCSharpId));
+                    var fieldIntegrateId = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameCSharpId).FirstOrDefault();
+                    UtilFramework.Assert(fieldIntegrateId != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameCSharpId));
 
-                    var fieldBuiltInIdName = UtilDalType.TypeRowToFieldList(typeRowBuiltIn).Where(item => item.FieldNameCSharp == fieldNameCSharpId + "Name").FirstOrDefault();
-                    UtilFramework.Assert(fieldBuiltInIdName != null, string.Format("Field not found! ({0}.{1})", tableNameBuiltIn, fieldNameCSharpId + "Name"));
+                    var fieldIntegrateIdName = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameCSharpId + "Name").FirstOrDefault();
+                    UtilFramework.Assert(fieldIntegrateIdName != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameCSharpId + "Name"));
 
-                    typeRowBuiltInResult = typeRowBuiltIn;
-                    fieldNameIdNameCSharpResult = fieldBuiltInIdName.FieldNameCSharp;
-                    fieldNameIdNameSqlResult = fieldBuiltInIdName.FieldNameCSharp;
+                    typeRowIntegrateResult = typeRowIntegrate;
+                    fieldNameIdNameCSharpResult = fieldIntegrateIdName.FieldNameCSharp;
+                    fieldNameIdNameSqlResult = fieldIntegrateIdName.FieldNameCSharp;
                 }
 
                 // Row Reference
                 {
                     Type typeRow = typeof(TRowReference);
                     string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    UtilFramework.Assert(!tableName.EndsWith("BuiltIn"), string.Format("Do not add BuiltIn. Use underlying table! ({0})", tableName));
+                    UtilFramework.Assert(!tableName.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying table! ({0})", tableName));
 
                     var fieldId = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.FieldNameCSharp == "Id").FirstOrDefault();
                     UtilFramework.Assert(fieldId != null, string.Format("Field not found! ({0}.{1})", tableName, "Id"));
@@ -642,26 +642,26 @@
                     typeRowReferenceResult = typeRow;
                 }
 
-                // Row Reference BuiltIn
+                // Row Reference Integrate
                 {
                     Type typeRow = typeof(TRowReference);
                     string tableName = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                    var tableBuiltIn = TableNameCSharpList.Where(item => item.Value == tableName + "BuiltIn").SingleOrDefault();
-                    Type typeRowBuiltIn = tableBuiltIn.Key;
-                    string tableNameBuiltIn = tableBuiltIn.Value;
-                    UtilFramework.Assert(tableNameBuiltIn != null, string.Format("BuiltIn not found! ({0})", tableNameBuiltIn));
+                    var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableName + "Integrate").SingleOrDefault();
+                    Type typeRowIntegrate = tableIntegrate.Key;
+                    string tableNameIntegrate = tableIntegrate.Value;
+                    UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! ({0})", tableNameIntegrate));
 
-                    var fieldBuiltInId = UtilDalType.TypeRowToFieldList(typeRowBuiltIn).Where(item => item.FieldNameCSharp == "Id").FirstOrDefault();
-                    UtilFramework.Assert(fieldBuiltInId != null, string.Format("Field not found! ({0}.{1})", tableNameBuiltIn, "Id"));
+                    var fieldIntegrateId = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == "Id").FirstOrDefault();
+                    UtilFramework.Assert(fieldIntegrateId != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, "Id"));
 
-                    var fieldBuiltInIdName = UtilDalType.TypeRowToFieldList(typeRowBuiltIn).Where(item => item.FieldNameCSharp == "IdName").FirstOrDefault();
-                    UtilFramework.Assert(fieldBuiltInIdName != null, string.Format("Field not found! ({0}.{1})", tableNameBuiltIn, "IdName"));
+                    var fieldIntegrateIdName = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == "IdName").FirstOrDefault();
+                    UtilFramework.Assert(fieldIntegrateIdName != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, "IdName"));
 
-                    typeRowReferenceBuiltInResult = typeRowBuiltIn;
+                    typeRowReferenceIntegrateResult = typeRowIntegrate;
                 }
 
                 // Result
-                var reference = new UtilDalUpsertBuiltIn.Reference(typeRowResult, fieldNameIdCSharpResult, fieldNameIdSqlResult, typeRowBuiltInResult, fieldNameIdNameCSharpResult, fieldNameIdNameSqlResult, typeRowReferenceResult, typeRowReferenceBuiltInResult);
+                var reference = new UtilDalUpsertIntegrate.Reference(typeRowResult, fieldNameIdCSharpResult, fieldNameIdSqlResult, typeRowIntegrateResult, fieldNameIdNameCSharpResult, fieldNameIdNameSqlResult, typeRowReferenceResult, typeRowReferenceIntegrateResult);
                 UtilFramework.Assert(ResultReference.Count(item => item.TypeRow == reference.TypeRow && item.FieldNameIdCSharp == reference.FieldNameIdCSharp) == 0, "Reference already defined!");
                 ResultReference.Add(reference);
             }

@@ -6,25 +6,25 @@
     using System.Text;
     using static Framework.Cli.AppCli;
 
-    internal static class NamingConventionBuiltIn
+    internal static class NamingConventionIntegrate
     {
-        public static bool TableNameIsBuiltIn(string tableNameCSharp)
+        public static bool TableNameIsIntegrate(string tableNameCSharp)
         {
-            return tableNameCSharp.EndsWith("BuiltIn");
+            return tableNameCSharp.EndsWith("Integrate");
         }
     }
 
-    internal class GenerateCSharpBuiltIn
+    internal class GenerateCSharpIntegrate
     {
         /// <summary>
         /// Generate CSharp namespace for every database schema.
         /// </summary>
         /// <param name="isFrameworkDb">If true, generate CSharp code for Framework library (internal use only) otherwise generate code for Application.</param>
         /// <param name="isApplication">If false, generate CSharp code for cli. If true, generate code for Application or Framework.</param>
-        private static void GenerateCSharpSchemaName(List<GenerateBuiltInItem> builtInList, bool isFrameworkDb, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpSchemaName(List<GenerateIntegrateItem> integrateList, bool isFrameworkDb, bool isApplication, StringBuilder result)
         {
-            builtInList = builtInList.Where(item => item.IsFrameworkDb == isFrameworkDb && item.IsApplication == isApplication).ToList();
-            var schemaNameCSharpList = builtInList.GroupBy(item => item.SchemaNameCSharp, (key, group) => key);
+            integrateList = integrateList.Where(item => item.IsFrameworkDb == isFrameworkDb && item.IsApplication == isApplication).ToList();
+            var schemaNameCSharpList = integrateList.GroupBy(item => item.SchemaNameCSharp, (key, group) => key);
             bool isFirst = true;
             foreach (string schemaNameCSharp in schemaNameCSharpList)
             {
@@ -36,7 +36,7 @@
                 {
                     result.AppendLine();
                 }
-                result.AppendLine(string.Format("namespace DatabaseBuiltIn.{0}", schemaNameCSharp));
+                result.AppendLine(string.Format("namespace DatabaseIntegrate.{0}", schemaNameCSharp));
                 result.AppendLine(string.Format("{{"));
                 result.AppendLine(string.Format("    using System;")); // Used for method Guid.Parse();
                 result.AppendLine(string.Format("    using System.Collections.Generic;"));
@@ -46,11 +46,11 @@
                     // See also class IdNameEnumAttribute
                     result.AppendLine(string.Format("    using System.Linq;"));
                     result.AppendLine(string.Format("    using Framework.DataAccessLayer;"));
-                    result.AppendLine(string.Format("    using Framework.DataAccessLayer.BuiltIn;"));
+                    result.AppendLine(string.Format("    using Framework.DataAccessLayer.Integrate;"));
                 }
                 result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
                 result.AppendLine();
-                GenerateCSharpTableNameClass(builtInList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, result);
+                GenerateCSharpTableNameClass(integrateList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, result);
                 result.AppendLine(string.Format("}}"));
             }
         }
@@ -58,10 +58,10 @@
         /// <summary>
         /// Generate static CSharp class for every database table.
         /// </summary>
-        private static void GenerateCSharpTableNameClass(List<GenerateBuiltInItem> builtInList, bool isFrameworkDb, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpTableNameClass(List<GenerateIntegrateItem> integrateList, bool isFrameworkDb, bool isApplication, StringBuilder result)
         {
             bool isFirst = true;
-            foreach (var builtIn in builtInList)
+            foreach (var integrate in integrateList)
             {
                 if (isFirst)
                 {
@@ -72,8 +72,8 @@
                     result.AppendLine();
                 }
 
-                // Use one "Database" and "DatabaseBuiltIn" namespace for Framework and Application
-                string classNameExtension = ""; // "Table"; // See also method CommandDeployDbBuiltInInternal();
+                // Use one "Database" and "DatabaseIntegrate" namespace for Framework and Application
+                string classNameExtension = ""; // "Table"; // See also method CommandDeployDbIntegrateInternal();
 
                 // Framework, Application
                 if (isFrameworkDb)
@@ -95,20 +95,20 @@
                     classNameExtension += "Cli";
                 }
 
-                result.AppendLine(string.Format("    public static class {0}{1}", builtIn.TableNameCSharp, classNameExtension));
+                result.AppendLine(string.Format("    public static class {0}{1}", integrate.TableNameCSharp, classNameExtension));
                 result.AppendLine(string.Format("    {{"));
                 if (isApplication)
                 {
-                    GenerateCSharpNameEnum(builtIn, result);
+                    GenerateCSharpNameEnum(integrate, result);
                 }
-                result.AppendLine(string.Format("        public static List<{0}> RowList", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("        public static List<{0}> RowList", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            get"));
                 result.AppendLine(string.Format("            {{"));
-                result.AppendLine(string.Format("                var result = new List<{0}>", builtIn.TableNameCSharp));
-                result.AppendLine(string.Format("                {{", builtIn.TableNameCSharp));
-                GenerateCSharpRowBuiltIn(builtIn, result);
-                result.AppendLine(string.Format("                }};", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("                var result = new List<{0}>", integrate.TableNameCSharp));
+                result.AppendLine(string.Format("                {{", integrate.TableNameCSharp));
+                GenerateCSharpRowIntegrate(integrate, result);
+                result.AppendLine(string.Format("                }};", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("                return result;"));
                 result.AppendLine(string.Format("            }}"));
                 result.AppendLine(string.Format("        }}"));
@@ -116,17 +116,17 @@
             }
         }
 
-        private static void GenerateCSharpNameEnum(GenerateBuiltInItem builtIn, StringBuilder result)
+        private static void GenerateCSharpNameEnum(GenerateIntegrateItem integrate, StringBuilder result)
         {
-            var fieldList = UtilDalType.TypeRowToFieldList(builtIn.TypeRow);
-            var fieldId = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "Id"); // See also FieldBuiltIn.IsKey
-            var fieldIdName = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "IdName"); // See also FieldBuiltIn.IsKey
+            var fieldList = UtilDalType.TypeRowToFieldList(integrate.TypeRow);
+            var fieldId = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "Id"); // See also FieldIntegrate.IsKey
+            var fieldIdName = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "IdName"); // See also FieldIntegrate.IsKey
             if (fieldIdName != null) 
             {
                 result.Append(string.Format("        public enum IdNameEnum {{ [IdNameEnum(null)]None = 0"));
                 List<string> nameExceptList = new List<string>();
                 int count = 0;
-                foreach (Row row in builtIn.RowList)
+                foreach (Row row in integrate.RowList)
                 {
                     count += 1;
                     string idName = (string)fieldIdName.PropertyInfo.GetValue(row);
@@ -135,7 +135,7 @@
                 }
                 result.AppendLine(string.Format(" }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static {0} Row(this IdNameEnum value)", builtIn.TableNameCSharp));
+                result.AppendLine(string.Format("        public static {0} Row(this IdNameEnum value)", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            return RowList.Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).SingleOrDefault();"));
                 result.AppendLine(string.Format("        }}"));
@@ -153,12 +153,12 @@
             }
         }
 
-        private static void GenerateCSharpRowBuiltIn(GenerateBuiltInItem builtInItem, StringBuilder result)
+        private static void GenerateCSharpRowIntegrate(GenerateIntegrateItem integrateItem, StringBuilder result)
         {
-            var fieldList = UtilDalType.TypeRowToFieldList(builtInItem.TypeRow);
-            foreach (Row row in builtInItem.RowList)
+            var fieldList = UtilDalType.TypeRowToFieldList(integrateItem.TypeRow);
+            foreach (Row row in integrateItem.RowList)
             {
-                result.Append(string.Format("                    new {0} {{", builtInItem.TableNameCSharp));
+                result.Append(string.Format("                    new {0} {{", integrateItem.TableNameCSharp));
                 bool isFirst = true;
                 foreach (var field in fieldList)
                 {
@@ -171,7 +171,7 @@
                         result.Append(", ");
                     }
                     object value = field.PropertyInfo.GetValue(row);
-                    GenerateCSharpRowBuiltInField(field, value, result);
+                    GenerateCSharpRowIntegrateField(field, value, result);
                 }
                 result.Append(" },");
                 result.AppendLine();
@@ -181,7 +181,7 @@
         /// <summary>
         /// Generate CSharp property with value.
         /// </summary>
-        private static void GenerateCSharpRowBuiltInField(UtilDalType.Field field, object value, StringBuilder result)
+        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, StringBuilder result)
         {
             string fieldNameCSharp = field.FieldNameCSharp;
             FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum);
@@ -201,12 +201,12 @@
         /// Generate CSharp code.
         /// </summary>
         /// <param name="isApplication">If false, generate code for cli. If true, generate code for Application.</param>
-        public void Run(out string cSharp, bool isFrameworkDb, bool isApplication, List<GenerateBuiltInItem> builtInList)
+        public void Run(out string cSharp, bool isFrameworkDb, bool isApplication, List<GenerateIntegrateItem> integrateList)
         {
             StringBuilder result = new StringBuilder();
             result.AppendLine("// Do not modify this file. It's generated by Framework.Cli.");
             result.AppendLine();
-            GenerateCSharpSchemaName(builtInList, isFrameworkDb, isApplication, result);
+            GenerateCSharpSchemaName(integrateList, isFrameworkDb, isApplication, result);
             cSharp = result.ToString();
         }
     }

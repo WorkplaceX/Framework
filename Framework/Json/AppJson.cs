@@ -859,13 +859,13 @@
         /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property ConfigName.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        internal List<FrameworkConfigGridBuiltIn> ConfigGridList;
+        internal List<FrameworkConfigGridIntegrate> ConfigGridList;
 
         /// <summary>
         /// Gets or sets ConfigFieldList. Can contain multiple configurations. See also property ConfigName.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        internal List<FrameworkConfigFieldBuiltIn> ConfigFieldList;
+        internal List<FrameworkConfigFieldIntegrate> ConfigFieldList;
 
         /// <summary>
         /// Gets or sets RowList. Data rows loaded from database.
@@ -1182,12 +1182,12 @@
             /// <summary>
             /// Gets or sets ConfigGridQuery. Should return one record.
             /// </summary>
-            public IQueryable<FrameworkConfigGridBuiltIn> ConfigGridQuery { get; set; }
+            public IQueryable<FrameworkConfigGridIntegrate> ConfigGridQuery { get; set; }
 
             /// <summary>
             /// Gets or sets ConfigFieldQuery.
             /// </summary>
-            public IQueryable<FrameworkConfigFieldBuiltIn> ConfigFieldQuery { get; set; }
+            public IQueryable<FrameworkConfigFieldIntegrate> ConfigFieldQuery { get; set; }
         }
 
         /// <summary>
@@ -1196,12 +1196,12 @@
         /// <param name="tableName">TableName as declared in CSharp code. Type of row to load.</param>
         protected virtual internal void QueryConfig(string tableName, QueryConfigResult result)
         {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
 
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
 
             // Example for static configuration:
-            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridIntegrate { RowCountMax = 2 } }.AsQueryable();
         }
 
         virtual internal IQueryable LookupQueryInternal(Row row, string fieldName, string text)
@@ -1216,12 +1216,12 @@
         /// <param name="tableName">TableName as declared in CSharp code.</param>
         protected virtual internal void LookupQueryConfig(Grid gridLookup, string tableName, QueryConfigResult result)
         {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridBuiltIn>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
 
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldBuiltIn>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
 
             // Example for static configuration:
-            // result.ConfigGridQuery = new [] { new FrameworkConfigGridBuiltIn { RowCountMax = 2 } }.AsQueryable();
+            // result.ConfigGridQuery = new [] { new FrameworkConfigGridIntegrate { RowCountMax = 2 } }.AsQueryable();
         }
 
         /// <summary>

@@ -7,7 +7,7 @@
 )
 
 GO
-CREATE VIEW FrameworkTableBuiltIn AS
+CREATE VIEW FrameworkTableIntegrate AS
 SELECT
 	Id,
 	TableNameCSharp AS IdName
@@ -26,13 +26,13 @@ CREATE TABLE FrameworkField /* Used for configuration. Contains all in source co
 )
 
 GO
-CREATE VIEW FrameworkFieldBuiltIn
+CREATE VIEW FrameworkFieldIntegrate
 AS
 SELECT
 	Field.Id,
-	CONCAT((SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = Field.TableId), '; ', Field.FieldNameCSharp) AS IdName,
+	CONCAT((SELECT TableIntegrate.IdName FROM FrameworkTableIntegrate TableIntegrate WHERE TableIntegrate.Id = Field.TableId), '; ', Field.FieldNameCSharp) AS IdName,
 	Field.TableId,
-	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = Field.TableId) AS TableIdName,
+	(SELECT TableIntegrate.IdName FROM FrameworkTableIntegrate TableIntegrate WHERE TableIntegrate.Id = Field.TableId) AS TableIdName,
 	Field.FieldNameCSharp,
 	Field.FieldNameSql,
 	Field.IsExist
@@ -52,13 +52,13 @@ CREATE TABLE FrameworkConfigGrid
 )
 
 GO
-CREATE VIEW FrameworkConfigGridBuiltIn
+CREATE VIEW FrameworkConfigGridIntegrate
 AS
 SELECT 
 	ConfigGrid.Id,
 	CONCAT((SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId), '; ', ConfigGrid.ConfigName) AS IdName,
 	ConfigGrid.TableId,
-	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS TableIdName,
+	(SELECT TableIntegrate.IdName FROM FrameworkTableIntegrate TableIntegrate WHERE TableIntegrate.Id = ConfigGrid.TableId) AS TableIdName,
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
 	ConfigGrid.ConfigName,
 	ConfigGrid.RowCountMax,
@@ -84,15 +84,15 @@ CREATE TABLE FrameworkConfigField
 )
 
 GO
-CREATE VIEW FrameworkConfigFieldBuiltIn
+CREATE VIEW FrameworkConfigFieldIntegrate
 AS
 SELECT 
 	/* Id */
     ConfigField.Id,
 	ConfigField.ConfigGridId,
-	(SELECT ConfigGridBuiltIn.IdName FROM FrameworkConfigGridBuiltIn ConfigGridBuiltIn WHERE ConfigGridBuiltIn.Id = ConfigField.ConfigGridId) AS ConfigGridIdName,
+	(SELECT ConfigGridIntegrate.IdName FROM FrameworkConfigGridIntegrate ConfigGridIntegrate WHERE ConfigGridIntegrate.Id = ConfigField.ConfigGridId) AS ConfigGridIdName,
 	ConfigField.FieldId,
-	(SELECT FieldBuiltIn.IdName FROM FrameworkFieldBuiltIn FieldBuiltIn WHERE FieldBuiltIn.Id = ConfigField.FieldId) AS FieldIdName,
+	(SELECT FieldIntegrate.IdName FROM FrameworkFieldIntegrate FieldIntegrate WHERE FieldIntegrate.Id = ConfigField.FieldId) AS FieldIdName,
 	ConfigField.InstanceName,
 	/* Extension */
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkConfigGrid Grid, FrameworkTable FrameworkTable WHERE Grid.Id = ConfigField.ConfigGridId AND FrameworkTable.Id = Grid.TableId) AS TableNameCSharp,
@@ -167,7 +167,7 @@ SELECT
 	/* ConfigGrid */
 	ConfigGrid.Id AS ConfigGridId,
 	ConfigGrid.TableId AS ConfigGridTableId,
-	(SELECT TableBuiltIn.IdName FROM FrameworkTableBuiltIn TableBuiltIn WHERE TableBuiltIn.Id = ConfigGrid.TableId) AS ConfigGridTableIdName,
+	(SELECT TableIntegrate.IdName FROM FrameworkTableIntegrate TableIntegrate WHERE TableIntegrate.Id = ConfigGrid.TableId) AS ConfigGridTableIdName,
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS ConfigGridTableNameCSharp,
 	ConfigGrid.ConfigName AS ConfigGridConfigName,
 	ConfigGrid.IsExist AS ConfigGridIsExist,

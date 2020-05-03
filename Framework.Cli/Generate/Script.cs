@@ -35,49 +35,49 @@
             }
             UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
 
-            // Read BuiltIn data from database and save (*.cs) files.
-            GenerateBuiltInResult generateBuiltInResult = null;
+            // Read Integrate data from database and save (*.cs) files.
+            GenerateIntegrateResult generateIntegrateResult = null;
             try
             {
-                generateBuiltInResult = appCli.CommandGenerateBuiltInInternal();
+                generateIntegrateResult = appCli.CommandGenerateIntegrateInternal();
             }
             catch (SqlException exception)
             {
                 isSuccessful = false;
-                string message = string.Format("Read BuiltIn data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
+                string message = string.Format("Read Integrate data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
                 UtilCli.ConsoleWriteLineColor(message, ConsoleColor.Red);
             }
-            if (generateBuiltInResult != null)
+            if (generateIntegrateResult != null)
             {
-                Run(generateBuiltInResult);
-                new GenerateCSharpBuiltIn().Run(out string cSharpCli, isFrameworkDb, isApplication: false, builtInList: generateBuiltInResult.Result);
-                new GenerateCSharpBuiltIn().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, builtInList: generateBuiltInResult.Result);
+                Run(generateIntegrateResult);
+                new GenerateCSharpIntegrate().Run(out string cSharpCli, isFrameworkDb, isApplication: false, integrateList: generateIntegrateResult.Result);
+                new GenerateCSharpIntegrate().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, integrateList: generateIntegrateResult.Result);
                 if (isFrameworkDb == false)
                 {
-                    UtilFramework.FileSave(UtilFramework.FolderName + "Application.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);
-                    UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database/DatabaseBuiltIn.cs", cSharpApplication);
+                    UtilFramework.FileSave(UtilFramework.FolderName + "Application.Cli/Database/DatabaseIntegrate.cs", cSharpCli);
+                    UtilFramework.FileSave(UtilFramework.FolderName + "Application.Database/Database/DatabaseIntegrate.cs", cSharpApplication);
                 }
                 else
                 {
-                    UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework.Cli/Database/DatabaseBuiltIn.cs", cSharpCli);
-                    UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/DatabaseBuiltIn.cs", cSharpApplication);
+                    UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework.Cli/Database/DatabaseIntegrate.cs", cSharpCli);
+                    UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/DatabaseIntegrate.cs", cSharpApplication);
                 }
-                UtilCli.ConsoleWriteLineColor("Generate CSharp code for BuiltIn data and write to (*.cs) files successful!", ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files successful!", ConsoleColor.Green);
             }
 
             return isSuccessful;
         }
 
         /// <summary>
-        /// Console log BuiltIn table relation.
+        /// Console log Integrate table relation.
         /// </summary>
-        private static void Run(GenerateBuiltInResult generateBuiltInResult)
+        private static void Run(GenerateIntegrateResult generateIntegrateResult)
         {
             bool isFirst = true;
             List<string> result = new List<string>();
-            foreach (var item in generateBuiltInResult.Result)
+            foreach (var item in generateIntegrateResult.Result)
             {
-                var fieldList = UtilDalUpsertBuiltIn.FieldBuiltInList(item.TypeRow, generateBuiltInResult.ResultReference);
+                var fieldList = UtilDalUpsertIntegrate.FieldIntegrateList(item.TypeRow, generateIntegrateResult.ResultReference);
                 foreach (var field in fieldList)
                 {
                     if (field.IsId)
@@ -88,7 +88,7 @@
                         if (isFirst)
                         {
                             isFirst = false;
-                            Console.WriteLine("BuiltIn Table Relation");
+                            Console.WriteLine("Integrate Table Relation");
                         }
                         result.Add(string.Format("[{0}].[{1}].[{2}] --> [{3}].[{4}]", schemaNameSql, tableNameSql, field.FieldNameIdSql, schemaNameSqlReference, tableNameSqlReference));
                     }

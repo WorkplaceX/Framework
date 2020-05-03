@@ -1,13 +1,13 @@
 ﻿/* Framework */
 DROP VIEW FrameworkConfigFieldDisplay
 DROP VIEW FrameworkConfigGridDisplay
-DROP VIEW FrameworkConfigFieldBuiltIn
+DROP VIEW FrameworkConfigFieldIntegrate
 DROP TABLE FrameworkConfigField
-DROP VIEW FrameworkConfigGridBuiltIn
+DROP VIEW FrameworkConfigGridIntegrate
 DROP TABLE FrameworkConfigGrid
-DROP VIEW FrameworkFieldBuiltIn
+DROP VIEW FrameworkFieldIntegrate
 DROP TABLE FrameworkField
-DROP VIEW FrameworkTableBuiltIn
+DROP VIEW FrameworkTableIntegrate
 DROP TABLE FrameworkTable
 
 DROP TABLE FrameworkDeployDb

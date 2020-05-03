@@ -56,10 +56,10 @@
             foreach (var propertyInfo in UtilDalType.TypeRowToPropertyInfoList(grid.TypeRow))
             {
                 var field = fieldList[propertyInfo.Name];
-                configFieldDictionary.TryGetValue(propertyInfo.Name, out List<FrameworkConfigFieldBuiltIn> configFieldList);
+                configFieldDictionary.TryGetValue(propertyInfo.Name, out List<FrameworkConfigFieldIntegrate> configFieldList);
                 if (configFieldList == null) // No ConfigField defined
                 {
-                    configFieldList = new List<FrameworkConfigFieldBuiltIn>
+                    configFieldList = new List<FrameworkConfigFieldIntegrate>
                     {
                         null
                     };
@@ -539,7 +539,7 @@
             }
 
             // Load config grid
-            grid.ConfigGridList = new List<FrameworkConfigGridBuiltIn>();
+            grid.ConfigGridList = new List<FrameworkConfigGridIntegrate>();
             if (queryConfigResult.ConfigGridQuery != null)
             {
                 grid.ConfigGridList = await queryConfigResult.ConfigGridQuery.QueryExecuteAsync();
@@ -548,7 +548,7 @@
             query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
 
             // Load config field (Task)
-            var configFieldListTask = Task.FromResult(new List<FrameworkConfigFieldBuiltIn>());
+            var configFieldListTask = Task.FromResult(new List<FrameworkConfigFieldIntegrate>());
             if (queryConfigResult.ConfigFieldQuery != null)
             {
                 configFieldListTask = queryConfigResult.ConfigFieldQuery.QueryExecuteAsync();
@@ -756,7 +756,7 @@
         /// <summary>
         /// Returns data grid configuration record.
         /// </summary>
-        private static FrameworkConfigGridBuiltIn ConfigGrid(Grid grid)
+        private static FrameworkConfigGridIntegrate ConfigGrid(Grid grid)
         {
             var result = grid.ConfigGridList.Where(item => item.ConfigName == grid.ConfigName).SingleOrDefault(); // LINQ to memory
             return result;
@@ -765,7 +765,7 @@
         /// <summary>
         /// Returns RowCountMax rows to load.
         /// </summary>
-        private static int ConfigRowCountMax(FrameworkConfigGridBuiltIn configGrid)
+        private static int ConfigRowCountMax(FrameworkConfigGridIntegrate configGrid)
         {
             return configGrid?.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
         }
@@ -773,22 +773,22 @@
         /// <summary>
         /// Returns ColumnCountMax of columns to render.
         /// </summary>
-        private static int ConfigColumnCountMax(FrameworkConfigGridBuiltIn configGrid)
+        private static int ConfigColumnCountMax(FrameworkConfigGridIntegrate configGrid)
         {
             return 5;
         }
 
         /// <summary>
-        /// Returns data grid field configuration records. (FieldName, FrameworkConfigFieldBuiltIn). One FieldName can have multiple FrameworkConfigFieldBuiltIn because of InstanceName.
+        /// Returns data grid field configuration records. (FieldName, FrameworkConfigFieldIntegrate). One FieldName can have multiple FrameworkConfigFieldIntegrate because of InstanceName.
         /// </summary>
-        private static Dictionary<string, List<FrameworkConfigFieldBuiltIn>> ConfigFieldDictionary(Grid grid)
+        private static Dictionary<string, List<FrameworkConfigFieldIntegrate>> ConfigFieldDictionary(Grid grid)
         {
-            var result = new Dictionary<string, List<FrameworkConfigFieldBuiltIn>>();
+            var result = new Dictionary<string, List<FrameworkConfigFieldIntegrate>>();
             foreach (var item in grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName)) // LINQ to memory
             {
                 if (!result.ContainsKey(item.FieldNameCSharp))
                 {
-                    result[item.FieldNameCSharp] = new List<FrameworkConfigFieldBuiltIn>();
+                    result[item.FieldNameCSharp] = new List<FrameworkConfigFieldIntegrate>();
                 }
                 result[item.FieldNameCSharp].Add(item);
             }

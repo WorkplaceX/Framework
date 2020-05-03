@@ -1077,9 +1077,9 @@
         }
     }
 
-    internal class UtilDalUpsertBuiltIn
+    internal class UtilDalUpsertIntegrate
     {
-        internal class FieldBuiltIn
+        internal class FieldIntegrate
         {
             /// <summary>
             /// Gets or sets Field. See also method UtilDalType.TypeRowToFieldList();
@@ -1107,18 +1107,18 @@
             public string FieldNameIdSql;
 
             /// <summary>
-            /// Gets or sets TypeRowReference. Referenced table (or view) containing field "Id" and "Name". For example view "FrameworkTableBuiltIn".
+            /// Gets or sets TypeRowReference. Referenced table (or view) containing field "Id" and "Name". For example view "FrameworkTableIntegrate".
             /// </summary>
             public Type TypeRowReference;
         }
 
         /// <summary>
-        /// Returns BuiltIn reference table.
+        /// Returns Integrate reference table.
         /// </summary>
-        /// <param name="typeRow">BuiltIn table.</param>
-        private static Type TypeRowReferenceBuiltIn(Type typeRow, string fieldNameIdSql, List<Reference> referenceList)
+        /// <param name="typeRow">Integrate table.</param>
+        private static Type TypeRowReferenceIntegrate(Type typeRow, string fieldNameIdSql, List<Reference> referenceList)
         {
-            var result = referenceList.SingleOrDefault(item => item.TypeRowBuiltIn == typeRow && item.FieldNameIdSql == fieldNameIdSql)?.TypeRowReferenceBuiltIn;
+            var result = referenceList.SingleOrDefault(item => item.TypeRowIntegrate == typeRow && item.FieldNameIdSql == fieldNameIdSql)?.TypeRowReferenceIntegrate;
             return result;
         }
 
@@ -1127,16 +1127,16 @@
         /// </summary>
         internal class Reference
         {
-            public Reference(Type typeRow, string fieldNameIdCSharp, string fieldNameIdSql, Type typeRowBuiltIn, string fieldNameIdNameCSharp, string fieldNameIdNameSql, Type typeRowReference, Type typeRowReferenceBuiltIn)
+            public Reference(Type typeRow, string fieldNameIdCSharp, string fieldNameIdSql, Type typeRowIntegrate, string fieldNameIdNameCSharp, string fieldNameIdNameSql, Type typeRowReference, Type typeRowReferenceIntegrate)
             {
                 TypeRow = typeRow;
                 FieldNameIdCSharp = fieldNameIdCSharp;
                 FieldNameIdSql = fieldNameIdSql;
-                TypeRowBuiltIn = typeRowBuiltIn;
+                TypeRowIntegrate = typeRowIntegrate;
                 FieldNameIdNameCSharp = fieldNameIdNameCSharp;
                 FieldNameIdNameSql = fieldNameIdNameSql;
                 TypeRowReference = typeRowReference;
-                TypeRowReferenceBuiltIn = typeRowReferenceBuiltIn;
+                TypeRowReferenceIntegrate = typeRowReferenceIntegrate;
             }
 
             /// <summary>
@@ -1152,9 +1152,9 @@
             public readonly string FieldNameIdSql;
 
             /// <summary>
-            /// Gets TypeRowBuiltIn. For example: "LoginUserRoleBuiltIn".
+            /// Gets TypeRowIntegrate. For example: "LoginUserRoleIntegrate".
             /// </summary>
-            public readonly Type TypeRowBuiltIn;
+            public readonly Type TypeRowIntegrate;
 
             /// <summary>
             /// Gets FieldNameIdNameCSharp. For example "UserIdName".
@@ -1169,36 +1169,36 @@
             public readonly Type TypeRowReference;
 
             /// <summary>
-            /// Gets TypeRowReferenceBuiltIn. For example: "LoginUserBuiltIn"
+            /// Gets TypeRowReferenceIntegrate. For example: "LoginUserIntegrate"
             /// </summary>
-            public readonly Type TypeRowReferenceBuiltIn;
+            public readonly Type TypeRowReferenceIntegrate;
         }
 
         /// <summary>
-        /// Returns list of FieldBuiltIn for TypeRow.
+        /// Returns list of FieldIntegrate for TypeRow.
         /// </summary>
         /// <param name="typeRow">Data row type.</param>
-        internal static List<FieldBuiltIn> FieldBuiltInList(Type typeRow, List<Reference> referenceList)
+        internal static List<FieldIntegrate> FieldIntegrateList(Type typeRow, List<Reference> referenceList)
         {
-            List<FieldBuiltIn> result = new List<FieldBuiltIn>();
+            List<FieldIntegrate> result = new List<FieldIntegrate>();
             var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
             var fieldNameSqlList = fieldList.Select(item => item.FieldNameSql).ToList();
 
             // Populate result
             foreach (var field in fieldList)
             {
-                FieldBuiltIn fieldBuiltIn = new FieldBuiltIn
+                FieldIntegrate fieldIntegrate = new FieldIntegrate
                 {
                     Field = field
                 };
-                result.Add(fieldBuiltIn);
+                result.Add(fieldIntegrate);
             }
 
-            foreach (var fieldBuiltIn in result)
+            foreach (var fieldIntegrate in result)
             {
-                string fieldNameSql = fieldBuiltIn.Field.FieldNameSql;
+                string fieldNameSql = fieldIntegrate.Field.FieldNameSql;
 
-                fieldBuiltIn.IsKey = fieldNameSql == "Id" || fieldNameSql == "IdName";
+                fieldIntegrate.IsKey = fieldNameSql == "Id" || fieldNameSql == "IdName";
 
                 string lastChar = ""; // Character before "IdName".
                 if (fieldNameSql.Length > "IdName".Length)
@@ -1206,30 +1206,30 @@
                     lastChar = fieldNameSql.Substring(fieldNameSql.Length - "IdName".Length - 1, 1);
                 }
                 bool lastCharIsLower = lastChar == lastChar.ToLower() && lastChar.Length == 1;
-                if (fieldNameSql.EndsWith("IdName") && lastCharIsLower) // BuiltIn naming convention.
+                if (fieldNameSql.EndsWith("IdName") && lastCharIsLower) // Integrate naming convention.
                 {
-                    string fieldNameIdSql = fieldNameSql.Substring(0, fieldNameSql.Length - "Name".Length); // BuiltIn naming convention.
+                    string fieldNameIdSql = fieldNameSql.Substring(0, fieldNameSql.Length - "Name".Length); // Integrate naming convention.
                     if (fieldNameSqlList.Contains(fieldNameIdSql))
                     {
                         UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
                         // Find reference table
-                        Type typeRowReference = TypeRowReferenceBuiltIn(typeRow, fieldNameIdSql, referenceList);
+                        Type typeRowReference = TypeRowReferenceIntegrate(typeRow, fieldNameIdSql, referenceList);
 
                         if (typeRowReference != null)
                         {
                             List<string> propertyNameList = UtilDalType.TypeRowToPropertyInfoList(typeRowReference).Select(item => item.Name).ToList();
-                            if (propertyNameList.Contains("Id") && propertyNameList.Contains("IdName")) // BuiltIn naming convention.
+                            if (propertyNameList.Contains("Id") && propertyNameList.Contains("IdName")) // Integrate naming convention.
                             {
                                 // IdName
-                                fieldBuiltIn.IsIdName = true;
-                                fieldBuiltIn.TypeRowReference = typeRowReference;
-                                fieldBuiltIn.FieldNameIdSql = fieldNameIdSql;
+                                fieldIntegrate.IsIdName = true;
+                                fieldIntegrate.TypeRowReference = typeRowReference;
+                                fieldIntegrate.FieldNameIdSql = fieldNameIdSql;
 
                                 // Id
-                                var fieldBuiltInId = result.Where(item => item.Field.FieldNameSql == fieldNameIdSql).Single();
-                                fieldBuiltInId.IsId = true;
-                                fieldBuiltInId.TypeRowReference = typeRowReference;
-                                fieldBuiltInId.FieldNameIdSql = fieldNameIdSql;
+                                var fieldIntegrateId = result.Where(item => item.Field.FieldNameSql == fieldNameIdSql).Single();
+                                fieldIntegrateId.IsId = true;
+                                fieldIntegrateId.TypeRowReference = typeRowReference;
+                                fieldIntegrateId.FieldNameIdSql = fieldNameIdSql;
                             }
                         }
                     }
@@ -1241,7 +1241,7 @@
         private static string UpsertSelect(Type typeRow, List<Row> rowList, List<Reference> referenceList, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList)
         {
             StringBuilder sqlSelect = new StringBuilder();
-            var fieldBuiltInList = FieldBuiltInList(typeRow, referenceList);
+            var fieldIntegrateList = FieldIntegrateList(typeRow, referenceList);
 
             // Row
             bool isFirstRow = true;
@@ -1260,9 +1260,9 @@
                 // Field
                 sqlSelect.Append("(SELECT ");
                 bool isFirstField = true;
-                foreach (var fieldBuiltIn in fieldBuiltInList)
+                foreach (var fieldIntegrate in fieldIntegrateList)
                 {
-                    bool isField = (fieldBuiltIn.IsId == false && fieldBuiltIn.IsIdName == false && fieldBuiltIn.IsKey == false) || fieldBuiltIn.IsIdName;
+                    bool isField = (fieldIntegrate.IsId == false && fieldIntegrate.IsIdName == false && fieldIntegrate.IsKey == false) || fieldIntegrate.IsIdName;
                     if (isField)
                     {
                         if (isFirstField)
@@ -1273,20 +1273,20 @@
                         {
                             sqlSelect.Append(", ");
                         }
-                        string fieldNameSql = fieldBuiltIn.Field.FieldNameSql;
-                        object value = fieldBuiltIn.Field.PropertyInfo.GetValue(row);
-                        string paramName = Data.ExecuteParamAdd(fieldBuiltIn.Field.FrameworkTypeEnum, value, paramList);
-                        if (fieldBuiltIn.IsId == false && fieldBuiltIn.IsIdName == false)
+                        string fieldNameSql = fieldIntegrate.Field.FieldNameSql;
+                        object value = fieldIntegrate.Field.PropertyInfo.GetValue(row);
+                        string paramName = Data.ExecuteParamAdd(fieldIntegrate.Field.FrameworkTypeEnum, value, paramList);
+                        if (fieldIntegrate.IsId == false && fieldIntegrate.IsIdName == false)
                         {
-                            sqlSelect.Append(string.Format("{0} AS {1}", paramName, fieldBuiltIn.Field.FieldNameSql));
+                            sqlSelect.Append(string.Format("{0} AS {1}", paramName, fieldIntegrate.Field.FieldNameSql));
                         }
                         else
                         {
-                            if (fieldBuiltIn.IsIdName)
+                            if (fieldIntegrate.IsIdName)
                             {
-                                string tableNameSql = UtilDalType.TypeRowToTableNameCSharp(fieldBuiltIn.TypeRowReference);
-                                string sqlBuiltIn = string.Format("(SELECT BuiltIn.Id FROM {0} BuiltIn WHERE BuiltIn.IdName = {1}) AS {2}", tableNameSql, paramName, fieldBuiltIn.FieldNameIdSql);
-                                sqlSelect.Append(sqlBuiltIn);
+                                string tableNameSql = UtilDalType.TypeRowToTableNameCSharp(fieldIntegrate.TypeRowReference);
+                                string sqlIntegrate = string.Format("(SELECT Integrate.Id FROM {0} Integrate WHERE Integrate.IdName = {1}) AS {2}", tableNameSql, paramName, fieldIntegrate.FieldNameIdSql);
+                                sqlSelect.Append(sqlIntegrate);
                             }
                         }
                     }
@@ -1309,13 +1309,13 @@
                     field.PropertyInfo.SetValue(row, true);
                 }
 
-                // Set sql table IsExist to false where IsBuiltIn is true (if column exists)
-                UtilDalUpsertBuiltIn.UpsertIsExistAsync(typeRow).Wait();
+                // Set sql table IsExist to false where IsIntegrate is true (if column exists)
+                UtilDalUpsertIntegrate.UpsertIsExistAsync(typeRow).Wait();
             }
         }
 
         /// <summary>
-        /// Sql merge into for BuiltIn.
+        /// Sql merge into for Integrate.
         /// </summary>
         /// <param name="typeRow">Type of rowList (can be empty).</param>
         /// <param name="rowList">Records to update.</param>
@@ -1325,18 +1325,18 @@
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
-            var fieldNameSqlListAll = FieldBuiltInList(typeRow, referenceList);
+            var fieldNameSqlListAll = FieldIntegrateList(typeRow, referenceList);
 
             foreach (var rowListSplit in UtilFramework.Split(rowList, 100)) // Prevent error: "The server supports a maximum of 2100 parameters"
             {
                 var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
                 string sqlSelect = UpsertSelect(typeRow, rowListSplit, referenceList, paramList);
 
-                // Update underlying sql table if sql view ends with "BuiltIn".
+                // Update underlying sql table if sql view ends with "Integrate".
                 UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-                if (tableNameSql.EndsWith("BuiltIn"))
+                if (tableNameSql.EndsWith("Integrate"))
                 {
-                    tableNameSql = tableNameSql.Substring(0, tableNameSql.Length - "BuiltIn".Length);
+                    tableNameSql = tableNameSql.Substring(0, tableNameSql.Length - "Integrate".Length);
                 }
                 Type typeRowDest = UtilDalType.TypeRowFromTableNameSql(schemaNameSql, tableNameSql, assemblyList);
                 var fieldDestList = UtilDalType.TypeRowToFieldListDictionary(typeRowDest);
@@ -1375,7 +1375,7 @@
                 // string sqlDebug = Data.ExecuteParamDebug(sqlUpsert, paramList);
 
                 // Upsert
-                await Data.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb); // See also method AppCli.CommandGenerateBuiltIn();
+                await Data.ExecuteNonQueryAsync(sqlUpsert, paramList, isFrameworkDb); // See also method AppCli.CommandGenerateIntegrate();
             }
         }
 
@@ -1426,7 +1426,7 @@
         }
 
         /// <summary>
-        /// Sql merge into for BuiltIn.
+        /// Sql merge into for Integrate.
         /// </summary>
         /// <param name="upsertList">List of rows to insert or update.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
@@ -1451,7 +1451,7 @@
                 List<Row> rowList = item.Value;
          
                 // IsExistSet
-                IsExistSet(typeRow, rowList); // One call for hierarchical BuiltIn which needs multiple upsert.
+                IsExistSet(typeRow, rowList); // One call for hierarchical Integrate which needs multiple upsert.
 
                 // Upsert
                 foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
@@ -1476,12 +1476,12 @@
         }
 
         /// <summary>
-        /// Set IsExist flag to false on sql table. If sql table contains IsBuiltIn column set IsExist flag to false only on IsBuiltIn data rows.
+        /// Set IsExist flag to false on sql table. If sql table contains IsIntegrate column set IsExist flag to false only on IsIntegrate data rows.
         /// </summary>
         private static async Task UpsertIsExistAsync(Type typeRow)
         {
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
-            if (!fieldList.ContainsKey("IsBuiltIn"))
+            if (!fieldList.ContainsKey("IsIntegrate"))
             {
                 await UtilDalUpsert.UpsertIsExistAsync(typeRow);
             }
@@ -1491,7 +1491,7 @@
                 string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
                 bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
                 // IsExists
-                string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT) WHERE IsBuiltIn = 1", tableNameWithSchemaSql, fieldNameSqlIsExist);
+                string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT) WHERE IsIntegrate = 1", tableNameWithSchemaSql, fieldNameSqlIsExist);
                 await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
             }
         }

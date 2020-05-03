@@ -109,7 +109,7 @@
         /// <summary>
         /// Populate sql tables FrameworkTable, FrameworkField with assembly typeRow.
         /// </summary>
-        private void Meta(DeployDbBuiltInResult result)
+        private void Meta(DeployDbIntegrateResult result)
         {
             var assemblyList = AppCli.AssemblyList(isIncludeApp: true);
             List<Type> typeRowList = UtilDalType.TypeRowList(assemblyList);
@@ -132,20 +132,20 @@
 
             // Field
             {
-                List<FrameworkFieldBuiltIn> rowList = new List<FrameworkFieldBuiltIn>();
+                List<FrameworkFieldIntegrate> rowList = new List<FrameworkFieldIntegrate>();
                 foreach (Type typeRow in typeRowList)
                 {
                     string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                     var fieldList = UtilDalType.TypeRowToFieldList(typeRow);
                     foreach (var field in fieldList)
                     {
-                        FrameworkFieldBuiltIn fieldBuiltIn = new FrameworkFieldBuiltIn();
-                        rowList.Add(fieldBuiltIn);
+                        FrameworkFieldIntegrate fieldIntegrate = new FrameworkFieldIntegrate();
+                        rowList.Add(fieldIntegrate);
 
-                        fieldBuiltIn.TableIdName = tableNameCSharp;
-                        fieldBuiltIn.FieldNameCSharp = field.PropertyInfo.Name;
-                        fieldBuiltIn.FieldNameSql = field.FieldNameSql;
-                        fieldBuiltIn.IsExist = true;
+                        fieldIntegrate.TableIdName = tableNameCSharp;
+                        fieldIntegrate.FieldNameCSharp = field.PropertyInfo.Name;
+                        fieldIntegrate.FieldNameSql = field.FieldNameSql;
+                        fieldIntegrate.IsExist = true;
                     }
                 }
 
@@ -156,23 +156,23 @@
         }
 
         /// <summary>
-        /// Populate sql BuiltIn tables.
+        /// Populate sql Integrate tables.
         /// </summary>
-        private void BuiltIn()
+        private void Integrate()
         {
-            var generateBuiltInResult = AppCli.CommandGenerateBuiltInInternal();
-            var deployDbResult = new DeployDbBuiltInResult(generateBuiltInResult);
+            var generateIntegrateResult = AppCli.CommandGenerateIntegrateInternal();
+            var deployDbResult = new DeployDbIntegrateResult(generateIntegrateResult);
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
 
             // Populate sql tables FrameworkTable, FrameworkField.
             UtilCli.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
             Meta(deployDbResult);
-            UtilDalUpsertBuiltIn.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
+            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
 
-            // Populate sql BuiltIn tables.
-            UtilCli.ConsoleWriteLineColor("Update BuiltIn tables", ConsoleColor.Green);
-            AppCli.CommandDeployDbBuiltInInternal(deployDbResult);
-            UtilDalUpsertBuiltIn.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
+            // Populate sql Integrate tables.
+            UtilCli.ConsoleWriteLineColor("Update Integrate tables", ConsoleColor.Green);
+            AppCli.CommandDeployDbIntegrateInternal(deployDbResult);
+            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
         }
 
         protected internal override void Execute()
@@ -214,7 +214,7 @@
                 DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
 
-                BuiltIn();
+                Integrate();
 
                 UtilCli.ConsoleWriteLineColor("DeployDb successful!", ConsoleColor.Green);
             }
