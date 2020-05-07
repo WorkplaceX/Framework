@@ -11,6 +11,7 @@
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Threading.Tasks;
 
     internal static class UtilCli
     {
@@ -265,22 +266,32 @@
 
         internal static void FolderDelete(string folderName)
         {
-            if (Directory.Exists(folderName))
+            var count = 0;
+            do
             {
-                foreach (FileInfo fileInfo in new DirectoryInfo(folderName).GetFiles("*.*", SearchOption.AllDirectories))
+                if (count > 0)
                 {
-                    fileInfo.Attributes = FileAttributes.Normal; // See also: https://stackoverflow.com/questions/1701457/directory-delete-doesnt-work-access-denied-error-but-under-windows-explorer-it/30673648
+                    Task.Delay(1000).Wait(); // Wait for next attempt.
                 }
-                try
+                if (UtilCli.FolderNameExist(folderName))
                 {
-                    Directory.Delete(folderName, true);
+                    foreach (FileInfo fileInfo in new DirectoryInfo(folderName).GetFiles("*.*", SearchOption.AllDirectories))
+                    {
+                        fileInfo.Attributes = FileAttributes.Normal; // See also: https://stackoverflow.com/questions/1701457/directory-delete-doesnt-work-access-denied-error-but-under-windows-explorer-it/30673648
+                    }
+                    try
+                    {
+                        Directory.Delete(folderName, true);
+                    }
+                    catch (IOException)
+                    {
+                        // Silent exception.
+                        Console.WriteLine(string.Format("Can not delete folder! ({0})", folderName));
+                    }
                 }
-                catch (IOException exception)
-                {
-                    throw new Exception(string.Format("Can not delete folder! Make sure server.ts and node.exe is not running. ({0})", folderName), exception);
-                }
-            }
-            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Can not delete folder! ({0}", folderName));
+                count += 1;
+            } while (UtilCli.FolderNameExist(folderName) && count <= 3);
+            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Can not delete folder! Make sure server.ts and node.exe is not running. ({0}", folderName));
         }
 
         internal static bool FolderNameExist(string folderName)
