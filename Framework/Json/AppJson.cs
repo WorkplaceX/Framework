@@ -2192,6 +2192,11 @@
         }
 
         public string TextHtml;
+
+        /// <summary>
+        /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml.
+        /// </summary>
+        public bool IsNoSanatize;
     }
 
     public class Page : ComponentJson

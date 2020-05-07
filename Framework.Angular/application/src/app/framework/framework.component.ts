@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 import { DataService, RequestJson } from '../data.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-framework',
@@ -60,12 +61,23 @@ export class Page {
 @Component({
   selector: '[data-Html]',
   template: `<i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>  
-  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="json.TextHtml" (click)="click($event);" ></div>`
+  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml" (click)="click($event);" ></div>`
 })
 export class Html {
   @Input() json: any
 
-  constructor(private dataService: DataService){
+  constructor(private dataService: DataService, private sanitizer: DomSanitizer){
+
+  }
+
+  textHtml: any;
+
+  ngOnChanges() {
+    if (this.json.IsNoSanatize) {
+      this.textHtml = this.sanitizer.bypassSecurityTrustHtml(this.json.TextHtml);
+    } else {
+      this.textHtml = this.json.TextHtml;
+    }
   }
 
   @ViewChild('div')
