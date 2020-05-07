@@ -523,6 +523,61 @@
             /// Gets FileNameExtension. For example: ".txt".
             /// </summary>
             public string FileNameExtension { get; private set; }
+
+            /// <summary>
+            /// Returns true, if path starts with pathPrefix.
+            /// </summary>
+            /// <param name="pathPrefix">For example: "/cms/".</param>
+            /// <param name="path">For example: "/contact/".</param>
+            public bool IsPath(string pathPrefix, out string path)
+            {
+                if (!pathPrefix.StartsWith("/"))
+                {
+                    pathPrefix = "/" + pathPrefix;
+                }
+                if (!pathPrefix.EndsWith("/"))
+                {
+                    pathPrefix += "/";
+                }
+                bool result = Path.StartsWith(pathPrefix);
+                if (result)
+                {
+                    path = Path.Substring(pathPrefix.Length - 1);
+                }
+                else
+                {
+                    path = null;
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Returns true, if path starts with pathPrefix.
+            /// </summary>
+            /// <param name="pathPrefix">For example: "/cmsfile/".</param>
+            /// <param name="fileName">For example: "about/Logo.png".</param>
+            public bool IsFileName(string pathPrefix, out string fileName)
+            {
+                bool result = false;
+                fileName = null;
+                if (FileName != null)
+                {
+                    if (!pathPrefix.StartsWith("/"))
+                    {
+                        pathPrefix = "/" + pathPrefix;
+                    }
+                    if (!pathPrefix.EndsWith("/"))
+                    {
+                        pathPrefix += "/";
+                    }
+                    result = Path.StartsWith(pathPrefix);
+                    if (result)
+                    {
+                        fileName = FileName.Substring(pathPrefix.Length - "/".Length);
+                    }
+                }
+                return result;
+            }
         }
 
         public class FileDownloadResult
@@ -2137,6 +2192,11 @@
         }
 
         public string TextHtml;
+
+        /// <summary>
+        /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml.
+        /// </summary>
+        public bool IsNoSanatize;
     }
 
     public class Page : ComponentJson
