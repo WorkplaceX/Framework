@@ -66,7 +66,7 @@
         /// <summary>
         /// Start script.
         /// </summary>
-        /// <param name="isRedirectStdErr">If true, do not write to stderr. Use this flag if shell command is known to write info (mistakenly) to stderror.</param>
+        /// <param name="isRedirectStdErr">If true, do not write to stderr. Use this flag if shell command is known to write info (mistakenly) to stderr.</param>
         internal static void Start(string workingDirectory, string fileName, string arguments, bool isWait = true, bool isRedirectStdErr = false)
         {
             string time = UtilFramework.DateTimeToString(DateTime.Now);
