@@ -50,16 +50,17 @@ Major  Minor  Patch  PreReleaseLabel BuildLabel
 
 ## Update
 
-Update Angular and website
+* Update Nuget packages
+* Update Angular and website
 
+* Framework.Angular/application/
 ```cmd
 ng update
 ```
-* Framework.Angular/application/
 
+* Framework.Cli/Template/Application.Website/MasterDefault/
+* Framework.Cli/Template/Application.Website/MasterEmpty/
 ```cmd
 npm audit
 npm audit fix
 ```
-* Framework.Cli/Template/Application.Website/MasterDefault/
-* Framework.Cli/Template/Application.Website/MasterEmpty/
