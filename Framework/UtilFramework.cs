@@ -28,18 +28,18 @@ namespace Framework
             get
             {
                 // dotnet --version
-                // 3.1.100
+                // 3.1.301
 
                 // node --version
-                // v12.13.0
+                // v12.18.1
 
                 // npm --version
-                // 6.12.0
+                // 6.14.4
 
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
-                // Angular CLI: 8.3.15
+                // Angular CLI: 9.1.1
 
-                return "v3.35.2";
+                return "v3.35.3";
             }
         }
 
