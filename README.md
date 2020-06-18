@@ -25,16 +25,16 @@ Framework to create database applications based on Angular 9 with server side re
 Some versions to check:
 ```cmd
 node --version
-v12.13.0
+v12.18.1
 
 npm --version
-6.14.0
+6.14.4
 
 dotnet --version
-3.1.201
+3.1.301
 
 ng --version
-Angular CLI: 9.1.1
+Angular CLI: 9.1.9
 ```
 
 For Windows:
@@ -47,3 +47,19 @@ Major  Minor  Patch  PreReleaseLabel BuildLabel
 -----  -----  -----  --------------- ----------
 6      2      3
 ```
+
+## Update
+
+Update Angular and website
+
+```cmd
+ng update
+```
+* Framework.Angular/application/
+
+```cmd
+npm audit
+npm audit fix
+```
+* Framework.Cli/Template/Application.Website/MasterDefault/
+* Framework.Cli/Template/Application.Website/MasterEmpty/

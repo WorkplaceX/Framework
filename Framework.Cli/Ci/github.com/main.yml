@@ -1,5 +1,7 @@
 # Copy this file from "./Framework/Framework.Cli/Ci/github.com/.main.yml" to "./.github/workflows/main.yml"
 
+# https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
+
 name: CI
 on:
   push:
