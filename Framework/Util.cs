@@ -5,17 +5,16 @@
 
     public class TextParseComponent
     {
-        public TextParseComponent(TextParseComponent owner, ExecuteModeEnum executeMode = ExecuteModeEnum.All)
+        public TextParseComponent(TextParseComponent owner)
         {
             Owner = owner;
-            ExecuteMode = executeMode;
             if (Owner != null)
             {
                 Owner.list.Add(this);
             }
         }
 
-        public TextParseComponent Owner { get; private set; }
+        public readonly TextParseComponent Owner;
 
         public TextParseDocument Document
         {
@@ -106,27 +105,16 @@
                     Document.LineIndex = lineIndexLocal;
                     Document.LineCharIndex = lineCharIndexLocal;
                 }
-                else
-                {
-                    if (ExecuteMode == ExecuteModeEnum.First)
-                    {
-                        break;
-                    }
-                }
             }
         }
-
-        public enum ExecuteModeEnum { None = 0, First = 1, All = 2 }
-
-        public ExecuteModeEnum ExecuteMode { get; private set; }
     }
 
     public class TextParseDocument : TextParseComponent
     {
-        public TextParseDocument(string text, ExecuteModeEnum executeMode = ExecuteModeEnum.All) 
-            : base(null, executeMode)
+        public TextParseDocument(string text)
+            : base(null)
         {
-            Text = text;
+            this.Text = text;
             StringReader reader = new StringReader(text);
             string line;
             while ((line = reader.ReadLine()) != null)
@@ -139,7 +127,7 @@
             }
         }
 
-        public string Text { get; private set; }
+        public readonly string Text;
 
         internal List<string> LineList;
 
