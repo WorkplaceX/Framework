@@ -261,12 +261,9 @@
                 object value = field.PropertyInfo.GetValue(row);
                 if (value != null)
                 {
-                    text = grid.CellTextInternal(row, field.PropertyInfo.Name); // Custom convert database value to cell text.
+                    text = field.FrameworkType().CellTextFromValue(value);
+                    text = grid.CellTextInternal(row, field.PropertyInfo.Name, text); // Custom convert database value to cell text.
                     text = UtilFramework.StringNull(text);
-                    if (text == null)
-                    {
-                        text = field.FrameworkType().CellTextFromValue(value);
-                    }
                 }
                 result.TextLeave = null;
                 if (result.ErrorParse == null) // Do not override user entered text as long as in ErrorParse mode.
@@ -1571,7 +1568,7 @@ namespace Framework.Session
                         object value = field.PropertyInfo.GetValue(row);
                         if (value != null)
                         {
-                            text = grid.CellTextInternal(row, field.FieldNameCSharp); // Custom convert database value to cell text.
+                            text = grid.CellTextInternal(row, field.FieldNameCSharp, text); // Custom convert database value to cell text.
                             text = UtilFramework.StringNull(text);
                             if (text == null)
                             {

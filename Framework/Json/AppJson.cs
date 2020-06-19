@@ -1106,9 +1106,9 @@
             }
         }
 
-        virtual internal string CellTextInternal(Row row, string fieldName)
+        virtual internal string CellTextInternal(Row row, string fieldName, string text)
         {
-            return null;
+            return text;
         }
 
         virtual internal void CellParseInternal(Row row, string fieldName, string text, ParseResultInternal result)
@@ -1490,18 +1490,46 @@
             }
         }
 
-        internal override string CellTextInternal(Row row, string fieldName)
+        internal override string CellTextInternal(Row row, string fieldName, string text)
         {
-            return CellText((TRow)row, fieldName);
+            var args = new CellTextArgs { Row = (TRow)row, FieldName = fieldName, Text = text };
+            var result = new CellTextResult { Text = text };
+            CellText(args, result);
+            return result.Text;
         }
 
         /// <summary>
-        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if value is not null.
+        /// Override this method for custom implementation of converting database value to front end grid cell text. Called only if database value is not null.
         /// </summary>
-        /// <returns>Returns cell text. If null is returned, framework does default conversion of value to string.</returns>
-        protected virtual string CellText(TRow row, string fieldName)
+        protected virtual void CellText(CellTextArgs args, CellTextResult result)
         {
-            return null;
+
+        }
+
+        public class CellTextArgs
+        {
+            /// <summary>
+            /// Data grid row.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// FieldName as declared in CSharp code. Data grid column name.
+            /// </summary>
+            public string FieldName { get; internal set; }
+
+            /// <summary>
+            /// Default database value front end grid cell text.
+            /// </summary>
+            public string Text { get; internal set; }
+        }
+
+        public class CellTextResult
+        {
+            /// <summary>
+            /// Custom database value front end grid cell text.
+            /// </summary>
+            public string Text;
         }
 
         internal override void CellParseInternal(Row row, string fieldName, string text, ParseResultInternal result)
