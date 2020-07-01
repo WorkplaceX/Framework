@@ -97,9 +97,11 @@ export class DataService {
   constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, rendererFactory: RendererFactory2, private location: Location) { 
     this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
+      // Render on SSR server
       this.json = this.jsonServerSideRendering;
       this.json.IsServerSideRendering = true;
     } else {
+      // Render in browser
       this.json = jsonBrowser;
       this.json.IsServerSideRendering = false;
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
