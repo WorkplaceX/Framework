@@ -40,17 +40,17 @@
         }
 
         /// <summary>
-        /// Returns true, if expected request has been sent by client.
+        /// Returns true, if expected command has been sent by client.
         /// </summary>
-        public static bool Request<T>(AppJson appJson, RequestCommand command, out RequestJson requestJson, out T componentJson) where T : ComponentJson
+        public static bool Request<T>(AppJson appJson, RequestCommand command, out CommandJson commandJson, out T componentJson) where T : ComponentJson
         {
             bool result = false;
-            requestJson = appJson.RequestJson;
+            commandJson = appJson.RequestJson.CommandGet();
             componentJson = (T)null;
-            if (command == requestJson.Command)
+            if (command == commandJson.Command)
             {
                 result = true;
-                componentJson = (T)appJson.Root.RootComponentJsonList[requestJson.ComponentId];
+                componentJson = (T)appJson.Root.RootComponentJsonList[commandJson.ComponentId];
             }
             return result;
         }

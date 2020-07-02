@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { DataService, RequestJson } from '../data.service';
+import { DataService, CommandJson } from '../data.service';
 
 /* BootstrapNavbar */
 @Component({
@@ -19,13 +19,13 @@ export class BootstrapNavbarComponent implements OnInit {
 
   click(button) {
     button.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
+    this.dataService.update(<CommandJson> { Command: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
     return false;
   }
 
   clickHome() {
     this.json.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 15, ComponentId: this.json.Id });
+    this.dataService.update(<CommandJson> { Command: 15, ComponentId: this.json.Id });
     return false;
   }
 

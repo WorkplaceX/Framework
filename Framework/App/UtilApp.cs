@@ -45,13 +45,13 @@
         }
 
         /// <summary>
-        /// User clicked internal link. Instead of GET and download Angular again a POST command is sent.
+        /// User clicked internal link or clicked backward, forward navigation history. Instead of GET and download Angular again a POST command is sent.
         /// </summary>
         public static async Task ProcessLinkPostAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.LinkPost, out RequestJson requestJson, out ComponentJson _))
+            if (UtilSession.Request(appJson, RequestCommand.LinkPost, out CommandJson commandJson, out ComponentJson _))
             {
-                await appJson.FileDownloadSessionInternalAsync(requestJson.LinkPostPath, requestJson.LinkPostPathIsBackwardForward);
+                await appJson.FileDownloadSessionInternalAsync(commandJson.LinkPostPath, commandJson.LinkPostPathIsBackwardForward);
             }
         }
 
@@ -75,8 +75,7 @@
         /// </summary>
         public static async Task ProcessBootstrapNavbarAsync(AppJson appJson)
         {
-            var request = appJson.RequestJson;
-            if (UtilSession.Request(appJson, RequestCommand.BootstrapNavbarButtonIsClick, out _, out BootstrapNavbar navbar))
+            if (UtilSession.Request(appJson, RequestCommand.BootstrapNavbarButtonIsClick, out CommandJson commandJson, out BootstrapNavbar navbar))
             {
                 if (navbar.ButtonList != null)
                 {
@@ -84,7 +83,7 @@
                     ProcessBootstrapNavbarButtonListAll(navbar.ButtonList, buttonList);
                     foreach (BootstrapNavbarButton button in buttonList)
                     {
-                        if (request.BootstrapNavbarButtonId == button.Id)
+                        if (commandJson.BootstrapNavbarButtonId == button.Id)
                         {
                             GridRowState rowState = button.Grid.RowStateList[button.RowStateId - 1];
                             await UtilGrid.RowSelectAsync(button.Grid, rowState, isRender: true);

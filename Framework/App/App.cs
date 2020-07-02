@@ -115,11 +115,14 @@
             if (requestJsonText != null)
             {
                 requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
-                requestJson.GridCellText = UtilFramework.StringNull(requestJson.GridCellText);
+                foreach (var command in requestJson.CommandList)
+                {
+                    command.GridCellText = UtilFramework.StringNull(command.GridCellText); // Sanitize incomming request.
+                }
             }
             else
             {
-                requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = 1 };
+                requestJson = new RequestJson(new CommandJson { Command = RequestCommand.None }) { RequestCount = 1 };
             }
 
             bool isSessionExpired = appJson == null && requestJson.RequestCount > 1;
@@ -130,7 +133,7 @@
             if (appJson == null || isBrowserRefresh || isBrowserTabSwitch)
             {
                 appJson = CreateAppJson();
-                requestJson = new RequestJson { Command = RequestCommand.None, RequestCount = requestJson.RequestCount };
+                requestJson = new RequestJson(new CommandJson { Command = RequestCommand.None }) { RequestCount = requestJson.RequestCount };
                 appJson.RequestJson = requestJson;
                 appJson.RequestUrl = UtilServer.RequestUrl();
                 if (isSessionExpired)

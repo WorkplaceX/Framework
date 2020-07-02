@@ -860,9 +860,9 @@
         /// </summary>
         private static async Task ProcessIsClickSortAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickSort, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickSort, out CommandJson commandJson, out Grid grid))
             {
-                GridCell cell = grid.CellList[requestJson.GridCellId - 1];
+                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
 
                 GridSortValue.IsSortSwitch(grid, column.FieldNameCSharp);
@@ -877,9 +877,9 @@
         /// </summary>
         private static async Task ProcessIsClickConfigAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickConfig, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickConfig, out CommandJson commandJson, out Grid grid))
             {
-                GridCell cell = grid.CellList[requestJson.GridCellId - 1];
+                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
                 Page page = grid.ComponentOwner<Page>();
 
@@ -896,9 +896,9 @@
         /// </summary>
         private static void ProcessIsTextLeave(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsTextLeave, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsTextLeave, out CommandJson commandJson, out Grid grid))
             {
-                GridCell cell = grid.CellList[requestJson.GridCellId - 1];
+                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 cell.Text = cell.TextLeave;
                 cell.TextLeave = null;
             }
@@ -909,13 +909,13 @@
         /// </summary>
         private static void ProcessStyleColumn(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridStyleColumn, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridStyleColumn, out CommandJson commandJson, out Grid grid))
             {
                 var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToArray();
                 for (int i = 0; i < columnList.Length; i++)
                 {
                     var column = columnList[i];
-                    var width = requestJson.GridStyleColumnList[i];
+                    var width = commandJson.GridStyleColumnList[i];
                     column.Width = width;
                 }
                 Render(grid); // Update Grid.StyleColumn
@@ -967,7 +967,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static async Task ProcessCellIsModifyParseAsync(Grid grid, GridRowEnum rowEnum, Row row, GridColumn column, Field field, GridCell cell, RequestJson requestJson)
+        private static async Task ProcessCellIsModifyParseAsync(Grid grid, GridRowEnum rowEnum, Row row, GridColumn column, Field field, GridCell cell, CommandJson commandJson)
         {
             cell.ErrorParse = null;
             // Parse
@@ -989,11 +989,11 @@
                     await grid.CellParseInternalAsync(row, column.FieldNameCSharp, UtilFramework.StringEmpty(cell.Text), result);
                 }
                 // Parse custom (FileUpload)
-                if (requestJson.GridCellTextBase64 != null)
+                if (commandJson.GridCellTextBase64 != null)
                 {
-                    UtilFramework.Assert(requestJson.GridCellTextBase64.StartsWith("data:application/octet-stream;base64,"));
-                    var data = System.Convert.FromBase64String(requestJson.GridCellTextBase64.Substring("data:application/octet-stream;base64,".Length));
-                    grid.CellParseFileUploadInternal(rowEnum, row, column.FieldNameCSharp, requestJson.GridCellTextBase64FileName, data, result);
+                    UtilFramework.Assert(commandJson.GridCellTextBase64.StartsWith("data:application/octet-stream;base64,"));
+                    var data = System.Convert.FromBase64String(commandJson.GridCellTextBase64.Substring("data:application/octet-stream;base64,".Length));
+                    grid.CellParseFileUploadInternal(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
                 }
                 // Parse default
                 if (!result.IsHandled)
@@ -1122,10 +1122,10 @@
         /// <summary>
         /// Set Text and preserve TextOld.
         /// </summary>
-        private static void ProcessCellIsModifyText(GridCell cell, RequestJson requestJson)
+        private static void ProcessCellIsModifyText(GridCell cell, CommandJson commandJson)
         {
             string textOld = cell.Text;
-            cell.Text = requestJson.GridCellText;
+            cell.Text = commandJson.GridCellText;
             if (cell.IsModified == false && cell.Text != textOld)
             {
                 cell.IsModified = true;
@@ -1158,9 +1158,9 @@
         /// </summary>
         private static async Task ProcessRowIsClickAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickRow, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickRow, out CommandJson commandJson, out Grid grid))
             {
-                GridCell cell = grid.CellList[requestJson.GridCellId - 1];
+                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 Row rowSelected = null;
                 foreach (var rowState in grid.RowStateList)
                 {
@@ -1195,7 +1195,7 @@
                         if (result.Text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out _, out _, out var cellDest);
-                            appJson.RequestJson = new RequestJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true };
+                            appJson.RequestJson = new RequestJson(new CommandJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
 
                             await ProcessCellIsModify(appJson);
                         }
@@ -1209,15 +1209,15 @@
         /// </summary>
         private static async Task ProcessCellIsModify(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridCellIsModify, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridCellIsModify, out CommandJson commandJson, out Grid grid))
             {
-                GridCell cell = grid.CellList[requestJson.GridCellId - 1];
+                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
                 var field = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow)[column.FieldNameCSharp];
                 GridRowState rowState = grid.RowStateList[cell.RowStateId - 1];
 
                 // Track IsModified
-                ProcessCellIsModifyText(cell, requestJson);
+                ProcessCellIsModifyText(cell, commandJson);
 
                 cell.Warning = null;
 
@@ -1248,7 +1248,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, requestJson);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, commandJson);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
@@ -1260,14 +1260,14 @@
                         }
                     }
                     // Lookup
-                    if (!requestJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
+                    if (!commandJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
                     {
                         await ProcessGridLookupOpenAsync(grid, rowState, column, cell);
                     }
 
                     // Do not set Cell.TextLeave if user clicked lookup row.
                     bool isTextLeave = true;
-                    if (requestJson.GridCellTextIsLookup)
+                    if (commandJson.GridCellTextIsLookup)
                     {
                         isTextLeave = false;
                     }
@@ -1287,7 +1287,7 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, requestJson);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, commandJson);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
@@ -1312,14 +1312,14 @@
                         }
                     }
                     // Lookup
-                    if (!requestJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
+                    if (!commandJson.GridCellTextIsLookup) // Do not open lookup again after lookup row has been clicked by user.
                     {
                         await ProcessGridLookupOpenAsync(grid, rowState, column, cell);
                     }
 
                     // Do not set Cell.TextLeave if user clicked lookup row.
                     bool isTextLeave = true;
-                    if (requestJson.GridCellTextIsLookup)
+                    if (commandJson.GridCellTextIsLookup)
                     {
                         isTextLeave = false;
                     }
@@ -1336,10 +1336,10 @@
         /// </summary>
         private static async Task ProcessIsClickEnum(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickEnum, out RequestJson requestJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommand.GridIsClickEnum, out CommandJson commandJson, out Grid grid))
             {
                 // Grid config
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.Config)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.Config)
                 {
                     if (grid.TypeRow != null) // Do not show config if for example no query is defined for data grid.
                     {
@@ -1354,7 +1354,7 @@
                 }
 
                 // Grid reload
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.Reload)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.Reload)
                 {
                     // Reset filter, sort
                     grid.FilterValueList = null;
@@ -1366,7 +1366,7 @@
                 }
 
                 // Grid page up
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageUp)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.PageUp)
                 {
                     var configGrid = ConfigGrid(grid);
                     grid.OffsetRow -= ConfigRowCountMax(configGrid);
@@ -1378,7 +1378,7 @@
                 }
 
                 // Grid page down
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageDown)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.PageDown)
                 {
                     var configGrid = ConfigGrid(grid);
                     int rowCount = grid.RowList.Count;
@@ -1391,7 +1391,7 @@
                 }
 
                 // Grid page left
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageLeft)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.PageLeft)
                 {
                     grid.OffsetColumn -= 1;
                     if (grid.OffsetColumn < 0)
@@ -1402,7 +1402,7 @@
                 }
 
                 // Grid page right
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.PageRight)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.PageRight)
                 {
                     if (grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid)) < grid.ColumnList.Count)
                     {
@@ -1412,21 +1412,21 @@
                 }
 
                 // Grid mode table
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.ModeTable)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.ModeTable)
                 {
                     grid.Mode = GridMode.Table;
                     Render(grid);
                 }
 
                 // Grid mode stack
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.ModeStack)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.ModeStack)
                 {
                     grid.Mode = GridMode.Stack;
                     Render(grid);
                 }
 
                 // Excel
-                if (requestJson.GridIsClickEnum == GridIsClickEnum.ExcelDownload)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.ExcelDownload)
                 {
                     UtilGridExcel.Export(grid);
                 }

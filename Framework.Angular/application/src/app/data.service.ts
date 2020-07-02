@@ -47,7 +47,7 @@ export class Json {
   LinkPostPath: string;
 }
 
-export class RequestJson {
+export class CommandJson {
   Command: number;
 
   GridCellId: number;
@@ -66,17 +66,19 @@ export class RequestJson {
 
   BootstrapNavbarButtonId: number;
 
+  LinkPostPath: string;
+
+  LinkPostPathIsBackwardForward: boolean;
+}
+
+export class RequestJson {
   RequestCount: number;
 
   ResponseCount: number;
 
   BrowserUrl: string;
 
-  IsRequestJson: boolean;
-
-  LinkPostPath: string;
-
-  LinkPostPathIsBackwardForward: boolean;
+  CommandList: CommandJson[];
 }
 
 @Injectable({
@@ -109,7 +111,7 @@ export class DataService {
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;
-        this.update(<RequestJson> { Command: 0 });
+        this.update(<CommandJson> { Command: 0 });
       }
     }
   }
@@ -143,7 +145,9 @@ export class DataService {
     }
   }
 
-  public update(requestJson: RequestJson): void {
+  public update(commandJson: CommandJson): void {
+    var requestJson = <RequestJson> { CommandList: [ commandJson ]  }
+
     if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
       // RequestCount
       if (this.json.RequestCount == null) {
@@ -178,7 +182,7 @@ export class DataService {
           let requestJsonQueue = this.requestJsonQueue;
           this.requestJsonQueue = null;
           this.isRequestPending = false;
-          this.update(requestJsonQueue); // Process latest request.
+          this.update(requestJsonQueue.CommandList[0]); // Process latest request.
         }
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {

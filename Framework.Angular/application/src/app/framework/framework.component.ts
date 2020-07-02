@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
-import { DataService, RequestJson } from '../data.service';
+import { DataService, CommandJson } from '../data.service';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -91,7 +91,7 @@ export class Html {
         var anchor = <HTMLAnchorElement>element;
         if (anchor.classList.contains("linkPost")) {
           event.preventDefault();
-          this.dataService.update(<RequestJson> { Command: 16, ComponentId: this.json.Id, LinkPostPath: anchor.pathname });
+          this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.json.Id, LinkPostPath: anchor.pathname });
         }
         break;
       }
@@ -122,7 +122,7 @@ export class Button {
 
   click(){
     this.json.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 1, ComponentId: this.json.Id });
+    this.dataService.update(<CommandJson> { Command: 1, ComponentId: this.json.Id });
   } 
 }
 

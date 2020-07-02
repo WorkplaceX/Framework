@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, Input, ElementRef } from '@angular/core';
-import { DataService, RequestJson } from '../data.service';
+import { DataService, CommandJson } from '../data.service';
 
 /* Grid */
 @Component({
@@ -21,18 +21,18 @@ export class GridComponent implements OnInit {
 
   ngModelChange(cell) {
     cell.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 9, ComponentId: this.json.Id, GridCellId: cell.Id, GridCellText: cell.Text });
+    this.dataService.update(<CommandJson> { Command: 9, ComponentId: this.json.Id, GridCellId: cell.Id, GridCellText: cell.Text });
   }
 
   clickSort(cell, event: MouseEvent) {
     cell.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 8, ComponentId: this.json.Id, GridCellId: cell.Id });
+    this.dataService.update(<CommandJson> { Command: 8, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
 
   clickConfig(cell, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     cell.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 12, ComponentId: this.json.Id, GridCellId: cell.Id });
+    this.dataService.update(<CommandJson> { Command: 12, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
 
   private cellFileUpload: any;
@@ -56,14 +56,14 @@ export class GridComponent implements OnInit {
         var base64data = reader.result;                
         console.log(base64data);
         cellFileUpload.IsShowSpinner = true;
-        dataService.update(<RequestJson> { Command: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file.name });
+        dataService.update(<CommandJson> { Command: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file.name });
     }
   }  
 
   focus(cell) {
     if (!cell.IsSelect) {
       cell.IsShowSpinner = true;
-      this.dataService.update(<RequestJson> { Command: 11, ComponentId: this.json.Id, GridCellId: cell.Id });
+      this.dataService.update(<CommandJson> { Command: 11, ComponentId: this.json.Id, GridCellId: cell.Id });
     }
   }
 
@@ -73,7 +73,7 @@ export class GridComponent implements OnInit {
         cell.Text = cell.TextLeave;
         cell.TextLeave = null;
         cell.IsShowSpinner = true;
-        this.dataService.update(<RequestJson> { Command: 13, ComponentId: this.json.Id, GridCellId: cell.Id });
+        this.dataService.update(<CommandJson> { Command: 13, ComponentId: this.json.Id, GridCellId: cell.Id });
       }
     }
   }
@@ -119,14 +119,14 @@ export class GridComponent implements OnInit {
   documentMouseUp(event: MouseEvent) {
     if (this.resizeCell != null) {
       this.resizeCell = null;
-      this.dataService.update(<RequestJson> { Command: 14, ComponentId: this.json.Id, GridStyleColumnList: this.styleColumnList() });
+      this.dataService.update(<CommandJson> { Command: 14, ComponentId: this.json.Id, GridStyleColumnList: this.styleColumnList() });
     }
   }
 
   clickGrid(isClickEnum, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.json.IsShowSpinner = true;
-    this.dataService.update(<RequestJson> { Command: 10, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
+    this.dataService.update(<CommandJson> { Command: 10, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
   }
 
   trackBy(index: any, item: any) {

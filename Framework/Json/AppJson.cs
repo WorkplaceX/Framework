@@ -46,15 +46,15 @@
         HomeIsClick = 15,
 
         /// <summary>
-        /// User clicked an internal link. For example: "/contact/". Instead of GET and download Angular again a POST command is sent to the server.
+        /// User clicked an internal link or clicked backward, forward navigation history. For example: "/contact/". Instead of GET and download Angular again a POST command is sent to the server.
         /// </summary>
         LinkPost = 16,
     }
 
     /// <summary>
-    /// Request sent by Angular client.
+    /// Command sent by browser. See also RequestJson.
     /// </summary>
-    internal sealed class RequestJson
+    internal sealed class CommandJson
     {
         public RequestCommand Command { get; set; }
 
@@ -91,6 +91,36 @@
 
         public int BootstrapNavbarButtonId { get; set; }
 
+        /// <summary>
+        /// Gets or sets LinkPost. For internal link. For example: "/contact/".
+        /// </summary>
+        public string LinkPostPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets LinkPostPathIsBackwardForward. True, if user clicked browser backward or forward button.
+        /// </summary>
+        public bool LinkPostPathIsBackwardForward { get; set; }
+    }
+
+    /// <summary>
+    /// Request sent by Angular client.
+    /// </summary>
+    internal sealed class RequestJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public RequestJson() { }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public RequestJson(CommandJson command)
+        {
+            this.CommandList = new List<CommandJson>();
+            this.CommandList.Add(command);
+        }
+
         public int RequestCount { get; set; }
 
         public int ResponseCount { get; set; }
@@ -101,14 +131,55 @@
         public string BrowserUrl { get; set; }
 
         /// <summary>
-        /// Gets or sets LinkPost. For internal link. For example: "/contact/".
+        /// Gets or sets CommandList. Command queue sent by one browser request. Commands can also be added during process.
         /// </summary>
-        public string LinkPostPath { get; set; }
+        public List<CommandJson> CommandList { get; set; }
 
         /// <summary>
-        /// Gets or sets LinkPostPathIsBackwardForward. True, if user clicked browser backward or forward button.
+        /// Gets or sets CommandListIndex. This is the current command to process.
         /// </summary>
-        public bool LinkPostPathIsBackwardForward { get; set; }
+        [Serialize(SerializeEnum.None)]
+        public int CommandIndex { get; set; }
+
+        /// <summary>
+        /// Returns current command to process.
+        /// </summary>
+        public CommandJson CommandGet()
+        {
+            CommandJson result = null;
+            if (CommandList.Count > CommandIndex)
+            {
+                result = CommandList[CommandIndex];
+            }
+            return result;
+        }
+
+        [Serialize(SerializeEnum.None)]
+        public int CommandAddCount;
+
+        /// <summary>
+        /// Add command on top to queue.
+        /// </summary>
+        public void CommandAdd(CommandJson command)
+        {
+            CommandAddCount += 1;
+            if (CommandAddCount == 4)
+            {
+                throw new Exception("CommandAdd overflow!");
+            }
+            CommandList.Add(command);
+        }
+
+        /// <summary>
+        /// Move to next command in queue.
+        /// </summary>
+        public void CommandNext()
+        {
+            if (CommandList.Count > CommandIndex)
+            {
+                CommandIndex += 1;
+            }
+        }
     }
 
     /// <summary>
@@ -666,17 +737,22 @@
         internal async Task ProcessInternalAsync(AppJson appJson)
         {
             UtilStopwatch.TimeStart("Process");
-            await UtilApp.ProcessHomeIsClickAsync(appJson);
-            await UtilApp.ProcessLinkPostAsync(appJson); // Link POST instead of GET.
-            await UtilGrid.ProcessAsync(appJson); // Process data grid.
-            await UtilApp.ProcessBootstrapNavbarAsync(appJson);
-
-            foreach (Page page in this.ComponentListAll().OfType<Page>())
+            while (appJson.RequestJson.CommandGet() != null)
             {
-                await page.ProcessAsync();
-            }
+                await UtilApp.ProcessHomeIsClickAsync(appJson);
+                await UtilApp.ProcessLinkPostAsync(appJson); // Link POST instead of GET.
+                await UtilGrid.ProcessAsync(appJson); // Process data grid.
+                await UtilApp.ProcessBootstrapNavbarAsync(appJson);
 
-            UtilApp.ProcessBootstrapModal(appJson); // Modal dialog window
+                foreach (Page page in this.ComponentListAll().OfType<Page>())
+                {
+                    await page.ProcessAsync();
+                }
+
+                UtilApp.ProcessBootstrapModal(appJson); // Modal dialog window
+
+                appJson.RequestJson.CommandNext();
+            }
             
             UtilApp.DivContainerRender(appJson);
             UtilApp.BootstrapNavbarRender(appJson);
@@ -797,8 +873,8 @@
         {
             get
             {
-                var requestJson = ((AppJson)Root).RequestJson;
-                return requestJson.Command == RequestCommand.ButtonIsClick && requestJson.ComponentId == Id;
+                var commandJson = ((AppJson)Root).RequestJson.CommandGet();
+                return commandJson.Command == RequestCommand.ButtonIsClick && commandJson.ComponentId == Id;
             }
         }
     }

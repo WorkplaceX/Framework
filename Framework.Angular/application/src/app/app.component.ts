@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DataService, RequestJson } from './data.service';
+import { DataService, CommandJson } from './data.service';
 import {Location, LocationStrategy, PathLocationStrategy, PopStateEvent} from '@angular/common';
 
 @Component({
@@ -19,7 +19,7 @@ export class AppComponent {
       }
       
       // LinkPost for backward and forward navigation.
-      this.dataService.update(<RequestJson> { Command: 16, ComponentId: this.dataService.json.Id, LinkPostPath: path, LinkPostPathIsBackwardForward: true}); 
+      this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.dataService.json.Id, LinkPostPath: path, LinkPostPathIsBackwardForward: true}); 
     });
   }
 
