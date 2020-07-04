@@ -1195,7 +1195,8 @@
                         if (result.Text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out _, out _, out var cellDest);
-                            appJson.RequestJson = new RequestJson(new CommandJson { Command = RequestCommand.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
+                            // TODO Use command queue
+                            appJson.RequestJson = new RequestJson(new CommandJson { Command = RequestCommand.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
 
                             await ProcessCellIsModify(appJson);
                         }

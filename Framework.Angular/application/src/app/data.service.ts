@@ -44,7 +44,7 @@ export class Json {
 
   IsScrollToTop: boolean;
 
-  LinkPostPath: string;
+  PathAddHistory: string;
 }
 
 export class CommandJson {
@@ -68,7 +68,7 @@ export class CommandJson {
 
   LinkPostPath: string;
 
-  LinkPostPathIsBackwardForward: boolean;
+  LinkPostPathIsAddHistory: boolean;
 }
 
 export class RequestJson {
@@ -111,7 +111,7 @@ export class DataService {
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;
-        this.update(<CommandJson> { Command: 0 });
+        this.update(null);
       }
     }
   }
@@ -146,7 +146,10 @@ export class DataService {
   }
 
   public update(commandJson: CommandJson): void {
-    var requestJson = <RequestJson> { CommandList: [ commandJson ]  }
+    var requestJson = <RequestJson> { CommandList: [] }
+    if (commandJson != null) {
+      requestJson.CommandList = [ commandJson ];
+    }
 
     if (this.isRequestPending == false) { // Do not send a new request while old is still processing.
       // RequestCount
@@ -190,8 +193,8 @@ export class DataService {
             window.location.reload(true);
           }, 1000); // Wait one second then reload.
         }
-        if (this.json.LinkPostPath != null) {
-          this.location.go(this.json.LinkPostPath, "", this.json.LinkPostPath); // Put path into state because Angular does not handle traling slash in location.
+        if (this.json.PathAddHistory != null) {
+          this.location.go(this.json.PathAddHistory, "", this.json.PathAddHistory); // Put path into state because Angular does not handle traling slash in location.
         }
       }, error => {
         this.isRequestPending = false;

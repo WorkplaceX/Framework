@@ -52,11 +52,34 @@
     }
 
     /// <summary>
+    /// Origin for request and command.
+    /// </summary>
+    internal enum RequestOrigin
+    {
+        None = 0,
+
+        /// <summary>
+        /// Request or command created by server.
+        /// </summary>
+        Server = 1,
+
+        /// <summary>
+        /// Request or command sent by browser.
+        /// </summary>
+        Browser = 2,
+    }
+
+    /// <summary>
     /// Command sent by browser. See also RequestJson.
     /// </summary>
     internal sealed class CommandJson
     {
         public RequestCommand Command { get; set; }
+
+        /// <summary>
+        /// Gets or sets Origin. Command sent by browser or created by server.
+        /// </summary>
+        public RequestOrigin Origin { get; set; }
 
         public int GridCellId { get; set; }
 
@@ -97,9 +120,9 @@
         public string LinkPostPath { get; set; }
 
         /// <summary>
-        /// Gets or sets LinkPostPathIsBackwardForward. True, if user clicked browser backward or forward button.
+        /// Gets or sets LinkPostPathIsAddHistory. If true, LinkPostPath is added to browser history. Used by server command. Not used by client command.
         /// </summary>
-        public bool LinkPostPathIsBackwardForward { get; set; }
+        public bool LinkPostPathIsAddHistory { get; set; }
     }
 
     /// <summary>
@@ -117,8 +140,12 @@
         /// </summary>
         public RequestJson(CommandJson command)
         {
+            this.Origin = RequestOrigin.Server;
             this.CommandList = new List<CommandJson>();
-            this.CommandList.Add(command);
+            if (command != null)
+            {
+                this.CommandList.Add(command);
+            }
         }
 
         public int RequestCount { get; set; }
@@ -126,9 +153,38 @@
         public int ResponseCount { get; set; }
 
         /// <summary>
-        /// Gets or sets BrowserUrl. Url shown in client.
+        /// Gets or sets Origin. Request sent by browser or created by server.
+        /// </summary>
+        public RequestOrigin Origin { get; set; }
+
+        /// <summary>
+        /// Gets or sets BrowserUrl. Url shown in browser. Available only for browser POST request. See also method BrowserPath();
         /// </summary>
         public string BrowserUrl { get; set; }
+
+        /// <summary>
+        /// Returns for example "/contact/".
+        /// </summary>
+        public string BrowserPath
+        {
+            get
+            {
+                string result;
+                if (Origin == RequestOrigin.Server)
+                {
+                    UtilFramework.Assert(UtilServer.Context.Request.Method == "GET");
+                    result = UtilServer.Context.Request.Path; // Browser refresh
+                }
+                else
+                {
+                    UtilFramework.Assert(Origin == RequestOrigin.Browser);
+                    UtilFramework.Assert(UtilServer.Context.Request.Method == "POST");
+                    UtilFramework.Assert(BrowserUrl != null);
+                    result = new Uri(BrowserUrl).AbsolutePath; // Browser back
+                }
+                return result;
+            }
+        }
 
         /// <summary>
         /// Gets or sets CommandList. Command queue sent by one browser request. Commands can also be added during process.
@@ -625,6 +681,15 @@
             /// <summary>
             /// Returns true, if path starts with pathPrefix.
             /// </summary>
+            /// <param name="pathPrefix">For example: "/cms/".</param>
+            public bool IsPath(string pathPrefix)
+            {
+                return IsPath(pathPrefix, out _);
+            }
+
+            /// <summary>
+            /// Returns true, if path starts with pathPrefix.
+            /// </summary>
             /// <param name="pathPrefix">For example: "/cmsfile/".</param>
             /// <param name="fileName">For example: "about/Logo.png".</param>
             public bool IsFileName(string pathPrefix, out string fileName)
@@ -664,7 +729,7 @@
             public byte[] Data;
         }
 
-        internal async Task<FileDownloadSessionResult> FileDownloadSessionInternalAsync(string path, bool isBackwardForward)
+        internal async Task<FileDownloadSessionResult> FileDownloadSessionInternalAsync(string path, bool isAddHistory)
         {
             var args = new FileDownloadArgs(path);
             var result = new FileDownloadSessionResult
@@ -674,9 +739,9 @@
             await FileDownloadSessionAsync(args, result);
             if (result.IsPage)
             {
-                if (!isBackwardForward)
+                if (isAddHistory)
                 {
-                    LinkPostPath = result.Path;
+                    PathAddHistory = result.Path;
                 }
             }
             return result;
@@ -693,9 +758,15 @@
         public class FileDownloadSessionResult
         {
             /// <summary>
-            /// Gets or sets IsPage. If true, requested url is a page. If false (and Data not null) requested url is a file.
+            /// Gets IsPage. If true, requested url is a page. If false (and Data not null) requested url is a file.
             /// </summary>
-            public bool IsPage { get; set; }
+            public bool IsPage
+            {
+                get
+                {
+                    return Data == null;
+                }
+            }
 
             /// <summary>
             /// Gets or sets Data. If not null, this is the file data sent to the browser to download.
@@ -706,6 +777,25 @@
             /// Gets or sets Path. For example: "/contact/" or "/signin/", if redirected.
             /// </summary>
             public string Path { get; set; }
+        }
+
+        /// <summary>
+        /// Add navigate command to queue.
+        /// </summary>
+        /// <param name="path">For example "/contact/"</param>
+        /// <param name="isAddHistory">If true, path is added to browser history.</param>
+        internal void FileDownloadSessionNavigate(string path, bool isAddHistory)
+        {
+            this.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.LinkPost, Origin = RequestOrigin.Server, ComponentId = Id, LinkPostPath = path, LinkPostPathIsAddHistory = isAddHistory });
+        }
+
+        /// <summary>
+        /// Add navigate command to queue.
+        /// </summary>
+        /// <param name="path">For example "/contact/"</param>
+        public void FileDownloadSessionNavigate(string path)
+        {
+            FileDownloadSessionNavigate(path, isAddHistory: true);
         }
 
         private NamingConvention namingConventionFramework;
@@ -819,10 +909,10 @@
         internal string DownloadData;
 
         /// <summary>
-        /// Gets or sets LinkPostPath. If not null, this is the new navigation path. For example: "/contact/" or "/signin/", if redirected.
+        /// Gets or sets PathAddHistory. This path is added to the browser navigation history. For example: "/contact/" or "/signin/", if redirected.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
-        internal string LinkPostPath;
+        internal string PathAddHistory;
 
         /// <summary>
         /// Gets or sets DownloadFileName. For example Grid.xlsx

@@ -106,41 +106,61 @@
         /// </summary>
         internal async Task<AppJson> CreateAppJsonSession(HttpContext context)
         {
-            // DeserializeSession
-            var appJson = UtilSession.Deserialize(); // Deserialize session or init.
-
-            // RequestJson
+            // Deserialize RequestJson
             RequestJson requestJson;
             string requestJsonText = await UtilServer.StreamToString(context.Request.Body);
             if (requestJsonText != null)
             {
                 requestJson = JsonSerializer.Deserialize<RequestJson>(requestJsonText);
+                requestJson.Origin = RequestOrigin.Browser;
                 foreach (var command in requestJson.CommandList)
                 {
+                    command.Origin = RequestOrigin.Browser;
                     command.GridCellText = UtilFramework.StringNull(command.GridCellText); // Sanitize incomming request.
                 }
             }
             else
             {
-                requestJson = new RequestJson(new CommandJson { Command = RequestCommand.None }) { RequestCount = 1 };
+                requestJson = new RequestJson(null) { RequestCount = 1 };
             }
 
-            bool isSessionExpired = appJson == null && requestJson.RequestCount > 1;
-            bool isBrowserRefresh = requestJson.RequestCount != appJson?.RequestCount + 1; // Or BrowserTabSwitch.
-            bool isBrowserTabSwitch = requestJson.ResponseCount != appJson?.ResponseCount;
+            // Deserialize AppJson (Session) or init
+            var appJson = UtilSession.Deserialize();
 
-            // New Session
+            // IsExpired
+            bool isSessionExpired = appJson == null && requestJson.RequestCount > 1;
+            bool isBrowserRefresh = appJson != null && requestJson.RequestCount != appJson.RequestCount + 1; // Or BrowserTabSwitch.
+            bool isBrowserTabSwitch = appJson != null && requestJson.ResponseCount != appJson.ResponseCount;
+
+            // New session
             if (appJson == null || isBrowserRefresh || isBrowserTabSwitch)
             {
-                appJson = CreateAppJson();
-                requestJson = new RequestJson(new CommandJson { Command = RequestCommand.None }) { RequestCount = requestJson.RequestCount };
-                appJson.RequestJson = requestJson;
-                appJson.RequestUrl = UtilServer.RequestUrl();
-                if (isSessionExpired)
+                // New AppJson (Session)
+                bool isInit = false;
+                if (appJson == null || UtilServer.Context.Request.Method == "GET")
                 {
-                    appJson.IsSessionExpired = true;
+                    appJson = CreateAppJson();
+                    isInit = true;
                 }
-                await appJson.InitInternalAsync();
+                appJson.RequestUrl = UtilServer.RequestUrl();
+                appJson.IsSessionExpired = isSessionExpired;
+
+                // New RequestJson
+                string browserPath = requestJson.BrowserPath;
+                requestJson = new RequestJson(null) { RequestCount = requestJson.RequestCount, BrowserUrl = requestJson.BrowserUrl }; // Reset RequestJson.
+                appJson.RequestJson = requestJson;
+
+                // Add navigate command to queue
+                if (UtilServer.Context.Request.Method == "POST" || browserPath == "/")
+                {
+                    appJson.FileDownloadSessionNavigate(browserPath, false); // User clicked backward, forward navigation history.
+                }
+
+                // New session init
+                if (isInit)
+                {
+                    await appJson.InitInternalAsync();
+                }
             }
             else
             {

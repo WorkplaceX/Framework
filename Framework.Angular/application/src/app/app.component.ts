@@ -19,7 +19,7 @@ export class AppComponent {
       }
       
       // LinkPost for backward and forward navigation.
-      this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.dataService.json.Id, LinkPostPath: path, LinkPostPathIsBackwardForward: true}); 
+      this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.dataService.json.Id, LinkPostPath: path, LinkPostPathIsAddHistory: false}); 
     });
   }
 
