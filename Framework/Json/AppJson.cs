@@ -46,9 +46,14 @@
         HomeIsClick = 15,
 
         /// <summary>
-        /// User clicked an internal link or clicked backward, forward navigation history. For example: "/contact/". Instead of GET and download Angular again a POST command is sent to the server.
+        /// User clicked an internal link. For example: "/contact/". Instead of GET and download Angular again a POST command is sent to the server.
         /// </summary>
-        LinkPost = 16,
+        NavigateLink = 16,
+
+        /// <summary>
+        /// User clicked backward, forward navigation history.
+        /// </summary>
+        NavigateLinkBackwardForward = 17,
     }
 
     /// <summary>
@@ -115,14 +120,14 @@
         public int BootstrapNavbarButtonId { get; set; }
 
         /// <summary>
-        /// Gets or sets LinkPost. For internal link. For example: "/contact/".
+        /// Gets or sets NavigateLinkPath. For internal link. For example: "/contact/".
         /// </summary>
-        public string LinkPostPath { get; set; }
+        public string NavigateLinkPath { get; set; }
 
         /// <summary>
-        /// Gets or sets LinkPostPathIsAddHistory. If true, LinkPostPath is added to browser history. Used by server command. Not used by client command.
+        /// Gets or sets NavigateLinkPathIsAddHistory. If true, NavigateLinkPath is added to browser history. Used by server command. Not used by client command.
         /// </summary>
-        public bool LinkPostPathIsAddHistory { get; set; }
+        public bool NavigateLinkPathIsAddHistory { get; set; }
     }
 
     /// <summary>
@@ -219,7 +224,7 @@
         public void CommandAdd(CommandJson command)
         {
             CommandAddCount += 1;
-            if (CommandAddCount == 4)
+            if (CommandAddCount == 8)
             {
                 throw new Exception("CommandAdd overflow!");
             }
@@ -504,7 +509,7 @@
         {
             if (component != null)
             {
-                component?.Owner.ListInternal.Remove(component);
+                component.Owner?.ListInternal.Remove(component);
                 component.Owner = null;
                 component.IsRemoved = true;
             }
@@ -739,8 +744,22 @@
             await NavigateSessionAsync(args, result);
             if (result.IsPage)
             {
+                if (UtilServer.Context.Request.Method == "GET")
+                {
+                    // Do not add history entry for any GET
+                    isAddHistory = false;
+                }
+                if (RequestJson.CommandList.FirstOrDefault()?.Command == RequestCommand.NavigateLinkBackwardForward)
+                {
+                    // Do not add history entry if user clicked backward, forward navigation button.
+                    isAddHistory = false;
+                }
                 if (isAddHistory)
                 {
+                    if (PathAddHistory != null)
+                    {
+                        throw new Exception("Only one PathAddHistory entry possible for one request!");
+                    }
                     PathAddHistory = result.Path;
                 }
             }
@@ -786,7 +805,7 @@
         /// <param name="isAddHistory">If true, path is added to browser history.</param>
         internal void Navigate(string path, bool isAddHistory)
         {
-            this.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.LinkPost, Origin = RequestOrigin.Server, ComponentId = Id, LinkPostPath = path, LinkPostPathIsAddHistory = isAddHistory });
+            this.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.NavigateLink, Origin = RequestOrigin.Server, ComponentId = Id, NavigateLinkPath = path, NavigateLinkPathIsAddHistory = isAddHistory });
         }
 
         /// <summary>
@@ -830,7 +849,7 @@
             while (appJson.RequestJson.CommandGet() != null)
             {
                 await UtilApp.ProcessHomeIsClickAsync(appJson);
-                await UtilApp.ProcessLinkPostAsync(appJson); // Link POST instead of GET.
+                await UtilApp.ProcessNavigateLinkAsync(appJson); // Link POST instead of GET.
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
 
@@ -909,7 +928,7 @@
         internal string DownloadData;
 
         /// <summary>
-        /// Gets or sets PathAddHistory. This path is added to the browser navigation history. For example: "/contact/" or "/signin/", if redirected.
+        /// Gets or sets PathAddHistory. This path is added by the browser to the navigation history. For example: "/contact/" or "/signin/", if redirected.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
         internal string PathAddHistory;
@@ -1089,10 +1108,21 @@
         internal List<FrameworkConfigFieldIntegrate> ConfigFieldList;
 
         /// <summary>
-        /// Gets or sets RowList. Data rows loaded from database.
+        /// Gets or sets RowListInternal. Data rows loaded from database.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        internal List<Row> RowList;
+        internal List<Row> RowListInternal; // TODO Remove empty RowListInternal from JsonClient.
+
+        /// <summary>
+        /// Gets RowList. Data rows loaded from database.
+        /// </summary>
+        public IReadOnlyList<Row> RowList
+        {
+            get
+            {
+                return RowListInternal;
+            }
+        }
 
         /// <summary>
         /// Gets or sets ConfigName. Switch to select current configuration. Multiple configurations can be stored.
@@ -1160,8 +1190,9 @@
         internal string GridLookupDestFieldNameCSharp;
 
         /// <summary>
-        /// Gets RowSelected. Currently selected data row by user.
+        /// Gets or sets RowSelected. Currently selected data row by user. Set queues command.
         /// </summary>
+        [Serialize(SerializeEnum.None)]
         public Row RowSelected
         {
             get
@@ -1171,11 +1202,15 @@
                 {
                     if (rowState.IsSelect && rowState.RowEnum == GridRowEnum.Index)
                     {
-                        result = RowList[rowState.RowId.Value - 1];
+                        result = RowListInternal[rowState.RowId.Value - 1];
                         break;
                     }
                 }
                 return result;
+            }
+            set
+            {
+                UtilGrid.QueueRowIsClick(this, value);
             }
         }
 
@@ -1646,13 +1681,29 @@
         }
 
         /// <summary>
-        /// Gets RowSelected. Currently selected data row by user.
+        /// Gets RowList. Data rows loaded from database.
         /// </summary>
+        public new IReadOnlyList<TRow> RowList
+        {
+            get
+            {
+                return base.RowListInternal.Cast<TRow>().ToList();
+            }
+        }
+
+        /// <summary>
+        /// Gets RowSelected. Currently selected data row by user. Set queues command.
+        /// </summary>
+        [Serialize(SerializeEnum.None)]
         public new TRow RowSelected
         {
             get
             {
                 return (TRow)base.RowSelected;
+            }
+            set
+            {
+                base.RowSelected = value;
             }
         }
 

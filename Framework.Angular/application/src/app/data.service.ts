@@ -66,9 +66,7 @@ export class CommandJson {
 
   BootstrapNavbarButtonId: number;
 
-  LinkPostPath: string;
-
-  LinkPostPathIsAddHistory: boolean;
+  NavigateLinkPath: string;
 }
 
 export class RequestJson {

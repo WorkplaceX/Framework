@@ -91,7 +91,7 @@ export class Html {
         var anchor = <HTMLAnchorElement>element;
         if (anchor.classList.contains("linkPost")) {
           event.preventDefault();
-          this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.json.Id, LinkPostPath: anchor.pathname });
+          this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.json.Id, NavigateLinkPath: anchor.pathname });
         }
         break;
       }

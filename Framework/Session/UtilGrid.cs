@@ -105,7 +105,7 @@
                 new GridRowState { RowId = null, RowEnum = GridRowEnum.Filter }
             };
             int rowId = 0;
-            foreach (var row in grid.RowList)
+            foreach (var row in grid.RowListInternal)
             {
                 rowId += 1;
                 result.Add(new GridRowState { RowId = rowId, RowEnum = GridRowEnum.Index });
@@ -240,7 +240,7 @@
             }
             else
             {
-                row = grid.RowList[rowState.RowId.Value - 1];
+                row = grid.RowListInternal[rowState.RowId.Value - 1];
             }
 
             var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.Index), (key) => new GridCell
@@ -560,10 +560,10 @@
             grid.ConfigFieldList = configFieldListTask.Result;
 
             // RowList
-            grid.RowList = rowListTask.Result;
+            grid.RowListInternal = rowListTask.Result;
 
             // Truncate
-            grid.TruncateInternal(grid.RowList);
+            grid.TruncateInternal(grid.RowListInternal);
 
             // ColumnList
             grid.ColumnList = LoadColumnList(grid);
@@ -615,10 +615,10 @@
             query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid));
 
             // Load row
-            grid.RowList = await query.QueryExecuteAsync();
+            grid.RowListInternal = await query.QueryExecuteAsync();
 
             // Trunctae
-            grid.TruncateInternal(grid.RowList);
+            grid.TruncateInternal(grid.RowListInternal);
 
         }
 
@@ -635,7 +635,7 @@
             {
                 grid.ColumnList = new List<GridColumn>(); ;
                 grid.RowStateList = new List<GridRowState>();
-                grid.RowList = new List<Row>();
+                grid.RowListInternal = new List<Row>();
                 grid.CellList = new List<GridCell>();
                 grid.GridLookup = null;
                 Render(grid);
@@ -697,7 +697,7 @@
             rowDest = null;
             if (rowStateDest.RowId != null)
             {
-                rowDest = gridDest.RowList[rowStateDest.RowId.Value - 1];
+                rowDest = gridDest.RowListInternal[rowStateDest.RowId.Value - 1];
             }
             fieldNameCSharpDest = gridLookup.GridLookupDestFieldNameCSharp;
             var fieldNameCSharpDestLocal = fieldNameCSharpDest;
@@ -803,7 +803,7 @@
             }
             if (rowState != null)
             {
-                Row row = grid.RowList[rowState.RowId.Value - 1];
+                Row row = grid.RowListInternal[rowState.RowId.Value - 1];
                 rowState.IsSelect = true;
                 UtilFramework.Assert(row == grid.RowSelected);
                 await grid.RowSelectedAsync();
@@ -1154,12 +1154,25 @@
         }
 
         /// <summary>
+        /// Create and queue RowIsClick command.
+        /// </summary>
+        public static void QueueRowIsClick(Grid grid, Row row)
+        {
+            var rowIndex = grid.RowListInternal.IndexOf(row);
+            var rowState = grid.RowStateList.First(item => item.RowId == rowIndex + 1);
+            var cell = grid.CellList.First(item => item.RowStateId == rowState.Id);
+            grid.ComponentOwner<AppJson>().RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, GridCellId = cell.Id });
+        }
+
+        /// <summary>
         /// User selected data row.
         /// </summary>
         private static async Task ProcessRowIsClickAsync(AppJson appJson)
         {
             if (UtilSession.Request(appJson, RequestCommand.GridIsClickRow, out CommandJson commandJson, out Grid grid))
             {
+                var rowSelectedLocal = grid.RowSelected;
+
                 GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 Row rowSelected = null;
                 foreach (var rowState in grid.RowStateList)
@@ -1169,7 +1182,7 @@
                         rowState.IsSelect = rowState.Id == cell.RowStateId;
                         if (rowState.IsSelect)
                         {
-                            rowSelected = grid.RowList[rowState.RowId.Value - 1];
+                            rowSelected = grid.RowListInternal[rowState.RowId.Value - 1];
                         }
                     }
                 }
@@ -1182,7 +1195,10 @@
                         GridLookupClose(grid);
                         Render(grid);
                         UtilFramework.Assert(rowSelected == grid.RowSelected);
-                        await grid.RowSelectedAsync(); // Load detail data grid
+                        if (rowSelected != rowSelectedLocal)
+                        {
+                            await grid.RowSelectedAsync(); // Load detail data grid
+                        }
                     }
                     else
                     {
@@ -1240,7 +1256,7 @@
                 // Parse Index
                 if (rowState.RowEnum == GridRowEnum.Index)
                 {
-                    Row row = grid.RowList[rowState.RowId.Value - 1];
+                    Row row = grid.RowListInternal[rowState.RowId.Value - 1];
                     if (rowState.Row == null)
                     {
                         rowState.Row = (Row)Activator.CreateInstance(grid.TypeRow);
@@ -1295,8 +1311,8 @@
                         await ProcessCellIsModifyInsertAsync(grid, rowState.Row, cell);
                         if (cell.ErrorSave == null)
                         {
-                            grid.RowList.Add(rowState.Row);
-                            rowState.RowId = grid.RowList.Count;
+                            grid.RowListInternal.Add(rowState.Row);
+                            rowState.RowId = grid.RowListInternal.Count;
                             foreach (var item in grid.CellList)
                             {
                                 if (item.RowStateId == cell.RowStateId) // Cells in same row
@@ -1382,7 +1398,7 @@
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.PageDown)
                 {
                     var configGrid = ConfigGrid(grid);
-                    int rowCount = grid.RowList.Count;
+                    int rowCount = grid.RowListInternal.Count;
                     int rowCountMax = ConfigRowCountMax(configGrid);
                     if (rowCount == rowCountMax) // Page down further on full grid only.
                     {
@@ -1557,7 +1573,7 @@ namespace Framework.Session
                         Row row;
                         if (rowState.Row == null)
                         {
-                            row = grid.RowList[rowState.RowId.Value - 1];
+                            row = grid.RowListInternal[rowState.RowId.Value - 1];
                         }
                         else
                         {

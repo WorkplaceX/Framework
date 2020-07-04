@@ -47,11 +47,17 @@
         /// <summary>
         /// User clicked internal link or clicked backward, forward navigation history. Instead of GET and download Angular again a POST command is sent.
         /// </summary>
-        public static async Task ProcessLinkPostAsync(AppJson appJson)
+        public static async Task ProcessNavigateLinkAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.LinkPost, out CommandJson commandJson, out ComponentJson _))
+            // User clicked internal link.
+            if (UtilSession.Request(appJson, RequestCommand.NavigateLink, out CommandJson commandJson, out ComponentJson _))
             {
-                await appJson.NavigateSessionInternalAsync(commandJson.LinkPostPath, commandJson.LinkPostPathIsAddHistory);
+                await appJson.NavigateSessionInternalAsync(commandJson.NavigateLinkPath, commandJson.NavigateLinkPathIsAddHistory);
+            }
+            // User clicked backward, forward navigation button.
+            if (UtilSession.Request(appJson, RequestCommand.NavigateLinkBackwardForward, out commandJson, out ComponentJson _))
+            {
+                await appJson.NavigateSessionInternalAsync(commandJson.NavigateLinkPath, commandJson.NavigateLinkPathIsAddHistory);
             }
         }
 
@@ -128,7 +134,7 @@
             {
                 if (rowState.RowEnum == GridRowEnum.Index)
                 {
-                    Row row = grid.RowList[rowState.RowId.Value - 1];
+                    Row row = grid.RowListInternal[rowState.RowId.Value - 1];
                     string itemTextHtml = (string)propertyInfoTextHtml.GetValue(row);
                     int? itemParentId = (int?)propertyInfoParentId?.GetValue(row); // Null if row does not have field "ParentId".
                     bool isActive = rowState.IsSelect;
@@ -152,7 +158,7 @@
                             buttonList.Add(button);
                             if (propertyInfoParentId != null) // Hierarchical navigation
                             {
-                                int itemId = (int)propertyInfoId.GetValue(grid.RowList[rowState.RowId.Value - 1]);
+                                int itemId = (int)propertyInfoId.GetValue(grid.RowListInternal[rowState.RowId.Value - 1]);
                                 BootstrapNavbarRender(bootstrapNavbar, bootstrapNavbarGrid, button, ref button.ButtonList, itemId, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml, ref buttonId);
                             }
                         }
