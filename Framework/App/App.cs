@@ -153,7 +153,7 @@
                 // Add navigate command to queue
                 if (UtilServer.Context.Request.Method == "POST" || browserPath == "/")
                 {
-                    appJson.FileDownloadSessionNavigate(browserPath, false); // User clicked backward, forward navigation history.
+                    appJson.Navigate(browserPath, false); // User clicked backward, forward navigation history.
                 }
 
                 // New session init

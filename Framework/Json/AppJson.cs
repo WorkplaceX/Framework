@@ -608,25 +608,25 @@
             return new NamingConvention();
         }
 
-        internal async Task<FileDownloadResult> FileDownloadInternalAsync(string path)
+        internal async Task<NavigateResult> NavigateInternalAsync(string path)
         {
-            var args = new FileDownloadArgs(path);
-            FileDownloadResult result = new FileDownloadResult();
-            await FileDownloadAsync(args, result);
+            var args = new NavigateArgs(path);
+            NavigateResult result = new NavigateResult();
+            await NavigateAsync(args, result);
             return result;
         }
 
         /// <summary>
-        /// Browser requests file or subpage to download. Inside this method no session data is available. Used for example to download a public available (*.pdf) file.
+        /// Browser requests (GET) file to download or navigate to subpage. Inside this method no session data is available. Used for example to download a public available (*.pdf) file.
         /// </summary>
-        protected internal virtual Task FileDownloadAsync(FileDownloadArgs args, FileDownloadResult result)
+        protected internal virtual Task NavigateAsync(NavigateArgs args, NavigateResult result)
         {
             return Task.FromResult(0);
         }
 
-        public class FileDownloadArgs
+        public class NavigateArgs
         {
-            internal FileDownloadArgs(string path)
+            internal NavigateArgs(string path)
             {
                 this.Path = path;
                 if (UtilServer.PathIsFileName(path))
@@ -716,10 +716,10 @@
             }
         }
 
-        public class FileDownloadResult
+        public class NavigateResult
         {
             /// <summary>
-            /// Gets or sets IsSession. If true, method FileDownloadSessionAsync(); with session data available is called next.
+            /// Gets or sets IsSession. If true, method NavigateSessionAsync(); with session data available is called next.
             /// </summary>
             public bool IsSession { get; set; }
 
@@ -729,14 +729,14 @@
             public byte[] Data;
         }
 
-        internal async Task<FileDownloadSessionResult> FileDownloadSessionInternalAsync(string path, bool isAddHistory)
+        internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string path, bool isAddHistory)
         {
-            var args = new FileDownloadArgs(path);
-            var result = new FileDownloadSessionResult
+            var args = new NavigateArgs(path);
+            var result = new NavigateSessionResult
             {
                 Path = args.Path
             };
-            await FileDownloadSessionAsync(args, result);
+            await NavigateSessionAsync(args, result);
             if (result.IsPage)
             {
                 if (isAddHistory)
@@ -748,14 +748,14 @@
         }
 
         /// <summary>
-        /// Browser requests file or subpage to download. Inside this method session data is available. Used for example to download a not public available (*.pdf) file.
+        /// Browser requests file to download or navigate to subpage. Inside this method session data is available. Used for example to download a not publicly available (*.pdf) file.
         /// </summary>
-        protected internal virtual Task FileDownloadSessionAsync(FileDownloadArgs args, FileDownloadSessionResult result)
+        protected internal virtual Task NavigateSessionAsync(NavigateArgs args, NavigateSessionResult result)
         {
             return Task.FromResult(0);
         }
 
-        public class FileDownloadSessionResult
+        public class NavigateSessionResult
         {
             /// <summary>
             /// Gets IsPage. If true, requested url is a page. If false (and Data not null) requested url is a file.
@@ -784,7 +784,7 @@
         /// </summary>
         /// <param name="path">For example "/contact/"</param>
         /// <param name="isAddHistory">If true, path is added to browser history.</param>
-        internal void FileDownloadSessionNavigate(string path, bool isAddHistory)
+        internal void Navigate(string path, bool isAddHistory)
         {
             this.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.LinkPost, Origin = RequestOrigin.Server, ComponentId = Id, LinkPostPath = path, LinkPostPathIsAddHistory = isAddHistory });
         }
@@ -793,9 +793,9 @@
         /// Add navigate command to queue.
         /// </summary>
         /// <param name="path">For example "/contact/"</param>
-        public void FileDownloadSessionNavigate(string path)
+        public void Navigate(string path)
         {
-            FileDownloadSessionNavigate(path, isAddHistory: true);
+            Navigate(path, isAddHistory: true);
         }
 
         private NamingConvention namingConventionFramework;

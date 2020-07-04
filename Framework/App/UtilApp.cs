@@ -51,7 +51,7 @@
         {
             if (UtilSession.Request(appJson, RequestCommand.LinkPost, out CommandJson commandJson, out ComponentJson _))
             {
-                await appJson.FileDownloadSessionInternalAsync(commandJson.LinkPostPath, commandJson.LinkPostPathIsAddHistory);
+                await appJson.NavigateSessionInternalAsync(commandJson.LinkPostPath, commandJson.LinkPostPathIsAddHistory);
             }
         }
 

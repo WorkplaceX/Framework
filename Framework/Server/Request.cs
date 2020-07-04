@@ -44,7 +44,7 @@
                             // GET Angular file from "Application.Server/Framework/Framework.Angular/browser"
                             if (!await AngularBrowserFileAsync(context, path))
                             {
-                                // GET file from database.
+                                // GET file from database or navigate to subpage.
                                 if (!await FileDownloadAsync(context, path, appSelector))
                                 {
                                     context.Response.StatusCode = 404; // Not found
@@ -138,31 +138,31 @@
         }
 
         /// <summary>
-        /// Browser request to download file or subpage.
+        /// Browser request to download file or navigate to subpage.
         /// </summary>
         private static async Task<bool> FileDownloadAsync(HttpContext context, string path, AppSelector appSelector)
         {
             bool result;
             var appJson = appSelector.CreateAppJson(); // Without deserialize session.
-            var fileDownloadResult = await appJson.FileDownloadInternalAsync(path);
-            if (fileDownloadResult.IsSession)
+            var navigateResult = await appJson.NavigateInternalAsync(path);
+            if (navigateResult.IsSession)
             {
                 var appJsonSession = await appSelector.CreateAppJsonSession(context); // With deserialize session.
-                var fileDownloadSessionResult = await appJsonSession.FileDownloadSessionInternalAsync(path, false);
-                if (fileDownloadSessionResult.IsPage)
+                var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(path, false);
+                if (navigateSessionResult.IsPage)
                 {
                     result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
                 }
                 else
                 {
                     // File download with session
-                    result = await FileDownloadAsync(context, path, fileDownloadSessionResult.Data);
+                    result = await FileDownloadAsync(context, path, navigateSessionResult.Data);
                 }
             }
             else
             {
                 // File download without session
-                result = await FileDownloadAsync(context, path, fileDownloadResult.Data);
+                result = await FileDownloadAsync(context, path, navigateResult.Data);
             }
             return result;
         }
