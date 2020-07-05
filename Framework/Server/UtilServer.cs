@@ -3,6 +3,7 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -45,6 +46,16 @@
                 }
                 return result;
             }
+        }
+
+        /// <summary>
+        /// Returns logger. See also file appsettings.json file.
+        /// </summary>
+        public static ILogger Logger(string categoryName)
+        {
+            var loggerFactory = (ILoggerFactory)Context.RequestServices.GetService(typeof(ILoggerFactory));
+            var result = loggerFactory.CreateLogger(categoryName);
+            return (ILogger)result;
         }
 
         /// <summary>

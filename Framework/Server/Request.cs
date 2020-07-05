@@ -3,7 +3,6 @@
     using Framework.App;
     using Framework.Config;
     using Framework.Json;
-    using Framework.Session;
     using Microsoft.AspNetCore.Http;
     using System;
     using System.IO;
@@ -22,7 +21,7 @@
             UtilStopwatch.RequestBind();
             try
             {
-                UtilStopwatch.TimeStart("Request");
+                UtilStopwatch.TimeStart(name: "Request");
 
                 UtilServer.Cors();
 
@@ -54,8 +53,10 @@
                     }
                 }
 
-                UtilStopwatch.TimeStop("Request");
-                UtilStopwatch.TimeLog();
+                // Total time for one request.
+                UtilStopwatch.TimeStop(name: "Request");
+                // One log entry for one request.
+                UtilStopwatch.TimeLog(); 
             }
             finally
             {

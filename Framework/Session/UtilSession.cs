@@ -19,9 +19,7 @@
             UtilStopwatch.TimeStop("Serialize");
             UtilServer.Session.SetString("AppInternal", jsonSession);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(string.Format("JsonSession.Length={0:n0}; JsonClient.Length={1:n0};", jsonSession.Length, jsonClient.Length));
-            Console.ResetColor();
+            UtilStopwatch.Log(string.Format("JsonSession.Length={0:n0}; JsonClient.Length={1:n0};", jsonSession.Length, jsonClient.Length));
         }
 
         /// <summary>

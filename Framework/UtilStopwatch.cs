@@ -1,11 +1,14 @@
 ﻿namespace Framework
 {
     using Framework.Server;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Primitives;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Text;
     using System.Threading;
 
     internal static class UtilStopwatch
@@ -39,12 +42,20 @@
             /// </summary>
             public int RequestCount;
 
+            /// <summary>
+            /// (Name, Stopwatch).
+            /// </summary>
             public readonly Dictionary<string, Item> List = new Dictionary<string, Item>();
 
             /// <summary>
             /// Gets or sets IsReleased. If true, StopwatchCollection has been released and can be reaused.
             /// </summary>
             public bool IsReleased;
+
+            /// <summary>
+            /// Gets LogText. Used to add some logging information at the end of request.
+            /// </summary>
+            public StringBuilder LogText = new StringBuilder();
         }
 
         private class Item
@@ -57,7 +68,8 @@
             public bool IsStart;
 
             /// <summary>
-            /// Gets StartCount. Number of times this stopwatch has been started.
+            /// Gets StartCount. Number of times this stopwatch has been started. It is resetted every 10 requests.
+            /// Same stopwatch (name) can be started and stopped multiple times in one request. 
             /// </summary>
             public int StartCount;
         }
@@ -113,6 +125,14 @@
         }
 
         /// <summary>
+        /// Write logging information to the end of the request.
+        /// </summary>
+        internal static void Log(string text)
+        {
+            CollectionCurrent.LogText.AppendLine(text);
+        }
+
+        /// <summary>
         /// Log stopwatch to console.
         /// </summary>
         internal static void TimeLog()
@@ -120,13 +140,19 @@
             int pathCount = RequestIdToStopwatchCollectionList.Where(item => item.Value.RequestPath == UtilServer.Context.Request.Path.Value).Count();
             var collection = CollectionCurrent;
 
-            Console.WriteLine("Stopwatch");
-            Console.WriteLine(string.Format("CollectionId={0}/{1}; Path={2}; RequestCount={3}; PathCount={4};", collection.Id, RequestIdToStopwatchCollectionList.Count, collection.RequestPath, collection.RequestCount, pathCount));
+            StringBuilder result = new StringBuilder();
+
+            result.AppendLine(string.Format("CollectionId={0}/{1}; Path={2}; RequestCount={3}; PathCount={4};", collection.Id, RequestIdToStopwatchCollectionList.Count, collection.RequestPath, collection.RequestCount, pathCount));
             foreach (var item in collection.List.OrderBy(item => item.Key)) // Order by stopwatch name.
             {
-                double second = ((double)item.Value.Stopwatch.ElapsedTicks / (double)Stopwatch.Frequency) / collection.RequestCount;
-                Console.WriteLine(string.Format("Time={0:000.0}ms; Name={1}; StartCount={2};", second * 1000, item.Key, item.Value.StartCount));
+                // Calculate average time per max 10 requests.
+                double second = ((double)item.Value.Stopwatch.ElapsedTicks / (double)Stopwatch.Frequency) / (collection.RequestCount % 10);
+                result.AppendLine(string.Format("Time={0:000.0}ms; Name={1}; StartCount={2};", second * 1000, item.Key, item.Value.StartCount));
             }
+
+            result.AppendLine(collection.LogText.ToString());
+
+            UtilServer.Logger(typeof(UtilStopwatch).Name).LogInformation(result.ToString().TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
         /// <summary>
@@ -144,6 +170,9 @@
 
             var collection = CollectionCurrent;
             collection.RequestCount += 1;
+            collection.LogText.Clear();
+
+            // Average time is calculated based on max every 10 requests.
             if (CollectionCurrent.RequestCount > 10)
             {
                 CollectionCurrent.RequestCount = 1;
