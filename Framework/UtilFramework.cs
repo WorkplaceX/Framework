@@ -39,7 +39,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 9.1.1
 
-                return "v3.37.2";
+                return "v3.37.3";
             }
         }
 
@@ -358,8 +358,7 @@ namespace Framework
         /// </summary>
         internal static void LogDebug(string text)
         {
-            // TelemetryConfiguration.Active.DisableTelemetry = true; // Disable "Application Insights Telemetry" logging // .NET Core throws "Could not load file or assembly Microsoft.ApplicationInsights" error. Not needed anymore.
-            Debug.WriteLine("### {0} {1}", UtilFramework.DateTimeToString(DateTime.Now, true), text);
+            UtilStopwatch.Log(string.Format("{0} {1}", UtilFramework.DateTimeToString(DateTime.Now, true), text));
         }
 
         /// <summary>

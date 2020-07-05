@@ -146,7 +146,7 @@
             foreach (var item in collection.List.OrderBy(item => item.Key)) // Order by stopwatch name.
             {
                 // Calculate average time per max 10 requests.
-                double second = ((double)item.Value.Stopwatch.ElapsedTicks / (double)Stopwatch.Frequency) / (collection.RequestCount % 10);
+                double second = ((double)item.Value.Stopwatch.ElapsedTicks / (double)Stopwatch.Frequency) / collection.RequestCount;
                 result.AppendLine(string.Format("Time={0:000.0}ms; Name={1}; StartCount={2};", second * 1000, item.Key, item.Value.StartCount));
             }
 
