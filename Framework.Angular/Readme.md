@@ -5,6 +5,7 @@
 node --version # v12.13.0
 npm --version # 6.12.0
 ng --version # Angular CLI: 9.1.1
+npm run ng -- --version # Angular CLI: 9.1.9 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
 npm list -g --depth 0 # List globally installed packages
 ```
 
