@@ -8,10 +8,28 @@ import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 
+import * as url from 'url'; // Framework: Enable SSR POST
+import * as querystring from 'querystring'; // Framework: Enable SSR POST
+import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
+
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
-  const distFolder = join(process.cwd(), 'dist/application/browser');
+  
+  server.use(bodyParser.json()); // Framework: Enable SSR POST 
+  
+  var distFolder = join(process.cwd(), 'dist/application/browser');
+  
+  // Framework: Enable SSR POST  
+  // Running in Visual Studio
+  const processCwd = process.cwd().split("\\").join("/"); // Rplace all
+  if (processCwd.endsWith("Application.Server/Framework")) {
+    distFolder = ".";
+  } // Running on IIS
+  if (processCwd.endsWith("Framework/Framework.Angular/server")) {
+    distFolder = "../../"
+  }  
+  
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -31,8 +49,25 @@ export function app(): express.Express {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-    res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
+	res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
   });
+  
+  // Framework: Enable SSR POST
+  server.post('*', (req, res) => {
+    let view = querystring.parse(url.parse(req.originalUrl).query).view as string;
+    console.log("View=", view);
+    res.render(view,     
+      {
+        req: req,
+        res: res,
+        providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
+          {
+            provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
+          }
+        ]
+      },
+    );
+  });  
 
   return server;
 }
