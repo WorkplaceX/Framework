@@ -9,11 +9,40 @@ npm run ng -- --version # Angular CLI: 9.1.9 run if no global Angular is install
 npm list -g --depth 0 # List globally installed packages
 ```
 
+## Setup Init
+Delete folder Framework/Framework.Angular/application/
+Push to new branch
+
+## Setup Angular CLI
+Run in folder Framework/Framework.Angular
+```cmd
+npm install @angular/cli
+```
+
+## Create package.json for Angular CLI
+In folder Framework/Framework.Angular/
+```json
+{
+  "scripts": {
+	"ng": "ng"
+  }
+}
+```
+
 ## Setup Angular
 Create new application with Angular CLI.
 ```cmd
-ng new application
-ng add @nguniversal/express-engine
+npm run ng -- new application
+```
+
+Delete files and folders of initial Angular CLI
+* node_modules
+* package.json
+* package-lock.json
+
+```cmd
+cd application
+npm run ng -- add @nguniversal/express-engine
 ```
 
 ## Modify file package.json
@@ -31,28 +60,28 @@ npm run serve:ssr # Use POST method
 
 ## Add Data Service
 ```cmd
-ng generate service data
+npm run ng -- generate service data
 ```
 
 * Add HttpClient
 
 ## Add Framework Component
 ```cmd
-ng generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
-ng generate component grid --skip-import --inlineStyle=true --skipTests=true
-ng generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
+npm run ng -- generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
+npm run ng -- generate component grid --skip-import --inlineStyle=true --skipTests=true
+npm run ng -- generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
 ```
 
 ## Add Framework Style
 Add new file frameworkStyle.scss and link it in styles.scss with @import "frameworkStyle"
 
 ## Application.Website
-* Create new folder src/Application.Website
+* Create new folder src/Application.Website (Run later cli build to populate)
 * Add it to .gitignore /src/Application.Website
 ### Modify angular.json
 * Replace "sourceRoot": "src", with "sourceRoot": "src/Application.Website/Default",
 * Replace "index": "src/index.html", with "index": "src/Application.Website/Default/index.html",
-* Remove "src/favicon.ico",
+* Remove line "src/favicon.ico",
 * Replace "src/assets" with "src/Application.Website/Default"
 
 ## Server Side Rendering (Universal)
