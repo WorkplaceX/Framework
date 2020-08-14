@@ -49,9 +49,9 @@ export function app(): express.Express {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-	res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+	  res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
   });
-  
+
   // Framework: Enable SSR POST
   server.post('*', (req, res) => {
     let view = querystring.parse(url.parse(req.originalUrl).query).view as string;
