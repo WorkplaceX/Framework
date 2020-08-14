@@ -204,7 +204,8 @@
 
             // Add Angular scripts
             scriptFind = "</body></html>";
-            scriptReplace = "<script src=\"runtime-es2015.js\" type=\"module\"></script><script src=\"runtime-es5.js\" nomodule defer></script><script src=\"polyfills-es5.js\" nomodule defer></script><script src=\"polyfills-es2015.js\" type=\"module\"></script><script src=\"main-es2015.js\" type=\"module\"></script><script src=\"main-es5.js\" nomodule defer></script></body></html>";
+            scriptReplace = $"<script src=\"runtime{angularBrowserFileNameJsSuffix}\" defer=\"\"></script><script src=\"polyfills{angularBrowserFileNameJsSuffix}\" defer=\"\"></script><script src=\"main{angularBrowserFileNameJsSuffix}\" defer=\"\"></script>" +
+                "</body></html>";
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
 
             return indexHtml;
@@ -231,6 +232,11 @@
         }
 
         /// <summary>
+        /// Prevent for example two main.js files (Angular and Website).
+        /// </summary>
+        private static readonly string angularBrowserFileNameJsSuffix = "-angular.js";
+
+        /// <summary>
         /// Returns true, if file found in folder "Application.Server/Framework/Framework.Angular/browser".
         /// </summary>
         private async Task<bool> AngularBrowserFileAsync(HttpContext context, string path)
@@ -240,6 +246,15 @@
             {
                 // Serve fileName
                 string fileName = UtilServer.FolderNameContentRoot() + "Framework/Framework.Angular/browser" + path;
+
+                if (fileName.EndsWith(angularBrowserFileNameJsSuffix))
+                {
+                    // Prevent for example two main.js. Angular js can not be overridden by Website
+                    // Application.Website/MasterDefault/dist/main.js
+                    // Application.Server/Framework/Framework.Angular/browser/main.js
+                    fileName = fileName.Substring(0, fileName.Length - angularBrowserFileNameJsSuffix.Length) + ".js";
+                }
+
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

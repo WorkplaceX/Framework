@@ -1,7 +1,7 @@
-import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Inject, RendererFactory2, Renderer2 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DOCUMENT, Location } from '@angular/common';
-
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
