@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Framework to create database applications based on Angular 9 with server side rendering, ASP.NET Core 3.1 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
+Framework to create database applications based on Angular 10 with server side rendering, ASP.NET Core 3.1 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
 
 ## Getting started
 
@@ -34,7 +34,7 @@ dotnet --version
 3.1.301
 
 ng --version
-Angular CLI: 9.1.9
+Angular CLI: 10.0.6
 ```
 
 For Windows:
