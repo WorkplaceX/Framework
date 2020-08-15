@@ -113,6 +113,10 @@
         /// </summary>
         private void BuildWebsite()
         {
+            // Delete folder Application.Server/Framework/Application.Website/
+            string folderNameApplicationWebsite = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/";
+            UtilCli.FolderDelete(folderNameApplicationWebsite);
+
             var configCli = ConfigCli.Load();
             foreach (var website in configCli.WebsiteList)
             {

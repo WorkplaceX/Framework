@@ -190,7 +190,7 @@
     public class ConfigCliWebsite
     {
         /// <summary>
-        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Website01/".
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Master01/". See also method ConfigServerWebsite.FolderNameServerGet();
         /// </summary>
         public string FolderNameServerGet(ConfigCli configCli)
         {

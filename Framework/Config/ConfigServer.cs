@@ -128,7 +128,7 @@
     internal class ConfigServerWebsite
     {
         /// <summary>
-        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Website01/".
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Master01/".
         /// </summary>
         public string FolderNameServerGet(ConfigServer configServer, string prefixRemove)
         {
