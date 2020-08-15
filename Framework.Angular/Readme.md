@@ -1,11 +1,11 @@
-# Angular 9 Client Application
+# Angular 10 Client Application
 
 ## Version Check
 ```cmd
 node --version # v12.13.0
 npm --version # 6.12.0
-ng --version # Angular CLI: 9.1.1
-npm run ng -- --version # Angular CLI: 9.1.9 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
+ng --version # Angular Angular CLI: 10.0.6
+npm run ng -- --version # Angular CLI: 10.0.6 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
 npm list -g --depth 0 # List globally installed packages
 ```
 
@@ -71,9 +71,6 @@ npm run ng -- generate component framework --skip-import --inlineTemplate=true -
 npm run ng -- generate component grid --skip-import --inlineStyle=true --skipTests=true
 npm run ng -- generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
 ```
-
-## Add Framework Style
-Add new file frameworkStyle.scss and link it in styles.scss with @import "frameworkStyle"
 
 ## Application.Website
 * Create new folder src/Application.Website (Run later cli build to populate)
