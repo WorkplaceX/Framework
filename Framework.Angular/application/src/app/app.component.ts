@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AppComponent {
   title = 'application';
-  localServer = 'localhost:44308/';
+  localServer = 'http://localhost:51302/';
 
   constructor(public dataService: DataService, private location: Location, private http: HttpClient) {
     this.location.onUrlChange((url: string, state: unknown) => {
