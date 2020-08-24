@@ -27,7 +27,7 @@ export class AppComponent {
   
   myClick() {
     this.localServer = "Get...";
-    this.http.get("https://localhost:44308/", {responseType: 'text'}).subscribe((data) => this.localServer = data);
+    this.http.get("http://localhost:51302/", {responseType: 'text'}).subscribe((data) => this.localServer = data);
   }
 
   trackBy(index: any, item: any) {
