@@ -33,7 +33,7 @@ export class FrameworkComponent implements OnInit {
   <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>  
   <div data-BingMap [ngClass]="json.CssClass" *ngIf="json.Type=='BingMap'" [json]=json></div>
-  <div data-custom01 style="display:inline" *ngIf="json.Type=='Custom01'" [json]=json></div>
+  <div data-Custom01 style="display:inline" *ngIf="json.Type=='Custom01'" [json]=json></div>
   `
 })
 export class Selector {

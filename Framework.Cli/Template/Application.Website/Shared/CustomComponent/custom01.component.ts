@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
-  selector: '[data-custom01]',
+  selector: '[data-Custom01]',
   template: `
     <h1>Custom01 Component</h1>
     <p>
