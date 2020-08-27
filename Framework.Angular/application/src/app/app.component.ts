@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { DataService, CommandJson } from './data.service';
 import { Location, LocationStrategy, PathLocationStrategy, PopStateEvent} from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -11,9 +10,8 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AppComponent {
   title = 'application';
-  localServer = 'http://localhost:51302/';
 
-  constructor(public dataService: DataService, private location: Location, private http: HttpClient) {
+  constructor(public dataService: DataService, private location: Location) {
     this.location.onUrlChange((url: string, state: unknown) => {
       var path: string = <string>state; // See also file data.service.ts method call location.go();
       if (path == null) {
@@ -23,11 +21,6 @@ export class AppComponent {
       // LinkPost for backward and forward navigation.
       this.dataService.update(<CommandJson> { Command: 17, ComponentId: this.dataService.json.Id, NavigateLinkPath: path});
     });
-  }
-  
-  myClick() {
-    this.localServer = "Get...";
-    this.http.get("http://localhost:51302/", {responseType: 'text'}).subscribe((data) => this.localServer = data);
   }
 
   trackBy(index: any, item: any) {

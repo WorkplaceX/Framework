@@ -9,7 +9,6 @@ namespace Framework
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -39,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 9.1.1
 
-                return "v3.37.7";
+                return "v3.37.8";
             }
         }
 
