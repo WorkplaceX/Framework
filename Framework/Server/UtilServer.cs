@@ -152,7 +152,7 @@
             string fileNameServer = folderName + "Framework.Angular/server/main.js";
             if (!File.Exists(fileNameServer))
             {
-                throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer));
+                throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer)); // Make sure cli build did run.
             }
             ProcessStartInfo info = new ProcessStartInfo
             {
