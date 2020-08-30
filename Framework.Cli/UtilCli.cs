@@ -386,9 +386,11 @@
         {
             string text = string.Format("{0}", value);
             var configCli = ConfigCli.Load();
-            text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringFramework);
-            text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().ConnectionStringApplication);
-            text = ConsoleWriteLinePasswordHide(text, configCli.EnvironmentGet().DeployAzureGitUrl);
+            var environment = configCli.EnvironmentGet();
+            text = ConsoleWriteLinePasswordHide(text, environment.ConnectionStringFramework);
+            text = ConsoleWriteLinePasswordHide(text, environment.ConnectionStringApplication);
+            text = ConsoleWriteLinePasswordHide(text, environment.DeployAzureGitUrl);
+            text = ConsoleWriteLinePasswordHide(text, configCli.ExternalGit);
 
             text = text.Replace("{", "{{").Replace("}", "}}"); // Console.Write("{", ConsoleColor.Green); throws exception "Input string was not in a correct format". // TODO Bug report
 
