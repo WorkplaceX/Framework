@@ -92,8 +92,29 @@
             {
                 ConfigCli configCli = new ConfigCli();
                 configCli.EnvironmentName = configCli.EnvironmentNameGet();
+                configCli.EnvironmentList = new List<ConfigCliEnvironment>();
                 configCli.WebsiteList = new List<ConfigCliWebsite>();
                 appCli.InitConfigCli(configCli);
+
+                // EnvironmentName defined in WebsiteList
+                List<string> environmentNameList = new List<string>();
+                foreach (var website in configCli.WebsiteList)
+                {
+                    foreach (var domainName in website.DomainNameList)
+                    {
+                        environmentNameList.Add(domainName.EnvironmentName);
+                    }
+                }
+                environmentNameList = environmentNameList.Distinct().ToList();
+
+                // Add missing environments
+                foreach (var environmentName in environmentNameList)
+                {
+                    if (configCli.EnvironmentList.Where(item => item.EnvironmentName == environmentName).FirstOrDefault() == null)
+                    {
+                        configCli.EnvironmentList.Add(new ConfigCliEnvironment { EnvironmentName = environmentName });
+                    }
+                }
                 UtilFramework.ConfigSave(configCli, FileName);
             }
         }
