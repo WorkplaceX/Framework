@@ -57,6 +57,17 @@
         public List<ConfigCliWebsite> WebsiteList { get; set; }
 
         /// <summary>
+        /// Gets or sets ExternalGit. For example: https://username:password@dev.azure.com/company/repo/_git/repo.git
+        /// Clones and calls prebuild script in folder External.Prebuild\ in cli build command.
+        /// </summary>
+        public string ExternalGit { get; set; }
+
+        /// <summary>
+        /// Gets or sets ExternalPrebuildFolderName. Cli build command calls this .NET script.
+        /// </summary>
+        public string ExternalPrebuildFolderName { get; set; }
+
+        /// <summary>
         /// Returns ConnectionString of application or framework.
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
@@ -229,11 +240,6 @@
         public string FolderNameDist { get; set; }
 
         /// <summary>
-        /// Gets or sets Git repo if "external" website is in an other git repo.
-        /// </summary>
-        public ConfigCliWebsiteGit Git { get; set; }
-
-        /// <summary>
         /// Gets DomainNameList. Domains mapped to this master website.
         /// </summary>
         public List<ConfigCliWebsiteDomain> DomainNameList { get; set; }
@@ -281,23 +287,5 @@
         /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
         /// </summary>
         public string AppTypeName { get; set; }
-    }
-
-    public class ConfigCliWebsiteGit
-    {
-        /// <summary>
-        /// Gets or sets GitUrl. Applicable if external website to include is in another git repo.
-        /// </summary>
-        public string GitUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets GitUser. For example if git repo is not a public repo.
-        /// </summary>
-        public string GitUser { get; set; }
-
-        /// <summary>
-        /// Gets or sets GitPassword. For example if git repo is not a public repo.
-        /// </summary>
-        public string GitPassword { get; set; }
     }
 }

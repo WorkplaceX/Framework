@@ -1,11 +1,9 @@
 ﻿namespace Framework.Cli.Command
 {
     using Framework.Cli.Config;
-    using Framework.Config;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.IO;
-    using System.Linq;
 
     /// <summary>
     /// Cli build command.
@@ -147,8 +145,36 @@
             }
         }
 
+        /// <summary>
+        /// Clone external git repo and call prebuild script.
+        /// </summary>
+        private void ExternalGit()
+        {
+            var configCli = ConfigCli.Load();
+
+            // Clone repo
+            var externalGit = UtilFramework.StringNull(configCli.ExternalGit);
+            if (externalGit != null)
+            {
+                string externalFolderName = UtilFramework.FolderName + "External.Git/";
+                UtilCli.FolderDelete(externalFolderName);
+                UtilCli.FolderCreate(externalFolderName);
+                UtilCli.Start(externalFolderName, "git.exe", "clone" + " " + externalGit);
+            }
+
+            // Call external prebuild script
+            var externalPrebuildFolderName = UtilFramework.StringNull(configCli.ExternalPrebuildFolderName);
+            if (externalPrebuildFolderName != null)
+            {
+                string folderName = UtilFramework.FolderName + "External.Git/" + externalPrebuildFolderName;
+                UtilCli.DotNet(folderName, "run");
+            }
+        }
+
         protected internal override void Execute()
         {
+            ExternalGit();
+
             // Build master Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
 
