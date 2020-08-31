@@ -63,9 +63,9 @@
         public string ExternalGit { get; set; }
 
         /// <summary>
-        /// Gets or sets ExternalPrebuildFolderName. Cli build command calls this .NET script.
+        /// Gets or sets ExternalProjectName. For example MyApp. Used to build ExternalFolderName External.Git/MyApp/ Cli build command calls this .NET script.
         /// </summary>
-        public string ExternalPrebuildFolderName { get; set; }
+        public string ExternalProjectName { get; set; }
 
         /// <summary>
         /// Returns ConnectionString of application or framework.

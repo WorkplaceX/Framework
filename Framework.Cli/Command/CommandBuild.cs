@@ -48,6 +48,9 @@
                 UtilFramework.Assert(Directory.Exists(folderNameApplicationWebSite));
             }
 
+            // Override for example custom components.
+            ExternalPrebuild();
+
             // Build SSR
             {
                 string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
@@ -149,7 +152,7 @@
         /// <summary>
         /// Clone external git repo and call prebuild script.
         /// </summary>
-        private void ExternalGit()
+        private static void ExternalGit()
         {
             var configCli = ConfigCli.Load();
 
@@ -158,22 +161,27 @@
             if (externalGit != null)
             {
                 string externalFolderName = UtilFramework.FolderName + "External.Git/";
-                UtilCli.FolderDelete(externalFolderName);
-                UtilCli.FolderCreate(externalFolderName);
-                UtilCli.Start(externalFolderName, "git", "clone -q" + " " + externalGit); // -q do not write to stderr on linux
+                if (!UtilCli.FolderNameExist(externalFolderName))
+                {
+                    UtilCli.FolderCreate(externalFolderName);
+                    UtilCli.Start(externalFolderName, "git", "clone --recursive -q" + " " + externalGit); // --recursive clone also submodule Framework -q do not write to stderr on linux
+                }
             }
+        }
 
-            // Call external prebuild script
-            var externalPrebuildFolderName = UtilFramework.StringNull(configCli.ExternalPrebuildFolderName);
-            if (externalPrebuildFolderName != null)
-            {
-                string folderName = UtilFramework.FolderName + "External.Git/" + externalPrebuildFolderName;
-                UtilCli.DotNet(folderName, "run");
-            }
+        private static void ExternalPrebuild()
+        {
+            var configCli = ConfigCli.Load();
+
+            // Call external cli command (prebuild script)
+            var externalProjectName = UtilFramework.StringNull(configCli.ExternalProjectName);
+            string folderName = UtilFramework.FolderName + "External.Git/" + externalProjectName + "/" + "Application.Cli";
+            UtilCli.DotNet(folderName, "run -- external");
         }
 
         protected internal override void Execute()
         {
+            // Clone external repo
             ExternalGit();
 
             // Build master Website(s) (npm) includes for example Bootstrap
