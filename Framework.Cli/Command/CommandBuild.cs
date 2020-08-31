@@ -4,6 +4,7 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.IO;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Cli build command.
@@ -159,7 +160,12 @@
                 string externalFolderName = UtilFramework.FolderName + "External.Git/";
                 UtilCli.FolderDelete(externalFolderName);
                 UtilCli.FolderCreate(externalFolderName);
-                UtilCli.Start(externalFolderName, "git.exe", "clone" + " " + externalGit);
+                var fileName = "git";
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    fileName += ".exe";
+                }
+                UtilCli.Start(externalFolderName, fileName, "clone" + " " + externalGit); // git clone
             }
 
             // Call external prebuild script
