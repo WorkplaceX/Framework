@@ -160,12 +160,7 @@
                 string externalFolderName = UtilFramework.FolderName + "External.Git/";
                 UtilCli.FolderDelete(externalFolderName);
                 UtilCli.FolderCreate(externalFolderName);
-                var fileName = "git";
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    fileName += ".exe";
-                }
-                UtilCli.Start(externalFolderName, fileName, "clone -q" + " " + externalGit); // git clone // -q do not write to stderr on linux
+                UtilCli.Start(externalFolderName, "git", "clone -q" + " " + externalGit); // -q do not write to stderr on linux
             }
 
             // Call external prebuild script

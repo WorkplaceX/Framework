@@ -38,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 9.1.1
 
-                return "v3.37.10";
+                return "v3.37.11";
             }
         }
 
@@ -50,7 +50,7 @@ namespace Framework
             get
             {
                 // See also: method CommandBuild.BuildServer();
-                return "Build (local)"; /* VersionBuild */
+                return "Build (WorkplaceX=v3.37.10; Commit=a95e046; Pc=DESKTOP-B1H1T1R; Time=2020-08-31 09:07:22 (UTC);)"; /* VersionBuild */
             }
         }
 
