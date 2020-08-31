@@ -155,6 +155,10 @@
             new CommandDeployDb(this);
             new CommandEnvironment(this);
             new CommandTest(this);
+            if (UtilFramework.IsExternalGit)
+            {
+                new CommandExternal(this);
+            }
         }
 
         /// <summary>
@@ -701,6 +705,36 @@
                 var reference = new UtilDalUpsertIntegrate.Reference(typeRowResult, fieldNameIdCSharpResult, fieldNameIdSqlResult, typeRowIntegrateResult, fieldNameIdNameCSharpResult, fieldNameIdNameSqlResult, typeRowReferenceResult, typeRowReferenceIntegrateResult);
                 UtilFramework.Assert(ResultReference.Count(item => item.TypeRow == reference.TypeRow && item.FieldNameIdCSharp == reference.FieldNameIdCSharp) == 0, "Reference already defined!");
                 ResultReference.Add(reference);
+            }
+        }
+
+        /// <summary>
+        /// Override if this application is cloned into External.Git/ folder.
+        /// </summary>
+        /// <param name="args">Some utils for example to copy files.</param>
+        protected virtual internal void ExternalPrebuild(ExternalPrebuildArgs args)
+        {
+
+        }
+
+        public class ExternalPrebuildArgs
+        {
+            /// <summary>
+            /// Gets ApplicationWebsiteFolderName. This is External folder Application.Website/
+            /// </summary>
+            public string ApplicationWebsiteSourceFolderName { get; internal set;  }
+
+            /// <summary>
+            /// Gets ApplicationWebsiteFolderName. This is Angular folder Framework/Framework.Angular/application/src/Application.Website/
+            /// </summary>
+            public string ApplicationWebsiteDestFolderName { get; internal set;  }
+
+            /// <summary>
+            /// Copy file from source to dest. Creates new dest folder if it doesn't exist.
+            /// </summary>
+            public void FileCopy(string fileNameSource, string fileNameDest)
+            {
+                UtilCli.FileCopy(fileNameSource, fileNameDest);
             }
         }
     }
