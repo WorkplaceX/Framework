@@ -17,7 +17,7 @@ namespace Framework
     using System.Text.Json;
     using System.Web;
 
-    internal class UtilFramework
+    internal static class UtilFramework
     {
         /// <summary>
         /// Gets Version. This is the framework version.
