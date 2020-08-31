@@ -165,7 +165,7 @@
                 {
                     fileName += ".exe";
                 }
-                UtilCli.Start(externalFolderName, fileName, "clone" + " " + externalGit); // git clone
+                UtilCli.Start(externalFolderName, fileName, "clone -q" + " " + externalGit); // git clone // -q do not write to stderr on linux
             }
 
             // Call external prebuild script
