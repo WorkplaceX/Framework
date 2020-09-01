@@ -198,8 +198,8 @@
             string indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:50919/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
 
             // Set jsonBrowser in index.html.
-            string scriptFind = "<script>var jsonBrowser={}</script>";
-            string scriptReplace = "<script>var jsonBrowser = " + jsonClient + "</script>";
+            string scriptFind = "</app-root>"; //" <script>var jsonBrowser={}</script>"; // For example Html5Boilerplate build process renames var jsonBrowser to a.
+            string scriptReplace = "</app-root><script>var jsonBrowser = " + jsonClient + "</script>";
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
 
             // Add Angular scripts
