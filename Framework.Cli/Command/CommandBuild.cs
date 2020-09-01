@@ -160,7 +160,7 @@
             var externalGit = UtilFramework.StringNull(configCli.ExternalGit);
             if (externalGit != null)
             {
-                string externalFolderName = UtilFramework.FolderName + "External.Git/";
+                string externalFolderName = UtilFramework.FolderName + "ExternalGit/";
                 if (!UtilCli.FolderNameExist(externalFolderName))
                 {
                     UtilCli.FolderCreate(externalFolderName);
@@ -175,7 +175,7 @@
 
             // Call external cli command (prebuild script)
             var externalProjectName = UtilFramework.StringNull(configCli.ExternalProjectName);
-            string folderName = UtilFramework.FolderName + "External.Git/" + externalProjectName + "/" + "Application.Cli";
+            string folderName = UtilFramework.FolderName + "ExternalGit/" + externalProjectName + "/" + "Application.Cli";
             UtilCli.DotNet(folderName, "run -- external");
         }
 

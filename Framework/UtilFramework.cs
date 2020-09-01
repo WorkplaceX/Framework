@@ -80,7 +80,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Gets FolderNameExternal. This is the root folder name of the parent application, if this application is cloned into parents External.Git/ folder.
+        /// Gets FolderNameExternal. This is the root folder name of the parent application, if this application is cloned into parents ExternalGit/ folder.
         /// </summary>
         public static string FolderNameExternal
         {
@@ -88,21 +88,21 @@ namespace Framework
             {
                 if (!IsExternalGit)
                 {
-                    throw new Exception("This Application is not cloned into External.Git/ folder!");
+                    throw new Exception("This Application is not cloned into ExternalGit/ folder!");
                 }
                 return new Uri(new Uri(FolderName), "../../").AbsolutePath;
             }
         }
 
         /// <summary>
-        /// Gets IsExternalGit. Returns true if this application is cloned into External.Git/ folder.
+        /// Gets IsExternalGit. Returns true if this application is cloned into ExternalGit/ folder.
         /// </summary>
         public static bool IsExternalGit
         {
             get
             {
                 var folderName = new Uri(new Uri(FolderName), "../").AbsolutePath;
-                return folderName.EndsWith("/External.Git/");
+                return folderName.EndsWith("/ExternalGit/");
             }
         }
 

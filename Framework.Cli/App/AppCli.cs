@@ -709,7 +709,7 @@
         }
 
         /// <summary>
-        /// Override if this application is cloned into External.Git/ folder.
+        /// Override if this application is cloned into ExternalGit/ folder.
         /// </summary>
         /// <param name="args">Some utils for example to copy files.</param>
         protected virtual internal void ExternalPrebuild(ExternalPrebuildArgs args)
