@@ -174,10 +174,17 @@
         {
             var configCli = ConfigCli.Load();
 
+            // External git url
+            var externalGit = UtilFramework.StringNull(configCli.ExternalGit);
+
             // Call external cli command (prebuild script)
             var externalProjectName = UtilFramework.StringNull(configCli.ExternalProjectName);
-            string folderName = UtilFramework.FolderName + "ExternalGit/" + externalProjectName + "/" + "Application.Cli";
-            UtilCli.DotNet(folderName, "run -- external");
+
+            if (externalGit != null && externalProjectName != null)
+            {
+                string folderName = UtilFramework.FolderName + "ExternalGit/" + externalProjectName + "/" + "Application.Cli";
+                UtilCli.DotNet(folderName, "run -- external");
+            }
         }
 
         protected internal override void Execute()
