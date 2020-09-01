@@ -163,6 +163,7 @@
                 string externalFolderName = UtilFramework.FolderName + "ExternalGit/";
                 if (!UtilCli.FolderNameExist(externalFolderName))
                 {
+                    Console.WriteLine("Git Clone ExternalGit");
                     UtilCli.FolderCreate(externalFolderName);
                     UtilCli.Start(externalFolderName, "git", "clone --recursive -q" + " " + externalGit); // --recursive clone also submodule Framework -q do not write to stderr on linux
                 }
