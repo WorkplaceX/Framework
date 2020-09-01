@@ -111,7 +111,7 @@
         }
 
         /// <summary>
-        /// Build all master Websites. For example: "Application.Website/MasterDefault"
+        /// Build all layout Websites. For example: "Application.Website/LayoutDefault"
         /// </summary>
         private void BuildWebsite()
         {
@@ -192,7 +192,7 @@
             // Clone external repo
             ExternalGit();
 
-            // Build master Website(s) (npm) includes for example Bootstrap
+            // Build layout Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
 
             UtilCli.VersionBuild(() => {

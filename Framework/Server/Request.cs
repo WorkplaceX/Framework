@@ -250,7 +250,7 @@
                 if (fileName.EndsWith(angularBrowserFileNameJsSuffix))
                 {
                     // Prevent for example two main.js. Angular js can not be overridden by Website
-                    // Application.Website/MasterDefault/dist/main.js
+                    // Application.Website/LayoutDefault/dist/main.js
                     // Application.Server/Framework/Framework.Angular/browser/main.js
                     fileName = fileName.Substring(0, fileName.Length - angularBrowserFileNameJsSuffix.Length) + ".js";
                 }

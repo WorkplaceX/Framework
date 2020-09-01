@@ -36,7 +36,7 @@
             argumentConnectionString = configuration.Argument("connectionString", "Set same database ConnectionString for Framework and Application.");
             argumentConnectionStringFramework = configuration.Argument("connectionStringFramework", "Get or set database ConnectionString for Framework.");
             argumentConnectionStringApplication = configuration.Argument("connectionStringApplication", "Get or set database ConnectionString for Application.");
-            argumentWebsite = configuration.Argument("website", "Add (include) a master website to ci build.");
+            argumentWebsite = configuration.Argument("website", "Add (include) a layout website to ci build.");
         }
 
         private void ArgumentWebsite()
@@ -58,7 +58,7 @@
             }
 
             // Input FolderName
-            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Application.Website/Master/'. In this folder ci calls npm install; npm build;");
+            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Application.Website/LayoutDefault/'. In this folder ci calls npm install; npm build;");
             Console.Write(">");
             string folderNameNpmBuild = Console.ReadLine();
             folderNameNpmBuild = UtilFramework.FolderNameParse(folderNameNpmBuild);
@@ -70,7 +70,7 @@
             }
 
             // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Application.Website/MasterDefault/dist/'. Content of this folder is copied to FolderNameServer");
+            Console.WriteLine("Enter dist folder name. For example 'Application.Website/LayoutDefault/dist/'. Content of this folder is copied to FolderNameServer");
             Console.Write(">");
             string folderNameDist = Console.ReadLine();
             folderNameDist = UtilFramework.FolderNameParse(folderNameDist);

@@ -222,11 +222,11 @@
     public class ConfigCliWebsite
     {
         /// <summary>
-        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Master01/". See also method ConfigServerWebsite.FolderNameServerGet();
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Layout01/". See also method ConfigServerWebsite.FolderNameServerGet();
         /// </summary>
         public string FolderNameServerGet(ConfigCli configCli)
         {
-            return string.Format("Application.Server/Framework/Application.Website/Master{0:00}/", configCli.WebsiteList.IndexOf(this) + 1);
+            return string.Format("Application.Server/Framework/Application.Website/Layout{0:00}/", configCli.WebsiteList.IndexOf(this) + 1);
         }
 
         /// <summary>
@@ -235,12 +235,12 @@
         public string FolderNameNpmBuild { get; set; }
 
         /// <summary>
-        /// Gets or sets FolderNameDist. For example: "Application.Website/MasterDefault/dist". Content of this folder will be copied to "Application.Server/Framework/Application.Website/Master01".
+        /// Gets or sets FolderNameDist. For example: "Application.Website/LayoutDefault/dist". Content of this folder will be copied to "Application.Server/Framework/Application.Website/Master01".
         /// </summary>
         public string FolderNameDist { get; set; }
 
         /// <summary>
-        /// Gets DomainNameList. Domains mapped to this master website.
+        /// Gets DomainNameList. Domains mapped to this layout website.
         /// </summary>
         public List<ConfigCliWebsiteDomain> DomainNameList { get; set; }
 
