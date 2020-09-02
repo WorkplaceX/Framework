@@ -123,7 +123,7 @@
                 {
                     if (configCli.EnvironmentList.Where(item => item.EnvironmentName == environmentName).FirstOrDefault() == null)
                     {
-                        configCli.EnvironmentList.Add(new ConfigCliEnvironment { EnvironmentName = environmentName });
+                        configCli.EnvironmentList.Add(new ConfigCliEnvironment { EnvironmentName = environmentName, IsUseDeveloperExceptionPage = environmentName == "DEV" });
                     }
                 }
                 UtilFramework.ConfigSave(configCli, FileName);
@@ -196,7 +196,7 @@
         public string EnvironmentName { get; set; }
 
         /// <summary>
-        /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions.
+        /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions. Restart web server after value change!
         /// </summary>
         public bool IsUseDeveloperExceptionPage { get; set; }
 

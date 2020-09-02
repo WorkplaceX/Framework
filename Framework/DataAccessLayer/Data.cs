@@ -1548,13 +1548,16 @@
             var result = new Dictionary<Type, string>();
             foreach (Assembly assembly in assemblyList)
             {
-                foreach (Type type in assembly.GetTypes())
+                if (assembly != null)
                 {
-                    if (type.IsSubclassOf(typeof(Row))) // TypeRow
+                    foreach (Type type in assembly.GetTypes())
                     {
-                        Type typeRow = type;
-                        string tableNameCSharp = TypeRowToTableNameCSharp(typeRow);
-                        result.Add(typeRow, tableNameCSharp);
+                        if (type.IsSubclassOf(typeof(Row))) // TypeRow
+                        {
+                            Type typeRow = type;
+                            string tableNameCSharp = TypeRowToTableNameCSharp(typeRow);
+                            result.Add(typeRow, tableNameCSharp);
+                        }
                     }
                 }
             }
@@ -1584,24 +1587,27 @@
             Dictionary<string, Type> result = new Dictionary<string, Type>();
             foreach (Assembly assembly in assemblyList)
             {
-                foreach (Type type in assembly.GetTypes())
+                if (assembly != null)
                 {
-                    if (type.IsSubclassOf(typeof(Row)))
+                    foreach (Type type in assembly.GetTypes())
                     {
-                        string name = UtilFramework.TypeToName(type);
-                        if (name.StartsWith("Database."))
+                        if (type.IsSubclassOf(typeof(Row)))
                         {
-                            string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
-                            if (result.ContainsKey(tableNameCSharp))
+                            string name = UtilFramework.TypeToName(type);
+                            if (name.StartsWith("Database."))
                             {
-                                throw new Exception(string.Format("TableNameCSharp exists already in different assembly! ({0})", tableNameCSharp));
+                                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(type);
+                                if (result.ContainsKey(tableNameCSharp))
+                                {
+                                    throw new Exception(string.Format("TableNameCSharp exists already in different assembly! ({0})", tableNameCSharp));
 
+                                }
+                                result.Add(tableNameCSharp, type);
                             }
-                            result.Add(tableNameCSharp, type);
-                        }
-                        else
-                        {
-                            throw new Exception(string.Format("Row class not defined in Database namespace! ({0})", UtilFramework.TypeToName(type)));
+                            else
+                            {
+                                throw new Exception(string.Format("Row class not defined in Database namespace! ({0})", UtilFramework.TypeToName(type)));
+                            }
                         }
                     }
                 }
@@ -1703,15 +1709,18 @@
             List<Type> result = new List<Type>();
             foreach (Assembly assembly in assemblyList)
             {
-                foreach (Type type in assembly.GetTypes())
+                if (assembly != null)
                 {
-                    if (UtilFramework.IsSubclassOf(type, typeof(Row))) // TypeRow
+                    foreach (Type type in assembly.GetTypes())
                     {
-                        if (TypeRowToTableNameSql(type, out string schemaNameSqlLocal, out string tableNameSqlLocal))
+                        if (UtilFramework.IsSubclassOf(type, typeof(Row))) // TypeRow
                         {
-                            if (schemaNameSqlLocal == schemaNameSql && tableNameSqlLocal == tableNameSql)
+                            if (TypeRowToTableNameSql(type, out string schemaNameSqlLocal, out string tableNameSqlLocal))
                             {
-                                result.Add(type);
+                                if (schemaNameSqlLocal == schemaNameSql && tableNameSqlLocal == tableNameSql)
+                                {
+                                    result.Add(type);
+                                }
                             }
                         }
                     }
