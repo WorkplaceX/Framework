@@ -123,27 +123,29 @@
             foreach (var website in configCli.WebsiteList)
             {
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
+                
+                // Delete dist folder
+                string folderNameDist = UtilFramework.FolderNameParse(website.FolderNameDist);
+                UtilFramework.Assert(folderNameDist != null);
+                UtilCli.FolderDelete(folderNameDist);
+
+                // npm run build
                 BuildWebsiteNpm(website);
                 string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServerGet(configCli));
                 UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
                 UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
 
-                string folderNameDist = UtilFramework.FolderNameParse(website.FolderNameDist);
-                if (folderNameDist != null)
+                // Copy dist folder
+                string folderNameSource = UtilFramework.FolderName + folderNameDist;
+                string folderNameDest = UtilFramework.FolderName + folderNameServer;
+                if (!UtilCli.FolderNameExist(folderNameSource))
                 {
-                    string folderNameSource = UtilFramework.FolderName + folderNameDist;
-                    string folderNameDest = UtilFramework.FolderName + folderNameServer;
-                    if (!UtilCli.FolderNameExist(folderNameSource))
-                    {
-                        throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
-                    }
-
-                    // Copy folder
-                    UtilCli.FolderDelete(folderNameDest);
-                    UtilFramework.Assert(!UtilCli.FolderNameExist(folderNameDest));
-                    UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
-                    UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
+                    throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
                 }
+                UtilCli.FolderDelete(folderNameDest);
+                UtilFramework.Assert(!UtilCli.FolderNameExist(folderNameDest));
+                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+                UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
 
                 Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
             }
