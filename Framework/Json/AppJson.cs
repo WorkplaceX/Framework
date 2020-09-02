@@ -724,7 +724,7 @@
         public class NavigateResult
         {
             /// <summary>
-            /// Gets or sets IsSession. If true, method NavigateSessionAsync(); with session data available is called next.
+            /// Gets or sets IsSession. If true, session is requested and method NavigateSessionAsync(); with session data available is called next.
             /// </summary>
             public bool IsSession { get; set; }
 
