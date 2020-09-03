@@ -720,14 +720,39 @@
         public class ExternalPrebuildArgs
         {
             /// <summary>
-            /// Gets ApplicationWebsiteFolderName. This is External folder Application.Website/
+            /// Gets AppSourceFolderName. This is folder ExternalGit/ProjectName/Application/App/
             /// </summary>
-            public string ApplicationWebsiteSourceFolderName { get; internal set;  }
+            public string AppSourceFolderName { get; internal set; }
 
             /// <summary>
-            /// Gets ApplicationWebsiteFolderName. This is Angular folder Framework/Framework.Angular/application/src/Application.Website/
+            /// Gets AppDestFolderName. This is folder Application/App/ExternalGit/
             /// </summary>
-            public string ApplicationWebsiteDestFolderName { get; internal set;  }
+            public string AppDestFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets DatabaseSourceFolderName. This is folder ExternalGit/ProjectName/Application.Database/Database/
+            /// </summary>
+            public string DatabaseSourceFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets DatabaseDestFolderName. This is folder Application.Database/Database/ExternalGit/
+            /// </summary>
+            public string DatabaseDestFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets WebsiteSourceFolderName. This is folder ExternalGit/ProjectName/Application.Website/
+            /// </summary>
+            public string WebsiteSourceFolderName { get; internal set;  }
+
+            /// <summary>
+            /// Gets WebsiteDestFolderName. This is folder Application.Website/ExternalGit/
+            /// </summary>
+            public string WebsiteDestFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets WebsiteAngularDestFolderName. This is Angular folder Framework/Framework.Angular/application/src/Application.Website/
+            /// </summary>
+            public string WebsiteAngularDestFolderName { get; internal set; }
 
             /// <summary>
             /// Copy file from source to dest. Creates new dest folder if it doesn't exist.
@@ -735,6 +760,15 @@
             public void FileCopy(string fileNameSource, string fileNameDest)
             {
                 UtilCli.FileCopy(fileNameSource, fileNameDest);
+            }
+
+            /// <summary>
+            /// Copy folder.
+            /// </summary>
+            public void FolderCopy(string folderNameSource, string folderNameDest)
+            {
+                UtilCli.FolderDelete(folderNameDest);
+                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
             }
         }
     }

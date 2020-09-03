@@ -23,11 +23,21 @@
 
         protected internal override void Execute()
         {
-            string applicationWebsiteSourceFolderName = UtilFramework.FolderName + "Application.Website/";
-            string applicationWebsiteDestFolderName = UtilFramework.FolderNameExternal + "Framework/Framework.Angular/application/src/Application.Website/";
-            var args = new ExternalPrebuildArgs { 
-                ApplicationWebsiteSourceFolderName = applicationWebsiteSourceFolderName,
-                ApplicationWebsiteDestFolderName = applicationWebsiteDestFolderName 
+            string appSourceFolderName = UtilFramework.FolderName + "Application/App/";
+            string appDestFolderName = UtilFramework.FolderNameExternal + "Application/App/ExternalGit/";
+            string databaseSourceFolderName = UtilFramework.FolderName + "Application.Database/Database/";
+            string databaseDestFolderName = UtilFramework.FolderNameExternal + "Application.Database/Database/ExternalGit/";
+            string websiteSourceFolderName = UtilFramework.FolderName + "Application.Website/";
+            string websiteDestFolderName = UtilFramework.FolderNameExternal + "Application.Website/ExternalGit/";
+            string websiteAngularDestFolderName = UtilFramework.FolderNameExternal + "Framework/Framework.Angular/application/src/Application.Website/";
+            var args = new ExternalPrebuildArgs {
+                AppSourceFolderName = appSourceFolderName,
+                AppDestFolderName = appDestFolderName,
+                DatabaseSourceFolderName = databaseSourceFolderName,
+                DatabaseDestFolderName = databaseDestFolderName,
+                WebsiteSourceFolderName = websiteSourceFolderName,
+                WebsiteDestFolderName = websiteDestFolderName,
+                WebsiteAngularDestFolderName = websiteAngularDestFolderName 
             };
             AppCli.ExternalPrebuild(args);
         }
