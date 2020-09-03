@@ -25,32 +25,31 @@
         }
 
         /// <summary>
+        /// Copy folder Application.Website/Shared/CustomComponent/
+        /// </summary>
+        private static void BuildAngularInit()
+        {
+            // Delete folder Application.Website/
+            string folderNameApplicationWebSite = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/";
+            UtilCli.FolderDelete(folderNameApplicationWebSite);
+
+            // Copy folder CustomComponent/
+            string folderNameSource = UtilFramework.FolderName + "Application.Website/Shared/CustomComponent/";
+            string folderNameDest = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Shared/CustomComponent/";
+            UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+
+            // Copy empty index.html file
+            UtilCli.FileCopy(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/index.html", UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Default/index.html");
+
+            // Ensure folder exists now
+            UtilFramework.Assert(Directory.Exists(folderNameApplicationWebSite));
+        }
+
+        /// <summary>
         /// Build Framework/Framework.Angular/application/.
         /// </summary>
         private static void BuildAngular()
         {
-            // Copy folder Application.Website
-            {
-                // Delete folder Application.Website
-                string folderNameApplicationWebSite = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website";
-                UtilCli.FolderDelete(folderNameApplicationWebSite);
-                UtilFramework.Assert(!Directory.Exists(folderNameApplicationWebSite));
-
-                // Copy folder CustomComponent
-                string folderNameSource = UtilFramework.FolderName + "Application.Website/Shared/CustomComponent/";
-                string folderNameDest = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Shared/CustomComponent/";
-                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
-
-                // Copy empty index.html file
-                UtilCli.FileCopy(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/index.html", UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Default/index.html");
-
-                // Ensure folder exists now
-                UtilFramework.Assert(Directory.Exists(folderNameApplicationWebSite));
-            }
-
-            // Override for example custom components.
-            ExternalPrebuild();
-
             // Build SSR
             {
                 string folderName = UtilFramework.FolderName + "Framework/Framework.Angular/application/";
@@ -172,6 +171,9 @@
             }
         }
 
+        /// <summary>
+        /// Run method AppCli.ExternalPrebuild(); on ExternalGit/ProjectName/
+        /// </summary>
         private static void ExternalPrebuild()
         {
             var configCli = ConfigCli.Load();
@@ -193,6 +195,12 @@
         {
             // Clone external repo
             ExternalGit();
+
+            // Copy folder Application.Website/Shared/CustomComponent/
+            BuildAngularInit();
+
+            // Run cli external command. Override for example custom components.
+            ExternalPrebuild();
 
             // Build layout Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
