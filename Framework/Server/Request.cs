@@ -177,7 +177,7 @@
             if (UtilServer.IsIssServer)
             {
                 // Running on IIS Server.
-                url = context.Request.IsHttps ? "https://" : "http://";
+                url = "http://"; // url = context.Request.IsHttps ? "https://" : "http://"; // Webserver (Azure) returns "Angular Universal Server Side Rendering" page also without https.
                 url += context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server/main.js"; // Url of server side rendering when running on IIS Server
             }
             else
