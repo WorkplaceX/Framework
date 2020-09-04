@@ -4,6 +4,7 @@
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
 
     /// <summary>
@@ -114,11 +115,16 @@
         /// </summary>
         private void BuildWebsite()
         {
+            var configCli = ConfigCli.Load();
+
+            // Ensure FolderNameNpmBuild is defined once only in ConfigCli.json.
+            ConfigCliWebsite configCliWebsite = configCli.WebsiteList.GroupBy(item => item.FolderNameNpmBuild.ToLower()).Where(group => group.Count() > 1).FirstOrDefault()?.FirstOrDefault();
+            UtilFramework.Assert(configCliWebsite == null, string.Format("ConfigCli.json Website defined more than once. Use DomainNameList instead! (FolderNameNpmBuild={0})", configCliWebsite?.FolderNameNpmBuild));
+
             // Delete folder Application.Server/Framework/Application.Website/
             string folderNameApplicationWebsite = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/";
             UtilCli.FolderDelete(folderNameApplicationWebsite);
 
-            var configCli = ConfigCli.Load();
             foreach (var website in configCli.WebsiteList)
             {
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
