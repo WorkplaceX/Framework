@@ -18,7 +18,7 @@
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilFramework.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
-            this.List = dbContext.Schema.FromSqlRaw(sql).ToArray(); // Schema changes can cause timeout. Run sql command sp_updatestats on master database.
+            this.List = dbContext.Schema.FromSqlRaw(sql).ToArray(); // Schema changes can cause timeout. Run sql command "exec sp_updatestats" on master database. If "select * from sys.columns" is slow, free up some memory.
             //
             // For Application filter out "dbo.Framework" tables.
             if (isFrameworkDb == false)
