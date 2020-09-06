@@ -1,6 +1,8 @@
-# Layout Empty Website
+# Layout Bulma Website
 
-Minimal web page with Webpack 4.
+Minimal web page based on Layout Empty Website and Bulma.
+
+See also: https://bulma.io/documentation/customize/with-webpack/
 
 Install
 ```cmd
