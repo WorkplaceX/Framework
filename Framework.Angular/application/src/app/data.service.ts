@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { Inject, RendererFactory2, Renderer2 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DOCUMENT, Location } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
-export class Json {
+export class Json { // AppJson
   Id: number;
 
   Name: string;
@@ -45,6 +46,8 @@ export class Json {
   IsScrollToTop: boolean;
 
   PathAddHistory: string;
+
+  Title: string;
 }
 
 export class CommandJson {
@@ -94,12 +97,21 @@ export class DataService {
 
   public renderer: Renderer2; // Used for BingMap
 
-  constructor(private httpClient: HttpClient, @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, @Inject(DOCUMENT) public document: Document, rendererFactory: RendererFactory2, private location: Location) { 
+  constructor(
+      private httpClient: HttpClient, 
+      @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, 
+      @Inject(DOCUMENT) public document: Document, 
+      rendererFactory: RendererFactory2, 
+      private location: Location,
+      private titleService: Title) { 
     this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
       // Render on SSR server
       this.json = this.jsonServerSideRendering;
       this.json.IsServerSideRendering = true;
+      if (this.json.Title != null) {
+        this.titleService.setTitle(this.json.Title);
+      }
     } else {
       // Render in browser
       this.json = jsonBrowser;
@@ -178,6 +190,9 @@ export class DataService {
         if (this.requestJsonQueue == null) { // Apply response if there is no newer request.
           this.json = jsonResponse;
           this.isRequestPending = false;
+          if (this.json.Title != null) {
+            this.titleService.setTitle(this.json.Title);
+          }
         } else {
           this.json.ResponseCount = jsonResponse.ResponseCount;
           let requestJsonQueue = this.requestJsonQueue;

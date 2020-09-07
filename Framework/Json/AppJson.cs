@@ -606,6 +606,11 @@
         }
 
         /// <summary>
+        /// Gets or sets Title. This is the html title.
+        /// </summary>
+        public string Title { get; set; }
+
+        /// <summary>
         /// Returns NamingConvention for app related sql tables.
         /// </summary>
         protected virtual NamingConvention NamingConventionApp()
