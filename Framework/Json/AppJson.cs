@@ -2449,6 +2449,17 @@
         public bool IsNoSanatize;
     }
 
+    public class Html2 : ComponentJson
+    {
+        public Html2(ComponentJson owner)
+            : base(owner, nameof(Html2))
+        {
+
+        }
+
+        public string TextHtml;
+    }
+
     public class Page : ComponentJson
     {
         /// <summary>

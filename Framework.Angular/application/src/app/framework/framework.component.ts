@@ -29,7 +29,8 @@ export class FrameworkComponent implements OnInit {
   <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
   <div data-DivContainer [ngClass]="json.CssClass" *ngIf="json.Type=='DivContainer'" [json]=json></div>
   <div data-Page [ngClass]="json.CssClass" *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
-  <div data-Html style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
+  <div data-Html style="display:inline" *ngIf="json.Type=='Html2'" [json]=json></div>
+  <div data-Html2 style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
   <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>  
   <div data-BingMap [ngClass]="json.CssClass" *ngIf="json.Type=='BingMap'" [json]=json></div>
@@ -101,6 +102,29 @@ export class Html {
       }
     } while (element != this.div.nativeElement && element != null)
   } 
+}
+
+/* Html2 */
+@Component({
+  selector: '[data-Html2]',
+  template: `
+  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml"></div>`
+})
+export class Html2 {
+  @Input() json: any
+
+  constructor(private sanitizer: DomSanitizer){
+
+  }
+
+  textHtml: any;
+
+  ngOnChanges() {
+    this.textHtml = this.sanitizer.bypassSecurityTrustHtml(this.json.TextHtml);
+  }
+
+  @ViewChild('div')
+  div: ElementRef;
 }
 
 /* Button */

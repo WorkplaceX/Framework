@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
-import { FrameworkComponent, Selector, Page, Html, Button, Div, DivContainer, BingMap } from './framework/framework.component';
+import { FrameworkComponent, Selector, Page, Html, Html2, Button, Div, DivContainer, BingMap } from './framework/framework.component';
 
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,7 @@ import { Custom01Component } from 'src/Application.Website/Shared/CustomComponen
 
 @NgModule({
   declarations: [
-    AppComponent, FrameworkComponent, Selector, Page, Html, Button, Div, DivContainer, BingMap, GridComponent, BootstrapNavbarComponent, Custom01Component
+    AppComponent, FrameworkComponent, Selector, Page, Html, Html2, Button, Div, DivContainer, BingMap, GridComponent, BootstrapNavbarComponent, Custom01Component
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
