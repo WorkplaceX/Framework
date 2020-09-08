@@ -34,7 +34,7 @@
                 // POST app.json
                 if (!await Post(context, path, appSelector))
                 {
-                    // GET index.html from "Application.Server/Framework/Application.Website/" (With server side rendering)
+                    // GET index.html from "Application.Server/Framework/Application.Website/" (With server side rendering or serve index.html directly)
                     if (!await WebsiteServerSideRenderingAsync(context, path, appSelector, null))
                     {
                         // GET file from "Application.Server/Framework/Application.Website/"
@@ -110,7 +110,7 @@
             string fileName = UtilFramework.FolderNameParse(folderName, pathIndexHtml);
             if (File.Exists(fileName))
             {
-                if (fileName.EndsWith(".html") && ConfigServer.Load().IsServerSideRendering && UtilFramework.StringNull(appSelector.AppTypeName) != null)
+                if (fileName.EndsWith(".html") && UtilFramework.StringNull(appSelector.AppTypeName) != null)
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
                     string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector, appJson);
@@ -195,12 +195,28 @@
             string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
             serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
             url += "?view=" + serverSideRenderView;
-            string indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:50919/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
+
+            bool isServerSideRendering = ConfigServer.Load().IsServerSideRendering;
+            string indexHtml;
+            if (isServerSideRendering)
+            {
+                // index.html server side rendering
+                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:50919/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
+            }
+            else
+            {
+                // index.html serve directly
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/"), "/index.html");
+                indexHtml = UtilFramework.FileLoad(fileName);
+            }
 
             // Set jsonBrowser in index.html.
             string scriptFind = "</app-root>"; //" <script>var jsonBrowser={}</script>"; // For example Html5Boilerplate build process renames var jsonBrowser to a.
             string scriptReplace = "</app-root><script>var jsonBrowser = " + jsonClient + "</script>";
-            indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
+            if (isServerSideRendering)
+            {
+                indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
+            }
 
             // Add Angular scripts
             scriptFind = "</body></html>";

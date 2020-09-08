@@ -114,7 +114,13 @@ export class DataService {
       }
     } else {
       // Render in browser
-      this.json = jsonBrowser;
+      if (typeof jsonBrowser == 'undefined') { // jsonBrowser not declared in index.html
+        this.json = <Json>{};
+      } else
+      {
+        this.json = jsonBrowser; // Provided by SSR in index.html see also method WebsiteServerSideRenderingAsync();
+      }
+
       this.json.IsServerSideRendering = false;
       if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
         this.json.EmbeddedUrl = "http://localhost:50919/";
