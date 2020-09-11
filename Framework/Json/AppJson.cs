@@ -2444,7 +2444,7 @@
         public string TextHtml;
 
         /// <summary>
-        /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml.
+        /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml. Html elements such as input are shown.
         /// </summary>
         public bool IsNoSanatize;
     }
