@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, SimpleChanges, TemplateRef, ViewContainerRef, Renderer2, ViewRef, ComponentFactoryResolver } from '@angular/core';
 import { DataService, CommandJson } from '../data.service';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -29,8 +29,8 @@ export class FrameworkComponent implements OnInit {
   <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
   <div data-DivContainer [ngClass]="json.CssClass" *ngIf="json.Type=='DivContainer'" [json]=json></div>
   <div data-Page [ngClass]="json.CssClass" *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
-  <div data-Html style="display:inline" *ngIf="json.Type=='Html2'" [json]=json></div>
-  <div data-Html2 style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
+  <div data-Html style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
+  <div data-Html2 style="display:inline" *ngIf="json.Type=='Html2'" [json]=json></div>
   <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
   <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>  
   <div data-BingMap [ngClass]="json.CssClass" *ngIf="json.Type=='BingMap'" [json]=json></div>
@@ -108,14 +108,62 @@ export class Html {
 @Component({
   selector: '[data-Html2]',
   template: `
-  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml"></div>`
+  ab
+  <ng-template #myTemplate>
+  aaa
+  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml"></div>
+  <div data-Button [json]="{}"></div>
+  </ng-template>
+  <ng-template #myTemplate2>
+  bb
+  </ng-template>
+  <ng-template #myTemplate3>
+  bb
+  </ng-template>
+  <ng-template #myTemplate4>
+  bb
+  </ng-template>
+  `
 })
-export class Html2 {
+export class Html2 implements OnInit {
   @Input() json: any
 
-  constructor(private sanitizer: DomSanitizer){
+  constructor(private sanitizer: DomSanitizer, private viewContainer: ViewContainerRef, private renderer: Renderer2, private componentFactoryResolver: ComponentFactoryResolver){
 
   }
+
+  ngOnInit() {
+    console.log("viewContainer", this.viewContainer);
+    console.log("myTemplate", this.myTemplate);
+    console.log("renderer", this. renderer);
+    console.log("myTemplate.elementRef", this.myTemplate.elementRef);
+    (<HTMLElement>this.myTemplate.elementRef.nativeElement).append(this.renderer.createElement("My"));
+    // this.myTemplate.createEmbeddedView(this.viewContainer);
+    var viewRef = this.viewContainer.createEmbeddedView(this.myTemplate);
+    console.log(viewRef);
+
+    // https://www.bennadel.com/blog/3737-rendering-a-templateref-as-a-child-of-the-body-element-in-angular-9-0-0-rc-5.htm
+
+    console.log("viewContainer", this.viewContainer.element);
+
+    var element = <HTMLElement>this.renderer.createElement("MyTag");
+    element.innerHTML = "Hello my";
+
+    (<HTMLElement>this.viewContainer.element.nativeElement).appendChild(element);
+
+    console.log("viewContainer", this.viewContainer.length);
+
+    let factory = this.componentFactoryResolver.resolveComponentFactory(Button);
+    let button = this.viewContainer.createComponent(factory);
+    button.instance.json = { TextHtml: 'Yes' };
+  }
+
+  ngAfterViewInit(){
+
+  }
+
+  @ViewChild('myTemplate', {static: true})
+  myTemplate: TemplateRef<unknown>
 
   textHtml: any;
 
