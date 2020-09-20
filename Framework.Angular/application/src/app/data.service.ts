@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Inject, RendererFactory2, Renderer2 } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
+
+// See also https://angular.io/guide/http
+import { throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
@@ -185,10 +189,16 @@ export class DataService {
       requestJson.ResponseCount = this.json.ResponseCount;
       requestJson.BrowserUrl = window.location.href;
 
-      this.httpClient.request("POST", requestUrl, {
-        body: JSON.stringify(requestJson),
-        withCredentials: true,
-      })
+      // app.json POST
+      this.httpClient.post<Json>(
+        requestUrl, 
+        JSON.stringify(requestJson),
+        { withCredentials: true }
+      )
+      .pipe(catchError((error: HttpErrorResponse) => {
+        this.isRequestPending = false;
+        return throwError("app.json POST failed!");
+      }))
       .subscribe((data: Json) => {
         let jsonResponse = data;
         this.fileDownload(jsonResponse);
@@ -209,14 +219,12 @@ export class DataService {
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {
           setTimeout(() => {
-            window.location.reload(true);
+            window.location.reload();
           }, 1000); // Wait one second then reload.
         }
         if (this.json.PathAddHistory != null) {
           this.location.go(this.json.PathAddHistory, "", this.json.PathAddHistory); // Put path into state because Angular does not handle traling slash in location.
         }
-      }, error => {
-        this.isRequestPending = false;
       });
     } else {
       this.requestJsonQueue = requestJson;

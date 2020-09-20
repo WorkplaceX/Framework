@@ -18,6 +18,7 @@ ToDo
 -Html5 valid
 -Navigation like https://rangle.io/
 -IoC for singleton and [ThreadStatic]
+-Rendering A TemplateRef As A Child Of The Body Element (https://www.bennadel.com/blog/3737-rendering-a-templateref-as-a-child-of-the-body-element-in-angular-9-0-0-rc-5.htm)
 
 ToDo
 -pixy.org Images

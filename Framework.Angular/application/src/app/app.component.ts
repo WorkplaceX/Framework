@@ -4,8 +4,7 @@ import { Location, LocationStrategy, PathLocationStrategy, PopStateEvent} from '
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  template: `<div style="display:inline" data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>`,
   providers: [Location, {provide: LocationStrategy, useClass: PathLocationStrategy}],
 })
 export class AppComponent {
