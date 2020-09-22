@@ -8,16 +8,10 @@ namespace Framework.Json.Bulma
     /// </summary>
     public class BulmaNavbar : ComponentJson
     {
-        internal BulmaNavbar(ComponentJson owner)
+        public BulmaNavbar(ComponentJson owner)
             : base(owner, nameof(BulmaNavbar))
         {
 
-        }
-
-        public BulmaNavbar(ComponentJson owner, BulmaNavbarAdapter bulmaNavbarAdapter) 
-            : this(owner)
-        {
-            BulmaNavbarAdapter = bulmaNavbarAdapter;
         }
 
         public string BrandTextHtml;
@@ -37,8 +31,23 @@ namespace Framework.Json.Bulma
 
         internal List<BulmaNavbarItem> ItemList;
 
-        [Serialize(SerializeEnum.Session)]
-        public BulmaNavbarAdapter BulmaNavbarAdapter;
+        private void RowMap(Row args, BulmaNavbarRowMapResult result, string propertyName)
+        {
+            object value = args.GetType().GetProperty(propertyName).GetValue(args);
+            result.GetType().GetProperty(propertyName).SetValue(result, value);
+        }
+
+        protected virtual void RowMap(Row args, BulmaNavbarRowMapResult result)
+        {
+            // Default row mapper
+            RowMap(args, result, nameof(result.Id));
+            RowMap(args, result, nameof(result.ParentId));
+            RowMap(args, result, nameof(result.TextHtml));
+            RowMap(args, result, nameof(result.IsDivider));
+            RowMap(args, result, nameof(result.FilterFieldName));
+            RowMap(args, result, nameof(result.IsNavbarEnd));
+            RowMap(args, result, nameof(result.Sort));
+        }
     }
 
     public class BulmaNavbarGrid
@@ -70,24 +79,7 @@ namespace Framework.Json.Bulma
         public List<BulmaNavbarItem> ItemList = new List<BulmaNavbarItem>();
     }
 
-    /// <summary>
-    /// Map row fields to known bulma fields.
-    /// </summary>
-    public class BulmaNavbarAdapter : ComponentJson
-    {
-        public BulmaNavbarAdapter(ComponentJson owner) 
-            : base(owner, null)
-        {
-
-        }
-
-        public virtual void Read(Row args, BulmaNavbarAdapterResult result)
-        {
-
-        }
-    }
-
-    public class BulmaNavbarAdapterResult
+    public class BulmaNavbarRowMapResult
     {
         public bool IsHide { get; set; }
 
@@ -102,5 +94,7 @@ namespace Framework.Json.Bulma
         public string FilterFieldName { get; set; }
 
         public bool IsNavbarEnd { get; set; }
+
+        public double Sort { get; set; }
     }
 }
