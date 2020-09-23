@@ -1,7 +1,6 @@
 ﻿namespace Framework.DataAccessLayer
 {
     using System;
-    using System.Linq;
 
     /// <summary>
     /// Base class for every database row. (Table and view).

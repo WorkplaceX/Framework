@@ -1,0 +1,50 @@
+<nav class="navbar is-info" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="#" (click)="clickHome()" [innerHtml]="json.BrandTextHtml">
+    </a>
+
+    <a #burger role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" (click)="clickBurger()">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <ng-template #itemTemplate let-item>
+    <!-- Level0 -->
+    <ng-container [ngSwitch]="item.ItemEnum">
+      <a *ngSwitchCase="1" class="navbar-item" [innerHtml]="item.TextHtml">
+      </a>
+      <a *ngSwitchCase="3" class="navbar-item">
+        <input class="input" type="search" placeholder="{{item.FilterPlaceholder}}">
+      </a>
+      <div *ngSwitchCase="4" class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link" [innerHtml]="item.TextHtml">
+        </a>
+        <!-- Level1 -->
+        <div class="navbar-dropdown">
+          <ng-container *ngFor="let item of item.ItemList; trackBy trackBy">
+            <ng-container [ngSwitch]="item.ItemEnum">
+              <a *ngSwitchCase="1" class="navbar-item" [innerHtml]="item.TextHtml">
+              </a>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
+
+  <div #burgerTarget class="navbar-menu">
+    <div class="navbar-start">
+      <ng-container *ngFor="let item of json.ItemStartList; trackBy trackBy">
+        <ng-container *ngTemplateOutlet="itemTemplate; context: {$implicit: item}"></ng-container>
+      </ng-container>
+    </div>
+
+    <div class="navbar-end">
+      <ng-container *ngFor="let item of json.ItemEndList; trackBy trackBy">
+        <ng-container *ngTemplateOutlet="itemTemplate; context: {$implicit: item}"></ng-container>
+      </ng-container>
+    </div>
+  </div>
+</nav>

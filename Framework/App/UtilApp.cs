@@ -172,7 +172,7 @@
             int buttonId = 0; // BootstrapNavbarButton.Id
             foreach (BootstrapNavbar bootstrapNavbar in appJson.ComponentListAll().OfType<BootstrapNavbar>())
             {
-                bootstrapNavbar.ButtonList = new List<BootstrapNavbarButton>();
+                bootstrapNavbar.ButtonList = new List<BootstrapNavbarButton>(); // Clear
                 foreach (var item in bootstrapNavbar.GridList)
                 {
                     if (item.Grid?.TypeRow != null)

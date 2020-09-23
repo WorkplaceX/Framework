@@ -2,38 +2,22 @@ import { Component, OnInit, Input, ViewChild, ElementRef, SimpleChanges } from '
 import { DataService, CommandJson } from '../data.service';
 import { DomSanitizer } from '@angular/platform-browser';
 
-@Component({
-  selector: 'app-framework',
-  template: `
-    <p>
-      framework works!
-    </p>
-  `,
-  styles: [
-  ]
-})
-export class FrameworkComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
-}
-
 /* Selector */
 @Component({
   selector: '[data-Selector]',
   template: `
-  <div data-Button style="display:inline" *ngIf="json.Type=='Button'" [json]=json></div>
-  <div data-Div [ngClass]="json.CssClass" *ngIf="json.Type=='Div'" [json]=json></div>
-  <div data-DivContainer [ngClass]="json.CssClass" *ngIf="json.Type=='DivContainer'" [json]=json></div>
-  <div data-Page [ngClass]="json.CssClass" *ngIf="json.Type=='Page' && !json.IsHide" [json]=json></div>
-  <div data-Html style="display:inline" *ngIf="json.Type=='Html'" [json]=json></div>
-  <div data-Grid [ngClass]="json.CssClass" *ngIf="json.Type=='Grid' && !json.IsHide" [json]=json></div>
-  <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngIf="json.Type=='BootstrapNavbar'" [json]=json></div>  
-  <div data-BingMap [ngClass]="json.CssClass" *ngIf="json.Type=='BingMap'" [json]=json></div>
-  <div data-Custom01 style="display:inline" *ngIf="json.Type=='Custom01'" [json]=json></div>
+  <ng-container [ngSwitch]="json.Type">
+    <div data-Button style="display:inline" *ngSwitchCase="'Button'" [json]=json></div>
+    <div data-Div [ngClass]="json.CssClass" *ngSwitchCase="'Div'" [json]=json></div>
+    <div data-DivContainer [ngClass]="json.CssClass" *ngSwitchCase="'DivContainer'" [json]=json></div>
+    <div data-Page [ngClass]="json.CssClass" *ngSwitchCase="'Page'" [json]=json></div>
+    <div data-Html style="display:inline" *ngSwitchCase="'Html'" [json]=json></div>
+    <div data-Grid [ngClass]="json.CssClass" *ngSwitchCase="'Grid'" [json]=json></div>
+    <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
+    <div data-BulmaNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>  
+    <div data-BingMap [ngClass]="json.CssClass" *ngSwitchCase="'BingMap'" [json]=json></div>
+    <div data-Custom01 style="display:inline" *ngSwitchCase="'Custom01'" [json]=json></div>
+  </ng-container>
   `
 })
 export class Selector {

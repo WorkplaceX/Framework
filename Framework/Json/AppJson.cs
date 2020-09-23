@@ -3,6 +3,7 @@
     using Database.dbo;
     using Framework.App;
     using Framework.DataAccessLayer;
+    using Framework.Json.Bulma;
     using Framework.Server;
     using Framework.Session;
     using Microsoft.AspNetCore.Http;
@@ -870,6 +871,7 @@
             
             UtilApp.DivContainerRender(appJson);
             UtilApp.BootstrapNavbarRender(appJson);
+            BulmaNavbar.Render(appJson);
 
             UtilStopwatch.TimeStop("Process");
         }
@@ -2199,6 +2201,15 @@
         /// Gets or sets Row. Data row to update (index) or insert (new) into database.
         /// </summary>
         public Row Row;
+
+        /// <summary>
+        /// Returns row loaded from database.
+        /// </summary>
+        public Row RowGet(Grid grid)
+        {
+            UtilFramework.Assert(RowEnum == GridRowEnum.Index);
+            return grid.RowList[RowId.Value - 1];
+        }
     }
 
     internal enum GridCellEnum

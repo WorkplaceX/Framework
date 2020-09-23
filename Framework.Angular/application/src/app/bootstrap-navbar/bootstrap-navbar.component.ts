@@ -4,9 +4,7 @@ import { DataService, CommandJson } from '../data.service';
 /* BootstrapNavbar */
 @Component({
   selector: '[data-BootstrapNavbar]',
-  templateUrl: './bootstrap-navbar.component.html',
-  styles: [
-  ]
+  templateUrl: './bootstrap-navbar.component.html'
 })
 export class BootstrapNavbarComponent implements OnInit {
 
