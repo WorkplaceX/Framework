@@ -72,6 +72,10 @@ export class CommandJson {
   GridIsClickEnum : number;
 
   BootstrapNavbarButtonId: number;
+  
+  BulmaNavbarItemId: number;
+
+  BulmaFilterText: string;
 
   NavigateLinkPath: string;
 }

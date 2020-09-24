@@ -11,7 +11,6 @@
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Json.Grid;
-    using static Framework.Json.Page;
 
     internal enum GridRowEnum
     {
@@ -1173,13 +1172,24 @@
             {
                 var rowSelectedLocal = grid.RowSelected;
 
-                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
+                int rowStateId;
+                // Get rowStateId either from cell or directly from command.
+                if (commandJson.GridCellId != 0)
+                {
+                    GridCell cell = grid.CellList[commandJson.GridCellId - 1];
+                    rowStateId = cell.RowStateId;
+                }
+                else
+                {
+                    rowStateId = commandJson.RowStateId;
+                }
+
                 Row rowSelected = null;
                 foreach (var rowState in grid.RowStateList)
                 {
                     if (rowState.RowEnum == GridRowEnum.Index)
                     {
-                        rowState.IsSelect = rowState.Id == cell.RowStateId;
+                        rowState.IsSelect = rowState.Id == rowStateId;
                         if (rowState.IsSelect)
                         {
                             rowSelected = grid.RowListInternal[rowState.RowId.Value - 1];

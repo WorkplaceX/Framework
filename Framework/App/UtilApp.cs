@@ -62,7 +62,7 @@
         }
 
         /// <summary>
-        /// Returns all button recursively.
+        /// Returns all button recursive.
         /// </summary>
         private static void ProcessBootstrapNavbarButtonListAll(List<BootstrapNavbarButton> buttonList, List<BootstrapNavbarButton> result)
         {

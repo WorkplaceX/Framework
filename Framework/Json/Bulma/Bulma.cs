@@ -1,5 +1,5 @@
-﻿using DocumentFormat.OpenXml.Office.CustomUI;
-using Framework.DataAccessLayer;
+﻿using Framework.DataAccessLayer;
+using Framework.Session;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,12 +10,18 @@ namespace Framework.Json.Bulma
     /// </summary>
     public class BulmaNavbar : ComponentJson
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public BulmaNavbar(ComponentJson owner)
             : base(owner, nameof(BulmaNavbar))
         {
 
         }
 
+        /// <summary>
+        /// For example company logo.
+        /// </summary>
         public string BrandTextHtml;
 
         [Serialize(SerializeEnum.Session)]
@@ -28,31 +34,55 @@ namespace Framework.Json.Bulma
         /// Add data grid to Navbar.
         /// </summary>
         /// <param name="grid">Data grid with Id, ParentId and TextHtml columns.</param>
+        /// <param name="isNavbarEnd">If true, items are placed on the right hand side of the navbar.</param>
         /// <param name="isSelectedMode">If true, currently selected row is shown on top as drop down button. Used for example for language switch.</param>
-        public void GridAdd(Grid grid, bool isSelectedMode = false)
+        public void GridAdd(Grid grid, bool isNavbarEnd = false, bool isSelectedMode = false)
         {
-            GridList.Add(new BulmaNavbarGrid { Grid = grid, IsSelectedMode = isSelectedMode });
+            GridList.Add(new BulmaNavbarGrid { Grid = grid, IsNavbarEnd = isNavbarEnd, IsSelectedMode = isSelectedMode });
         }
 
         /// <summary>
-        /// Add data grid search filter to navbar.
+        /// Add data grid search filter input element to navbar.
         /// </summary>
+        /// <param name="grid">Data grid on which to search.</param>
+        /// <param name="isNavbarEnd">If true, search box is placed to the right hand side of the navbar.</param>
         public void FilterSet(Grid grid, string fieldName, bool isNavbarEnd = false)
         {
-            Filter = new BulmaNavbarFilter { Grid = grid, FieldName = fieldName, IsNavbarEnd = isNavbarEnd };
+            Filter = new BulmaNavbarFilter { Grid = grid, FieldNameCSharp = fieldName, IsNavbarEnd = isNavbarEnd };
         }
 
         /// <summary>
         /// Gets ItemStartList. Items on left hand side in navbar.
         /// </summary>
-        [Serialize(SerializeEnum.Client)]
         internal List<BulmaNavbarItem> ItemStartList = new List<BulmaNavbarItem>();
 
         /// <summary>
         /// Gets ItemStartList. Items on left hand side in navbar.
         /// </summary>
-        [Serialize(SerializeEnum.Client)]
         internal List<BulmaNavbarItem> ItemEndList = new List<BulmaNavbarItem>();
+
+        private void ItemListAll(List<BulmaNavbarItem> itemList, List<BulmaNavbarItem> result)
+        {
+            if (itemList != null)
+            {
+                foreach (var navbarItem in itemList)
+                {
+                    result.Add(navbarItem);
+                    ItemListAll(navbarItem.ItemList, result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns ItemStartList and ItemEndList recursive.
+        /// </summary>
+        private List<BulmaNavbarItem> ItemListAll()
+        {
+            var result = new List<BulmaNavbarItem>();
+            ItemListAll(ItemStartList, result);
+            ItemListAll(ItemEndList, result);
+            return result;
+        }
 
         private void RowMap(BulmaNavbarRowMapArgs args, BulmaNavbarRowMapResult result, string fieldName)
         {
@@ -64,6 +94,9 @@ namespace Framework.Json.Bulma
             }
         }
 
+        /// <summary>
+        /// Override this method to custom map incoming data rows to navbar items.
+        /// </summary>
         protected virtual void RowMap(BulmaNavbarRowMapArgs args, BulmaNavbarRowMapResult result)
         {
             // Default row mapper
@@ -75,16 +108,18 @@ namespace Framework.Json.Bulma
             RowMap(args, result, nameof(result.Sort));
         }
 
-        private static void Render(BulmaNavbar navbar, Grid grid, ref int navbarItemId)
+        private static void Render(BulmaNavbar navbar, BulmaNavbarGrid navbarGrid, ref int navbarItemId)
         {
+            Grid grid = navbarGrid.Grid;
+
             // Map all data grid rows
             var rowMapList = new List<BulmaNavbarRowMapResult>();
             foreach (var rowState in grid.RowStateList)
             {
-                if (rowState.RowEnum == Session.GridRowEnum.Index)
+                if (rowState.RowEnum == GridRowEnum.Index)
                 {
-                    var rowMapArgs = new BulmaNavbarRowMapArgs { Row = rowState.RowGet(grid) };
-                    var rowMapResult = new BulmaNavbarRowMapResult { RowStateId = rowState.Id };
+                    var rowMapArgs = new BulmaNavbarRowMapArgs { Row = grid.RowList[rowState.RowId.Value - 1] };
+                    var rowMapResult = new BulmaNavbarRowMapResult { RowStateId = rowState.Id, IsSelect = rowState.IsSelect };
                     navbar.RowMap(rowMapArgs, rowMapResult);
                     if (rowMapResult.IsHide == false)
                     {
@@ -94,17 +129,38 @@ namespace Framework.Json.Bulma
             }
             rowMapList = rowMapList.OrderBy(item => item.Sort).ToList();
 
+            // IsSelectedMode for example for language selection.
+            if (navbarGrid.IsSelectedMode && rowMapList.Count > 0)
+            {
+                var rowMapTop = rowMapList.FirstOrDefault(item => item.RowStateId == grid.RowSelectedRowStateId);
+                if (rowMapTop == null)
+                {
+                    rowMapTop = rowMapList.First();
+                }
+                foreach (var rowMap in rowMapList)
+                {
+                    if (rowMap != rowMapTop)
+                    {
+                        rowMap.ParentId = rowMapTop.Id;
+                    }
+                }
+            }
+
             // Level 0
             Dictionary<int, BulmaNavbarItem> level0List = new Dictionary<int, BulmaNavbarItem>();
-            foreach (var item in rowMapList)
+            foreach (var rowMap in rowMapList)
             {
-                if (item.ParentId == null)
+                if (rowMap.ParentId == null)
                 {
                     BulmaNavbarItemEnum itemEnum = BulmaNavbarItemEnum.Text;
-                    navbarItemId += 1;
-                    var navbarItem = new BulmaNavbarItem { Id = navbarItemId, ItemEnum = itemEnum, Grid = grid, RowStateId = item.RowStateId, TextHtml = item.TextHtml };
-                    level0List.Add(item.Id, navbarItem);
-                    if (item.IsNavbarEnd == false)
+                    var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, IsActive = rowMap.IsSelect };
+                    level0List.Add(rowMap.Id, navbarItem);
+                    bool isNavbarEnd = navbarGrid.IsNavbarEnd;
+                    if (rowMap.IsNavbarEnd != null)
+                    {
+                        isNavbarEnd = rowMap.IsNavbarEnd.Value;
+                    }
+                    if (isNavbarEnd == false)
                     {
                         navbar.ItemStartList.Add(navbarItem);
                     }
@@ -116,20 +172,20 @@ namespace Framework.Json.Bulma
             }
 
             // Level 1
-            foreach (var item in rowMapList)
+            foreach (var rowMap in rowMapList)
             {
-                if (item.ParentId != null)
+                if (rowMap.ParentId != null)
                 {
-                    if (level0List.TryGetValue(item.ParentId.Value, out var navbarItemParent))
+                    if (level0List.TryGetValue(rowMap.ParentId.Value, out var navbarItemParent))
                     {
                         navbarItemParent.ItemEnum = BulmaNavbarItemEnum.Parent;
 
                         BulmaNavbarItemEnum itemEnum = BulmaNavbarItemEnum.Text;
-                        if (item.IsDivider)
+                        if (rowMap.IsDivider)
                         {
                             itemEnum = BulmaNavbarItemEnum.Divider;
                         }
-                        var navbarItem = new BulmaNavbarItem { Id = navbarItemId, ItemEnum = itemEnum, Grid = grid, RowStateId = item.RowStateId, TextHtml = item.TextHtml };
+                        var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, IsActive = rowMap.IsSelect };
                         navbarItemParent.ItemList.Add(navbarItem);
                     }
                 }
@@ -141,18 +197,28 @@ namespace Framework.Json.Bulma
             int navbarItemId = 0;
             foreach (BulmaNavbar navbar in appJson.ComponentListAll().OfType<BulmaNavbar>())
             {
+                // ItemList clear
+                navbar.ItemStartList.Clear();
+                navbar.ItemEndList.Clear();
+
                 // Add level 0 and level 1 to navbar
-                foreach (var grid in navbar.GridList)
+                foreach (var navbarGrid in navbar.GridList)
                 {
-                    Render(navbar, grid.Grid, ref navbarItemId);
+                    Render(navbar, navbarGrid, ref navbarItemId);
                 }
 
-                // Add data grid filter to navbar
+                // Add data grid filter (input text) to navbar
                 if (navbar.Filter != null)
                 {
                     var filter = navbar.Filter;
-                    navbarItemId += 1;
-                    var navbarItem = new BulmaNavbarItem { Id = navbarItemId, ItemEnum = BulmaNavbarItemEnum.Filter, Grid = filter.Grid, FilterFieldName = filter.FieldName, FilterPlaceholder = "Search" };
+                    var grid = filter.Grid;
+
+                    // Get filter text from value store.
+                    new GridFilter(grid).FilterValueList().TryGetValue(filter.FieldNameCSharp, out var gridFilterValue);
+                    string filterText = gridFilterValue?.Text;
+                    int rowSateId = grid.RowStateList.Single(item => item.RowEnum == GridRowEnum.Filter).Id;
+
+                    var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = BulmaNavbarItemEnum.Filter, Grid = grid, FilterFieldNameCSharp = filter.FieldNameCSharp, RowStateId = rowSateId, FilterText = filterText, FilterPlaceholder = "Search" };
                     if (filter.IsNavbarEnd == false)
                     {
                         navbar.ItemStartList.Add(navbarItem);
@@ -164,9 +230,37 @@ namespace Framework.Json.Bulma
                 }
             }
         }
+
+        internal static void ProcessAsync(AppJson appJson)
+        {
+            if (UtilSession.Request(appJson, RequestCommand.BulmaNavbarItemIsClick, out CommandJson commandJson, out BulmaNavbar navbar))
+            {
+                var navbarItem = navbar.ItemListAll().Single(item => item.Id == commandJson.BulmaNavbarItemId);
+                Grid grid = navbarItem.Grid;
+
+                // User clicked navbar item
+                if (navbarItem.ItemEnum == BulmaNavbarItemEnum.Text)
+                {
+                    appJson.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId });
+                }
+
+                // User changed navbar filter text
+                if (navbarItem.ItemEnum == BulmaNavbarItemEnum.Filter)
+                {
+                    string filterText = commandJson.BulmaFilterText;
+                    int rowStateId = navbarItem.RowStateId;
+                    
+                    var column = grid.ColumnList.Single(item => item.FieldNameCSharp == navbarItem.FilterFieldNameCSharp);
+                    var cell = grid.CellList.Single(item => item.RowStateId == rowStateId && item.ColumnId == column.Id && item.CellEnum == GridCellEnum.Filter);
+
+                    appJson.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId, GridCellId = cell.Id, GridCellText = filterText });
+
+                }
+            }
+        }
     }
 
-    public class BulmaNavbarGrid
+    internal class BulmaNavbarGrid
     {
         public Grid Grid;
 
@@ -174,18 +268,20 @@ namespace Framework.Json.Bulma
         /// Gets or sets IsSelectedMode. If true, currently selected row is shown on top as drop down button. Used for example for language switch.
         /// </summary>
         public bool IsSelectedMode;
-    }
-
-    public class BulmaNavbarFilter
-    {
-        public Grid Grid;
-
-        public string FieldName;
 
         public bool IsNavbarEnd;
     }
 
-    public enum BulmaNavbarItemEnum
+    internal class BulmaNavbarFilter
+    {
+        public Grid Grid;
+
+        public string FieldNameCSharp;
+
+        public bool IsNavbarEnd;
+    }
+
+    internal enum BulmaNavbarItemEnum
     {
         None = 0,
 
@@ -199,14 +295,13 @@ namespace Framework.Json.Bulma
     }
 
     /// <summary>
-    /// Dto for Angular bulma button or input html element.
+    /// Dto for Angular bulma link or input html element.
     /// </summary>
-    public class BulmaNavbarItem
+    internal class BulmaNavbarItem
     {
         [Serialize(SerializeEnum.Both)]
         public int Id;
 
-        [Serialize(SerializeEnum.Client)]
         public BulmaNavbarItemEnum ItemEnum;
 
         [Serialize(SerializeEnum.Session)]
@@ -218,8 +313,11 @@ namespace Framework.Json.Bulma
         [Serialize(SerializeEnum.Client)]
         public string TextHtml;
 
+        [Serialize(SerializeEnum.Client)]
+        public bool IsActive;
+
         [Serialize(SerializeEnum.Session)]
-        public string FilterFieldName;
+        public string FilterFieldNameCSharp;
 
         [Serialize(SerializeEnum.Client)]
         public string FilterText;
@@ -248,10 +346,12 @@ namespace Framework.Json.Bulma
 
         public bool IsDivider;
 
-        public bool IsNavbarEnd;
+        public bool? IsNavbarEnd;
 
-        public double Sort;
+        public double? Sort;
 
         internal int RowStateId;
+
+        internal bool IsSelect;
     }
 }

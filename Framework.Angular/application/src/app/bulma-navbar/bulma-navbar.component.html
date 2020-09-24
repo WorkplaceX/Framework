@@ -1,6 +1,8 @@
 <nav class="navbar is-info" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="#" (click)="clickHome()" [innerHtml]="json.BrandTextHtml">
+    <a class="navbar-item" href="#" (click)="clickHome()">
+      <span [innerHtml]="json.BrandTextHtml"></span>
+      <span *ngIf="json.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
     </a>
 
     <a #burger role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" (click)="clickBurger()">
@@ -13,19 +15,29 @@
   <ng-template #itemTemplate let-item>
     <!-- Level0 -->
     <ng-container [ngSwitch]="item.ItemEnum">
-      <a *ngSwitchCase="1" class="navbar-item" [innerHtml]="item.TextHtml">
+      <!-- Link -->
+      <a *ngSwitchCase="1" class="navbar-item" [ngClass]="{'is-active':item.IsActive}" (click)="click(item)">
+        <span [innerHtml]="item.TextHtml"></span>
+        <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
       </a>
-      <a *ngSwitchCase="3" class="navbar-item">
-        <input class="input" type="search" placeholder="{{item.FilterPlaceholder}}">
+      <!-- Input -->
+      <a *ngSwitchCase="3" class="navbar-item is-active">
+        <input class="input" type="text" [(ngModel)]="item.FilterText" (ngModelChange)="filterTextChange(item)" placeholder="{{item.FilterPlaceholder}}">
+        <span class="icon" *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
       </a>
+      <!-- DropDown -->
       <div *ngSwitchCase="4" class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link" [innerHtml]="item.TextHtml">
+        <a class="navbar-link" (click)="click(item)">
+          <span [innerHtml]="item.TextHtml"></span>
+          <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
         </a>
         <!-- Level1 -->
         <div class="navbar-dropdown">
           <ng-container *ngFor="let item of item.ItemList; trackBy trackBy">
             <ng-container [ngSwitch]="item.ItemEnum">
-              <a *ngSwitchCase="1" class="navbar-item" [innerHtml]="item.TextHtml">
+              <a *ngSwitchCase="1" class="navbar-item" [ngClass]="{'is-active':item.IsActive}" (click)="click(item)">
+                <span [innerHtml]="item.TextHtml"></span>
+                <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
               </a>
             </ng-container>
           </ng-container>

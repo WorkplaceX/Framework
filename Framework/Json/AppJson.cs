@@ -19,8 +19,6 @@
 
         ButtonIsClick = 1,
 
-        BootstrapNavbarButtonIsClick = 7,
-
         GridIsClickSort = 8,
 
         GridCellIsModify = 9,
@@ -55,6 +53,13 @@
         /// User clicked backward, forward navigation history.
         /// </summary>
         NavigateLinkBackwardForward = 17,
+
+        BootstrapNavbarButtonIsClick = 7,
+
+        /// <summary>
+        /// User clicked button on bulma navbar.
+        /// </summary>
+        BulmaNavbarItemIsClick = 18,
     }
 
     /// <summary>
@@ -89,6 +94,8 @@
 
         public int GridCellId { get; set; }
 
+        public int RowStateId { get; set; }
+
         public string GridCellText { get; set; }
 
         /// <summary>
@@ -119,6 +126,10 @@
         public bool GridCellTextIsLookup; // TODO Command Queue
 
         public int BootstrapNavbarButtonId { get; set; }
+        
+        public int BulmaNavbarItemId { get; set; }
+
+        public string BulmaFilterText { get; set; }
 
         /// <summary>
         /// Gets or sets NavigateLinkPath. For internal link. For example: "/contact/".
@@ -413,7 +424,7 @@
         }
 
         /// <summary>
-        /// Returns list of all child components recursively including this.
+        /// Returns list of all child components recursive including this.
         /// </summary>
         public static List<ComponentJson> ComponentListAll(this ComponentJson component)
         {
@@ -858,6 +869,7 @@
                 await UtilApp.ProcessNavigateLinkAsync(appJson); // Link POST instead of GET.
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
+                BulmaNavbar.ProcessAsync(appJson);
 
                 foreach (Page page in this.ComponentListAll().OfType<Page>())
                 {
@@ -916,6 +928,7 @@
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
         /// </summary>
+        [Serialize(SerializeEnum.Client)]
         internal bool IsReload { get; set; }
 
         /// <summary>
@@ -1984,7 +1997,7 @@
     }
 
     /// <summary>
-    /// Wrapper providing value store functions.
+    /// Wrapper providing filter value store functions.
     /// </summary>
     public sealed class GridFilter
     {
@@ -2201,15 +2214,6 @@
         /// Gets or sets Row. Data row to update (index) or insert (new) into database.
         /// </summary>
         public Row Row;
-
-        /// <summary>
-        /// Returns row loaded from database.
-        /// </summary>
-        public Row RowGet(Grid grid)
-        {
-            UtilFramework.Assert(RowEnum == GridRowEnum.Index);
-            return grid.RowList[RowId.Value - 1];
-        }
     }
 
     internal enum GridCellEnum

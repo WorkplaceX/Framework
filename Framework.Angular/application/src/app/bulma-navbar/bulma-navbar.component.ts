@@ -32,6 +32,17 @@ export class BulmaNavbarComponent implements OnInit {
     (<HTMLElement>this.burgerTarget.nativeElement).classList.toggle("is-active");
   }
 
+  click(navbarItem) {
+    navbarItem.IsShowSpinner = true;
+    this.dataService.update(<CommandJson> { Command: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id });
+    return false;
+  }
+
+  filterTextChange(navbarItem) {
+    navbarItem.IsShowSpinner = true;
+    this.dataService.update(<CommandJson> { Command: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id, BulmaFilterText: navbarItem.FilterText });
+  }
+
   trackBy(index, item) {
     return index; // or item.id
   }  
