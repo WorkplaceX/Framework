@@ -38,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 9.1.1
 
-                return "v3.37.27";
+                return "v3.37.28";
             }
         }
 
@@ -76,33 +76,6 @@ namespace Framework
                     throw new Exception("Running on ISS server! Use method UtilServer.FolderNameContentRoot();"); // Diferent folder structure! Use method: UtilServer.FolderNameContentRoot();
                 }
                 return FolderNameGet();
-            }
-        }
-
-        /// <summary>
-        /// Gets FolderNameExternal. This is the root folder name of the parent application, if this application is cloned into parents ExternalGit/ folder.
-        /// </summary>
-        public static string FolderNameExternal
-        {
-            get
-            {
-                if (!IsExternalGit)
-                {
-                    throw new Exception("This Application is not cloned into ExternalGit/ folder!");
-                }
-                return new Uri(new Uri(FolderName), "../../").AbsolutePath;
-            }
-        }
-
-        /// <summary>
-        /// Gets IsExternalGit. Returns true if this application is cloned into ExternalGit/ folder.
-        /// </summary>
-        public static bool IsExternalGit
-        {
-            get
-            {
-                var folderName = new Uri(new Uri(FolderName), "../").AbsolutePath;
-                return folderName.EndsWith("/ExternalGit/");
             }
         }
 

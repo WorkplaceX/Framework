@@ -155,7 +155,7 @@
             new CommandDeployDb(this);
             new CommandEnvironment(this);
             new CommandTest(this);
-            if (UtilFramework.IsExternalGit)
+            if (UtilExternal.IsExternal)
             {
                 new CommandExternal(this);
             }
@@ -737,22 +737,22 @@
             /// <summary>
             /// Gets AppSourceFolderName. This is folder ExternalGit/ProjectName/Application/App/
             /// </summary>
-            public string AppSourceFolderName { get; internal set; }
+            internal string AppSourceFolderName { get; set; }
 
             /// <summary>
             /// Gets AppDestFolderName. This is folder Application/App/ExternalGit/ProjectName/
             /// </summary>
-            public string AppDestFolderName { get; internal set; }
+            internal string AppDestFolderName { get; set; }
 
             /// <summary>
             /// Gets DatabaseSourceFolderName. This is folder ExternalGit/ProjectName/Application.Database/Database/
             /// </summary>
-            public string DatabaseSourceFolderName { get; internal set; }
+            internal string DatabaseSourceFolderName { get; set; }
 
             /// <summary>
             /// Gets DatabaseDestFolderName. This is folder Application.Database/Database/ExternalGit/ProjectName/
             /// </summary>
-            public string DatabaseDestFolderName { get; internal set; }
+            internal string DatabaseDestFolderName { get; set; }
 
             /// <summary>
             /// Gets WebsiteSourceFolderName. This is folder ExternalGit/ProjectName/Application.Website/
@@ -762,42 +762,47 @@
             /// <summary>
             /// Gets WebsiteDestFolderName. This is folder Application.Website/ExternalGit/ProjectName/
             /// </summary>
-            public string WebsiteDestFolderName { get; internal set; }
+            internal string WebsiteDestFolderName { get; set; }
 
             /// <summary>
             /// Gets CliAppSourceFolderName. This is folder Application.Cli/App/
             /// </summary>
-            public string CliAppSourceFolderName { get; internal set; }
+            internal string CliAppSourceFolderName { get; set; }
 
             /// <summary>
             /// Gets CliAppDestFolderName. This is folder Application.Cli/App/ExternalGit/ProjectName/
             /// </summary>
-            public string CliAppDestFolderName { get; internal set; }
+            internal string CliAppDestFolderName { get; set; }
 
             /// <summary>
             /// Gets CliDatabaseSourceFolderName. This is folder Application.Cli/Database/
             /// </summary>
-            public string CliDatabaseSourceFolderName { get; internal set; }
+            internal string CliDatabaseSourceFolderName { get; set; }
 
             /// <summary>
             /// Gets CliDatabaseDestFolderName. This is folder Application.Cli/Database/ExternalGit/ProjectName/
             /// </summary>
-            public string CliDatabaseDestFolderName { get; internal set; }
+            internal string CliDatabaseDestFolderName { get; set; }
 
             /// <summary>
             /// Gets DeployDbSourceFolderName. This is folder Application.Cli/DeployDb/
             /// </summary>
-            public string CliDeployDbSourceFolderName { get; internal set; }
+            internal string CliDeployDbSourceFolderName { get; set; }
 
             /// <summary>
             /// Gets DeployDbDestFolderName. This is folder Application.Cli/DeployDb/ExternalGit/ProjectName/
             /// </summary>
-            public string CliDeployDbDestFolderName { get; internal set; }
+            internal string CliDeployDbDestFolderName { get; set; }
 
             /// <summary>
             /// Gets WebsiteAngularDestFolderName. This is Angular folder Framework/Framework.Angular/application/src/Application.Website/
             /// </summary>
             public string WebsiteAngularDestFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets ExternalProjectName. See also file ConfigCli.json of host cli.
+            /// </summary>
+            internal string ExternalProjectName { get; set; }
 
             /// <summary>
             /// Copy file from source to dest. Creates new dest folder if it doesn't exist.
@@ -810,10 +815,20 @@
             /// <summary>
             /// Copy folder.
             /// </summary>
-            public void FolderCopy(string folderNameSource, string folderNameDest)
+            internal void FolderCopy(string folderNameSource, string folderNameDest)
             {
                 UtilCli.FolderDelete(folderNameDest);
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+            }
+
+            /// <summary>
+            /// Find and replace a line in a text file.
+            /// </summary>
+            internal void FileReplaceLine(string fileName, string find, string replace)
+            {
+                string text = UtilFramework.FileLoad(fileName);
+                text = UtilFramework.ReplaceLine(text, find, replace);
+                UtilFramework.FileSave(fileName, text);
             }
         }
     }

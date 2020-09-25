@@ -12,6 +12,54 @@ namespace Framework.Cli
     internal static class UtilExternal
     {
         /// <summary>
+        /// Gets FolderNameExternal. This is the root folder name of the parent application, if this application is cloned into parents ExternalGit/ folder.
+        /// </summary>
+        public static string FolderNameExternal
+        {
+            get
+            {
+                if (!IsExternal)
+                {
+                    throw new Exception("This Application is not cloned into ExternalGit/ folder!");
+                }
+                return new Uri(new Uri(UtilFramework.FolderName), "../../").AbsolutePath;
+            }
+        }
+
+        /// <summary>
+        /// Gets IsExternalGit. Returns true if this application is cloned into ExternalGit/ folder.
+        /// </summary>
+        public static bool IsExternal
+        {
+            get
+            {
+                var folderName = new Uri(new Uri(UtilFramework.FolderName), "../").AbsolutePath;
+                return folderName.EndsWith("/ExternalGit/");
+            }
+        }
+
+        /// <summary>
+        /// Returns ExternalProjectName without reading file ConfigCli. json. External file Config.Cli.json does not contain this value. See also file ConfigCli.json of host cli.
+        /// </summary>
+        public static string ExternalProjectName()
+        {
+            UtilFramework.Assert(IsExternal);
+
+            UtilFramework.Assert(UtilFramework.FolderName.StartsWith(UtilExternal.FolderNameExternal));
+
+            // ExternalGit/ProjectName/
+            string externalGitProjectNamePath = UtilFramework.FolderName.Substring(UtilExternal.FolderNameExternal.Length);
+
+            UtilFramework.Assert(externalGitProjectNamePath.StartsWith("ExternalGit/"));
+            UtilFramework.Assert(externalGitProjectNamePath.EndsWith("/"));
+
+            string result = externalGitProjectNamePath.Substring("ExternalGit/".Length);
+            result = result.Substring(0, result.Length - 1);
+
+            return result;
+        }
+
+        /// <summary>
         /// Call method CommandGenerateIntegrate(); on external AppCli.
         /// </summary>
         public static void CommandGenerateIntegrate(AppCli appCli, GenerateIntegrateResult result)
@@ -93,37 +141,35 @@ namespace Framework.Cli
         /// </summary>
         public static ExternalArgs ExternalArgs()
         {
-            UtilFramework.Assert(UtilFramework.FolderName.StartsWith(UtilFramework.FolderNameExternal));
-
             // ExternalGit/ProjectName/
-            string externalGitProjectNamePath = UtilFramework.FolderName.Substring(UtilFramework.FolderNameExternal.Length);
+            string externalGitProjectNamePath = "ExternalGit/" + UtilExternal.ExternalProjectName() + "/";
 
             // Application/App/
             string appSourceFolderName = UtilFramework.FolderName + "Application/App/";
-            string appDestFolderName = UtilFramework.FolderNameExternal + "Application/App/" + externalGitProjectNamePath;
+            string appDestFolderName = UtilExternal.FolderNameExternal + "Application/App/" + externalGitProjectNamePath;
 
             // Application.Database/Database/
             string databaseSourceFolderName = UtilFramework.FolderName + "Application.Database/Database/";
-            string databaseDestFolderName = UtilFramework.FolderNameExternal + "Application.Database/Database/" + externalGitProjectNamePath;
+            string databaseDestFolderName = UtilExternal.FolderNameExternal + "Application.Database/Database/" + externalGitProjectNamePath;
 
             // Application.Website/
             string websiteSourceFolderName = UtilFramework.FolderName + "Application.Website/";
-            string websiteDestFolderName = UtilFramework.FolderNameExternal + "Application.Website/" + externalGitProjectNamePath;
+            string websiteDestFolderName = UtilExternal.FolderNameExternal + "Application.Website/" + externalGitProjectNamePath;
 
             // Application.Cli/App/
             string cliAppSourceFolderName = UtilFramework.FolderName + "Application.Cli/App/";
-            string cliAppDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/App/" + externalGitProjectNamePath;
+            string cliAppDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/App/" + externalGitProjectNamePath;
 
             // Application.Cli/App/
             string cliDatabaseSourceFolderName = UtilFramework.FolderName + "Application.Cli/Database/";
-            string cliDatabaseDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/Database/" + externalGitProjectNamePath;
+            string cliDatabaseDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/Database/" + externalGitProjectNamePath;
 
             // Application.Cli/DeployDb/
             string cliDeployDbSourceFolderName = UtilFramework.FolderName + "Application.Cli/DeployDb/";
-            string cliDeployDbDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
+            string cliDeployDbDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
 
             // Angular
-            string websiteAngularDestFolderName = UtilFramework.FolderNameExternal + "Framework/Framework.Angular/application/src/Application.Website/";
+            string websiteAngularDestFolderName = UtilExternal.FolderNameExternal + "Framework/Framework.Angular/application/src/Application.Website/";
 
             var result = new ExternalArgs
             {
@@ -139,7 +185,8 @@ namespace Framework.Cli
                 CliDatabaseDestFolderName = cliDatabaseDestFolderName,
                 CliDeployDbSourceFolderName = cliDeployDbSourceFolderName,
                 CliDeployDbDestFolderName = cliDeployDbDestFolderName,
-                WebsiteAngularDestFolderName = websiteAngularDestFolderName
+                WebsiteAngularDestFolderName = websiteAngularDestFolderName,
+                ExternalProjectName = UtilExternal.ExternalProjectName(),
             };
 
             return result;
