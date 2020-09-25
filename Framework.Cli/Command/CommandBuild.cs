@@ -178,9 +178,9 @@
         }
 
         /// <summary>
-        /// Run method AppCli.ExternalPrebuild(); on ExternalGit/ProjectName/
+        /// Run method AppCli.CommandExternal(); on ExternalGit/ProjectName/
         /// </summary>
-        private static void ExternalPrebuild()
+        private static void CommandExternal()
         {
             var configCli = ConfigCli.Load();
 
@@ -206,7 +206,7 @@
             BuildAngularInit();
 
             // Run cli external command. Override for example custom components.
-            ExternalPrebuild();
+            CommandExternal();
 
             // Build layout Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/

@@ -38,6 +38,7 @@
             // Make sure Website has been found
             if (result.Count == 0)
             {
+                // Run command cli env name=dev
                 throw new Exception(string.Format("Website not found! See also: ConfigServer.json (Domain={0}; Environment={1};)", requestDomainName, this.ConfigServer.EnvironmentName));
             }
             if (result.Count > 1)

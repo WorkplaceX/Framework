@@ -242,7 +242,7 @@
         /// <summary>
         /// Override this method to add Integrate data rows to list. Used by cli deployDb command to deploy Integrate rows to database.
         /// </summary>
-        protected virtual void CommandDeployDbIntegrate(DeployDbIntegrateResult result)
+        protected virtual internal void CommandDeployDbIntegrate(DeployDbIntegrateResult result)
         {
 
         }
@@ -264,6 +264,9 @@
                 var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
+                // Collect rowList from external FrameworkConfigGridIntegrateApplicationCli (ConfigGrid).
+                UtilExternal.CommandDeployDbIntegrate(this, rowList);
+
                 result.Add(rowList);
             }
 
@@ -279,11 +282,17 @@
                 var rowApplicationCliList = (List<FrameworkConfigFieldIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
+                // Collect rowList from external FrameworkConfigFieldIntegrateApplicationCli (ConfigField).
+                UtilExternal.CommandDeployDbIntegrate(this, rowList);
+
                 result.Add(rowList);
             }
 
             // Add application (custom) Integrate data rows to deploy to database
             CommandDeployDbIntegrate(result);
+
+            // Call method CommandDeployDbIntegrate(); on external AppCli.
+            UtilExternal.CommandDeployDbIntegrate(this, result);
         }
 
         public class DeployDbIntegrateResult
@@ -449,6 +458,9 @@
             // Application (custom) Integrate data rows to generate CSharp code from.
             CommandGenerateIntegrate(result);
 
+            // Call method CommandGenerateIntegrate(); on external AppCli.
+            UtilExternal.CommandGenerateIntegrate(this, result);
+
             return result;
         }
 
@@ -456,7 +468,7 @@
         /// Override this method to add Integrate data rows to list. Used by cli generate command to generate CSharp code.
         /// Note: Cli generate command is not Integrate table reference aware. Data is generated in CSharp code as it is.
         /// </summary>
-        protected virtual void CommandGenerateIntegrate(GenerateIntegrateResult result)
+        protected virtual internal void CommandGenerateIntegrate(GenerateIntegrateResult result)
         {
 
         }
@@ -712,12 +724,15 @@
         /// Override if this application is cloned into ExternalGit/ folder. See also cli command external.
         /// </summary>
         /// <param name="args">Some utils for example to copy files.</param>
-        protected virtual internal void CommandExternal(ExternalPrebuildArgs args)
+        protected virtual internal void CommandExternal(ExternalArgs args)
         {
 
         }
 
-        public class ExternalPrebuildArgs
+        /// <summary>
+        /// Args for cli external command.
+        /// </summary>
+        public class ExternalArgs
         {
             /// <summary>
             /// Gets AppSourceFolderName. This is folder ExternalGit/ProjectName/Application/App/

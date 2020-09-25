@@ -2,6 +2,9 @@
 {
     using Microsoft.Extensions.CommandLineUtils;
 
+    /// <summary>
+    /// Cli command.
+    /// </summary>
     internal class CommandBase
     {
         public CommandBase(AppCli appCli, string name, string description)

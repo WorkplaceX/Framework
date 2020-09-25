@@ -1,7 +1,5 @@
 ﻿namespace Framework.Cli.Command
 {
-    using System.Runtime.InteropServices;
-
     /// <summary>
     /// Cli test command to run unit tests.
     /// </summary>
