@@ -712,7 +712,7 @@
         /// Override if this application is cloned into ExternalGit/ folder. See also cli command external.
         /// </summary>
         /// <param name="args">Some utils for example to copy files.</param>
-        protected virtual internal void ExternalPrebuild(ExternalPrebuildArgs args)
+        protected virtual internal void CommandExternal(ExternalPrebuildArgs args)
         {
 
         }
@@ -750,14 +750,34 @@
             public string WebsiteDestFolderName { get; internal set; }
 
             /// <summary>
+            /// Gets CliAppSourceFolderName. This is folder Application.Cli/App/
+            /// </summary>
+            public string CliAppSourceFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets CliAppDestFolderName. This is folder Application.Cli/App/ExternalGit/ProjectName/
+            /// </summary>
+            public string CliAppDestFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets CliDatabaseSourceFolderName. This is folder Application.Cli/Database/
+            /// </summary>
+            public string CliDatabaseSourceFolderName { get; internal set; }
+
+            /// <summary>
+            /// Gets CliDatabaseDestFolderName. This is folder Application.Cli/Database/ExternalGit/ProjectName/
+            /// </summary>
+            public string CliDatabaseDestFolderName { get; internal set; }
+
+            /// <summary>
             /// Gets DeployDbSourceFolderName. This is folder Application.Cli/DeployDb/
             /// </summary>
-            public string DeployDbSourceFolderName { get; internal set; }
+            public string CliDeployDbSourceFolderName { get; internal set; }
 
             /// <summary>
             /// Gets DeployDbDestFolderName. This is folder Application.Cli/DeployDb/ExternalGit/ProjectName/
             /// </summary>
-            public string DeployDbDestFolderName { get; internal set; }
+            public string CliDeployDbDestFolderName { get; internal set; }
 
             /// <summary>
             /// Gets WebsiteAngularDestFolderName. This is Angular folder Framework/Framework.Angular/application/src/Application.Website/

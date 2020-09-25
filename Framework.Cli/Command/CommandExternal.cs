@@ -33,9 +33,17 @@
             string websiteSourceFolderName = UtilFramework.FolderName + "Application.Website/";
             string websiteDestFolderName = UtilFramework.FolderNameExternal + "Application.Website/" + externalGitProjectNamePath;
 
+            // Application.Cli/App/
+            string cliAppSourceFolderName = UtilFramework.FolderName + "Application.Cli/App/";
+            string cliAppDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/App/" + externalGitProjectNamePath;
+
+            // Application.Cli/App/
+            string cliDatabaseSourceFolderName = UtilFramework.FolderName + "Application.Cli/Database/";
+            string cliDatabaseDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/Database/" + externalGitProjectNamePath;
+
             // Application.Cli/DeployDb/
-            string deployDbSourceFolderName = UtilFramework.FolderName + "Application.Cli/DeployDb/";
-            string deployDbDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
+            string cliDeployDbSourceFolderName = UtilFramework.FolderName + "Application.Cli/DeployDb/";
+            string cliDeployDbDestFolderName = UtilFramework.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
 
             // Angular
             string websiteAngularDestFolderName = UtilFramework.FolderNameExternal + "Framework/Framework.Angular/application/src/Application.Website/";
@@ -47,11 +55,15 @@
                 DatabaseDestFolderName = databaseDestFolderName,
                 WebsiteSourceFolderName = websiteSourceFolderName,
                 WebsiteDestFolderName = websiteDestFolderName,
-                DeployDbSourceFolderName = deployDbSourceFolderName,
-                DeployDbDestFolderName = deployDbDestFolderName,
+                CliAppSourceFolderName = cliAppSourceFolderName,
+                CliAppDestFolderName = cliAppDestFolderName,
+                CliDatabaseSourceFolderName = cliDatabaseSourceFolderName,
+                CliDatabaseDestFolderName = cliDatabaseDestFolderName,
+                CliDeployDbSourceFolderName = cliDeployDbSourceFolderName,
+                CliDeployDbDestFolderName = cliDeployDbDestFolderName,
                 WebsiteAngularDestFolderName = websiteAngularDestFolderName 
             };
-            AppCli.ExternalPrebuild(args);
+            AppCli.CommandExternal(args);
         }
     }
 }
