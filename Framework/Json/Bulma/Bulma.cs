@@ -103,6 +103,7 @@ namespace Framework.Json.Bulma
             RowMap(args, result, nameof(result.Id));
             RowMap(args, result, nameof(result.ParentId));
             RowMap(args, result, nameof(result.TextHtml));
+            RowMap(args, result, nameof(result.NavigatePath));
             RowMap(args, result, nameof(result.IsDivider));
             RowMap(args, result, nameof(result.IsNavbarEnd));
             RowMap(args, result, nameof(result.Sort));
@@ -153,7 +154,8 @@ namespace Framework.Json.Bulma
                 if (rowMap.ParentId == null)
                 {
                     BulmaNavbarItemEnum itemEnum = BulmaNavbarItemEnum.Text;
-                    var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, IsActive = rowMap.IsSelect };
+                    // Level 0
+                    var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, NavigatePath = rowMap.NavigatePath, IsActive = rowMap.IsSelect };
                     level0List.Add(rowMap.Id, navbarItem);
                     bool isNavbarEnd = navbarGrid.IsNavbarEnd;
                     if (rowMap.IsNavbarEnd != null)
@@ -185,7 +187,8 @@ namespace Framework.Json.Bulma
                         {
                             itemEnum = BulmaNavbarItemEnum.Divider;
                         }
-                        var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, IsActive = rowMap.IsSelect };
+                        // Level 1
+                        var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, NavigatePath = rowMap.NavigatePath, IsActive = rowMap.IsSelect };
                         navbarItemParent.ItemList.Add(navbarItem);
                     }
                 }
@@ -218,6 +221,7 @@ namespace Framework.Json.Bulma
                     string filterText = gridFilterValue?.Text;
                     int rowSateId = grid.RowStateList.Single(item => item.RowEnum == GridRowEnum.Filter).Id;
 
+                    // Filter input text box
                     var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = BulmaNavbarItemEnum.Filter, Grid = grid, FilterFieldNameCSharp = filter.FieldNameCSharp, RowStateId = rowSateId, FilterText = filterText, FilterPlaceholder = "Search" };
                     if (filter.IsNavbarEnd == false)
                     {
@@ -238,7 +242,7 @@ namespace Framework.Json.Bulma
                 var navbarItem = navbar.ItemListAll().Single(item => item.Id == commandJson.BulmaNavbarItemId);
                 Grid grid = navbarItem.Grid;
 
-                // User clicked navbar item
+                // User clicked navbar button
                 if (navbarItem.ItemEnum == BulmaNavbarItemEnum.Text)
                 {
                     appJson.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId });
@@ -289,6 +293,9 @@ namespace Framework.Json.Bulma
 
         Divider = 2,
 
+        /// <summary>
+        /// Filter input text box.
+        /// </summary>
         Filter = 3,
 
         Parent = 4
@@ -312,6 +319,9 @@ namespace Framework.Json.Bulma
 
         [Serialize(SerializeEnum.Client)]
         public string TextHtml;
+
+        [Serialize(SerializeEnum.Both)]
+        public string NavigatePath;
 
         [Serialize(SerializeEnum.Client)]
         public bool IsActive;
@@ -343,6 +353,8 @@ namespace Framework.Json.Bulma
         public bool IsHide;
 
         public string TextHtml;
+
+        public string NavigatePath;
 
         public bool IsDivider;
 

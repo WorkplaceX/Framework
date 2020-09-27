@@ -32,7 +32,11 @@ export class BulmaNavbarComponent implements OnInit {
     (<HTMLElement>this.burgerTarget.nativeElement).classList.toggle("is-active");
   }
 
-  click(navbarItem) {
+  click(navbarItem, event: MouseEvent) {
+    if (event != null) {
+      // Drop down does not close if level 1 item has a href attribute.
+      (<HTMLElement>event.currentTarget).blur();
+    }
     navbarItem.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { Command: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id });
     return false;

@@ -114,7 +114,7 @@
         public int Id;
 
         /// <summary>
-        /// Gets or sets Grid. For example navigation and language buttons can be shown in the Navbar.
+        /// Gets or sets Grid. For example navigate and language buttons can be shown in the Navbar.
         /// </summary>
         public Grid Grid;
 

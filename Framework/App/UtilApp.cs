@@ -45,19 +45,19 @@
         }
 
         /// <summary>
-        /// User clicked internal link or clicked backward, forward navigation history. Instead of GET and download Angular again a POST command is sent.
+        /// User clicked internal link or user clicked backward or forward button in browser. Instead of GET and download Angular again a POST command is sent.
         /// </summary>
-        public static async Task ProcessNavigateLinkAsync(AppJson appJson)
+        public static async Task ProcessNavigatePostAsync(AppJson appJson)
         {
             // User clicked internal link.
-            if (UtilSession.Request(appJson, RequestCommand.NavigateLink, out CommandJson commandJson, out ComponentJson _))
+            if (UtilSession.Request(appJson, RequestCommand.NavigatePost, out CommandJson commandJson, out ComponentJson _))
             {
-                await appJson.NavigateSessionInternalAsync(commandJson.NavigateLinkPath, commandJson.NavigateLinkPathIsAddHistory);
+                await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
             }
-            // User clicked backward, forward navigation button.
-            if (UtilSession.Request(appJson, RequestCommand.NavigateLinkBackwardForward, out commandJson, out ComponentJson _))
+            // User clicked backward or forward button in browser.
+            if (UtilSession.Request(appJson, RequestCommand.NavigateBackwardForward, out commandJson, out ComponentJson _))
             {
-                await appJson.NavigateSessionInternalAsync(commandJson.NavigateLinkPath, commandJson.NavigateLinkPathIsAddHistory);
+                await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
             }
         }
 

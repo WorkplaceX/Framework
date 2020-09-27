@@ -189,9 +189,11 @@
         /// <summary>
         /// Returns true, if request or response path is a FileName. Otherwise path is a FolderName.
         /// </summary>
-        public static bool PathIsFileName(string path)
+        /// <param name="navigatePath">For example "/" or "/main.js"</param>
+        /// <returns></returns>
+        public static bool NavigatePathIsFileName(string navigatePath)
         {
-            return !string.IsNullOrEmpty(Path.GetFileName(path));
+            return !string.IsNullOrEmpty(Path.GetFileName(navigatePath));
         }
 
         /// <summary>

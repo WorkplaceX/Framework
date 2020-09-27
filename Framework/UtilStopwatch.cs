@@ -33,9 +33,9 @@
             public int Id;
 
             /// <summary>
-            /// Gets RequestPath. This stopwatch Collection is used only for this request path.
+            /// Gets NavigatePath. This stopwatch Collection is used only for this NavigatePath (request) path.
             /// </summary>
-            public string RequestPath;
+            public string NavigatePath;
 
             /// <summary>
             /// Gets RequestCount. Number of requests this stopwatch Collection has been used for.
@@ -80,7 +80,7 @@
             {
                 var result = RequestIdToStopwatchCollectionList.GetOrAdd(requestId.Value, (key) =>
                 {
-                    var released = RequestIdToStopwatchCollectionList.Where(item => item.Value.IsReleased == true && item.Value.RequestPath == UtilServer.Context.Request.Path.Value).FirstOrDefault();
+                    var released = RequestIdToStopwatchCollectionList.Where(item => item.Value.IsReleased == true && item.Value.NavigatePath == UtilServer.Context.Request.Path.Value).FirstOrDefault();
                     if (!released.Equals(default(KeyValuePair<Guid, Collection>))) // released != null
                     {
                         released.Value.IsReleased = false;
@@ -90,7 +90,7 @@
                             return stopwatchCollection;
                         }
                     }
-                    return new Collection { RequestPath = UtilServer.Context?.Request.Path.Value }; // Also called by cli command deployDb
+                    return new Collection { NavigatePath = UtilServer.Context?.Request.Path.Value }; // Also called by cli command deployDb
                 });
 
                 return result;
@@ -137,12 +137,12 @@
         /// </summary>
         internal static void TimeLog()
         {
-            int pathCount = RequestIdToStopwatchCollectionList.Where(item => item.Value.RequestPath == UtilServer.Context.Request.Path.Value).Count();
+            int pathCount = RequestIdToStopwatchCollectionList.Where(item => item.Value.NavigatePath == UtilServer.Context.Request.Path.Value).Count();
             var collection = CollectionCurrent;
 
             StringBuilder result = new StringBuilder();
 
-            result.AppendLine(string.Format("CollectionId={0}/{1}; Path={2}; RequestCount={3}; PathCount={4};", collection.Id, RequestIdToStopwatchCollectionList.Count, collection.RequestPath, collection.RequestCount, pathCount));
+            result.AppendLine(string.Format("CollectionId={0}/{1}; Path={2}; RequestCount={3}; PathCount={4};", collection.Id, RequestIdToStopwatchCollectionList.Count, collection.NavigatePath, collection.RequestCount, pathCount));
             foreach (var item in collection.List.OrderBy(item => item.Key)) // Order by stopwatch name.
             {
                 // Calculate average time per max 10 requests.

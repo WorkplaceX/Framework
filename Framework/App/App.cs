@@ -147,14 +147,14 @@
                 appJson.IsSessionExpired = isSessionExpired;
 
                 // New RequestJson
-                string browserPath = requestJson.BrowserPath;
-                requestJson = new RequestJson(null) { RequestCount = requestJson.RequestCount, BrowserUrl = requestJson.BrowserUrl }; // Reset RequestJson.
+                string browserNavigatePath = requestJson.BrowserNavigatePath;
+                requestJson = new RequestJson(null) { RequestCount = requestJson.RequestCount, BrowserNavigatePathPost = requestJson.BrowserNavigatePathPost }; // Reset RequestJson.
                 appJson.RequestJson = requestJson;
 
                 // Add navigate command to queue
-                if (UtilServer.Context.Request.Method == "POST" || browserPath == "/")
+                if (UtilServer.Context.Request.Method == "POST" || browserNavigatePath == "/")
                 {
-                    appJson.Navigate(browserPath, false); // User clicked backward, forward navigation history.
+                    appJson.Navigate(browserNavigatePath, isAddHistory: false); // User clicked backward or forward button in browser.
                 }
 
                 // New session init

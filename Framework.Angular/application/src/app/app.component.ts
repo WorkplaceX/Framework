@@ -17,8 +17,8 @@ export class AppComponent {
         path = "/";
       }
       
-      // LinkPost for backward and forward navigation.
-      this.dataService.update(<CommandJson> { Command: 17, ComponentId: this.dataService.json.Id, NavigateLinkPath: path});
+      // User clicked backward or forward button in browser.
+      this.dataService.update(<CommandJson> { Command: 17, ComponentId: this.dataService.json.Id, NavigatePath: path});
     });
   }
 

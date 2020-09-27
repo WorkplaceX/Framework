@@ -47,12 +47,12 @@
         /// <summary>
         /// User clicked an internal link. For example: "/contact/". Instead of GET and download Angular again a POST command is sent to the server.
         /// </summary>
-        NavigateLink = 16,
+        NavigatePost = 16,
 
         /// <summary>
-        /// User clicked backward, forward navigation history.
+        /// User clicked backward or forward button in browser.
         /// </summary>
-        NavigateLinkBackwardForward = 17,
+        NavigateBackwardForward = 17,
 
         BootstrapNavbarButtonIsClick = 7,
 
@@ -132,14 +132,14 @@
         public string BulmaFilterText { get; set; }
 
         /// <summary>
-        /// Gets or sets NavigateLinkPath. For internal link. For example: "/contact/".
+        /// Gets or sets NavigatePath. For internal link. For example: "/contact/".
         /// </summary>
-        public string NavigateLinkPath { get; set; }
+        public string NavigatePath { get; set; }
 
         /// <summary>
-        /// Gets or sets NavigateLinkPathIsAddHistory. If true, NavigateLinkPath is added to browser history. Used by server command. Not used by client command.
+        /// Gets or sets NavigatePathIsAddHistory. If true, NavigatePath is added to browser history. Used by server command. Not used by client command.
         /// </summary>
-        public bool NavigateLinkPathIsAddHistory { get; set; }
+        public bool NavigatePathIsAddHistory { get; set; }
     }
 
     /// <summary>
@@ -175,14 +175,14 @@
         public RequestOrigin Origin { get; set; }
 
         /// <summary>
-        /// Gets or sets BrowserUrl. Url shown in browser. Available only for browser POST request. See also method BrowserPath();
+        /// Gets or sets BrowserNavigatePathPost. Url shown in browser. Available only for browser POST request. See also method BrowserPath();
         /// </summary>
-        public string BrowserUrl { get; set; }
+        public string BrowserNavigatePathPost { get; set; }
 
         /// <summary>
-        /// Returns for example "/contact/".
+        /// Gets BrowserNavigatePath. For example "/contact/".
         /// </summary>
-        public string BrowserPath
+        public string BrowserNavigatePath
         {
             get
             {
@@ -196,8 +196,8 @@
                 {
                     UtilFramework.Assert(Origin == RequestOrigin.Browser);
                     UtilFramework.Assert(UtilServer.Context.Request.Method == "POST");
-                    UtilFramework.Assert(BrowserUrl != null);
-                    result = new Uri(BrowserUrl).AbsolutePath; // Browser back
+                    UtilFramework.Assert(BrowserNavigatePathPost != null);
+                    result = new Uri(BrowserNavigatePathPost).AbsolutePath; // Browser back
                 }
                 return result;
             }
@@ -630,16 +630,19 @@
             return new NamingConvention();
         }
 
-        internal async Task<NavigateResult> NavigateInternalAsync(string path)
+        internal async Task<NavigateResult> NavigateInternalAsync(string navigatePath)
         {
-            var args = new NavigateArgs(path);
+            var args = new NavigateArgs(navigatePath);
             NavigateResult result = new NavigateResult();
             await NavigateAsync(args, result);
+            UtilFramework.Assert(!(result.Data != null && result.IsSession), $"Method {nameof(AppJson.NavigateAsync)}(); can not send data and request session at the same time!");
             return result;
         }
 
         /// <summary>
         /// Browser requests (GET) file to download or navigate to subpage. Inside this method no session data is available. Used for example to download a public available (*.pdf) file.
+        /// If no data or IsSession flag is returned HTTP 404 code page not found is sent to browser. Method is not called for root NavigatePath "/" or if application is running embedded.
+        /// It is also possible to request IsSession and then return in the method NavigateSessionAsync(); a custom 404 page not found.
         /// </summary>
         protected internal virtual Task NavigateAsync(NavigateArgs args, NavigateResult result)
         {
@@ -648,23 +651,23 @@
 
         public class NavigateArgs
         {
-            internal NavigateArgs(string path)
+            internal NavigateArgs(string navigatePath)
             {
-                this.Path = path;
-                if (UtilServer.PathIsFileName(path))
+                this.NavigatePath = navigatePath;
+                if (UtilServer.NavigatePathIsFileName(navigatePath))
                 {
-                    this.FileName = UtilFramework.FolderNameParse(null, path);
+                    this.FileName = UtilFramework.FolderNameParse(null, navigatePath);
                     this.FileNameExtension = UtilFramework.FileNameExtension(FileName);
                 }
             }
 
             /// <summary>
-            /// Gets Path. For example: "/Readme.txt" or "/contact/". Or "/", if user clicked browser back button.
+            /// Gets NavigatePath. For example: "/Readme.txt" or "/contact/". Or "/", if user clicked browser back button.
             /// </summary>
-            public string Path { get; private set; }
+            public string NavigatePath { get; private set; }
 
             /// <summary>
-            /// Gets FileName. For example: "Readme.txt". Is null, if path is for example: "/contact/".
+            /// Gets FileName. For example: "Readme.txt". Is null, if navigatePath is for example: "/contact/".
             /// </summary>
             public string FileName { get; private set; }
 
@@ -674,64 +677,64 @@
             public string FileNameExtension { get; private set; }
 
             /// <summary>
-            /// Returns true, if path starts with pathPrefix.
+            /// Returns true, if navigatePath starts with navigatePathPrefix.
             /// </summary>
-            /// <param name="pathPrefix">For example: "/cms/".</param>
-            /// <param name="path">For example: "/contact/".</param>
-            public bool IsPath(string pathPrefix, out string path)
+            /// <param name="navigatePathPrefix">For example: "/cms/".</param>
+            /// <param name="navigatePath">For example: "/contact/".</param>
+            public bool IsNavigatePath(string navigatePathPrefix, out string navigatePath)
             {
-                if (!pathPrefix.StartsWith("/"))
+                if (!navigatePathPrefix.StartsWith("/"))
                 {
-                    pathPrefix = "/" + pathPrefix;
+                    navigatePathPrefix = "/" + navigatePathPrefix;
                 }
-                if (!pathPrefix.EndsWith("/"))
+                if (!navigatePathPrefix.EndsWith("/"))
                 {
-                    pathPrefix += "/";
+                    navigatePathPrefix += "/";
                 }
-                bool result = Path.StartsWith(pathPrefix);
+                bool result = NavigatePath.StartsWith(navigatePathPrefix);
                 if (result)
                 {
-                    path = Path.Substring(pathPrefix.Length - 1);
+                    navigatePath = NavigatePath.Substring(navigatePathPrefix.Length - 1);
                 }
                 else
                 {
-                    path = null;
+                    navigatePath = null;
                 }
                 return result;
             }
 
             /// <summary>
-            /// Returns true, if path starts with pathPrefix.
+            /// Returns true, if navigatePath starts with navigatePathPrefix.
             /// </summary>
-            /// <param name="pathPrefix">For example: "/cms/".</param>
-            public bool IsPath(string pathPrefix)
+            /// <param name="navigatePathPrefix">For example: "/cms/".</param>
+            public bool IsNavigatePath(string navigatePathPrefix)
             {
-                return IsPath(pathPrefix, out _);
+                return IsNavigatePath(navigatePathPrefix, out _);
             }
 
             /// <summary>
-            /// Returns true, if path starts with pathPrefix.
+            /// Returns true, if navigatePath starts with navigatePathPrefix.
             /// </summary>
-            /// <param name="pathPrefix">For example: "/cmsfile/".</param>
+            /// <param name="navigatePathPrefix">For example: "/cmsfile/".</param>
             /// <param name="fileName">For example: "about/Logo.png".</param>
-            public bool IsFileName(string pathPrefix, out string fileName)
+            public bool IsFileName(string navigatePathPrefix, out string fileName)
             {
                 bool result = false;
                 fileName = null;
                 if (FileName != null)
                 {
-                    if (!pathPrefix.StartsWith("/"))
+                    if (!navigatePathPrefix.StartsWith("/"))
                     {
-                        pathPrefix = "/" + pathPrefix;
+                        navigatePathPrefix = "/" + navigatePathPrefix;
                     }
-                    if (!pathPrefix.EndsWith("/"))
+                    if (!navigatePathPrefix.EndsWith("/"))
                     {
-                        pathPrefix += "/";
+                        navigatePathPrefix += "/";
                     }
-                    result = Path.StartsWith(pathPrefix);
+                    result = NavigatePath.StartsWith(navigatePathPrefix);
                     if (result)
                     {
-                        fileName = FileName.Substring(pathPrefix.Length - "/".Length);
+                        fileName = FileName.Substring(navigatePathPrefix.Length - "/".Length);
                     }
                 }
                 return result;
@@ -751,13 +754,10 @@
             public byte[] Data;
         }
 
-        internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string path, bool isAddHistory)
+        internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string navigatePath, bool isAddHistory)
         {
-            var args = new NavigateArgs(path);
-            var result = new NavigateSessionResult
-            {
-                Path = args.Path
-            };
+            var args = new NavigateArgs(navigatePath);
+            var result = new NavigateSessionResult { NavigatePath = args.NavigatePath };
             await NavigateSessionAsync(args, result);
             if (result.IsPage)
             {
@@ -766,25 +766,30 @@
                     // Do not add history entry for any GET
                     isAddHistory = false;
                 }
-                if (RequestJson.CommandList.FirstOrDefault()?.Command == RequestCommand.NavigateLinkBackwardForward)
+                if (RequestJson.CommandList.FirstOrDefault()?.Command == RequestCommand.NavigateBackwardForward)
                 {
-                    // Do not add history entry if user clicked backward, forward navigation button.
+                    // Do not add history entry if user clicked backward or forward button in browser.
                     isAddHistory = false;
                 }
                 if (isAddHistory)
                 {
-                    if (PathAddHistory != null)
+                    if (NavigatePathAddHistory != null)
                     {
                         throw new Exception("Only one PathAddHistory entry possible for one request!");
                     }
-                    PathAddHistory = result.Path;
+                    NavigatePathAddHistory = result.NavigatePath;
                 }
+            }
+            else
+            {
+                Download(result.Data, args.FileName);
             }
             return result;
         }
 
         /// <summary>
-        /// Browser requests file to download or navigate to subpage. Inside this method session data is available. Used for example to download a not publicly available (*.pdf) file.
+        /// Browser requests file to download or navigate to subpage. Inside this method session data is available. Used for example to download a NOT publicly available (*.pdf) file.
+        /// Also called when user clicked backward or forward button in browser or if application is running embedded. It is also possible to return a custom 404 page note found.
         /// </summary>
         protected internal virtual Task NavigateSessionAsync(NavigateArgs args, NavigateSessionResult result)
         {
@@ -810,28 +815,46 @@
             public byte[] Data;
 
             /// <summary>
-            /// Gets or sets Path. For example: "/contact/" or "/signin/", if redirected.
+            /// Gets or sets IsPageNotFound. If true, page is sent together with HTTP status code 404.
             /// </summary>
-            public string Path { get; set; }
+            public bool IsPageNotFound { get; set; }
+
+            /// <summary>
+            /// Gets or sets NavigatePath. For example: "/contact/" or "/signin/", if redirected.
+            /// </summary>
+            public string NavigatePath { get; set; }
         }
 
         /// <summary>
         /// Add navigate command to queue.
         /// </summary>
-        /// <param name="path">For example "/contact/"</param>
-        /// <param name="isAddHistory">If true, path is added to browser history.</param>
-        internal void Navigate(string path, bool isAddHistory)
+        /// <param name="navigatePath">For example "/contact/"</param>
+        /// <param name="isAddHistory">If true, navigatePath is added to browser history.</param>
+        internal void Navigate(string navigatePath, bool isAddHistory)
         {
-            this.RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.NavigateLink, Origin = RequestOrigin.Server, ComponentId = Id, NavigateLinkPath = path, NavigateLinkPathIsAddHistory = isAddHistory });
+            this.RequestJson.CommandAdd(new CommandJson { 
+                Command = RequestCommand.NavigatePost, 
+                Origin = RequestOrigin.Server, 
+                ComponentId = Id, 
+                NavigatePath = navigatePath, 
+                NavigatePathIsAddHistory = isAddHistory });
         }
 
         /// <summary>
         /// Add navigate command to queue.
         /// </summary>
-        /// <param name="path">For example "/contact/"</param>
-        public void Navigate(string path)
+        /// <param name="navigatePath">For example "/contact/"</param>
+        public void Navigate(string navigatePath)
         {
-            Navigate(path, isAddHistory: true);
+            Navigate(navigatePath, isAddHistory: true);
+        }
+
+        /// <summary>
+        /// Add navigate command to queue to navigate to current request path.
+        /// </summary>
+        public void Navigate()
+        {
+            Navigate(UtilServer.Context.Request.Path.Value);
         }
 
         private NamingConvention namingConventionFramework;
@@ -866,7 +889,7 @@
             while (appJson.RequestJson.CommandGet() != null)
             {
                 await UtilApp.ProcessHomeIsClickAsync(appJson);
-                await UtilApp.ProcessNavigateLinkAsync(appJson); // Link POST instead of GET.
+                await UtilApp.ProcessNavigatePostAsync(appJson); // Link POST instead of GET.
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
                 BulmaNavbar.ProcessAsync(appJson);
@@ -937,7 +960,7 @@
         internal string RequestUrl { get; set; }
 
         /// <summary>
-        /// Gets EmbeddedUrl. Value used by Angular client on first app.json POST to indicate application is embedded an running on other website.
+        /// Gets EmbeddedUrl. Value used by Angular client on first app.json POST to indicate application is embedded and running on other website.
         /// </summary>
         internal string EmbeddedUrl { get; set; }
 
@@ -948,10 +971,10 @@
         internal string DownloadData;
 
         /// <summary>
-        /// Gets or sets PathAddHistory. This path is added by the browser to the navigation history. For example: "/contact/" or "/signin/", if redirected.
+        /// Gets or sets NavigatePathAddHistory. This navigatePath is added by the browser to the navigate history. For example: "/contact/" or "/signin/", if redirected.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
-        internal string PathAddHistory;
+        internal string NavigatePathAddHistory;
 
         /// <summary>
         /// Gets or sets DownloadFileName. For example Grid.xlsx

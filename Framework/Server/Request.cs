@@ -46,7 +46,7 @@
                                 // GET file from database or navigate to subpage.
                                 if (!await FileDownloadAsync(context, path, appSelector))
                                 {
-                                    context.Response.StatusCode = 404; // Not found
+                                    context.Response.StatusCode = StatusCodes.Status404NotFound;
                                 }
                             }
                         }
@@ -85,7 +85,7 @@
         /// <summary>
         /// Divert request to "Application.Server/Framework/Application.Website/"
         /// </summary>
-        private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string path, AppSelector appSelector, AppJson appJson)
+        private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string navigatePath, AppSelector appSelector, AppJson appJson)
         {
             bool result = false;
 
@@ -100,8 +100,8 @@
             }
 
             // Index.html
-            string pathIndexHtml = path;
-            if (!UtilServer.PathIsFileName(path))
+            string pathIndexHtml = navigatePath;
+            if (!UtilServer.NavigatePathIsFileName(navigatePath))
             {
                 pathIndexHtml += "index.html";
             }
@@ -141,29 +141,35 @@
         /// <summary>
         /// Browser request to download file or navigate to subpage.
         /// </summary>
-        private static async Task<bool> FileDownloadAsync(HttpContext context, string path, AppSelector appSelector)
+        private static async Task<bool> FileDownloadAsync(HttpContext context, string navigatePath, AppSelector appSelector)
         {
             bool result;
             var appJson = appSelector.CreateAppJson(); // Without deserialize session.
-            var navigateResult = await appJson.NavigateInternalAsync(path);
+            var navigateResult = await appJson.NavigateInternalAsync(navigatePath);
             if (navigateResult.IsSession)
             {
                 var appJsonSession = await appSelector.CreateAppJsonSession(context); // With deserialize session.
-                var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(path, false);
+                var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(navigatePath, isAddHistory: false);
                 if (navigateSessionResult.IsPage)
                 {
+                    // Send page together with HTTP 404 not found code
+                    if (navigateSessionResult.IsPageNotFound)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                    }
+
                     result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
                 }
                 else
                 {
                     // File download with session
-                    result = await FileDownloadAsync(context, path, navigateSessionResult.Data);
+                    result = await FileDownloadAsync(context, navigatePath, navigateSessionResult.Data);
                 }
             }
             else
             {
                 // File download without session
-                result = await FileDownloadAsync(context, path, navigateResult.Data);
+                result = await FileDownloadAsync(context, navigatePath, navigateResult.Data);
             }
             return result;
         }
@@ -233,7 +239,7 @@
         private async Task<bool> WebsiteFileAsync(HttpContext context, string path, AppSelector appSelector)
         {
             bool result = false;
-            if (UtilServer.PathIsFileName(path))
+            if (UtilServer.NavigatePathIsFileName(path))
             {
                 // Serve fileName
                 string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/"), path);
@@ -258,7 +264,7 @@
         private async Task<bool> AngularBrowserFileAsync(HttpContext context, string path)
         {
             // Fallback Application.Server/Framework/Framework.Angular/browser
-            if (UtilServer.PathIsFileName(path))
+            if (UtilServer.NavigatePathIsFileName(path))
             {
                 // Serve fileName
                 string fileName = UtilServer.FolderNameContentRoot() + "Framework/Framework.Angular/browser" + path;

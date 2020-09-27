@@ -16,7 +16,7 @@
     <!-- Level0 -->
     <ng-container [ngSwitch]="item.ItemEnum">
       <!-- Link -->
-      <a *ngSwitchCase="1" class="navbar-item" [ngClass]="{'is-active':item.IsActive}" (click)="click(item)">
+      <a *ngSwitchCase="1" class="navbar-item" [ngClass]="{'is-active':item.IsActive}" href="{{item.NavigatePath}}" (click)="click(item)">
         <span [innerHtml]="item.TextHtml"></span>
         <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
       </a>
@@ -35,7 +35,7 @@
         <div class="navbar-dropdown">
           <ng-container *ngFor="let item of item.ItemList; trackBy trackBy">
             <ng-container [ngSwitch]="item.ItemEnum">
-              <a *ngSwitchCase="1" class="navbar-item" [ngClass]="{'is-active':item.IsActive}" (click)="click(item)">
+              <a *ngSwitchCase="1" class="navbar-item" [ngClass]="{'is-active':item.IsActive}" href="{{item.NavigatePath}}" (click)="click(item, $event)">
                 <span [innerHtml]="item.TextHtml"></span>
                 <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
               </a>

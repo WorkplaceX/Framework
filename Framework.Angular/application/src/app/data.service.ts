@@ -49,7 +49,7 @@ export class Json { // AppJson
 
   IsScrollToTop: boolean;
 
-  PathAddHistory: string;
+  NavigatePathAddHistory: string;
 
   Title: string;
 }
@@ -77,7 +77,7 @@ export class CommandJson {
 
   BulmaFilterText: string;
 
-  NavigateLinkPath: string;
+  NavigatePath: string;
 }
 
 export class RequestJson {
@@ -85,7 +85,7 @@ export class RequestJson {
 
   ResponseCount: number;
 
-  BrowserUrl: string;
+  BrowserNavigatePathPost: string;
 
   CommandList: CommandJson[];
 }
@@ -191,7 +191,7 @@ export class DataService {
 
       requestJson.RequestCount = this.json.RequestCount;
       requestJson.ResponseCount = this.json.ResponseCount;
-      requestJson.BrowserUrl = window.location.href;
+      requestJson.BrowserNavigatePathPost = window.location.href;
 
       // app.json POST
       this.httpClient.post<Json>(
@@ -226,8 +226,8 @@ export class DataService {
             window.location.reload();
           }, 1000); // Wait one second then reload.
         }
-        if (this.json.PathAddHistory != null) {
-          this.location.go(this.json.PathAddHistory, "", this.json.PathAddHistory); // Put path into state because Angular does not handle traling slash in location.
+        if (this.json.NavigatePathAddHistory != null) {
+          this.location.go(this.json.NavigatePathAddHistory, "", this.json.NavigatePathAddHistory); // Put path into state because Angular does not handle traling slash in location.
         }
       });
     } else {

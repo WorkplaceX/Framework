@@ -103,7 +103,7 @@ export class GridComponent implements OnInit {
   mouseDown(cell, event: MouseEvent): boolean {
     event.stopPropagation();
     this.resizeCell = cell;
-    let resizeCellElement = (<HTMLElement>event.srcElement).parentElement.parentElement;
+    let resizeCellElement = (<HTMLElement>event.currentTarget).parentElement.parentElement;
     this.resizeOffset = resizeCellElement.offsetWidth - event.pageX;
     return false;
   }

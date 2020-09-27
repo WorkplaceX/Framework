@@ -68,13 +68,13 @@ export class Html {
 
   click(event: MouseEvent){
     this.json.IsShowSpinner = true;
-    var element = event.srcElement;
+    var element = event.target;
     do {
       if (element instanceof HTMLAnchorElement) {
         var anchor = <HTMLAnchorElement>element;
-        if (anchor.classList.contains("linkPost")) {
+        if (anchor.classList.contains("navigatePost")) {
           event.preventDefault();
-          this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.json.Id, NavigateLinkPath: anchor.pathname });
+          this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.json.Id, NavigatePath: anchor.pathname });
         }
         break;
       }
