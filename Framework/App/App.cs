@@ -180,8 +180,12 @@
         /// </summary>
         public AppJson CreateAppJson()
         {
-            Type type = UtilFramework.TypeFromName(AppTypeName);
-            if (type == null)
+            Type type;
+            try
+            {
+                type = UtilFramework.TypeFromName(AppTypeName);
+            }
+            catch
             {
                 throw new Exception(string.Format("AppTypeName does not exist! See also file: ConfigServer.json ({0})", AppTypeName));
             }

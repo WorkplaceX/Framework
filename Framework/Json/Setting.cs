@@ -32,7 +32,7 @@ namespace Framework.Json
     /// </summary>
     internal class Setting
     {
-        public virtual ComponentJson Alert(Page owner, string textHtml, AlertEnum alertEnum)
+        public virtual Html Alert(Page owner, string textHtml, AlertEnum alertEnum)
         {
             var result = new Html(owner) { TextHtml = textHtml };
             result.ComponentMove(0); // Move to top
@@ -50,7 +50,7 @@ namespace Framework.Json
     /// </summary>
     internal class SettingBootstrap : Setting
     {
-        public override ComponentJson Alert(Page owner, string textHtml, AlertEnum alertEnum)
+        public override Html Alert(Page owner, string textHtml, AlertEnum alertEnum)
         {
             return owner.BootstrapAlert(textHtml, alertEnum);
         }
@@ -61,7 +61,7 @@ namespace Framework.Json
     /// </summary>
     internal class SettingBulma : Setting
     {
-        public override ComponentJson Alert(Page owner, string textHtml, AlertEnum alertEnum)
+        public override Html Alert(Page owner, string textHtml, AlertEnum alertEnum)
         {
             return owner.BulmaAlert(textHtml, alertEnum);
         }
@@ -98,7 +98,7 @@ namespace Framework.Json
             }
         }
 
-        public static ComponentJson CreateAlert(this Page owner, string textHtml, AlertEnum alertEnum = AlertEnum.Info)
+        public static Html CreateAlert(this Page owner, string textHtml, AlertEnum alertEnum = AlertEnum.Info)
         {
             return Setting(owner).Alert(owner, textHtml, alertEnum);
         }
