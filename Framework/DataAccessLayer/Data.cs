@@ -26,19 +26,24 @@
         None = 0,
 
         /// <summary>
-        /// Linq to database.
+        /// Linq to database. Update and insert data with methods Data.Update(); and Data.Insert();
         /// </summary>
         Database = 1,
 
         /// <summary>
-        /// Linq to memory shared by multiple requests (singleton scope).
+        /// Linq to memory shared by multiple requests (singleton scope). Update and insert data with methods Data.Update(); and Data.Insert();
         /// </summary>
         MemorySingleton = 2,
 
         /// <summary>
         /// Linq to memory (request scope).
         /// </summary>
-        MemoryRequest = 3
+        // MemoryRequest = 3,
+
+        /// <summary>
+        /// Linq to custom data source. For example list on ComponentJson. Update and insert data by overriding methods Gird.Update(); and Grid.Insert(); 
+        /// </summary>
+        Custom = 4,
     }
 
     /// <summary>
@@ -802,6 +807,8 @@
                         rowList.Add(row);
                         break;
                     }
+                case DatabaseEnum.Custom:
+                    throw new Exception("Override method Grid.Insert(); to handle custom data source!");
                 default:
                     throw new Exception("Scope not supported!");
             }
@@ -863,6 +870,8 @@
                             }
                             break;
                         }
+                    case DatabaseEnum.Custom:
+                        throw new Exception("Override method Grid.Update(); to handle custom data source!");
                     default:
                         throw new Exception("Scope not supported!");
                 }

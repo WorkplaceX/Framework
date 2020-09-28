@@ -22,18 +22,10 @@
     {
         public ListRow(DatabaseMemoryInternal databaseMemory)
         {
-            this.databaseMemory = databaseMemory;
+            this.DatabaseMemory = databaseMemory;
         }
 
-        private readonly DatabaseMemoryInternal databaseMemory;
-
-        public DatabaseMemoryInternal DatabaseMemory
-        {
-            get
-            {
-                return databaseMemory;
-            }
-        }
+        public DatabaseMemoryInternal DatabaseMemory { get; }
     }
 
     /// <summary>
@@ -93,6 +85,10 @@
                 if (expressionVisitorScope.DatabaseEnumList.Count == 1)
                 {
                     return expressionVisitorScope.DatabaseEnumList.Single();
+                }
+                else
+                {
+                    return DataAccessLayer.DatabaseEnum.Custom;
                 }
             }
             return result;
