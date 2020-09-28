@@ -84,7 +84,7 @@
             }
             catch (Exception exception)
             {
-                appJson.BootstrapAlert(UtilFramework.ExceptionToString(exception), BootstrapAlertEnum.Error);
+                appJson.CreateAlert(UtilFramework.ExceptionToString(exception), AlertEnum.Error);
                 appJson.IsReload = true;
             }
 

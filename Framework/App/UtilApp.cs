@@ -100,28 +100,6 @@
         }
 
         /// <summary>
-        /// Remove non Div components from DivContainer.
-        /// </summary>
-        public static void DivContainerRender(AppJson appJson)
-        {
-            foreach (var divContainer in appJson.ComponentListAll().OfType<DivContainer>())
-            {
-                List<ComponentJson> listRemove = new List<ComponentJson>(); // Collect items to remove.
-                foreach (var item in divContainer.List)
-                {
-                    if (!(item is Div)) // ComponentJson.Type is not evalueted on DivComponent children!
-                    {
-                        listRemove.Add(item);
-                    }
-                }
-                foreach (var item in listRemove)
-                {
-                    item.ComponentRemove();
-                }
-            }
-        }
-
-        /// <summary>
         /// Add BootstrapNavbarButton.
         /// </summary>
         /// <param name="buttonList">List to add buttons.</param>

@@ -623,9 +623,14 @@
         public string Title { get; set; }
 
         /// <summary>
+        /// Gets or sets SettingEnum. Switch between Bootstrap and Bulma framework.
+        /// </summary>
+        public SettingEnum SettingEnum { get; set; }
+
+        /// <summary>
         /// Returns NamingConvention for app related sql tables.
         /// </summary>
-        protected virtual NamingConvention NamingConventionApp()
+        internal virtual NamingConvention NamingConventionApp()
         {
             return new NamingConvention();
         }
@@ -903,8 +908,8 @@
 
                 appJson.RequestJson.CommandNext();
             }
-            
-            UtilApp.DivContainerRender(appJson);
+
+            DivContainer.Render(appJson);
             UtilApp.BootstrapNavbarRender(appJson);
             BulmaNavbar.Render(appJson);
 
@@ -1045,6 +1050,7 @@
 
     /// <summary>
     /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
+    /// Non Div component children are removed.
     /// </summary>
     public class DivContainer : ComponentJson
     {
@@ -1052,6 +1058,28 @@
             : base(owner, nameof(DivContainer))
         {
 
+        }
+
+        /// <summary>
+        /// Remove non Div components from DivContainer.
+        /// </summary>
+        internal static void Render(AppJson appJson)
+        {
+            foreach (var divContainer in appJson.ComponentListAll().OfType<DivContainer>())
+            {
+                List<ComponentJson> listRemove = new List<ComponentJson>(); // Collect items to remove.
+                foreach (var item in divContainer.List)
+                {
+                    if (!(item is Div)) // ComponentJson.Type is not evaluated on DivComponent children!
+                    {
+                        listRemove.Add(item);
+                    }
+                }
+                foreach (var item in listRemove)
+                {
+                    item.ComponentRemove();
+                }
+            }
         }
     }
 

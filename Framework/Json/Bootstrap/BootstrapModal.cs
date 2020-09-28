@@ -1,4 +1,4 @@
-﻿namespace Framework.Json
+﻿namespace Framework.Json.Bootstrap
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -8,8 +8,6 @@
     /// </summary>
     public class BootstrapModal : Page
     {
-        public BootstrapModal() : this(null) { }
-
         public BootstrapModal(ComponentJson owner) : base(owner) { }
 
         public override Task InitAsync()

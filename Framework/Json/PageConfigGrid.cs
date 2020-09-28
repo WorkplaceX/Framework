@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Database.dbo;
     using Framework.DataAccessLayer;
+    using Framework.Json.Bootstrap;
 
     /// <summary>
     /// Page to configure data grid and columns.

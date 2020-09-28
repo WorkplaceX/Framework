@@ -4,7 +4,7 @@
     using System.Text;
     using static Framework.DataAccessLayer.UtilDalType;
 
-    public class NamingConvention
+    internal class NamingConvention
     {
         /// <summary>
         /// Override this method for custom column IsVisible.

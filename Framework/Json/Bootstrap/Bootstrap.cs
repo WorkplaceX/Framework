@@ -135,40 +135,27 @@
         public List<BootstrapNavbarButton> ButtonList;
     }
 
-    public enum BootstrapAlertEnum
-    {
-        None = 0,
-
-        Info = 1,
-
-        Success = 2,
-
-        Warning = 3,
-
-        Error = 4
-    }
-
-    public static class BootstrapExtension
+    internal static class BootstrapExtension
     {
         /// <summary>
         /// Show bootstrap alert (on per page).
         /// </summary>
-        public static Html BootstrapAlert(this Page page, string textHtml, BootstrapAlertEnum alertEnum, int index = 0)
+        public static Html BootstrapAlert(this Page page, string textHtml, AlertEnum alertEnum, int index = 0)
         {
             string htmlTextAlert = "<div class='alert {{CssClass}}' role='alert'>{{TextHtml}}</div>";
             string cssClass = null;
             switch (alertEnum)
             {
-                case BootstrapAlertEnum.Info:
+                case AlertEnum.Info:
                     cssClass = "alert-info";
                     break;
-                case BootstrapAlertEnum.Success:
+                case AlertEnum.Success:
                     cssClass = "alert-success";
                     break;
-                case BootstrapAlertEnum.Warning:
+                case AlertEnum.Warning:
                     cssClass = "alert-warning";
                     break;
-                case BootstrapAlertEnum.Error:
+                case AlertEnum.Error:
                     cssClass = "alert-danger";
                     break;
                 default:

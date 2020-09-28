@@ -367,40 +367,27 @@ namespace Framework.Json.Bulma
         internal bool IsSelect;
     }
 
-    public enum BulmaNotificationEnum
-    {
-        None = 0,
-
-        Info = 1,
-
-        Success = 2,
-
-        Warning = 3,
-
-        Error = 4
-    }
-
-    public static class BulmaExtension
+    internal static class BulmaExtension
     {
         /// <summary>
         /// See also: https://bulma.io/documentation/elements/notification/
         /// </summary>
-        public static Html Notification(this Page page, string textHtml, BulmaNotificationEnum notificationEnum, int index = 0)
+        public static Html BulmaAlert(this Page page, string textHtml, AlertEnum alertEnum, int index = 0)
         {
             string htmlText = "<div class='{{CssClass}}'><button class='delete'></button>{{TextHtml}}</div>";
             string cssClass = null;
-            switch (notificationEnum)
+            switch (alertEnum)
             {
-                case BulmaNotificationEnum.Info:
+                case AlertEnum.Info:
                     cssClass = "notification is-info";
                     break;
-                case BulmaNotificationEnum.Success:
+                case AlertEnum.Success:
                     cssClass = "notification is-success";
                     break;
-                case BulmaNotificationEnum.Warning:
+                case AlertEnum.Warning:
                     cssClass = "notification is-warning";
                     break;
-                case BulmaNotificationEnum.Error:
+                case AlertEnum.Error:
                     cssClass = "notification is-danger";
                     break;
                 default:
@@ -409,6 +396,18 @@ namespace Framework.Json.Bulma
             htmlText = htmlText.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
             Html result = new Html(page) { TextHtml = htmlText, IsNoSanatize = true };
             result.ComponentMove(index);
+            return result;
+        }
+
+        public static PageModal BulmaModal(this Page page)
+        {
+            var result = new PageModal(page);
+            var divModal = new DivContainer(result) { CssClass = "modal is-active" };
+            new Div(divModal) { CssClass = "modal-background" };
+            var divModalContent = result.DivContent = new Div(divModal) { CssClass = "modal-content" };
+            result.DivContent = new Div(divModalContent) { CssClass = "modal-card-body" };
+            result.ButtonClose = new Button(new Div(divModal)) { CssClass = "modal-close is-large" };
+            result.ComponentMove(0); // Move to top
             return result;
         }
     }
