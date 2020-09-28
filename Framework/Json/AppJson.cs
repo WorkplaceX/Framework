@@ -1006,7 +1006,7 @@
     }
 
     /// <summary>
-    /// Json Button. Rendered as html button element.
+    /// Json Button. Rendered as html button element. If user clicks it property IsClick is true.
     /// </summary>
     public class Button : ComponentJson
     {
@@ -1052,55 +1052,6 @@
             : base(owner, nameof(DivContainer))
         {
 
-        }
-    }
-
-    public enum BootstrapAlertEnum
-    {
-        None = 0,
-
-        Info = 1,
-
-        Success = 2,
-
-        Warning = 3,
-
-        Error = 4
-    }
-
-    public static class BootstrapExtension
-    {
-        /// <summary>
-        /// Show bootstrap alert (on per page).
-        /// </summary>
-        public static Html BootstrapAlert(this Page page, string textHtml, BootstrapAlertEnum alertEnum, int index = 0)
-        {
-            string htmlTextAlert = "<div class='alert {{CssClass}}' role='alert'>{{TextHtml}}</div>";
-            string cssClass = null;
-            switch (alertEnum)
-            {
-                case BootstrapAlertEnum.Info:
-                    cssClass = "alert-info";
-                    break;
-                case BootstrapAlertEnum.Success:
-                    cssClass = "alert-success";
-                    break;
-                case BootstrapAlertEnum.Warning:
-                    cssClass = "alert-warning";
-                    break;
-                case BootstrapAlertEnum.Error:
-                    cssClass = "alert-danger";
-                    break;
-                default:
-                    break;
-            }
-            htmlTextAlert = htmlTextAlert.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
-            Html result = new Html(page)
-            {
-                TextHtml = htmlTextAlert
-            };
-            result.ComponentMove(index);
-            return result;
         }
     }
 

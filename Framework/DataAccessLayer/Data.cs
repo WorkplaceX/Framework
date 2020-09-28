@@ -32,13 +32,14 @@
 
         /// <summary>
         /// Linq to memory shared by multiple requests (singleton scope). Update and insert data with methods Data.Update(); and Data.Insert();
+        /// For update it assumes first field is primary key.
         /// </summary>
-        MemorySingleton = 2,
+        Memory = 2,
 
         /// <summary>
         /// Linq to memory (request scope).
         /// </summary>
-        // MemoryRequest = 3,
+        // MemoryRequest = 3, // Replaced with Custom
 
         /// <summary>
         /// Linq to custom data source. For example list on ComponentJson. Update and insert data by overriding methods Gird.Update(); and Grid.Insert(); 
@@ -74,11 +75,11 @@
         /// <summary>
         /// Returns memory where rows are stored.
         /// </summary>
-        public static IList MemoryRowList(Type typeRow, DatabaseEnum databaseEnum = DatabaseEnum.MemorySingleton)
+        public static IList MemoryRowList(Type typeRow, DatabaseEnum databaseEnum = DatabaseEnum.Memory)
         {
             switch (databaseEnum)
             {
-                case DatabaseEnum.MemorySingleton:
+                case DatabaseEnum.Memory:
                     return DatabaseMemory.DatabaseMemoryInternal.Instance.RowListGet(typeRow);
                 default:
                     throw new Exception("DatabaseEnum not supported!");
@@ -88,11 +89,11 @@
         /// <summary>
         /// Returns linq to memory query.
         /// </summary>
-        public static List<TRow> MemoryRowList<TRow>(DatabaseEnum databaseEnum = DatabaseEnum.MemorySingleton) where TRow : Row
+        public static List<TRow> MemoryRowList<TRow>(DatabaseEnum databaseEnum = DatabaseEnum.Memory) where TRow : Row
         {
             switch (databaseEnum)
             {
-                case DatabaseEnum.MemorySingleton:
+                case DatabaseEnum.Memory:
                     return (List<TRow>)MemoryRowList(typeof(TRow));
                 default:
                     throw new Exception("Scope not supported!");
@@ -547,8 +548,10 @@
             {
                 case DatabaseEnum.Database:
                     return DbContextInternalCreate(typeRow, isQuery: true).Query;
-                case DatabaseEnum.MemorySingleton:
+                case DatabaseEnum.Memory:
                     return DatabaseMemoryInternal.Instance.RowListGet(typeRow).AsQueryable();
+                case DatabaseEnum.Custom:
+                    throw new Exception("Use for example ComponentJson.MyList.AsQueryable(); instead!");
                 default:
                     throw new Exception("Scope not supported!");
             }
@@ -801,7 +804,7 @@
                         }
                         break;
                     }
-                case DatabaseEnum.MemorySingleton:
+                case DatabaseEnum.Memory:
                     {
                         var rowList = Data.MemoryRowList(row.GetType(), databaseEnum);
                         rowList.Add(row);
@@ -845,7 +848,7 @@
                             UtilFramework.Assert(count == 1, "Update failed!");
                             break;
                         }
-                    case DatabaseEnum.MemorySingleton:
+                    case DatabaseEnum.Memory:
                         {
                             var rowList = Data.MemoryRowList(rowOld.GetType(), databaseEnum);
                             PropertyInfo propertyInfo = UtilDalType.TypeRowToPropertyInfoList(rowOld.GetType()).First(); // Assume first field is primary key.

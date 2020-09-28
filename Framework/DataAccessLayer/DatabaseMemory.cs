@@ -117,7 +117,7 @@
                     DatabaseMemoryInternal databaseMemory = ((IListRow)enumerable).DatabaseMemory;
                     if (databaseMemory == DatabaseMemoryInternal.Instance)
                     {
-                        DatabaseEnumList.Add(DatabaseEnum.MemorySingleton);
+                        DatabaseEnumList.Add(DatabaseEnum.Memory);
                     }
                 }
             }

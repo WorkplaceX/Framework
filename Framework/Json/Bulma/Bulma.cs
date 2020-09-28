@@ -366,4 +366,50 @@ namespace Framework.Json.Bulma
 
         internal bool IsSelect;
     }
+
+    public enum BulmaNotificationEnum
+    {
+        None = 0,
+
+        Info = 1,
+
+        Success = 2,
+
+        Warning = 3,
+
+        Error = 4
+    }
+
+    public static class BulmaExtension
+    {
+        /// <summary>
+        /// See also: https://bulma.io/documentation/elements/notification/
+        /// </summary>
+        public static Html Notification(this Page page, string textHtml, BulmaNotificationEnum notificationEnum, int index = 0)
+        {
+            string htmlText = "<div class='{{CssClass}}'><button class='delete'></button>{{TextHtml}}</div>";
+            string cssClass = null;
+            switch (notificationEnum)
+            {
+                case BulmaNotificationEnum.Info:
+                    cssClass = "notification is-info";
+                    break;
+                case BulmaNotificationEnum.Success:
+                    cssClass = "notification is-success";
+                    break;
+                case BulmaNotificationEnum.Warning:
+                    cssClass = "notification is-warning";
+                    break;
+                case BulmaNotificationEnum.Error:
+                    cssClass = "notification is-danger";
+                    break;
+                default:
+                    break;
+            }
+            htmlText = htmlText.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
+            Html result = new Html(page) { TextHtml = htmlText, IsNoSanatize = true };
+            result.ComponentMove(index);
+            return result;
+        }
+    }
 }
