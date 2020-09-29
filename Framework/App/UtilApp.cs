@@ -36,7 +36,7 @@
         /// </summary>
         public static Task ProcessHomeIsClickAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.HomeIsClick, out _, out ComponentJson _))
+            if (UtilSession.Request(appJson, RequestCommandEnum.HomeIsClick, out _, out ComponentJson _))
             {
                 // User clicked home button
             }
@@ -50,12 +50,12 @@
         public static async Task ProcessNavigatePostAsync(AppJson appJson)
         {
             // User clicked internal link.
-            if (UtilSession.Request(appJson, RequestCommand.NavigatePost, out CommandJson commandJson, out ComponentJson _))
+            if (UtilSession.Request(appJson, RequestCommandEnum.NavigatePost, out CommandJson commandJson, out ComponentJson _))
             {
                 await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
             }
             // User clicked backward or forward button in browser.
-            if (UtilSession.Request(appJson, RequestCommand.NavigateBackwardForward, out commandJson, out ComponentJson _))
+            if (UtilSession.Request(appJson, RequestCommandEnum.NavigateBackwardForward, out commandJson, out ComponentJson _))
             {
                 await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
             }
@@ -81,7 +81,7 @@
         /// </summary>
         public static async Task ProcessBootstrapNavbarAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.BootstrapNavbarButtonIsClick, out CommandJson commandJson, out BootstrapNavbar navbar))
+            if (UtilSession.Request(appJson, RequestCommandEnum.BootstrapNavbarButtonIsClick, out CommandJson commandJson, out BootstrapNavbar navbar))
             {
                 if (navbar.ButtonList != null)
                 {
