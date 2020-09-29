@@ -42,7 +42,7 @@
         /// <summary>
         /// Returns true, if expected command has been sent by client.
         /// </summary>
-        public static bool Request<T>(AppJson appJson, RequestCommandEnum command, out CommandJson commandJson, out T componentJson) where T : ComponentJson
+        public static bool Request<T>(AppJson appJson, CommandEnum command, out CommandJson commandJson, out T componentJson) where T : ComponentJson
         {
             bool result = false;
             commandJson = appJson.RequestJson.CommandGet();

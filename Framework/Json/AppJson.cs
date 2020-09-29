@@ -13,7 +13,10 @@
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
 
-    internal enum RequestCommandEnum
+    /// <summary>
+    /// Request command sent by browser or internally by server.
+    /// </summary>
+    internal enum CommandEnum
     {
         None = 0,
 
@@ -60,6 +63,11 @@
         /// User clicked button on bulma navbar.
         /// </summary>
         BulmaNavbarItemIsClick = 18,
+
+        /// <summary>
+        /// User clicked button on Html json component.
+        /// </summary>
+        HtmlButtonIsClick = 19,
     }
 
     /// <summary>
@@ -85,7 +93,7 @@
     /// </summary>
     internal sealed class CommandJson
     {
-        public RequestCommandEnum CommandEnum { get; set; }
+        public CommandEnum CommandEnum { get; set; }
 
         /// <summary>
         /// Gets or sets Origin. Command sent by browser or created by server.
@@ -140,6 +148,11 @@
         /// Gets or sets NavigatePathIsAddHistory. If true, NavigatePath is added to browser history. Used by server command. Not used by client command.
         /// </summary>
         public bool NavigatePathIsAddHistory { get; set; }
+
+        /// <summary>
+        /// Gets or sets HtmlButtonId. If user clicked button in Html json component this is its id.
+        /// </summary>
+        public string HtmlButtonId { get; set; }
     }
 
     /// <summary>
@@ -771,7 +784,7 @@
                     // Do not add history entry for any GET
                     isAddHistory = false;
                 }
-                if (RequestJson.CommandList.FirstOrDefault()?.CommandEnum == RequestCommandEnum.NavigateBackwardForward)
+                if (RequestJson.CommandList.FirstOrDefault()?.CommandEnum == CommandEnum.NavigateBackwardForward)
                 {
                     // Do not add history entry if user clicked backward or forward button in browser.
                     isAddHistory = false;
@@ -838,7 +851,7 @@
         internal void Navigate(string navigatePath, bool isAddHistory)
         {
             this.RequestJson.CommandAdd(new CommandJson { 
-                CommandEnum = RequestCommandEnum.NavigatePost, 
+                CommandEnum = CommandEnum.NavigatePost, 
                 Origin = RequestOrigin.Server, 
                 ComponentId = Id, 
                 NavigatePath = navigatePath, 
@@ -1031,7 +1044,7 @@
             get
             {
                 var commandJson = ((AppJson)Root).RequestJson.CommandGet();
-                return commandJson.CommandEnum == RequestCommandEnum.ButtonIsClick && commandJson.ComponentId == Id;
+                return commandJson.CommandEnum == CommandEnum.ButtonIsClick && commandJson.ComponentId == Id;
             }
         }
     }
@@ -2464,6 +2477,17 @@
         /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml. Html elements such as input are shown.
         /// </summary>
         public bool IsNoSanatize;
+
+        /// <summary>
+        /// Returns true if user clicked button in this Html json component.
+        /// </summary>
+        /// <param name="id">Html element id of button.</param>
+        public bool ButtonIsClick(string id)
+        {
+            var command = this.ComponentOwner<AppJson>().RequestJson.CommandGet();
+            var result = command.CommandEnum == CommandEnum.HtmlButtonIsClick && command.HtmlButtonId == id;
+            return result;
+        }
     }
 
     public class Page : ComponentJson

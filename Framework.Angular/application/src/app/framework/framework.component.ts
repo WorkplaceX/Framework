@@ -68,16 +68,21 @@ export class Html {
   div: ElementRef;
 
   click(event: MouseEvent){
-    this.json.IsShowSpinner = true;
     var element = event.target;
     do {
       if (element instanceof HTMLAnchorElement) {
-        var anchor = <HTMLAnchorElement>element;
+        let anchor = <HTMLAnchorElement>element;
         if (anchor.classList.contains("navigatePost")) {
           event.preventDefault();
+          this.json.IsShowSpinner = true;
           this.dataService.update(<CommandJson> { CommandEnum: 16, ComponentId: this.json.Id, NavigatePath: anchor.pathname });
         }
         break;
+      }
+      if (element instanceof HTMLButtonElement) {
+        let button = <HTMLButtonElement>element;
+        this.json.IsShowSpinner = true;
+        this.dataService.update(<CommandJson> { CommandEnum: 19, ComponentId: this.json.Id, HtmlButtonId: button.id });
       }
       if (element instanceof HTMLElement) {
         element = (<HTMLElement>element).parentElement;

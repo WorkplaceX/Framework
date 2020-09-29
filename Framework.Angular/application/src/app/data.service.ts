@@ -78,6 +78,8 @@ export class CommandJson {
   BulmaFilterText: string;
 
   NavigatePath: string;
+
+  HtmlButtonId: string;
 }
 
 export class RequestJson {
