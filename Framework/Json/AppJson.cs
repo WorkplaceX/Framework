@@ -13,7 +13,7 @@
     using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
 
-    internal enum RequestCommand
+    internal enum RequestCommandEnum
     {
         None = 0,
 
@@ -85,7 +85,7 @@
     /// </summary>
     internal sealed class CommandJson
     {
-        public RequestCommand Command { get; set; }
+        public RequestCommandEnum CommandEnum { get; set; }
 
         /// <summary>
         /// Gets or sets Origin. Command sent by browser or created by server.
@@ -771,7 +771,7 @@
                     // Do not add history entry for any GET
                     isAddHistory = false;
                 }
-                if (RequestJson.CommandList.FirstOrDefault()?.Command == RequestCommand.NavigateBackwardForward)
+                if (RequestJson.CommandList.FirstOrDefault()?.CommandEnum == RequestCommandEnum.NavigateBackwardForward)
                 {
                     // Do not add history entry if user clicked backward or forward button in browser.
                     isAddHistory = false;
@@ -838,7 +838,7 @@
         internal void Navigate(string navigatePath, bool isAddHistory)
         {
             this.RequestJson.CommandAdd(new CommandJson { 
-                Command = RequestCommand.NavigatePost, 
+                CommandEnum = RequestCommandEnum.NavigatePost, 
                 Origin = RequestOrigin.Server, 
                 ComponentId = Id, 
                 NavigatePath = navigatePath, 
@@ -1031,7 +1031,7 @@
             get
             {
                 var commandJson = ((AppJson)Root).RequestJson.CommandGet();
-                return commandJson.Command == RequestCommand.ButtonIsClick && commandJson.ComponentId == Id;
+                return commandJson.CommandEnum == RequestCommandEnum.ButtonIsClick && commandJson.ComponentId == Id;
             }
         }
     }

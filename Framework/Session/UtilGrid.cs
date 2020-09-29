@@ -859,7 +859,7 @@
         /// </summary>
         private static async Task ProcessIsClickSortAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickSort, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridIsClickSort, out CommandJson commandJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
@@ -876,7 +876,7 @@
         /// </summary>
         private static async Task ProcessIsClickConfigAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickConfig, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridIsClickConfig, out CommandJson commandJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
@@ -895,7 +895,7 @@
         /// </summary>
         private static void ProcessIsTextLeave(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsTextLeave, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridIsTextLeave, out CommandJson commandJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 cell.Text = cell.TextLeave;
@@ -908,7 +908,7 @@
         /// </summary>
         private static void ProcessStyleColumn(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridStyleColumn, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridStyleColumn, out CommandJson commandJson, out Grid grid))
             {
                 var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToArray();
                 for (int i = 0; i < columnList.Length; i++)
@@ -1160,7 +1160,7 @@
             var rowIndex = grid.RowListInternal.IndexOf(row);
             var rowState = grid.RowStateList.First(item => item.RowId == rowIndex + 1);
             var cell = grid.CellList.First(item => item.RowStateId == rowState.Id);
-            grid.ComponentOwner<AppJson>().RequestJson.CommandAdd(new CommandJson { Command = RequestCommand.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, GridCellId = cell.Id });
+            grid.ComponentOwner<AppJson>().RequestJson.CommandAdd(new CommandJson { CommandEnum = RequestCommandEnum.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, GridCellId = cell.Id });
         }
 
         /// <summary>
@@ -1168,7 +1168,7 @@
         /// </summary>
         private static async Task ProcessRowIsClickAsync(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickRow, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridIsClickRow, out CommandJson commandJson, out Grid grid))
             {
                 var rowSelectedLocal = grid.RowSelected;
 
@@ -1222,7 +1222,7 @@
                         {
                             GridLookupToGridDest(grid, out var gridDest, out _, out _, out var cellDest);
                             // TODO Use command queue
-                            appJson.RequestJson = new RequestJson(new CommandJson { Command = RequestCommand.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
+                            appJson.RequestJson = new RequestJson(new CommandJson { CommandEnum = RequestCommandEnum.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
 
                             await ProcessCellIsModify(appJson);
                         }
@@ -1236,7 +1236,7 @@
         /// </summary>
         private static async Task ProcessCellIsModify(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridCellIsModify, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridCellIsModify, out CommandJson commandJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
@@ -1363,7 +1363,7 @@
         /// </summary>
         private static async Task ProcessIsClickEnum(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, RequestCommand.GridIsClickEnum, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, RequestCommandEnum.GridIsClickEnum, out CommandJson commandJson, out Grid grid))
             {
                 // Grid config
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.Config)
