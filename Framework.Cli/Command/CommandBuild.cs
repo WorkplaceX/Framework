@@ -136,7 +136,7 @@
 
                 // npm run build
                 BuildWebsiteNpm(website);
-                string folderNameServer = UtilFramework.FolderNameParse(website.FolderNameServerGet(configCli));
+                string folderNameServer = UtilFramework.FolderNameParse("Application.Server/Framework/" + website.FolderNameDist);
                 UtilFramework.Assert(folderNameServer != null, "FolderNameServer can not be null!");
                 UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Website/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Website/'!");
 

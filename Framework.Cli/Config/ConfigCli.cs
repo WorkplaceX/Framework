@@ -177,6 +177,7 @@
             {
                 configServer.WebsiteList.Add(new ConfigServerWebsite()
                 {
+                    FolderNameDist = webSite.FolderNameDist,
                     DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
                 });
             }
@@ -221,14 +222,6 @@
     /// </summary>
     public class ConfigCliWebsite
     {
-        /// <summary>
-        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Layout01/". See also method ConfigServerWebsite.FolderNameServerGet();
-        /// </summary>
-        public string FolderNameServerGet(ConfigCli configCli)
-        {
-            return string.Format("Application.Server/Framework/Application.Website/Layout{0:00}/", configCli.WebsiteList.IndexOf(this) + 1);
-        }
-
         /// <summary>
         /// Gets or sets FolderNameNpmBuild. In this folder the following commands are executed: "npm install", "npm build". 
         /// </summary>

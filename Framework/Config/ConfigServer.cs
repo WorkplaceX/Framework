@@ -128,15 +128,20 @@
     internal class ConfigServerWebsite
     {
         /// <summary>
-        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Layout01/".
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/LayoutDefault/dist/".
         /// </summary>
         public string FolderNameServerGet(ConfigServer configServer, string prefixRemove)
         {
-            string result = string.Format("Application.Server/Framework/Application.Website/Layout{0:00}/", configServer.WebsiteList.IndexOf(this) + 1);
+            string result = "Application.Server/Framework/" + FolderNameDist;
             UtilFramework.Assert(result.StartsWith(prefixRemove));
             result = result.Substring(prefixRemove.Length);
             return result;
         }
+
+        /// <summary>
+        /// Gets or sets FolderNameDist. This is the FolderName when running on the server. For example: "Application.Website/LayoutDefault/dist".
+        /// </summary>
+        public string FolderNameDist { get; set; }
 
         public List<ConfigServerWebsiteDomain> DomainNameList { get; set; }
     }
