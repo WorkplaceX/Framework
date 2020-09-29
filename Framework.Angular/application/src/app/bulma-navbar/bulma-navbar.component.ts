@@ -23,7 +23,7 @@ export class BulmaNavbarComponent implements OnInit {
 
   clickHome() {
     this.json.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { Command: 15, ComponentId: this.json.Id });
+    this.dataService.update(<CommandJson> { CommandEnum: 15, ComponentId: this.json.Id });
     return false;
   }
 
@@ -38,13 +38,13 @@ export class BulmaNavbarComponent implements OnInit {
       (<HTMLElement>event.currentTarget).blur();
     }
     navbarItem.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { Command: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id });
+    this.dataService.update(<CommandJson> { CommandEnum: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id });
     return false;
   }
 
   filterTextChange(navbarItem) {
     navbarItem.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { Command: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id, BulmaFilterText: navbarItem.FilterText });
+    this.dataService.update(<CommandJson> { CommandEnum: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id, BulmaFilterText: navbarItem.FilterText });
   }
 
   trackBy(index, item) {

@@ -18,7 +18,7 @@ export class AppComponent {
       }
       
       // User clicked backward or forward button in browser.
-      this.dataService.update(<CommandJson> { Command: 17, ComponentId: this.dataService.json.Id, NavigatePath: path});
+      this.dataService.update(<CommandJson> { CommandEnum: 17, ComponentId: this.dataService.json.Id, NavigatePath: path});
     });
   }
 

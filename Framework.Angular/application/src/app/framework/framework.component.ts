@@ -43,8 +43,9 @@ export class Page {
 /* Html */
 @Component({
   selector: '[data-Html]',
-  template: `<i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>  
-  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml" (click)="click($event);" ></div>`
+  template: `
+  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml" (click)="click($event);"></div>
+  <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>`
 })
 export class Html {
   @Input() json: any
@@ -74,7 +75,7 @@ export class Html {
         var anchor = <HTMLAnchorElement>element;
         if (anchor.classList.contains("navigatePost")) {
           event.preventDefault();
-          this.dataService.update(<CommandJson> { Command: 16, ComponentId: this.json.Id, NavigatePath: anchor.pathname });
+          this.dataService.update(<CommandJson> { CommandEnum: 16, ComponentId: this.json.Id, NavigatePath: anchor.pathname });
         }
         break;
       }
@@ -105,7 +106,7 @@ export class Button {
 
   click(){
     this.json.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { Command: 1, ComponentId: this.json.Id });
+    this.dataService.update(<CommandJson> { CommandEnum: 1, ComponentId: this.json.Id });
   } 
 }
 

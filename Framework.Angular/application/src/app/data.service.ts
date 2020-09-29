@@ -55,7 +55,7 @@ export class Json { // AppJson
 }
 
 export class CommandJson {
-  Command: number;
+  CommandEnum: number;
 
   GridCellId: number;
 
