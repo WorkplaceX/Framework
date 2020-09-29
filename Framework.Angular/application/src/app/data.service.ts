@@ -130,8 +130,8 @@ export class DataService {
       }
 
       this.json.IsServerSideRendering = false;
-      if (window.location.href.startsWith("http://localhost:4200/")) { // Running in Framework\Framework.Angular\application\
-        this.json.EmbeddedUrl = "http://localhost:50919/";
+      if (window.location.href.endsWith(":4200/")) { // Running in Framework/Framework.Angular/application/
+        this.json.EmbeddedUrl = "http://" + window.location.hostname + ":50919/"; // http://localhost:50919/ or http://localhost2:50919/
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;

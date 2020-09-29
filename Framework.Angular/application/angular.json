@@ -11,20 +11,20 @@
         }
       },
       "root": "",
-      "sourceRoot": "src/Application.Website/Default",
+      "sourceRoot": "src/Application.Website/dist",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/application/browser",
-            "index": "src/Application.Website/Default/index.html",
+            "index": "src/Application.Website/dist/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/Application.Website/Default"
+              "src/Application.Website/dist"
             ],
             "styles": [
               "src/styles.scss"
@@ -87,7 +87,7 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": [
-              "src/Application.Website/Default"
+              "src/Application.Website/dist"
             ],
             "styles": [
               "src/styles.scss"

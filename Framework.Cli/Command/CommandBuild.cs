@@ -22,7 +22,7 @@
 
         protected internal override void Register(CommandLineApplication configuration)
         {
-            OptionClientOnly = configuration.Option("-c|--client", "Build angular client only.", CommandOptionType.NoValue);
+            OptionClientOnly = configuration.Option("-c|--client", "Build website and Angular only.", CommandOptionType.NoValue);
         }
 
         /// <summary>
@@ -40,7 +40,7 @@
             UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
 
             // Copy empty index.html file
-            UtilCli.FileCopy(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/index.html", UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/Default/index.html");
+            UtilCli.FileCopy(UtilFramework.FolderName + "Framework/Framework.Angular/application/src/index.html", UtilFramework.FolderName + "Framework/Framework.Angular/application/src/Application.Website/dist/index.html");
 
             // Ensure folder exists now
             UtilFramework.Assert(Directory.Exists(folderNameApplicationWebSite));
