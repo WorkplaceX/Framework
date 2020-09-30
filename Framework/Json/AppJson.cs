@@ -940,8 +940,6 @@
                     }
                 }
 
-                UtilApp.ProcessBootstrapModal(appJson); // Modal dialog window
-
                 appJson.RequestJson.CommandNext();
             }
 
@@ -982,12 +980,6 @@
         internal string Session { get; set; }
 
         internal string SessionApp { get; set; }
-
-        /// <summary>
-        /// Gets or sets IsModal. Indicating an object PageModal exists in the component tree. 
-        /// Used for example for html "body class='modal-open'" to enable vertical scroll bar.
-        /// </summary>
-        internal bool IsBootstrapModal { get; set; }
 
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
@@ -2568,6 +2560,180 @@
         protected virtual internal Task ProcessAsync()
         {
             return Task.FromResult(0);
+        }
+    }
+
+    public enum AlertEnum
+    {
+        None = 0,
+
+        Info = 1,
+
+        Success = 2,
+
+        Warning = 3,
+
+        Error = 4
+    }
+
+    /// <summary>
+    /// Application feedback message.
+    /// </summary>
+    public class Alert : Html
+    {
+        public Alert(ComponentJson owner, string textHtml, AlertEnum alertEnum, int? index = 0)
+            : base(owner)
+        {
+            var settingEnum = this.ComponentOwner<AppJson>().CssFrameworkEnum;
+            switch (settingEnum)
+            {
+                case CssFrameworkEnum.Bootstrap:
+                    {
+                        // See also: https://getbootstrap.com/docs/4.4/components/alerts/
+                        string textHtmlTemplate = "<div class='alert {{CssClass}}' role='alert'>{{TextHtml}}<button class='close'><span>&times;</span></button></div>";
+                        string cssClass = null;
+                        switch (alertEnum)
+                        {
+                            case AlertEnum.Info:
+                                cssClass = "alert-info";
+                                break;
+                            case AlertEnum.Success:
+                                cssClass = "alert-success";
+                                break;
+                            case AlertEnum.Warning:
+                                cssClass = "alert-warning";
+                                break;
+                            case AlertEnum.Error:
+                                cssClass = "alert-danger";
+                                break;
+                            default:
+                                break;
+                        }
+                        textHtmlTemplate = textHtmlTemplate.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
+                        TextHtml = textHtmlTemplate;
+                        IsNoSanatize = true;
+                    }
+                    break;
+                case CssFrameworkEnum.Bulma:
+                    {
+                        // See also: https://bulma.io/documentation/elements/notification/
+                        string textHtmlTemplate = "<div class='{{CssClass}}'><button class='delete'></button>{{TextHtml}}</div>";
+                        string cssClass = null;
+                        switch (alertEnum)
+                        {
+                            case AlertEnum.Info:
+                                cssClass = "notification is-info";
+                                break;
+                            case AlertEnum.Success:
+                                cssClass = "notification is-success";
+                                break;
+                            case AlertEnum.Warning:
+                                cssClass = "notification is-warning";
+                                break;
+                            case AlertEnum.Error:
+                                cssClass = "notification is-danger";
+                                break;
+                            default:
+                                break;
+                        }
+                        textHtmlTemplate = textHtmlTemplate.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
+                        TextHtml = textHtmlTemplate;
+                        IsNoSanatize = true;
+                    }
+                    break;
+                default:
+                    throw new Exception("Enum unknown!");
+            }
+
+            // Move to top
+            if (index != null)
+            {
+                this.ComponentMove(index.Value);
+            }
+        }
+
+        protected internal override Task ProcessAsync()
+        {
+            if (ButtonIsClick())
+            {
+                this.ComponentRemove();
+            }
+            return base.ProcessAsync();
+        }
+    }
+
+    /// <summary>
+    /// Application dialog.
+    /// </summary>
+    public class PageModal : Page
+    {
+        public PageModal(ComponentJson owner) : base(owner)
+        {
+            var settingEnum = this.ComponentOwner<AppJson>().CssFrameworkEnum;
+            switch (settingEnum)
+            {
+                case CssFrameworkEnum.Bootstrap:
+                    {
+                        // https://getbootstrap.com/docs/4.4/components/modal/
+                        new Div(this) { CssClass = "modal-backdrop show" };
+                        var divModal = new Div(this) { CssClass = "modal" };
+                        var divModalDialog = new Div(divModal) { CssClass = "modal-dialog" };
+                        var divModalContent = new Div(divModalDialog) { CssClass = "modal-content" };
+                        var divHeader = new Div(divModalContent) { CssClass = "modal-header" };
+                        DivHeader = new Div(divHeader);
+                        ButtonClose = new Button(divHeader) { CssClass = "close", TextHtml = "<span>&times;</span>" };
+                        DivBody = new Div(divModalContent) { CssClass = "modal-body" };
+                        DivFooter = new Div(divModalContent) { CssClass = "modal-footer" };
+                        divModalDialog.CssClass += " modal-lg";
+                    }
+                    break;
+                case CssFrameworkEnum.Bulma:
+                    {
+                        // See also: https://bulma.io/documentation/elements/notification/
+                        var divModal = new DivContainer(this) { CssClass = "modal is-active" };
+                        new Div(divModal) { CssClass = "modal-background" };
+                        var divCard = new Div(divModal) { CssClass = "modal-card" };
+                        var divHeaderLocal = new DivContainer(divCard) { CssClass = "modal-card-head" };
+                        DivHeader = new Div(divHeaderLocal) { CssClass = "modal-card-title" };
+                        ButtonClose = new Button(new Div(divHeaderLocal)) { CssClass = "delete" };
+                        DivBody = new Div(divCard) { CssClass = "modal-card-body" };
+                        DivFooter = new Div(divCard) { CssClass = "modal-card-foot" };
+                        // Title
+                        {
+                            // new Html(result.DivHeader) { TextHtml = "<p>Title</p>" };
+                        }
+                        // Two buttons in Html
+                        {
+                            // new Html(result.DivFooter) { TextHtml = "<button class='button is-success'>Save changes</button><button class='button'>Cancel</button>", IsNoSanatize = true };
+                        }
+                        // Two individual buttons
+                        {
+                            // new Button(result.DivFooter) { CssClass = "button is-success", TextHtml = "Ok" };
+                            // new Html(result.DivFooter) { TextHtml = "&nbsp" };
+                            // new Button(result.DivFooter) { CssClass = "button", TextHtml = "Cancel" };
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("Enum unknown!");
+            }
+        }
+
+        public Div DivHeader;
+
+        public Div DivBody;
+
+        public Div DivFooter;
+
+        public Button ButtonClose;
+
+        protected internal override Task ProcessAsync()
+        {
+            if (ButtonClose.IsClick)
+            {
+                this.ComponentRemove();
+            }
+            return base.ProcessAsync();
         }
     }
 

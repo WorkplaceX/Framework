@@ -28,10 +28,10 @@
 
         public override async Task InitAsync()
         {
-            new Html(DivHeader) { TextHtml = "Config" };
-            new Html(DivBody) { TextHtml = "<h1>Config Grid</h1>" };
+            new Html(DivHeader) { TextHtml = "<h1>Config</h1>" };
+            new Html(DivBody) { TextHtml = "<h2>Config Grid</h2>" };
             GridConfigGrid = new GridConfigGrid(DivBody);
-            new Html(DivBody) { TextHtml = "<h1>Config Field</h1>" };
+            new Html(DivBody) { TextHtml = "<h2>Config Field</h2>" };
             GridConfigField = new GridConfigField(DivBody);
 
             await GridConfigGrid.LoadAsync();

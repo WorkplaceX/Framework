@@ -12,26 +12,6 @@
     internal static class UtilApp
     {
         /// <summary>
-        /// Process bootstrap modal dialog window.
-        /// </summary>
-        public static void ProcessBootstrapModal(AppJson appJson)
-        {
-            appJson.IsBootstrapModal = false;
-            BootstrapModal.DivModalBackdropRemove(appJson);
-            bool isExist = false;
-            foreach (var item in appJson.ComponentListAll().OfType<BootstrapModal>())
-            {
-                item.ButtonClose?.ComponentMoveLast();
-                isExist = true;
-            }
-            if (isExist)
-            {
-                appJson.IsBootstrapModal = true;
-                BootstrapModal.DivModalBackdropCreate(appJson);
-            }
-        }
-
-        /// <summary>
         /// User clicked home button for example on navbar.
         /// </summary>
         public static Task ProcessHomeIsClickAsync(AppJson appJson)

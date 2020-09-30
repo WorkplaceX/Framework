@@ -37,8 +37,6 @@ export class Json { // AppJson
 
   IsReload: boolean;
 
-  IsBootstrapModal: boolean;
-
   List: any;
 
   DownloadData: string;
