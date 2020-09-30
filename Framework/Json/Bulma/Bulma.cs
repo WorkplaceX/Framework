@@ -352,6 +352,9 @@ namespace Framework.Json.Bulma
 
         public bool IsHide;
 
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string TextHtml;
 
         public string NavigatePath;
@@ -365,50 +368,5 @@ namespace Framework.Json.Bulma
         internal int RowStateId;
 
         internal bool IsSelect;
-    }
-
-    internal static class BulmaExtension
-    {
-        /// <summary>
-        /// See also: https://bulma.io/documentation/elements/notification/
-        /// </summary>
-        public static Html BulmaAlert(this Page page, string textHtml, AlertEnum alertEnum, int index = 0)
-        {
-            string htmlText = "<div class='{{CssClass}}'><button class='delete'></button>{{TextHtml}}</div>";
-            string cssClass = null;
-            switch (alertEnum)
-            {
-                case AlertEnum.Info:
-                    cssClass = "notification is-info";
-                    break;
-                case AlertEnum.Success:
-                    cssClass = "notification is-success";
-                    break;
-                case AlertEnum.Warning:
-                    cssClass = "notification is-warning";
-                    break;
-                case AlertEnum.Error:
-                    cssClass = "notification is-danger";
-                    break;
-                default:
-                    break;
-            }
-            htmlText = htmlText.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
-            Html result = new Html(page) { TextHtml = htmlText, IsNoSanatize = true };
-            result.ComponentMove(index);
-            return result;
-        }
-
-        public static PageModal BulmaModal(this Page page)
-        {
-            var result = new PageModal(page);
-            var divModal = new DivContainer(result) { CssClass = "modal is-active" };
-            new Div(divModal) { CssClass = "modal-background" };
-            var divModalContent = result.DivContent = new Div(divModal) { CssClass = "modal-content" };
-            result.DivContent = new Div(divModalContent) { CssClass = "modal-card-body" };
-            result.ButtonClose = new Button(new Div(divModal)) { CssClass = "modal-close is-large" };
-            result.ComponentMove(0); // Move to top
-            return result;
-        }
     }
 }

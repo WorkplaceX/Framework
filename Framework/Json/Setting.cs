@@ -5,15 +5,6 @@ using System.Threading.Tasks;
 
 namespace Framework.Json
 {
-    public enum SettingEnum
-    {
-        None = 0,
-
-        Bootstrap = 1,
-
-        Bulma = 2
-    }
-
     public enum AlertEnum
     {
         None = 0,
@@ -56,43 +47,25 @@ namespace Framework.Json
         }
     }
 
-    /// <summary>
-    /// Bulma implementation of generic methods.
-    /// </summary>
-    internal class SettingBulma : Setting
-    {
-        public override Html Alert(Page owner, string textHtml, AlertEnum alertEnum)
-        {
-            return owner.BulmaAlert(textHtml, alertEnum);
-        }
-
-        public override PageModal Modal(Page owner)
-        {
-            return owner.BulmaModal();
-        }
-    }
-
     public static class SettingExtension
     {
         private static Setting Setting(ComponentJson componentJson)
         {
-            SettingEnum settingEnum;
+            CssFrameworkEnum settingEnum;
             if (componentJson is AppJson appJson)
             {
-                settingEnum = appJson.SettingEnum;
+                settingEnum = appJson.CssFrameworkEnum;
             }
             else
             {
-                settingEnum = componentJson.ComponentOwner<AppJson>().SettingEnum;
+                settingEnum = componentJson.ComponentOwner<AppJson>().CssFrameworkEnum;
             }
             switch (settingEnum)
             {
-                case SettingEnum.None:
+                case CssFrameworkEnum.None:
                     return new Setting();
-                case SettingEnum.Bootstrap:
+                case CssFrameworkEnum.Bootstrap:
                     return new SettingBootstrap();
-                case SettingEnum.Bulma:
-                    return new SettingBulma();
                 default:
                     throw new Exception("Enum unknown!");
             }
@@ -109,16 +82,110 @@ namespace Framework.Json
         }
     }
 
+    public class Alert : Html
+    {
+        public Alert(ComponentJson owner, string textHtml, AlertEnum alertEnum, int? index = 0) 
+            : base(owner)
+        {
+            var settingEnum = this.ComponentOwner<AppJson>().CssFrameworkEnum;
+            switch (settingEnum)
+            {
+                case CssFrameworkEnum.None:
+                    break;
+                case CssFrameworkEnum.Bootstrap:
+                    break;
+                case CssFrameworkEnum.Bulma:
+                    {
+                        // See also: https://bulma.io/documentation/elements/notification/
+                        string textHtmlTemplate = "<div class='{{CssClass}}'><button class='delete'></button>{{TextHtml}}</div>";
+                        string cssClass = null;
+                        switch (alertEnum)
+                        {
+                            case AlertEnum.Info:
+                                cssClass = "notification is-info";
+                                break;
+                            case AlertEnum.Success:
+                                cssClass = "notification is-success";
+                                break;
+                            case AlertEnum.Warning:
+                                cssClass = "notification is-warning";
+                                break;
+                            case AlertEnum.Error:
+                                cssClass = "notification is-danger";
+                                break;
+                            default:
+                                break;
+                        }
+                        textHtmlTemplate = textHtmlTemplate.Replace("{{CssClass}}", cssClass).Replace("{{TextHtml}}", textHtml);
+                        TextHtml = textHtmlTemplate;
+                        IsNoSanatize = true;
+                        if (index != null)
+                        {
+                            this.ComponentMove(index.Value);
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("Enum unknown!");
+            }
+        }
+
+        protected internal override Task ProcessAsync()
+        {
+            if (ButtonIsClick())
+            {
+                this.ComponentRemove();
+            }
+            return base.ProcessAsync();
+        }
+    }
+
     public class PageModal : Page
     {
         public PageModal(ComponentJson owner) : base(owner)
         {
-
+            var settingEnum = this.ComponentOwner<AppJson>().CssFrameworkEnum;
+            switch (settingEnum)
+            {
+                case CssFrameworkEnum.None:
+                    break;
+                case CssFrameworkEnum.Bootstrap:
+                    break;
+                case CssFrameworkEnum.Bulma:
+                    {
+                        // See also: https://bulma.io/documentation/elements/notification/
+                        var divModal = new DivContainer(this) { CssClass = "modal is-active" };
+                        new Div(divModal) { CssClass = "modal-background" };
+                        var divCard = new Div(divModal) { CssClass = "modal-card" };
+                        var divHeaderLocal = new DivContainer(divCard) { CssClass = "modal-card-head" };
+                        DivHeader = new Div(divHeaderLocal) { CssClass = "modal-card-title" };
+                        ButtonClose = new Button(new Div(divHeaderLocal)) { CssClass = "delete" };
+                        DivBody = new Div(divCard) { CssClass = "modal-card-body" };
+                        DivFooter = new Div(divCard) { CssClass = "modal-card-foot" };
+                        // Title
+                        {
+                            // new Html(result.DivHeader) { TextHtml = "<p>Title</p>" };
+                        }
+                        // Two buttons in Html
+                        {
+                            // new Html(result.DivFooter) { TextHtml = "<button class='button is-success'>Save changes</button><button class='button'>Cancel</button>", IsNoSanatize = true };
+                        }
+                        // Two individual buttons
+                        {
+                            // new Button(result.DivFooter) { CssClass = "button is-success", TextHtml = "Ok" };
+                            // new Html(result.DivFooter) { TextHtml = "&nbsp" };
+                            // new Button(result.DivFooter) { CssClass = "button", TextHtml = "Cancel" };
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("Enum unknown!");
+            }
         }
 
-        public Div DivContent;
-
         public Div DivHeader;
+        
+        public Div DivBody;
 
         public Div DivFooter;
 

@@ -49,7 +49,7 @@
         }
 
         /// <summary>
-        /// Returns logger. See also file appsettings.json file.
+        /// Returns logger. See also file appsettings.json.
         /// </summary>
         public static ILogger Logger(string categoryName)
         {

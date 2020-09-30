@@ -89,7 +89,7 @@
     }
 
     /// <summary>
-    /// Command sent by browser. See also RequestJson.
+    /// Command sent by browser. See also class RequestJson.
     /// </summary>
     internal sealed class CommandJson
     {
@@ -366,12 +366,12 @@
         }
 
         /// <summary>
-        /// Gets Id. Client sends command to server. See also <see cref="RequestJson.ComponentId"/>
+        /// Gets Id. Client sends command to server. See also field <see cref="CommandJson.ComponentId"/>
         /// </summary>
         internal int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets Type. Used by Angular. Type to be rendered for derived classes. See also <see cref="Page"/>.
+        /// Gets or sets Type. Used by Angular. Type to be rendered for derived classes. See also class <see cref="Page"/>.
         /// </summary>
         internal string Type;
 
@@ -622,6 +622,21 @@
         }
     }
 
+    public enum CssFrameworkEnum
+    {
+        None = 0,
+
+        /// <summary>
+        /// See also: https://getbootstrap.com/
+        /// </summary>
+        Bootstrap = 1,
+
+        /// <summary>
+        /// See also: https://bulma.io/
+        /// </summary>
+        Bulma = 2
+    }
+
     public class AppJson : Page
     {
         public AppJson()            
@@ -636,9 +651,9 @@
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets SettingEnum. Switch between Bootstrap and Bulma framework.
+        /// Gets or sets CssFrameworkEnum. Switch between Bootstrap and Bulma framework.
         /// </summary>
-        public SettingEnum SettingEnum { get; set; }
+        public CssFrameworkEnum CssFrameworkEnum { get; set; }
 
         /// <summary>
         /// Returns NamingConvention for app related sql tables.
@@ -912,9 +927,17 @@
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
                 BulmaNavbar.ProcessAsync(appJson);
 
-                foreach (Page page in this.ComponentListAll().OfType<Page>())
+                // ProcessAsync
+                foreach (var item in this.ComponentListAll())
                 {
-                    await page.ProcessAsync();
+                    if (item is Page page)
+                    {
+                        await page.ProcessAsync();
+                    }
+                    if (item is Html html)
+                    {
+                        await html.ProcessAsync();
+                    }
                 }
 
                 UtilApp.ProcessBootstrapModal(appJson); // Modal dialog window
@@ -973,7 +996,7 @@
         internal bool IsReload { get; set; }
 
         /// <summary>
-        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method: UtilServer.RequestUrl();
+        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method <see cref="UtilServer.RequestUrl"/>;
         /// </summary>
         internal string RequestUrl { get; set; }
 
@@ -983,7 +1006,7 @@
         internal string EmbeddedUrl { get; set; }
 
         /// <summary>
-        /// Gets or sets DownloadData Used to send file to download to client.. See also method Convert.ToBase64String();
+        /// Gets or sets DownloadData Used to send file to download to client.. See also method <see cref="Convert.ToBase64String"/>.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
         internal string DownloadData;
@@ -1034,6 +1057,9 @@
 
         }
 
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string TextHtml;
 
         /// <summary>
@@ -1059,13 +1085,23 @@
         {
 
         }
+
+        internal Div(ComponentJson owner, string type)
+            : base(owner, type)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
+        public string TextHtml;
     }
 
     /// <summary>
     /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
-    /// Non Div component children are removed.
     /// </summary>
-    public class DivContainer : ComponentJson
+    public class DivContainer : Div
     {
         public DivContainer(ComponentJson owner)
             : base(owner, nameof(DivContainer))
@@ -1090,7 +1126,8 @@
                 }
                 foreach (var item in listRemove)
                 {
-                    item.ComponentRemove();
+                    throw new Exception($"Child of DivContainer has to be a Div ({item.GetType().Name})!");
+                    // item.ComponentRemove();
                 }
             }
         }
@@ -2344,7 +2381,7 @@
         public bool IsVisibleScroll;
 
         /// <summary>
-        /// Gets or sets Width. Used for user column resize. See also StyleColumn.
+        /// Gets or sets Width. Used for user column resize. See also field StyleColumn.
         /// </summary>
         public string Width;
 
@@ -2471,6 +2508,9 @@
 
         }
 
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string TextHtml;
 
         /// <summary>
@@ -2481,12 +2521,25 @@
         /// <summary>
         /// Returns true if user clicked button in this Html json component.
         /// </summary>
-        /// <param name="id">Html element id of button.</param>
-        public bool ButtonIsClick(string id)
+        /// <param name="id">Html element id of button. Use it to distinct if multiple buttons.</param>
+        public bool ButtonIsClick(string id = null)
         {
             var command = this.ComponentOwner<AppJson>().RequestJson.CommandGet();
-            var result = command.CommandEnum == CommandEnum.HtmlButtonIsClick && command.HtmlButtonId == id;
+            var result = command.CommandEnum == CommandEnum.HtmlButtonIsClick && command.ComponentId == this.Id;
+            if (result && id != null)
+            {
+                result = command.HtmlButtonId == id;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Override this method to implement custom process at the end of the process chain. Called once every request.
+        /// For example to process html button click.
+        /// </summary>
+        protected virtual internal Task ProcessAsync()
+        {
+            return Task.FromResult(0);
         }
     }
 
@@ -2533,6 +2586,9 @@
 
         }
 
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string TextHtml;
     }
 }

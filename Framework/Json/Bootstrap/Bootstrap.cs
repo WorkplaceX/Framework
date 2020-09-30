@@ -47,6 +47,9 @@
 
         }
 
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string BrandTextHtml;
 
         /// <summary>
@@ -96,6 +99,9 @@
 
     public class BootstrapNavbarButtonResult
     {
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string TextHtml;
     }
 
@@ -123,6 +129,9 @@
         /// </summary>
         public int RowStateId;
 
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
         public string TextHtml;
 
         public bool IsActive;

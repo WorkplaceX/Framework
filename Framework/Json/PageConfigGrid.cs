@@ -5,22 +5,19 @@
     using System.Threading.Tasks;
     using Database.dbo;
     using Framework.DataAccessLayer;
-    using Framework.Json.Bootstrap;
 
     /// <summary>
     /// Page to configure data grid and columns.
     /// </summary>
-    public class PageConfigGrid : BootstrapModal
+    public class PageConfigGrid : PageModal
     {
-        public PageConfigGrid() : this(null) { }
-
         public PageConfigGrid(ComponentJson owner) : base(owner) { }
 
         public void Init(string tableNameCSharp, string configName, string fieldNameCSharp)
         {
-            this.TableNameCSharp = tableNameCSharp;
-            this.ConfigName = configName;
-            this.FieldNameCSharp = fieldNameCSharp;
+            TableNameCSharp = tableNameCSharp;
+            ConfigName = configName;
+            FieldNameCSharp = fieldNameCSharp;
         }
 
         public string TableNameCSharp { get; set; }
@@ -31,7 +28,6 @@
 
         public override async Task InitAsync()
         {
-            Init(true, false, isLarge: true);
             new Html(DivHeader) { TextHtml = "Config" };
             new Html(DivBody) { TextHtml = "<h1>Config Grid</h1>" };
             GridConfigGrid = new GridConfigGrid(DivBody);
