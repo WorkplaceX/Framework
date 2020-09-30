@@ -371,7 +371,8 @@
         internal int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets Type. Used by Angular. Type to be rendered for derived classes. See also class <see cref="Page"/>.
+        /// Gets or sets Type. Used by Angular. Type to be rendered also for derived classes. See also class <see cref="Page"/>.
+        /// Used by Angular client. Not used by server for serialization or deserialization.
         /// </summary>
         internal string Type;
 
@@ -1078,6 +1079,9 @@
 
         }
 
+        /// <summary>
+        /// Constructor used by derived DivContainer.
+        /// </summary>
         internal Div(ComponentJson owner, string type)
             : base(owner, type)
         {
@@ -2516,11 +2520,15 @@
         /// <param name="id">Html element id of button. Use it to distinct if multiple buttons.</param>
         public bool ButtonIsClick(string id = null)
         {
-            var command = this.ComponentOwner<AppJson>().RequestJson.CommandGet();
-            var result = command.CommandEnum == CommandEnum.HtmlButtonIsClick && command.ComponentId == this.Id;
-            if (result && id != null)
+            var result = false;
+            if (IsRemoved == false)
             {
-                result = command.HtmlButtonId == id;
+                var command = this.ComponentOwner<AppJson>().RequestJson.CommandGet();
+                result = command.CommandEnum == CommandEnum.HtmlButtonIsClick && command.ComponentId == this.Id;
+                if (result && id != null)
+                {
+                    result = command.HtmlButtonId == id;
+                }
             }
             return result;
         }

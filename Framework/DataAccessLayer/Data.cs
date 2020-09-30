@@ -874,7 +874,7 @@
                             break;
                         }
                     case DatabaseEnum.Custom:
-                        throw new Exception("Override method Grid.Update(); to handle custom data source!");
+                        throw new Exception("Override method Grid.Update(); and set result.IsHandled flag for custom data source!");
                     default:
                         throw new Exception("Scope not supported!");
                 }
