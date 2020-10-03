@@ -349,6 +349,24 @@
             }
             grid.StyleColumn = styleColumnList.ToString();
 
+            // Render Grid.StyleColumnWidthList
+            if (grid.StyleColumnWidthList == null)
+            {
+                grid.StyleColumnWidthList = new List<string>();
+                int percent = (int)Math.Floor(100.0 / columnList.Count);
+                foreach (var column in columnList)
+                {
+                    if (column != columnList.Last())
+                    {
+                        grid.StyleColumnWidthList.Add($"{percent}%");
+                    }
+                    else
+                    {
+                        grid.StyleColumnWidthList.Add(null);
+                    }
+                }
+            }
+
             // Render Grid.CellList
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
             var filter = new GridFilter(grid);
@@ -397,6 +415,8 @@
         {
             // Render Grid.StyleColumn
             grid.StyleColumn = "minmax(0, 1fr)";
+            grid.StyleColumnWidthList = new List<string>();
+            grid.StyleColumnWidthList.Add(null); // One column for ModeStak.
 
             // Render Grid.CellList
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
@@ -514,6 +534,27 @@
             {
                 GridRowState rowState = grid.RowStateList[cellLocal.RowStateId - 1];
                 cellLocal.IsSelect = rowState.IsSelect;
+            }
+
+            // CellList to CellRow structure.
+            GridCellEnum? cellEnum = null;
+            int? rowStateId = null;
+            GridCellRow cellRow = null;
+            grid.CellRowList = new List<GridCellRow>();
+            foreach (var cellLocal in grid.CellList)
+            {
+                if (cellLocal.IsVisibleScroll)
+                {
+                    if (cellLocal.RowStateId != rowStateId || cellLocal.CellEnum != cellEnum)
+                    {
+                        rowStateId = cellLocal.RowStateId;
+                        cellEnum = cellLocal.CellEnum;
+                        cellRow = new GridCellRow();
+                        grid.CellRowList.Add(cellRow);
+                        cellRow.CellList = new List<GridCell>();
+                    }
+                    cellRow.CellList.Add(cellLocal);
+                }
             }
         }
 

@@ -760,7 +760,7 @@ namespace Framework.Json
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }
-                                if (propertyValue is GridCell gridCell && gridCell.IsVisibleScroll == false)
+                                if (propertyValue is GridCell gridCell && gridCell.IsVisibleScroll == false) // TODO Interface IHide
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }

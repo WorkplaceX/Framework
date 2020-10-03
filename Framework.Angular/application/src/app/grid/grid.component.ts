@@ -25,8 +25,10 @@ export class GridComponent implements OnInit {
   }
 
   clickSort(cell, event: MouseEvent) {
-    cell.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { CommandEnum: 8, ComponentId: this.json.Id, GridCellId: cell.Id });
+    if (this.resizeColumnIndex == null) {
+      cell.IsShowSpinner = true;
+      this.dataService.update(<CommandJson> { CommandEnum: 8, ComponentId: this.json.Id, GridCellId: cell.Id });
+    }
   }
 
   clickConfig(cell, event: MouseEvent) {
@@ -95,6 +97,10 @@ export class GridComponent implements OnInit {
 
   resizeCell: any;
   resizeOffset: number;
+  resizeColumnIndex: number;
+  resizeColumnWidth: number;
+  resizePageX: number;
+  resizeTableWidth: number;
 
   click(event: MouseEvent) {
     event.stopPropagation(); // Prevent sort after column resize
@@ -108,11 +114,47 @@ export class GridComponent implements OnInit {
     return false;
   }
 
+  mouseDown2(columnIndex, event: MouseEvent): boolean {
+    event.stopPropagation();
+    this.resizeColumnIndex = columnIndex;
+    this.resizePageX = event.pageX;
+    this.resizeColumnWidth = null;
+    this.resizeTableWidth = (<HTMLElement>event.currentTarget).parentElement.parentElement.parentElement.parentElement.clientWidth;
+    return false;
+  }
+
   documentMouseMove(event: MouseEvent) {
     if (this.resizeCell != null) {
-      
       this.resizeCell.Width = this.resizeOffset + event.pageX + 'px';
       this.json.StyleColumn = this.styleColumnList().join(" ");
+    }
+    if (this.resizeColumnIndex != null) {
+      let resizeColumnWidth = this.json.StyleColumnWidthList[this.resizeColumnIndex];
+      if (resizeColumnWidth.endsWith("%")) {
+        let columnWidth = Number.parseInt(resizeColumnWidth.substring(0, resizeColumnWidth.length - 1));
+        if (this.resizeColumnWidth == null) {
+          this.resizeColumnWidth = columnWidth;
+        }
+        let offset = event.pageX - this.resizePageX;
+        let offsetPercent = (offset / this.resizeTableWidth) * 100;
+        let columnWidthNew = Math.round((this.resizeColumnWidth + offsetPercent) * 100) / 100;
+        if (columnWidthNew < 0) {
+          columnWidthNew = 0;
+        }
+
+        // ColumnWidthTotal
+        let columnWidthTotal = 0;
+        for (let i = 0; i < 3; i++)
+        {
+
+        }
+
+        columnWidth = columnWidthNew;
+        this.json.StyleColumnWidthList[this.resizeColumnIndex] = columnWidth + "%";
+
+        console.log("columnWidthNew", columnWidthNew, "offset", offset, "columnWidth", columnWidth, "offsetPercent", offsetPercent);
+
+      }
     }
   }
 
@@ -120,6 +162,10 @@ export class GridComponent implements OnInit {
     if (this.resizeCell != null) {
       this.resizeCell = null;
       this.dataService.update(<CommandJson> { CommandEnum: 14, ComponentId: this.json.Id, GridStyleColumnList: this.styleColumnList() });
+    }
+    if (this.resizeColumnIndex != null) {
+      this.resizeColumnIndex = null;
+      event.stopPropagation();
     }
   }
 

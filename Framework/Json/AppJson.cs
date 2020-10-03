@@ -1212,6 +1212,8 @@
         /// </summary>
         internal List<GridCell> CellList;
 
+        internal List<GridCellRow> CellRowList;
+
         [Serialize(SerializeEnum.Session)]
         internal List<GridFilterValue> FilterValueList;
 
@@ -1227,7 +1229,9 @@
         /// <summary>
         /// Gets or sets StyleColumn. This is the css grid style attribute grid-template-columns.
         /// </summary>
-        internal string StyleColumn;
+        internal string StyleColumn; // GridLayer2 remove
+
+        internal List<string> StyleColumnWidthList; // GridLayer2
 
         /// <summary>
         /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
@@ -2299,8 +2303,13 @@
         Separator = 6,
     }
 
+    internal class GridCellRow
+    {
+        public List<GridCell> CellList;
+    }
+
     /// <summary>
-    /// Grid cell display sent to client. Unlike GridColumn a cell it is not persistent and lives only while it is IsVisibleScroll or contains ErrorParse.
+    /// Grid cell display sent to client. Unlike GridColumn a cell is not persistent and lives only while it is IsVisibleScroll or contains ErrorParse.
     /// </summary>
     internal sealed class GridCell
     {
@@ -2372,6 +2381,7 @@
 
         /// <summary>
         /// Gets or sets IsVisibleScroll. If true, cell is visible in scrallable range. If false, cell is not sent to client.
+        /// Like field ComponentJson.IsHide. See also method SerializeObject();
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public bool IsVisibleScroll;
