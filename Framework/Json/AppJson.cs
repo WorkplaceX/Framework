@@ -269,9 +269,20 @@
     }
 
     /// <summary>
+    /// Used by method UtilJson.Serialize(); to determine whether ComponentJson or Dto should be sent to client if stored in a list.
+    /// </summary>
+    public interface IHide
+    {
+        /// <summary>
+        /// Gets IsHide. If true, ComponentJson or Dto is not sent to client if stored in a list.
+        /// </summary>
+        public bool IsHide { get; }
+    }
+
+    /// <summary>
     /// Application component tree. Tree is serialized and deserialized for every client request. Stores session state from public and internal fields and properties.
     /// </summary>
-    public abstract class ComponentJson
+    public abstract class ComponentJson : IHide
     {
         /// <summary>
         /// Constructor to programmatically create new object. Constructor is not called on client request session deserialization (GetUninitializedObject).
@@ -404,7 +415,7 @@
         /// <summary>
         /// Gets or sets IsHide. If true component is not sent to client.
         /// </summary>
-        public bool IsHide;
+        public bool IsHide { get; set; }
     }
 
     /// <summary>
@@ -2302,7 +2313,7 @@
     /// <summary>
     /// Grid cell display sent to client. Unlike GridColumn a cell it is not persistent and lives only while it is IsVisibleScroll or contains ErrorParse.
     /// </summary>
-    internal sealed class GridCell
+    internal sealed class GridCell : IHide
     {
         /// <summary>
         /// Gets or sets Id. Sent back by client with <see cref="RequestJson.GridCellId"/>.
@@ -2375,6 +2386,22 @@
         /// </summary>
         [Serialize(SerializeEnum.Session)]
         public bool IsVisibleScroll;
+
+        /// <summary>
+        /// Gets or sets IsHide. Calculated property for interface IHide.
+        /// </summary>
+        [Serialize(SerializeEnum.None)]
+        public bool IsHide
+        {
+            get
+            {
+                return !IsVisibleScroll;
+            }
+            set
+            {
+                IsVisibleScroll = !value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets Width. Used for user column resize. See also field StyleColumn.

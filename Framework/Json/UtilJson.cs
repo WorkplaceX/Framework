@@ -756,11 +756,7 @@ namespace Framework.Json
                             foreach (var propertyValue in propertyValueList)
                             {
                                 var isSerializeClientLocal = isSerializeClient;
-                                if (propertyValue is ComponentJson componentJson && componentJson.IsHide)
-                                {
-                                    isSerializeClientLocal = false; // No list entry for hidden object.
-                                }
-                                if (propertyValue is GridCell gridCell && gridCell.IsVisibleScroll == false)
+                                if (propertyValue is IHide hide && hide.IsHide)
                                 {
                                     isSerializeClientLocal = false; // No list entry for hidden object.
                                 }

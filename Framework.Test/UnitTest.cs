@@ -7,11 +7,31 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     public static class UnitTest
     {
         public static void Run()
         {
+            {
+                MyHideComponent component = new MyHideComponent(null);
+                component.DtoList = new List<MyHideDto>();
+                component.DtoList.Add(new MyHideDto { Text = "DtoInList", IsHide = false });
+                component.DtoList.Add(new MyHideDto { Text = "DtoInList", IsHide = true });
+                component.DtoList.Add(new MyHideDto { Text = "DtoInList", IsHide = false });
+                component.Dto = new MyHideDto { Text = "DtoInField", IsHide = false };
+                UtilJson.Serialize(component, out var jsonSession, out var jsonClient);
+                UtilFramework.Assert(Regex.Matches(jsonSession, "DtoInList").Count == 3);
+                UtilFramework.Assert(Regex.Matches(jsonSession, "DtoInField").Count == 1);
+                UtilFramework.Assert(Regex.Matches(jsonClient, "DtoInList").Count == 2);
+                UtilFramework.Assert(Regex.Matches(jsonClient, "DtoInField").Count == 1);
+            }
+            {
+                MyHideComponent component = new MyHideComponent(null) { Text = "Parent" };
+                var component2 = new MyHideComponent(component) { Text = "Child" };
+                component.Ref = component2;
+                UtilJson.Serialize(component, out var jsonSession, out var jsonClient);
+            }
             {
                 UtilFramework.CamelCase camelCase = new UtilFramework.CamelCase("AbcDef");
                 UtilFramework.Assert(camelCase.TextList[0] == "Abc");
@@ -669,5 +689,29 @@
         public BootstrapRow Row;
 
         public BootstrapCol Col;
+    }
+
+    public class MyHideComponent : ComponentJson
+    {
+        public MyHideComponent(ComponentJson owner) 
+            : base(owner, nameof(MyHideComponent))
+        {
+
+        }
+
+        public string Text;
+
+        public List<MyHideDto> DtoList;
+
+        public MyHideDto Dto;
+
+        public ComponentJson Ref;
+    }
+
+    public class MyHideDto : IHide
+    {
+        public string Text;
+
+        public bool IsHide { get; set; }
     }
 }
