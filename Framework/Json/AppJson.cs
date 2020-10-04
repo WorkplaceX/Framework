@@ -38,11 +38,6 @@
         GridIsTextLeave = 13,
 
         /// <summary>
-        /// Send css grid style property grid-template-columns to server after column resize.
-        /// </summary>
-        GridStyleColumn = 14,
-
-        /// <summary>
         /// User clicked home button for example on navbar.
         /// </summary>
         HomeIsClick = 15,
@@ -68,6 +63,11 @@
         /// User clicked button on Html json component.
         /// </summary>
         HtmlButtonIsClick = 19,
+
+        /// <summary>
+        /// User resized column width.
+        /// </summary>
+        StyleColumnWidth = 20,
     }
 
     /// <summary>
@@ -117,11 +117,6 @@
         public string GridCellTextBase64FileName { get; set; }
 
         /// <summary>
-        /// Send visible column width list to server.
-        /// </summary>
-        public string[] GridStyleColumnList { get; set; }
-
-        /// <summary>
         /// Gets or sets Id. This is ComponentJson.Id.
         /// </summary>
         public int ComponentId { get; set; }
@@ -153,6 +148,16 @@
         /// Gets or sets HtmlButtonId. If user clicked button in Html json component this is its id.
         /// </summary>
         public string HtmlButtonId { get; set; }
+
+        /// <summary>
+        /// Gets or sets ResizeColumnIndex. User resized IsVisibleScroll column with this index.
+        /// </summary>
+        public int ResizeColumnIndex { get; set; }
+
+        /// <summary>
+        /// Gets or sets ResizeColumnWidthValue. This is the new column width.
+        /// </summary>
+        public double ResizeColumnWidthValue { get; set; }
     }
 
     /// <summary>
@@ -1236,9 +1241,14 @@
         internal int OffsetColumn;
 
         /// <summary>
-        /// Gets or sets StyleColumn. This is the css grid style attribute grid-template-columns.
+        /// Gets or sets StyleColumnList. Contains for example column width.
         /// </summary>
-        internal string StyleColumn;
+        internal List<GridStyleColumn> StyleColumnList;
+
+        /// <summary>
+        /// Gets or sets StyleRowList. Used by Angular to iterate rows.
+        /// </summary>
+        internal List<GridStyleRow> StyleRowList;
 
         /// <summary>
         /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
@@ -1588,6 +1598,32 @@
             /// </summary>
             public string Text { get; set; }
         }
+    }
+
+    internal class GridStyleColumn
+    {
+        /// <summary>
+        /// Gets or sets Width. This is the data grid column width. For example 33% or 33px.
+        /// </summary>
+        public string Width;
+
+        /// <summary>
+        /// Gets or sets WidthValue. For example 33.
+        /// </summary>
+        public double? WidthValue;
+
+        /// <summary>
+        /// Gets or sets WidthUnit. For example % or px.
+        /// </summary>
+        public string WidthUnit;
+    }
+
+    /// <summary>
+    /// Used by Angular to iterate the rows.
+    /// </summary>
+    internal class GridStyleRow
+    {
+
     }
 
     public class GridCellParseFilterResult
@@ -2243,9 +2279,9 @@
         public int SortField;
 
         /// <summary>
-        /// Gets or sets Width. This is the css grid style property grid-template-columns Width.
+        /// Gets or sets WidthValue. For example 33%.
         /// </summary>
-        public string Width;
+        public double? WidthValue;
     }
 
     /// <summary>
@@ -2402,11 +2438,6 @@
                 IsVisibleScroll = !value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets Width. Used for user column resize. See also field StyleColumn.
-        /// </summary>
-        public string Width;
 
         /// <summary>
         /// Gets or sets GridLookup.

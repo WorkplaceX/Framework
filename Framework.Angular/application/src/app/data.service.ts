@@ -63,8 +63,6 @@ export class CommandJson {
 
   GridCellTextBase64FileName: string;
 
-  GridStyleColumnList: string[];
-  
   ComponentId: number;
 
   GridIsClickEnum : number;
@@ -78,6 +76,10 @@ export class CommandJson {
   NavigatePath: string;
 
   HtmlButtonId: string;
+
+  ResizeColumnIndex: number;
+
+  ResizeColumnWidthValue: number;
 }
 
 export class RequestJson {

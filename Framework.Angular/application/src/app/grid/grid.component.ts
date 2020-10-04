@@ -93,34 +93,62 @@ export class GridComponent implements OnInit {
     return result;
   }
 
-  resizeCell: any;
-  resizeOffset: number;
+  resizeColumnIndex: number; // If not null, user column resize in progress
+  resizeColumnWidthValue: number;
+  resizePageX: number;
+  resizeTableWidth: number;
 
   click(event: MouseEvent) {
     event.stopPropagation(); // Prevent sort after column resize
   }
 
-  mouseDown(cell, event: MouseEvent): boolean {
+  mouseDown(columnIndex, event: MouseEvent): boolean {
     event.stopPropagation();
-    this.resizeCell = cell;
-    let resizeCellElement = (<HTMLElement>event.currentTarget).parentElement.parentElement;
-    this.resizeOffset = resizeCellElement.offsetWidth - event.pageX;
+    this.resizeColumnIndex = columnIndex;
+    this.resizePageX = event.pageX;
+    this.resizeColumnWidthValue = null;
+    this.resizeTableWidth = (<HTMLElement>event.currentTarget).parentElement.parentElement.parentElement.parentElement.clientWidth;
     return false;
-  }
+  }    
 
   documentMouseMove(event: MouseEvent) {
-    if (this.resizeCell != null) {
+    if (this.resizeColumnIndex != null) {
+      let styleColumn = this.json.StyleColumnList[this.resizeColumnIndex];
+      let widthValue = styleColumn.WidthValue;
+      if (this.resizeColumnWidthValue == null) {
+        this.resizeColumnWidthValue = widthValue;
+      }
+      let offset = event.pageX - this.resizePageX;
+      let offsetPercent = (offset / this.resizeTableWidth) * 100;
+      let columnWidthNew = Math.round((this.resizeColumnWidthValue + offsetPercent) * 100) / 100;
+      if (columnWidthNew < 0) {
+        columnWidthNew = 0;
+      }
       
-      this.resizeCell.Width = this.resizeOffset + event.pageX + 'px';
-      this.json.StyleColumn = this.styleColumnList().join(" ");
+      // ColumnWidthTotal
+      let columnWidthTotal = 0;
+      for (let i = 0; i < this.json.StyleColumnList.length; i++) {
+        let widthValue = this.json.StyleColumnList[i].WidthValue;
+        if (i != this.resizeColumnIndex && widthValue != null) {
+          columnWidthTotal += widthValue;
+        }
+      }
+      if (columnWidthTotal + columnWidthNew > 100) {
+        columnWidthNew = 100 - columnWidthTotal;
+      }
+
+      widthValue = columnWidthNew;
+      styleColumn.Width = widthValue + styleColumn.WidthUnit;
+      styleColumn.WidthValue = widthValue;
     }
   }
 
   documentMouseUp(event: MouseEvent) {
-    if (this.resizeCell != null) {
-      this.resizeCell = null;
-      this.dataService.update(<CommandJson> { CommandEnum: 14, ComponentId: this.json.Id, GridStyleColumnList: this.styleColumnList() });
-    }
+    event.stopPropagation();
+    let resizeColumnIndexLocal = this.resizeColumnIndex;
+    this.resizeColumnIndex = null;
+    let widthValue = <number>this.json.StyleColumnList[resizeColumnIndexLocal].WidthValue;
+    this.dataService.update(<CommandJson> { CommandEnum: 20, ComponentId: this.json.Id, ResizeColumnIndex: resizeColumnIndexLocal, ResizeColumnWidthValue: widthValue });
   }
 
   clickGrid(isClickEnum, event: MouseEvent) {

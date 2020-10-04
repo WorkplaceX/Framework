@@ -173,7 +173,6 @@
             });
             grid.CellList.Add(result);
             result.IsSort = GridSortValue.IsSortGet(grid, column.FieldNameCSharp);
-            result.Width = column.Width;
             result.IsVisibleScroll = true;
 
             return result;
@@ -192,7 +191,6 @@
                 ColumnText = column.ColumnText + ":",
             });
             grid.CellList.Add(result);
-            result.Width = column.Width;
             result.IsVisibleScroll = true;
 
             return result;
@@ -322,32 +320,60 @@
         /// </summary>
         private static void RenderModeTable(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
         {
-            // Render Grid.StyleColumn
-            StringBuilder styleColumnList = new StringBuilder();
-            bool isFirst = true;
-            int widthEndsWithPxCount = 0;
+            // Render Grid.StyleColumnList
+            grid.StyleColumnList = new List<GridStyleColumn>();
+            double widthValueTotal = 0;
+            double widthCount = 0;
             foreach (var column in columnList)
             {
-                if (isFirst)
+                if (column.WidthValue != null)
                 {
-                    isFirst = false;
+                    widthCount += 1;
+                    widthValueTotal += column.WidthValue.Value;
+                }
+            }
+            double widthValueAvg = (100 - widthValueTotal) / (columnList.Count - widthCount);
+            foreach (var column in columnList)
+            {
+                string width;
+                double? widthValue;
+                string widthUnit;
+                if (column.WidthValue != null)
+                {
+                    width = column.WidthValue + "%";
+                    widthValue = column.WidthValue;
+                    widthUnit = "%";
                 }
                 else
                 {
-                    styleColumnList.Append(" ");
+                    width = widthValueAvg + "%";
+                    widthValue = widthValueAvg;
+                    widthUnit = "%";
                 }
-                string width = column.Width != null ? width = column.Width : width = "minmax(0, 1fr)";
-                if (width.EndsWith("px"))
+                if (column != columnList.Last())
                 {
-                    widthEndsWithPxCount += 1;
+                    grid.StyleColumnList.Add(new GridStyleColumn { Width = width, WidthValue = widthValue, WidthUnit = widthUnit });
                 }
-                if (columnList.Count == widthEndsWithPxCount) // Set last column to dynamic, if all columns have a fix width defined.
+                else
                 {
-                    width = "minmax(0, 1fr)";
+                    grid.StyleColumnList.Add(new GridStyleColumn());
                 }
-                styleColumnList.Append(width);
             }
-            grid.StyleColumn = styleColumnList.ToString();
+
+            // Render Grid.StyleRowList
+            grid.StyleRowList = new List<GridStyleRow>();
+            foreach (var rowState in rowStateList)
+            {
+                if (rowState.RowEnum == GridRowEnum.Filter)
+                {
+                    grid.StyleRowList.Add(new GridStyleRow()); // Filter Header
+                    grid.StyleRowList.Add(new GridStyleRow()); // Filter Value
+                }
+                else
+                {
+                    grid.StyleRowList.Add(new GridStyleRow());
+                }
+            }
 
             // Render Grid.CellList
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
@@ -395,8 +421,19 @@
         /// </summary>
         private static void RenderModeStack(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
         {
-            // Render Grid.StyleColumn
-            grid.StyleColumn = "minmax(0, 1fr)";
+            // Render Grid.StyleColumnList
+            grid.StyleColumnList = new List<GridStyleColumn>();
+            grid.StyleColumnList.Add(new GridStyleColumn()); // One column for ModeStack
+
+            // Render Grid.StyleRowList
+            grid.StyleRowList = new List<GridStyleRow>();
+            foreach (var rowState in rowStateList)
+            {
+                foreach (var column in columnList)
+                {
+                    grid.StyleRowList.Add(new GridStyleRow());
+                }
+            }
 
             // Render Grid.CellList
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow);
@@ -908,16 +945,11 @@
         /// </summary>
         private static void ProcessStyleColumn(AppJson appJson)
         {
-            if (UtilSession.Request(appJson, CommandEnum.GridStyleColumn, out CommandJson commandJson, out Grid grid))
+            if (UtilSession.Request(appJson, CommandEnum.StyleColumnWidth, out CommandJson commandJson, out Grid grid))
             {
                 var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToArray();
-                for (int i = 0; i < columnList.Length; i++)
-                {
-                    var column = columnList[i];
-                    var width = commandJson.GridStyleColumnList[i];
-                    column.Width = width;
-                }
-                Render(grid); // Update Grid.StyleColumn
+                columnList[commandJson.ResizeColumnIndex].WidthValue = commandJson.ResizeColumnWidthValue;
+                Render(grid); // Update Grid.StyleColumnList
             }
         }
 
