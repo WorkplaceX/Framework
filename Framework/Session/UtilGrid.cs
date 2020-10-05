@@ -561,14 +561,14 @@
         {
             UtilFramework.Assert(grid.TypeRow == query.ElementType);
             // Get config grid and field query
-            Grid.QueryConfigResult queryConfigResult = new Grid.QueryConfigResult();
+            Grid.QueryConfigResult queryConfigResult;
             if (grid.IsGridLookup == false)
             {
-                grid.QueryConfig(UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), queryConfigResult);
+                queryConfigResult = grid.QueryConfigInternal(UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow));
             }
             else
             {
-                grid.LookupQueryConfig(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow), queryConfigResult);
+                queryConfigResult = grid.GridDest.LookupQueryConfigInternal(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow));
             }
 
             // Load config grid
@@ -787,11 +787,11 @@
         }
 
         /// <summary>
-        /// Returns data grid configuration record.
+        /// Returns one data grid configuration record.
         /// </summary>
         private static FrameworkConfigGridIntegrate ConfigGrid(Grid grid)
         {
-            var result = grid.ConfigGridList.Where(item => item.ConfigName == grid.ConfigName).SingleOrDefault(); // LINQ to memory
+            var result = grid.ConfigGridList.SingleOrDefault(); // LINQ to memory
             return result;
         }
 
@@ -817,7 +817,7 @@
         private static Dictionary<string, List<FrameworkConfigFieldIntegrate>> ConfigFieldDictionary(Grid grid)
         {
             var result = new Dictionary<string, List<FrameworkConfigFieldIntegrate>>();
-            foreach (var item in grid.ConfigFieldList.Where(item => item.ConfigName == grid.ConfigName)) // LINQ to memory
+            foreach (var item in grid.ConfigFieldList)
             {
                 if (!result.ContainsKey(item.FieldNameCSharp))
                 {
@@ -920,9 +920,7 @@
                 Page page = grid.ComponentOwner<Page>();
 
                 string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                string configName = grid.ConfigName;
-                var pageConfigGrid = new PageConfigGrid(page);
-                pageConfigGrid.Init(tableNameCSharp, configName, column.FieldNameCSharp);
+                var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp);
                 await pageConfigGrid.InitAsync();
             }
         }
@@ -1405,9 +1403,7 @@
                         Page page = grid.ComponentOwner<Page>();
 
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                        string configName = grid.ConfigName;
-                        var pageConfigGrid = new PageConfigGrid(page);
-                        pageConfigGrid.Init(tableNameCSharp, configName, null);
+                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null);
                         await pageConfigGrid.InitAsync();
                     }
                 }

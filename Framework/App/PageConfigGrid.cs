@@ -11,18 +11,14 @@
     /// </summary>
     public class PageConfigGrid : PageModal
     {
-        public PageConfigGrid(ComponentJson owner) : base(owner) { }
-
-        public void Init(string tableNameCSharp, string configName, string fieldNameCSharp)
+        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp) 
+            : base(owner) 
         {
             TableNameCSharp = tableNameCSharp;
-            ConfigName = configName;
             FieldNameCSharp = fieldNameCSharp;
         }
 
         public string TableNameCSharp { get; set; }
-
-        public string ConfigName { get; set; }
 
         public string FieldNameCSharp { get; set; }
 
@@ -90,7 +86,7 @@
         {
             if (TableNameCSharp != null)
             {
-                result.Query = args.Query.Where(item => item.TableNameCSharp == TableNameCSharp && item.ConfigName == ConfigName);
+                result.Query = args.Query.Where(item => item.TableNameCSharp == TableNameCSharp);
             }
         }
 
@@ -143,10 +139,13 @@
         {
             var rowDest = new FrameworkConfigGrid();
             Data.RowCopy(args.Row, rowDest);
+            int tableId = (await Data.Query<FrameworkTable>().Where(item => item.TableNameCSharp == TableNameCSharp).QueryExecuteAsync()).Single().Id;
+            rowDest.TableId = tableId;
             rowDest.IsExist = true;
             await Data.InsertAsync(rowDest);
-            var rowReload = await Reload(args.Row);
-            Data.RowCopy(rowReload, args.Row);
+            Data.RowCopy(rowDest, result.Row);
+            var rowReload = await Reload(result.Row);
+            Data.RowCopy(rowReload, result.Row);
 
             result.IsHandled = true;
         }

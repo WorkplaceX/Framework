@@ -1209,12 +1209,6 @@
         }
 
         /// <summary>
-        /// Gets or sets ConfigName. Switch to select current configuration. Multiple configurations can be stored.
-        /// </summary>
-        [Serialize(SerializeEnum.Session)]
-        internal string ConfigName;
-
-        /// <summary>
         /// Gets or sets ColumnList. Does not include hidden columns.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
@@ -1520,7 +1514,18 @@
         }
 
         /// <summary>
-        /// Contains one query for data grid configuration and one query for data grid field configuration.
+        /// Arguments for config query.
+        /// </summary>
+        public class QueryConfigArgs
+        {
+            /// <summary>
+            /// Gets TableName. This is the TableName for which to return the config query. TableName as declared in CSharp code. 
+            /// </summary>
+            public string TableName { get; internal set; }
+        }
+
+        /// <summary>
+        /// Returns one query for data grid configuration and one query for data grid field configuration.
         /// </summary>
         public class QueryConfigResult
         {
@@ -1533,18 +1538,40 @@
             /// Gets or sets ConfigFieldQuery.
             /// </summary>
             public IQueryable<FrameworkConfigFieldIntegrate> ConfigFieldQuery { get; set; }
+
+            /// <summary>
+            /// Gets or sets ConfigName. Will be added to ConfigGridQuery and ConfigFieldQuery as additional filter.
+            /// </summary>
+            public string ConfigName { get; set; }
         }
 
         /// <summary>
         /// Returns configuration query of data grid to load.
         /// </summary>
         /// <param name="tableName">TableName as declared in CSharp code. Type of row to load.</param>
-        protected virtual internal void QueryConfig(string tableName, QueryConfigResult result)
+        internal QueryConfigResult QueryConfigInternal(string tableName)
         {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be loaded. See also Grid.Data.
+            var result = new QueryConfigResult();
+            var args = new QueryConfigArgs { TableName = tableName };
 
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName /* && item.ConfigName == grid.ConfigName */); // Multiple configuration can be Loaded. See also Grid.GridData.
+            // Default result
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName);
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName);
 
+            QueryConfig(args, result);
+
+            // Filter one configuration
+            result.ConfigGridQuery = result.ConfigGridQuery.Where(item => item.ConfigName == result.ConfigName); 
+            result.ConfigFieldQuery = result.ConfigFieldQuery.Where(item => item.ConfigName == result.ConfigName);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns configuration query of data grid to load.
+        /// </summary>
+        protected virtual void QueryConfig(QueryConfigArgs args, QueryConfigResult result)
+        {
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridIntegrate { RowCountMax = 2 } }.AsQueryable();
         }
@@ -1559,12 +1586,29 @@
         /// </summary>
         /// <param name="gridLookup">Lookup data grid for which to load the configuration.</param>
         /// <param name="tableName">TableName as declared in CSharp code.</param>
-        protected virtual internal void LookupQueryConfig(Grid gridLookup, string tableName, QueryConfigResult result)
+        internal QueryConfigResult LookupQueryConfigInternal(Grid gridLookup, string tableName)
         {
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
+            var result = new QueryConfigResult();
+            var args = new QueryConfigArgs { TableName = tableName };
 
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName && item.ConfigName == gridLookup.ConfigName);
+            // Default result
+            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName);
+            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName);
 
+            LookupQueryConfig(args, result);
+
+            // Filter one configuration
+            result.ConfigGridQuery = result.ConfigGridQuery.Where(item => item.ConfigName == result.ConfigName);
+            result.ConfigFieldQuery = result.ConfigFieldQuery.Where(item => item.ConfigName == result.ConfigName);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns configuration query of lookup data grid to load.
+        /// </summary>
+        protected virtual void LookupQueryConfig(QueryConfigArgs args, QueryConfigResult result)
+        {
             // Example for static configuration:
             // result.ConfigGridQuery = new [] { new FrameworkConfigGridIntegrate { RowCountMax = 2 } }.AsQueryable();
         }
