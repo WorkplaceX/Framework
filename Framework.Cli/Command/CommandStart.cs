@@ -124,10 +124,13 @@
                         Task.Delay(5000).ContinueWith((Task task) => heartBeat());
                     }
 
-                    heartBeat();
-                    while (true)
+                    if (isFileSync || isWebsiteWatch || isAngular || isServer)
                     {
-                        Console.ReadLine(); // Program would end and with it FileSync
+                        heartBeat();
+                        while (true)
+                        {
+                            Console.ReadLine(); // Program would end and with it FileSync
+                        }
                     }
                 }
             }

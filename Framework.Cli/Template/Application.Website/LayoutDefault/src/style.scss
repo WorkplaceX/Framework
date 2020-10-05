@@ -8,3 +8,7 @@ $enable-responsive-font-sizes: true;
 @import "../node_modules/bootstrap/scss/bootstrap";
 
 @import "../../Shared/frameworkStyle.scss";
+
+td {
+    padding: 0;
+}
