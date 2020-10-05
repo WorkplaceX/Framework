@@ -49,6 +49,8 @@ CREATE TABLE FrameworkConfigGrid
 	ConfigName NVARCHAR(256),
 	RowCountMax INT,
 	IsAllowInsert BIT,
+	IsShowHeader BIT,
+	IsShowPagination BIT,
 	IsExist BIT NOT NULL
 	INDEX IX_FrameworkConfigGrid UNIQUE (TableId, ConfigName)
 )
@@ -65,6 +67,8 @@ SELECT
 	ConfigGrid.ConfigName,
 	ConfigGrid.RowCountMax,
 	ConfigGrid.IsAllowInsert,
+	ConfigGrid.IsShowHeader,
+	ConfigGrid.IsShowPagination,
 	ConfigGrid.IsExist
 FROM
 	FrameworkConfigGrid ConfigGrid
@@ -121,6 +125,8 @@ SELECT
 	ConfigGrid.ConfigName AS ConfigName,
 	ConfigGrid.RowCountMax AS RowCountMax,
 	ConfigGrid.IsAllowInsert AS IsAllowInsert,
+	ConfigGrid.IsShowHeader AS IsShowHeader,
+	ConfigGrid.IsShowPagination AS IsShowPagination,
 	ConfigGrid.IsExist AS IsExist
 FROM
 	FrameworkConfigGrid ConfigGrid
@@ -133,6 +139,8 @@ SELECT
 	NULL AS ConfigName,
 	NULL AS RowCountMax,
 	NULL AS IsAllowInsert,
+	NULL AS IsShowHeader,
+	NULL AS IsShowPagination,
 	NULL AS IsExist
 FROM
 	FrameworkTable FrameworkTable

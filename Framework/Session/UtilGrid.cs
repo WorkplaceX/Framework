@@ -318,10 +318,8 @@
         /// <summary>
         /// Render data grid in table mode.
         /// </summary>
-        private static void RenderModeTable(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
+        private static void RenderModeTable(Grid grid, FrameworkConfigGridIntegrate configGrid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
         {
-            var configGrid = UtilGrid.ConfigGrid(grid);
-
             // Render Grid.StyleColumnList
             grid.StyleColumnList = new List<GridStyleColumn>();
             double widthValueTotal = 0;
@@ -369,8 +367,11 @@
                 switch (rowState.RowEnum)
                 {
                     case GridRowEnum.Filter:
-                        grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
-                        grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                        if ((configGrid?.IsShowHeader).GetValueOrDefault(true))
+                        {
+                            grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
+                            grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                        }
                         break;
                     case GridRowEnum.Index:
                         grid.StyleRowList.Add(new GridStyleRow()); // Cell value
@@ -391,7 +392,7 @@
             foreach (var rowState in rowStateList)
             {
                 // Render Filter
-                if (rowState.RowEnum == GridRowEnum.Filter)
+                if (rowState.RowEnum == GridRowEnum.Filter && (configGrid?.IsShowHeader).GetValueOrDefault(true))
                 {
                     // Filter Header
                     foreach (var column in columnList)
@@ -428,10 +429,8 @@
         /// <summary>
         /// Render data grid in stack mode.
         /// </summary>
-        private static void RenderModeStack(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
+        private static void RenderModeStack(Grid grid, FrameworkConfigGridIntegrate configGrid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
         {
-            var configGrid = UtilGrid.ConfigGrid(grid);
-
             // Render Grid.StyleColumnList
             grid.StyleColumnList = new List<GridStyleColumn>();
             grid.StyleColumnList.Add(new GridStyleColumn()); // One column for ModeStack
@@ -445,8 +444,11 @@
                     switch (rowState.RowEnum)
                     {
                         case GridRowEnum.Filter:
-                            grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
-                            grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                            if ((configGrid?.IsShowHeader).GetValueOrDefault(true))
+                            {
+                                grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
+                                grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                            }
                             break;
                         case GridRowEnum.Index:
                             grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderRow
@@ -475,7 +477,7 @@
                 count += 1;
 
                 // Render Filter
-                if (rowState.RowEnum == GridRowEnum.Filter)
+                if (rowState.RowEnum == GridRowEnum.Filter && (configGrid?.IsShowHeader).GetValueOrDefault(true))
                 {
                     foreach (var column in columnList)
                     {
@@ -523,6 +525,8 @@
         {
             UtilFramework.LogDebug(string.Format("RENDER ({0}) IsCell={1};", grid.TypeRow?.Name, cell != null));
 
+            var configGrid = UtilGrid.ConfigGrid(grid);
+
             // IsVisibleScroll
             int count = 0;
             foreach (var column in grid.ColumnList)
@@ -547,12 +551,15 @@
 
             if (grid.Mode == GridMode.Table)
             {
-                RenderModeTable(grid, columnList, rowStateList, cellList, cell, isTextLeave);
+                RenderModeTable(grid, configGrid, columnList, rowStateList, cellList, cell, isTextLeave);
             }
             else
             {
-                RenderModeStack(grid, columnList, rowStateList, cellList, cell, isTextLeave);
+                RenderModeStack(grid, configGrid, columnList, rowStateList, cellList, cell, isTextLeave);
             }
+
+            // IsHidePagination
+            grid.IsHidePagination = !(configGrid?.IsShowPagination).GetValueOrDefault(true);
 
             // Preserve cell in ErrorParse or ErrorSave state
             foreach (var cellLocal in cellList.Values)

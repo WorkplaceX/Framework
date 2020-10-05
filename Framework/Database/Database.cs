@@ -173,6 +173,12 @@ namespace Database.dbo
         [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
         public bool? IsAllowInsert { get; set; }
 
+        [SqlField("IsShowHeader", FrameworkTypeEnum.Bit)]
+        public bool? IsShowHeader { get; set; }
+
+        [SqlField("IsShowPagination", FrameworkTypeEnum.Bit)]
+        public bool? IsShowPagination { get; set; }
+
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }
     }
@@ -200,6 +206,12 @@ namespace Database.dbo
 
         [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
         public bool? IsAllowInsert { get; set; }
+
+        [SqlField("IsShowHeader", FrameworkTypeEnum.Bit)]
+        public bool? IsShowHeader { get; set; }
+
+        [SqlField("IsShowPagination", FrameworkTypeEnum.Bit)]
+        public bool? IsShowPagination { get; set; }
 
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool? IsExist { get; set; }
@@ -231,6 +243,12 @@ namespace Database.dbo
 
         [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
         public bool? IsAllowInsert { get; set; }
+
+        [SqlField("IsShowHeader", FrameworkTypeEnum.Bit)]
+        public bool? IsShowHeader { get; set; }
+
+        [SqlField("IsShowPagination", FrameworkTypeEnum.Bit)]
+        public bool? IsShowPagination { get; set; }
 
         [SqlField("IsExist", FrameworkTypeEnum.Bit)]
         public bool IsExist { get; set; }

@@ -1245,6 +1245,11 @@
         internal List<GridStyleRow> StyleRowList;
 
         /// <summary>
+        /// Gets or sets IsHidePagination. If true, data grid pagination is not shown.
+        /// </summary>
+        internal bool IsHidePagination;
+
+        /// <summary>
         /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
