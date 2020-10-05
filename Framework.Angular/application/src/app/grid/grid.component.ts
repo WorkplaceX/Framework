@@ -144,11 +144,13 @@ export class GridComponent implements OnInit {
   }
 
   documentMouseUp(event: MouseEvent) {
-    event.stopPropagation();
-    let resizeColumnIndexLocal = this.resizeColumnIndex;
-    this.resizeColumnIndex = null;
-    let widthValue = <number>this.json.StyleColumnList[resizeColumnIndexLocal].WidthValue;
-    this.dataService.update(<CommandJson> { CommandEnum: 20, ComponentId: this.json.Id, ResizeColumnIndex: resizeColumnIndexLocal, ResizeColumnWidthValue: widthValue });
+    if (this.resizeColumnIndex != null) {
+      event.stopPropagation();
+      let resizeColumnIndexLocal = this.resizeColumnIndex;
+      this.resizeColumnIndex = null;
+      let widthValue = <number>this.json.StyleColumnList[resizeColumnIndexLocal].WidthValue;
+      this.dataService.update(<CommandJson> { CommandEnum: 20, ComponentId: this.json.Id, ResizeColumnIndex: resizeColumnIndexLocal, ResizeColumnWidthValue: widthValue });
+    }
   }
 
   clickGrid(isClickEnum, event: MouseEvent) {
