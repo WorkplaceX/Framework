@@ -1543,6 +1543,11 @@
             /// Gets or sets ConfigName. Will be added to ConfigGridQuery and ConfigFieldQuery as additional filter.
             /// </summary>
             public string ConfigName { get; set; }
+
+            /// <summary>
+            /// Gets or sets GridMode. This is the data grid display mode to start with. User can still switch later on.
+            /// </summary>
+            public GridMode GridMode { get; set; }
         }
 
         /// <summary>
@@ -1551,7 +1556,7 @@
         /// <param name="tableName">TableName as declared in CSharp code. Type of row to load.</param>
         internal QueryConfigResult QueryConfigInternal(string tableName)
         {
-            var result = new QueryConfigResult();
+            var result = new QueryConfigResult { GridMode = GridMode.Table }; // Display table by default
             var args = new QueryConfigArgs { TableName = tableName };
 
             // Default result
@@ -2127,11 +2132,23 @@
     /// <summary>
     /// Data grid display mode.
     /// </summary>
-    internal enum GridMode
+    public enum GridMode
     {
         None = 0,
+
+        /// <summary>
+        /// Display grid cells as table.
+        /// </summary>
         Table = 1,
+
+        /// <summary>
+        /// Display grid cells stacked on top of each other.
+        /// </summary>
         Stack = 2,
+
+        /// <summary>
+        /// Display grid cells in predifined positions.
+        /// </summary>
         Form = 3
     }
 

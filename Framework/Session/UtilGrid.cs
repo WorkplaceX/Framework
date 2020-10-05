@@ -188,7 +188,7 @@
                 ColumnId = key.Item1,
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
-                ColumnText = column.ColumnText + ":",
+                ColumnText = column.ColumnText,
             });
             grid.CellList.Add(result);
             result.IsVisibleScroll = true;
@@ -320,6 +320,8 @@
         /// </summary>
         private static void RenderModeTable(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
         {
+            var configGrid = UtilGrid.ConfigGrid(grid);
+
             // Render Grid.StyleColumnList
             grid.StyleColumnList = new List<GridStyleColumn>();
             double widthValueTotal = 0;
@@ -364,14 +366,21 @@
             grid.StyleRowList = new List<GridStyleRow>();
             foreach (var rowState in rowStateList)
             {
-                if (rowState.RowEnum == GridRowEnum.Filter)
+                switch (rowState.RowEnum)
                 {
-                    grid.StyleRowList.Add(new GridStyleRow()); // Filter Header
-                    grid.StyleRowList.Add(new GridStyleRow()); // Filter Value
-                }
-                else
-                {
-                    grid.StyleRowList.Add(new GridStyleRow());
+                    case GridRowEnum.Filter:
+                        grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
+                        grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                        break;
+                    case GridRowEnum.Index:
+                        grid.StyleRowList.Add(new GridStyleRow()); // Cell value
+                        break;
+                    case GridRowEnum.New:
+                        if ((configGrid?.IsAllowInsert).GetValueOrDefault(true))
+                        {
+                            grid.StyleRowList.Add(new GridStyleRow()); // Cell value
+                        }
+                        break;
                 }
             }
 
@@ -406,7 +415,7 @@
                 }
 
                 // Render New
-                if (rowState.RowEnum == GridRowEnum.New)
+                if (rowState.RowEnum == GridRowEnum.New && (configGrid?.IsAllowInsert).GetValueOrDefault(true))
                 {
                     foreach (var column in columnList)
                     {
@@ -421,6 +430,8 @@
         /// </summary>
         private static void RenderModeStack(Grid grid, List<GridColumn> columnList, List<GridRowState> rowStateList, Dictionary<(int, int, GridCellEnum), GridCell> cellList, GridCell cell, bool isTextLeave)
         {
+            var configGrid = UtilGrid.ConfigGrid(grid);
+
             // Render Grid.StyleColumnList
             grid.StyleColumnList = new List<GridStyleColumn>();
             grid.StyleColumnList.Add(new GridStyleColumn()); // One column for ModeStack
@@ -431,7 +442,24 @@
             {
                 foreach (var column in columnList)
                 {
-                    grid.StyleRowList.Add(new GridStyleRow());
+                    switch (rowState.RowEnum)
+                    {
+                        case GridRowEnum.Filter:
+                            grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
+                            grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                            break;
+                        case GridRowEnum.Index:
+                            grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderRow
+                            grid.StyleRowList.Add(new GridStyleRow()); // Cell value
+                            break;
+                        case GridRowEnum.New:
+                            if ((configGrid?.IsAllowInsert).GetValueOrDefault(true))
+                            {
+                                grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderRow
+                                grid.StyleRowList.Add(new GridStyleRow()); // Cell value
+                            }
+                            break;
+                    }
                 }
             }
 
@@ -473,7 +501,7 @@
                 }
 
                 // Render New
-                if (rowState.RowEnum == GridRowEnum.New)
+                if (rowState.RowEnum == GridRowEnum.New && (configGrid?.IsAllowInsert).GetValueOrDefault(true))
                 {
                     foreach (var column in columnList)
                     {
@@ -570,6 +598,9 @@
             {
                 queryConfigResult = grid.GridDest.LookupQueryConfigInternal(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow));
             }
+
+            // Display grid mode
+            grid.Mode = queryConfigResult.GridMode;
 
             // Load config grid
             grid.ConfigGridList = new List<FrameworkConfigGridIntegrate>();
