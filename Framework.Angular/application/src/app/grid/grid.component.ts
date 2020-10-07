@@ -58,9 +58,16 @@ export class GridComponent implements OnInit {
         cellFileUpload.IsShowSpinner = true;
         dataService.update(<CommandJson> { CommandEnum: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file.name });
     }
-  }  
+  }
+
+  clickCell(cell, event: MouseEvent) {
+    if (!(event.target instanceof HTMLInputElement)) {
+      this.focus(cell);
+    }
+  }
 
   focus(cell) {
+    console.log("F");
     if (!cell.IsSelect) {
       cell.IsShowSpinner = true;
       this.dataService.update(<CommandJson> { CommandEnum: 11, ComponentId: this.json.Id, GridCellId: cell.Id });
