@@ -111,6 +111,12 @@ app-root * .grid-td {
   height: 1px; /* If cells in same row have different height. See also: https://stackoverflow.com/questions/3542090/how-to-make-div-fill-td-height */
 }
 
+@-moz-document url-prefix() { /* See also: https://stackoverflow.com/questions/36575846/how-to-make-div-fill-td-height-in-firefox/36576083#36576083 */
+  app-root * .grid-td {
+       height: 100%;
+   }
+}
+
 app-root * .grid-div {
   /* First div in td (cell) */
   display: flex;
