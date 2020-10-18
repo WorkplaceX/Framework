@@ -56,6 +56,7 @@ Major  Minor  Patch  PreReleaseLabel BuildLabel
 * Framework.Angular/application/
 ```cmd
 ng update
+ng update --all
 ```
 
 * Framework.Cli/Template/Application.Website/MasterDefault/
