@@ -15,9 +15,21 @@ export class GridComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  ngAfterViewInit() {
+    (<HTMLTableElement>this.table.nativeElement).addEventListener("wheel", event => this.wheel(event));
+    (<HTMLDivElement>this.divGridClick.nativeElement).addEventListener("wheel", event => this.wheel(event));
+  }
+
   @Input() json: any;
 
-  @ViewChild('inputFileUpload', {static: false}) inputFileUpload: ElementRef<HTMLElement>;
+  @ViewChild('table')
+  table: ElementRef;
+
+  @ViewChild('divGridClick')
+  divGridClick: ElementRef;
+
+  @ViewChild('inputFileUpload', {static: false}) 
+  inputFileUpload: ElementRef<HTMLElement>;
 
   ngModelChange(cell) {
     cell.IsShowSpinner = true;
@@ -67,7 +79,6 @@ export class GridComponent implements OnInit {
   }
 
   focus(cell) {
-    console.log("F");
     if (!cell.IsSelect) {
       cell.IsShowSpinner = true;
       this.dataService.update(<CommandJson> { CommandEnum: 11, ComponentId: this.json.Id, GridCellId: cell.Id });
@@ -164,6 +175,32 @@ export class GridComponent implements OnInit {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.json.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 10, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
+  }
+
+  wheel(event: WheelEvent) {
+
+    if (event.altKey) {
+      let gridIsClickEnum = 0;
+
+      if (!event.shiftKey && event.deltaY > 0) {
+        gridIsClickEnum = 2; // PageDown
+      }
+      if (!event.shiftKey && event.deltaY < 0) {
+        gridIsClickEnum = 1; // PageUp
+      }
+      if (event.shiftKey && event.deltaY > 0) {
+        gridIsClickEnum = 4; // PageRight
+      }
+      if (event.shiftKey && event.deltaY < 0) {
+        gridIsClickEnum = 3; // PageLeft
+      }
+
+      if (gridIsClickEnum != 0) {
+        event.preventDefault();
+        this.json.IsShowSpinner = true;
+        this.dataService.update(<CommandJson> { CommandEnum: 10, ComponentId: this.json.Id, GridIsClickEnum: gridIsClickEnum });
+      }
+    }
   }
 
   trackBy(index: any, item: any) {

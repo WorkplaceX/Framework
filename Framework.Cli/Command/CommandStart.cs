@@ -50,7 +50,7 @@
                         Console.WriteLine(string.Format("{0}={1}", i + 1, configCli.WebsiteList[i].FolderNameNpmBuild));
                     }
 
-                    Console.Write("Website:");
+                    Console.Write("Website: ");
 
                     var websiteIndex = int.Parse(Console.ReadLine()) - 1;
 
@@ -68,8 +68,8 @@
                     Console.WriteLine("Copy folder CustomComponent/");
                     UtilCli.FolderCopy(folderNameCustomComponent, folderNameAngular + "src/Application.Website/Shared/CustomComponent/", "*.*", true);
 
-                    bool isFileSync = UtilCli.ConsoleReadYesNo("Start FileSync?");
-                    bool isWebsiteWatch = UtilCli.ConsoleReadYesNo("Start Website watch?");
+                    bool isWebsiteWatch = UtilCli.ConsoleReadYesNo("Start Website npm watch?");
+                    bool isFileSync = UtilCli.ConsoleReadYesNo("Start Website FileSync (dist/ to Angular)?");
                     bool isAngular = UtilCli.ConsoleReadYesNo("Start Angular?");
                     bool isServer = UtilCli.ConsoleReadYesNo("Start Server?");
 

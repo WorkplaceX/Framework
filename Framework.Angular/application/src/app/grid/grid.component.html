@@ -1,4 +1,4 @@
-<table class="grid-table" (document:mousemove)="documentMouseMove($event)" (document:mouseup)="documentMouseUp($event)">
+<table #table class="grid-table" (document:mousemove)="documentMouseMove($event)" (document:mouseup)="documentMouseUp($event)">
   <colgroup>
     <col *ngFor="let styleColumn of json.StyleColumnList; trackBy trackBy;" [ngStyle]="{'width': styleColumn.Width}">
   </colgroup>
@@ -66,12 +66,13 @@
 </table>
 
 <input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event.target.files)">
-<div *ngIf="json.IsHidePagination != true" class="colorBlue gridClick" [ngClass]="json.CssClass" onmousedown="return false;">
-  <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up" (click)="clickGrid(1, $event);"></i>
-  <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down" (click)="clickGrid(2, $event);"></i>
+
+<div #divGridClick *ngIf="json.IsHidePagination != true" class="colorBlue gridClick" [ngClass]="json.CssClass" onmousedown="return false;">
+  <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up (Alt + Wheel up)" (click)="clickGrid(1, $event);"></i>
+  <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down (Alt + Wheel down)" (click)="clickGrid(2, $event);"></i>
   &nbsp;
-  <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left" (click)="clickGrid(3, $event);"></i>
-  <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right" (click)="clickGrid(4, $event);"></i>
+  <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left (Alt + Shift + Wheel up)" (click)="clickGrid(3, $event);"></i>
+  <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right (Alt + Shift + Wheel down)" (click)="clickGrid(4, $event);"></i>
   &nbsp;
   <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
   <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
