@@ -636,7 +636,7 @@
             // Load config field
             grid.ConfigFieldList = configFieldListTask.Result;
             // In memory ConfigName filter
-            grid.ConfigFieldList = grid.ConfigFieldList.Where(item => item.ConfigName == tableNameCSharp).ToList();
+            grid.ConfigFieldList = grid.ConfigFieldList.Where(item => item.ConfigName == queryConfigResult.ConfigName).ToList();
 
             // RowList
             grid.RowListInternal = rowListTask.Result;

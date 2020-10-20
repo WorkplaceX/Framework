@@ -333,7 +333,7 @@
                     typeRowUnderlying = GenerateIntegrateResult.TableNameCSharpList.SingleOrDefault(item => item.Value == tableNameCSharpUnderlying).Key;
                     UtilFramework.Assert(typeRowUnderlying != null, string.Format("Use underlying sql table! ({0})", tableNameCSharp));
                 }
-                UtilFramework.Assert(GenerateIntegrateResult.ResultKey.ContainsKey(typeRowUnderlying), string.Format("TypRow not unique key defined! ({0})", tableNameCSharp));
+                UtilFramework.Assert(GenerateIntegrateResult.ResultKey.ContainsKey(typeRowUnderlying), string.Format("TypRow not unique key defined! See also method GenerateIntegrateResult.AddKey(); ({0})", tableNameCSharp));
                 var fieldNameCSharpKeyList = GenerateIntegrateResult.ResultKey[typeRowUnderlying];
 
                 // Result
