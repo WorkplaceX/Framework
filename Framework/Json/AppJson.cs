@@ -1535,17 +1535,22 @@
         public class QueryConfigResult
         {
             /// <summary>
-            /// Gets or sets ConfigGridQuery. Should return one record.
+            /// Gets or sets ConfigGrid. ConfigGrid without ConfigGridQuery.
+            /// </summary>
+            public FrameworkConfigGridIntegrate ConfigGrid { get; set; }
+
+            /// <summary>
+            /// Gets or sets ConfigGridQuery. Can return multiple configuration records but one record once filtered by ConfigName.
             /// </summary>
             public IQueryable<FrameworkConfigGridIntegrate> ConfigGridQuery { get; set; }
 
             /// <summary>
-            /// Gets or sets ConfigFieldQuery.
+            /// Gets or sets ConfigFieldQuery. Will be filtered (in memory) by ConfigName.
             /// </summary>
             public IQueryable<FrameworkConfigFieldIntegrate> ConfigFieldQuery { get; set; }
 
             /// <summary>
-            /// Gets or sets ConfigName. Will be added to ConfigGridQuery and ConfigFieldQuery as additional filter.
+            /// Gets or sets ConfigName. Will be added to ConfigGridQuery and ConfigFieldQuery as additional (in memory) filter.
             /// </summary>
             public string ConfigName { get; set; }
 
@@ -1558,21 +1563,34 @@
         /// <summary>
         /// Returns configuration query of data grid to load.
         /// </summary>
-        /// <param name="tableName">TableName as declared in CSharp code. Type of row to load.</param>
-        internal QueryConfigResult QueryConfigInternal(string tableName)
+        /// <param name="tableNameCSharp">TableName as declared in CSharp code. Type of row to load.</param>
+        internal QueryConfigResult QueryConfigInternal(string tableNameCSharp)
         {
             var result = new QueryConfigResult { GridMode = GridMode.Table }; // Display table by default
-            var args = new QueryConfigArgs { TableName = tableName };
-
-            // Default result
-            result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableName);
-            result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableName);
+            var args = new QueryConfigArgs { TableName = tableNameCSharp };
 
             QueryConfig(args, result);
 
-            // Filter one configuration
-            result.ConfigGridQuery = result.ConfigGridQuery.Where(item => item.ConfigName == result.ConfigName); 
-            result.ConfigFieldQuery = result.ConfigFieldQuery.Where(item => item.ConfigName == result.ConfigName);
+            // Result returned one ConfigGrid instead of a query.
+            if (result.ConfigGrid != null)
+            {
+                result.ConfigGrid.TableNameCSharp = tableNameCSharp;
+                var configGridList = new List<FrameworkConfigGridIntegrate>();
+                configGridList.Add(result.ConfigGrid);
+                result.ConfigGridQuery = configGridList.AsQueryable();
+            }
+
+            // Default result
+            if (result.ConfigGridQuery == null)
+            {
+                result.ConfigGridQuery = Data.Query<FrameworkConfigGridIntegrate>().Where(item => item.TableNameCSharp == tableNameCSharp);
+            }
+
+            // Default result
+            if (result.ConfigFieldQuery == null)
+            {
+                result.ConfigFieldQuery = Data.Query<FrameworkConfigFieldIntegrate>().Where(item => item.TableNameCSharp == tableNameCSharp);
+            }
 
             return result;
         }

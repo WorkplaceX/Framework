@@ -596,14 +596,15 @@
         {
             UtilFramework.Assert(grid.TypeRow == query.ElementType);
             // Get config grid and field query
+            string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
             Grid.QueryConfigResult queryConfigResult;
             if (grid.IsGridLookup == false)
             {
-                queryConfigResult = grid.QueryConfigInternal(UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow));
+                queryConfigResult = grid.QueryConfigInternal(tableNameCSharp);
             }
             else
             {
-                queryConfigResult = grid.GridDest.LookupQueryConfigInternal(grid, UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow));
+                queryConfigResult = grid.GridDest.LookupQueryConfigInternal(grid, tableNameCSharp);
             }
 
             // Display grid mode
@@ -614,6 +615,8 @@
             if (queryConfigResult.ConfigGridQuery != null)
             {
                 grid.ConfigGridList = await queryConfigResult.ConfigGridQuery.QueryExecuteAsync();
+                // In memory ConfigName filter
+                grid.ConfigGridList = grid.ConfigGridList.Where(item => item.ConfigName == queryConfigResult.ConfigName).ToList();
             }
             var configGrid = ConfigGrid(grid);
             query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
@@ -632,6 +635,8 @@
 
             // Load config field
             grid.ConfigFieldList = configFieldListTask.Result;
+            // In memory ConfigName filter
+            grid.ConfigFieldList = grid.ConfigFieldList.Where(item => item.ConfigName == tableNameCSharp).ToList();
 
             // RowList
             grid.RowListInternal = rowListTask.Result;
