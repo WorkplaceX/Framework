@@ -717,7 +717,7 @@
             public string NavigatePath { get; private set; }
 
             /// <summary>
-            /// Gets FileName. For example: "Readme.txt". Is null, if navigatePath is for example: "/contact/".
+            /// Gets FileName. For example: "Readme.txt" or "/cms/Readme.txt". Is null, if navigatePath is for example: "/contact/". See also method IsFileName(); to extract it.
             /// </summary>
             public string FileName { get; private set; }
 
@@ -1765,7 +1765,10 @@
 
         internal override void TruncateInternal(List<Row> rowList)
         {
-            Truncate(new TruncateArgs { RowList = rowList.Cast<TRow>().ToList() });
+            foreach (var row in rowList)
+            {
+                Truncate(new TruncateArgs { Row = (TRow)row });
+            }
         }
 
         /// <summary>
@@ -1779,9 +1782,9 @@
         public class TruncateArgs
         {
             /// <summary>
-            /// Gets RowList. Truncate big data cells on these rows to reduce session state size.
+            /// Gets Row. Truncate big data cells to reduce session state size.
             /// </summary>
-            public List<TRow> RowList { get; internal set; }
+            public TRow Row { get; internal set; }
         }
 
         internal override async Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResultInternal result)
@@ -2018,7 +2021,13 @@
         /// <param name="result">Set result.IsHandled to true.</param>
         protected virtual void CellParseFileUpload(FileUploadArgs args, ParseResult result)
         {
-
+            var propertyInfo = result.Row.GetType().GetProperty(args.FieldName);
+            if (propertyInfo.PropertyType == args.Data.GetType())
+            {
+                // Property is of type byte[]
+                propertyInfo.SetValue(result.Row, args.Data);
+                result.IsHandled = true;
+            }
         }
 
         public class FileUploadArgs
@@ -2051,17 +2060,17 @@
 
         internal override void CellAnnotationInternal(GridRowEnum rowEnum, Row row, string fieldName, AnnotationResult result)
         {
-            var args = new AnnotationArgs { Row = (TRow)row, FieldName = fieldName };
-
             if (rowEnum == GridRowEnum.Index)
             {
-                CellAnnotationRow(args, result);
+                var args = new AnnotationArgs { Row = (TRow)row, FieldName = fieldName };
+                CellAnnotation(args, result);
             }
             else
             {
+                var args = new AnnotationFilterNewArgs { Row = (TRow)row, FieldName = fieldName };
                 args.IsFilter = rowEnum == GridRowEnum.Filter;
                 args.IsNew = rowEnum == GridRowEnum.New;
-                CellAnnotation(args, result);
+                CellAnnotationFilterNew(args, result);
             }
         }
 
@@ -2069,7 +2078,7 @@
         /// Override this method to provide additional custom annotation information for a data grid cell. Annotation is updated for every cell on same row when user changes text in one cell.
         /// </summary>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual void CellAnnotationRow(AnnotationArgs args, AnnotationResult result)
+        protected virtual void CellAnnotation(AnnotationArgs args, AnnotationResult result)
         {
 
         }
@@ -2078,6 +2087,19 @@
         /// Annotation for data row.
         /// </summary>
         public class AnnotationArgs
+        {
+            /// <summary>
+            /// Data grid row. Null, if filter or new data row.
+            /// </summary>
+            public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// FieldName as declared in CSharp code. Data grid column name.
+            /// </summary>
+            public string FieldName { get; internal set; }
+        }
+
+        public class AnnotationFilterNewArgs
         {
             /// <summary>
             /// Data grid row. Null, if filter or new data row.
@@ -2104,7 +2126,7 @@
         /// Override this method to provide annotation information for data grid cell in filter and new row.
         /// </summary>
         /// <param name="result">Returns data grid cell annotation.</param>
-        protected virtual void CellAnnotation(AnnotationArgs args, AnnotationResult result)
+        protected virtual void CellAnnotationFilterNew(AnnotationFilterNewArgs args, AnnotationResult result)
         {
 
         }

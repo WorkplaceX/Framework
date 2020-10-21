@@ -1066,6 +1066,11 @@
                     UtilFramework.Assert(commandJson.GridCellTextBase64.StartsWith("data:application/octet-stream;base64,"));
                     var data = System.Convert.FromBase64String(commandJson.GridCellTextBase64.Substring("data:application/octet-stream;base64,".Length));
                     grid.CellParseFileUploadInternal(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
+                    if (result.IsHandled == false)
+                    {
+                        result.IsHandled = true;
+                        result.ErrorParse = "Can not parse binary! Override method CellParseFileUpload();";
+                    }
                 }
                 // Parse default
                 if (!result.IsHandled)

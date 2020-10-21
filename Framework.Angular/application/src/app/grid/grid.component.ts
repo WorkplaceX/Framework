@@ -17,7 +17,9 @@ export class GridComponent implements OnInit {
 
   ngAfterViewInit() {
     (<HTMLTableElement>this.table.nativeElement).addEventListener("wheel", event => this.wheel(event));
-    (<HTMLDivElement>this.divGridClick.nativeElement).addEventListener("wheel", event => this.wheel(event));
+    if (this.divGridClick != null) { // Does not exist if IsHidePagination
+      (<HTMLDivElement>this.divGridClick.nativeElement).addEventListener("wheel", event => this.wheel(event));
+    }
   }
 
   @Input() json: any;
