@@ -152,7 +152,7 @@
             string fileNameServer = folderName + "Framework.Angular/server/main.js";
             if (!File.Exists(fileNameServer))
             {
-                throw new Exception(string.Format("File does not exis! Make sure cli build did run. ({0})", fileNameServer)); // Make sure cli build command did run.
+                throw new Exception(string.Format("File does not exis! Make sure cli build command did run. ({0})", fileNameServer));
             }
             ProcessStartInfo info = new ProcessStartInfo
             {
@@ -206,12 +206,12 @@
             try
             {
                 response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
+                response.EnsureSuccessStatusCode();
             }
             catch (HttpRequestException exception)
             {
-                throw new Exception(string.Format("Http request failed! ({0})", url), exception);
+                throw new Exception(string.Format("Http request failed! Make sure cli build command did run. ({0})", url), exception);
             }
-            response.EnsureSuccessStatusCode();
             string result = await response.Content.ReadAsStringAsync();
             return result;
         }

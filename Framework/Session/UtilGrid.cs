@@ -1068,6 +1068,10 @@
                     grid.CellParseFileUploadInternal(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
                     if (result.IsHandled == false)
                     {
+                        await grid.CellParseFileUploadInternalAsync(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
+                    }
+                    if (result.IsHandled == false)
+                    {
                         result.IsHandled = true;
                         result.ErrorParse = "Can not parse binary! Override method CellParseFileUpload();";
                     }

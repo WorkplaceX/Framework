@@ -96,7 +96,7 @@
             string folderName = UtilServer.FolderNameContentRoot() + folderNameServer;
             if (!Directory.Exists(folderName))
             {
-                throw new Exception(string.Format("Folder does not exis! Make sure cli build did run. ({0})", folderName));
+                throw new Exception(string.Format("Folder does not exis! Make sure cli build command did run. ({0})", folderName));
             }
 
             // Index.html

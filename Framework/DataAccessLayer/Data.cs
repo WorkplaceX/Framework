@@ -223,7 +223,7 @@
                     }
                     if (isPrimaryKey == false)
                     {
-                        throw new Exception("No primary key defined!"); // Did you set result.IsHandled?
+                        throw new Exception("No primary key defined! See also property IsHandled."); // Did you set result.IsHandled?
                     }
                 }
                 else

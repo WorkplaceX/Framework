@@ -682,7 +682,7 @@
 
         internal async Task<NavigateResult> NavigateInternalAsync(string navigatePath)
         {
-            var args = new NavigateArgs(navigatePath);
+            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query);
             NavigateResult result = new NavigateResult();
             await NavigateAsync(args, result);
             UtilFramework.Assert(!(result.Data != null && result.IsSession), $"Method {nameof(AppJson.NavigateAsync)}(); can not send data and request session at the same time!");
@@ -701,13 +701,14 @@
 
         public class NavigateArgs
         {
-            internal NavigateArgs(string navigatePath)
+            internal NavigateArgs(string navigatePath, IQueryCollection httpQuery)
             {
-                this.NavigatePath = navigatePath;
+                NavigatePath = navigatePath;
+                HttpQuery = httpQuery;
                 if (UtilServer.NavigatePathIsFileName(navigatePath))
                 {
-                    this.FileName = UtilFramework.FolderNameParse(null, navigatePath);
-                    this.FileNameExtension = UtilFramework.FileNameExtension(FileName);
+                    FileName = UtilFramework.FolderNameParse(null, navigatePath);
+                    FileNameExtension = UtilFramework.FileNameExtension(FileName);
                 }
             }
 
@@ -725,6 +726,11 @@
             /// Gets FileNameExtension. For example: ".txt".
             /// </summary>
             public string FileNameExtension { get; private set; }
+
+            /// <summary>
+            /// Gets HttpQuery. Determine for example: "/cms/image.png?thumbnail"
+            /// </summary>
+            public IQueryCollection HttpQuery { get; private set; }
 
             /// <summary>
             /// Returns true, if navigatePath starts with navigatePathPrefix.
@@ -806,7 +812,7 @@
 
         internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string navigatePath, bool isAddHistory)
         {
-            var args = new NavigateArgs(navigatePath);
+            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query);
             var result = new NavigateSessionResult { NavigatePath = args.NavigatePath };
             await NavigateSessionAsync(args, result);
             if (result.IsPage)
@@ -900,7 +906,7 @@
         }
 
         /// <summary>
-        /// Add navigate command to queue to navigate to current request path.
+        /// Add navigate command to queue to navigate to current request path. For example: "/" or "/about/".
         /// </summary>
         public void Navigate()
         {
@@ -1413,6 +1419,11 @@
         virtual internal void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
         {
 
+        }
+
+        virtual internal Task CellParseFileUploadInternalAsync(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
+        {
+            return Task.FromResult(0);
         }
 
         internal class ParseResultInternal
@@ -2015,8 +2026,15 @@
             ParseResultInternal.Convert(resultLocal, ref result);
         }
 
+        internal override async Task CellParseFileUploadInternalAsync(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
+        {
+            var resultLocal = ParseResultInternal.Convert(result, (TRow)row);
+            await CellParseFileUploadAsync(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data, IsNew = rowEnum == GridRowEnum.New }, resultLocal);
+            ParseResultInternal.Convert(resultLocal, ref result);
+        }
+
         /// <summary>
-        /// Parse user uploaded file and assign it to row.
+        /// Parse user uploaded file and assign it to field in row.
         /// </summary>
         /// <param name="result">Set result.IsHandled to true.</param>
         protected virtual void CellParseFileUpload(FileUploadArgs args, ParseResult result)
@@ -2028,6 +2046,15 @@
                 propertyInfo.SetValue(result.Row, args.Data);
                 result.IsHandled = true;
             }
+        }
+
+        /// <summary>
+        /// Parse user uploaded file and assign it to field in row.
+        /// </summary>
+        /// <param name="result">Set result.IsHandled to true.</param>
+        protected virtual Task CellParseFileUploadAsync(FileUploadArgs args, ParseResult result)
+        {
+            return Task.FromResult(0);
         }
 
         public class FileUploadArgs
