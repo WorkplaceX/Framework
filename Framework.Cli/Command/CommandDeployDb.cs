@@ -3,12 +3,14 @@
     using Database.dbo;
     using Framework.Cli.Config;
     using Framework.DataAccessLayer;
+    using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using static Framework.Cli.AppCli;
+    using static Framework.DataAccessLayer.UtilDalUpsertIntegrate;
 
     /// <summary>
     /// Cli deployDb command.
@@ -25,10 +27,13 @@
 
         private CommandOption optionSilent;
 
+        private CommandOption optionReseed;
+
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionDrop = configuration.Option("-d|--drop", "Drop sql tables and views.", CommandOptionType.NoValue);
             optionSilent = configuration.Option("-s|--silent", "No command line user interaction.", CommandOptionType.NoValue);
+            optionReseed = configuration.Option("-r|--reseed", "Reseed Integrate records.", CommandOptionType.NoValue);
         }
 
         /// <summary>
@@ -157,9 +162,34 @@
         }
 
         /// <summary>
+        /// Resedd sql table for Integrate.
+        /// </summary>
+        private void IntegrateReseed(List<UpsertItem> upsertList, int? reseed, List<Assembly> assemblyList)
+        {
+            if (reseed != null)
+            {
+                foreach (var item in upsertList)
+                {
+                    if (item.IsDeployed == false)
+                    {
+                        Type typeRowDest = item.TypeRowDest(assemblyList);
+                        UtilDalType.TypeRowToTableNameSql(typeRowDest, out string schemaNameSql, out string tableNameSql);
+                        string tableNameWithSchemaSql = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameSql);
+                        bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(item.TypeRow);
+                        var paramList = new List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)>();
+                        string paramNameTableNameCSharp = Data.ExecuteParamAdd(FrameworkTypeEnum.Nvarcahr, tableNameWithSchemaSql, paramList);
+                        string paramNameReseed = Data.ExecuteParamAdd(FrameworkTypeEnum.Bigint, (long)reseed, paramList);
+                        string sql = string.Format("DBCC checkident ({0}, reseed, {1})", paramNameTableNameCSharp, paramNameReseed);
+                        Data.ExecuteNonQueryAsync(sql, paramList, isFrameworkDb).Wait();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Populate sql Integrate tables.
         /// </summary>
-        private void Integrate()
+        private void Integrate(int? reseed)
         {
             var generateIntegrateResult = AppCli.CommandGenerateIntegrateInternal();
             var deployDbResult = new DeployDbIntegrateResult(generateIntegrateResult);
@@ -168,12 +198,14 @@
             // Populate sql tables FrameworkTable, FrameworkField.
             UtilCli.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
             Meta(deployDbResult);
+            IntegrateReseed(deployDbResult.Result, reseed, assemblyList);
             UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
 
             // Populate sql Integrate tables.
             UtilCli.ConsoleWriteLineColor("Update Integrate tables", ConsoleColor.Green);
             AppCli.CommandDeployDbIntegrateInternal(deployDbResult);
-            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
+            IntegrateReseed(deployDbResult.Result, reseed, assemblyList);
+            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait(); // See also property IsDeployed
         }
 
         protected internal override void Execute()
@@ -215,7 +247,13 @@
                 DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
 
-                Integrate();
+                // Reseed
+                int? reseed = null;
+                if (optionReseed.OptionGet())
+                {
+                    reseed = 1000;
+                }
+                Integrate(reseed);
 
                 UtilCli.ConsoleWriteLineColor("DeployDb successful!", ConsoleColor.Green);
             }

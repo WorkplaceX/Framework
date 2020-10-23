@@ -1330,10 +1330,11 @@
         /// Sql merge into for Integrate.
         /// </summary>
         /// <param name="typeRow">Type of rowList (can be empty).</param>
+        /// <param name="typeRowDest">Type underlying sql table.</param>
         /// <param name="rowList">Records to update.</param>
         /// <param name="fieldNameSqlKeyList">Key fields for record identification.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        private static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList, List<Assembly> assemblyList)
+        private static async Task UpsertAsync(Type typeRow, Type typeRowDest, List<Row> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList, List<Assembly> assemblyList)
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
@@ -1345,14 +1346,9 @@
                 string sqlSelect = UpsertSelect(typeRow, rowListSplit, referenceList, paramList);
 
                 // Update underlying sql table if sql view ends with "Integrate".
-                UtilDalType.TypeRowToTableNameSql(typeRow, out string schemaNameSql, out string tableNameSql);
-                if (tableNameSql.EndsWith("Integrate"))
-                {
-                    tableNameSql = tableNameSql.Substring(0, tableNameSql.Length - "Integrate".Length);
-                }
-                Type typeRowDest = UtilDalType.TypeRowFromTableNameSql(schemaNameSql, tableNameSql, assemblyList);
-                var fieldDestList = UtilDalType.TypeRowToFieldListDictionary(typeRowDest);
+                UtilDalType.TypeRowToTableNameSql(typeRowDest, out string schemaNameSql, out string tableNameSql);
                 string tableNameWithSchemaSql = UtilDalType.TableNameWithSchemaSql(schemaNameSql, tableNameSql);
+                var fieldDestList = UtilDalType.TypeRowToFieldListDictionary(typeRowDest);
 
                 var fieldNameSqlList = fieldNameSqlListAll
                     .Where(item => item.IsIdName == false && item.Field.IsPrimaryKey == false && item.IsKey == false && fieldDestList.ContainsKey(item.Field.FieldNameCSharp))
@@ -1415,9 +1411,24 @@
             }
 
             /// <summary>
-            /// Gets TypeRow.
+            /// Gets TypeRow. For example: "[dbo].[LoginUser]" or "[dbo].[LoginUserIntegrate]".
             /// </summary>
             public readonly Type TypeRow;
+
+            /// <summary>
+            /// Returns underlying sql table if sql view ends with "Integrate". For example "[dbo].[LoginUser]".
+            /// </summary>
+            public Type TypeRowDest(List<Assembly> assemblyList)
+            {
+                UtilDalType.TypeRowToTableNameSql(TypeRow, out string schemaNameSql, out string tableNameSql);
+                if (tableNameSql.EndsWith("Integrate"))
+                {
+                    tableNameSql = tableNameSql.Substring(0, tableNameSql.Length - "Integrate".Length);
+                }
+                Type typeRowDest = UtilDalType.TypeRowFromTableNameSql(schemaNameSql, tableNameSql, assemblyList);
+
+                return typeRowDest;
+            }
 
             /// <summary>
             /// Gets RowList. Rows to insert or update.
@@ -1468,7 +1479,8 @@
                 // Upsert
                 foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
                 {
-                    await UpsertAsync(itemUpsert.TypeRow, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList, assemblyList);
+                    Type typeRowDest = itemUpsert.TypeRowDest(assemblyList);
+                    await UpsertAsync(itemUpsert.TypeRow, typeRowDest, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList, assemblyList);
                 }
             }
 

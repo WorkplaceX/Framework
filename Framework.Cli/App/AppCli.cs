@@ -631,11 +631,11 @@
             }
 
             /// <summary>
-            /// Add reference table.
+            /// Add reference table. Parameter fieldNameId references a table. For example: "UserId". It also needs a corresponding "UserIdName". Command cli generate will produce "UserId = 0" CSharp code.
             /// </summary>
             /// <typeparam name="TRow">For example: "LoginUserRole".</typeparam>
             /// <typeparam name="TRowReference">For example: "LoginUser".</typeparam>
-            /// <param name="fieldNameId">For example: "UserId".</param>
+            /// <param name="fieldNameId">For example: "UserId". Needs a corresponding "UserIdName".</param>
             public void AddReference<TRow, TRowReference>(string fieldNameId) where TRow : Row where TRowReference : Row
             {
                 string fieldNameIdCSharp = fieldNameId;

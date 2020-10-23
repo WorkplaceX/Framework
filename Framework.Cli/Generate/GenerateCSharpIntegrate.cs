@@ -131,7 +131,7 @@
                     count += 1;
                     string idName = (string)fieldIdName.PropertyInfo.GetValue(row);
                     string nameCSharp = UtilGenerate.NameCSharp(idName, nameExceptList);
-                    result.Append(string.Format(", [IdNameEnum(\"{0}\")]{1} = {2}", idName, nameCSharp, count));
+                    result.Append(string.Format(", [IdNameEnum(\"{0}\")]{1} = {2}", idName, nameCSharp, count * -1)); // Count * -1 to ensure there is no relation between enum id and database record id!
                 }
                 result.AppendLine(string.Format(" }}"));
                 result.AppendLine();
@@ -166,13 +166,14 @@
                     if (isFirst)
                     {
                         isFirst = false;
+                        result.Append(" ");
                     }
                     else
                     {
                         result.Append(", ");
                     }
                     object value = field.PropertyInfo.GetValue(row);
-                    if (fieldNameIdCSharpReferenceList.Contains(field.FieldNameCSharp) || (fieldNameIdCSharpReferenceList.Count() > 0 && field.FieldNameCSharp == "Id"))
+                    if (fieldNameIdCSharpReferenceList.Contains(field.FieldNameCSharp) || field.FieldNameCSharp == "Id")
                     {
                         UtilFramework.Assert(value == null || value.GetType() == typeof(int));
 
