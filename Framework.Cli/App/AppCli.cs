@@ -459,7 +459,7 @@
             CommandGenerateIntegrate(result);
 
             // Call method CommandGenerateIntegrate(); on external AppCli.
-            UtilExternal.CommandGenerateIntegrate(this, result);
+            // UtilExternal.CommandGenerateIntegrate(this, result); // Do not generate CSharp code for external.
 
             return result;
         }

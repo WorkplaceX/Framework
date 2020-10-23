@@ -1733,7 +1733,7 @@
 
         internal override IQueryable QueryInternal()
         {
-            QueryArgs args = new QueryArgs { TypeRow = typeof(TRow) };
+            QueryArgs args = new QueryArgs();
             QueryResult result = new QueryResult();
 
             // Custom query
@@ -1742,14 +1742,7 @@
             // Default query, if no custom query provided.
             if (result.Query == null)
             {
-                if (typeof(TRow) == typeof(Row))
-                {
-                    result.Query = null; // Data.QueryEmpty<TRow>(); is not possible since class Row has no TableNameSql defined.
-                }
-                else
-                {
-                    result.Query = Data.Query<TRow>();
-                }
+                result.Query = args.Query;
             }
 
             return result.Query;
@@ -1766,9 +1759,22 @@
         public class QueryArgs
         {
             /// <summary>
-            /// Gets TypeRow. TypeRow for which to provide a query.
+            /// Gets Query. This is the default query.
             /// </summary>
-            public Type TypeRow { get; internal set; }
+            public IQueryable<TRow> Query
+            {
+                get
+                {
+                    if (typeof(TRow) == typeof(Row))
+                    {
+                        return null; // Data.QueryEmpty<TRow>(); is not possible since class Row has no TableNameSql defined.
+                    }
+                    else
+                    {
+                        return Data.Query<TRow>();
+                    }
+                }
+            }
         }
 
         public class QueryResult

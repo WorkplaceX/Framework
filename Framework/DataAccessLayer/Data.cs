@@ -174,7 +174,7 @@
                 get
                 {
                     string methodName = IsQuery == false ? "Set" : "Query";
-                    return (IQueryable)(this.GetType().GetTypeInfo().GetMethod(methodName).MakeGenericMethod(TypeRow).Invoke(this, null));
+                    return (IQueryable)(this.GetType().GetMethod(methodName).MakeGenericMethod(TypeRow).Invoke(this, null));
                 }
             }
 
