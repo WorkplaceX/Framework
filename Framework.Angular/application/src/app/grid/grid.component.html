@@ -65,7 +65,7 @@
   </tr>
 </table>
 
-<input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event.target.files)">
+<input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event)">
 
 <div #divGridClick *ngIf="json.IsHidePagination != true" class="colorBlue gridClick" [ngClass]="json.CssClass" onmousedown="return false;">
   <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up (Alt + Wheel up)" (click)="clickGrid(1, $event);"></i>

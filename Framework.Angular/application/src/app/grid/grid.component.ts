@@ -57,8 +57,9 @@ export class GridComponent implements OnInit {
     this.inputFileUpload.nativeElement.click();
   }
 
-  changeInputFileUpload(files: FileList) {
-    const file = files.item(0);
+  changeInputFileUpload(event: Event) {
+    const file = (<HTMLInputElement>event.target).files.item(0);
+    (<HTMLInputElement>event.target).value = null; // Upload same file multiple times. Trigger change event.
 
     const cellFileUpload = this.cellFileUpload;
     const dataService = this.dataService;
@@ -67,8 +68,7 @@ export class GridComponent implements OnInit {
     var reader = new FileReader();
     reader.readAsDataURL(file.slice()); 
     reader.onloadend = function() {
-        var base64data = reader.result;                
-        console.log(base64data);
+        var base64data = reader.result;
         cellFileUpload.IsShowSpinner = true;
         dataService.update(<CommandJson> { CommandEnum: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file.name });
     }

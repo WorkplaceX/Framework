@@ -86,7 +86,7 @@
         {
             if (TableNameCSharp != null)
             {
-                result.Query = args.Query.Where(item => item.TableNameCSharp == TableNameCSharp);
+                result.Query = Data.Query<FrameworkConfigGridDisplay>().Where(item => item.TableNameCSharp == TableNameCSharp);
             }
         }
 
@@ -187,7 +187,7 @@
         protected override void Query(QueryArgs args, QueryResult result)
         {
             var rowSelected = GridConfigGridRowSelected;
-            result.Query = args.Query.Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
+            result.Query = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
             if (FieldNameCSharp != null)
             {
                 result.Query = result.Query.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
