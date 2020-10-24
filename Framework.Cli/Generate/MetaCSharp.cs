@@ -69,6 +69,9 @@
 
         public string SchemaNameCSharp { get; set; }
 
+        /// <summary>
+        /// Gets TableNameCSharp. For example: "RawWikipediaAircraft". See also property MetaSqlSchema.TableName.
+        /// </summary>
         public string TableNameCSharp { get; set; }
 
         public string FieldNameCSharp { get; set; }

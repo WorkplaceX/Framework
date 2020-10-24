@@ -39,7 +39,14 @@
             GenerateIntegrateResult generateIntegrateResult = null;
             try
             {
-                generateIntegrateResult = appCli.CommandGenerateIntegrateInternal();
+                // TableNameCSharp defined in method AppCli.CommandGenerateFilter();
+                List<string> tableNameCSharpApplicationFilterList = null;
+                if (isFrameworkDb == false)
+                {
+                    tableNameCSharpApplicationFilterList = metaCSharp.List.GroupBy(item => item.SchemaNameCSharp + "." + item.TableNameCSharp).Select(item => item.Key).ToList();
+                }
+
+                generateIntegrateResult = appCli.CommandGenerateIntegrateInternal(isDeployDb: false, tableNameCSharpApplicationFilterList);
             }
             catch (SqlException exception)
             {

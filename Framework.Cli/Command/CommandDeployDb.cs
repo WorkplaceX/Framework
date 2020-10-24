@@ -191,7 +191,7 @@
         /// </summary>
         private void Integrate(int? reseed)
         {
-            var generateIntegrateResult = AppCli.CommandGenerateIntegrateInternal();
+            var generateIntegrateResult = AppCli.CommandGenerateIntegrateInternal(isDeployDb: true, null);
             var deployDbResult = new DeployDbIntegrateResult(generateIntegrateResult);
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
 

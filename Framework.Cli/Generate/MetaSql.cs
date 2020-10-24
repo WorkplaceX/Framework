@@ -71,22 +71,25 @@
     /// </summary>
     public class MetaSqlSchema
     {
-        public string SchemaName { get; set; }
+        public string SchemaName { get; internal set; }
 
-        public string TableName { get; set; }
+        /// <summary>
+        /// Gets TableName. For example: "Raw.Wikipedia.Aircraft". See also property MetaCSharpSchema.TableNameCSharp.
+        /// </summary>
+        public string TableName { get; internal set; }
 
-        public string FieldName { get; set; }
+        public string FieldName { get; internal set; }
 
-        public int FieldNameSort { get; set; }
+        public int FieldNameSort { get; internal set; }
 
-        public bool IsView { get; set; }
+        public bool IsView { get; internal set; }
 
-        public byte SqlType { get; set; }
+        public byte SqlType { get; internal set; }
 
-        public bool IsNullable { get; set; }
+        public bool IsNullable { get; internal set; }
 
-        public bool IsPrimaryKey { get; set; }
+        public bool IsPrimaryKey { get; internal set; }
 
-        public bool IsSystemTable { get; set; }
+        public bool IsSystemTable { get; internal set; }
     }
 }

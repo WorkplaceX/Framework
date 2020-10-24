@@ -378,7 +378,9 @@
         /// <summary>
         /// Returns Integrate rows to generate CSharp code.
         /// </summary>
-        internal GenerateIntegrateResult CommandGenerateIntegrateInternal()
+        /// <param name="isDeployDb">Method is called from cli command generate or command deployDb.</param>
+        /// <param name="tableNameCSharpApplicationFilterList">TableNameCSharp defined in method AppCli.CommandGenerateFilter();</param>
+        internal GenerateIntegrateResult CommandGenerateIntegrateInternal(bool isDeployDb, List<string> tableNameCSharpApplicationFilterList)
         {
             var result = new GenerateIntegrateResult(AssemblyList(true, true));
 
@@ -390,8 +392,19 @@
 
             var tableNameCSharpFrameworkList = UtilDalType.TableNameCSharpList(AssemblyFramework); // TableNameCSharp declared in Framework assembly.
             var tableNameCSharpApplicationList = UtilDalType.TableNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase); // TableNameCSharp declared in Application assembly.
-            var fieldNameCSharpFrameworkList = UtilDalType.FieldNameCSharpList(AssemblyFramework).Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp); // FieldNameCSharp declared in Framework assembly
-            var fieldNameCSharpApplicationList = UtilDalType.FieldNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase).Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp); // FieldNameCSharp declared in Framework assembly
+            var fieldNameCSharpFrameworkList = UtilDalType.FieldNameCSharpList(AssemblyFramework); // FieldNameCSharp declared in Framework assembly
+            var fieldNameCSharpApplicationList = UtilDalType.FieldNameCSharpList(AssemblyApplication, AssemblyApplicationDatabase); // FieldNameCSharp declared in Framework assembly
+
+            // Filter out tables defined in method AppCli.CommandGenerateFilter();
+            if (tableNameCSharpApplicationFilterList != null)
+            {
+                tableNameCSharpApplicationList = tableNameCSharpApplicationList.Where(item => tableNameCSharpApplicationFilterList.Contains(item.Value)).ToDictionary(item => item.Key, item => item.Value);
+                fieldNameCSharpApplicationList = fieldNameCSharpApplicationList.Where(item => tableNameCSharpApplicationFilterList.Contains(item.TableNameCSharp)).ToList();
+            }
+
+            // Prevent build error "An expression tree may not contain a tuple literal".
+            var fieldNameCSharpFrameworkNoTupleList = fieldNameCSharpFrameworkList.Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp);
+            var fieldNameCSharpApplicationNoTupleList = fieldNameCSharpApplicationList.Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp);
 
             // FrameworkConfigGridIntegrate
             {
@@ -429,7 +442,7 @@
                 // Framework (.\cli.cmd generate -f)
                 {
                     var rowFilterList = rowList.Where(item => tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter FrameworkDb.
-                    rowFilterList = rowList.Where(item => fieldNameCSharpFrameworkList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Framework assembly.
+                    rowFilterList = rowList.Where(item => fieldNameCSharpFrameworkNoTupleList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Framework assembly.
                     rowFilterList = rowFilterList.OrderBy(item => item.FieldIdName);
                     result.Add(
                         isFrameworkDb: true,
@@ -441,7 +454,7 @@
                 // Application (.\cli.cmd generate)
                 {
                     var rowFilterList = rowList.Where(item => !tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp) && tableNameCSharpApplicationList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter (not Framework and Application).
-                    rowFilterList = rowList.Where(item => fieldNameCSharpApplicationList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Application assembly.
+                    rowFilterList = rowList.Where(item => fieldNameCSharpApplicationNoTupleList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Application assembly.
                     rowFilterList = rowFilterList.OrderBy(item => item.FieldIdName);
                     result.Add(
                         isFrameworkDb: false,
@@ -458,8 +471,11 @@
             // Application (custom) Integrate data rows to generate CSharp code from.
             CommandGenerateIntegrate(result);
 
-            // Call method CommandGenerateIntegrate(); on external AppCli.
-            // UtilExternal.CommandGenerateIntegrate(this, result); // Do not generate CSharp code for external.
+            // Call method CommandGenerateIntegrate(); on external AppCli for deployDb only. Not for cli generate command.
+            if (isDeployDb)
+            {
+                UtilExternal.CommandGenerateIntegrate(this, result);
+            }
 
             return result;
         }
