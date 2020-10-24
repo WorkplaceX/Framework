@@ -198,9 +198,9 @@ export class GridComponent implements OnInit {
       }
 
       if (gridIsClickEnum != 0) {
-        event.preventDefault();
         this.json.IsShowSpinner = true;
         this.dataService.update(<CommandJson> { CommandEnum: 10, ComponentId: this.json.Id, GridIsClickEnum: gridIsClickEnum });
+        return true;
       }
     }
   }
