@@ -633,8 +633,16 @@
             {
                 Type typeRow = typeof(TRow);
 
+                // Asser table name ends with Integrate
                 string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                 UtilFramework.Assert(!tableNameCSharp.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying sql table! ({0})", tableNameCSharp));
+
+                // Asser field exists
+                var fieldNameCSharpList = UtilDalType.TypeRowToFieldList(typeRow).Select(item => item.FieldNameCSharp).ToList();
+                foreach (var fieldNameCSharp in fieldNameKeyList)
+                {
+                    UtilFramework.Assert(fieldNameCSharpList.Contains(fieldNameCSharp), string.Format("Field not found! ({0})", fieldNameCSharp));
+                }
 
                 if (ResultKey.ContainsKey(typeof(TRow)))
                 {
