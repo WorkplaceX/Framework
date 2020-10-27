@@ -243,19 +243,21 @@
                 string sqlInit = UtilFramework.FileLoad(fileNameInit);
                 Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
+                // (*.sql)
                 UtilCli.ConsoleWriteLineColor("DeployDb run (*.sql) scripts", ConsoleColor.Green);
                 DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
+                UtilCli.ConsoleWriteLineColor("DeployDb run (*.sql) scripts successful!", ConsoleColor.Green);
 
-                // Reseed
+                // Integrate
+                UtilCli.ConsoleWriteLineColor("DeployDb run Integrate", ConsoleColor.Green);
                 int? reseed = null;
                 if (optionReseed.OptionGet())
                 {
                     reseed = 1000;
                 }
                 Integrate(reseed);
-
-                UtilCli.ConsoleWriteLineColor("DeployDb successful!", ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor("DeployDb run Integrate successful!", ConsoleColor.Green);
             }
         }
     }

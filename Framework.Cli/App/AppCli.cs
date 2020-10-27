@@ -694,7 +694,7 @@
                     var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableNameCSharp + "Integrate").SingleOrDefault();
                     Type typeRowIntegrate = tableIntegrate.Key;
                     string tableNameIntegrate = tableIntegrate.Value;
-                    UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! ({0})", tableNameIntegrate));
+                    UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! Run cli command generate. ({0})", tableNameCSharp));
 
                     var fieldIntegrateId = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameIdCSharp).FirstOrDefault();
                     UtilFramework.Assert(fieldIntegrateId != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameIdCSharp));
