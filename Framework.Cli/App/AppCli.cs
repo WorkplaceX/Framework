@@ -180,7 +180,7 @@
                     command.Register(configuration);
                     configuration.OnExecute(() =>
                     {
-                        UtilCli.ConsoleWriteLineColor($"Execute Framework Cli Command ({command.Name})", ConsoleColor.Green);
+                        UtilCli.ConsoleWriteLineColor($"Execute Framework Command Cli ({command.Name})", ConsoleColor.Green);
                         command.Execute();
                         return 0;
                     });
@@ -212,7 +212,7 @@
             var environment = configCli.EnvironmentGet();
             if (UtilFramework.StringNull(environment.ConnectionStringFramework) == null || UtilFramework.StringNull(environment.ConnectionStringFramework) == null)
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("No ConnectionString for {0}! Set it with cli command config connectionString", environment.EnvironmentName), ConsoleColor.Yellow);
+                UtilCli.ConsoleWriteLineColor(string.Format("No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow);
             }
         }
 
@@ -378,7 +378,7 @@
         /// <summary>
         /// Returns Integrate rows to generate CSharp code.
         /// </summary>
-        /// <param name="isDeployDb">Method is called from cli command generate or command deployDb.</param>
+        /// <param name="isDeployDb">Method is called from command cli generate or cli deployDb.</param>
         /// <param name="tableNameCSharpApplicationFilterList">TableNameCSharp defined in method AppCli.CommandGenerateFilter();</param>
         internal GenerateIntegrateResult CommandGenerateIntegrateInternal(bool isDeployDb, List<string> tableNameCSharpApplicationFilterList)
         {
@@ -694,13 +694,13 @@
                     var tableIntegrate = TableNameCSharpList.Where(item => item.Value == tableNameCSharp + "Integrate").SingleOrDefault();
                     Type typeRowIntegrate = tableIntegrate.Key;
                     string tableNameIntegrate = tableIntegrate.Value;
-                    UtilFramework.Assert(tableNameIntegrate != null, string.Format("Integrate not found! Run cli command generate. ({0})", tableNameCSharp));
+                    UtilFramework.Assert(tableNameIntegrate != null, string.Format("CSharp Integrate row not found! Run command cli generate? ({0})", tableNameCSharp));
 
                     var fieldIntegrateId = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameIdCSharp).FirstOrDefault();
                     UtilFramework.Assert(fieldIntegrateId != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameIdCSharp));
 
                     var fieldIntegrateIdName = UtilDalType.TypeRowToFieldList(typeRowIntegrate).Where(item => item.FieldNameCSharp == fieldNameIdCSharp + "Name").FirstOrDefault();
-                    UtilFramework.Assert(fieldIntegrateIdName != null, string.Format("Field not found! ({0}.{1})", tableNameIntegrate, fieldNameIdCSharp + "Name"));
+                    UtilFramework.Assert(fieldIntegrateIdName != null, string.Format("CSharp field not found! Run command cli generate? ({0}.{1})", tableNameIntegrate, fieldNameIdCSharp + "Name"));
 
                     typeRowIntegrateResult = typeRowIntegrate;
                     fieldNameIdNameCSharpResult = fieldIntegrateIdName.FieldNameCSharp;
@@ -745,7 +745,7 @@
         }
 
         /// <summary>
-        /// Override if this application is cloned into ExternalGit/ folder. See also cli command external.
+        /// Override if this application is cloned into ExternalGit/ folder. See also command cli external.
         /// </summary>
         /// <param name="args">Some utils for example to copy files.</param>
         protected virtual internal void CommandExternal(ExternalArgs args)

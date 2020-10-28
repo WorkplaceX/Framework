@@ -187,7 +187,7 @@
             // External git url
             var externalGit = UtilFramework.StringNull(configCli.ExternalGit);
 
-            // Call external cli command (prebuild script)
+            // Call command cli external (prebuild script)
             var externalProjectName = UtilFramework.StringNull(configCli.ExternalProjectName);
 
             if (externalGit != null && externalProjectName != null)

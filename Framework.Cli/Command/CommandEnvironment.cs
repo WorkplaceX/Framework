@@ -10,7 +10,7 @@
     internal class CommandEnvironment : CommandBase
     {
         public CommandEnvironment(AppCli appCli)
-            : base(appCli, "env", "Select current environment to use for all cli commands")
+            : base(appCli, "env", "Select current environment to use for all command cli")
         {
 
         }

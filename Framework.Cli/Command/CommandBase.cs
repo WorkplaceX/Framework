@@ -3,7 +3,7 @@
     using Microsoft.Extensions.CommandLineUtils;
 
     /// <summary>
-    /// Cli command.
+    /// Command Cli.
     /// </summary>
     internal class CommandBase
     {

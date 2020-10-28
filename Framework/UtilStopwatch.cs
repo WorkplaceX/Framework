@@ -90,7 +90,7 @@
                             return stopwatchCollection;
                         }
                     }
-                    return new Collection { NavigatePath = UtilServer.Context?.Request.Path.Value }; // Also called by cli command deployDb
+                    return new Collection { NavigatePath = UtilServer.Context?.Request.Path.Value }; // Also called by command cli deployDb
                 });
 
                 return result;

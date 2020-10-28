@@ -1,14 +1,12 @@
 ﻿namespace Framework.Cli.Config
 {
-    using Framework.Cli.Command;
     using Framework.Config;
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
 
     /// <summary>
-    /// Configuration used by all cli commands.
+    /// Configuration used by all command cli.
     /// </summary>
     public class ConfigCli
     {

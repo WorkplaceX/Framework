@@ -24,6 +24,7 @@
             MetaCSharp metaCSharp = new MetaCSharp(metaSql);
 
             // Generate CSharp classes from database schema and save (*.cs) files.
+            UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files", ConsoleColor.Green);
             new CSharpGenerate(metaCSharp).Run(isFrameworkDb, out string cSharp);
             if (isFrameworkDb == false)
             {
@@ -36,6 +37,7 @@
             UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
 
             // Read Integrate data from database and save (*.cs) files.
+            UtilCli.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files", ConsoleColor.Green);
             GenerateIntegrateResult generateIntegrateResult = null;
             try
             {
