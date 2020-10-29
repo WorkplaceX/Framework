@@ -45,6 +45,7 @@
                 {
                     // See also class IdNameEnumAttribute
                     result.AppendLine(string.Format("    using System.Linq;"));
+                    result.AppendLine(string.Format("    using System.Threading.Tasks;"));
                     result.AppendLine(string.Format("    using Framework.DataAccessLayer;"));
                     result.AppendLine(string.Format("    using Framework.DataAccessLayer.Integrate;"));
                 }
@@ -148,6 +149,11 @@
                 result.AppendLine(string.Format("        public static string IdName(this IdNameEnum value)"));
                 result.AppendLine(string.Format("        {{"));
                 result.AppendLine(string.Format("            return IdNameEnumAttribute.IdNameFromEnum(value);"));
+                result.AppendLine(string.Format("        }}"));
+                result.AppendLine();
+                result.AppendLine(string.Format("        public static async Task<int> Id(this IdNameEnum value)"));
+                result.AppendLine(string.Format("        {{"));
+                result.AppendLine(string.Format("            return (await Data.Query<{0}>().Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).QueryExecuteAsync()).Single().Id;", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
             }
