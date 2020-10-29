@@ -212,7 +212,7 @@
             internal readonly MetaSqlSchema MetaSqlSchema;
 
             /// <summary>
-            /// Gets SchemaName. This is the sql schema name.
+            /// Gets SchemaName. This is the database sql schema name.
             /// </summary>
             public string SchemaName
             {
@@ -223,7 +223,7 @@
             }
 
             /// <summary>
-            /// Gets TableName. This is the sql table name.
+            /// Gets TableName. This is the database sql table name.
             /// </summary>
             public string TableName
             {
@@ -250,18 +250,36 @@
             internal GenerateFilterArgs(MetaSqlSchema[] list)
             {
                 FieldSqlList = new List<GenerateFilterFieldSql>();
+                TypeRowCalculatedList = new List<Type>();
+
                 foreach (var item in list)
                 {
                     FieldSqlList.Add(new GenerateFilterFieldSql(item));
                 }
             }
 
+            /// <summary>
+            /// Gets FieldSqlList. This is the database sql field list to generate CSharp code.
+            /// </summary>
             public List<GenerateFilterFieldSql> FieldSqlList { get; private set; }
+
+            /// <summary>
+            /// Gets TypeRowCalculatedList. Used to generate (FrameworkConfigGrid and FrameworkConfigField) Integrate CSharp code from database for calculated rows.
+            /// </summary>
+            public List<Type> TypeRowCalculatedList { get; private set; }
         }
 
         public class GenerateFilterResult
         {
+            /// <summary>
+            /// Gets or sets FieldSqlList. Used to generate CSharp code from database meta schema.
+            /// </summary>
             public List<GenerateFilterFieldSql> FieldSqlList { get; set; }
+
+            /// <summary>
+            /// Gets or sets TypeRowCalculatedList. Used to generate (FrameworkConfigGrid and FrameworkConfigField) Integrate CSharp code from database for calculated rows.
+            /// </summary>
+            public List<Type> TypeRowCalculatedList { get; set; }
 
             internal MetaSqlSchema[] List
             {

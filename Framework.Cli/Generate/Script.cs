@@ -23,14 +23,12 @@
 
             // Custom sql table and field filtering for code generation.
             var list = metaSql.List;
+            var typeRowCalculatedList = new List<Type>(); // Calculated row.
+            
             if (isFrameworkDb == false)
             {
-                var result = new GenerateFilterResult();
-                appCli.CommandGenerateFilter(new GenerateFilterArgs(list), result);
-                if (result.FieldSqlList != null)
-                {
-                    list = result.List;
-                }
+                // Call method CommandGenerateFilter();
+                Run(ref list, ref typeRowCalculatedList, appCli);
             }
 
             MetaCSharp metaCSharp = new MetaCSharp(list);
@@ -58,6 +56,8 @@
                 if (isFrameworkDb == false)
                 {
                     tableNameCSharpApplicationFilterList = metaCSharp.List.GroupBy(item => item.SchemaNameCSharp + "." + item.TableNameCSharp).Select(item => item.Key).ToList();
+                    var tableNameCSharpCalculatedList = typeRowCalculatedList.Select(item => UtilDalType.TypeRowToTableNameCSharp(item)).ToList();
+                    tableNameCSharpApplicationFilterList.AddRange(tableNameCSharpCalculatedList);
                 }
 
                 generateIntegrateResult = appCli.CommandGenerateIntegrateInternal(isDeployDb: false, tableNameCSharpApplicationFilterList);
@@ -87,6 +87,43 @@
             }
 
             return isSuccessful;
+        }
+
+        /// <summary>
+        /// Call method CommandGenerateFilter();
+        /// </summary>
+        private static void Run(ref MetaSqlSchema[] list, ref List<Type> typeRowCalculatedList, AppCli appCli)
+        {
+            var args = new GenerateFilterArgs(list);
+            var result = new GenerateFilterResult();
+            
+            // Args for calculated row
+            var assemblyList = appCli.AssemblyList(isIncludeApp: true);
+            List<Type> typeRowList = UtilDalType.TypeRowList(assemblyList);
+            foreach (Type typeRow in typeRowList)
+            {
+                if (UtilDalType.TypeRowIsTableNameSql(typeRow) == false) // Calculated row
+                {
+                    args.TypeRowCalculatedList.Add(typeRow);
+                }
+            }
+            
+            // Call method CommandGenerateFilter();
+            appCli.CommandGenerateFilter(args, result);
+            
+            // Result
+            if (result.FieldSqlList != null)
+            {
+                list = result.List;
+            }
+            if (result.TypeRowCalculatedList == null)
+            {
+                typeRowCalculatedList = args.TypeRowCalculatedList;
+            }
+            else
+            {
+                typeRowCalculatedList = result.TypeRowCalculatedList;
+            }
         }
 
         /// <summary>
