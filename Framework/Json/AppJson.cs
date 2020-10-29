@@ -831,7 +831,8 @@
                 {
                     if (NavigatePathAddHistory != null)
                     {
-                        throw new Exception("Only one PathAddHistory entry possible for one request!");
+                        // Allow multiple calls of method Navigate();
+                        // throw new Exception(string.Format("Only one PathAddHistory entry possible for one request! ({0}, {1})", NavigatePathAddHistory, result.NavigatePath));
                     }
                     NavigatePathAddHistory = result.NavigatePath;
                 }

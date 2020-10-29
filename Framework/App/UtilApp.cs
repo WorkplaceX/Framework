@@ -34,6 +34,7 @@
             {
                 await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
             }
+            
             // User clicked backward or forward button in browser.
             if (UtilSession.Request(appJson, CommandEnum.NavigateBackwardForward, out commandJson, out ComponentJson _))
             {
