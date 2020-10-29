@@ -345,7 +345,7 @@
                 var rowList = FrameworkConfigGridIntegrateFrameworkCli.RowList;
 
                 // Read FrameworkConfigGridIntegrate.RowListList from Application.Cli project.
-                string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateApplicationCli"; // See also method GenerateCSharpTableNameClass();
+                string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridIntegrateFrameworkCli.RowList));
@@ -363,7 +363,7 @@
                 var rowList = FrameworkConfigFieldIntegrateFrameworkCli.RowList;
 
                 // Read FrameworkConfigFieldIntegrateCli.List from Application.Cli project.
-                string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateApplicationCli"; // See also method GenerateCSharpTableNameClass();
+                string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateAppCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldIntegrateFrameworkCli.RowList));

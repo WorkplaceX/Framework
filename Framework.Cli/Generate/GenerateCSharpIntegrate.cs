@@ -83,7 +83,7 @@
                 }
                 else
                 {
-                    classNameExtension += "Application";
+                    classNameExtension += "App";
                 }
 
                 // Cli, Application
