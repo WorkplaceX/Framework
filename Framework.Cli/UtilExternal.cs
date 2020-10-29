@@ -97,15 +97,15 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Collect rowList from external FrameworkConfigGridIntegrateApplicationCli (ConfigGrid).
+        /// Collect rowList from external FrameworkConfigGridIntegrateAppCli (ConfigGrid).
         /// </summary>
         public static void CommandDeployDbIntegrate(AppCli appCli, List<FrameworkConfigGridIntegrate> rowList)
         {
             foreach (var type in appCli.AssemblyApplicationCli.GetTypes())
             {
-                if (type.FullName.StartsWith("DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateApplicationCli"))
+                if (type.FullName.StartsWith("DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli"))
                 {
-                    if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateApplicationCli")
+                    if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli")
                     {
                         var typeCliExternal = appCli.AssemblyApplicationCli.GetType(type.FullName);
                         var propertyInfo = typeCliExternal.GetProperty(nameof(FrameworkConfigGridIntegrateFrameworkCli.RowList));
@@ -117,15 +117,15 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Collect rowList from external FrameworkConfigFieldIntegrateApplicationCli (ConfigField).
+        /// Collect rowList from external FrameworkConfigFieldIntegrateAppCli (ConfigField).
         /// </summary>
         public static void CommandDeployDbIntegrate(AppCli appCli, List<FrameworkConfigFieldIntegrate> rowList)
         {
             foreach (var type in appCli.AssemblyApplicationCli.GetTypes())
             {
-                if (type.FullName.StartsWith("DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateApplicationCli"))
+                if (type.FullName.StartsWith("DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateAppCli"))
                 {
-                    if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateApplicationCli")
+                    if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateAppCli")
                     {
                         var typeCliExternal = appCli.AssemblyApplicationCli.GetType(type.FullName);
                         var propertyInfo = typeCliExternal.GetProperty(nameof(FrameworkConfigFieldIntegrateFrameworkCli.RowList));

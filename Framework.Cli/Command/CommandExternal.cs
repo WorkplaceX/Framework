@@ -75,13 +75,13 @@
             Console.WriteLine("Update file DatabaseIntegrate.cs");
             args.FileReplaceLine(
                 args.CliDatabaseDestFolderName + "DatabaseIntegrate.cs",
-                "    public static class FrameworkConfigGridIntegrateApplicationCli",
-                "    public static class FrameworkConfigGridIntegrateApplicationCli" + "External" + args.ExternalProjectName);
+                "    public static class FrameworkConfigGridIntegrateAppCli",
+                "    public static class FrameworkConfigGridIntegrateAppCli" + "External" + args.ExternalProjectName);
 
             args.FileReplaceLine(
                 args.CliDatabaseDestFolderName + "DatabaseIntegrate.cs",
-                "    public static class FrameworkConfigFieldIntegrateApplicationCli",
-                "    public static class FrameworkConfigFieldIntegrateApplicationCli" + "External" + args.ExternalProjectName);
+                "    public static class FrameworkConfigFieldIntegrateAppCli",
+                "    public static class FrameworkConfigFieldIntegrateAppCli" + "External" + args.ExternalProjectName);
 
             // Copy folder CliDeployDb/
             Console.WriteLine("Copy folder CliDeployDb/");

@@ -352,7 +352,7 @@
                 var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
-                // Collect rowList from external FrameworkConfigGridIntegrateApplicationCli (ConfigGrid).
+                // Collect rowList from external FrameworkConfigGridIntegrateAppCli (ConfigGrid).
                 UtilExternal.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
@@ -370,7 +370,7 @@
                 var rowApplicationCliList = (List<FrameworkConfigFieldIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
-                // Collect rowList from external FrameworkConfigFieldIntegrateApplicationCli (ConfigField).
+                // Collect rowList from external FrameworkConfigFieldIntegrateAppCli (ConfigField).
                 UtilExternal.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
