@@ -1,6 +1,5 @@
 ﻿namespace Framework.Cli.Generate
 {
-    using Framework.Cli.Command;
     using Framework.Cli.Config;
     using Microsoft.EntityFrameworkCore;
     using System.Linq;
@@ -14,7 +13,7 @@
         /// Constructor runs Schema.sql.
         /// </summary>
         /// <param name="isFrameworkDb">For internal use only.</param>
-        public MetaSql(bool isFrameworkDb, AppCli appCli)
+        public MetaSql(bool isFrameworkDb)
         {
             MetaSqlDbContext dbContext = new MetaSqlDbContext(isFrameworkDb);
             string sql = UtilFramework.FileLoad(UtilFramework.FolderName + "Framework/Framework.Cli/Generate/Sql/Schema.sql");
@@ -23,12 +22,11 @@
             // For Application filter out "dbo.Framework" tables.
             if (isFrameworkDb == false)
             {
-                this.List = this.List.Where(item => !(item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
-                this.List = appCli.CommandGenerateFilter(this.List); // Custom table name filtering for code generation.
+                this.List = this.List.Where(item => !(item.SchemaName == "dbo" && item.TableName.StartsWith("Framework"))).ToArray();
             }
             else
             {
-                this.List = this.List.Where(item => (item.SchemaName.StartsWith("dbo") && item.TableName.StartsWith("Framework"))).ToArray();
+                this.List = this.List.Where(item => (item.SchemaName == "dbo" && item.TableName.StartsWith("Framework"))).ToArray();
             }
             // Filter out "sysdiagrams" table.
             this.List = this.List.Where(item => item.IsSystemTable == false).ToArray();
@@ -69,7 +67,7 @@
     /// <summary>
     /// See also file Sql\Schema.sql
     /// </summary>
-    public class MetaSqlSchema
+    internal class MetaSqlSchema
     {
         public string SchemaName { get; internal set; }
 

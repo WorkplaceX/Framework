@@ -12,9 +12,9 @@
         /// <summary>
         /// Constructor.
         /// </summary>
-        public MetaCSharp(MetaSql metaSql)
+        public MetaCSharp(MetaSqlSchema[] list)
         {
-            SchemaName(metaSql.List);
+            SchemaName(list);
         }
 
         private void SchemaName(MetaSqlSchema[] dataList)

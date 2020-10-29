@@ -194,12 +194,82 @@
         /// <summary>
         /// Overwrite this method to filter out only specific application tables and fields for which to generate code. For example only tables starting with "Explorer".
         /// </summary>
-        /// <param name="list">Input list.</param>
-        /// <returns>Returns filtered output list.</returns>
-        protected virtual internal MetaSqlSchema[] CommandGenerateFilter(MetaSqlSchema[] list)
+        protected virtual internal void CommandGenerateFilter(GenerateFilterArgs args, GenerateFilterResult result)
         {
-            // return list.Where(item => item.SchemaName == "dbo" && item.TableName.StartsWith("Explorer")).ToArray();
-            return list;
+
+        }
+
+        /// <summary>
+        /// Sql field.
+        /// </summary>
+        public class GenerateFilterFieldSql
+        {
+            internal GenerateFilterFieldSql(MetaSqlSchema metaSqlSchema)
+            {
+                MetaSqlSchema = metaSqlSchema;
+            }
+
+            internal readonly MetaSqlSchema MetaSqlSchema;
+
+            /// <summary>
+            /// Gets SchemaName. This is the sql schema name.
+            /// </summary>
+            public string SchemaName
+            {
+                get
+                {
+                    return MetaSqlSchema.SchemaName;
+                }
+            }
+
+            /// <summary>
+            /// Gets TableName. This is the sql table name.
+            /// </summary>
+            public string TableName
+            {
+                get
+                {
+                    return MetaSqlSchema.TableName;
+                }
+            }
+
+            /// <summary>
+            /// Gets FieldName. This is the sql field name.
+            /// </summary>
+            public string FieldName
+            {
+                get
+                {
+                    return MetaSqlSchema.FieldName;
+                }
+            }
+        }
+
+        public class GenerateFilterArgs
+        {
+            internal GenerateFilterArgs(MetaSqlSchema[] list)
+            {
+                FieldSqlList = new List<GenerateFilterFieldSql>();
+                foreach (var item in list)
+                {
+                    FieldSqlList.Add(new GenerateFilterFieldSql(item));
+                }
+            }
+
+            public List<GenerateFilterFieldSql> FieldSqlList { get; private set; }
+        }
+
+        public class GenerateFilterResult
+        {
+            public List<GenerateFilterFieldSql> FieldSqlList { get; set; }
+
+            internal MetaSqlSchema[] List
+            {
+                get
+                {
+                    return FieldSqlList?.Select(item => item.MetaSqlSchema).ToArray();
+                }
+            }
         }
 
         /// <summary>

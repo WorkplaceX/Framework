@@ -19,9 +19,21 @@
         public static bool Run(bool isFrameworkDb, AppCli appCli)
         {
             bool isSuccessful = true;
+            MetaSql metaSql = new MetaSql(isFrameworkDb);
 
-            MetaSql metaSql = new MetaSql(isFrameworkDb, appCli);
-            MetaCSharp metaCSharp = new MetaCSharp(metaSql);
+            // Custom sql table and field filtering for code generation.
+            var list = metaSql.List;
+            if (isFrameworkDb == false)
+            {
+                var result = new GenerateFilterResult();
+                appCli.CommandGenerateFilter(new GenerateFilterArgs(list), result);
+                if (result.FieldSqlList != null)
+                {
+                    list = result.List;
+                }
+            }
+
+            MetaCSharp metaCSharp = new MetaCSharp(list);
 
             // Generate CSharp classes from database schema and save (*.cs) files.
             UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files", ConsoleColor.Green);
