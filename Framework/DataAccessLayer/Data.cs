@@ -1646,7 +1646,8 @@
         {
             UtilFramework.Assert(UtilFramework.IsSubclassOf(typeRow, typeof(Row)), "Wrong type!");
             string result = UtilFramework.TypeToName(typeRow);
-            UtilFramework.Assert(result.StartsWith("Database.")); // If it is a calculated row which does not exist on database move it for example to namespace "DatabaseCalculated".
+            UtilFramework.Assert(result.StartsWith("Database."), string.Format("Move calculated row to different namespace! For example Database.Calculated. ({0})", UtilFramework.TypeToName(typeRow))); // If it is a calculated row which does not exist on database move it for example to namespace "Database.Calculated".
+            UtilFramework.Assert(typeRow.BaseType == typeof(Row), string.Format("Calculated row has to derive from type Row! ({0})", UtilFramework.TypeToName(typeRow)));
             result = result.Substring("Database.".Length); // Remove "DatabaseFramework" namespace.
             return result;
         }
