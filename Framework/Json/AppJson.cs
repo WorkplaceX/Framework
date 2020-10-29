@@ -1335,10 +1335,12 @@
         /// <summary>
         /// Returns query to load data grid. Override this method to define sql query.
         /// </summary>
-        /// <returns>If return value is null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</returns>
-        internal virtual IQueryable QueryInternal()
+        /// <param name="query">If return value is null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</param>
+        /// <param name="isRowSelectFirst">If return value is true, first row is selected after data grid load.</param>
+        internal virtual void QueryInternal(out IQueryable query, out bool isRowSelectFirst)
         {
-            return null;
+            query = null;
+            isRowSelectFirst = false;
         }
 
         /// <summary>
@@ -1732,10 +1734,10 @@
 
         }
 
-        internal override IQueryable QueryInternal()
+        internal override void QueryInternal(out IQueryable query, out bool isRowSelectFirst)
         {
             QueryArgs args = new QueryArgs();
-            QueryResult result = new QueryResult();
+            QueryResult result = new QueryResult { IsRowSelectFirst = true };
 
             // Custom query
             Query(args, result);
@@ -1746,7 +1748,8 @@
                 result.Query = args.Query;
             }
 
-            return result.Query;
+            query = result.Query;
+            isRowSelectFirst = result.IsRowSelectFirst;
         }
 
         /// <summary>
@@ -1782,8 +1785,14 @@
         {
             /// <summary>
             /// Gets or sets Query. Query used to load data grid.
+            /// If value is null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.
             /// </summary>
             public IQueryable<TRow> Query { get; set; }
+
+            /// <summary>
+            /// Gets or sets IsRowSelectFirst. If true, first row is selected after data grid load.
+            /// </summary>
+            public bool IsRowSelectFirst { get; set; }
         }
 
         internal override void TruncateInternal(List<Row> rowList)
