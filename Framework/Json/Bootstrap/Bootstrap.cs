@@ -64,10 +64,10 @@
         /// Add data grid to Navbar.
         /// </summary>
         /// <param name="grid">Data grid with Id, ParentId and TextHtml columns.</param>
-        /// <param name="isSelectedMode">If true, currently selected row is shown on top as drop down button. Used for example for language switch.</param>
-        public void GridAdd(Grid grid, bool isSelectedMode = false)
+        /// <param name="isSelectMode">If true, currently selected row is shown on top as drop down button. Used for example for language switch.</param>
+        public void GridAdd(Grid grid, bool isSelectMode = false)
         {
-            GridList.Add(new BootstrapNavbarGrid { Grid = grid, IsSelectedMode = isSelectedMode });
+            GridList.Add(new BootstrapNavbarGrid { Grid = grid, IsSelectMode = isSelectMode });
         }
 
         internal List<BootstrapNavbarButton> ButtonList;
@@ -110,9 +110,9 @@
         public Grid Grid;
 
         /// <summary>
-        /// Gets or sets IsSelectedMode. If true, currently selected row is shown on top as drop down button. Used for example for language switch.
+        /// Gets or sets IsSelectMode. If true, currently selected row is shown on top as drop down button. Used for example for language switch.
         /// </summary>
-        public bool IsSelectedMode;
+        public bool IsSelectMode;
     }
 
     internal sealed class BootstrapNavbarButton
@@ -125,7 +125,7 @@
         public Grid Grid;
 
         /// <summary>
-        /// Gets or sets RowStateId. Can be null for example for drop down button for language. See also <see cref="BootstrapNavbarGrid.IsSelectedMode"/>
+        /// Gets or sets RowStateId. Can be null for example for drop down button for language. See also <see cref="BootstrapNavbarGrid.IsSelectMode"/>
         /// </summary>
         public int RowStateId;
 

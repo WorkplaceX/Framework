@@ -1285,10 +1285,10 @@
         internal string GridLookupDestFieldNameCSharp;
 
         /// <summary>
-        /// Gets or sets RowSelected. Currently selected data row by user. Set queues command.
+        /// Gets or sets RowSelect. Currently selected data row by user. Set queues command.
         /// </summary>
         [Serialize(SerializeEnum.None)]
-        public Row RowSelected
+        public Row RowSelect
         {
             get
             {
@@ -1310,9 +1310,9 @@
         }
 
         /// <summary>
-        /// Gets RowSelectedRowStateId. Currently selected data row by user.
+        /// Gets RowSelectRowStateId. Currently selected data row by user.
         /// </summary>
-        internal int? RowSelectedRowStateId
+        internal int? RowSelectRowStateId
         {
             get
             {
@@ -1354,7 +1354,7 @@
         /// <summary>
         /// Override this method for custom implementation. Method is called when data row has been selected. Reload for example a detail data grid.
         /// </summary>
-        protected virtual internal Task RowSelectedAsync()
+        protected virtual internal Task RowSelectAsync()
         {
             return Task.FromResult(0);
         }
@@ -1659,17 +1659,17 @@
         /// Override this method to extract and return text from lookup grid row for further processing. 
         /// Process wise there is no difference between user selecting a row on the lookup grid or entering text manually.
         /// <param name="result">Returns text like entered by user for further processing.</param>
-        protected virtual internal void LookupRowSelected(LookupRowSelectedArgs args, LookupRowSelectedResult result)
+        protected virtual internal void LookupRowSelect(LookupRowSelectArgs args, LookupRowSelectResult result)
         {
 
         }
 
-        public class LookupRowSelectedArgs
+        public class LookupRowSelectArgs
         {
             /// <summary>
-            /// Gets RowSelected. This is the row which has been clicked by the user in the lookup window.
+            /// Gets RowSelect. This is the row which has been clicked by the user in the lookup window.
             /// </summary>
-            public Row RowSelected { get; internal set; }
+            public Row RowSelect { get; internal set; }
 
             /// <summary>
             /// Gets FieldName. This is the FieldName for which the lookup window is open.
@@ -1677,7 +1677,7 @@
             public string FieldName { get; internal set; }
         }
 
-        public class LookupRowSelectedResult
+        public class LookupRowSelectResult
         {
             /// <summary>
             /// Gets or sets Text. Like the text entered by user for further processing.
@@ -1914,18 +1914,18 @@
         }
 
         /// <summary>
-        /// Gets RowSelected. Currently selected data row by user. Set queues command.
+        /// Gets RowSelect. Currently selected data row by user. Set queues command.
         /// </summary>
         [Serialize(SerializeEnum.None)]
-        public new TRow RowSelected
+        public new TRow RowSelect
         {
             get
             {
-                return (TRow)base.RowSelected;
+                return (TRow)base.RowSelect;
             }
             set
             {
-                base.RowSelected = value;
+                base.RowSelect = value;
             }
         }
 

@@ -36,9 +36,9 @@
         public GridConfigGrid GridConfigGrid;
 
         /// <summary>
-        /// Gets GridConfigGridSelected. Master row.
+        /// Gets GridConfigGridSelect. Master row.
         /// </summary>
-        public FrameworkConfigGridDisplay GridConfigGridRowSelected => (FrameworkConfigGridDisplay)GridConfigGrid.RowSelected;
+        public FrameworkConfigGridDisplay GridConfigGridRowSelect => (FrameworkConfigGridDisplay)GridConfigGrid.RowSelect;
 
         public GridConfigField GridConfigField;
 
@@ -93,7 +93,7 @@
         /// <summary>
         /// Load detail grid (config field).
         /// </summary>
-        protected internal override async Task RowSelectedAsync()
+        protected internal override async Task RowSelectAsync()
         {
             await this.ComponentOwner<PageConfigGrid>().GridConfigField.LoadAsync();
         }
@@ -164,13 +164,13 @@
         }
 
         /// <summary>
-        /// Gets GridConfigGridSelected. Master row.
+        /// Gets GridConfigGridSelect. Master row.
         /// </summary>
-        public FrameworkConfigGridDisplay GridConfigGridRowSelected
+        public FrameworkConfigGridDisplay GridConfigGridRowSelect
         {
             get
             {
-                return this.ComponentOwner<PageConfigGrid>().GridConfigGrid.RowSelected;
+                return this.ComponentOwner<PageConfigGrid>().GridConfigGrid.RowSelect;
             }
         }
 
@@ -186,8 +186,8 @@
 
         protected override void Query(QueryArgs args, QueryResult result)
         {
-            var rowSelected = GridConfigGridRowSelected;
-            result.Query = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelected.TableId && item.ConfigGridConfigName == rowSelected.ConfigName);
+            var rowSelect = GridConfigGridRowSelect;
+            result.Query = Data.Query<FrameworkConfigFieldDisplay>().Where(item => item.ConfigGridTableId == rowSelect.TableId && item.ConfigGridConfigName == rowSelect.ConfigName);
             if (FieldNameCSharp != null)
             {
                 result.Query = result.Query.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
@@ -241,24 +241,24 @@
 
         protected override async Task InsertAsync(InsertArgs args, InsertResult result)
         {
-            args.Row.ConfigGridTableId = GridConfigGridRowSelected.TableId; // Master
-            args.Row.ConfigGridConfigName = GridConfigGridRowSelected.ConfigName; // Master
+            args.Row.ConfigGridTableId = GridConfigGridRowSelect.TableId; // Master
+            args.Row.ConfigGridConfigName = GridConfigGridRowSelect.ConfigName; // Master
 
             var rowDest = new FrameworkConfigField();
             Data.RowCopy(args.Row, rowDest, "ConfigField");
-            if (GridConfigGridRowSelected.Id == null) // Master does not have FrameworkConfigGrid in database
+            if (GridConfigGridRowSelect.Id == null) // Master does not have FrameworkConfigGrid in database
             {
                 var rowDestConfigGrid = new FrameworkConfigGrid();
-                Data.RowCopy(GridConfigGridRowSelected, rowDestConfigGrid);
+                Data.RowCopy(GridConfigGridRowSelect, rowDestConfigGrid);
                 rowDestConfigGrid.IsExist = true;
                 await Data.InsertAsync(rowDestConfigGrid);
-                GridConfigGridRowSelected.Id = rowDestConfigGrid.Id;
+                GridConfigGridRowSelect.Id = rowDestConfigGrid.Id;
             }
-            rowDest.ConfigGridId = GridConfigGridRowSelected.Id.Value; // Master
+            rowDest.ConfigGridId = GridConfigGridRowSelect.Id.Value; // Master
 
             // Lookup field
             string fieldNameCSharp = ((FrameworkConfigFieldDisplay)args.Row).FieldFieldNameCSharp; // Text entered by user.
-            var fieldList = await Data.Query<FrameworkField>().Where(item => item.TableId == GridConfigGridRowSelected.TableId && item.FieldNameCSharp == fieldNameCSharp).QueryExecuteAsync();
+            var fieldList = await Data.Query<FrameworkField>().Where(item => item.TableId == GridConfigGridRowSelect.TableId && item.FieldNameCSharp == fieldNameCSharp).QueryExecuteAsync();
             if (fieldList.Count == 0)
             {
                 throw new Exception("Field not found!");

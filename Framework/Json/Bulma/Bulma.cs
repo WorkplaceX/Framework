@@ -35,10 +35,10 @@ namespace Framework.Json.Bulma
         /// </summary>
         /// <param name="grid">Data grid with Id, ParentId and TextHtml columns.</param>
         /// <param name="isNavbarEnd">If true, items are placed on the right hand side of the navbar.</param>
-        /// <param name="isSelectedMode">If true, currently selected row is shown on top as drop down button. Used for example for language switch.</param>
-        public void GridAdd(Grid grid, bool isNavbarEnd = false, bool isSelectedMode = false)
+        /// <param name="isSelectMode">If true, currently selected row is shown on top as drop down button. Used for example for language switch.</param>
+        public void GridAdd(Grid grid, bool isNavbarEnd = false, bool isSelectMode = false)
         {
-            GridList.Add(new BulmaNavbarGrid { Grid = grid, IsNavbarEnd = isNavbarEnd, IsSelectedMode = isSelectedMode });
+            GridList.Add(new BulmaNavbarGrid { Grid = grid, IsNavbarEnd = isNavbarEnd, IsSelectMode = isSelectMode });
         }
 
         /// <summary>
@@ -130,10 +130,10 @@ namespace Framework.Json.Bulma
             }
             rowMapList = rowMapList.OrderBy(item => item.Sort).ToList();
 
-            // IsSelectedMode for example for language selection.
-            if (navbarGrid.IsSelectedMode && rowMapList.Count > 0)
+            // IsSelectMode for example for language selection.
+            if (navbarGrid.IsSelectMode && rowMapList.Count > 0)
             {
-                var rowMapTop = rowMapList.FirstOrDefault(item => item.RowStateId == grid.RowSelectedRowStateId);
+                var rowMapTop = rowMapList.FirstOrDefault(item => item.RowStateId == grid.RowSelectRowStateId);
                 if (rowMapTop == null)
                 {
                     rowMapTop = rowMapList.First();
@@ -269,9 +269,9 @@ namespace Framework.Json.Bulma
         public Grid Grid;
 
         /// <summary>
-        /// Gets or sets IsSelectedMode. If true, currently selected row is shown on top as drop down button. Used for example for language switch.
+        /// Gets or sets IsSelectMode. If true, currently selected row is shown on top as drop down button. Used for example for language switch.
         /// </summary>
-        public bool IsSelectedMode;
+        public bool IsSelectMode;
 
         public bool IsNavbarEnd;
     }

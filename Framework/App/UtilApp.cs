@@ -106,7 +106,7 @@
                         var args = new BootstrapNavbarButtonArgs { BootstrapNavbar = bootstrapNavbar, Grid = grid, Row = row };
                         var result = new BootstrapNavbarButtonResult { TextHtml = itemTextHtml };
                         bootstrapNavbar.ButtonTextHtml(args, result);
-                        if (!(bootstrapNavbarGrid.IsSelectedMode && row == grid.RowSelected)) // For example for language: do not show selected language again under drop down button.
+                        if (!(bootstrapNavbarGrid.IsSelectMode && row == grid.RowSelect)) // For example for language: do not show selected language again under drop down button.
                         {
                             buttonId += 1;
                             BootstrapNavbarButton button = new BootstrapNavbarButton { Id = buttonId, Grid = grid, RowStateId = rowState.Id, TextHtml = result.TextHtml, IsActive = isActive };
@@ -149,16 +149,16 @@
                         UtilFramework.Assert(propertyInfoTextHtml != null, string.Format("Row needs a column 'TextHtml' ({0})!", UtilDalType.TypeRowToTableNameCSharp(item.Grid.TypeRow)));
 
                         // Add for example language switch
-                        if (item.IsSelectedMode)
+                        if (item.IsSelectMode)
                         {
-                            if (item.Grid.RowSelected != null)
+                            if (item.Grid.RowSelect != null)
                             {
-                                string textHtml = (string)propertyInfoTextHtml.GetValue(item.Grid.RowSelected);
-                                var args = new BootstrapNavbarButtonArgs { BootstrapNavbar = bootstrapNavbar, Grid = item.Grid, Row = item.Grid.RowSelected };
+                                string textHtml = (string)propertyInfoTextHtml.GetValue(item.Grid.RowSelect);
+                                var args = new BootstrapNavbarButtonArgs { BootstrapNavbar = bootstrapNavbar, Grid = item.Grid, Row = item.Grid.RowSelect };
                                 var result = new BootstrapNavbarButtonResult { TextHtml = textHtml };
                                 bootstrapNavbar.ButtonTextHtml(args, result);
                                 buttonId += 1;
-                                var button = new BootstrapNavbarButton { Id = buttonId, Grid = item.Grid, RowStateId = item.Grid.RowSelectedRowStateId.Value, TextHtml = result.TextHtml };
+                                var button = new BootstrapNavbarButton { Id = buttonId, Grid = item.Grid, RowStateId = item.Grid.RowSelectRowStateId.Value, TextHtml = result.TextHtml };
                                 bootstrapNavbar.ButtonList.Add(button);
                                 BootstrapNavbarRender(bootstrapNavbar, item, button, ref button.ButtonList, findParentId: null, propertyInfoId, propertyInfoParentId, propertyInfoTextHtml, ref buttonId);
                             }

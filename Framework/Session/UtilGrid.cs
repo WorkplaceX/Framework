@@ -885,8 +885,8 @@
             {
                 Row row = grid.RowListInternal[rowState.RowId.Value - 1];
                 rowState.IsSelect = true;
-                UtilFramework.Assert(row == grid.RowSelected);
-                await grid.RowSelectedAsync();
+                UtilFramework.Assert(row == grid.RowSelect);
+                await grid.RowSelectAsync();
             }
 
             if (isRender)
@@ -1253,7 +1253,7 @@
         {
             if (UtilSession.Request(appJson, CommandEnum.GridIsClickRow, out CommandJson commandJson, out Grid grid))
             {
-                var rowSelectedLocal = grid.RowSelected;
+                var rowSelectLocal = grid.RowSelect;
 
                 int rowStateId;
                 // Get rowStateId either from cell or directly from command.
@@ -1267,7 +1267,7 @@
                     rowStateId = commandJson.RowStateId;
                 }
 
-                Row rowSelected = null;
+                Row rowSelect = null;
                 foreach (var rowState in grid.RowStateList)
                 {
                     if (rowState.RowEnum == GridRowEnum.Index)
@@ -1275,32 +1275,32 @@
                         rowState.IsSelect = rowState.Id == rowStateId;
                         if (rowState.IsSelect)
                         {
-                            rowSelected = grid.RowListInternal[rowState.RowId.Value - 1];
+                            rowSelect = grid.RowListInternal[rowState.RowId.Value - 1];
                         }
                     }
                 }
 
-                if (rowSelected != null)
+                if (rowSelect != null)
                 {
                     if (grid.IsGridLookup == false)
                     {
                         // Grid normal row selected
                         GridLookupClose(grid);
                         Render(grid);
-                        UtilFramework.Assert(rowSelected == grid.RowSelected);
-                        if (rowSelected != rowSelectedLocal)
+                        UtilFramework.Assert(rowSelect == grid.RowSelect);
+                        if (rowSelect != rowSelectLocal)
                         {
-                            await grid.RowSelectedAsync(); // Load detail data grid
+                            await grid.RowSelectAsync(); // Load detail data grid
                         }
                     }
                     else
                     {
                         // Grid lookup row selected
                         GridLookupClose(grid.GridDest);
-                        UtilFramework.Assert(rowSelected == grid.RowSelected);
-                        LookupRowSelectedArgs args = new LookupRowSelectedArgs { RowSelected = grid.RowSelected, FieldName = grid.GridLookupDestFieldNameCSharp };
-                        LookupRowSelectedResult result = new LookupRowSelectedResult();
-                        grid.GridDest.LookupRowSelected(args, result);
+                        UtilFramework.Assert(rowSelect == grid.RowSelect);
+                        LookupRowSelectArgs args = new LookupRowSelectArgs { RowSelect = grid.RowSelect, FieldName = grid.GridLookupDestFieldNameCSharp };
+                        LookupRowSelectResult result = new LookupRowSelectResult();
+                        grid.GridDest.LookupRowSelect(args, result);
                         if (result.Text != null)
                         {
                             GridLookupToGridDest(grid, out var gridDest, out _, out _, out var cellDest);
