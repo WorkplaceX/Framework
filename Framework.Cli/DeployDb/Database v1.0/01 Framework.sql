@@ -3,7 +3,7 @@
 	Id INT PRIMARY KEY IDENTITY,
 	TableNameCSharp NVARCHAR(256) NOT NULL UNIQUE, -- See also method UtilDataAccessLayer.TypeRowToNameCSharp();
 	TableNameSql NVARCHAR(256), -- Can be null for memory rows.
-	IsExist BIT NOT NULL
+	IsDelete BIT NOT NULL
 )
 
 GO
@@ -22,7 +22,7 @@ CREATE TABLE FrameworkField /* Used for configuration. Contains all in source co
 	FieldNameCSharp NVARCHAR(256) NOT NULL,
 	FieldNameSql NVARCHAR(256), -- Can be null for calculated columns.
 	Sort INT NOT NULL, -- See also method UtilDalType.TypeRowToFieldList();
-	IsExist BIT NOT NULL
+	IsDelete BIT NOT NULL
 	INDEX IX_FrameworkField UNIQUE (TableId, FieldNameCSharp)
 )
 
@@ -37,7 +37,7 @@ SELECT
 	Field.FieldNameCSharp,
 	Field.FieldNameSql,
 	Field.Sort,
-	Field.IsExist
+	Field.IsDelete
 FROM
 	FrameworkField Field
 GO
@@ -51,7 +51,7 @@ CREATE TABLE FrameworkConfigGrid
 	IsAllowInsert BIT,
 	IsShowHeader BIT,
 	IsShowPagination BIT,
-	IsExist BIT NOT NULL
+	IsDelete BIT NOT NULL
 	INDEX IX_FrameworkConfigGrid UNIQUE (TableId, ConfigName)
 )
 
@@ -69,7 +69,7 @@ SELECT
 	ConfigGrid.IsAllowInsert,
 	ConfigGrid.IsShowHeader,
 	ConfigGrid.IsShowPagination,
-	ConfigGrid.IsExist
+	ConfigGrid.IsDelete
 FROM
 	FrameworkConfigGrid ConfigGrid
 GO
@@ -85,7 +85,7 @@ CREATE TABLE FrameworkConfigField
 	IsVisible BIT,
 	IsReadOnly BIT,
 	Sort FLOAT,
-	IsExist BIT NOT NULL
+	IsDelete BIT NOT NULL
 	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId, InstanceName)
 )
 
@@ -110,7 +110,7 @@ SELECT
 	ConfigField.IsVisible,
 	ConfigField.IsReadOnly,
 	ConfigField.Sort,
-	ConfigField.IsExist
+	ConfigField.IsDelete
 FROM
 	FrameworkConfigField ConfigField
 GO
@@ -127,7 +127,7 @@ SELECT
 	ConfigGrid.IsAllowInsert AS IsAllowInsert,
 	ConfigGrid.IsShowHeader AS IsShowHeader,
 	ConfigGrid.IsShowPagination AS IsShowPagination,
-	ConfigGrid.IsExist AS IsExist
+	ConfigGrid.IsDelete AS IsDelete
 FROM
 	FrameworkConfigGrid ConfigGrid
 UNION ALL
@@ -141,7 +141,7 @@ SELECT
 	NULL AS IsAllowInsert,
 	NULL AS IsShowHeader,
 	NULL AS IsShowPagination,
-	NULL AS IsExist
+	NULL AS IsDelete
 FROM
 	FrameworkTable FrameworkTable
 WHERE
@@ -157,7 +157,7 @@ WITH ConfigGrid AS (
 		(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
 		(SELECT FrameworkTable.TableNameSql FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameSql,
 		ConfigGrid.ConfigName AS ConfigName,
-		ConfigGrid.IsExist AS IsExist
+		ConfigGrid.IsDelete AS IsDelete
 	FROM
 		FrameworkConfigGrid ConfigGrid
 	UNION ALL
@@ -167,7 +167,7 @@ WITH ConfigGrid AS (
 		FrameworkTable.TableNameCSharp,
 		FrameworkTable.TableNameSql,
 		NULL AS ConfigName,
-		NULL AS IsExist
+		NULL AS IsDelete
 	FROM
 		FrameworkTable FrameworkTable
 	WHERE
@@ -180,14 +180,14 @@ SELECT
 	(SELECT TableIntegrate.IdName FROM FrameworkTableIntegrate TableIntegrate WHERE TableIntegrate.Id = ConfigGrid.TableId) AS ConfigGridTableIdName,
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS ConfigGridTableNameCSharp,
 	ConfigGrid.ConfigName AS ConfigGridConfigName,
-	ConfigGrid.IsExist AS ConfigGridIsExist,
+	ConfigGrid.IsDelete AS ConfigGridIsDelete,
 	/* Field */
 	Field.Id AS FieldId,
 	Field.TableId AS FieldTableId,
 	Field.FieldNameCSharp AS FieldFieldNameCSharp,
 	Field.FieldNameSql AS FieldFieldNameSql,
 	Field.Sort AS FieldFieldSort,
-	Field.IsExist AS FieldIsExist,
+	Field.IsDelete AS FieldIsDelete,
 	/* ConfigField */
 	ConfigField.Id AS ConfigFieldId,
 	ConfigField.ConfigGridId AS ConfigFieldConfigGridId,

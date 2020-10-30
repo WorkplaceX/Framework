@@ -110,7 +110,7 @@
                 {
                     var rowDest = new FrameworkConfigGrid();
                     Data.RowCopy(args.Row, rowDest);
-                    rowDest.IsExist = true;
+                    rowDest.IsDelete = false;
                     await Data.InsertAsync(rowDest);
                     args.Row.Id = rowDest.Id;
                     isInsert = true;
@@ -122,7 +122,7 @@
             {
                 var rowDest = new FrameworkConfigGrid();
                 Data.RowCopy(args.Row, rowDest);
-                rowDest.IsExist = true;
+                rowDest.IsDelete = false;
                 await Data.UpdateAsync(rowDest);
             }
 
@@ -141,7 +141,7 @@
             Data.RowCopy(args.Row, rowDest);
             int tableId = (await Data.Query<FrameworkTable>().Where(item => item.TableNameCSharp == TableNameCSharp).QueryExecuteAsync()).Single().Id;
             rowDest.TableId = tableId;
-            rowDest.IsExist = true;
+            rowDest.IsDelete = false;
             await Data.InsertAsync(rowDest);
             Data.RowCopy(rowDest, result.Row);
             var rowReload = await Reload(result.Row);
@@ -206,7 +206,7 @@
                 {
                     var rowDest = new FrameworkConfigGrid();
                     Data.RowCopy(args.Row, rowDest, "ConfigGrid");
-                    rowDest.IsExist = true;
+                    rowDest.IsDelete = false;
                     await Data.InsertAsync(rowDest);
                     args.Row.ConfigGridId = rowDest.Id;
                 }
@@ -219,7 +219,7 @@
                 Data.RowCopy(args.Row, rowDest, "ConfigField");
                 rowDest.ConfigGridId = args.Row.ConfigGridId.Value;
                 rowDest.FieldId = args.Row.FieldId;
-                rowDest.IsExist = true;
+                rowDest.IsDelete = false;
                 await Data.InsertAsync(rowDest);
                 args.Row.ConfigFieldId = rowDest.Id;
             }
@@ -250,7 +250,7 @@
             {
                 var rowDestConfigGrid = new FrameworkConfigGrid();
                 Data.RowCopy(GridConfigGridRowSelect, rowDestConfigGrid);
-                rowDestConfigGrid.IsExist = true;
+                rowDestConfigGrid.IsDelete = false;
                 await Data.InsertAsync(rowDestConfigGrid);
                 GridConfigGridRowSelect.Id = rowDestConfigGrid.Id;
             }
@@ -266,7 +266,7 @@
             int fieldId = fieldList.Single().Id;
             rowDest.FieldId = fieldId;
             args.Row.FieldId = fieldId;
-            rowDest.IsExist = true;
+            rowDest.IsDelete = false;
             await Data.InsertAsync(rowDest);
             var rowReload = await Reload(args.Row);
             Data.RowCopy(rowReload, args.Row);

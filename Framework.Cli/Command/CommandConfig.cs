@@ -150,7 +150,7 @@
             ConfigCli configCli = ConfigCli.Load();
 
             // Command "json"
-            if (UtilCli.ArgumentValueIsExist(this, argumentJson))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentJson))
             {
                 if (UtilCli.ArgumentValue(this, argumentJson, out string json))
                 {
@@ -171,7 +171,7 @@
             }
 
             // Command "deployAzureGitUrl"
-            if (UtilCli.ArgumentValueIsExist(this, argumentDeployAzureGitUrl))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentDeployAzureGitUrl))
             {
                 if (UtilCli.ArgumentValue(this, argumentDeployAzureGitUrl, out string value))
                 {
@@ -188,28 +188,28 @@
             }
 
             // Command "connectionString"
-            if (UtilCli.ArgumentValueIsExist(this, argumentConnectionString))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentConnectionString))
             {
                 ArgumentConnectionString();
                 return;
             }
 
             // Command "connectionStringFramework"
-            if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringFramework))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentConnectionStringFramework))
             {
                 ArgumentConnectionStringFramework();
                 return;
             }
 
             // Command "connectionStringApplication"
-            if (UtilCli.ArgumentValueIsExist(this, argumentConnectionStringApplication))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentConnectionStringApplication))
             {
                 ArgumentConnectionStringApplication();
                 return;
             }
 
             // Command "website"
-            if (UtilCli.ArgumentValueIsExist(this, argumentWebsite))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentWebsite))
             {
                 ArgumentWebsite();
                 return;

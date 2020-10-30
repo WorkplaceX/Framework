@@ -27,7 +27,7 @@
             ConfigCli configCli = ConfigCli.Load();
             string environmentNameOld = configCli.EnvironmentName;
 
-            if (UtilCli.ArgumentValueIsExist(this, argumentName))
+            if (UtilCli.ArgumentValueIsDelete(this, argumentName))
             {
                 if (UtilCli.ArgumentValue(this, argumentName, out string name))
                 {

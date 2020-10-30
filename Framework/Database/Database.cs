@@ -35,8 +35,8 @@ namespace Database.dbo
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigFieldDisplay")]
@@ -57,8 +57,8 @@ namespace Database.dbo
         [SqlField("ConfigGridConfigName", FrameworkTypeEnum.Nvarcahr)]
         public string ConfigGridConfigName { get; set; }
 
-        [SqlField("ConfigGridIsExist", FrameworkTypeEnum.Bit)]
-        public bool? ConfigGridIsExist { get; set; }
+        [SqlField("ConfigGridIsDelete", FrameworkTypeEnum.Bit)]
+        public bool? ConfigGridIsDelete { get; set; }
 
         [SqlField("FieldId", FrameworkTypeEnum.Int)]
         public int FieldId { get; set; }
@@ -75,8 +75,8 @@ namespace Database.dbo
         [SqlField("FieldFieldSort", FrameworkTypeEnum.Int)]
         public int FieldFieldSort { get; set; }
 
-        [SqlField("FieldIsExist", FrameworkTypeEnum.Bit)]
-        public bool FieldIsExist { get; set; }
+        [SqlField("FieldIsDelete", FrameworkTypeEnum.Bit)]
+        public bool FieldIsDelete { get; set; }
 
         [SqlField("ConfigFieldId", FrameworkTypeEnum.Int)]
         public int? ConfigFieldId { get; set; }
@@ -151,8 +151,8 @@ namespace Database.dbo
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigGrid")]
@@ -179,8 +179,8 @@ namespace Database.dbo
         [SqlField("IsShowPagination", FrameworkTypeEnum.Bit)]
         public bool? IsShowPagination { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigGridDisplay")]
@@ -213,8 +213,8 @@ namespace Database.dbo
         [SqlField("IsShowPagination", FrameworkTypeEnum.Bit)]
         public bool? IsShowPagination { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool? IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool? IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkConfigGridIntegrate")]
@@ -250,8 +250,8 @@ namespace Database.dbo
         [SqlField("IsShowPagination", FrameworkTypeEnum.Bit)]
         public bool? IsShowPagination { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkDeployDb")]
@@ -285,8 +285,8 @@ namespace Database.dbo
         [SqlField("Sort", FrameworkTypeEnum.Int)]
         public int Sort { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkFieldIntegrate")]
@@ -313,8 +313,8 @@ namespace Database.dbo
         [SqlField("Sort", FrameworkTypeEnum.Int)]
         public int Sort { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkTable")]
@@ -329,8 +329,8 @@ namespace Database.dbo
         [SqlField("TableNameSql", FrameworkTypeEnum.Nvarcahr)]
         public string TableNameSql { get; set; }
 
-        [SqlField("IsExist", FrameworkTypeEnum.Bit)]
-        public bool IsExist { get; set; }
+        [SqlField("IsDelete", FrameworkTypeEnum.Bit)]
+        public bool IsDelete { get; set; }
     }
 
     [SqlTable("dbo", "FrameworkTableIntegrate")]

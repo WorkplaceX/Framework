@@ -1068,24 +1068,24 @@
         }
 
         /// <summary>
-        /// Set IsExist flag to false on sql table.
+        /// Set IsDelete flag to false on sql table.
         /// </summary>
-        internal static async Task UpsertIsExistAsync(Type typeRow)
+        internal static async Task UpsertIsDeleteAsync(Type typeRow)
         {
-            string fieldNameSqlIsExist = "IsExist";
+            string fieldNameSqlIsDelete = "IsDelete";
             string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
-            // IsExists
-            string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT)", tableNameWithSchemaSql, fieldNameSqlIsExist);
-            await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
+            // IsDeletes
+            string sqlIsDelete = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT)", tableNameWithSchemaSql, fieldNameSqlIsDelete);
+            await Data.ExecuteNonQueryAsync(sqlIsDelete, null, isFrameworkDb);
         }
 
         /// <summary>
         /// Overload.
         /// </summary>
-        internal static async Task UpsertIsExistAsync<TRow>() where TRow : Row
+        internal static async Task UpsertIsDeleteAsync<TRow>() where TRow : Row
         {
-            await UpsertIsExistAsync(typeof(TRow));
+            await UpsertIsDeleteAsync(typeof(TRow));
         }
     }
 
@@ -1309,20 +1309,20 @@
         }
 
         /// <summary>
-        /// Set IsExist property to true on row and to false on sql table.
+        /// Set IsDelete property to true on row and to false on sql table.
         /// </summary>
-        private static void IsExistSet(Type typeRow, List<Row> rowList)
+        private static void IsDeleteSet(Type typeRow, List<Row> rowList)
         {
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
-            if (fieldList.TryGetValue("IsExist", out Field field))
+            if (fieldList.TryGetValue("IsDelete", out Field field))
             {
                 foreach (var row in rowList)
                 {
                     field.PropertyInfo.SetValue(row, true);
                 }
 
-                // Set sql table IsExist to false where IsIntegrate is true (if column exists)
-                UtilDalUpsertIntegrate.UpsertIsExistAsync(typeRow).Wait();
+                // Set sql table IsDelete to false where IsIntegrate is true (if column exists)
+                UtilDalUpsertIntegrate.UpsertIsDeleteAsync(typeRow).Wait();
             }
         }
 
@@ -1473,8 +1473,8 @@
                 Type typeRow = item.Key;
                 List<Row> rowList = item.Value;
          
-                // IsExistSet
-                IsExistSet(typeRow, rowList); // One call for hierarchical Integrate which needs multiple upsert.
+                // IsDeleteSet
+                IsDeleteSet(typeRow, rowList); // One call for hierarchical Integrate which needs multiple upsert.
 
                 // Upsert
                 foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
@@ -1500,23 +1500,23 @@
         }
 
         /// <summary>
-        /// Set IsExist flag to false on sql table. If sql table contains IsIntegrate column set IsExist flag to false only on IsIntegrate data rows.
+        /// Set IsDelete flag to false on sql table. If sql table contains IsIntegrate column set IsDelete flag to false only on IsIntegrate data rows.
         /// </summary>
-        private static async Task UpsertIsExistAsync(Type typeRow)
+        private static async Task UpsertIsDeleteAsync(Type typeRow)
         {
             var fieldList = UtilDalType.TypeRowToFieldListDictionary(typeRow);
             if (!fieldList.ContainsKey("IsIntegrate"))
             {
-                await UtilDalUpsert.UpsertIsExistAsync(typeRow);
+                await UtilDalUpsert.UpsertIsDeleteAsync(typeRow);
             }
             else
             {
-                string fieldNameSqlIsExist = "IsExist";
+                string fieldNameSqlIsDelete = "IsDelete";
                 string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
                 bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
-                // IsExists
-                string sqlIsExist = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT) WHERE IsIntegrate = 1", tableNameWithSchemaSql, fieldNameSqlIsExist);
-                await Data.ExecuteNonQueryAsync(sqlIsExist, null, isFrameworkDb);
+                // IsDeletes
+                string sqlIsDelete = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT) WHERE IsIntegrate = 1", tableNameWithSchemaSql, fieldNameSqlIsDelete);
+                await Data.ExecuteNonQueryAsync(sqlIsDelete, null, isFrameworkDb);
             }
         }
     }

@@ -130,7 +130,7 @@
                     {
                         table.TableNameSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
                     }
-                    table.IsExist = true;
+                    table.IsDelete = false;
                 }
                 result.Add(rowList);
             }
@@ -151,7 +151,7 @@
                         fieldIntegrate.FieldNameCSharp = field.PropertyInfo.Name;
                         fieldIntegrate.FieldNameSql = field.FieldNameSql;
                         fieldIntegrate.Sort = field.Sort;
-                        fieldIntegrate.IsExist = true;
+                        fieldIntegrate.IsDelete = false;
                     }
                 }
 

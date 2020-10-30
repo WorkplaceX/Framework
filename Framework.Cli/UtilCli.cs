@@ -183,7 +183,7 @@
         /// <summary>
         /// Returns true, if argument is used in command line.
         /// </summary>
-        internal static bool ArgumentValueIsExist(CommandBase command, CommandArgument commandArgument)
+        internal static bool ArgumentValueIsDelete(CommandBase command, CommandArgument commandArgument)
         {
             commandArgument = ArgumentValue(command, commandArgument); // Sequence of passed arguments might be wrong.
 
