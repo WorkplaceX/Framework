@@ -124,7 +124,7 @@
             var fieldIdName = fieldList.SingleOrDefault(item => item.FieldNameCSharp == "IdName"); // See also FieldIntegrate.IsKey
             if (fieldIdName != null) 
             {
-                result.Append(string.Format("        public enum IdNameEnum {{ [IdNameEnum(null)]None = 0"));
+                result.Append(string.Format("        public enum IdEnum {{ [IdEnum(null)]None = 0"));
                 List<string> nameExceptList = new List<string>();
                 int count = 0;
                 foreach (Row row in integrate.RowList)
@@ -132,28 +132,28 @@
                     count += 1;
                     string idName = (string)fieldIdName.PropertyInfo.GetValue(row);
                     string nameCSharp = UtilGenerate.NameCSharp(idName, nameExceptList);
-                    result.Append(string.Format(", [IdNameEnum(\"{0}\")]{1} = {2}", idName, nameCSharp, count * -1)); // Count * -1 to ensure there is no relation between enum id and database record id!
+                    result.Append(string.Format(", [IdEnum(\"{0}\")]{1} = {2}", idName, nameCSharp, count * -1)); // Count * -1 to ensure there is no relation between enum id and database record id!
                 }
                 result.AppendLine(string.Format(" }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static {0} Row(this IdNameEnum value)", integrate.TableNameCSharp));
+                result.AppendLine(string.Format("        public static {0} Row(this IdEnum value)", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("        {{"));
-                result.AppendLine(string.Format("            return RowList.Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).SingleOrDefault();"));
+                result.AppendLine(string.Format("            return RowList.Where(item => item.IdName == IdEnumAttribute.IdNameFromEnum(value)).SingleOrDefault();"));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static IdNameEnum IdName(string value)"));
+                result.AppendLine(string.Format("        public static IdEnum IdName(string value)"));
                 result.AppendLine(string.Format("        {{"));
-                result.AppendLine(string.Format("            return IdNameEnumAttribute.IdNameToEnum<IdNameEnum>(value);"));
+                result.AppendLine(string.Format("            return IdEnumAttribute.IdNameToEnum<IdEnum>(value);"));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static string IdName(this IdNameEnum value)"));
+                result.AppendLine(string.Format("        public static string IdName(this IdEnum value)"));
                 result.AppendLine(string.Format("        {{"));
-                result.AppendLine(string.Format("            return IdNameEnumAttribute.IdNameFromEnum(value);"));
+                result.AppendLine(string.Format("            return IdEnumAttribute.IdNameFromEnum(value);"));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
-                result.AppendLine(string.Format("        public static async Task<int> Id(this IdNameEnum value)"));
+                result.AppendLine(string.Format("        public static async Task<int> Id(this IdEnum value)"));
                 result.AppendLine(string.Format("        {{"));
-                result.AppendLine(string.Format("            return (await Data.Query<{0}>().Where(item => item.IdName == IdNameEnumAttribute.IdNameFromEnum(value)).QueryExecuteAsync()).Single().Id;", integrate.TableNameCSharp));
+                result.AppendLine(string.Format("            return (await Data.Query<{0}>().Where(item => item.IdName == IdEnumAttribute.IdNameFromEnum(value)).QueryExecuteAsync()).Single().Id;", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("        }}"));
                 result.AppendLine();
             }

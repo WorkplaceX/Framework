@@ -7,9 +7,9 @@
     /// Mapping from CSharp enum to value in sql table.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)] // Enum entry
-    public class IdNameEnumAttribute : Attribute
+    public class IdEnumAttribute : Attribute
     {
-        public IdNameEnumAttribute(string idName)
+        public IdEnumAttribute(string idName)
         {
             this.IdName = idName;
         }
@@ -26,7 +26,7 @@
         {
             var enumType = idEnum.GetType();
             var enumName = Enum.GetName(enumType, idEnum);
-            var enumNameAttribute = enumType.GetField(enumName).GetCustomAttributes(false).OfType<IdNameEnumAttribute>().Single();
+            var enumNameAttribute = enumType.GetField(enumName).GetCustomAttributes(false).OfType<IdEnumAttribute>().Single();
             return enumNameAttribute.IdName;
         }
 
