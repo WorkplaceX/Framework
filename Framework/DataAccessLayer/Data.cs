@@ -1318,10 +1318,10 @@
             {
                 foreach (var row in rowList)
                 {
-                    field.PropertyInfo.SetValue(row, true);
+                    field.PropertyInfo.SetValue(row, false);
                 }
 
-                // Set sql table IsDelete to false where IsIntegrate is true (if column exists)
+                // Set sql table IsDelete to true where IsIntegrate is true (if column exists)
                 UtilDalUpsertIntegrate.UpsertIsDeleteAsync(typeRow).Wait();
             }
         }
@@ -1515,7 +1515,7 @@
                 string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
                 bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
                 // IsDeletes
-                string sqlIsDelete = string.Format("UPDATE {0} SET {1}=CAST(0 AS BIT) WHERE IsIntegrate = 1", tableNameWithSchemaSql, fieldNameSqlIsDelete);
+                string sqlIsDelete = string.Format("UPDATE {0} SET {1}=CAST(1 AS BIT) WHERE IsIntegrate = 1", tableNameWithSchemaSql, fieldNameSqlIsDelete);
                 await Data.ExecuteNonQueryAsync(sqlIsDelete, null, isFrameworkDb);
             }
         }
