@@ -400,16 +400,30 @@
         /// <summary>
         /// Write to console in color.
         /// </summary>
-        internal static void ConsoleWriteLineColor(object value, ConsoleColor? color)
+        internal static void ConsoleWriteLineColor(object value, ConsoleColor? color, bool isLine = true)
         {
             if (color == null)
             {
-                Console.WriteLine(value);
+                if (isLine)
+                {
+                    Console.WriteLine(value);
+                }
+                else
+                {
+                    Console.Write(value);
+                }
             }
             else
             {
                 Console.ForegroundColor = color.Value;
-                Console.WriteLine(value);
+                if (isLine)
+                {
+                    Console.WriteLine(value);
+                }
+                else
+                {
+                    Console.Write(value);
+                }
                 Console.ResetColor();
 
                 // ConsoleColor foregroundColor = Console.ForegroundColor;

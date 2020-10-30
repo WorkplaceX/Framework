@@ -170,7 +170,7 @@
             {
                 foreach (var item in upsertList)
                 {
-                    if (item.IsDeployed == false)
+                    if (item.IsDeploy == false)
                     {
                         Type typeRowDest = item.TypeRowDest(assemblyList);
                         UtilDalType.TypeRowToTableNameSql(typeRowDest, out string schemaNameSql, out string tableNameSql);
@@ -202,10 +202,11 @@
             UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
 
             // Populate sql Integrate tables.
-            UtilCli.ConsoleWriteLineColor("Update Integrate tables", ConsoleColor.Green);
+            UtilCli.ConsoleWriteLineColor("Update Integrate tables ", ConsoleColor.Green, isLine: false);
             AppCli.CommandDeployDbIntegrateInternal(deployDbResult);
             IntegrateReseed(deployDbResult.Result, reseed, assemblyList);
-            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait(); // See also property IsDeployed
+            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList, (typeRow) => UtilCli.ConsoleWriteLineColor(".", ConsoleColor.Green, isLine: false)).Wait(); // See also property IsDeploy
+            Console.WriteLine();
         }
 
         protected internal override void Execute()

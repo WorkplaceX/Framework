@@ -1443,9 +1443,9 @@
             public readonly List<Reference> ReferenceList;
 
             /// <summary>
-            /// Gets IsDeployed. True, if RowList is deployed to database.
+            /// Gets IsDeploy. True, if RowList is deployed to database.
             /// </summary>
-            public bool IsDeployed { get; internal set; }
+            public bool IsDeploy { get; internal set; }
         }
 
         /// <summary>
@@ -1453,9 +1453,9 @@
         /// </summary>
         /// <param name="upsertList">List of rows to insert or update.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        internal static async Task UpsertAsync(List<UpsertItem> upsertList, List<Assembly> assemblyList)
+        internal static async Task UpsertAsync(List<UpsertItem> upsertList, List<Assembly> assemblyList, Action<Type> progressBar = null)
         {
-            upsertList = upsertList.Where(item => item.IsDeployed == false).ToList();
+            upsertList = upsertList.Where(item => item.IsDeploy == false).ToList();
 
             // Group by TypeRow
             Dictionary<Type, List<Row>> typeRowToRowList = new Dictionary<Type, List<Row>>();
@@ -1480,14 +1480,15 @@
                 foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
                 {
                     Type typeRowDest = itemUpsert.TypeRowDest(assemblyList);
+                    progressBar?.Invoke(typeRowDest);
                     await UpsertAsync(itemUpsert.TypeRow, typeRowDest, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList, assemblyList);
                 }
             }
 
-            // Set IsDeployed
+            // Set IsDeploy
             foreach (var item in upsertList)
             {
-                item.IsDeployed = true;
+                item.IsDeploy = true;
             }
         }
 
