@@ -26,7 +26,7 @@
             else
             {
                 string folderName = UtilFramework.FolderName + "Application.Server/";
-                string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/netcoreapp3.1/publish/";
+                string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/net5.0/publish/";
                 string folderNamePublishGit = folderNamePublish + ".git";
 
                 UtilCli.FolderDelete(folderNamePublishGit); // Undo git init.

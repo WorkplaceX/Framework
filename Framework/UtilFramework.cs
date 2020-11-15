@@ -38,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 9.1.1
 
-                return "v3.45.01";
+                return "v3.45.02";
             }
         }
 
@@ -59,7 +59,7 @@ namespace Framework
         /// </summary>
         internal static string FolderNameGet()
         {
-            Uri result = new Uri(typeof(UtilFramework).Assembly.CodeBase);
+            Uri result = new Uri(typeof(UtilFramework).Assembly.Location);
             result = new Uri(result, "../../../../");
             return result.AbsolutePath;
         }
