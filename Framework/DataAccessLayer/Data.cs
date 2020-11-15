@@ -430,7 +430,7 @@
                     }
                     else
                     {
-                        throw exception;
+                        throw;
                     }
                 }
             }
@@ -797,10 +797,10 @@
                             // Exception: The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
                             // Cause: CSharp not nullable DateTime default value is "{1/1/0001 12:00:00 AM}" change it to nullable or set value for example to DateTime.Now
                         }
-                        catch (Exception exception)
+                        catch
                         {
                             Data.RowCopy(rowCopy, row); // In case of exception, auto increment id stays -2147482647. Reverse it back.
-                            throw exception;
+                            throw;
                         }
                         break;
                     }
@@ -2187,10 +2187,7 @@
         public static string CellTextFromValue(DateTime value, bool isTime = true)
         {
             string result = null;
-            if (value != null)
-            {
-                result = UtilFramework.DateTimeToText(value, isTime);
-            }
+            result = UtilFramework.DateTimeToText(value, isTime);
             return result;
         }
 

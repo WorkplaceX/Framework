@@ -59,7 +59,7 @@ namespace Framework
         /// </summary>
         internal static string FolderNameGet()
         {
-            Uri result = new Uri(typeof(UtilFramework).Assembly.CodeBase);
+            Uri result = new Uri(typeof(UtilFramework).Assembly.Location);
             result = new Uri(result, "../../../../");
             return result.AbsolutePath;
         }
