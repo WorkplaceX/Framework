@@ -36,9 +36,9 @@ namespace Framework
                 // 6.14.4
 
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
-                // Angular CLI: 9.1.1
+                // Angular CLI: 11.0.1
 
-                return "v3.45.03";
+                return "v3.46.0";
             }
         }
 
