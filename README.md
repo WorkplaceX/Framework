@@ -65,3 +65,6 @@ ng update --all
 npm audit
 npm audit fix
 ```
+
+## Update Angular
+https://update.angular.io/
