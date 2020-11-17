@@ -103,10 +103,12 @@
         protected override Expression VisitConstant(ConstantExpression node)
         {
             // Database
-            if (node.Type.IsGenericType && node.Type.GetGenericTypeDefinition() == typeof(EntityQueryable<>))
-            {
-                DatabaseEnumList.Add(DatabaseEnum.Database);
-            }
+            //
+            // This combination is not possible (anymore) for async queries. Also: EntityQueryable<> is an internal API
+            // if (node.Type.IsGenericType && node.Type.GetGenericTypeDefinition() == typeof(EntityQueryable<>)) // For example: Query.Where(item => item.Id == 3);
+            // {
+            //     DatabaseEnumList.Add(DatabaseEnum.Database);
+            // }
 
             // MemorySingleton
             if (node.Value?.GetType().BaseType == typeof(EnumerableQuery))

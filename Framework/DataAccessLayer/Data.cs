@@ -173,8 +173,8 @@
             {
                 get
                 {
-                    string methodName = IsQuery == false ? "Set" : "Query";
-                    return (IQueryable)(this.GetType().GetMethod(methodName).MakeGenericMethod(TypeRow).Invoke(this, null));
+                    var methodInfo = GetType().GetMethods().Where(item => item.Name == "Set" && item.IsGenericMethod).First();
+                    return (IQueryable)methodInfo.MakeGenericMethod(TypeRow).Invoke(this, null);
                 }
             }
 
@@ -190,7 +190,7 @@
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 var fieldList = UtilDalType.TypeRowToFieldList(TypeRow);
-                SqlTableAttribute tableAttribute = (SqlTableAttribute)TypeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+                SqlTableAttribute tableAttribute = (SqlTableAttribute)TypeRow.GetCustomAttribute(typeof(SqlTableAttribute));
 
                 if (IsQuery == false)
                 {
@@ -279,15 +279,13 @@
 
         internal class DbContextDebug : DbContext
         {
-            // public DbSet<MyDebug> MyDebug { get; set; }
-            // public DbQuery<MyDebug> MyDebug { get; set; }
+            public DbSet<MyDebug> MyDebug { get; set; }
 
             public IQueryable<MyDebug> MyQuery
             {
                 get
                 {
-                    // var result = (IQueryable)(this.GetType().GetTypeInfo().GetMethod("Set").MakeGenericMethod(typeof(MyDebug)).Invoke(this, null));
-                    var result = (IQueryable)(this.GetType().GetTypeInfo().GetMethod("Query").MakeGenericMethod(typeof(MyDebug)).Invoke(this, null));
+                    var result = (IQueryable)(this.GetType().GetMethods().Where(item => item.Name == "Set" && item.IsGenericMethod).First()).MakeGenericMethod(typeof(MyDebug)).Invoke(this, null);
                     return (IQueryable<MyDebug>)result;
                 }
             }
@@ -305,7 +303,7 @@
             {
                 // Entity model
                 // var entityBuilder = modelBuilder.Entity(typeof(MyDebug));
-                var entityBuilder = modelBuilder.Query(typeof(MyDebug));
+                var entityBuilder = modelBuilder.Entity(typeof(MyDebug)).HasNoKey();
                 entityBuilder.ToView("MyDebug");
                 entityBuilder.Property("Id");
                 entityBuilder.Property("Text");
@@ -584,7 +582,7 @@
             {
                 string fieldNameDest = propertyInfoDest.Name;
                 string fieldNameSource = fieldNameSourcePrefix + fieldNameDest;
-                PropertyInfo propertyInfoSource = rowSource.GetType().GetTypeInfo().GetProperty(fieldNameSource);
+                PropertyInfo propertyInfoSource = rowSource.GetType().GetProperty(fieldNameSource);
                 if (propertyInfoSource != null)
                 {
                     object value = propertyInfoSource.GetValue(rowSource);
@@ -1561,7 +1559,7 @@
         /// </summary>
         internal static bool TypeRowIsFrameworkDb(Type typeRow)
         {
-            return typeRow.GetTypeInfo().Assembly == UtilFramework.AssemblyFramework; // Type is declared in Framework assembly.
+            return typeRow.Assembly == UtilFramework.AssemblyFramework; // Type is declared in Framework assembly.
         }
 
         /// <summary>
@@ -1595,7 +1593,7 @@
         internal static bool TypeRowIsTableNameSql(Type typeRow)
         {
             bool result = false;
-            SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+            SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetCustomAttribute(typeof(SqlTableAttribute));
             if (tableAttribute != null && (tableAttribute.SchemaNameSql != null || tableAttribute.TableNameSql != null))
             {
                 result = true;
@@ -1720,7 +1718,7 @@
         /// </summary>
         internal static bool TypeRowToTableNameSql(Type typeRow, out string schemaNameSql, out string tableNameSql)
         {
-            SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetTypeInfo().GetCustomAttribute(typeof(SqlTableAttribute));
+            SqlTableAttribute tableAttribute = (SqlTableAttribute)typeRow.GetCustomAttribute(typeof(SqlTableAttribute));
             schemaNameSql = tableAttribute?.SchemaNameSql;
             tableNameSql = tableAttribute?.TableNameSql;
             return tableAttribute != null;
@@ -1831,7 +1829,7 @@
             }
             else
             {
-                return typeRow.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                return typeRow.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             }
         }
 

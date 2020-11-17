@@ -92,7 +92,7 @@
         {
             Type type = UtilDalType.SqlTypeToType(sqlType);
             string result = TypeToCSharpType(type);
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
                 if (isNullable)
                 {

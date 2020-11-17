@@ -38,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 9.1.1
 
-                return "v3.45.02";
+                return "v3.45.03";
             }
         }
 
@@ -253,7 +253,7 @@ namespace Framework
             }
             if (typeBase.IsGenericType == false)
             {
-                return type.GetTypeInfo().IsSubclassOf(typeBase) || type == typeBase;
+                return type.IsSubclassOf(typeBase) || type == typeBase;
             }
             else
             {
