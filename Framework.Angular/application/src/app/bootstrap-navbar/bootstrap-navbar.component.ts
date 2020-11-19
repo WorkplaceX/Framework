@@ -1,33 +1,16 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { DataService, CommandJson } from '../data.service';
+import { Component, OnInit } from '@angular/core';
 
-/* BootstrapNavbar */
 @Component({
-  selector: '[data-BootstrapNavbar]',
-  templateUrl: './bootstrap-navbar.component.html'
+  selector: 'app-bootstrap-navbar',
+  templateUrl: './bootstrap-navbar.component.html',
+  styles: [
+  ]
 })
 export class BootstrapNavbarComponent implements OnInit {
 
-  constructor(private dataService: DataService) { }
+  constructor() { }
 
   ngOnInit(): void {
   }
 
-  @Input() json: any
-
-  click(button) {
-    button.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { CommandEnum: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
-    return false;
-  }
-
-  clickHome() {
-    this.json.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { CommandEnum: 15, ComponentId: this.json.Id });
-    return false;
-  }
-
-  trackBy(index, item) {
-    return index; // or item.id
-  }  
 }

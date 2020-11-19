@@ -1,28 +1,10 @@
 import { Component } from '@angular/core';
-import { DataService, CommandJson } from './data.service';
-import { Location, LocationStrategy, PathLocationStrategy, PopStateEvent} from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  template: `<div style="display:inline" data-Selector [json]=item *ngFor="let item of dataService.json.List; trackBy trackBy"></div>`,
-  providers: [Location, {provide: LocationStrategy, useClass: PathLocationStrategy}],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'application';
-
-  constructor(public dataService: DataService, private location: Location) {
-    this.location.onUrlChange((url: string, state: unknown) => {
-      var path: string = <string>state; // See also file data.service.ts method call location.go();
-      if (path == null) {
-        path = "/";
-      }
-      
-      // User clicked backward or forward button in browser.
-      this.dataService.update(<CommandJson> { CommandEnum: 17, ComponentId: this.dataService.json.Id, NavigatePath: path});
-    });
-  }
-
-  trackBy(index: any, item: any) {
-    return item.TrackBy;
-  }
 }

@@ -8,13 +8,5 @@ if (environment.production) {
   enableProdMode();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  platformBrowserDynamic(
-    [
-      { 
-        provide: 'jsonServerSideRendering', useValue: null // Default value for data.service.ts when running normal without server side rendering. Make it injectable.
-      }
-    ]    
-  ).bootstrapModule(AppModule)
+platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));
-});
