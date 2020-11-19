@@ -1,8 +1,8 @@
-# Angular 10 Client Application
+# Angular 11 Client Application
 
 ## Version Check
 ```cmd
-node --version # v12.13.0
+node --version # v12.18.1
 npm --version # 6.14.4
 ng --version # Angular Angular CLI: 11.0.2
 npm run ng -- --version # Angular CLI: 11.0.2 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
