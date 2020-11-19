@@ -210,7 +210,7 @@
             }
             catch (HttpRequestException exception)
             {
-                throw new Exception(string.Format("Http request failed! Make sure cli build command did run. ({0})", url), exception);
+                throw new Exception(string.Format("Http request failed! Make sure cli build command did run. Close node.exe ({0})", url), exception);
             }
             string result = await response.Content.ReadAsStringAsync();
             return result;

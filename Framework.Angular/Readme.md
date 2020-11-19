@@ -3,9 +3,9 @@
 ## Version Check
 ```cmd
 node --version # v12.13.0
-npm --version # 6.12.0
-ng --version # Angular Angular CLI: 10.0.6
-npm run ng -- --version # Angular CLI: 10.0.6 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
+npm --version # 6.14.4
+ng --version # Angular Angular CLI: 11.0.2
+npm run ng -- --version # Angular CLI: 11.0.2 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
 npm list -g --depth 0 # List globally installed packages
 ```
 
@@ -13,7 +13,14 @@ npm list -g --depth 0 # List globally installed packages
 Delete folder Framework/Framework.Angular/application/
 Push to new branch
 
-## Setup Angular CLI
+## Setup Angular CLI (Global)
+```cmd
+npm uninstall -g @angular/cli
+npm cache clean --force
+npm install -g @angular/cli
+```
+
+## Setup Angular CLI (Local)
 Run in folder Framework/Framework.Angular
 ```cmd
 npm install @angular/cli
@@ -60,7 +67,7 @@ npm run serve:ssr # Use POST method
 
 ## Add Data Service
 ```cmd
-npm run ng -- generate service data
+npm run ng -- generate service data --skipTests=true
 ```
 
 * Add HttpClient
