@@ -67,4 +67,10 @@ npm audit fix
 ```
 
 ## Update Angular
+```cmd
+npm uninstall -g @angular/cli
+npm cache clean --force
+npm install -g @angular/cli
+```
+
 https://update.angular.io/
