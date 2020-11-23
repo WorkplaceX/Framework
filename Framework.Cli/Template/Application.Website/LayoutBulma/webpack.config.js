@@ -4,6 +4,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // Extracts CSS
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = [{
+  output: {
+    filename: 'main-layout.js'
+  },
   module: {
     rules: [
       {

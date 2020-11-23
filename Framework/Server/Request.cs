@@ -226,7 +226,7 @@
 
             // Add Angular scripts
             scriptFind = "</body></html>";
-            scriptReplace = $"<script src=\"runtime{angularBrowserFileNameJsSuffix}\" defer=\"\"></script><script src=\"polyfills{angularBrowserFileNameJsSuffix}\" defer=\"\"></script><script src=\"main{angularBrowserFileNameJsSuffix}\" defer=\"\"></script>" +
+            scriptReplace = "<script src=\"runtime.js\" defer></script><script src=\"polyfills.js\" defer></script><script src=\"styles.js\" defer></script><script src=\"vendor.js\" defer></script><script src=\"main.js\" defer>" +
                 "</body></html>";
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
 
@@ -254,11 +254,6 @@
         }
 
         /// <summary>
-        /// Prevent for example two main.js files (Angular and Website).
-        /// </summary>
-        private static readonly string angularBrowserFileNameJsSuffix = "-angular.js";
-
-        /// <summary>
         /// Returns true, if file found in folder "Application.Server/Framework/Framework.Angular/browser".
         /// </summary>
         private async Task<bool> AngularBrowserFileAsync(HttpContext context, string path)
@@ -268,14 +263,6 @@
             {
                 // Serve fileName
                 string fileName = UtilServer.FolderNameContentRoot() + "Framework/Framework.Angular/browser" + path;
-
-                if (fileName.EndsWith(angularBrowserFileNameJsSuffix))
-                {
-                    // Prevent for example two main.js. Angular js can not be overridden by Website
-                    // Application.Website/LayoutDefault/dist/main.js
-                    // Application.Server/Framework/Framework.Angular/browser/main.js
-                    fileName = fileName.Substring(0, fileName.Length - angularBrowserFileNameJsSuffix.Length) + ".js";
-                }
 
                 if (File.Exists(fileName))
                 {

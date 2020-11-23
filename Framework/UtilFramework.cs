@@ -38,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 11.0.1
 
-                return "v3.46.0";
+                return "v3.46.01";
             }
         }
 
@@ -418,7 +418,7 @@ namespace Framework
         /// <summary>
         /// (TypeName, Type). Cache.
         /// </summary>
-        private static readonly Dictionary<string, Type> typeFromNameListCache = new Dictionary<string, Type>();
+        private static readonly ConcurrentDictionary<string, Type> typeFromNameListCache = new ConcurrentDictionary<string, Type>();
 
         /// <summary>
         /// Returns type of for example Application.AppMain" or better "Application.AppMain, Application".

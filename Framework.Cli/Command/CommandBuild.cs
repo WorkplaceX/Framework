@@ -147,6 +147,21 @@
                 {
                     throw new Exception(string.Format("Folder does not exist! ({0})", folderNameDest));
                 }
+
+                // Layout file main.js and Angular file main.js
+                // Prevent for example two main.js. Angular js can not be overridden by layout Website
+                // Application.Website/LayoutDefault/dist/main.js
+                // Application.Server/Framework/Framework.Angular/browser/main.js
+                var fileNameList = new string[] { "runtime.js", "polyfills.js", "styles.js", "vendor.js", "main.js" };
+                foreach (var fileName in fileNameList)
+                {
+                    var fileNameFull = folderNameSource + fileName;
+                    if (File.Exists(fileNameFull))
+                    {
+                        throw new Exception(string.Format("File conflicts with Angular! See also: https://webpack.js.org/configuration/output/ ({0})", fileNameFull));
+                    }
+                }
+
                 UtilCli.FolderDelete(folderNameDest);
                 UtilFramework.Assert(!UtilCli.FolderNameExist(folderNameDest));
                 UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
