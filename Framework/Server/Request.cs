@@ -226,7 +226,7 @@
 
             // Add Angular scripts
             scriptFind = "</body></html>";
-            scriptReplace = "<script src=\"runtime.js\" defer></script><script src=\"polyfills.js\" defer></script><script src=\"styles.js\" defer></script><script src=\"vendor.js\" defer></script><script src=\"main.js\" defer>" +
+            scriptReplace = "<script src=\"runtime.js\" defer></script><script src=\"polyfills.js\" defer></script><script src=\"main.js\" defer></script>" +
                 "</body></html>";
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
 

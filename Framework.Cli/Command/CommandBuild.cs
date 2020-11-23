@@ -152,7 +152,7 @@
                 // Prevent for example two main.js. Angular js can not be overridden by layout Website
                 // Application.Website/LayoutDefault/dist/main.js
                 // Application.Server/Framework/Framework.Angular/browser/main.js
-                var fileNameList = new string[] { "runtime.js", "polyfills.js", "styles.js", "vendor.js", "main.js" };
+                var fileNameList = new string[] { "runtime.js", "polyfills.js", "main.js" };
                 foreach (var fileName in fileNameList)
                 {
                     var fileNameFull = folderNameSource + fileName;
