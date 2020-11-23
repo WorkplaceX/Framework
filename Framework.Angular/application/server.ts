@@ -15,11 +15,11 @@ import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
-  
+
   server.use(bodyParser.json()); // Framework: Enable SSR POST 
-  
+
   var distFolder = join(process.cwd(), 'dist/application/browser');
-  
+
   // Framework: Enable SSR POST  
   // Running in Visual Studio
   const processCwd = process.cwd().split("\\").join("/"); // Rplace all
@@ -29,7 +29,7 @@ export function app(): express.Express {
   if (processCwd.endsWith("Framework/Framework.Angular/server")) {
     distFolder = "../../"
   }  
-  
+
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -54,7 +54,7 @@ export function app(): express.Express {
 
   // Framework: Enable SSR POST
   server.post('*', (req, res) => {
-    let view = querystring.parse(url.parse(req.originalUrl).query).view as string;
+    let view = querystring.parse(url.parse(req.originalUrl).query || "").view as string;
     console.log("View=", view);
     res.render(view,     
       {

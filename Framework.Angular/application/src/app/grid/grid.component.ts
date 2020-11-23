@@ -16,7 +16,7 @@ export class GridComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    (<HTMLTableElement>this.table.nativeElement).addEventListener("wheel", event => this.wheel(event));
+    (<HTMLTableElement>this.table?.nativeElement).addEventListener("wheel", event => this.wheel(event));
     if (this.divGridClick != null) { // Does not exist if IsHidePagination
       (<HTMLDivElement>this.divGridClick.nativeElement).addEventListener("wheel", event => this.wheel(event));
     }
@@ -25,25 +25,25 @@ export class GridComponent implements OnInit {
   @Input() json: any;
 
   @ViewChild('table')
-  table: ElementRef;
+  table: ElementRef | undefined;
 
   @ViewChild('divGridClick')
-  divGridClick: ElementRef;
+  divGridClick: ElementRef | undefined;
 
   @ViewChild('inputFileUpload', {static: false}) 
-  inputFileUpload: ElementRef<HTMLElement>;
+  inputFileUpload: ElementRef<HTMLElement> | undefined;
 
-  ngModelChange(cell) {
+  ngModelChange(cell: any) {
     cell.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 9, ComponentId: this.json.Id, GridCellId: cell.Id, GridCellText: cell.Text });
   }
 
-  clickSort(cell, event: MouseEvent) {
+  clickSort(cell: any, event: MouseEvent) {
     cell.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 8, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
 
-  clickConfig(cell, event: MouseEvent) {
+  clickConfig(cell: any, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     cell.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 12, ComponentId: this.json.Id, GridCellId: cell.Id });
@@ -51,43 +51,45 @@ export class GridComponent implements OnInit {
 
   private cellFileUpload: any;
 
-  clickFileUpload(cell, event: MouseEvent) {
+  clickFileUpload(cell: any, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.cellFileUpload = cell;
-    this.inputFileUpload.nativeElement.click();
+    this.inputFileUpload?.nativeElement.click();
   }
 
   changeInputFileUpload(event: Event) {
-    const file = (<HTMLInputElement>event.target).files.item(0);
-    (<HTMLInputElement>event.target).value = null; // Upload same file multiple times. Trigger change event.
+    const file = (<HTMLInputElement>event.target).files?.item(0);
+    (<HTMLInputElement>event.target).value = ""; // Upload same file multiple times. Trigger change event.
 
     const cellFileUpload = this.cellFileUpload;
     const dataService = this.dataService;
     const json = this.json;
 
     var reader = new FileReader();
-    reader.readAsDataURL(file.slice()); 
+    if (file != null){
+      reader.readAsDataURL(file.slice()); 
+    }
     reader.onloadend = function() {
         var base64data = reader.result;
         cellFileUpload.IsShowSpinner = true;
-        dataService.update(<CommandJson> { CommandEnum: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file.name });
+        dataService.update(<CommandJson> { CommandEnum: 9, ComponentId: json.Id, GridCellId: cellFileUpload.Id, GridCellText: cellFileUpload.Text, GridCellTextBase64: base64data, GridCellTextBase64FileName: file?.name });
     }
   }
 
-  clickCell(cell, event: MouseEvent) {
+  clickCell(cell: any, event: MouseEvent) {
     if (!(event.target instanceof HTMLInputElement)) {
       this.focus(cell);
     }
   }
 
-  focus(cell) {
+  focus(cell: any) {
     if (!cell.IsSelect) {
       cell.IsShowSpinner = true;
       this.dataService.update(<CommandJson> { CommandEnum: 11, ComponentId: this.json.Id, GridCellId: cell.Id });
     }
   }
 
-  focusout(cell) {
+  focusout(cell: any) {
     if (cell.TextLeave != null) {
       if (cell.Text != cell.TextLeave) {
         cell.Text = cell.TextLeave;
@@ -100,7 +102,7 @@ export class GridComponent implements OnInit {
 
   styleColumnList(): string[] {
     let result: string[] = [];
-    this.json.CellList.forEach(cell => {
+    this.json.CellList.forEach((cell: { CellEnum: number; Width: string | null; }) => {
       if (cell.CellEnum == 4){
         if (cell.Width == null) {
           result.push("minmax(0, 1fr)");
@@ -113,21 +115,21 @@ export class GridComponent implements OnInit {
     return result;
   }
 
-  resizeColumnIndex: number; // If not null, user column resize in progress
-  resizeColumnWidthValue: number;
-  resizePageX: number;
-  resizeTableWidth: number;
+  resizeColumnIndex: number | undefined; // If not null, user column resize in progress
+  resizeColumnWidthValue: number | undefined;
+  resizePageX: number | undefined;
+  resizeTableWidth: number | undefined;
 
   click(event: MouseEvent) {
     event.stopPropagation(); // Prevent sort after column resize
   }
 
-  mouseDown(columnIndex, event: MouseEvent): boolean {
+  mouseDown(columnIndex: number, event: MouseEvent): boolean {
     event.stopPropagation();
     this.resizeColumnIndex = columnIndex;
     this.resizePageX = event.pageX;
-    this.resizeColumnWidthValue = null;
-    this.resizeTableWidth = (<HTMLElement>event.currentTarget).parentElement.parentElement.parentElement.parentElement.clientWidth;
+    this.resizeColumnWidthValue = undefined;
+    this.resizeTableWidth = (<HTMLElement>event.currentTarget).parentElement?.parentElement?.parentElement?.parentElement?.clientWidth;
     return false;
   }    
 
@@ -138,9 +140,9 @@ export class GridComponent implements OnInit {
       if (this.resizeColumnWidthValue == null) {
         this.resizeColumnWidthValue = widthValue;
       }
-      let offset = event.pageX - this.resizePageX;
-      let offsetPercent = (offset / this.resizeTableWidth) * 100;
-      let columnWidthNew = Math.round((this.resizeColumnWidthValue + offsetPercent) * 100) / 100;
+      let offset = event.pageX - (this.resizePageX || 0);
+      let offsetPercent = (offset / (this.resizeTableWidth || 0)) * 100;
+      let columnWidthNew = Math.round(((this.resizeColumnWidthValue || 0) + offsetPercent) * 100) / 100;
       if (columnWidthNew < 0) {
         columnWidthNew = 0;
       }
@@ -167,13 +169,13 @@ export class GridComponent implements OnInit {
     if (this.resizeColumnIndex != null) {
       event.stopPropagation();
       let resizeColumnIndexLocal = this.resizeColumnIndex;
-      this.resizeColumnIndex = null;
+      this.resizeColumnIndex = undefined;
       let widthValue = <number>this.json.StyleColumnList[resizeColumnIndexLocal].WidthValue;
       this.dataService.update(<CommandJson> { CommandEnum: 20, ComponentId: this.json.Id, ResizeColumnIndex: resizeColumnIndexLocal, ResizeColumnWidthValue: widthValue });
     }
   }
 
-  clickGrid(isClickEnum, event: MouseEvent) {
+  clickGrid(isClickEnum: number, event: MouseEvent) {
     event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
     this.json.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 10, ComponentId: this.json.Id, GridIsClickEnum: isClickEnum });
@@ -203,6 +205,8 @@ export class GridComponent implements OnInit {
         return true;
       }
     }
+
+    return false;
   }
 
   trackBy(index: any, item: any) {

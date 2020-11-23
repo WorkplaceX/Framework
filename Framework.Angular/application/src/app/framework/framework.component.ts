@@ -1,22 +1,21 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
-import { DataService, CommandJson } from '../data.service';
+import { Component, ElementRef, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { CommandJson, DataService } from '../data.service';
 
 /* Selector */
 @Component({
   selector: '[data-Selector]',
   template: `
   <ng-container [ngSwitch]="json.Type">
+    <div data-Page [ngClass]="json.CssClass" *ngSwitchCase="'Page'" [json]=json></div>
     <div data-Button style="display:inline" *ngSwitchCase="'Button'" [json]=json></div>
+    <div data-Html style="display:inline" *ngSwitchCase="'Html'" [json]=json></div>
     <div data-Div [ngClass]="json.CssClass" *ngSwitchCase="'Div'" [json]=json></div>
     <div data-DivContainer [ngClass]="json.CssClass" *ngSwitchCase="'DivContainer'" [json]=json></div>
-    <div data-Page [ngClass]="json.CssClass" *ngSwitchCase="'Page'" [json]=json></div>
-    <div data-Html style="display:inline" *ngSwitchCase="'Html'" [json]=json></div>
-    <div data-Grid [ngClass]="json.CssClass" *ngSwitchCase="'Grid'" [json]=json></div>
-    <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
-    <div data-BulmaNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>  
     <div data-BingMap [ngClass]="json.CssClass" *ngSwitchCase="'BingMap'" [json]=json></div>
-    <div data-Custom01 style="display:inline" *ngSwitchCase="'Custom01'" [json]=json></div>
+    <div data-BulmaNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>
+    <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
+    <div data-Grid [ngClass]="json.CssClass" *ngSwitchCase="'Grid'" [json]=json></div>
   </ng-container>
   `
 })
@@ -33,11 +32,30 @@ export class Selector {
 })
 export class Page {
   @Input() json: any
-  dataService: DataService;
 
   trackBy(index: any, item: any) {
     return item.TrackBy;
   }
+}
+
+/* Button */
+@Component({
+  selector: '[data-Button]',
+  template: `
+  <button [ngClass]="json.CssClass" (click)="click();" [innerHtml]="json.TextHtml"></button>
+  <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>  
+  `
+})
+export class Button {
+  constructor(private dataService: DataService){
+  }
+
+  @Input() json: any
+
+  click(){
+    this.json.IsShowSpinner = true;
+    this.dataService.update(<CommandJson> { CommandEnum: 1, ComponentId: this.json.Id });
+  } 
 }
 
 /* Html */
@@ -65,7 +83,7 @@ export class Html {
   }
 
   @ViewChild('div')
-  div: ElementRef;
+  div: ElementRef | undefined;
 
   click(event: MouseEvent){
     var element = event.target;
@@ -89,29 +107,7 @@ export class Html {
       } else {
         break;
       }
-    } while (element != this.div.nativeElement && element != null)
-  } 
-}
-
-/* Button */
-@Component({
-  selector: '[data-Button]',
-  template: `
-  <button [ngClass]="json.CssClass" (click)="click();" [innerHtml]="json.TextHtml"></button>
-  <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>  
-  `
-})
-export class Button {
-  constructor(dataService: DataService){
-    this.dataService = dataService;
-  }
-
-  @Input() json: any
-  dataService: DataService;
-
-  click(){
-    this.json.IsShowSpinner = true;
-    this.dataService.update(<CommandJson> { CommandEnum: 1, ComponentId: this.json.Id });
+    } while (element != this.div?.nativeElement && element != null)
   } 
 }
 
@@ -140,7 +136,7 @@ export class Div {
 export class DivContainer {
   @Input() json: any;
   
-  trackBy(index, item) {
+  trackBy(index: any, item: any) {
     return index; // or item.id
   }
 }
@@ -163,7 +159,7 @@ export class BingMap {
   dataService: DataService;
 
   @ViewChild('map', { static: true}) 
-  map: ElementRef;
+  map: ElementRef | undefined;
  
   ngOnChanges(changes: SimpleChanges) {
     if (changes.json.previousValue == null || changes.json.previousValue.Lat != changes.json.currentValue.Lat || changes.json.previousValue.Long != changes.json.currentValue.Long)

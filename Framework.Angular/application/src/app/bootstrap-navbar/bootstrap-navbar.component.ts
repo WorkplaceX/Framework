@@ -15,7 +15,7 @@ export class BootstrapNavbarComponent implements OnInit {
 
   @Input() json: any
 
-  click(button) {
+  click(button: any) {
     button.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 7, ComponentId: this.json.Id, BootstrapNavbarButtonId: button.Id });
     return false;
@@ -27,7 +27,7 @@ export class BootstrapNavbarComponent implements OnInit {
     return false;
   }
 
-  trackBy(index, item) {
+  trackBy(index: any, item: any) {
     return index; // or item.id
   }  
 }

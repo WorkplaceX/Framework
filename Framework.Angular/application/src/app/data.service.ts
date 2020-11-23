@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Inject, RendererFactory2, Renderer2 } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT, Location } from '@angular/common';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 // See also https://angular.io/guide/http
@@ -11,85 +10,85 @@ import { catchError } from 'rxjs/operators';
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
 export class Json { // AppJson
-  Id: number;
+  Id: number | undefined;
 
-  Name: string;
+  Name: string | undefined;
 
-  Version: string;
+  Version: string | undefined;
 
-  VersionBuild: string;
+  VersionBuild: string | undefined;
 
-  IsServerSideRendering: boolean;
+  IsServerSideRendering: boolean | undefined;
 
-  Session: string;
+  Session: string | undefined;
 
-  SessionApp: string;
+  SessionApp: string | undefined;
 
-  SessionState: string;
+  SessionState: string | undefined;
 
-  RequestCount: number;
+  RequestCount: number | undefined;
 
-  ResponseCount: number;
+  ResponseCount: number | undefined;
 
-  RequestUrl: string;
+  RequestUrl: string | undefined;
 
-  EmbeddedUrl: string;
+  EmbeddedUrl: string | undefined;
 
-  IsReload: boolean;
+  IsReload: boolean | undefined;
 
   List: any;
 
-  DownloadData: string;
+  DownloadData: string | undefined;
 
-  DownloadFileName: string;
+  DownloadFileName: string | undefined;
 
-  DownloadContentType: string;
+  DownloadContentType: string | undefined;
 
-  IsScrollToTop: boolean;
+  IsScrollToTop: boolean | undefined;
 
-  NavigatePathAddHistory: string;
+  NavigatePathAddHistory: string | undefined;
 
-  Title: string;
+  Title: string | undefined;
 }
 
 export class CommandJson {
-  CommandEnum: number;
+  CommandEnum: number | undefined;
 
-  GridCellId: number;
+  GridCellId: number | undefined;
 
-  GridCellText: string;
+  GridCellText: string | undefined;
 
-  GridCellTextBase64: string;
+  GridCellTextBase64: string | undefined;
 
-  GridCellTextBase64FileName: string;
+  GridCellTextBase64FileName: string | undefined;
 
-  ComponentId: number;
+  ComponentId: number | undefined;
 
-  GridIsClickEnum : number;
+  GridIsClickEnum : number | undefined;
 
-  BootstrapNavbarButtonId: number;
+  BootstrapNavbarButtonId: number | undefined;
   
-  BulmaNavbarItemId: number;
+  BulmaNavbarItemId: number | undefined;
 
-  BulmaFilterText: string;
+  BulmaFilterText: string | undefined;
 
-  NavigatePath: string;
+  NavigatePath: string | undefined;
 
-  HtmlButtonId: string;
+  HtmlButtonId: string | undefined;
 
-  ResizeColumnIndex: number;
+  ResizeColumnIndex: number | undefined;
 
-  ResizeColumnWidthValue: number;
+  ResizeColumnWidthValue: number | undefined;
 }
 
 export class RequestJson {
-  RequestCount: number;
+  RequestCount: number | undefined;
 
-  ResponseCount: number;
+  ResponseCount: number | undefined;
 
-  BrowserNavigatePathPost: string;
+  BrowserNavigatePathPost: string | undefined;
 
-  CommandList: CommandJson[];
+  CommandList: CommandJson[] | undefined;
 }
 
 @Injectable({
@@ -103,17 +102,18 @@ export class DataService {
 
   public isRequestPending: boolean = false; // Request is in prgress.
 
-  requestJsonQueue: RequestJson // Put latest request in queue, if waiting for pending request.
+  requestJsonQueue: RequestJson | undefined // Put latest request in queue, if waiting for pending request.
 
   public renderer: Renderer2; // Used for BingMap
 
   constructor(
-      private httpClient: HttpClient, 
-      @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, 
-      @Inject(DOCUMENT) public document: Document, 
-      rendererFactory: RendererFactory2, 
-      private location: Location,
-      private titleService: Title) { 
+    private httpClient: HttpClient, // app.module.ts imports: [HttpClientModule
+    @Inject('jsonServerSideRendering') private jsonServerSideRendering: any, 
+    @Inject(DOCUMENT) public document: Document, 
+    rendererFactory: RendererFactory2, 
+    private location: Location,
+    private titleService: Title)  
+  { 
     this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
       // Render on SSR server
@@ -144,7 +144,7 @@ export class DataService {
 
   private fileDownload(jsonResponse: Json) { // See also: https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
     if (jsonResponse.DownloadFileName != null) {
-      const byteCharacters = atob(jsonResponse.DownloadData);
+      const byteCharacters = atob(jsonResponse.DownloadData || "");
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -171,8 +171,8 @@ export class DataService {
     }
   }
 
-  public update(commandJson: CommandJson): void {
-    var requestJson = <RequestJson> { CommandList: [] }
+  public update(commandJson: CommandJson | null): void {
+    var requestJson = <RequestJson> <unknown>{ CommandList: [] }
     if (commandJson != null) {
       requestJson.CommandList = [ commandJson ];
     }
@@ -201,9 +201,9 @@ export class DataService {
         JSON.stringify(requestJson),
         { withCredentials: true }
       )
-      .pipe(catchError((error: HttpErrorResponse) => {
+      .pipe(catchError((error: HttpErrorResponse) => { // import { catchError } from 'rxjs/operators';
         this.isRequestPending = false;
-        return throwError("app.json POST failed!");
+        return throwError("app.json POST failed!"); // import { throwError } from 'rxjs';
       }))
       .subscribe((data: Json) => {
         let jsonResponse = data;
@@ -218,9 +218,11 @@ export class DataService {
         } else {
           this.json.ResponseCount = jsonResponse.ResponseCount;
           let requestJsonQueue = this.requestJsonQueue;
-          this.requestJsonQueue = null;
+          this.requestJsonQueue =  undefined;
           this.isRequestPending = false;
-          this.update(requestJsonQueue.CommandList[0]); // Process latest request.
+          if (requestJsonQueue.CommandList != null) {
+            this.update(requestJsonQueue.CommandList[0]); // Process latest request.
+          }
         }
         this.json.IsServerSideRendering = false;
         if (this.json.IsReload) {
@@ -229,7 +231,7 @@ export class DataService {
           }, 1000); // Wait one second then reload.
         }
         if (this.json.NavigatePathAddHistory != null) {
-          this.location.go(this.json.NavigatePathAddHistory, "", this.json.NavigatePathAddHistory); // Put path into state because Angular does not handle traling slash in location.
+          this.location.go(this.json.NavigatePathAddHistory, "", this.json.NavigatePathAddHistory); // Put path into state because Angular does not handle traling slash in location. // import { Location } from '@angular/common';
         }
       });
     } else {

@@ -1,9 +1,9 @@
-# Angular 10 Client Application
+# Angular 11 Client Application
 
 ## Version Check
 ```cmd
-node --version # v12.13.0
-npm --version # 6.14.4
+node --version # v12.18.1
+npm --version # 6.14.5
 ng --version # Angular Angular CLI: 11.0.2
 npm run ng -- --version # Angular CLI: 11.0.2 run if no global Angular is installed. Run in folder Framework/Framework.Angular/application/
 npm list -g --depth 0 # List globally installed packages
@@ -77,16 +77,17 @@ npm run ng -- generate service data --skipTests=true
 npm run ng -- generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
 npm run ng -- generate component grid --skip-import --inlineStyle=true --skipTests=true
 npm run ng -- generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
+npm run ng -- generate component bulma-navbar --skip-import --inlineStyle=true --skipTests=true
 ```
 
 ## Application.Website
-* Create new folder src/Application.Website (Run later cli build to populate)
+* Create new folder src/Application.Website (Run later cli build anc cli start --watch to populate)
 * Add it to .gitignore /src/Application.Website
 ### Modify angular.json
-* Replace "sourceRoot": "src", with "sourceRoot": "src/Application.Website/Default",
-* Replace "index": "src/index.html", with "index": "src/Application.Website/Default/index.html",
+* Replace "sourceRoot": "src", with "sourceRoot": "src/Application.Website/dist",
+* Replace "index": "src/index.html", with "index": "src/Application.Website/dist/index.html",
 * Remove line "src/favicon.ico",
-* Replace "src/assets" with "src/Application.Website/Default"
+* Replace "src/assets" with "src/Application.Website/dist"
 
 ## Server Side Rendering (Universal)
 ### Running in Angular Environment

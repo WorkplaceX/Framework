@@ -1,87 +1,87 @@
 <table #table class="grid-table" (document:mousemove)="documentMouseMove($event)" (document:mouseup)="documentMouseUp($event)">
-  <colgroup>
-    <col *ngFor="let styleColumn of json.StyleColumnList; trackBy trackBy;" [ngStyle]="{'width': styleColumn.Width}">
-  </colgroup>
-  <!-- Row -->
-  <tr *ngFor="let styleRow of json.StyleRowList; index as rowIndex; trackBy trackBy;">
-    <!-- Cell -->
-    <td *ngFor="let cell of json.CellList | slice : rowIndex * json.StyleColumnList.length : (rowIndex + 1) * json.StyleColumnList.length; index as columnIndex; trackBy trackBy;" class="grid-td">
-      <!-- HeaderColumn -->
-      <div *ngIf="cell.CellEnum==4" class="grid-div th" (click)="clickSort(cell, $event);">
-        <div style="flex:1; overflow:hidden;">
-          <i *ngIf="cell.IsSort==false" class="fas fa-caret-up colorWhite"></i>
-          <i *ngIf="cell.IsSort==true" class="fas fa-caret-down colorWhite"></i>
-          {{ cell.ColumnText }}
+    <colgroup>
+      <col *ngFor="let styleColumn of json.StyleColumnList; trackBy trackBy;" [ngStyle]="{'width': styleColumn.Width}">
+    </colgroup>
+    <!-- Row -->
+    <tr *ngFor="let styleRow of json.StyleRowList; index as rowIndex; trackBy trackBy;">
+      <!-- Cell -->
+      <td *ngFor="let cell of json.CellList | slice : rowIndex * json.StyleColumnList.length : (rowIndex + 1) * json.StyleColumnList.length; index as columnIndex; trackBy trackBy;" class="grid-td">
+        <!-- HeaderColumn -->
+        <div *ngIf="$any(cell).CellEnum==4" class="grid-div th" (click)="clickSort(cell, $event);">
+          <div style="flex:1; overflow:hidden;">
+            <i *ngIf="$any(cell).IsSort==false" class="fas fa-caret-up colorWhite"></i>
+            <i *ngIf="$any(cell).IsSort==true" class="fas fa-caret-down colorWhite"></i>
+            {{ $any(cell).ColumnText }}
+          </div>
+          <div style="padding-left:2px;">
+            <i *ngIf="$any(cell).IsShowSpinner" class="fas fa-spinner fa-spin colorWhite"></i>
+            <i *ngIf="$any(cell).Description!=null" class="fas fa-info-circle colorWhite" title="{{ $any(cell).Description }}"></i>
+            <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
+          </div>
+  
+          <div class="gridSplitter" style="width:5px;" (click)="click($event)" (mousedown)="mouseDown(columnIndex, $event)">
+          </div>
         </div>
-        <div style="padding-left:2px;">
-          <i *ngIf="cell.IsShowSpinner" class="fas fa-spinner fa-spin colorWhite"></i>
-          <i *ngIf="cell.Description!=null" class="fas fa-info-circle colorWhite" title="{{ cell.Description }}"></i>
-          <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
+  
+        <!-- HeaderRow -->
+        <div *ngIf="$any(cell).CellEnum==5" class="grid-div">
+          <div style="flex:1; overflow:hidden;">
+            <label class="label">{{ $any(cell).ColumnText }}</label>
+          </div>
         </div>
-
-        <div class="gridSplitter" style="width:5px;" (click)="click($event)" (mousedown)="mouseDown(columnIndex, $event)">
+  
+        <!-- Row (Filter, Index, New) -->
+        <div *ngIf="$any(cell).CellEnum==1||$any(cell).CellEnum==2||$any(cell).CellEnum==3" class="grid-div gridRow" [ngClass]="{'gridRowFilter':$any(cell).CellEnum==1, 'gridRowIsSelect':$any(cell).IsSelect}">
+          <div *ngIf="$any(cell).HtmlLeft" style="display: flex; align-items: center; margin-right: 2px;">
+            <div [innerHTML]="$any(cell).HtmlLeft"></div>
+          </div>
+  
+          <div style="display:flex; flex-grow:1; flex-direction: column;" (click)="clickCell(cell, $event)">
+            <input autocomplete="nope" *ngIf="!$any(cell).IsPassword && !($any(cell).Html && !$any(cell).HtmlIsEdit)" [readonly]="$any(cell).IsReadOnly" style="flex-grow:1;" [ngClass]="{'textAlignCenter':$any(cell).Align==2, 'textAlignRight':$any(cell).Align==3}" type="text" [(ngModel)]="$any(cell).Text" placeholder="{{$any(cell).Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
+            <input autofocus="off" *ngIf="$any(cell).IsPassword && !($any(cell).Html && !$any(cell).HtmlIsEdit)" [readonly]="$any(cell).IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="$any(cell).Text" placeholder="{{$any(cell).Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
+            <div *ngIf="$any(cell).Html" style="flex-grow:1; display:flex; align-items:center;" [ngClass]="{'alignSelfCenter':$any(cell).Align==2, 'alignSelfFlexEnd':$any(cell).Align==3}" [innerHTML]="$any(cell).Html"></div>
+          </div>
+  
+          <div style="display: flex; align-items: center; margin-left:2px;">
+            <div *ngIf="$any(cell).HtmlRight" [innerHTML]="$any(cell).HtmlRight"></div>
+            <i *ngIf="$any(cell).IsReadOnly" class="fas fa-lock colorBlack"></i>
+            <i *ngIf="$any(cell).ErrorParse!=null" class="fas fa-exclamation-circle text-danger" title="{{ $any(cell).ErrorParse }}"></i>
+            <i *ngIf="$any(cell).ErrorSave!=null" class="fas fa-exclamation-circle text-danger" title="{{ $any(cell).ErrorSave }}"></i>
+            <i *ngIf="$any(cell).Warning!=null" class="fas fas fa-exclamation-triangle text-warning" title="{{ $any(cell).Warning }}"></i>
+            <i *ngIf="$any(cell).IsShowSpinner" class="fas fa-spinner fa-spin colorBlack"></i>
+            <i *ngIf="$any(cell).CellEnum==1" class="fas fa-search colorBlack" title="Search"></i>
+            <i *ngIf="$any(cell).CellEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
+            <i *ngIf="$any(cell).IsFileUpload" class="fas fa-file-upload colorBlack" style="cursor:pointer;" (click)="clickFileUpload(cell, $event);"></i>
+          </div>
         </div>
-      </div>
-
-      <!-- HeaderRow -->
-      <div *ngIf="cell.CellEnum==5" class="grid-div">
-        <div style="flex:1; overflow:hidden;">
-          <label class="label">{{ cell.ColumnText }}</label>
+  
+        <!-- Lookup -->
+        <div *ngIf="$any(cell).GridLookup" style="position:relative;">
+          <div style="position:absolute;width:100%">
+            <div data-Grid [json]="$any(cell).GridLookup" class="gridLookup"></div>
+          </div>
         </div>
-      </div>
-
-      <!-- Row (Filter, Index, New) -->
-      <div *ngIf="cell.CellEnum==1||cell.CellEnum==2||cell.CellEnum==3" class="grid-div gridRow" [ngClass]="{'gridRowFilter':cell.CellEnum==1, 'gridRowIsSelect':cell.IsSelect}">
-        <div *ngIf="cell.HtmlLeft" style="display: flex; align-items: center; margin-right: 2px;">
-          <div [innerHTML]="cell.HtmlLeft"></div>
-        </div>
-
-        <div style="display:flex; flex-grow:1; flex-direction: column;" (click)="clickCell(cell, $event)">
-          <input autocomplete="nope" *ngIf="!cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" [ngClass]="{'textAlignCenter':cell.Align==2, 'textAlignRight':cell.Align==3}" type="text" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
-          <input autofocus="off" *ngIf="cell.IsPassword && !(cell.Html && !cell.HtmlIsEdit)" [readonly]="cell.IsReadOnly" style="flex-grow:1;" type="password" [(ngModel)]="cell.Text" placeholder="{{cell.Placeholder}}" (focusout)="focusout(cell)" (focusin)="focus(cell)" (ngModelChange)="ngModelChange(cell)">
-          <div *ngIf="cell.Html" style="flex-grow:1; display:flex; align-items:center;" [ngClass]="{'alignSelfCenter':cell.Align==2, 'alignSelfFlexEnd':cell.Align==3}" [innerHTML]="cell.Html"></div>
-        </div>
-
-        <div style="display: flex; align-items: center; margin-left:2px;">
-          <div *ngIf="cell.HtmlRight" [innerHTML]="cell.HtmlRight"></div>
-          <i *ngIf="cell.IsReadOnly" class="fas fa-lock colorBlack"></i>
-          <i *ngIf="cell.ErrorParse!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorParse }}"></i>
-          <i *ngIf="cell.ErrorSave!=null" class="fas fa-exclamation-circle text-danger" title="{{ cell.ErrorSave }}"></i>
-          <i *ngIf="cell.Warning!=null" class="fas fas fa-exclamation-triangle text-warning" title="{{ cell.Warning }}"></i>
-          <i *ngIf="cell.IsShowSpinner" class="fas fa-spinner fa-spin colorBlack"></i>
-          <i *ngIf="cell.CellEnum==1" class="fas fa-search colorBlack" title="Search"></i>
-          <i *ngIf="cell.CellEnum==3" class="fas fa-plus" title="Add new data record" style="color:#FACC2E"></i>
-          <i *ngIf="cell.IsFileUpload" class="fas fa-file-upload colorBlack" style="cursor:pointer;" (click)="clickFileUpload(cell, $event);"></i>
-        </div>
-      </div>
-
-      <!-- Lookup -->
-      <div *ngIf="cell.GridLookup" style="position:relative;">
-        <div style="position:absolute;width:100%">
-          <div data-Grid [json]="cell.GridLookup" class="gridLookup"></div>
-        </div>
-      </div>
-    </td>
-  </tr>
-</table>
-
-<input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event)">
-
-<div #divGridClick *ngIf="json.IsHidePagination != true" class="colorBlue gridClick" [ngClass]="json.CssClass" onmousedown="return false;">
-  <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up (Alt + Wheel up)" (click)="clickGrid(1, $event);"></i>
-  <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down (Alt + Wheel down)" (click)="clickGrid(2, $event);"></i>
-  &nbsp;
-  <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left (Alt + Shift + Wheel up)" (click)="clickGrid(3, $event);"></i>
-  <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right (Alt + Shift + Wheel down)" (click)="clickGrid(4, $event);"></i>
-  &nbsp;
-  <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
-  <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
-  <i class="fas fa-th-large colorBlueHover pointer" title="Form" (click)="clickGrid(9, $event);"></i>
-  &nbsp;
-  <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
-  <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>
-  &nbsp;
-  <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
-  <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
-  <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>
-</div>
+      </td>
+    </tr>
+  </table>
+  
+  <input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event)">
+  
+  <div #divGridClick *ngIf="json.IsHidePagination != true" class="colorBlue gridClick" [ngClass]="json.CssClass" onmousedown="return false;">
+    <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up (Alt + Wheel up)" (click)="clickGrid(1, $event);"></i>
+    <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down (Alt + Wheel down)" (click)="clickGrid(2, $event);"></i>
+    &nbsp;
+    <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left (Alt + Shift + Wheel up)" (click)="clickGrid(3, $event);"></i>
+    <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right (Alt + Shift + Wheel down)" (click)="clickGrid(4, $event);"></i>
+    &nbsp;
+    <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
+    <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
+    <i class="fas fa-th-large colorBlueHover pointer" title="Form" (click)="clickGrid(9, $event);"></i>
+    &nbsp;
+    <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
+    <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>
+    &nbsp;
+    <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
+    <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
+    <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>
+  </div>
