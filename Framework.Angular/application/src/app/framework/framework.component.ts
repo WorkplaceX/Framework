@@ -16,6 +16,7 @@ import { CommandJson, DataService } from '../data.service';
     <div data-BulmaNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>
     <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
     <div data-Grid [ngClass]="json.CssClass" *ngSwitchCase="'Grid'" [json]=json></div>
+    <div data-Custom01 style="display:inline" *ngSwitchCase="'Custom01'" [json]=json></div>
   </ng-container>
   `
 })
