@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { DataService, CommandJson } from '../data.service';
+import { DataService, CommandJson, Json } from '../data.service';
 
 /* BootstrapNavbar */
 @Component({
@@ -13,7 +13,7 @@ export class BootstrapNavbarComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  @Input() json: any
+  @Input() json!: Json
 
   click(button: any) {
     button.IsShowSpinner = true;

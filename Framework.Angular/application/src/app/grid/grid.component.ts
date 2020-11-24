@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, Input, ElementRef } from '@angular/core';
-import { DataService, CommandJson } from '../data.service';
+import { DataService, CommandJson, Json, Cell } from '../data.service';
 
 /* Grid */
 @Component({
@@ -22,7 +22,7 @@ export class GridComponent implements OnInit {
     }
   }
 
-  @Input() json: any;
+  @Input() json!: Json;
 
   @ViewChild('table')
   table: ElementRef | undefined;
@@ -102,7 +102,7 @@ export class GridComponent implements OnInit {
 
   styleColumnList(): string[] {
     let result: string[] = [];
-    this.json.CellList.forEach((cell: { CellEnum: number; Width: string | null; }) => {
+    this.json.CellList!.forEach((cell: Cell) => {
       if (cell.CellEnum == 4){
         if (cell.Width == null) {
           result.push("minmax(0, 1fr)");
@@ -135,7 +135,7 @@ export class GridComponent implements OnInit {
 
   documentMouseMove(event: MouseEvent) {
     if (this.resizeColumnIndex != null) {
-      let styleColumn = this.json.StyleColumnList[this.resizeColumnIndex];
+      let styleColumn = this.json.StyleColumnList![this.resizeColumnIndex];
       let widthValue = styleColumn.WidthValue;
       if (this.resizeColumnWidthValue == null) {
         this.resizeColumnWidthValue = widthValue;
@@ -149,8 +149,8 @@ export class GridComponent implements OnInit {
       
       // ColumnWidthTotal
       let columnWidthTotal = 0;
-      for (let i = 0; i < this.json.StyleColumnList.length; i++) {
-        let widthValue = this.json.StyleColumnList[i].WidthValue;
+      for (let i = 0; i < this.json.StyleColumnList!.length; i++) {
+        let widthValue = this.json.StyleColumnList![i].WidthValue;
         if (i != this.resizeColumnIndex && widthValue != null) {
           columnWidthTotal += widthValue;
         }
@@ -160,7 +160,7 @@ export class GridComponent implements OnInit {
       }
 
       widthValue = columnWidthNew;
-      styleColumn.Width = widthValue + styleColumn.WidthUnit;
+      styleColumn.Width = widthValue + styleColumn.WidthUnit!;
       styleColumn.WidthValue = widthValue;
     }
   }
@@ -170,7 +170,7 @@ export class GridComponent implements OnInit {
       event.stopPropagation();
       let resizeColumnIndexLocal = this.resizeColumnIndex;
       this.resizeColumnIndex = undefined;
-      let widthValue = <number>this.json.StyleColumnList[resizeColumnIndexLocal].WidthValue;
+      let widthValue = <number>this.json.StyleColumnList![resizeColumnIndexLocal].WidthValue;
       this.dataService.update(<CommandJson> { CommandEnum: 20, ComponentId: this.json.Id, ResizeColumnIndex: resizeColumnIndexLocal, ResizeColumnWidthValue: widthValue });
     }
   }

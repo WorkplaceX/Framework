@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { CommandJson, DataService } from '../data.service';
+import { CommandJson, DataService, Json } from '../data.service';
 
 @Component({
   selector: '[data-BulmaNavbar]',
@@ -10,7 +10,7 @@ export class BulmaNavbarComponent implements OnInit {
   constructor(private dataService: DataService) { }
 
   @Input() 
-  json: any
+  json!: Json
 
   @ViewChild('burger') 
   burger: ElementRef | undefined;

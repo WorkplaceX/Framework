@@ -1,27 +1,27 @@
 import { Component, ElementRef, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { CommandJson, DataService } from '../data.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { CommandJson, DataService, Json } from '../data.service';
 
 /* Selector */
 @Component({
   selector: '[data-Selector]',
   template: `
   <ng-container [ngSwitch]="json.Type">
-    <div data-Page [ngClass]="json.CssClass" *ngSwitchCase="'Page'" [json]=json></div>
+    <div data-Page [ngClass]="json.CssClass!" *ngSwitchCase="'Page'" [json]=json></div>
     <div data-Button style="display:inline" *ngSwitchCase="'Button'" [json]=json></div>
     <div data-Html style="display:inline" *ngSwitchCase="'Html'" [json]=json></div>
-    <div data-Div [ngClass]="json.CssClass" *ngSwitchCase="'Div'" [json]=json></div>
-    <div data-DivContainer [ngClass]="json.CssClass" *ngSwitchCase="'DivContainer'" [json]=json></div>
-    <div data-BingMap [ngClass]="json.CssClass" *ngSwitchCase="'BingMap'" [json]=json></div>
-    <div data-BulmaNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>
-    <div data-BootstrapNavbar [ngClass]="json.CssClass" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
-    <div data-Grid [ngClass]="json.CssClass" *ngSwitchCase="'Grid'" [json]=json></div>
+    <div data-Div [ngClass]="json.CssClass!" *ngSwitchCase="'Div'" [json]=json></div>
+    <div data-DivContainer [ngClass]="json.CssClass!" *ngSwitchCase="'DivContainer'" [json]=json></div>
+    <div data-BingMap [ngClass]="json.CssClass!" *ngSwitchCase="'BingMap'" [json]=json></div>
+    <div data-BulmaNavbar [ngClass]="json.CssClass!" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>
+    <div data-BootstrapNavbar [ngClass]="json.CssClass!" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
+    <div data-Grid [ngClass]="json.CssClass!" *ngSwitchCase="'Grid'" [json]=json></div>
     <div data-Custom01 style="display:inline" *ngSwitchCase="'Custom01'" [json]=json></div>
   </ng-container>
   `
 })
 export class Selector {
-  @Input() json: any
+  @Input() json!: Json
 }
 
 /* Page */
@@ -32,7 +32,7 @@ export class Selector {
   `
 })
 export class Page {
-  @Input() json: any
+  @Input() json!: Json
 
   trackBy(index: any, item: any) {
     return item.TrackBy;
@@ -43,7 +43,7 @@ export class Page {
 @Component({
   selector: '[data-Button]',
   template: `
-  <button [ngClass]="json.CssClass" (click)="click();" [innerHtml]="json.TextHtml"></button>
+  <button [ngClass]="json.CssClass!" (click)="click();" [innerHtml]="json.TextHtml"></button>
   <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>  
   `
 })
@@ -51,7 +51,7 @@ export class Button {
   constructor(private dataService: DataService){
   }
 
-  @Input() json: any
+  @Input() json!: Json
 
   click(){
     this.json.IsShowSpinner = true;
@@ -63,21 +63,23 @@ export class Button {
 @Component({
   selector: '[data-Html]',
   template: `
-  <div #div style="display:inline" [ngClass]="json.CssClass" [innerHtml]="textHtml" (click)="click($event);"></div>
+  <div #div style="display:inline" [ngClass]="json.CssClass!" [innerHtml]="textHtml" (click)="click($event);"></div>
   <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>`
 })
 export class Html {
-  @Input() json: any
+  @Input() json!: Json
 
   constructor(private dataService: DataService, private sanitizer: DomSanitizer){
 
   }
 
-  textHtml: any;
+  textHtml: SafeHtml | undefined;
 
   ngOnChanges() {
     if (this.json.IsNoSanatize) {
-      this.textHtml = this.sanitizer.bypassSecurityTrustHtml(this.json.TextHtml);
+      if (this.json.TextHtml != null) {
+        this.textHtml = this.sanitizer.bypassSecurityTrustHtml(this.json.TextHtml);
+      }
     } else {
       this.textHtml = this.json.TextHtml;
     }
@@ -120,7 +122,7 @@ export class Html {
   `
 })
 export class Div {
-  @Input() json: any;
+  @Input() json!: Json;
 
   trackBy(index: any, item: any) {
     return item.TrackBy;
@@ -135,7 +137,7 @@ export class Div {
   `
 })
 export class DivContainer {
-  @Input() json: any;
+  @Input() json!: Json;
   
   trackBy(index: any, item: any) {
     return index; // or item.id
@@ -156,7 +158,7 @@ export class BingMap {
     this.dataService = dataService;
   }
 
-  @Input() json: any;
+  @Input() json!: Json;
   dataService: DataService;
 
   @ViewChild('map', { static: true}) 

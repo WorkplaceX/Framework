@@ -10,9 +10,13 @@ import { catchError } from 'rxjs/operators';
 declare var jsonBrowser: any; // Data from browser, sent by server on first request.
 
 export class Json { // AppJson
-  Id: number | undefined;
+  Id!: number;
 
   Name: string | undefined;
+  
+  Type: string | undefined;
+  
+  CssClass: string | undefined;
 
   Version: string | undefined;
 
@@ -49,6 +53,30 @@ export class Json { // AppJson
   NavigatePathAddHistory: string | undefined;
 
   Title: string | undefined;
+
+  CellList: Cell[] | undefined;
+
+  StyleColumnList: StyleColumn[] | undefined;
+
+  IsShowSpinner: boolean | undefined;
+
+  IsHidePagination: boolean | undefined;
+
+  StyleRowList: StyleRow[] | undefined;
+
+  TextHtml: string | undefined;
+
+  IsNoSanatize: boolean | undefined;
+
+  Key: string | undefined; // BingMap
+
+  BrandTextHtml: string | undefined; // BootstrapNavbar, BulmaNavbar
+
+  ItemStartList: any;
+
+  ItemEndList: any;
+
+  ButtonList: any;
 }
 
 export class CommandJson {
@@ -89,6 +117,62 @@ export class RequestJson {
   BrowserNavigatePathPost: string | undefined;
 
   CommandList: CommandJson[] | undefined;
+}
+
+export class Cell {
+  CellEnum!: number;
+
+  Width: string | undefined;
+
+  IsSort: boolean | undefined;
+
+  IsShowSpinner: boolean | undefined;
+
+  Description: string | undefined;
+
+  ColumnText: string | undefined;
+
+  IsSelect: boolean | undefined;
+
+  Html: string | undefined;
+
+  HtmlLeft: string | undefined;
+
+  HtmlRight: string | undefined;
+
+  IsPassword: boolean | undefined;
+
+  HtmlIsEdit: boolean | undefined;
+  
+  Align: number | undefined; // CellAnnotationAlignEnum
+  
+  Text: string | undefined;
+
+  IsReadOnly: boolean | undefined;
+
+  Placeholder: string | undefined;
+
+  ErrorParse: string | undefined;
+
+  ErrorSave: string | undefined;
+
+  Warning: string | undefined;
+
+  IsFileUpload: boolean | undefined;
+
+  GridLookup: any;
+}
+
+export class StyleRow {
+  
+}
+
+export class StyleColumn {
+  Width: string | undefined;
+
+  WidthValue: number | undefined;
+
+  WidthUnit: string | undefined;
 }
 
 @Injectable({
