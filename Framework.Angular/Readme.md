@@ -9,7 +9,7 @@ npm run ng -- --version # Angular CLI: 11.0.2 run if no global Angular is instal
 npm list -g --depth 0 # List globally installed packages
 ```
 
-## Azure
+## Version Check Azure
 Set node version in App Service Application Settings
 * WEBSITE_NODE_DEFAULT_VERSION 12.18.0
 
