@@ -12,6 +12,7 @@ npm list -g --depth 0 # List globally installed packages
 ## Azure
 Set node version in App Service Application Settings
 * WEBSITE_NODE_DEFAULT_VERSION 12.18.0
+
 For available node versions go to App Service Advanced Tools (Kudu). Got to CMD. Type CD .. Go to D:\Program Files\nodejs
 
 ## Setup Init
