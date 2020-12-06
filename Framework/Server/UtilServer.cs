@@ -7,6 +7,7 @@
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net.Http;
     using System.Runtime.InteropServices;
     using System.Text;
@@ -144,7 +145,7 @@
         }
 
         /// <summary>
-        /// Start Universal server. Detects Visual Studio environment.
+        /// Start Universal server.
         /// </summary>
         public static void StartUniversalServer()
         {
@@ -166,6 +167,14 @@
             info.Arguments = "Framework.Angular/server/main.js";
             info.UseShellExecute = true; // Open additional node window.
             info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
+
+            // Close running node.exe
+            foreach (var process in Process.GetProcesses().Where(item => item.MainWindowTitle.EndsWith("node.exe")))
+            {
+                process.Kill();
+            }
+
+            // Start node with Application.Server/Framework/Framework.Angular/server/main.js
             Process.Start(info);
         }
 

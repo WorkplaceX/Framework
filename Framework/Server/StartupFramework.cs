@@ -33,6 +33,7 @@
 
             if (UtilServer.IsIssServer == false)
             {
+                // Running in Visual Studio environment.
                 if (ConfigServer.Load().IsServerSideRendering)
                 {
                     UtilServer.StartUniversalServer();

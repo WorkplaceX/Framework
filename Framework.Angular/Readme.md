@@ -9,6 +9,11 @@ npm run ng -- --version # Angular CLI: 11.0.2 run if no global Angular is instal
 npm list -g --depth 0 # List globally installed packages
 ```
 
+## Azure
+Set node version in App Service Application Settings
+* WEBSITE_NODE_DEFAULT_VERSION 12.18.0
+For available node versions go to App Service Advanced Tools (Kudu). Got to CMD. Type CD .. Go to D:\Program Files\nodejs
+
 ## Setup Init
 Delete folder Framework/Framework.Angular/application/
 Push to new branch
