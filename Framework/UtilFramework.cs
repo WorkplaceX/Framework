@@ -38,7 +38,7 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 11.0.1
 
-                return "v3.47.03"; // Angular 11 Universal 10!
+                return "v3.47.04";
             }
         }
 

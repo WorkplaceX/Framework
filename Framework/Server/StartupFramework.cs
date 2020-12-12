@@ -49,6 +49,10 @@
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
 
+            // Enforce HTTPS in ASP.NET Core https://docs.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-5.0&tabs=visual-studio
+            applicationBuilder.UseHsts();
+            applicationBuilder.UseHttpsRedirection();
+
             applicationBuilder.Run(new Request().RunAsync);
         }
     }
