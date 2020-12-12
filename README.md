@@ -4,13 +4,12 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Framework to create database applications based on Angular 10 with server side rendering, ASP.NET Core 3.1 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
+Framework to create database applications based on Angular 11 with server side rendering, ASP.NET Core 5.0 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
 
 ## Getting started
 
 * Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
 * Get started with: [Application](https://github.com/WorkplaceX/Application) (Empty hello world application)
-* Documentation see: [Documentation](https://github.com/WorkplaceX/Framework/wiki) (wiki)
 * Project page: [WorkplaceX.org](http://workplacex.org)
 
 ## Project Folder Structure
@@ -28,19 +27,19 @@ node --version
 v12.18.1
 
 npm --version
-6.14.4
+6.14.5
 
 dotnet --version
-3.1.301
+5.0.101
 
 ng --version
-Angular CLI: 10.0.6
+Angular CLI: 11.0.3
 ```
 
 For Windows:
 ```cmd
 git --version
-git version 2.21.0.windows.1
+git version 2.29.2.windows.2
 
 $PSVersionTable.PSVersion
 Major  Minor  Patch  PreReleaseLabel BuildLabel
