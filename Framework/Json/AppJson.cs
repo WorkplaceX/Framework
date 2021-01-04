@@ -639,17 +639,28 @@
         }
     }
 
+    /// <summary>
+    /// Css framework to render for example generic class Alert.
+    /// </summary>
     public enum CssFrameworkEnum
     {
+        /// <summary>
+        /// No css framework is used. For example class Alert is not available.
+        /// See also: Framework/Framework.Cli/Template/Application.Website/LayoutEmpty
+        /// </summary>
         None = 0,
 
         /// <summary>
+        /// Bootstrap css framework is used.
         /// See also: https://getbootstrap.com/
+        /// See also: Framework/Framework.Cli/Template/Application.Website/LayoutBootstrap/
         /// </summary>
         Bootstrap = 1,
 
         /// <summary>
+        /// Bulma css framework is used.
         /// See also: https://bulma.io/
+        /// See also: Framework/Framework.Cli/Template/Application.Website/LayoutBulma/
         /// </summary>
         Bulma = 2
     }
