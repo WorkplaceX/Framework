@@ -13,7 +13,7 @@ node --version
 npm --version
 git --version
 git config --list
-git config --global init.defaultBranch main
+git config --global init.defaultBranch master
 
 # List globally installed packages
 npm list -g --depth 0
