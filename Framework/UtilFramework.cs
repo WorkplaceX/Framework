@@ -17,7 +17,7 @@ namespace Framework
     using System.Text.Json;
     using System.Web;
 
-    internal static class UtilFramework
+    public static class UtilFramework
     {
         /// <summary>
         /// Gets Version. This is the framework version.
@@ -38,14 +38,15 @@ namespace Framework
                 // npm run ng -- --version (Framework/Framework.Angular/application/)
                 // Angular CLI: 11.0.1
 
-                return "v3.47.04";
+                // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
+                return "v3.48.00"; 
             }
         }
 
         /// <summary>
         /// Gets time and pc name of Ci build. Value is set during build process.
         /// </summary>
-        public static string VersionBuild
+        internal static string VersionBuild
         {
             get
             {
@@ -67,7 +68,7 @@ namespace Framework
         /// <summary>
         /// Gets FolderName. This is the root folder name. Throws exception if running on IIS server. See also method: UtilServer.FolderNameContentRoot();
         /// </summary>
-        public static string FolderName
+        internal static string FolderName
         {
             get
             {
@@ -85,7 +86,7 @@ namespace Framework
         /// <param name="folderName">For example "Default/"</param>
         /// <param name="path">For example "/index.html"</param>
         /// <returns>Returns for example "Default/index.html"</returns>
-        public static string FolderNameParse(string folderName, string path)
+        internal static string FolderNameParse(string folderName, string path)
         {
             path = HttpUtility.UrlDecode(path); // For example "Hello%20World.pdf"
             string result = FolderNameParse(folderName);
@@ -98,7 +99,7 @@ namespace Framework
             return result;
         }
 
-        public static string FolderNameParse(string folderName)
+        internal static string FolderNameParse(string folderName)
         {
             if (UtilFramework.StringNull(folderName) == null)
             {
@@ -423,7 +424,7 @@ namespace Framework
         /// <summary>
         /// Returns type of for example Application.AppMain" or better "Application.AppMain, Application".
         /// </summary>
-        public static Type TypeFromName(string typeName)
+        internal static Type TypeFromName(string typeName)
         {
             if (!typeFromNameListCache.ContainsKey(typeName))
             {
@@ -537,7 +538,7 @@ namespace Framework
         /// <summary>
         /// Returns list of text chunks with max length of 80.
         /// </summary>
-        public static List<string> SplitChunk(string text, int lengthChunkMax = 80)
+        internal static List<string> SplitChunk(string text, int lengthChunkMax = 80)
         {
             List<string> result = new List<string>();
             int index = 0;
@@ -554,7 +555,7 @@ namespace Framework
         /// <summary>
         /// Gets FrameworkAssembly. See also class AppCli. There is AssemblyFramework, AssemblyFrameworkCli, AssemblyApplication, AssemblyApplicationCli and AssemblyApplicationDatabase.
         /// </summary>
-        public static Assembly AssemblyFramework
+        internal static Assembly AssemblyFramework
         {
             get
             {
@@ -565,7 +566,7 @@ namespace Framework
         /// <summary>
         /// Returns for example: ".jpg".
         /// </summary>
-        public static string FileNameExtension(string fileName)
+        internal static string FileNameExtension(string fileName)
         {
             var result = StringNull(Path.GetExtension(fileName));
             return result;
@@ -574,7 +575,7 @@ namespace Framework
         /// <summary>
         /// Split text in camel case blocks.
         /// </summary>
-        public class CamelCase
+        internal class CamelCase
         {
             public CamelCase(string text)
             {
