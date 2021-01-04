@@ -6,7 +6,8 @@
     using System.Linq;
 
     /// <summary>
-    /// Configuration used by all command cli.
+    /// Configuration used by all command cli. Values are stored in file ConfigCli.json. See also method ConfigCli.CopyConfigCliToConfigServer();
+    /// For default configuration see also method AppCli.InitConfigCli();
     /// </summary>
     public class ConfigCli
     {
@@ -153,9 +154,9 @@
         }
 
         /// <summary>
-        /// Copy from file ConfigCli.json to ConfigServer.json
+        /// Copy from file ConfigCli.json to ConfigServer.json. Selects values depending on current EnvironmentName.
         /// </summary>
-        public static void ConfigToServer()
+        internal static void CopyConfigCliToConfigServer()
         {
             // Console.WriteLine("Copy runtime specific values from ConfigCli to ConfigServer"); // There is also other values not needed for runtime like DeployAzureGitUrl.
             var configCli = ConfigCli.Load();
@@ -185,7 +186,7 @@
     }
 
     /// <summary>
-    /// Allows definition of DEV, TEST, PROD environments in ConfigCli.json file.
+    /// Definition of DEV, TEST, PROD environments in ConfigCli.json file.
     /// </summary>
     public class ConfigCliEnvironment
     {
@@ -216,7 +217,7 @@
     }
 
     /// <summary>
-    /// Include "external" website.
+    /// Include layout website.
     /// </summary>
     public class ConfigCliWebsite
     {

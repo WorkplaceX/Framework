@@ -84,7 +84,7 @@
         /// <param name="isIncludeApp">If true, Application assembly (with App class and derived custom logic) is included.</param>
         /// <param name="isIncludeFrameworkCli">If true, Framework.Cli assembly is included</param>
         /// <returns>List of assemblies.</returns>
-        public List<Assembly> AssemblyList(bool isIncludeApp = false, bool isIncludeFrameworkCli = false)
+        internal List<Assembly> AssemblyList(bool isIncludeApp = false, bool isIncludeFrameworkCli = false)
         {
             List<Assembly> result = new List<Assembly>
             {
@@ -293,9 +293,9 @@
         /// <summary>
         /// Copy ConfigCli.json to ConfigServer.json and validate ConnectionString exists.
         /// </summary>
-        private void ConfigToServer()
+        private void CopyConfigCliToConfigServer()
         {
-            ConfigCli.ConfigToServer();
+            ConfigCli.CopyConfigCliToConfigServer();
             var configCli = ConfigCli.Load();
             var environment = configCli.EnvironmentGet();
             if (UtilFramework.StringNull(environment.ConnectionStringFramework) == null || UtilFramework.StringNull(environment.ConnectionStringFramework) == null)
@@ -315,10 +315,10 @@
                 ConfigCli.Init(this);
                 var configCli = ConfigCli.Load();
                 ConfigCli.Save(configCli); // Reset ConfigCli.json
-                ConfigCli.ConfigToServer();
+                ConfigCli.CopyConfigCliToConfigServer();
                 CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
                 commandLineApplication.Execute(args);
-                ConfigToServer(); // Copy new values from ConfigCli.json to ConfigServer.json
+                CopyConfigCliToConfigServer(); // Copy new values from ConfigCli.json to ConfigServer.json
             }
             catch (Exception exception) // For example unrecognized option
             {
