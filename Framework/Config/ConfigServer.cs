@@ -18,9 +18,14 @@
         public string EnvironmentName { get; set; }
 
         /// <summary>
-        /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions.
+        /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions. Restart web server after value change!
         /// </summary>
         public bool IsUseDeveloperExceptionPage { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsUseHttpsRedirection. If true, http is redirected to https. By default this value is false. Restart web server after value change!
+        /// </summary>
+        public bool IsUseHttpsRedirection { get; set; }
 
         /// <summary>
         /// Gets or sets IsServerSideRendering. By default this value is true. Can be changed on the deployed server for trouble shooting.

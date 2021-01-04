@@ -165,6 +165,7 @@
             // Environment
             configServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
             configServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
+            configServer.IsUseHttpsRedirection = configCli.EnvironmentGet().IsUseHttpsRedirection;
 
             // ConnectionString
             configServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
@@ -199,6 +200,11 @@
         /// Gets or sets IsUseDeveloperExceptionPage. If true, show detailed exceptions. Restart web server after value change!
         /// </summary>
         public bool IsUseDeveloperExceptionPage { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsUseHttpsRedirection. If true, http is redirected to https. By default this value is false. Restart web server after value change!
+        /// </summary>
+        public bool IsUseHttpsRedirection { get; set; }
 
         /// <summary>
         /// Gets or sets ConnectionStringFramework. Can be different from ConnectionStringApplication, if framework relevant tables are stored on another database.

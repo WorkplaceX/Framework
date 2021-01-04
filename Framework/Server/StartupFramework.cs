@@ -31,16 +31,18 @@
         {
             UtilServer.ApplicationBuilder = applicationBuilder;
 
+            var configServer = ConfigServer.Load();
+
             if (UtilServer.IsIssServer == false)
             {
                 // Running in Visual Studio environment.
-                if (ConfigServer.Load().IsServerSideRendering)
+                if (configServer.IsServerSideRendering)
                 {
                     UtilServer.StartUniversalServer();
                 }
             }
 
-            if (ConfigServer.Load().IsUseDeveloperExceptionPage)
+            if (configServer.IsUseDeveloperExceptionPage)
             {
                 applicationBuilder.UseDeveloperExceptionPage();
             }
@@ -49,9 +51,12 @@
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
 
-            // Enforce HTTPS in ASP.NET Core https://docs.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-5.0&tabs=visual-studio
-            // applicationBuilder.UseHsts();
-            // applicationBuilder.UseHttpsRedirection();
+            if (configServer.IsUseHttpsRedirection)
+            {
+                // Enforce HTTPS in ASP.NET Core https://docs.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-5.0&tabs=visual-studio
+                applicationBuilder.UseHsts();
+                applicationBuilder.UseHttpsRedirection();
+            }
 
             applicationBuilder.Run(new Request().RunAsync);
         }
