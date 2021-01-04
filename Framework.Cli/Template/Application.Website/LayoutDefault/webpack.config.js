@@ -6,9 +6,6 @@ module.exports = [{
   output: {
     filename: 'main-layout.js'
   },
-  output: {
-    path: path.resolve(__dirname, 'dist'), /* Output */
-  },
   module: {
     rules: [
       {

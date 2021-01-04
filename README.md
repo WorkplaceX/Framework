@@ -58,8 +58,9 @@ ng update
 ng update --all
 ```
 
-* Framework.Cli/Template/Application.Website/MasterDefault/
-* Framework.Cli/Template/Application.Website/MasterEmpty/
+* Framework.Cli/Template/Application.Website/LayoutBulma/
+* Framework.Cli/Template/Application.Website/LayoutDefault/
+* Framework.Cli/Template/Application.Website/LayoutEmpty/
 ```cmd
 npm audit
 npm audit fix
