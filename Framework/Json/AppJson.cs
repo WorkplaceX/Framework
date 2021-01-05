@@ -647,6 +647,7 @@
         /// <summary>
         /// No css framework is used. For example class Alert is not available.
         /// See also: Framework/Framework.Cli/Template/Application.Website/LayoutEmpty
+        /// See also: Application.Website/LayoutEmpty/ (if applicable)
         /// </summary>
         None = 0,
 
@@ -654,6 +655,7 @@
         /// Bootstrap css framework is used.
         /// See also: https://getbootstrap.com/
         /// See also: Framework/Framework.Cli/Template/Application.Website/LayoutBootstrap/
+        /// See also: Application.Website/LayoutBootstrap/ (if applicable)
         /// </summary>
         Bootstrap = 1,
 
@@ -661,6 +663,7 @@
         /// Bulma css framework is used.
         /// See also: https://bulma.io/
         /// See also: Framework/Framework.Cli/Template/Application.Website/LayoutBulma/
+        /// See also: Application.Website/LayoutBulma/ (if applicable)
         /// </summary>
         Bulma = 2
     }

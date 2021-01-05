@@ -2051,6 +2051,24 @@
         public readonly bool IsNumber;
 
         /// <summary>
+        /// Convert database value to front end cell text for bool.
+        /// </summary>
+        private void CellTextFromValueBool(object value, ref string result)
+        {
+            if (value is bool valueBool)
+            {
+                if (valueBool)
+                {
+                    result = "Yes";
+                }
+                else
+                {
+                    result = "No";
+                }
+            }
+        }
+
+        /// <summary>
         /// Convert database value to front end cell text.
         /// </summary>
         /// <param name="value">Value is never null when this method is called.</param>
@@ -2058,6 +2076,29 @@
         protected virtual internal string CellTextFromValue(object value)
         {
             string result = value.ToString();
+            CellTextFromValueBool(value, ref result);
+            return result;
+        }
+
+        /// <summary>
+        /// Parse user entered text to database value for bool. Text is never null.
+        /// </summary>
+        private object CellTextParseBool(string text)
+        {
+            object result = null;
+            string textUpper = text?.ToUpper();
+            if (textUpper.StartsWith("Y") == true)
+            {
+                result = true;
+            }
+            if (textUpper.StartsWith("N") == true)
+            {
+                result = false;
+            }
+            if (result == null)
+            {
+                throw new Exception(string.Format("Text was not recognized as a valid yes, no value! ({0})", text));
+            }
             return result;
         }
 
@@ -2070,7 +2111,14 @@
             if (text != null)
             {
                 Type type = UtilFramework.TypeUnderlying(ValueType);
-                result = Convert.ChangeType(text, type, CultureInfo.InvariantCulture);
+                if (type == typeof(bool))
+                {
+                    result = CellTextParseBool(text);
+                }
+                else
+                {
+                    result = Convert.ChangeType(text, type, CultureInfo.InvariantCulture);
+                }
             }
             return result;
         }
