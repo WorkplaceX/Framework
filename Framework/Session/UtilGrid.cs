@@ -1246,7 +1246,7 @@
             var rowIndex = grid.RowListInternal.IndexOf(row);
             var rowState = grid.RowStateList.First(item => item.RowId == rowIndex + 1);
             var cell = grid.CellList.First(item => item.RowStateId == rowState.Id);
-            grid.ComponentOwner<AppJson>().RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, GridCellId = cell.Id });
+            grid.ComponentOwner<AppJson>().RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickRow, ComponentId = grid.Id, GridCellId = cell.Id });
         }
 
         /// <summary>
@@ -1308,7 +1308,7 @@
                         {
                             GridLookupToGridDest(grid, out var gridDest, out _, out _, out var cellDest);
                             // TODO Use command queue
-                            appJson.RequestJson = new RequestJson(new CommandJson { CommandEnum = CommandEnum.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
+                            appJson.RequestJson = new RequestJson(new CommandJson { CommandEnum = CommandEnum.GridCellIsModify, ComponentId = gridDest.Id, GridCellId = cellDest.Id, GridCellText = result.Text, GridCellTextIsLookup = true });
 
                             await ProcessCellIsModify(appJson);
                         }

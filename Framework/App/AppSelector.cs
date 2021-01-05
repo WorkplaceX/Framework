@@ -116,7 +116,6 @@
                 requestJson.Origin = RequestOrigin.Browser;
                 foreach (var command in requestJson.CommandList)
                 {
-                    command.Origin = RequestOrigin.Browser;
                     command.GridCellText = UtilFramework.StringNull(command.GridCellText); // Sanitize incomming request.
                 }
             }

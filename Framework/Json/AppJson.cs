@@ -95,11 +95,6 @@
     {
         public CommandEnum CommandEnum { get; set; }
 
-        /// <summary>
-        /// Gets or sets Origin. Command sent by browser or created by server.
-        /// </summary>
-        public RequestOrigin Origin { get; set; }
-
         public int GridCellId { get; set; }
 
         public int RowStateId { get; set; }
@@ -936,7 +931,6 @@
         {
             this.RequestJson.CommandAdd(new CommandJson { 
                 CommandEnum = CommandEnum.NavigatePost, 
-                Origin = RequestOrigin.Server, 
                 ComponentId = Id, 
                 NavigatePath = navigatePath, 
                 NavigatePathIsAddHistory = isAddHistory });

@@ -245,7 +245,7 @@ namespace Framework.Json.Bulma
                 // User clicked navbar button
                 if (navbarItem.ItemEnum == BulmaNavbarItemEnum.Text)
                 {
-                    appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickRow, Origin = RequestOrigin.Server, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId });
+                    appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickRow, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId });
                 }
 
                 // User changed navbar filter text
@@ -257,7 +257,7 @@ namespace Framework.Json.Bulma
                     var column = grid.ColumnList.Single(item => item.FieldNameCSharp == navbarItem.FilterFieldNameCSharp);
                     var cell = grid.CellList.Single(item => item.RowStateId == rowStateId && item.ColumnId == column.Id && item.CellEnum == GridCellEnum.Filter);
 
-                    appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId, GridCellId = cell.Id, GridCellText = filterText });
+                    appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridCellIsModify, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId, GridCellId = cell.Id, GridCellText = filterText });
                 }
             }
         }
