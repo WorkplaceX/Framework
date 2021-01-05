@@ -462,19 +462,19 @@
         }
 
         /// <summary>
+        /// Returns list of all child components recursive including this of type T.
+        /// </summary>
+        public static List<T> ComponentListAll<T>(this ComponentJson component) where T : ComponentJson
+        {
+            return component.ComponentListAll().OfType<T>().ToList();
+        }
+
+        /// <summary>
         /// Returns all child components of type T.
         /// </summary>
         public static List<T> ComponentList<T>(this ComponentJson component) where T : ComponentJson
         {
-            var result = new List<T>();
-            foreach (var item in component.List)
-            {
-                if (UtilFramework.IsSubclassOf(item.GetType(), typeof(T)))
-                {
-                    result.Add((T)item);
-                }
-            }
-            return result;
+            return component.List.OfType<T>().ToList();
         }
 
         public enum PageShowEnum
@@ -482,17 +482,12 @@
             None = 0,
 
             /// <summary>
-            /// Add page to sibling pages.
-            /// </summary>
-            Default = 1,
-
-            /// <summary>
-            /// Remove sibling pages.
+            /// Add page and remove sibling pages.
             /// </summary>
             SiblingRemove = 1,
 
             /// <summary>
-            /// Hide sibling pages and keep their state.
+            /// Add page and hide sibling pages and keep their state.
             /// </summary>
             SiblingHide = 2,
         }
@@ -500,7 +495,7 @@
         /// <summary>
         /// Shows page or creates new one if it does not yet exist. Invokes also page init async.
         /// </summary>
-        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, T page, PageShowEnum pageShowEnum = PageShowEnum.Default, Action<T> init = null) where T : Page
+        public static async Task<T> ComponentPageShowAsync<T>(this ComponentJson owner, T page, PageShowEnum pageShowEnum = PageShowEnum.SiblingRemove, Action<T> init = null) where T : Page
         {
             T result = page;
             if (page != null && page.IsRemoved == false)
@@ -1220,9 +1215,9 @@
         /// <summary>
         /// Load data into grid. Override method Page.GridQuery(); to define query. It's also called to reload data.
         /// </summary>
-        public async Task LoadAsync()
+        public Task LoadAsync()
         {
-            await UtilGrid.LoadAsync(this);
+            return UtilGrid.LoadAsync(this);
         }
 
         /// <summary>

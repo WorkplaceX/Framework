@@ -595,9 +595,14 @@
         /// <summary>
         /// Load (full) data grid with config.
         /// </summary>
+        /// <param name="query">Query for rows. If null, only config is loaded.</param>
         private static async Task LoadFullAsync(Grid grid, IQueryable query)
         {
-            UtilFramework.Assert(grid.TypeRow == query.ElementType);
+            if (query != null)
+            {
+                UtilFramework.Assert(grid.TypeRow == query.ElementType);
+            }
+            
             // Get config grid and field query
             string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
             Grid.QueryConfigResult queryConfigResult;
@@ -622,7 +627,12 @@
                 grid.ConfigGridList = grid.ConfigGridList.Where(item => item.ConfigName == queryConfigResult.ConfigName).ToList();
             }
             var configGrid = ConfigGrid(grid);
-            query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
+
+            // Load row
+            if (query != null)
+            {
+                query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
+            }
 
             // Load config field (Task)
             var configFieldListTask = Task.FromResult(new List<FrameworkConfigFieldIntegrate>());
@@ -632,9 +642,17 @@
             }
 
             // Load row (Task)
-            var rowListTask = query.QueryExecuteAsync();
+            var rowListTask = query?.QueryExecuteAsync();
 
-            await Task.WhenAll(configFieldListTask, rowListTask); // Load config field and row in parallel
+            // Load config field and row in parallel
+            if (rowListTask == null)
+            {
+                await Task.WhenAll(configFieldListTask); 
+            }
+            else
+            {
+                await Task.WhenAll(configFieldListTask, rowListTask);
+            }
 
             // Load config field
             grid.ConfigFieldList = configFieldListTask.Result;
@@ -642,7 +660,10 @@
             grid.ConfigFieldList = grid.ConfigFieldList.Where(item => item.ConfigName == queryConfigResult.ConfigName).ToList();
 
             // RowList
-            grid.RowListInternal = rowListTask.Result;
+            if (query != null)
+            {
+                grid.RowListInternal = rowListTask.Result;
+            }
 
             // Truncate
             grid.TruncateInternal(grid.RowListInternal);
@@ -751,7 +772,7 @@
         }
 
         /// <summary>
-        /// Load or reload data grid.
+        /// Load or reload data grid and (re)render.
         /// </summary>
         public static async Task LoadAsync(Grid grid)
         {
@@ -767,6 +788,18 @@
                 query = gridDest.LookupQueryInternal(rowDest, fieldNameCSharpDest, cellDest.Text);
             }
             await LoadAsync(grid, query, isRowSelectFirst);
+        }
+
+        /// <summary>
+        /// Load or reload data grid configuration only. For example after config change. See also class PageConfigGrid.
+        /// </summary>
+        internal static async Task LoadConfigOnlyAsync(Grid grid)
+        {
+            await LoadFullAsync(grid, null);
+
+            grid.CellList = new List<GridCell>();
+
+            Render(grid);
         }
 
         /// <summary>

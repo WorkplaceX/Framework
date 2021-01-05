@@ -1,18 +1,19 @@
 ﻿namespace Framework.Json
 {
+    using Database.dbo;
+    using Framework.DataAccessLayer;
+    using Framework.Session;
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Database.dbo;
-    using Framework.DataAccessLayer;
 
     /// <summary>
     /// Page to configure data grid and columns.
     /// </summary>
     public class PageConfigGrid : PageModal
     {
-        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp) 
-            : base(owner) 
+        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp)
+            : base(owner)
         {
             TableNameCSharp = tableNameCSharp;
             FieldNameCSharp = fieldNameCSharp;
@@ -24,10 +25,10 @@
 
         public override async Task InitAsync()
         {
-            new Html(DivHeader) { TextHtml = "<h1>Config</h1>" };
-            new Html(DivBody) { TextHtml = "<h2>Config Grid</h2>" };
+            _ = new Html(DivHeader) { TextHtml = "<h1>Config</h1>" };
+            _ = new Html(DivBody) { TextHtml = "<h2>Config Grid</h2>" };
             GridConfigGrid = new GridConfigGrid(DivBody);
-            new Html(DivBody) { TextHtml = "<h2>Config Field</h2>" };
+            _ = new Html(DivBody) { TextHtml = "<h2>Config Field</h2>" };
             GridConfigField = new GridConfigField(DivBody);
 
             await GridConfigGrid.LoadAsync();
@@ -42,23 +43,24 @@
 
         public GridConfigField GridConfigField;
 
-        private async Task<FrameworkConfigGridDisplay> GridConfigGridReload(Row row)
+        /// <summary>
+        /// User clicked close button. Reload grids with new config.
+        /// </summary>
+        protected internal override async Task ProcessAsync()
         {
-            var rowDisplay = (FrameworkConfigGridDisplay)row;
-            var result = (await Data.Query<FrameworkConfigGridDisplay>().Where(
-                item => item.TableId == rowDisplay.TableId && 
-                item.ConfigName == rowDisplay.ConfigName).QueryExecuteAsync()).Single();
-            return result;
-        }
+            if (ButtonClose.IsClick)
+            {
+                foreach (var grid in this.ComponentOwner<AppJson>().ComponentListAll<Grid>())
+                {
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
+                    if (TableNameCSharp == tableNameCSharp)
+                    {
+                        await UtilGrid.LoadConfigOnlyAsync(grid);
+                    }
+                }
+            }
 
-        private async Task<FrameworkConfigFieldDisplay> GridConfigFieldReload(FrameworkConfigFieldDisplay row)
-        {
-            var result = (await Data.Query<FrameworkConfigFieldDisplay>().Where(
-                item => item.ConfigGridTableId == row.ConfigGridTableId &&
-                item.ConfigGridConfigName == row.ConfigGridConfigName &&
-                item.FieldId == row.FieldId &&
-                item.ConfigFieldInstanceName == row.ConfigFieldInstanceName).QueryExecuteAsync()).Single();
-            return result;
+            await base.ProcessAsync();
         }
     }
 
@@ -74,7 +76,7 @@
             }
         }
 
-        private async Task<FrameworkConfigGridDisplay> Reload(FrameworkConfigGridDisplay row)
+        private static async Task<FrameworkConfigGridDisplay> Reload(FrameworkConfigGridDisplay row)
         {
             var result = (await Data.Query<FrameworkConfigGridDisplay>().Where(
                 item => item.TableId == row.TableId &&
@@ -174,7 +176,7 @@
             }
         }
 
-        private async Task<FrameworkConfigFieldDisplay> Reload(FrameworkConfigFieldDisplay row)
+        private static async Task<FrameworkConfigFieldDisplay> Reload(FrameworkConfigFieldDisplay row)
         {
             var result = (await Data.Query<FrameworkConfigFieldDisplay>().Where(
                 item => item.ConfigGridTableId == row.ConfigGridTableId &&
