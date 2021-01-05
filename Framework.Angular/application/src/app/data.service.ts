@@ -62,6 +62,8 @@ export class Json { // AppJson
 
   IsHidePagination: boolean | undefined;
 
+  IsShowConfigDeveloper: boolean | undefined;
+
   StyleRowList: StyleRow[] | undefined;
 
   TextHtml: string | undefined;

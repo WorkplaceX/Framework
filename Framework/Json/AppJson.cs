@@ -687,6 +687,37 @@
         public CssFrameworkEnum CssFrameworkEnum { get; set; }
 
         /// <summary>
+        /// Returns settings for currently logged in user. Used for example by class Grid to determine if developer is logged in to configure data grid.
+        /// </summary>
+        protected virtual void Setting(SettingArgs args, SettingResult result)
+        {
+
+        }
+
+        public class SettingArgs
+        {
+            /// <summary>
+            /// Gets Grid. Settings for this grid are requested.
+            /// </summary>
+            public Grid Grid { get; internal set; }
+        }
+
+        public class SettingResult
+        {
+            /// <summary>
+            /// Gets or sets IsGridShowConfigDeveloper. If true, grid shows config developer (coffee icon).
+            /// </summary>
+            public bool IsGridShowConfigDeveloper { get; set; }
+        }
+
+        internal static SettingResult SettingInternal(ComponentJson component, SettingArgs args)
+        {
+            var result = new SettingResult();
+            component.ComponentOwner<AppJson>()?.Setting(args, result);
+            return result;
+        }
+
+        /// <summary>
         /// Returns NamingConvention for app related sql tables.
         /// </summary>
         internal virtual NamingConvention NamingConventionApp()
@@ -1269,6 +1300,11 @@
         /// Gets or sets IsHidePagination. If true, data grid pagination is not shown.
         /// </summary>
         internal bool IsHidePagination;
+
+        /// <summary>
+        /// Gets or sets IsShowConfigDeveloper. If true, config developer button (coffee icon) is shown to configure data grid.
+        /// </summary>
+        internal bool IsShowConfigDeveloper;
 
         /// <summary>
         /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.
@@ -2689,27 +2725,27 @@
         /// <summary>
         /// Show data grid in table mode.
         /// </summary>
-        ModeTable=7,
+        ModeTable = 7,
 
         /// <summary>
         /// Show data grid in stack mode.
         /// </summary>
-        ModeStack=8,
+        ModeStack = 8,
 
         /// <summary>
         /// Show data grid in form mode.
         /// </summary>
-        ModeForm=9,
+        ModeForm = 9,
 
         /// <summary>
         /// Download data rows as Excel (*.xlsx) file.
         /// </summary>
-        ExcelDownload=10,
+        ExcelDownload = 10,
 
         /// <summary>
         /// Upload data rows as Excel (*.xlsx) file.
         /// </summary>
-        ExcelUpload=11,
+        ExcelUpload = 11,
 
         /// <summary>
         /// Clear filter and reload data rows from database.
@@ -2720,6 +2756,11 @@
         /// Open data grid config dialog.
         /// </summary>
         Config = 6,
+
+        /// <summary>
+        /// Open data grid config dialog for developer. User clicked grid (coffee icon).
+        /// </summary>
+        ConfigDeveloper = 12,
     }
 
     public class Html : ComponentJson

@@ -67,21 +67,25 @@
   
   <input #inputFileUpload type="file" hidden (change)="changeInputFileUpload($event)">
   
-  <div #divGridClick *ngIf="json.IsHidePagination != true" class="colorBlue gridClick" [ngClass]="json.CssClass!" onmousedown="return false;">
-    <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up (Alt + Wheel up)" (click)="clickGrid(1, $event);"></i>
-    <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down (Alt + Wheel down)" (click)="clickGrid(2, $event);"></i>
-    &nbsp;
-    <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left (Alt + Shift + Wheel up)" (click)="clickGrid(3, $event);"></i>
-    <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right (Alt + Shift + Wheel down)" (click)="clickGrid(4, $event);"></i>
-    &nbsp;
-    <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
-    <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
-    <i class="fas fa-th-large colorBlueHover pointer" title="Form" (click)="clickGrid(9, $event);"></i>
-    &nbsp;
-    <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
-    <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>
-    &nbsp;
-    <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
-    <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
+  <div *ngIf="!json.IsHidePagination || json.IsShowConfigDeveloper" #divGridClick class="colorBlue gridClick" [ngClass]="json.CssClass!" onmousedown="return false;">
+    <span *ngIf="!json.IsHidePagination" >
+      <i class="fas fa-chevron-circle-up colorBlueHover pointer" title="Page up (Alt + Wheel up)" (click)="clickGrid(1, $event);"></i>
+      <i class="fas fa-chevron-circle-down colorBlueHover pointer" title="Page down (Alt + Wheel down)" (click)="clickGrid(2, $event);"></i>
+      &nbsp;
+      <i class="fas fa-chevron-circle-left colorBlueHover pointer" title="Navigate left (Alt + Shift + Wheel up)" (click)="clickGrid(3, $event);"></i>
+      <i class="fas fa-chevron-circle-right colorBlueHover pointer" title="Navigate right (Alt + Shift + Wheel down)" (click)="clickGrid(4, $event);"></i>
+      &nbsp;
+      <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
+      <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
+      <i class="fas fa-th-large colorBlueHover pointer" title="Form" (click)="clickGrid(9, $event);"></i>
+      &nbsp;
+      <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
+      <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>
+      &nbsp;
+      <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
+      <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
+      &nbsp;
+    </span>
+    <i *ngIf="json.IsShowConfigDeveloper" class="fas fa-coffee colorBlueHover pointer" title="Developer" (click)="clickGrid(12, $event);"></i>
     <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>
   </div>

@@ -258,7 +258,6 @@ namespace Framework.Json.Bulma
                     var cell = grid.CellList.Single(item => item.RowStateId == rowStateId && item.ColumnId == column.Id && item.CellEnum == GridCellEnum.Filter);
 
                     appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridCellIsModify, Origin = RequestOrigin.Server, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId, GridCellId = cell.Id, GridCellText = filterText });
-
                 }
             }
         }

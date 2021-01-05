@@ -561,6 +561,9 @@
             // IsHidePagination
             grid.IsHidePagination = !(configGrid?.IsShowPagination).GetValueOrDefault(true);
 
+            // IsShowConfigDeveloper
+            grid.IsShowConfigDeveloper = AppJson.SettingInternal(grid, new AppJson.SettingArgs { Grid = grid }).IsGridShowConfigDeveloper;
+
             // Preserve cell in ErrorParse or ErrorSave state
             foreach (var cellLocal in cellList.Values)
             {
@@ -1449,7 +1452,7 @@
             if (UtilSession.Request(appJson, CommandEnum.GridIsClickEnum, out CommandJson commandJson, out Grid grid))
             {
                 // Grid config
-                if (commandJson.GridIsClickEnum == GridIsClickEnum.Config)
+                if (commandJson.GridIsClickEnum == GridIsClickEnum.Config || commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper)
                 {
                     if (grid.TypeRow != null) // Do not show config if for example no query is defined for data grid.
                     {
