@@ -162,7 +162,7 @@
         }
 
         /// <summary>
-        /// Override this method to change default cli configuration.
+        /// Override this method to define default cli configuration. This method is called if file ConfigCli.json does not yet exist.
         /// </summary>
         protected virtual internal void InitConfigCli(ConfigCli configCli)
         {
