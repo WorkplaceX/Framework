@@ -1,6 +1,7 @@
 ﻿namespace Framework.Session
 {
     using Database.dbo;
+    using DatabaseIntegrate.dbo;
     using Framework.DataAccessLayer;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
@@ -1501,7 +1502,12 @@
                         Page page = grid.ComponentOwner<Page>();
 
                         // Show data grid config in developer config (mode) if user clicked developer button.
-                        var configName = commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper ? "Developer" : null;
+                        string configName = null;
+                        if (commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper)
+                        {
+                            // Gets Strongly typed name "Developer"
+                            configName = FrameworkConfigGridIntegrateFramework.IdEnum.dboFrameworkConfigFieldDisplayDeveloper.Row().ConfigName;
+                        }
 
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
                         var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, configName);

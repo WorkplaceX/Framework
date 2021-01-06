@@ -7,24 +7,6 @@ namespace DatabaseIntegrate.dbo
     using System.Globalization;
     using Database.dbo;
 
-    public static class FrameworkConfigGridIntegrateFrameworkCli
-    {
-        public static List<FrameworkConfigGridIntegrate> RowList
-        {
-            get
-            {
-                var result = new List<FrameworkConfigGridIntegrate>
-                {
-                    new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigFieldDisplay; ", TableId = 0, TableIdName = "dbo.FrameworkConfigFieldDisplay", TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
-                    new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigFieldDisplay; Developer", TableId = 0, TableIdName = "dbo.FrameworkConfigFieldDisplay", TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = "Developer", RowCountMax = null, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
-                    new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigGridDisplay; ", TableId = 0, TableIdName = "dbo.FrameworkConfigGridDisplay", TableNameCSharp = "dbo.FrameworkConfigGridDisplay", ConfigName = null, RowCountMax = null, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
-                    new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigGridDisplay; Developer", TableId = 0, TableIdName = "dbo.FrameworkConfigGridDisplay", TableNameCSharp = "dbo.FrameworkConfigGridDisplay", ConfigName = "Developer", RowCountMax = null, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
-                };
-                return result;
-            }
-        }
-    }
-
     public static class FrameworkConfigFieldIntegrateFrameworkCli
     {
         public static List<FrameworkConfigFieldIntegrate> RowList

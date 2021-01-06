@@ -108,7 +108,7 @@ namespace Framework.Cli
                     if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli")
                     {
                         var typeCliExternal = appCli.AssemblyApplicationCli.GetType(type.FullName);
-                        var propertyInfo = typeCliExternal.GetProperty(nameof(FrameworkConfigGridIntegrateFrameworkCli.RowList));
+                        var propertyInfo = typeCliExternal.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
                         var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                         rowList.AddRange(rowApplicationCliList);
                     }

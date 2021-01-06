@@ -342,13 +342,13 @@
         {
             // FrameworkConfigGridIntegrate
             {
-                var rowList = FrameworkConfigGridIntegrateFrameworkCli.RowList;
+                var rowList = FrameworkConfigGridIntegrateFramework.RowList;
 
                 // Read FrameworkConfigGridIntegrate.RowListList from Application.Cli project.
                 string nameCli = "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli"; // See also method GenerateCSharpTableNameClass();
                 var typeCli = AssemblyApplicationCli.GetType(nameCli);
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
-                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridIntegrateFrameworkCli.RowList));
+                PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
                 var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                 rowList.AddRange(rowApplicationCliList);
 
@@ -504,7 +504,7 @@
                     rowFilterList = rowFilterList.OrderBy(item => item.IdName);
                     result.Add(
                         isFrameworkDb: true,
-                        isApplication: false,
+                        isApplication: true, // Make FrameworkConfigGrid available in application insted of cli. Enum can be used for example to get strongly typed ConfigName.
                         typeRow: typeof(FrameworkConfigGridIntegrate),
                         query: rowFilterList
                     );
