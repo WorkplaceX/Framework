@@ -8,7 +8,7 @@
       <td *ngFor="let cell of json.CellList | slice : rowIndex * json.StyleColumnList!.length : (rowIndex + 1) * json.StyleColumnList!.length; index as columnIndex; trackBy trackBy;" class="grid-td">
         <!-- HeaderColumn -->
         <div *ngIf="cell.CellEnum==4" class="grid-div th" (click)="clickSort(cell, $event);">
-          <div style="flex:1; overflow:hidden;">
+          <div style="flex:1; overflow:hidden;" title="{{cell.ColumnText}}">
             <i *ngIf="cell.IsSort==false" class="fas fa-caret-up colorWhite"></i>
             <i *ngIf="cell.IsSort==true" class="fas fa-caret-down colorWhite"></i>
             {{ cell.ColumnText }}
@@ -16,7 +16,7 @@
           <div style="padding-left:2px;">
             <i *ngIf="cell.IsShowSpinner" class="fas fa-spinner fa-spin colorWhite"></i>
             <i *ngIf="cell.Description!=null" class="fas fa-info-circle colorWhite" title="{{ cell.Description }}"></i>
-            <i class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
+            <i *ngIf="json.IsShowConfig" class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
           </div>
   
           <div class="gridSplitter" style="width:5px;" (click)="click($event)" (mousedown)="mouseDown(columnIndex, $event)">
@@ -82,7 +82,7 @@
       <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
       <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>
       &nbsp;
-      <i class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
+      <i *ngIf="json.IsShowConfig" class="fas fa-cog colorBlueHover pointer" title="Config data grid" (click)="clickGrid(6, $event);"></i>
       <i class="fas fa-sync colorBlueHover pointer" title="Reload data" (click)="clickGrid(5, $event);"></i>
       &nbsp;
     </span>

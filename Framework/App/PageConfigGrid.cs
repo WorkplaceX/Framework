@@ -12,16 +12,28 @@
     /// </summary>
     public class PageConfigGrid : PageModal
     {
-        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp)
+        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp, string configName)
             : base(owner)
         {
             TableNameCSharp = tableNameCSharp;
             FieldNameCSharp = fieldNameCSharp;
+            ConfigName = configName;
         }
 
-        public string TableNameCSharp { get; set; }
+        /// <summary>
+        /// Gets TableNameCSharp. This is the table name for which this page is for.
+        /// </summary>
+        public string TableNameCSharp { get; }
 
-        public string FieldNameCSharp { get; set; }
+        /// <summary>
+        /// Gets FieldNameCSharp. This is the field name for which this page is for. If null, all fields are shown.
+        /// </summary>
+        public string FieldNameCSharp { get; }
+
+        /// <summary>
+        /// Gets ConfigName. This is the data grid ConfigName for GridConfigGrid and GridConfigField.
+        /// </summary>
+        public string ConfigName { get; }
 
         public override async Task InitAsync()
         {
@@ -90,6 +102,11 @@
             {
                 result.Query = Data.Query<FrameworkConfigGridDisplay>().Where(item => item.TableNameCSharp == TableNameCSharp);
             }
+        }
+
+        protected override void QueryConfig(QueryConfigArgs args, QueryConfigResult result)
+        {
+            result.ConfigName = this.ComponentOwner<PageConfigGrid>().ConfigName;
         }
 
         /// <summary>
@@ -195,6 +212,11 @@
                 result.Query = result.Query.Where(item => item.FieldFieldNameCSharp == FieldNameCSharp);
             }
             result.Query = result.Query.OrderBy(item => item.FieldFieldSort);
+        }
+
+        protected override void QueryConfig(QueryConfigArgs args, QueryConfigResult result)
+        {
+            result.ConfigName = this.ComponentOwner<PageConfigGrid>().ConfigName;
         }
 
         protected override async Task UpdateAsync(UpdateArgs args, UpdateResult result)

@@ -561,8 +561,10 @@
             // IsHidePagination
             grid.IsHidePagination = !(configGrid?.IsShowPagination).GetValueOrDefault(true);
 
-            // IsShowConfigDeveloper
-            grid.IsShowConfigDeveloper = AppJson.SettingInternal(grid, new AppJson.SettingArgs { Grid = grid }).IsGridShowConfigDeveloper;
+            // IsShowConfig
+            var settingResult = AppJson.SettingInternal(grid, new AppJson.SettingArgs { Grid = grid });
+            grid.IsShowConfig = settingResult.GridIsShowConfig;
+            grid.IsShowConfigDeveloper = settingResult.GridIsShowConfigDeveloper;
 
             // Preserve cell in ErrorParse or ErrorSave state
             foreach (var cellLocal in cellList.Values)
@@ -995,13 +997,18 @@
         {
             if (UtilSession.Request(appJson, CommandEnum.GridIsClickConfig, out CommandJson commandJson, out Grid grid))
             {
-                GridCell cell = grid.CellList[commandJson.GridCellId - 1];
-                GridColumn column = grid.ColumnList[cell.ColumnId - 1];
-                Page page = grid.ComponentOwner<Page>();
+                if (grid.IsShowConfig || grid.IsShowConfigDeveloper)
+                {
 
-                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp);
-                await pageConfigGrid.InitAsync();
+                    GridCell cell = grid.CellList[commandJson.GridCellId - 1];
+                    GridColumn column = grid.ColumnList[cell.ColumnId - 1];
+                    Page page = grid.ComponentOwner<Page>();
+
+                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
+                    var configName = grid.IsShowConfigDeveloper ? "Developer" : null;
+                    var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp, configName);
+                    await pageConfigGrid.InitAsync();
+                }
             }
         }
 
@@ -1484,15 +1491,19 @@
         {
             if (UtilSession.Request(appJson, CommandEnum.GridIsClickEnum, out CommandJson commandJson, out Grid grid))
             {
+                var isClickConfig = grid.IsShowConfig && commandJson.GridIsClickEnum == GridIsClickEnum.Config;
+                var isClickConfigDeveloper = grid.IsShowConfigDeveloper && commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper;
                 // Grid config
-                if (commandJson.GridIsClickEnum == GridIsClickEnum.Config || commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper)
+                if (isClickConfig || isClickConfigDeveloper)
                 {
                     if (grid.TypeRow != null) // Do not show config if for example no query is defined for data grid.
                     {
                         Page page = grid.ComponentOwner<Page>();
 
+                        var configName = grid.IsShowConfigDeveloper ? "Developer" : null;
+
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null);
+                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, configName);
                         await pageConfigGrid.InitAsync();
                     }
                 }

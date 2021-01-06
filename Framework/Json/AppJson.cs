@@ -15,6 +15,7 @@
 
     /// <summary>
     /// Request command sent by browser or internally by server.
+    /// See also enum: GridIsClickEnum.
     /// </summary>
     internal enum CommandEnum
     {
@@ -26,10 +27,16 @@
 
         GridCellIsModify = 9,
 
+        /// <summary>
+        /// See also enum GridIsClickEnum for details of this command.
+        /// </summary>
         GridIsClickEnum = 10,
 
         GridIsClickRow = 11,
 
+        /// <summary>
+        /// User clicked data grid header column config button.
+        /// </summary>
         GridIsClickConfig = 12,
 
         /// <summary>
@@ -695,9 +702,14 @@
         public class SettingResult
         {
             /// <summary>
-            /// Gets or sets IsGridShowConfigDeveloper. If true, grid shows config developer (coffee icon).
+            /// Gets or sets GridIsShowConfig. If true, data grid config button is shown.
             /// </summary>
-            public bool IsGridShowConfigDeveloper { get; set; }
+            public bool GridIsShowConfig { get; set; }
+
+            /// <summary>
+            /// Gets or sets GridIsShowConfigDeveloper. If true, grid shows config developer (coffee icon) button.
+            /// </summary>
+            public bool GridIsShowConfigDeveloper { get; set; }
         }
 
         internal static SettingResult SettingInternal(ComponentJson component, SettingArgs args)
@@ -1286,9 +1298,14 @@
         internal List<GridStyleRow> StyleRowList;
 
         /// <summary>
-        /// Gets or sets IsHidePagination. If true, data grid pagination is not shown.
+        /// Gets or sets IsHidePagination. If true, data grid pagination (and config button) is not shown.
         /// </summary>
         internal bool IsHidePagination;
+
+        /// <summary>
+        /// Gets or sets IsShowConfigDeveloper. If true, data grid config button is shown.
+        /// </summary>
+        internal bool IsShowConfig;
 
         /// <summary>
         /// Gets or sets IsShowConfigDeveloper. If true, config developer button (coffee icon) is shown to configure data grid.
