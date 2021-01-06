@@ -2,6 +2,7 @@
 {
     using Framework.DataAccessLayer;
     using Framework.Server;
+    using Microsoft.Extensions.Configuration;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -43,18 +44,32 @@
         public string ConnectionStringApplication { get; set; }
 
         /// <summary>
-        /// Returns WebServer ConnectionString.
+        /// Returns ConnectionString for WebServer. See also method: ConfigCli.ConnectionString();
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
         {
-            var configServer = ConfigServer.Load();
+            var configuration = (IConfiguration)UtilServer.Context.RequestServices.GetService(typeof(IConfiguration));
+
+            // ConnectionString defined in file appsettings.json (or Azure) has higher priority than file ConfigServer.json. 
+            // For appsettings.json see also: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-strings
+            string connectionStringApplication = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringApplication"));
+            string connectionStringFramework = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringFramework"));
+
             if (isFrameworkDb == false)
             {
-                return configServer.ConnectionStringApplication;
+                if (connectionStringApplication != null)
+                {
+                    return connectionStringApplication;
+                }
+                return ConfigServer.Load().ConnectionStringApplication;
             }
             else
             {
-                return configServer.ConnectionStringFramework;
+                if (connectionStringFramework != null)
+                {
+                    return connectionStringFramework;
+                }
+                return ConfigServer.Load().ConnectionStringFramework;
             }
         }
 

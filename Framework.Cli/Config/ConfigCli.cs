@@ -67,7 +67,7 @@
         public string ExternalProjectName { get; set; }
 
         /// <summary>
-        /// Returns ConnectionString of application or framework.
+        /// Returns ConnectionString for cli command. See also method: ConfigServer.ConnectionString();
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
         {
