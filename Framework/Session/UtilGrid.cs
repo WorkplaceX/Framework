@@ -1005,7 +1005,7 @@
                     Page page = grid.ComponentOwner<Page>();
 
                     string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                    var configName = grid.IsShowConfigDeveloper ? "Developer" : null;
+                    string configName = null; // Never show data grid header column config in developer config (mode).
                     var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp, configName);
                     await pageConfigGrid.InitAsync();
                 }
@@ -1500,7 +1500,8 @@
                     {
                         Page page = grid.ComponentOwner<Page>();
 
-                        var configName = grid.IsShowConfigDeveloper ? "Developer" : null;
+                        // Show data grid config in developer config (mode) if user clicked developer button.
+                        var configName = commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper ? "Developer" : null;
 
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
                         var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, configName);
