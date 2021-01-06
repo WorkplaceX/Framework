@@ -106,7 +106,7 @@
                 }
                 catch
                 {
-                    UtilCli.ConsoleWriteLineColor("Already dropped or drop failed!", ConsoleColor.DarkYellow);
+                    UtilCli.ConsoleWriteLineColor("Warning! Already dropped or drop failed!", ConsoleColor.Yellow); // Warning
                 }
             }
         }

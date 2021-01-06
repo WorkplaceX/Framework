@@ -54,7 +54,7 @@
             string appTypeName = Console.ReadLine();
             if (Type.GetType(appTypeName) == null)
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Type not found! ({0})", appTypeName), ConsoleColor.Yellow);
+                UtilCli.ConsoleWriteLineColor(string.Format("Warning! Type not found! ({0})", appTypeName), ConsoleColor.Yellow); // Warning
             }
 
             // Input FolderName
@@ -66,7 +66,7 @@
             string folderNameNpmBuildCheck = UtilFramework.FolderName + folderNameNpmBuild;
             if (!Directory.Exists(folderNameNpmBuildCheck))
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Yellow);
+                UtilCli.ConsoleWriteLineColor(string.Format("Warning! Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Yellow); // Warning
             }
 
             // Input FolderNameDist
@@ -77,7 +77,7 @@
             string folderNameDistCheck = UtilFramework.FolderName + folderNameDist;
             if (!Directory.Exists(folderNameDistCheck))
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Folder does not exist! ({0})", folderNameDist), ConsoleColor.Yellow);
+                UtilCli.ConsoleWriteLineColor(string.Format("Warning! Folder does not exist! ({0})", folderNameDist), ConsoleColor.Yellow); // Warning
             }
 
             // Add Website

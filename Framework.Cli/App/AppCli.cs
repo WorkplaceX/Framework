@@ -300,7 +300,7 @@
             var environment = configCli.EnvironmentGet();
             if (UtilFramework.StringNull(environment.ConnectionStringFramework) == null || UtilFramework.StringNull(environment.ConnectionStringFramework) == null)
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow);
+                UtilCli.ConsoleWriteLineColor(string.Format("Warning! No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow); // Warning
             }
         }
 

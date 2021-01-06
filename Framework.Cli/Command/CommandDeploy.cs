@@ -21,11 +21,12 @@
             string deployAzureGitUrl = UtilFramework.StringNull(configCli.EnvironmentGet().DeployAzureGitUrl); // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
             if (deployAzureGitUrl == null)
             {
-                UtilCli.ConsoleWriteLineColor(nameof(ConfigCliEnvironment.DeployAzureGitUrl) + " not set!", System.ConsoleColor.Green);
+                UtilCli.ConsoleWriteLineColor("Warning! " + nameof(ConfigCliEnvironment.DeployAzureGitUrl) + " not set!", System.ConsoleColor.Yellow); // Warning
             }
             else
             {
-                string folderName = UtilFramework.FolderName + "Application.Server/";
+                UtilCli.ConsoleWriteLineColor("Information! Always run build command first in order to deploy latest version.", System.ConsoleColor.Cyan); // Information
+
                 string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/net5.0/publish/";
                 string folderNamePublishGit = folderNamePublish + ".git";
 

@@ -65,8 +65,8 @@
             catch (SqlException exception)
             {
                 isSuccessful = false;
-                string message = string.Format("Read Integrate data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
-                UtilCli.ConsoleWriteLineColor(message, ConsoleColor.Red);
+                string message = string.Format("Error! Read Integrate data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
+                UtilCli.ConsoleWriteLineColor(message, ConsoleColor.Red); // Error
             }
             if (generateIntegrateResult != null)
             {

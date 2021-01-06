@@ -144,7 +144,7 @@
                 }
                 if (item.FrameworkTypeEnum == FrameworkTypeEnum.None)
                 {
-                    UtilCli.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.Yellow);
+                    UtilCli.ConsoleWriteLineColor(string.Format("Warning! Type not supported by framework. ({0}.{1}.{2})", item.Schema.SchemaName, item.Schema.TableName, item.Schema.FieldName), ConsoleColor.Yellow); // Warning
                 }
                 else
                 {

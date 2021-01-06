@@ -151,7 +151,7 @@
                     // Ubuntu list all running processes: 'ps'
                     // To reboot Ubuntu type on Windows command prompt: 'wsl -t Ubuntu-18.04'
                     // Ubuntu show processes tool: 'htop'
-                    UtilCli.ConsoleWriteLineColor("Stop server with command 'killall -SIGKILL Application.Server node dotnet'", System.ConsoleColor.Yellow);
+                    UtilCli.ConsoleWriteLineColor("Warning! Stop server with command 'killall -SIGKILL Application.Server node dotnet'", System.ConsoleColor.Yellow); // Warning
                 }
             }
         }
