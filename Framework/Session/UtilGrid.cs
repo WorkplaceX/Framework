@@ -1504,8 +1504,25 @@
         {
             if (UtilSession.Request(appJson, CommandEnum.GridIsClickEnum, out CommandJson commandJson, out Grid grid))
             {
-                var isClickConfig = grid.IsShowConfig && commandJson.GridIsClickEnum == GridIsClickEnum.Config;
-                var isClickConfigDeveloper = grid.IsShowConfigDeveloper && commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper;
+                var isClickConfig = commandJson.GridIsClickEnum == GridIsClickEnum.Config;
+                var isClickConfigDeveloper = commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper;
+
+                // Security
+                if (isClickConfig)
+                {
+                    if (!grid.IsShowConfig)
+                    {
+                        throw new ExceptionSecurity("Grid Config not allowed!");
+                    }
+                }
+                if (isClickConfigDeveloper)
+                {
+                    if (!grid.IsShowConfigDeveloper)
+                    {
+                        throw new ExceptionSecurity("Grid ConfigDeveloper not allowed!");
+                    }
+                }
+
                 // Grid config
                 if (isClickConfig || isClickConfigDeveloper)
                 {
@@ -1525,10 +1542,6 @@
                         var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, configName);
                         await pageConfigGrid.InitAsync();
                     }
-                }
-                else
-                {
-                    throw new ExceptionSecurity("Grid can not be configured!");
                 }
 
                 // Grid reload

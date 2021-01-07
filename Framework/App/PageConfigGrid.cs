@@ -19,7 +19,7 @@
             TableNameCSharp = tableNameCSharp;
             FieldNameCSharp = fieldNameCSharp;
             ConfigName = configName;
-            ConfigNameIsDeveloper = ConfigName == FrameworkConfigGridIntegrateFramework.IdEnum.dboFrameworkConfigFieldDisplayDeveloper.Row().ConfigName;
+            ConfigNameDeveloper = FrameworkConfigGridIntegrateFramework.IdEnum.dboFrameworkConfigFieldDisplayDeveloper.Row().ConfigName;
         }
 
         /// <summary>
@@ -38,9 +38,9 @@
         public string ConfigName { get; }
 
         /// <summary>
-        /// Gets ConfigNameIsDeveloper. If true, page is shown in developer config mode.
+        /// Gets ConfigNameDeveloper. This is strongly typed Developer.
         /// </summary>
-        public bool ConfigNameIsDeveloper { get; }
+        public string ConfigNameDeveloper { get; }
 
         public override async Task InitAsync()
         {
@@ -273,10 +273,10 @@
         protected override void CellAnnotation(AnnotationArgs args, AnnotationResult result)
         {
             var pageConfigGrid = this.ComponentOwner<PageConfigGrid>();
-            if (!pageConfigGrid.ConfigNameIsDeveloper)
+            if (pageConfigGrid.ConfigName != pageConfigGrid.ConfigNameDeveloper)
             {
                 // User needs flag SettingResult.GridIsShowConfigDeveloper and (coffee icon) button clicked to modify developer config.
-                result.IsReadOnly = !(args.Row.ConfigGridConfigName == pageConfigGrid.ConfigName);
+                result.IsReadOnly = args.Row.ConfigGridConfigName == pageConfigGrid.ConfigNameDeveloper;
             }
         }
 
