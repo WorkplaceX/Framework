@@ -66,7 +66,7 @@
         {
             get
             {
-                return new HttpContextAccessor().HttpContext; // Not available during startup. See also: method ConfigureServices();
+                return new HttpContextAccessor().HttpContext; // Not available during startup. See also: method ConfigureServices(); Not available for Cli.
             }
         }
 

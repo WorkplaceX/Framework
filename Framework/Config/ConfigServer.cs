@@ -48,12 +48,19 @@
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
         {
-            var configuration = (IConfiguration)UtilServer.Context.RequestServices.GetService(typeof(IConfiguration));
+            string connectionStringApplication = null;
+            string connectionStringFramework = null;
 
-            // ConnectionString defined in file appsettings.json (or Azure) has higher priority than file ConfigServer.json. 
-            // For appsettings.json see also: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-strings
-            string connectionStringApplication = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringApplication"));
-            string connectionStringFramework = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringFramework"));
+            // Application running on WebServer? (or cli)
+            if (UtilServer.Context != null)
+            {
+                var configuration = (IConfiguration)UtilServer.Context.RequestServices.GetService(typeof(IConfiguration));
+
+                // ConnectionString defined in file appsettings.json (or Azure) has higher priority than file ConfigServer.json. 
+                // For appsettings.json see also: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-strings
+                connectionStringApplication = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringApplication"));
+                connectionStringFramework = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringFramework"));
+            }
 
             if (isFrameworkDb == false)
             {
