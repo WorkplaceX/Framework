@@ -145,6 +145,18 @@
             }
         }
 
+        /// <summary>
+        /// Removes ConnectionString from ConfigCli. Used for CI server if WebServer manages ConnectionString.
+        /// </summary>
+        private static void ConnectionStringRemove(ConfigCli configCli)
+        {
+            foreach (var environment in configCli.EnvironmentList)
+            {
+                environment.ConnectionStringFramework = null;
+                environment.ConnectionStringApplication = null;
+            }
+        }
+
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
@@ -220,6 +232,13 @@
                 configCli = ConfigCli.Load();
                 Console.WriteLine();
                 UtilCli.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
+
+                // Remove ConnectionString
+                if (UtilCli.ConsoleReadYesNo("Include ConnectionString? (CI Server does not need it if managed by WebServer)") == false)
+                {
+                    ConnectionStringRemove(configCli);
+                }
+
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
                 UtilCli.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
