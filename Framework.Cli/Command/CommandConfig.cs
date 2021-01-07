@@ -150,10 +150,13 @@
         /// </summary>
         private static void ConnectionStringRemove(ConfigCli configCli)
         {
-            foreach (var environment in configCli.EnvironmentList)
+            if (configCli.EnvironmentList != null)
             {
-                environment.ConnectionStringFramework = null;
-                environment.ConnectionStringApplication = null;
+                foreach (var environment in configCli.EnvironmentList)
+                {
+                    environment.ConnectionStringFramework = null;
+                    environment.ConnectionStringApplication = null;
+                }
             }
         }
 
@@ -234,9 +237,12 @@
                 UtilCli.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
 
                 // Remove ConnectionString
-                if (UtilCli.ConsoleReadYesNo("Include ConnectionString? (CI Server does not need it if managed by WebServer)") == false)
+                if (UtilCli.ArgumentValueIsDelete(this, argumentJson) == false) // No user interaction when json argument used.
                 {
-                    ConnectionStringRemove(configCli);
+                    if (UtilCli.ConsoleReadYesNo("Include ConnectionString? (CI Server does not need it if managed by WebServer)") == false)
+                    {
+                        ConnectionStringRemove(configCli);
+                    }
                 }
 
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
