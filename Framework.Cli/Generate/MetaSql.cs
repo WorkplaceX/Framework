@@ -1,6 +1,6 @@
 ﻿namespace Framework.Cli.Generate
 {
-    using Framework.Cli.Config;
+    using Framework.Config;
     using Microsoft.EntityFrameworkCore;
     using System.Linq;
 
@@ -49,7 +49,7 @@
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connectionString = ConfigCli.ConnectionString(IsFrameworkDb);
+            string connectionString = ConfigServer.ConnectionString(IsFrameworkDb);
             UtilFramework.Assert(string.IsNullOrEmpty(connectionString) == false, "ConnectionString is null!");
             optionsBuilder.UseSqlServer(connectionString);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);

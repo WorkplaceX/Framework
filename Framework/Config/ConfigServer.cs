@@ -44,7 +44,7 @@
         public string ConnectionStringApplication { get; set; }
 
         /// <summary>
-        /// Returns ConnectionString for WebServer. See also method: ConfigCli.ConnectionString();
+        /// Returns ConnectionString. Used by WebServer  and Cli.
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
         {

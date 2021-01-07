@@ -67,22 +67,6 @@
         public string ExternalProjectName { get; set; }
 
         /// <summary>
-        /// Returns ConnectionString for cli command. See also method: ConfigServer.ConnectionString();
-        /// </summary>
-        public static string ConnectionString(bool isFrameworkDb)
-        {
-            var configCli = ConfigCli.Load();
-            if (isFrameworkDb == false)
-            {
-                return configCli.EnvironmentGet().ConnectionStringApplication;
-            }
-            else
-            {
-                return configCli.EnvironmentGet().ConnectionStringFramework;
-            }
-        }
-
-        /// <summary>
         /// Gets ConfigCli.json. Used by CommandBuild. Created with default values if file does not exist.
         /// </summary>
         private static string FileName

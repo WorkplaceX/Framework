@@ -293,14 +293,17 @@
         /// <summary>
         /// Copy ConfigCli.json to ConfigServer.json and validate ConnectionString exists.
         /// </summary>
-        private void CopyConfigCliToConfigServer()
+        private void CopyConfigCliToConfigServer(bool isWarning)
         {
             ConfigCli.CopyConfigCliToConfigServer();
             var configCli = ConfigCli.Load();
             var environment = configCli.EnvironmentGet();
-            if (UtilFramework.StringNull(environment.ConnectionStringFramework) == null || UtilFramework.StringNull(environment.ConnectionStringFramework) == null)
+            if (UtilFramework.StringNull(environment.ConnectionStringApplication) == null || UtilFramework.StringNull(environment.ConnectionStringFramework) == null)
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Warning! No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow); // Warning
+                if (isWarning)
+                {
+                    UtilCli.ConsoleWriteLineColor(string.Format("Warning! No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow); // Warning
+                }
             }
         }
 
@@ -317,8 +320,9 @@
                 ConfigCli.Save(configCli); // Reset ConfigCli.json
                 ConfigCli.CopyConfigCliToConfigServer();
                 CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
+                CopyConfigCliToConfigServer(isWarning: false); // Copy from ConfigCli.json to ConfigServer.json
                 commandLineApplication.Execute(args);
-                CopyConfigCliToConfigServer(); // Copy new values from ConfigCli.json to ConfigServer.json
+                CopyConfigCliToConfigServer(isWarning: true); // Copy new values from ConfigCli.json to ConfigServer.json
             }
             catch (Exception exception) // For example unrecognized option
             {
