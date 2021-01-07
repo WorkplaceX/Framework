@@ -5,6 +5,7 @@
     using Framework.DataAccessLayer;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
+    using Framework.Server;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -69,6 +70,7 @@
                     NamingConvention namingConvention = appJson.NamingConventionInternal(grid.TypeRow);
                     string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
                     bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
+                    bool isReadOnly = namingConvention.ColumnIsReadOnlyInternal(grid.TypeRow, propertyInfo.Name, configField?.IsReadOnly);
                     double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
                     result.Add(new GridColumn
                     {
@@ -76,6 +78,7 @@
                         ColumnText = columnText,
                         Description = configField?.Description,
                         IsVisible = isVisible,
+                        IsReadOnly = isReadOnly,
                         Sort = sort,
                         SortField = field.Sort
                     });
@@ -141,10 +144,15 @@
             return list.GetOrAdd(key, valueFactory, out bool _);
         }
 
-        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, GridRowEnum rowEnum, Row row)
+        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, GridRowEnum rowEnum, Row row, bool isReadOnly)
         {
-            var result = new Grid.AnnotationResult();
+            var result = new Grid.AnnotationResult { IsReadOnly = isReadOnly };
             grid.CellAnnotationInternal(rowEnum, row, fieldNameCSharp, result);
+            if (isReadOnly)
+            {
+                // Annotation can not override IsReadOnly if true in configuration.
+                result.IsReadOnly = true;
+            }
             cell.Html = UtilFramework.StringNull(result.Html);
             cell.HtmlIsEdit = result.HtmlIsEdit;
             cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
@@ -220,7 +228,7 @@
 
             if (isAdded)
             {
-                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null);
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null, isReadOnly: false); // CellFilter
             }
 
             return result;
@@ -287,7 +295,7 @@
 
             if (isAdded)
             {
-                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, row);
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, row, column.IsReadOnly);
             }
 
             return result;
@@ -310,7 +318,7 @@
 
             if (isAdded)
             {
-                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null);
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null, isReadOnly: false); // CellNew
             }
 
             return result;
@@ -1366,6 +1374,10 @@
             if (UtilSession.Request(appJson, CommandEnum.GridCellIsModify, out CommandJson commandJson, out Grid grid))
             {
                 GridCell cell = grid.CellList[commandJson.GridCellId - 1];
+                if (cell.IsReadOnly)
+                {
+                    throw new ExceptionSecurity("Cell IsReadOnly!");
+                }
                 GridColumn column = grid.ColumnList[cell.ColumnId - 1];
                 var field = UtilDalType.TypeRowToFieldListDictionary(grid.TypeRow)[column.FieldNameCSharp];
                 GridRowState rowState = grid.RowStateList[cell.RowStateId - 1];
@@ -1513,6 +1525,10 @@
                         var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, configName);
                         await pageConfigGrid.InitAsync();
                     }
+                }
+                else
+                {
+                    throw new ExceptionSecurity("Grid can not be configured!");
                 }
 
                 // Grid reload

@@ -28,6 +28,26 @@
         }
 
         /// <summary>
+        /// Override this method for custom column IsReadOnly.
+        /// </summary>
+        protected virtual bool ColumnIsReadOnly(Type typeRow, string fieldName, bool isReadOnlyDefault, bool? isReadOnlyConfig)
+        {
+            bool result = isReadOnlyDefault;
+            if (isReadOnlyConfig != null)
+            {
+                result = isReadOnlyConfig.Value;
+            }
+            return result;
+        }
+
+        internal bool ColumnIsReadOnlyInternal(Type typeRow, string fieldName, bool? isReadOnlyConfig)
+        {
+            bool isReadOnlyDefault = isReadOnlyConfig.GetValueOrDefault(false);
+            var result = ColumnIsReadOnly(typeRow, fieldName, isReadOnlyDefault, isReadOnlyConfig);
+            return result;
+        }
+
+        /// <summary>
         /// Override this column for custom column text.
         /// </summary>
         protected virtual string ColumnText(Type typeRow, string fieldName, string textDefault, string textConfig)

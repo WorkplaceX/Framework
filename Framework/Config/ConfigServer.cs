@@ -56,7 +56,8 @@
             {
                 var configuration = (IConfiguration)UtilServer.Context.RequestServices.GetService(typeof(IConfiguration));
 
-                // ConnectionString defined in file appsettings.json (or Azure) has higher priority than file ConfigServer.json. 
+                // ConnectionString defined in file appsettings.json (or Azure) has higher priority than file ConfigServer.json.
+                // Typically this is used on a PROD WebServer only. No ConnectionString on CI server is needed in ConfigCli secret.
                 // For appsettings.json see also: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-strings
                 connectionStringApplication = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringApplication"));
                 connectionStringFramework = UtilFramework.StringNull(ConfigurationExtensions.GetConnectionString(configuration, "ConnectionStringFramework"));

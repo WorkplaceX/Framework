@@ -225,4 +225,15 @@
             return result;
         }
     }
+
+    /// <summary>
+    /// Exception for example if client send request to modify a field which IsReadOnly.
+    /// </summary>
+    internal class ExceptionSecurity : Exception
+    {
+        public ExceptionSecurity(string message) : base(message)
+        {
+
+        }
+    }
 }

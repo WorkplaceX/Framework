@@ -2476,6 +2476,11 @@
         /// </summary>
         public bool IsVisible;
 
+        /// <summary>
+        /// Gets or sets IsReadOnly.
+        /// </summary>
+        public bool IsReadOnly;
+
         public bool IsVisibleScroll;
 
         /// <summary>

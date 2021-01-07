@@ -1,6 +1,7 @@
 ﻿namespace Framework.Json
 {
     using Database.dbo;
+    using DatabaseIntegrate.dbo;
     using Framework.DataAccessLayer;
     using Framework.Session;
     using System;
@@ -10,7 +11,7 @@
     /// <summary>
     /// Page to configure data grid and columns.
     /// </summary>
-    public class PageConfigGrid : PageModal
+    internal class PageConfigGrid : PageModal
     {
         public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp, string configName)
             : base(owner)
@@ -18,6 +19,7 @@
             TableNameCSharp = tableNameCSharp;
             FieldNameCSharp = fieldNameCSharp;
             ConfigName = configName;
+            ConfigNameIsDeveloper = ConfigName == FrameworkConfigGridIntegrateFramework.IdEnum.dboFrameworkConfigFieldDisplayDeveloper.Row().ConfigName;
         }
 
         /// <summary>
@@ -34,6 +36,11 @@
         /// Gets ConfigName. This is the data grid ConfigName for GridConfigGrid and GridConfigField.
         /// </summary>
         public string ConfigName { get; }
+
+        /// <summary>
+        /// Gets ConfigNameIsDeveloper. If true, page is shown in developer config mode.
+        /// </summary>
+        public bool ConfigNameIsDeveloper { get; }
 
         public override async Task InitAsync()
         {
@@ -76,7 +83,7 @@
         }
     }
 
-    public class GridConfigGrid : Grid<FrameworkConfigGridDisplay>
+    internal class GridConfigGrid : Grid<FrameworkConfigGridDisplay>
     {
         public GridConfigGrid(ComponentJson owner) : base(owner) { }
 
@@ -170,7 +177,7 @@
         }
     }
 
-    public class GridConfigField : Grid<FrameworkConfigFieldDisplay>
+    internal class GridConfigField : Grid<FrameworkConfigFieldDisplay>
     {
         public GridConfigField(ComponentJson owner) : base(owner) { }
 
@@ -261,6 +268,16 @@
             }
 
             result.IsHandled = true;
+        }
+
+        protected override void CellAnnotation(AnnotationArgs args, AnnotationResult result)
+        {
+            var pageConfigGrid = this.ComponentOwner<PageConfigGrid>();
+            if (!pageConfigGrid.ConfigNameIsDeveloper)
+            {
+                // User needs flag SettingResult.GridIsShowConfigDeveloper and (coffee icon) button clicked to modify developer config.
+                result.IsReadOnly = !(args.Row.ConfigGridConfigName == pageConfigGrid.ConfigName);
+            }
         }
 
         protected override async Task InsertAsync(InsertArgs args, InsertResult result)
