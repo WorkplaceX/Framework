@@ -113,7 +113,17 @@
                 if (fileName.EndsWith(".html") && UtilFramework.StringNull(appSelector.AppTypeName) != null)
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);
+
+                    // Do not cache (*.html) page with included jsonBrowser. For example if user navigates to sub page (POST) and then opens an image 
+                    // and then navigates back, it forces browser to reload page and not to show an old cached page.
+                    // See also: http://cristian.sulea.net/blog/disable-browser-caching-with-meta-html-tags/
+                    context.Response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+                    context.Response.Headers.Add("Pragma", "no-cache");
+                    context.Response.Headers.Add("Expires", "0");
+
+                    // Create page (*.html). Also if SSR is disabled.
                     string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector, appJson);
+
                     await context.Response.WriteAsync(htmlIndex);
                     result = true;
                 }
@@ -175,7 +185,7 @@
         }
 
         /// <summary>
-        /// Render first html GET request.
+        /// Render first html GET request. Also if SSR is disabled. Include always jsonBrowser into (*.html) response file.
         /// </summary>
         private static async Task<string> WebsiteServerSideRenderingAsync(HttpContext context, AppSelector appSelector, AppJson appJson)
         {

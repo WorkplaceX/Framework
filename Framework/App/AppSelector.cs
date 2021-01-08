@@ -129,11 +129,12 @@
 
             // IsExpired
             bool isSessionExpired = appJson == null && requestJson.RequestCount > 1;
-            bool isBrowserRefresh = appJson != null && requestJson.RequestCount != appJson.RequestCount + 1; // Or BrowserTabSwitch.
-            bool isBrowserTabSwitch = appJson != null && requestJson.ResponseCount != appJson.ResponseCount;
+            bool isBrowserRefresh = appJson != null && requestJson.RequestCount == 1 && requestJson.RequestCount != appJson.RequestCount + 1;
+            bool isBrowserTabSwitch = !isBrowserRefresh && (appJson != null && requestJson.ResponseCount != appJson.ResponseCount);
+            bool isException = appJson?.IsReload == true; // After exception has been thrown recycle session.
 
             // New session
-            if (appJson == null || isBrowserRefresh || isBrowserTabSwitch)
+            if (appJson == null || isBrowserTabSwitch || isException)
             {
                 // New AppJson (Session)
                 bool isInit = false;
@@ -203,12 +204,6 @@
             if (string.IsNullOrEmpty(appJson.SessionApp))
             {
                 appJson.SessionApp = UtilServer.Session.Id;
-            }
-
-            // IsReload
-            if (UtilServer.Session.Id != appJson.SessionApp) // Session expired!
-            {
-                appJson.IsReload = true;
             }
         }
     }

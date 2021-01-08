@@ -1052,9 +1052,8 @@
         internal string SessionApp { get; set; }
 
         /// <summary>
-        /// Gets or sets IsReload. If true, client reloads page. For example if session expired.
+        /// Gets or sets IsReload. If true, client reloads page. This appens after exception has been thrown.
         /// </summary>
-        [Serialize(SerializeEnum.Client)]
         internal bool IsReload { get; set; }
 
         /// <summary>
