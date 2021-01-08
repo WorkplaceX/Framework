@@ -207,7 +207,7 @@
             if (isServerSideRendering)
             {
                 // index.html server side rendering
-                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:50919/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
+                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:5000/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
             }
             else
             {
@@ -219,10 +219,7 @@
             // Set jsonBrowser in index.html.
             string scriptFind = "</app-root>"; //" <script>var jsonBrowser={}</script>"; // For example Html5Boilerplate build process renames var jsonBrowser to a.
             string scriptReplace = "</app-root><script>var jsonBrowser = " + jsonClient + "</script>";
-            if (isServerSideRendering)
-            {
-                indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
-            }
+            indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace); // Send jsonBrowser with index.html to client for both SSR and not SSR.
 
             // Add Angular scripts
             scriptFind = "</body></html>";

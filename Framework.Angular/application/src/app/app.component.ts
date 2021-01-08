@@ -16,8 +16,12 @@ export class AppComponent {
         path = "/";
       }
       
-      // User clicked backward or forward button in browser.
-      this.dataService.update(<CommandJson> { CommandEnum: 17, ComponentId: this.dataService.json.Id, NavigatePath: path});
+      // Make sure event origin comes from user and not data.service.ts NavigatePathAddHistory.
+      if (dataService.json.NavigatePathAddHistory == undefined) {
+        // User clicked backward or forward button in browser.
+        this.dataService.update(<CommandJson> { CommandEnum: 17, ComponentId: this.dataService.json.Id, NavigatePath: path});
+      }
+      dataService.json.NavigatePathAddHistory = undefined;
     });
   }
 

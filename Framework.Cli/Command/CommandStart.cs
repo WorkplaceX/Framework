@@ -110,7 +110,7 @@
                         }
                         if (isServer)
                         {
-                            UtilCli.ConsoleWriteLineColor("Server: http://" + website.DomainNameList.First().DomainName + ":50919/", System.ConsoleColor.Green);
+                            UtilCli.ConsoleWriteLineColor("Server: http://" + website.DomainNameList.First().DomainName + ":5000/", System.ConsoleColor.Green);
                         }
                         if (isFileSync)
                         {
@@ -144,7 +144,7 @@
                 UtilCli.DotNet(folderName, "run --no-build", false);
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    UtilCli.OpenWebBrowser("http://localhost:50919/"); // For port setting see also: Application.Server\Properties\launchSettings.json (applicationUrl, sslPort)
+                    UtilCli.OpenWebBrowser("http://localhost:5000/"); // For port setting see also: Application.Server\Properties\launchSettings.json (applicationUrl, sslPort)
                 }
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {

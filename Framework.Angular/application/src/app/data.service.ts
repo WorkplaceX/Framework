@@ -216,16 +216,19 @@ export class DataService {
         this.json = <Json>{};
       } else
       {
-        this.json = jsonBrowser; // Provided by SSR in index.html see also method WebsiteServerSideRenderingAsync();
+        this.json = jsonBrowser; // Provided by index.html coming from ASP.NET Core WebServer for both SSR and not SSR.
       }
 
       this.json.IsServerSideRendering = false;
       if (window.location.href.endsWith(":4200/")) { // Running in Framework/Framework.Angular/application/
-        this.json.EmbeddedUrl = "http://" + window.location.hostname + ":50919/"; // http://localhost:50919/ or http://localhost2:50919/
+        this.json.EmbeddedUrl = "http://" + window.location.hostname + ":5000/"; // http://localhost:5000/ or http://localhost2:5000/
       } 
       if (window != null) { // Running on client.
         this.json.RequestUrl = window.location.href;
-        this.update(null);
+        if (typeof jsonBrowser == 'undefined')
+        {
+          this.update(null); // First request if running on http://localhost:4200
+        }
       }
     }
   }
