@@ -1116,8 +1116,14 @@
                 // Parse custom (FileUpload)
                 if (commandJson.GridCellTextBase64 != null)
                 {
-                    UtilFramework.Assert(commandJson.GridCellTextBase64.StartsWith("data:application/octet-stream;base64,"));
-                    var data = System.Convert.FromBase64String(commandJson.GridCellTextBase64.Substring("data:application/octet-stream;base64,".Length));
+                    var startsWith = "data:application/octet-stream;base64,";
+                    // User uploaded empty (0 bytes) file
+                    if (commandJson.GridCellTextBase64 == "data:")
+                    {
+                        startsWith = "data:";
+                    }
+                    UtilFramework.Assert(commandJson.GridCellTextBase64.StartsWith(startsWith));
+                    var data = System.Convert.FromBase64String(commandJson.GridCellTextBase64.Substring(startsWith.Length));
                     grid.CellParseFileUploadInternal(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
                     if (result.IsHandled == false)
                     {

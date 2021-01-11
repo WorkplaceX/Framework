@@ -2151,7 +2151,7 @@
             public string FileName { get; internal set; }
 
             /// <summary>
-            /// Gets Data. From user uploaded file.
+            /// Gets Data. From user uploaded file. It's never null but can be byte[0] for file of size 0 bytes.
             /// </summary>
             public byte[] Data { get; internal set; }
 
