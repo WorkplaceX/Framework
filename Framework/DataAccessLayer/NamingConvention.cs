@@ -40,10 +40,31 @@
             return result;
         }
 
+
+        /// <summary>
+        /// Override this method for custom column IsMultiline.
+        /// </summary>
+        protected virtual bool ColumnIsMultiline(Type typeRow, string fieldName, bool isMultilineDefault, bool? isMultilineConfig)
+        {
+            bool result = isMultilineDefault;
+            if (isMultilineConfig != null)
+            {
+                result = isMultilineConfig.Value;
+            }
+            return result;
+        }
+
         internal bool ColumnIsReadOnlyInternal(Type typeRow, string fieldName, bool? isReadOnlyConfig)
         {
             bool isReadOnlyDefault = isReadOnlyConfig.GetValueOrDefault(false);
             var result = ColumnIsReadOnly(typeRow, fieldName, isReadOnlyDefault, isReadOnlyConfig);
+            return result;
+        }
+
+        internal bool ColumnIsMultilineInternal(Type typeRow, string fieldName, bool? isMultilineConfig)
+        {
+            bool isMultilineDefault = isMultilineConfig.GetValueOrDefault(false);
+            var result = ColumnIsMultiline(typeRow, fieldName, isMultilineDefault, isMultilineConfig);
             return result;
         }
 

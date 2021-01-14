@@ -154,6 +154,8 @@ export class Cell {
 
   IsReadOnly: boolean | undefined;
 
+  IsMultiline: boolean | undefined;
+
   Placeholder: string | undefined;
 
   ErrorParse: string | undefined;

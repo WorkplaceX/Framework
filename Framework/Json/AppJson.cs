@@ -1542,12 +1542,15 @@
         public class AnnotationResult
         {
             /// <summary>
-            /// Gets or sets Html. Use for example to transform plain text into a hyper link. For empty html set "&nbsp;" to keep the layout consistent with none empty html fields.
+            /// Gets or sets Html. If not null, cell is rendered as (readonly) html. 
+            /// Used for example to transform plain text into a hyper link.  
+            /// For multiline html set property IsMultiline. 
+            /// For empty html set non-breaking space (nbsp) to keep the layout consistent with none empty html fields.
             /// </summary>
             public string Html;
 
             /// <summary>
-            /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown to edit plain html. Applies only if Html is not null.
+            /// Gets or sets HtmlIsEdit. If true, html is rendered and additionally input text box is shown on top to edit plain html. Applies only if Html is not null.
             /// </summary>
             public bool HtmlIsEdit;
 
@@ -1565,6 +1568,11 @@
             /// Gets or sets IsReadOnly. If true, user can not edit text.
             /// </summary>
             public bool IsReadOnly;
+
+            /// <summary>
+            /// Gets or sets IsMultiline. If true, text box is multiline.
+            /// </summary>
+            public bool IsMultiline;
 
             /// <summary>
             /// Gets or sets IsPassword. If true, user can not read text.
@@ -2480,6 +2488,11 @@
         /// </summary>
         public bool IsReadOnly;
 
+        /// <summary>
+        /// Gets or sets IsMultiline.
+        /// </summary>
+        public bool IsMultiline;
+
         public bool IsVisibleScroll;
 
         /// <summary>
@@ -2683,6 +2696,11 @@
         /// Gets or sets IsReadOnly. If true, user can not edit text.
         /// </summary>
         public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets IsMultiline. If true, text box is multiline.
+        /// </summary>
+        public bool IsMultiline;
 
         /// <summary>
         /// Gets or sets IsPassword. If true, user can not read text.

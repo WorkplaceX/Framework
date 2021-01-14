@@ -1,8 +1,20 @@
+/* To modify this file live use cli command start --watch */
+
+/*
+body {
+  background: yellow;
+}
+*/
+
 $colorBlue: #007bff;
 $colorBlueHover: lightblue;
 $colorWhite: #fff;
 $colorBlack: #444;
 $colorRed: red;
+
+.displayFlex {
+  display: flex;
+}
 
 .modal {
   display: block; /* Make bootstrap modal window visible */

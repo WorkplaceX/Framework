@@ -84,6 +84,7 @@ CREATE TABLE FrameworkConfigField
 	Description NVARCHAR(256), -- Column header description.
 	IsVisible BIT,
 	IsReadOnly BIT,
+	IsMultiline BIT,
 	Sort FLOAT,
 	IsDelete BIT NOT NULL
 	INDEX IX_FrameworkConfigField UNIQUE (ConfigGridId, FieldId, InstanceName)
@@ -109,6 +110,7 @@ SELECT
 	ConfigField.Description,
 	ConfigField.IsVisible,
 	ConfigField.IsReadOnly,
+	ConfigField.IsMultiline,
 	ConfigField.Sort,
 	ConfigField.IsDelete
 FROM
@@ -197,6 +199,7 @@ SELECT
 	ConfigField.Description AS ConfigFieldDescription,
 	ConfigField.IsVisible AS ConfigFieldIsVisible,
 	ConfigField.IsReadOnly AS ConfigFieldIsReadOnly,
+	ConfigField.IsMultiline AS ConfigFieldIsMultiline,
 	ConfigField.Sort AS ConfigFieldSort
 FROM
 	ConfigGrid ConfigGrid

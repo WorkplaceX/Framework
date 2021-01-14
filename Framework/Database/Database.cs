@@ -32,6 +32,9 @@ namespace Database.dbo
         [SqlField("IsReadOnly", FrameworkTypeEnum.Bit)]
         public bool? IsReadOnly { get; set; }
 
+        [SqlField("IsMultiline", FrameworkTypeEnum.Bit)]
+        public bool? IsMultiline { get; set; }
+
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }
 
@@ -102,6 +105,9 @@ namespace Database.dbo
         [SqlField("ConfigFieldIsReadOnly", FrameworkTypeEnum.Bit)]
         public bool? ConfigFieldIsReadOnly { get; set; }
 
+        [SqlField("ConfigFieldIsMultiline", FrameworkTypeEnum.Bit)]
+        public bool? ConfigFieldIsMultiline { get; set; }
+
         [SqlField("ConfigFieldSort", FrameworkTypeEnum.Float)]
         public double? ConfigFieldSort { get; set; }
     }
@@ -147,6 +153,9 @@ namespace Database.dbo
 
         [SqlField("IsReadOnly", FrameworkTypeEnum.Bit)]
         public bool? IsReadOnly { get; set; }
+
+        [SqlField("IsMultiline", FrameworkTypeEnum.Bit)]
+        public bool? IsMultiline { get; set; }
 
         [SqlField("Sort", FrameworkTypeEnum.Float)]
         public double? Sort { get; set; }

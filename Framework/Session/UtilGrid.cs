@@ -71,6 +71,7 @@
                     string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
                     bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
                     bool isReadOnly = namingConvention.ColumnIsReadOnlyInternal(grid.TypeRow, propertyInfo.Name, configField?.IsReadOnly);
+                    bool isMultiline = namingConvention.ColumnIsMultilineInternal(grid.TypeRow, propertyInfo.Name, configField?.IsMultiline);
                     double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
                     result.Add(new GridColumn
                     {
@@ -79,6 +80,7 @@
                         Description = configField?.Description,
                         IsVisible = isVisible,
                         IsReadOnly = isReadOnly,
+                        IsMultiline = isMultiline,
                         Sort = sort,
                         SortField = field.Sort
                     });
@@ -144,9 +146,9 @@
             return list.GetOrAdd(key, valueFactory, out bool _);
         }
 
-        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, GridRowEnum rowEnum, Row row, bool isReadOnly)
+        private static void RenderAnnotation(Grid grid, GridCell cell, string fieldNameCSharp, GridRowEnum rowEnum, Row row, bool isReadOnly, bool isMultiline)
         {
-            var result = new Grid.AnnotationResult { IsReadOnly = isReadOnly };
+            var result = new Grid.AnnotationResult { IsReadOnly = isReadOnly, IsMultiline = isMultiline };
             grid.CellAnnotationInternal(rowEnum, row, fieldNameCSharp, result);
             if (isReadOnly)
             {
@@ -158,6 +160,7 @@
             cell.HtmlLeft = UtilFramework.StringNull(result.HtmlLeft);
             cell.HtmlRight = UtilFramework.StringNull(result.HtmlRight);
             cell.IsReadOnly = result.IsReadOnly;
+            cell.IsMultiline = result.IsMultiline;
             cell.IsPassword = result.IsPassword;
             cell.Align = result.Align;
             cell.IsFileUpload = result.IsFileUpload;
@@ -228,7 +231,7 @@
 
             if (isAdded)
             {
-                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null, isReadOnly: false); // CellFilter
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null, result.IsReadOnly, result.IsMultiline); // Cell Filter
             }
 
             return result;
@@ -295,7 +298,7 @@
 
             if (isAdded)
             {
-                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, row, column.IsReadOnly);
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, row, column.IsReadOnly, column.IsMultiline); // Cell
             }
 
             return result;
@@ -318,7 +321,7 @@
 
             if (isAdded)
             {
-                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null, isReadOnly: false); // CellNew
+                RenderAnnotation(grid, result, column.FieldNameCSharp, rowState.RowEnum, null, result.IsReadOnly, result.IsMultiline); // Cell New
             }
 
             return result;
