@@ -40,7 +40,7 @@
             {
                 EnvironmentList = new List<ConfigCliEnvironment>();
             }
-            var result = EnvironmentList.SingleOrDefault(item => item.EnvironmentName?.ToUpper() == EnvironmentNameGet());
+            var result = EnvironmentGet(EnvironmentNameGet());
             if (result == null)
             {
                 result = new ConfigCliEnvironment { EnvironmentName = EnvironmentNameGet() };
@@ -48,6 +48,14 @@
                 EnvironmentName = EnvironmentNameGet();
             }
             return result;
+        }
+
+        /// <summary>
+        /// Returns specific environment. Returns null if not found in config.
+        /// </summary>
+        internal ConfigCliEnvironment EnvironmentGet(string environmentName)
+        {
+            return EnvironmentList.SingleOrDefault(item => item.EnvironmentName?.ToUpper() == environmentName);
         }
 
         /// <summary>

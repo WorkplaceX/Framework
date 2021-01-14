@@ -31,6 +31,13 @@
             {
                 if (UtilCli.ArgumentValue(this, argumentName, out string name))
                 {
+                    if (configCli.EnvironmentGet(name?.ToUpper()) == null)
+                    {
+                        if (UtilCli.ConsoleReadYesNo(string.Format("Environment does not exist. Add to config? (Name={0})", name?.ToUpper())) == false)
+                        {
+                            return;
+                        }
+                    }
                     configCli.EnvironmentName = name?.ToUpper();
                 }
             }
