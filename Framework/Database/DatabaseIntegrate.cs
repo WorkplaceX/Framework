@@ -8,7 +8,6 @@ namespace DatabaseIntegrate.dbo
     using System.Linq;
     using System.Threading.Tasks;
     using Framework.DataAccessLayer;
-    using Framework.DataAccessLayer.Integrate;
     using Database.dbo;
 
     public static class FrameworkConfigGridIntegrateFramework

@@ -1,4 +1,4 @@
-﻿namespace Framework.DataAccessLayer.Integrate
+﻿namespace Framework.DataAccessLayer
 {
     using System;
     using System.Linq;

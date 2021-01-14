@@ -47,7 +47,6 @@
                     result.AppendLine(string.Format("    using System.Linq;"));
                     result.AppendLine(string.Format("    using System.Threading.Tasks;"));
                     result.AppendLine(string.Format("    using Framework.DataAccessLayer;"));
-                    result.AppendLine(string.Format("    using Framework.DataAccessLayer.Integrate;"));
                 }
                 result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
                 result.AppendLine();
