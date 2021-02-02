@@ -75,6 +75,11 @@
         public string ExternalProjectName { get; set; }
 
         /// <summary>
+        /// Gets or sets BingMapKey. See also class BingMap.
+        /// </summary>
+        public string BingMapKey { get; set; }
+
+        /// <summary>
         /// Gets ConfigCli.json. Used by CommandBuild. Created with default values if file does not exist.
         /// </summary>
         private static string FileName
@@ -173,6 +178,9 @@
                     DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
                 });
             }
+
+            // BingMap key
+            configServer.BingMapKey = configCli.BingMapKey;
 
             ConfigServer.Save(configServer);
         }
