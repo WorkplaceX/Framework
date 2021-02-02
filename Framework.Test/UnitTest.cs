@@ -1,5 +1,6 @@
 ﻿namespace Framework.Test
 {
+    using Framework.Doc;
     using Database.dbo;
     using Framework.DataAccessLayer;
     using Framework.Json;
@@ -14,6 +15,8 @@
         public static void Run()
         {
             {
+                UtilDoc.Debug();
+
                 MyHideComponent component = new MyHideComponent(null);
                 component.DtoList = new List<MyHideDto>();
                 component.DtoList.Add(new MyHideDto { Text = "DtoInList", IsHide = false });
