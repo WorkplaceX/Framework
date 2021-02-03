@@ -765,7 +765,7 @@
             public string NavigatePath { get; private set; }
 
             /// <summary>
-            /// Gets FileName. For example: "Readme.txt" or "/cms/Readme.txt". Is null, if navigatePath is for example: "/contact/". See also method IsFileName(); to extract it.
+            /// Gets FileName. For example: "Readme.txt" or "/doc/Readme.txt". Is null, if navigatePath is for example: "/contact/". See also method IsFileName(); to extract it.
             /// </summary>
             public string FileName { get; private set; }
 
@@ -775,14 +775,14 @@
             public string FileNameExtension { get; private set; }
 
             /// <summary>
-            /// Gets HttpQuery. Determine for example: "/cms/image.png?thumbnail"
+            /// Gets HttpQuery. Determine for example: "/doc/image.png?thumbnail"
             /// </summary>
             public IQueryCollection HttpQuery { get; private set; }
 
             /// <summary>
             /// Returns true, if navigatePath starts with navigatePathPrefix.
             /// </summary>
-            /// <param name="navigatePathPrefix">For example: "/cms/".</param>
+            /// <param name="navigatePathPrefix">For example: "/doc/".</param>
             /// <param name="navigatePath">For example: "/contact/".</param>
             public bool IsNavigatePath(string navigatePathPrefix, out string navigatePath)
             {
@@ -809,7 +809,7 @@
             /// <summary>
             /// Returns true, if navigatePath starts with navigatePathPrefix.
             /// </summary>
-            /// <param name="navigatePathPrefix">For example: "/cms/".</param>
+            /// <param name="navigatePathPrefix">For example: "/doc/".</param>
             public bool IsNavigatePath(string navigatePathPrefix)
             {
                 return IsNavigatePath(navigatePathPrefix, out _);
@@ -818,7 +818,7 @@
             /// <summary>
             /// Returns true, if navigatePath starts with navigatePathPrefix.
             /// </summary>
-            /// <param name="navigatePathPrefix">For example: "/cmsfile/".</param>
+            /// <param name="navigatePathPrefix">For example: "/doc/file/".</param>
             /// <param name="fileName">For example: "about/Logo.png".</param>
             public bool IsFileName(string navigatePathPrefix, out string fileName)
             {
