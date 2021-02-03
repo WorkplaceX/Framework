@@ -226,6 +226,7 @@
             // Build layout Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
 
+            // Version tag and build Build Angular and .NET Core server.
             UtilCli.VersionBuild(() => {
                 // Build Angular client (npm)
                 BuildAngular();

@@ -62,11 +62,15 @@
 
         SyntaxImage,
 
+        SyntaxPageBreak,
+
+        SyntaxParagraph,
+
+        SyntaxNewLine,
+
         SyntaxContent,
 
         SyntaxIgnore,
-
-        SyntaxPageBreak,
 
         HtmlDoc,
 
@@ -75,6 +79,8 @@
         HtmlComment,
 
         HtmlTitle,
+        
+        HtmlParagraph,
 
         HtmlBulletList,
 
@@ -113,9 +119,21 @@
         public int Index;
 
         /// <summary>
-        /// Gets List. Can be null if no children.
+        /// Gets List. Can be null if no children. See also method ListGet();
         /// </summary>
         public List<DataDoc> List { get; set; }
+
+        public List<DataDoc> ListGet()
+        {
+            if (List == null)
+            {
+                return new List<DataDoc>();
+            }
+            else
+            {
+                return List;
+            }
+        }
 
         public int ListCount()
         {
@@ -222,13 +240,15 @@
             Add(typeof(SyntaxPage));
             Add(typeof(SyntaxComment));
             Add(typeof(SyntaxTitle));
-            Add(typeof(SyntaxBullet));
             Add(typeof(SyntaxCode));
+            Add(typeof(SyntaxBullet));
             Add(typeof(SyntaxFont));
             Add(typeof(SyntaxLink));
             Add(typeof(SyntaxImage));
-            Add(typeof(SyntaxContent));
             Add(typeof(SyntaxPageBreak));
+            Add(typeof(SyntaxParagraph));
+            Add(typeof(SyntaxNewLine));
+            Add(typeof(SyntaxContent));
             Add(typeof(SyntaxIgnore)); // This should be the last SyntaX
 
             // Html
@@ -236,6 +256,7 @@
             Add(typeof(HtmlPage));
             Add(typeof(HtmlComment));
             Add(typeof(HtmlTitle));
+            Add(typeof(HtmlParagraph));
             Add(typeof(HtmlBulletList));
             Add(typeof(HtmlBulletItem));
             Add(typeof(HtmlFont));
@@ -450,7 +471,10 @@
             foreach (MdPage page in MdDoc.List)
             {
                 // Clear token list
-                page.Data.List = new List<DataDoc>();
+                if (page.Data.ListCount() > 0)
+                {
+                    page.Data.List = new List<DataDoc>();
+                }
 
                 // Lexer
                 mdRegistry.Parse(page);
@@ -690,9 +714,9 @@
                 }
 
                 // Parse
-                var countBefore = owner.Data.List.Count;
+                var countBefore = owner.Data.ListCount();
                 token.Parse(registry, owner, text, index);
-                var countAfter = owner.Data.List.Count;
+                var countAfter = owner.Data.ListCount();
 
                 UtilDoc.Assert(countBefore <= countAfter);
 
@@ -1210,10 +1234,13 @@
             // ParseOne
             foreach (MdPage page in mdDoc.List)
             {
-                var tokenBegin = (MdTokenBase)page.Data.List[0].Component();
-                var tokenEnd = (MdTokenBase)page.Data.List[page.Data.List.Count - 1].Component();
-                var syntaxPage = new SyntaxPage(syntaxDocOne, tokenBegin, tokenEnd);
-                SyntaxBase.ParseOne(this, syntaxPage);
+                if (page.Data.ListCount() > 0)
+                {
+                    var tokenBegin = (MdTokenBase)page.Data.List[0].Component();
+                    var tokenEnd = (MdTokenBase)page.Data.List[page.Data.List.Count - 1].Component();
+                    var syntaxPage = new SyntaxPage(syntaxDocOne, tokenBegin, tokenEnd);
+                    SyntaxBase.ParseOneMain(this, syntaxPage);
+                }
             }
 
             // ParseTwo
@@ -1464,17 +1491,20 @@
             return result;
         }
 
-        internal static void ParseOne(SyntaxRegistry registry, SyntaxBase owner)
+        /// <summary>
+        /// Main entry for ParseOne.
+        /// </summary>
+        internal static void ParseOneMain(SyntaxRegistry registry, SyntaxBase owner)
         {
             var tokenEnd = owner.TokenEnd;
             MdTokenBase tokenBegin;
             while ((tokenBegin = ParseOneToken(owner)) != null)
             {
                 bool isFind = false;
-                foreach (var syntax in registry.List)
+                foreach (var syntaxParser in registry.List)
                 {
                     var countBefore = owner.Data.ListCount();
-                    syntax.ParseOne(registry, owner, tokenBegin, tokenEnd);
+                    syntaxParser.ParseOne(registry, owner, tokenBegin, tokenEnd);
                     var countAfter = owner.Data.ListCount();
 
                     UtilDoc.Assert(countBefore <= countAfter);
@@ -1489,21 +1519,29 @@
             }
         }
 
-        internal static bool ParseTwoIsText(SyntaxBase syntax, bool isAllowLink)
+        internal static bool ParseTwoIsText(SyntaxBase syntax, bool isAllowLink, bool isAllowNewLine)
         {
             var result = syntax is SyntaxContent || syntax is SyntaxFont || syntax is SyntaxIgnore;
             if (isAllowLink)
             {
                 result = result || syntax is SyntaxLink;
             }
+            if (isAllowNewLine)
+            {
+                result = result || syntax is SyntaxNewLine;
+            }
             return result;
         }
 
-        internal static void ParseTwo(SyntaxBase syntax, SyntaxBase owner, SyntaxBase syntaxNew, Func<SyntaxBase, bool> isChild)
+        /// <summary>
+        /// Main entry for ParseTwo.
+        /// </summary>
+        internal static void ParseTwoBreak(SyntaxBase syntax, SyntaxBase owner, SyntaxBase syntaxNew, Func<SyntaxBase, bool> isChild)
         {
             bool isChildLocal = true;
-            foreach (SyntaxBase item in syntax.List)
+            foreach (DataDoc data in syntax.Data.ListGet())
             {
+                SyntaxBase item = (SyntaxBase)data.Component(); 
                 if (isChildLocal && isChild(item) == false)
                 {
                     isChildLocal = false;
@@ -1527,6 +1565,9 @@
 
         }
 
+        /// <summary>
+        /// Override this method to custom transform syntax tree ParseOne into ParseTwo.
+        /// </summary>
         internal virtual void ParseTwo(SyntaxBase owner)
         {
             // var syntaxNew = new SyntaxBase(owner, this);
@@ -1537,6 +1578,9 @@
             }
         }
 
+        /// <summary>
+        /// Override this method to custom transform syntax tree ParseTwo into html.
+        /// </summary>
         internal virtual void ParseHtml(HtmlBase owner)
         {
             foreach (SyntaxBase item in List)
@@ -1721,14 +1765,14 @@
                     new SyntaxIgnore(title, space);
                 }
 
-                ParseOne(registry, title);
+                ParseOneMain(registry, title);
             }
         }
 
         internal override void ParseTwo(SyntaxBase owner)
         {
             var title = new SyntaxTitle(owner, this);
-            ParseTwo(this, owner, title, (item) => ParseTwoIsText(item, isAllowLink: false)); // No link in title
+            ParseTwoBreak(this, owner, title, (syntax) => ParseTwoIsText(syntax, isAllowLink: false, isAllowNewLine: false)); // No link in title
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -1794,7 +1838,7 @@
                         new SyntaxIgnore(bullet, space);
                     }
 
-                    ParseOne(registry, bullet);
+                    ParseOneMain(registry, bullet);
                 }
             }
         }
@@ -1802,7 +1846,7 @@
         internal override void ParseTwo(SyntaxBase owner)
         {
             var bullet = new SyntaxBullet(owner, this);
-            ParseTwo(this, owner, bullet, (item) => ParseTwoIsText(item, isAllowLink: true)); // Link in bullet item.
+            ParseTwoBreak(this, owner, bullet, (syntax) => ParseTwoIsText(syntax, isAllowLink: true, isAllowNewLine: true)); // Link in bullet item.
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -1982,7 +2026,7 @@
                 {
                     var syntaxFont = new SyntaxFont(owner, tokenBegin, next);
                     new SyntaxIgnore(syntaxFont, tokenBegin);
-                    ParseOne(registry, syntaxFont);
+                    ParseOneMain(registry, syntaxFont);
                 }
                 else
                 {
@@ -2204,6 +2248,7 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
+            bool isFind = false;
             if (tokenBegin is MdContent)
             {
                 var contentEnd = tokenBegin;
@@ -2218,6 +2263,7 @@
                 }
 
                 new SyntaxContent(owner, tokenBegin, contentEnd);
+                isFind = true;
             }
 
             if (tokenBegin is MdSpace)
@@ -2226,10 +2272,11 @@
                 if (next is not MdNewLine && next is not MdComment)
                 {
                     new SyntaxContent(owner, tokenBegin, tokenBegin);
+                    isFind = true;
                 }
             }
 
-            if (tokenBegin is MdBracket)
+            if (!isFind)
             {
                 new SyntaxContent(owner, tokenBegin, tokenBegin);
             }
@@ -2243,6 +2290,135 @@
         internal override void ParseHtml(HtmlBase owner)
         {
             new HtmlContent(owner, this);
+        }
+    }
+
+    internal class SyntaxParagraph : SyntaxBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxParagraph()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxParagraph(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo.
+        /// </summary>
+        public SyntaxParagraph(SyntaxPage owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        {
+            if (tokenBegin is MdNewLine && tokenBegin.Next(tokenEnd) is MdNewLine)
+            {
+                var paragraph = new SyntaxParagraph(owner, tokenBegin, tokenEnd);
+
+                // Ignore NewLine tokens
+                var tokenParagraphList = new List<MdTokenBase>();
+                tokenParagraphList.Add(tokenBegin);
+                var next = tokenBegin;
+                while (Next(ref next, tokenEnd))
+                {
+                    if (next is not MdNewLine)
+                    {
+                        break;
+                    }
+                    tokenParagraphList.Add(next);
+                }
+                foreach (var item in tokenParagraphList)
+                {
+                    new SyntaxIgnore(paragraph, item);
+                }
+
+                ParseOneMain(registry, paragraph);
+            }
+        }
+
+        private static bool ParseTwoIsChild(SyntaxBase syntax)
+        {
+            return !(
+                syntax is SyntaxTitle ||
+                syntax is SyntaxPageBreak ||
+                syntax is SyntaxImage ||
+                syntax is SyntaxCode ||
+                syntax is SyntaxParagraph);
+        }
+
+        internal override void ParseTwo(SyntaxBase owner)
+        {
+            var paragraph = new SyntaxParagraph((SyntaxPage)owner, this);
+            ParseTwoBreak(this, owner, paragraph, (syntax) => ParseTwoIsChild(syntax));
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            var paragraph = new HtmlParagraph(owner, this);
+
+            base.ParseHtml(paragraph);
+        }
+    }
+
+    internal class SyntaxNewLine : SyntaxBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxNewLine()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxNewLine(SyntaxBase owner, MdTokenBase token)
+            : base(owner, token, token)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo.
+        /// </summary>
+        public SyntaxNewLine(SyntaxBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        {
+            if (tokenBegin is MdNewLine)
+            {
+                UtilDoc.Assert(tokenBegin.Next(tokenEnd) is not MdNewLine); // Detected by SyntaxParagraph.
+                new SyntaxNewLine(owner, tokenBegin);
+            }
+        }
+
+        internal override void ParseTwo(SyntaxBase owner)
+        {
+            new SyntaxNewLine(owner, this);
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            // No html for NewLine token.
         }
     }
 
@@ -2277,7 +2453,8 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
-            new SyntaxIgnore(owner, tokenBegin);
+            // No parser found for tokenBegin!
+            throw new Exception("Syntax unknown!");
         }
 
         internal override void ParseTwo(SyntaxBase owner)
@@ -2320,6 +2497,7 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
+            // Detect (Page)
             if (ParseOneIsNewLine<MdBracket>(tokenBegin, tokenEnd, out var tokenNewLine, out var tokenSpace, out var token))
             {
                 if (token.TextBracket == "(")
@@ -2328,21 +2506,24 @@
                     {
                         if (bracketEnd.TextBracket == ")")
                         {
-                            // Ignore leading new line
-                            if (tokenNewLine != null)
+                            if (content.Text == "Page")
                             {
-                                new SyntaxIgnore(owner, tokenNewLine);
+                                // Ignore leading new line
+                                if (tokenNewLine != null)
+                                {
+                                    new SyntaxIgnore(owner, tokenNewLine);
+                                }
+                                // Ignore leading space
+                                if (tokenSpace != null)
+                                {
+                                    new SyntaxIgnore(owner, tokenSpace);
+                                }
+                                var pageBreak = new SyntaxPageBreak(owner, token, tokenEnd);
+                                new SyntaxIgnore(pageBreak, token);
+                                new SyntaxIgnore(pageBreak, content);
+                                new SyntaxIgnore(pageBreak, bracketEnd);
+                                ParseOneMain(registry, pageBreak);
                             }
-                            // Ignore leading space
-                            if (tokenSpace != null)
-                            {
-                                new SyntaxIgnore(owner, tokenSpace);
-                            }
-                            var pageBreak = new SyntaxPageBreak(owner, token, tokenEnd);
-                            new SyntaxIgnore(pageBreak, token);
-                            new SyntaxIgnore(pageBreak, content);
-                            new SyntaxIgnore(pageBreak, bracketEnd);
-                            ParseOne(registry, pageBreak);
                         }
                     }
                 }
@@ -2446,12 +2627,12 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
-            result.Append("<html><head></head><body>");
+            // result.Append("<html><head></head><body>");
         }
 
         internal override void RenderEnd(StringBuilder result)
         {
-            result.Append("</body></html>");
+            // result.Append("</body></html>");
         }
     }
 
@@ -2491,6 +2672,28 @@
         internal override void RenderEnd(StringBuilder result)
         {
             result.Append("</h1>");
+        }
+    }
+
+    internal class HtmlParagraph : HtmlBase
+    {
+        /// <summary>
+        /// Constructor parse html.
+        /// </summary>
+        public HtmlParagraph(HtmlBase owner, SyntaxParagraph syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void RenderBegin(StringBuilder result)
+        {
+            result.Append("<p>");
+        }
+
+        internal override void RenderEnd(StringBuilder result)
+        {
+            result.Append("</p>");
         }
     }
 
@@ -2652,13 +2855,14 @@
             var appDoc = new AppDoc();
             var mdPage = new MdPage(appDoc.MdDoc,
 @"
-![My Cli](https://workplacex.org/Doc/Cli.png)
-* [Node.js](https://nodejs.org/en/) (LTS Version) 
-#   Title Book 
+# Hello
+World
 * One 
-* Two**Bold**   <!-- Comment --> 
-(Page)  
-# Page2    <!-- Comment2\r-->http://google.com
+* Two 
+Click: [workplacex.org](https://workplacex.org)
+* Three
+
+![My Cli](https://workplacex.org/Doc/Cli.png)
 ");
             // var mdPage = new MdPage(appDoc, " #Title Hello\r\nWorld\nThis     is the <!-- --> \r ## Title \r\n![Image](a.png)");
 
@@ -2674,9 +2878,8 @@
 
             textDebug += "\r\n\r\n" + textHtml;
 
-            File.WriteAllText(@"C:\Temp\UtilDoc.Debug.txt", textDebug);
-            File.WriteAllText(@"C:\Temp\UtilDoc.Debug.html", textHtml);
-
+            File.WriteAllText(@"C:\Temp\Debug.txt", textDebug);
+            File.WriteAllText(@"C:\Temp\Debug.html", textHtml);
             // Console.WriteLine(textDebug);
         }
 

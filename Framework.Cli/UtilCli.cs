@@ -330,7 +330,7 @@
 
             string versionBuild = string.Format("Build (WorkplaceX={3}; Commit={0}; Pc={1}; Time={2} (UTC);)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()), UtilFramework.Version);
 
-            string findServer = "/* VersionBuild */"; // See also: method CommandBuild.BuildServer();
+            string findServer = "/* VersionBuild */"; // See also: method CommandBuild.Execute(); and method CommandStart.Execute();
             string replaceServer = string.Format("                return \"{0}\"; /* VersionBuild */", versionBuild);
             string findClient = "/* VersionBuild */"; // See also: file data.service.ts
             string replaceClient = string.Format("  public VersionBuild: string = \"{0}\"; /* VersionBuild */", versionBuild);

@@ -137,6 +137,7 @@
             else
             {
                 string folderName = UtilFramework.FolderName + @"Application.Server/";
+                // Version tag and build only .NET Core server.
                 UtilCli.VersionBuild(() =>
                 {
                     UtilCli.DotNet(folderName, "build");

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Framework
 {
     using Database.dbo;
+    using Framework.Doc;
     using Framework.Server;
     using System;
     using System.Collections.Concurrent;
@@ -39,7 +40,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.48.41";
+                return "v3.48.42";
             }
         }
 
@@ -50,9 +51,29 @@ namespace Framework
         {
             get
             {
-                // See also: method CommandBuild.BuildServer();
+                // See also: method UtilCli.VersionBuild();
+                // Version tag with commit sha, build pc and time stamp.
                 return "Build (local)"; /* VersionBuild */
             }
+        }
+
+        /// <summary>
+        /// Convert markdown text to html.
+        /// </summary>
+        public static string TextMdToHtml(string textMd)
+        {
+            var appDoc = new AppDoc();
+            new MdPage(appDoc.MdDoc, textMd);
+            appDoc.Parse();
+            var textHtml = appDoc.HtmlDoc.Render();
+            
+            //// Debug
+            //var textDebug = UtilDoc.TextDebug(appDoc);
+            //textDebug += "\r\n\r\n" + textHtml;
+            //File.WriteAllText(@"C:\Temp\Debug.txt", textDebug);
+            //File.WriteAllText(@"C:\Temp\Debug.html", textHtml);
+
+            return textHtml;
         }
 
         /// <summary>
