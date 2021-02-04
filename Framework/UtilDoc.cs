@@ -2033,7 +2033,11 @@
                 }
                 else
                 {
-                    if (owner is not SyntaxFont)
+                    if (owner is SyntaxFont syntaxFont)
+                    {
+                        new SyntaxIgnore(syntaxFont, tokenBegin);
+                    }
+                    else
                     {
                         new SyntaxContent(owner, tokenBegin, tokenBegin);
                     }
