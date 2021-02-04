@@ -1328,6 +1328,13 @@
                 bool isShorten = Index(syntax.Data.TokenIdEnd) <= Index(owner.Data.TokenIdEnd);
                 bool isExtend = Index(syntax.Data.TokenIdBegin) == Index(owner.Data.TokenIdEnd) + 1;
                 UtilDoc.Assert(isShorten ^ isExtend);
+                var next = owner.Data;
+                while (next.DataEnum != DataEnum.SyntaxDoc)
+                {
+                    UtilDoc.Assert(next.Owner.List.Last() == next); // Modify TokenIdEnd only on last item
+                    next.TokenIdEnd = syntax.Data.TokenIdEnd; // Modify TokenIdEnd
+                    next = next.Owner;
+                }
                 owner.Data.TokenIdEnd = syntax.Data.TokenIdEnd;
                 UtilDoc.Assert(Index(owner.Data.TokenIdBegin) <= Index(owner.Data.TokenIdEnd));
             }
@@ -1572,13 +1579,35 @@
                 }
                 if (isOwnerNewChildLocal == false)
                 {
+                    // item is not child
                     item.ParseTwo(owner);
                 }
                 else
                 {
+                    // item is child
                     item.ParseTwo(ownerNew);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns paragraph.
+        /// </summary>
+        internal static SyntaxBase ParseTwoParagraph(SyntaxBase owner, SyntaxBase syntax)
+        {
+            var result = owner;
+            if (owner is SyntaxPage page)
+            {
+                if (owner.Data.ListCount() > 0 && owner.Data.List.Last().DataEnum == DataEnum.SyntaxParagraph)
+                {
+                    result = (SyntaxBase)owner.Data.List.Last().Component();
+                }
+                else
+                {
+                    result = new SyntaxParagraph(page, syntax);
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -1753,7 +1782,7 @@
         /// <summary>
         /// Constructor ParseTwo.
         /// </summary>
-        public SyntaxTitle(SyntaxBase owner, SyntaxBase syntax)
+        public SyntaxTitle(SyntaxPage owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
 
@@ -1784,7 +1813,7 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            var title = new SyntaxTitle(owner, this);
+            var title = new SyntaxTitle((SyntaxPage)owner, this);
             ParseTwoMainBreak(owner, title, this, (syntax) => ParseTwoIsText(syntax, isAllowLink: false, isAllowNewLine: false)); // No link in title
         }
 
@@ -1818,7 +1847,7 @@
         /// <summary>
         /// Constructor ParseTwo.
         /// </summary>
-        public SyntaxBullet(SyntaxBase owner, SyntaxBase syntax)
+        public SyntaxBullet(SyntaxPage owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
 
@@ -1853,7 +1882,7 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            var bullet = new SyntaxBullet(owner, this);
+            var bullet = new SyntaxBullet((SyntaxPage)owner, this);
             ParseTwoMainBreak(owner, bullet, this, (syntax) => ParseTwoIsText(syntax, isAllowLink: true, isAllowNewLine: true)); // Link in bullet item.
         }
 
@@ -2151,7 +2180,7 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            new SyntaxLink(owner, this);
+            new SyntaxLink(ParseTwoParagraph(owner, this), this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2183,7 +2212,7 @@
         /// <summary>
         /// Constructor ParseTwo.
         /// </summary>
-        public SyntaxImage(SyntaxBase owner, SyntaxImage syntax)
+        public SyntaxImage(SyntaxPage owner, SyntaxImage syntax)
             : base(owner, syntax)
         {
             Data.Link = syntax.Link;
@@ -2222,7 +2251,7 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            new SyntaxImage(owner, this);
+            new SyntaxImage((SyntaxPage)owner, this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2298,7 +2327,7 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            new SyntaxContent(owner, this);
+            new SyntaxContent(ParseTwoParagraph(owner, this), this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2353,6 +2382,7 @@
             bool result = !(
                 syntax is SyntaxCode ||
                 syntax is SyntaxTitle ||
+                syntax is SyntaxBullet ||
                 syntax is SyntaxPageBreak ||
                 syntax is SyntaxImage ||
                 syntax is SyntaxParagraph);
@@ -2420,7 +2450,7 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            new SyntaxNewLine(owner, this);
+            new SyntaxNewLine(ParseTwoParagraph(owner, this), this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2690,12 +2720,12 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
-            result.Append("<p>[p]");
+            result.Append("<p>(p)");
         }
 
         internal override void RenderEnd(StringBuilder result)
         {
-            result.Append("[/p]</p>");
+            result.Append("(/p)</p>");
         }
     }
 
@@ -2867,10 +2897,14 @@ Click: [workplacex.org](https://workplacex.org)
 
             text =
 @"
+My
 
 # F Hello [](https://workplacex.org)
+
 ppp
 ";
+
+            text = "abc def ghi";
 
             // Doc
             var appDoc = new AppDoc();
