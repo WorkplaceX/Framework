@@ -1560,6 +1560,8 @@
         /// <param name="isOwnerNewChild">Returns true, if item is a child of ownerNew. If false, it is a child of owner.</param>
         internal static void ParseTwoMainBreak(SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
         {
+            UtilDoc.Assert(ownerNew.Owner.Data == owner.Data);
+
             bool isOwnerNewChildLocal = true;
             foreach (DataDoc data in syntax.Data.ListGet())
             {
@@ -1661,9 +1663,8 @@
         {
             var page = new SyntaxPage(owner, this);
 
-            base.ParseTwo(page);
+            ParseTwoMain(page, this);
         }
-
 
         internal override void ParseHtml(HtmlBase owner)
         {
@@ -2050,7 +2051,7 @@
                 ownerFont = new SyntaxFont(owner, this);
             }
 
-            base.ParseTwo(ownerFont);
+            ParseTwoMain(ownerFont, this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2117,7 +2118,10 @@
             {
                 var next = tokenBegin.Next(tokenEnd);
                 ParseOneIsLinkText(next, tokenEnd, out var linkTextEnd, out string linkText);
-                next = linkTextEnd.Next(tokenEnd);
+                if (linkText != null)
+                {
+                    next = linkTextEnd.Next(tokenEnd);
+                }
                 if (next is MdBracket bracketSquareEnd && bracketSquareEnd.TextBracket == "]")
                 {
                     next = next.Next(tokenEnd);
@@ -2129,6 +2133,10 @@
                             next = linkEnd.Next(tokenEnd);
                             if (next is MdBracket bracketRoundEnd && bracketRoundEnd.TextBracket == ")")
                             {
+                                if (linkText == null)
+                                {
+                                    linkText = link;
+                                }
                                 new SyntaxLink(owner, tokenBegin, next, link, linkText);
                             }
                         }
@@ -2337,11 +2345,12 @@
 
         private static bool ParseTwoIsChild(SyntaxBase syntax)
         {
+            // Not a child of a paragraph
             bool result = !(
+                syntax is SyntaxCode ||
                 syntax is SyntaxTitle ||
                 syntax is SyntaxPageBreak ||
                 syntax is SyntaxImage ||
-                syntax is SyntaxCode ||
                 syntax is SyntaxParagraph);
             return result;
         }
@@ -2522,7 +2531,7 @@
         internal override void ParseTwo(SyntaxBase owner)
         {
             var page = new SyntaxPageBreak(owner, this);
-            base.ParseTwo(page);
+            ParseTwoMain(page, this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2677,12 +2686,12 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
-            result.Append("<p>");
+            result.Append("<p>[p]");
         }
 
         internal override void RenderEnd(StringBuilder result)
         {
-            result.Append("</p>");
+            result.Append("[/p]</p>");
         }
     }
 
@@ -2854,11 +2863,10 @@ Click: [workplacex.org](https://workplacex.org)
 
             text =
 @"
-* A
 
-* B
-
-![My Cli](https://workplacex.org/Doc/Cli.png)";
+# F Hello [](https://workplacex.org)
+ppp
+";
 
             // Doc
             var appDoc = new AppDoc();
