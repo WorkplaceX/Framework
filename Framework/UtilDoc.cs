@@ -24,6 +24,8 @@
 
         MdSpace,
 
+        MdParagraph,
+
         MdNewLine,
 
         MdComment,
@@ -224,6 +226,7 @@
             Add(typeof(MdDoc));
             Add(typeof(MdPage));
             Add(typeof(MdSpace));
+            Add(typeof(MdParagraph));
             Add(typeof(MdNewLine));
             Add(typeof(MdComment));
             Add(typeof(MdTitle));
@@ -377,17 +380,22 @@
             }
         }
 
-        private Component Next(Component componentEnd)
+        /// <summary>
+        /// Returns next or previous component.
+        /// </summary>
+        /// <param name="componentBeginEnd">Can be null for no range check.</param>
+        /// <param name="offset">For example 1 (next) or -1 (previous)</param>
+        private Component Next(Component componentBeginEnd, int offset)
         {
             Component result = null;
             if (Data.Owner != null) // Not root
             {
                 UtilDoc.Assert(Data.Owner.List[Data.Index] == Data); // Index check
-                if (this != componentEnd) // Reached not yet end
+                if (this != componentBeginEnd) // Reached not yet begin or end
                 {
-                    if (Data.Index + 1 < Data.Owner.List.Count) // There is a next component
+                    if (Data.Index + offset >= 0 && Data.Index + offset < Data.Owner.List.Count) // There is a next component
                     {
-                        result = Data.Owner.List[Data.Index + 1].Component(); // Move next
+                        result = Data.Owner.List[Data.Index + offset].Component(); // Move next
                     }
                 }
             }
@@ -396,12 +404,12 @@
 
         public T Next<T>(T componentEnd) where T : Component
         {
-            var result = Next((Component)componentEnd);
+            var result = Next(componentEnd, offset: 1);
             return (T)result;
         }
 
         /// <summary>
-        /// Returns true if next component.
+        /// Returns true, if next component.
         /// </summary>
         public static bool Next<T>(ref T component, T componentEnd) where T : Component
         {
@@ -411,6 +419,16 @@
                 component = result;
             }
             return result != null;
+        }
+
+        /// <summary>
+        /// Returns previous component.
+        /// </summary>
+        /// <param name="componentBegin">Can be null for no range check.</param>
+        public T Previous<T>(T componentBegin) where T : Component
+        {
+            var result = Next(componentBegin, offset: -1);
+            return (T)result;
         }
 
         public void Serialize(out string json)
@@ -665,38 +683,6 @@
             return result;
         }
 
-        /// <summary>
-        /// Returns true, if current text parse index is on a new line. Allows leading spaces.
-        /// </summary>
-        public static bool ParseIsNewLine(MdPage owner)
-        {
-            bool result = false;
-
-            // Previous token
-            var previous = (MdTokenBase)owner.Data.Last(isOrDefault: true)?.Component();
-            if (previous == null)
-            {
-                result = true;
-            }
-            if (previous is MdNewLine)
-            {
-                result = true;
-            }
-
-            // Previous previous token
-            var previousPrevious = (MdTokenBase)owner.Data.Last(isOrDefault: true, offset: 1)?.Component();
-            if (previous is MdSpace && previousPrevious == null)
-            {
-                result = true;
-            }
-            if (previous is MdSpace && previousPrevious is MdNewLine)
-            {
-                result = true;
-            }
-
-            return result;
-        }
-
         internal static bool Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, bool isExcludeContent = false)
         {
             var result = false;
@@ -737,6 +723,42 @@
         }
     }
 
+    internal class MdParagraph : MdTokenBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public MdParagraph()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor instance token.
+        /// </summary>
+        public MdParagraph(MdPage owner, int length)
+            : base(owner, length)
+        {
+
+        }
+
+        internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
+        {
+            int next = index;
+            int count = 0;
+            while (MdNewLine.Parse(text, next, out int length))
+            {
+                next += length;
+                count += 1;
+            }
+            if (count >= 2)
+            {
+                new MdParagraph(owner, next - index);
+            }
+        }
+    }
+
     internal class MdNewLine : MdTokenBase
     {
         /// <summary>
@@ -745,12 +767,7 @@
         public MdNewLine()
             : base()
         {
-            textFindList = new List<string>
-            {
-                "\r\n",
-                "\r",
-                "\n"
-            };
+
         }
 
         /// <summary>
@@ -763,19 +780,37 @@
         }
 
         /// <summary>
-        /// Used in factory mode only.
+        /// Returns true, if NewLine.
         /// </summary>
-        private readonly List<string> textFindList;
-
-        internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
+        internal static bool Parse(ReadOnlySpan<char> text, int index, out int length)
         {
+            var result = false;
+            length = 0;
+
+            var textFindList = new List<string>
+            {
+                "\r\n",
+                "\r",
+                "\n"
+            };
+
             foreach (var textFind in textFindList)
             {
                 if (text.StartsWith(index, textFind))
                 {
-                    new MdNewLine(owner, textFind.Length);
+                    result = true;
+                    length = textFind.Length;
                     break;
                 }
+            }
+            return result;
+        }
+
+        internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
+        {
+            if (Parse(text, index, out int length))
+            {
+                new MdNewLine(owner, length);
             }
         }
     }
@@ -874,29 +909,21 @@
 
         public int TitleLevel => Data.TitleLevel;
 
-        private static void Parse(MdPage page, int titleLevel)
-        {
-            if (ParseIsNewLine(page))
-            {
-                new MdTitle(page, titleLevel, titleLevel);
-            }
-        }
-
         internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
         {
             if (!text.StartsWith(index, "####"))
             {
                 if (text.StartsWith(index, "### "))
                 {
-                    Parse(owner, 3);
+                    new MdTitle(owner, length: 3, titleLevel: 3);
                 }
                 if (text.StartsWith(index, "## "))
                 {
-                    Parse(owner, 2);
+                    new MdTitle(owner, length: 2, titleLevel: 2);
                 }
                 if (text.StartsWith(index, "# "))
                 {
-                    Parse(owner, 1);
+                    new MdTitle(owner, length: 1, titleLevel: 1);
                 }
             }
         }
@@ -1296,23 +1323,13 @@
             Data.TokenIdBegin = syntax.TokenBegin.Data.Id;
             Data.TokenIdEnd = syntax.TokenEnd.Data.Id;
 
-            if (owner is SyntaxBase)
+            if (owner is not SyntaxDoc)
             {
-                if (Data.Index == 0)
-                {
-                    if (owner is not SyntaxDoc)
-                    {
-                        UtilDoc.Assert(Index(syntax.Data.TokenIdBegin) == Index(owner.Data.TokenIdBegin));
-                    }
-                }
-                else
-                {
-                    bool isShorten = Index(syntax.Data.TokenIdEnd) <= Index(owner.Data.TokenIdEnd);
-                    bool isExtend = Index(syntax.Data.TokenIdBegin) == Index(owner.Data.TokenIdEnd) + 1;
-                    UtilDoc.Assert(isShorten ^ isExtend);
-                    owner.Data.TokenIdEnd = syntax.Data.TokenIdEnd;
-                    UtilDoc.Assert(Index(owner.Data.TokenIdBegin) <= Index(owner.Data.TokenIdEnd));
-                }
+                bool isShorten = Index(syntax.Data.TokenIdEnd) <= Index(owner.Data.TokenIdEnd);
+                bool isExtend = Index(syntax.Data.TokenIdBegin) == Index(owner.Data.TokenIdEnd) + 1;
+                UtilDoc.Assert(isShorten ^ isExtend);
+                owner.Data.TokenIdEnd = syntax.Data.TokenIdEnd;
+                UtilDoc.Assert(Index(owner.Data.TokenIdBegin) <= Index(owner.Data.TokenIdEnd));
             }
 
             CreateValidate();
@@ -1396,28 +1413,21 @@
         /// Returns true, if tokenBegin is a new line starting with token T.
         /// </summary>
         /// <typeparam name="T">Token to search.</typeparam>
-        /// <param name="tokenNewLine">Leading new line.</param>
         /// <param name="tokenSpace">Leading space.</param>
         /// <param name="token">Found token.</param>
-        internal static bool ParseOneIsNewLine<T>(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdNewLine tokenNewLine, out MdSpace tokenSpace, out T token) where T : MdTokenBase
+        internal static bool ParseOneIsNewLine<T>(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdSpace tokenSpace, out T token) where T : MdTokenBase
         {
             var result = false;
 
             bool isStart;
-            tokenNewLine = null;
             tokenSpace = null;
             token = null;
 
             Component component = tokenBegin;
 
-            // Leading start
-            isStart = tokenBegin.IndexBegin == 0;
-            // Leading NewLine
-            if (component is MdNewLine line)
-            {
-                tokenNewLine = line;
-                component = component.Next(tokenEnd);
-            }
+            // Leading start or NewLine or Paragraph
+            var previous = tokenBegin.Previous((MdTokenBase)null);
+            isStart = previous == null || previous is MdNewLine || previous is MdParagraph;
             // Leading Space
             if (component is MdSpace space)
             {
@@ -1430,7 +1440,7 @@
                 token = (T)component;
             }
 
-            if ((isStart || tokenNewLine != null) && token != null)
+            if (isStart && token != null)
             {
                 result = true;
             }
@@ -1743,13 +1753,8 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
-            if (ParseOneIsNewLine<MdTitle>(tokenBegin, tokenEnd, out MdNewLine tokenNewLine, out MdSpace tokenSpace, out var token))
+            if (ParseOneIsNewLine<MdTitle>(tokenBegin, tokenEnd, out MdSpace tokenSpace, out var token))
             {
-                // Ignore leading new line
-                if (tokenNewLine != null)
-                {
-                    new SyntaxIgnore(owner, tokenNewLine);
-                }
                 // Ignore leading space
                 if (tokenSpace != null)
                 {
@@ -1813,16 +1818,11 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
-            if (ParseOneIsNewLine<MdBullet>(tokenBegin, tokenEnd, out MdNewLine tokenNewLine, out MdSpace tokenSpace, out var token))
+            if (ParseOneIsNewLine<MdBullet>(tokenBegin, tokenEnd, out MdSpace tokenSpace, out var token))
             {
                 // Space after star
                 if (token.Next(tokenEnd) is MdSpace)
                 {
-                    // Ignore leading new line
-                    if (tokenNewLine != null)
-                    {
-                        new SyntaxIgnore(owner, tokenNewLine);
-                    }
                     // Ignore leading space
                     if (tokenSpace != null)
                     {
@@ -1894,7 +1894,7 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
-            if (ParseOneIsNewLine<MdCode>(tokenBegin, tokenEnd, out MdNewLine tokenNewLine, out MdSpace tokenSpace, out var codeBegin))
+            if (ParseOneIsNewLine<MdCode>(tokenBegin, tokenEnd, out MdSpace tokenSpace, out var codeBegin))
             {
                 MdCode codeEnd = null;
                 MdTokenBase next = codeBegin;
@@ -1942,11 +1942,6 @@
                     // Code content exists
                     if (codeContentBegin != null)
                     {
-                        // Ignore leading new line
-                        if (tokenNewLine != null)
-                        {
-                            new SyntaxIgnore(owner, tokenNewLine);
-                        }
                         // Ignore leading space
                         if (tokenSpace != null)
                         {
@@ -2324,45 +2319,33 @@
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
-            if (tokenBegin is MdNewLine && tokenBegin.Next(tokenEnd) is MdNewLine)
+            if (tokenBegin is MdParagraph)
             {
                 var paragraph = new SyntaxParagraph(owner, tokenBegin, tokenEnd);
-
-                // Ignore NewLine tokens
-                var tokenParagraphList = new List<MdTokenBase>();
-                tokenParagraphList.Add(tokenBegin);
-                var next = tokenBegin;
-                while (Next(ref next, tokenEnd))
-                {
-                    if (next is not MdNewLine)
-                    {
-                        break;
-                    }
-                    tokenParagraphList.Add(next);
-                }
-                foreach (var item in tokenParagraphList)
-                {
-                    new SyntaxIgnore(paragraph, item);
-                }
-
+                // Ignore paragrpah token
+                new SyntaxIgnore(paragraph, tokenBegin);
                 ParseOneMain(registry, paragraph);
             }
         }
 
         private static bool ParseTwoIsChild(SyntaxBase syntax)
         {
-            return !(
+            bool result = !(
                 syntax is SyntaxTitle ||
                 syntax is SyntaxPageBreak ||
                 syntax is SyntaxImage ||
                 syntax is SyntaxCode ||
                 syntax is SyntaxParagraph);
+            return result;
         }
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            var paragraph = new SyntaxParagraph((SyntaxPage)owner, this);
-            ParseTwoBreak(this, owner, paragraph, (syntax) => ParseTwoIsChild(syntax));
+            if (owner is SyntaxPage page)
+            {
+                var paragraph = new SyntaxParagraph(page, this);
+                ParseTwoBreak(this, page, paragraph, (syntax) => ParseTwoIsChild(syntax));
+            }
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2498,7 +2481,7 @@
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
             // Detect (Page)
-            if (ParseOneIsNewLine<MdBracket>(tokenBegin, tokenEnd, out var tokenNewLine, out var tokenSpace, out var token))
+            if (ParseOneIsNewLine<MdBracket>(tokenBegin, tokenEnd, out var tokenSpace, out var token))
             {
                 if (token.TextBracket == "(")
                 {
@@ -2508,11 +2491,6 @@
                         {
                             if (content.Text == "Page")
                             {
-                                // Ignore leading new line
-                                if (tokenNewLine != null)
-                                {
-                                    new SyntaxIgnore(owner, tokenNewLine);
-                                }
                                 // Ignore leading space
                                 if (tokenSpace != null)
                                 {
@@ -2851,9 +2829,7 @@
     {
         public static void Debug()
         {
-            // Doc
-            var appDoc = new AppDoc();
-            var mdPage = new MdPage(appDoc.MdDoc,
+            string text =
 @"
 # Hello
 World
@@ -2863,7 +2839,11 @@ Click: [workplacex.org](https://workplacex.org)
 * Three
 
 ![My Cli](https://workplacex.org/Doc/Cli.png)
-");
+";
+
+            // Doc
+            var appDoc = new AppDoc();
+            var mdPage = new MdPage(appDoc.MdDoc, text);
             // var mdPage = new MdPage(appDoc, " #Title Hello\r\nWorld\nThis     is the <!-- --> \r ## Title \r\n![Image](a.png)");
 
             // mdPage.Parse(appDoc.SyntaxDocOne, appDoc.SyntaxDocTwo, appDoc.HtmlDoc);
