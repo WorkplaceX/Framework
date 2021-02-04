@@ -1271,7 +1271,7 @@
             }
 
             // ParseTwo
-            syntaxDocOne.ParseTwo(syntaxDocTwo);
+            SyntaxBase.ParseTwoMain(syntaxDocTwo, syntaxDocOne);
 
             // ParseHtml
             syntaxDocTwo.ParseHtml(htmlDoc);
@@ -1546,23 +1546,35 @@
         /// <summary>
         /// Main entry for ParseTwo.
         /// </summary>
-        internal static void ParseTwoBreak(SyntaxBase syntax, SyntaxBase owner, SyntaxBase syntaxNew, Func<SyntaxBase, bool> isChild)
+        internal static void ParseTwoMain(SyntaxBase owner, SyntaxBase syntax)
         {
-            bool isChildLocal = true;
+            foreach (SyntaxBase item in syntax.List)
+            {
+                item.ParseTwo(owner);
+            }
+        }
+
+        /// <summary>
+        /// Main entry for ParseTwo with break.
+        /// </summary>
+        /// <param name="isOwnerNewChild">Returns true, if item is a child of ownerNew. If false, it is a child of owner.</param>
+        internal static void ParseTwoMainBreak(SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
+        {
+            bool isOwnerNewChildLocal = true;
             foreach (DataDoc data in syntax.Data.ListGet())
             {
                 SyntaxBase item = (SyntaxBase)data.Component(); 
-                if (isChildLocal && isChild(item) == false)
+                if (isOwnerNewChildLocal && isOwnerNewChild(item) == false)
                 {
-                    isChildLocal = false;
+                    isOwnerNewChildLocal = false;
                 }
-                if (isChildLocal == false)
+                if (isOwnerNewChildLocal == false)
                 {
                     item.ParseTwo(owner);
                 }
                 else
                 {
-                    item.ParseTwo(syntaxNew);
+                    item.ParseTwo(ownerNew);
                 }
             }
         }
@@ -1580,12 +1592,7 @@
         /// </summary>
         internal virtual void ParseTwo(SyntaxBase owner)
         {
-            // var syntaxNew = new SyntaxBase(owner, this);
-
-            foreach (SyntaxBase item in List)
-            {
-                item.ParseTwo(owner);
-            }
+            ParseTwoMain(owner, this);
         }
 
         /// <summary>
@@ -1777,7 +1784,7 @@
         internal override void ParseTwo(SyntaxBase owner)
         {
             var title = new SyntaxTitle(owner, this);
-            ParseTwoBreak(this, owner, title, (syntax) => ParseTwoIsText(syntax, isAllowLink: false, isAllowNewLine: false)); // No link in title
+            ParseTwoMainBreak(owner, title, this, (syntax) => ParseTwoIsText(syntax, isAllowLink: false, isAllowNewLine: false)); // No link in title
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -1846,7 +1853,7 @@
         internal override void ParseTwo(SyntaxBase owner)
         {
             var bullet = new SyntaxBullet(owner, this);
-            ParseTwoBreak(this, owner, bullet, (syntax) => ParseTwoIsText(syntax, isAllowLink: true, isAllowNewLine: true)); // Link in bullet item.
+            ParseTwoMainBreak(owner, bullet, this, (syntax) => ParseTwoIsText(syntax, isAllowLink: true, isAllowNewLine: true)); // Link in bullet item.
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -2344,7 +2351,11 @@
             if (owner is SyntaxPage page)
             {
                 var paragraph = new SyntaxParagraph(page, this);
-                ParseTwoBreak(this, page, paragraph, (syntax) => ParseTwoIsChild(syntax));
+                ParseTwoMainBreak(page, paragraph, this, (syntax) => ParseTwoIsChild(syntax));
+            }
+            else
+            {
+                ParseTwoMain(owner, this);
             }
         }
 
@@ -2840,6 +2851,14 @@ Click: [workplacex.org](https://workplacex.org)
 
 ![My Cli](https://workplacex.org/Doc/Cli.png)
 ";
+
+            text =
+@"
+* A
+
+* B
+
+![My Cli](https://workplacex.org/Doc/Cli.png)";
 
             // Doc
             var appDoc = new AppDoc();
