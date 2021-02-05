@@ -15,8 +15,10 @@
         public static void Run()
         {
             {
+                UnitTestMd.Run();
                 UtilDoc.Debug();
-
+            }
+            {
                 MyHideComponent component = new MyHideComponent(null);
                 component.DtoList = new List<MyHideDto>();
                 component.DtoList.Add(new MyHideDto { Text = "DtoInList", IsHide = false });
@@ -557,6 +559,48 @@
                     UtilFramework.Assert(exception.Message == "Referenced ComponentJson not in same object graph!");
                 }
             }
+        }
+    }
+
+    public static class UnitTestMd
+    {
+        public static void Run()
+        {
+            List<Item> list = new List<Item>();
+            list.Add(new Item { TextMd = "Text", TextHtml = "<p>(p)Text(/p)</p>" });
+            list.Add(new Item { TextMd = "# Title", TextHtml = "<h1>Title</h1>" });
+            list.Add(new Item { TextMd = "Hello\r\n\r\nWorld", TextHtml = "<p>(p)Hello(/p)</p><p>(p)World(/p)</p>" });
+            list.Add(new Item { TextMd = "Hello\r\nWorld", TextHtml = "<p>(p)HelloWorld(/p)</p>" });
+            list.Add(new Item { TextMd = "Hello\r\n\r\nWorld", TextHtml = "<p>(p)Hello(/p)</p><p>(p)World(/p)</p>" });
+            list.Add(new Item { TextMd = "![My Cli](https://workplacex.org/Doc/Cli.png)", TextHtml = "<img src=\"https://workplacex.org/Doc/Cli.png\" alt=\"My Cli\" />" });
+            list.Add(new Item { TextMd = "![](https://workplacex.org/Doc/Cli.png)", TextHtml = "<img src=\"https://workplacex.org/Doc/Cli.png\" alt=\"https://workplacex.org/Doc/Cli.png\" />" });
+            list.Add(new Item { TextMd = "\r\n\r\n![](https://workplacex.org/Doc/Cli.png)a", TextHtml = "<p>(p)(/p)</p><img src=\"https://workplacex.org/Doc/Cli.png\" alt=\"https://workplacex.org/Doc/Cli.png\" /><p>(p)a(/p)</p>" });
+            list.Add(new Item { TextMd = "\r\n![](https://workplacex.org/Doc/Cli.png)a", TextHtml = "<p>(p)(/p)</p><img src=\"https://workplacex.org/Doc/Cli.png\" alt=\"https://workplacex.org/Doc/Cli.png\" /><p>(p)a(/p)</p>" });
+            list.Add(new Item { TextMd = "\r\n![](https://workplacex.org/Doc/Cli.png)\r\n", TextHtml = "<p>(p)(/p)</p><img src=\"https://workplacex.org/Doc/Cli.png\" alt=\"https://workplacex.org/Doc/Cli.png\" /><p>(p)(/p)</p>" });
+            list.Add(new Item { TextMd = "\r\n![](https://workplacex.org/Doc/Cli.png)\r\nT", TextHtml = "<p>(p)(/p)</p><img src=\"https://workplacex.org/Doc/Cli.png\" alt=\"https://workplacex.org/Doc/Cli.png\" /><p>(p)T(/p)</p>" });
+            list.Add(new Item { TextMd = "**Bold**Text", TextHtml = "<p>(p)<strong>Bold</strong>Text(/p)</p>" });
+            list.Add(new Item { TextMd = "* One\r\n* Two", TextHtml = "<ul><li>One</li><li>Two</li></ul>" });
+            list.Add(new Item { TextMd = "\r\n* One\r\n* Two", TextHtml = "<p>(p)(/p)</p><ul><li>One</li><li>Two</li></ul>" });
+            list.Add(new Item { TextMd = "\r\n* One\r\n1\r\n* Two", TextHtml = "<p>(p)(/p)</p><ul><li>One1</li><li>Two</li></ul>" });
+            list.Add(new Item { TextMd = "\r\n* One\r\n1\r\n\r\n* Two", TextHtml = "<p>(p)(/p)</p><ul><li>One1</li></ul><p>(p)(/p)</p><ul><li>Two</li></ul>" });
+            list.Add(new Item { TextMd = "* A\r\nB", TextHtml = "<ul><li>AB</li></ul>" });
+
+            foreach (var item in list)
+            {
+                var appDoc = new AppDoc();
+                new MdPage(appDoc.MdDoc, item.TextMd);
+                appDoc.Parse();
+                var textHtml = appDoc.HtmlDoc.Render();
+
+                UtilFramework.Assert(textHtml == item.TextHtml);
+            }
+        }
+
+        public class Item
+        {
+            public string TextMd { get; set; }
+
+            public string TextHtml { get; set; }
         }
     }
 

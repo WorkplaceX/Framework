@@ -67,11 +67,8 @@ namespace Framework
             appDoc.Parse();
             var textHtml = appDoc.HtmlDoc.Render();
 
-            //// Debug
-            //var textDebug = UtilDoc.TextDebug(appDoc);
-            //textDebug += "\r\n\r\n" + textHtml;
-            //File.WriteAllText(@"C:\Temp\Debug.txt", textDebug);
-            //File.WriteAllText(@"C:\Temp\Debug.html", textHtml);
+            // Debug
+            // UtilDoc.TextDebugWriteToFile(appDoc);
 
             return textHtml;
         }
