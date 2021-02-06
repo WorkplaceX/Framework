@@ -14,9 +14,10 @@
     {
         public static void Run()
         {
+            // Test Md
             {
                 UnitTestMd.Run();
-                UtilDoc.Debug();
+                // UtilDoc.Debug();
             }
             {
                 MyHideComponent component = new MyHideComponent(null);
@@ -584,6 +585,12 @@
             list.Add(new Item { TextMd = "\r\n* One\r\n1\r\n* Two", TextHtml = "<p>(p)(/p)</p><ul><li>One1</li><li>Two</li></ul>" });
             list.Add(new Item { TextMd = "\r\n* One\r\n1\r\n\r\n* Two", TextHtml = "<p>(p)(/p)</p><ul><li>One1</li></ul><p>(p)(/p)</p><ul><li>Two</li></ul>" });
             list.Add(new Item { TextMd = "* A\r\nB", TextHtml = "<ul><li>AB</li></ul>" });
+            list.Add(new Item { TextMd = "# A\r\nB", TextHtml = "<h1>A</h1><p>(p)B(/p)</p>" });
+            list.Add(new Item { TextMd = "* A\r\nB", TextHtml = "<ul><li>AB</li></ul>" });
+            list.Add(new Item { TextMd = "* A\r\n\r\nB", TextHtml = "<ul><li>A</li></ul><p>(p)B(/p)</p>" });
+            list.Add(new Item { TextMd = "\r\n\r\nB\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
+            list.Add(new Item { TextMd = "\r\nB\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
+            list.Add(new Item { TextMd = "B\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
 
             foreach (var item in list)
             {

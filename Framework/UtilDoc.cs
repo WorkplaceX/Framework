@@ -215,6 +215,22 @@
     }
 
     /// <summary>
+    /// Parse steps.
+    /// </summary>
+    public enum ParseEnum
+    {
+        None = 0,
+
+        ParseOne = 1,
+
+        ParseTwo = 2,
+
+        ParseThree = 3,
+        
+        ParseHtml = 4,
+    }
+
+    /// <summary>
     /// Component registry.
     /// </summary>
     internal class Registry
@@ -323,6 +339,11 @@
         {
             return value?.Data.Id;
         }
+
+        /// <summary>
+        /// Gets or sets ParseEnum. This is the current parse step.
+        /// </summary>
+        public ParseEnum ParseEnum { get; set; }
 
         public Component Deserialize(DataDoc data)
         {
@@ -518,7 +539,7 @@
                 mdRegistry.Parse(page);
             }
 
-            syntaxRegistry.Parse(MdDoc, SyntaxDocOne, SyntaxDocTwo, SyntaxDocThree, HtmlDoc);
+            syntaxRegistry.Parse(this);
         }
 
         public MdDoc MdDoc
@@ -1282,9 +1303,16 @@
         /// </summary>
         public List<SyntaxBase> List = new List<SyntaxBase>();
 
-        public void Parse(MdDoc mdDoc, SyntaxDoc syntaxDocOne, SyntaxDoc syntaxDocTwo, SyntaxDoc syntaxDocThree, HtmlDoc htmlDoc)
+        public void Parse(AppDoc appDoc)
         {
+            var mdDoc = appDoc.MdDoc;
+            var syntaxDocOne = appDoc.SyntaxDocOne;
+            var syntaxDocTwo = appDoc.SyntaxDocTwo;
+            var syntaxDocThree = appDoc.SyntaxDocThree;
+            var htmlDoc = appDoc.HtmlDoc;
+
             // ParseOne
+            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseOne;
             foreach (MdPage page in mdDoc.List)
             {
                 if (page.Data.ListCount() > 0)
@@ -1297,12 +1325,15 @@
             }
 
             // ParseTwo
+            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseTwo;
             SyntaxBase.ParseTwoMain(syntaxDocTwo, syntaxDocOne);
 
             // ParseThree
+            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseThree;
             SyntaxBase.ParseThreeMain(syntaxDocThree, syntaxDocTwo);
 
             // ParseHtml
+            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseHtml;
             syntaxDocThree.ParseHtml(htmlDoc);
         }
     }
@@ -1337,6 +1368,8 @@
         public SyntaxBase(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
             : base(owner)
         {
+            UtilDoc.Assert(owner.Data.Registry.ParseEnum == ParseEnum.ParseOne);
+
             Data.TokenIdBegin = tokenBegin.Data.Id;
             Data.TokenIdEnd = tokenEnd.Data.Id;
 
@@ -1349,8 +1382,19 @@
         public SyntaxBase(SyntaxBase owner, SyntaxBase syntax)
             : base(owner)
         {
+            UtilDoc.Assert(owner.Data.Registry.ParseEnum == ParseEnum.ParseTwo || owner.Data.Registry.ParseEnum == ParseEnum.ParseThree);
+
             Data.TokenIdBegin = syntax.TokenBegin.Data.Id;
             Data.TokenIdEnd = syntax.TokenEnd.Data.Id;
+
+            // Enable, disable (for debug only) ParseThree validate.
+            if (owner.Data.Registry.ParseEnum == ParseEnum.ParseThree)
+            {
+                // Uncomment return to disable ParseThree validate.
+                // No more exceptions but wrong sequence of components in output!
+                
+                // return;
+            }
 
             if (owner is not SyntaxDoc)
             {
@@ -1359,7 +1403,7 @@
                 var indexEndOwner = Index(owner.Data.TokenIdEnd);
                 bool isShorten = indexEnd <= indexEndOwner;
                 bool isExtend = indexBegin == indexEndOwner + 1;
-                UtilDoc.Assert(isShorten ^ isExtend);
+                UtilDoc.Assert(isShorten ^ isExtend); // If exception in ParseThree, disable (for debug only) ParseThree validate above.
                 var next = owner.Data;
                 while (next.DataEnum != DataEnum.SyntaxDoc)
                 {
@@ -1639,45 +1683,46 @@
             Page = 1,
              
             Paragraph = 2,
-
-            Font = 3,
         }
 
         internal static SyntaxBase ParseThreeOwner(SyntaxBase owner, SyntaxBase syntax, OwnerEnum ownerEnum)
         {
-            var lastData = owner.OwnerFind<SyntaxDoc>().Data;
-            while (lastData.ListCount() > 0)
-            {
-                lastData = lastData.List.Last();
-            }
-            var last = (SyntaxBase)lastData.Component();
-
             var result = owner;
-
             switch (ownerEnum)
             {
                 case OwnerEnum.Page:
                     result = owner.OwnerFind<SyntaxPage>();
                     break;
                 case OwnerEnum.Paragraph:
-                    result = last.OwnerFind<SyntaxParagraph>();
-                    if (result == null)
-                    {
-                        result = last.OwnerFind<SyntaxTitle>();
-                    }
-                    if (result == null)
-                    {
-                        result = last.OwnerFind<SyntaxBullet>();
-                    }
-                    if (result == null)
-                    {
-                        var page = owner.OwnerFind<SyntaxPage>();
-                        result = new SyntaxParagraph(page, syntax);
-                    }
-                    break;
-                case OwnerEnum.Font:
                     result = owner.OwnerFind<SyntaxFont>();
+                    if (result == null)
+                    {
+                        result = owner.OwnerFind<SyntaxParagraph>();
+                    }
+                    if (result == null)
+                    {
+                        result = owner.OwnerFind<SyntaxTitle>();
+                    }
+                    if (result == null)
+                    {
+                        result = owner.OwnerFind<SyntaxBullet>();
+                    }
+                    if (result == null)
+                    {
+                        if (owner.Data.ListCount() > 0 && owner.Data.List.Last().Component() is SyntaxParagraph paragraph)
+                        {
+                            // Last paragraph.
+                            result = paragraph;
+                        }
+                        else
+                        {
+                            var page = owner.OwnerFind<SyntaxPage>();
+                            result = new SyntaxParagraph(page, syntax);
+                        }
+                    }
                     break;
+                default:
+                    throw new Exception("Enum unknown!");
             }
 
             UtilDoc.Assert(result != null);
@@ -1845,8 +1890,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var ownerLast = ParseThreeOwner(owner, this, OwnerEnum.None);
-            new SyntaxComment(ownerLast, this);
+            new SyntaxComment(owner, this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -1915,7 +1959,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var page = (SyntaxPage)ParseThreeOwner(owner, this, OwnerEnum.Page);
+            var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
             var title = new SyntaxTitle(page, this);
             ParseThreeMain(title, this);
         }
@@ -1991,7 +2035,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var page = (SyntaxPage)ParseThreeOwner(owner, this, OwnerEnum.Page);
+            var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
             var bullet = new SyntaxBullet(page, this);
             ParseThreeMain(bullet, this);
         }
@@ -2122,7 +2166,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var page = (SyntaxPage)ParseThreeOwner(owner, this, OwnerEnum.Page);
+            var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
             var code = new SyntaxCode(page, this);
             ParseThreeMain(code, this);
         }
@@ -2389,7 +2433,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var page = (SyntaxPage)ParseThreeOwner(owner, this, OwnerEnum.Page);
+            var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
             var image = new SyntaxImage(page, this);
             ParseThreeMain(image, this);
         }
@@ -2472,13 +2516,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            bool isFont = owner is SyntaxFont;
-            OwnerEnum ownerEnum = OwnerEnum.Paragraph;
-            if (isFont)
-            {
-                ownerEnum = OwnerEnum.Font;
-            }
-            var paragraph = ParseThreeOwner(owner, this, ownerEnum);
+            var paragraph = ParseThreeOwner(owner, this, OwnerEnum.Paragraph);
             new SyntaxContent(paragraph, this);
         }
 
@@ -2531,12 +2569,12 @@
         internal override void ParseTwo(SyntaxBase owner)
         {
             var paragraph = new SyntaxParagraph(owner, this);
-            ParseTwoMain(paragraph, this);
+            ParseTwoMainBreak(owner, paragraph, this, (syntax) => syntax is not SyntaxTitle && syntax is not SyntaxBullet && syntax is not SyntaxImage && syntax is not SyntaxParagraph);
         }
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var page = (SyntaxPage)ParseThreeOwner(owner, this, OwnerEnum.Page);
+            var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
             var paragraph = new SyntaxParagraph(page, this);
             ParseThreeMain(paragraph, this);
         }
@@ -2725,7 +2763,7 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var page = (SyntaxPage)ParseThreeOwner(owner, this, OwnerEnum.Page);
+            var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
             var pageBreak = new SyntaxPageBreak(page, this);
             ParseThreeMain(pageBreak, this);
         }
@@ -2758,6 +2796,8 @@
         public HtmlBase(HtmlBase owner, SyntaxBase syntax)
             : base(owner)
         {
+            UtilDoc.Assert(owner.Data.Registry.ParseEnum == ParseEnum.ParseHtml);
+
             Data.SyntaxId = Registry.ReferenceSet(syntax);
         }
 
@@ -3045,32 +3085,7 @@
     {
         public static void Debug()
         {
-            string textMd =
-@"
-# Hello
-World
-* One 
-* Two 
-Click: [workplacex.org](https://workplacex.org)
-* Three
-
-![My Cli](https://workplacex.org/Doc/Cli.png)
-";
-
-            textMd =
-@"
-My
-
-# F Hello [](https://workplacex.org)
-
-ppp
-";
-
-            textMd =
-@"* Hello
-Text";
-
-            textMd = "# A\r\nB";
+            string textMd = "# Title\r\nText";
 
             // Doc
             var appDoc = new AppDoc();
