@@ -93,10 +93,10 @@
         HtmlLink,
 
         HtmlImage,
+        
+        HtmlCode,
 
         HtmlContent,
-
-        // HtmlIgnore
     }
 
     /// <summary>
@@ -212,6 +212,8 @@
         public string LinkText { get; set; }
 
         public string CodeLanguage { get; set; }
+
+        public string CodeText { get; set; }
     }
 
     /// <summary>
@@ -283,6 +285,7 @@
             Add(typeof(HtmlFont));
             Add(typeof(HtmlLink));
             Add(typeof(HtmlImage));
+            Add(typeof(HtmlCode));
             Add(typeof(HtmlContent));
         }
 
@@ -1377,7 +1380,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxBase(SyntaxBase owner, SyntaxBase syntax)
             : base(owner)
@@ -1403,7 +1406,7 @@
                 var indexEndOwner = Index(owner.Data.TokenIdEnd);
                 bool isShorten = indexEnd <= indexEndOwner;
                 bool isExtend = indexBegin == indexEndOwner + 1;
-                UtilDoc.Assert(isShorten ^ isExtend); // If exception in ParseThree, disable (for debug only) ParseThree validate above.
+                UtilDoc.Assert(isShorten ^ isExtend); // If exception in ParseThree, disable (for debug only) ParseThree validate above. Caused by wrong break in method ParseTwo calling method ParseTwoMainBreak.
                 var next = owner.Data;
                 while (next.DataEnum != DataEnum.SyntaxDoc)
                 {
@@ -1486,7 +1489,7 @@
             {
                 var syntaxLast = (SyntaxBase)syntax.Data.Registry.IdList[last.Id].Component();
                 result = syntaxLast.TokenEnd;
-                result = (MdTokenBase)result.Next(syntax.TokenEnd);
+                result = result.Next(syntax.TokenEnd);
             }
             return result;
         }
@@ -1731,6 +1734,17 @@
         }
 
         /// <summary>
+        /// Main entry for ParseHtml.
+        /// </summary>
+        internal static void ParseHtmlMain(HtmlBase owner, SyntaxBase syntax)
+        {
+            foreach (SyntaxBase item in syntax.List)
+            {
+                item.ParseHtml(owner);
+            }
+        }
+
+        /// <summary>
         /// Parse md token between tokenBegin and tokenEnd.
         /// </summary>
         internal virtual void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
@@ -1759,10 +1773,7 @@
         /// </summary>
         internal virtual void ParseHtml(HtmlBase owner)
         {
-            foreach (SyntaxBase item in List)
-            {
-                item.ParseHtml(owner);
-            }
+            ParseHtmlMain(owner, this);
         }
     }
 
@@ -1808,7 +1819,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxPage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -1834,7 +1845,7 @@
         {
             var page = new HtmlPage(owner, this);
 
-            base.ParseHtml(page);
+            ParseHtmlMain(page, this);
         }
     }
 
@@ -1859,7 +1870,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxComment(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -1920,7 +1931,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxTitle(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -1967,7 +1978,8 @@
         internal override void ParseHtml(HtmlBase owner)
         {
             var title = new HtmlTitle(owner, this);
-            base.ParseHtml(title);
+
+            ParseHtmlMain(title, this);
         }
     }
 
@@ -1992,7 +2004,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxBullet(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2048,7 +2060,8 @@
                 bulletList = new HtmlBulletList(owner);
             }
             var bulletItem = new HtmlBulletItem(bulletList, this);
-            base.ParseHtml(bulletItem);
+
+            ParseHtmlMain(bulletItem, this);
         }
     }
 
@@ -2073,15 +2086,22 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
-        public SyntaxCode(SyntaxBase owner, SyntaxBase syntax)
+        public SyntaxCode(SyntaxBase owner, SyntaxBase syntax, string codeLanguage, string codeText)
             : base(owner, syntax)
         {
-
+            Data.CodeLanguage = codeLanguage;
+            Data.CodeText = codeText;
         }
 
         public string CodeLanguage => Data.CodeLanguage;
+
+        public string CodeText
+        {
+            get => Data.CodeText;
+            set => Data.CodeText = value;
+        }
 
         internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
@@ -2110,28 +2130,28 @@
                     // Next
                     next = codeLanguage != null ? codeLanguage : codeBegin;
 
-                    // Code content
-                    MdTokenBase codeContentBegin = null;
-                    MdTokenBase codeContentEnd = null;
+                    // Code text
+                    MdTokenBase codeTextBegin = null;
+                    MdTokenBase codeTextEnd = null;
                     while (Next(ref next, tokenEnd))
                     {
                         if (next == codeEnd)
                         {
                             break;
                         }
-                        if (codeContentBegin == null)
+                        if (codeTextBegin == null)
                         {
-                            codeContentBegin = next;
-                            codeContentEnd = next;
+                            codeTextBegin = next;
+                            codeTextEnd = next;
                         }
                         else
                         {
-                            codeContentEnd = next;
+                            codeTextEnd = next;
                         }
                     }
 
-                    // Code content exists
-                    if (codeContentBegin != null)
+                    // Code text exists
+                    if (codeTextBegin != null)
                     {
                         // Ignore leading space
                         if (tokenSpace != null)
@@ -2142,15 +2162,17 @@
                         // Create code syntax
                         var code = new SyntaxCode(owner, codeBegin, codeEnd, codeLanguage?.Text);
 
-                        // Ignore code language token
+                        // Ignore code language
                         new SyntaxIgnore(code, codeBegin);
                         if (codeLanguage != null)
                         {
                             new SyntaxIgnore(code, codeLanguage);
                         }
 
-                        // Code content
-                        new SyntaxContent(code, codeContentBegin, codeContentEnd);
+                        // Ignore code text
+                        var codeText = new SyntaxIgnore(code, codeTextBegin, codeTextEnd);
+
+                        code.CodeText = codeText.Text;
 
                         // Ignore code end token
                         new SyntaxIgnore(code, codeEnd);
@@ -2161,14 +2183,19 @@
 
         internal override void ParseTwo(SyntaxBase owner)
         {
-            new SyntaxCode(owner, this);
+            new SyntaxCode(owner, this, CodeLanguage, CodeText);
         }
 
         internal override void ParseThree(SyntaxBase owner)
         {
             var page = ParseThreeOwner(owner, this, OwnerEnum.Page);
-            var code = new SyntaxCode(page, this);
+            var code = new SyntaxCode(page, this, CodeLanguage, CodeText);
             ParseThreeMain(code, this);
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            new HtmlCode(owner, this);
         }
     }
 
@@ -2193,7 +2220,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxFont(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2265,7 +2292,7 @@
                 font = new HtmlFont(owner, this);
             }
 
-            base.ParseHtml(font);
+            ParseHtmlMain(font, this);
         }
     }
 
@@ -2290,7 +2317,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxLink(SyntaxBase owner, SyntaxLink syntax)
             : base(owner, syntax)
@@ -2384,7 +2411,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxImage(SyntaxBase owner, SyntaxImage syntax)
             : base(owner, syntax)
@@ -2465,7 +2492,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxContent(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2547,7 +2574,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxParagraph(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2569,7 +2596,8 @@
         internal override void ParseTwo(SyntaxBase owner)
         {
             var paragraph = new SyntaxParagraph(owner, this);
-            ParseTwoMainBreak(owner, paragraph, this, (syntax) => syntax is not SyntaxTitle && syntax is not SyntaxBullet && syntax is not SyntaxImage && syntax is not SyntaxParagraph);
+            ParseTwoMainBreak(owner, paragraph, this, 
+                (syntax) => syntax is not SyntaxTitle && syntax is not SyntaxBullet && syntax is not SyntaxImage && syntax is not SyntaxCode && syntax is not SyntaxParagraph);
         }
 
         internal override void ParseThree(SyntaxBase owner)
@@ -2583,7 +2611,7 @@
         {
             var paragraph = new HtmlParagraph(owner, this);
 
-            base.ParseHtml(paragraph);
+            ParseHtmlMain(paragraph, this);
         }
     }
 
@@ -2608,7 +2636,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxNewLine(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2663,7 +2691,16 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxIgnore(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxIgnore(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2717,7 +2754,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo.
+        /// Constructor ParseTwo and ParseThree.
         /// </summary>
         public SyntaxPageBreak(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2772,7 +2809,7 @@
         {
             var page = new HtmlPage((HtmlBase)owner.Owner, this);
 
-            base.ParseHtml(page);
+            ParseHtmlMain(page, this);
         }
     }
 
@@ -3064,6 +3101,27 @@
         }
     }
 
+    internal class HtmlCode : HtmlBase
+    {
+        /// <summary>
+        /// Constructor parse html.
+        /// </summary>
+        public HtmlCode(HtmlBase owner, SyntaxCode syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        public new SyntaxCode Syntax => (SyntaxCode)base.Syntax;
+
+        internal override void RenderContent(StringBuilder result)
+        {
+            result.Append(string.Format("<pre><code class=\"{0}\">", "language-" + Syntax.CodeLanguage));
+            result.Append(Syntax.CodeText);
+            result.Append("</code></pre>");
+        }
+    }
+
     internal class HtmlContent : HtmlBase
     {
         /// <summary>
@@ -3085,7 +3143,12 @@
     {
         public static void Debug()
         {
-            string textMd = "# Title\r\nText";
+            string textMd = @"
+
+```cmd
+cd
+```
+";
 
             // Doc
             var appDoc = new AppDoc();
@@ -3184,6 +3247,7 @@
 
             string textMdEscape = textMd.Replace("\r", "\\r").Replace("\n", "\\n");
             string textHtmlEscape = textHtml.Replace("\"", @"\""");
+            textHtmlEscape = textHtmlEscape.Replace("\r", "\\r").Replace("\n", "\\n");
             string textCSharp = string.Format("list.Add(new Item (( TextMd = \"{0}\", TextHtml = \"{1}\" )));", textMdEscape, textHtmlEscape).Replace("((", "{").Replace("))", "}");
 
             result += "\r\n\r\n" + "CSharp:\r\n";

@@ -17,7 +17,7 @@
             // Test Md
             {
                 UnitTestMd.Run();
-                // UtilDoc.Debug();
+                // UtilDoc.Debug(); return;
             }
             {
                 MyHideComponent component = new MyHideComponent(null);
@@ -591,6 +591,7 @@
             list.Add(new Item { TextMd = "\r\n\r\nB\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
             list.Add(new Item { TextMd = "\r\nB\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
             list.Add(new Item { TextMd = "B\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
+            list.Add(new Item { TextMd = "\r\n\r\n```cmd\r\ncd\r\n```\r\n", TextHtml = "<p>(p)(/p)</p><pre><code class=\"language-cmd\">\r\ncd\r\n</code></pre><p>(p)(/p)</p>" });
 
             foreach (var item in list)
             {
