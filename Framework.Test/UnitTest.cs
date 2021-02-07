@@ -592,6 +592,9 @@
             list.Add(new Item { TextMd = "\r\nB\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
             list.Add(new Item { TextMd = "B\r\n\r\n# T\r\nD", TextHtml = "<p>(p)B(/p)</p><p>(p)(/p)</p><h1>T</h1><p>(p)D(/p)</p>" });
             list.Add(new Item { TextMd = "\r\n\r\n```cmd\r\ncd\r\n```\r\n", TextHtml = "<p>(p)(/p)</p><pre><code class=\"language-cmd\">\r\ncd\r\n</code></pre><p>(p)(/p)</p>" });
+            list.Add(new Item { TextMd = "# T\n(Note)\nHello\n(Note)", TextHtml = "<h1>T</h1><p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article>" });
+            list.Add(new Item { TextMd = "\r\n\r\n(Note)\r\nHello\r\n(Note)", TextHtml = "<p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article>" });
+            list.Add(new Item { TextMd = "(Note)\r\nD\r\n\r\nE\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)D(/p)</p><p>(p)E(/p)</p></div></article>" });
 
             foreach (var item in list)
             {

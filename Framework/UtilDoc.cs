@@ -40,6 +40,12 @@
 
         MdBracket,
 
+        MdQuotation,
+
+        MdSymbol,
+
+        MdSpecial,
+
         MdFont,
 
         MdLink,
@@ -63,6 +69,8 @@
         SyntaxLink,
 
         SyntaxImage,
+
+        SyntaxCustomNote,
 
         SyntaxPageBreak,
 
@@ -95,6 +103,8 @@
         HtmlImage,
         
         HtmlCode,
+
+        HtmlCustomNote,
 
         HtmlContent,
     }
@@ -189,6 +199,10 @@
 
         public bool IsBracketEnd { get; set; }
 
+        public MdQuotationEnum QuotationEnum { get; set; }
+        
+        public MdSymbolEnum SymbolEnum { get; set; }
+
         public MdFontEnum FontEnum { get; set; }
 
         public int TokenIdBegin { get; set; }
@@ -254,6 +268,8 @@
             Add(typeof(MdCode));
             Add(typeof(MdImage));
             Add(typeof(MdBracket));
+            Add(typeof(MdQuotation));
+            Add(typeof(MdSymbol));
             Add(typeof(MdFont));
             Add(typeof(MdLink));
             Add(typeof(MdContent));
@@ -268,6 +284,7 @@
             Add(typeof(SyntaxFont));
             Add(typeof(SyntaxLink));
             Add(typeof(SyntaxImage));
+            Add(typeof(SyntaxCustomNote));
             Add(typeof(SyntaxPageBreak));
             Add(typeof(SyntaxParagraph));
             Add(typeof(SyntaxNewLine));
@@ -286,6 +303,7 @@
             Add(typeof(HtmlLink));
             Add(typeof(HtmlImage));
             Add(typeof(HtmlCode));
+            Add(typeof(HtmlCustomNote));
             Add(typeof(HtmlContent));
         }
 
@@ -1074,21 +1092,18 @@
         {
             get
             {
-                if (BracketEnum == MdBracketEnum.Round)
+                switch (BracketEnum)
                 {
-                    if (IsBracketEnd == false)
-                    {
-                        return "(";
-                    }
-                    else
-                    {
-                        return ")";
-                    }
-                }
-                else
-                {
-                    if (BracketEnum == MdBracketEnum.Square)
-                    {
+                    case MdBracketEnum.Round:
+                        if (IsBracketEnd == false)
+                        {
+                            return "(";
+                        }
+                        else
+                        {
+                            return ")";
+                        }
+                    case MdBracketEnum.Square:
                         if (IsBracketEnd == false)
                         {
                             return "[";
@@ -1097,11 +1112,8 @@
                         {
                             return "]";
                         }
-                    }
-                    else
-                    {
-                        throw new Exception("Type unknown!");
-                    }
+                    default:
+                        throw new Exception("Enum unknown!");
                 }
             }
         }
@@ -1122,6 +1134,123 @@
                     break;
                 case ']':
                     new MdBracket(owner, 1, MdBracketEnum.Square, isBracketEnd: true);
+                    break;
+            }
+        }
+    }
+
+    internal enum MdQuotationEnum
+    {
+        None,
+
+        Single,
+
+        Double,
+    }
+
+    internal class MdQuotation : MdTokenBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public MdQuotation()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor instance token.
+        /// </summary>
+        public MdQuotation(MdPage owner, int length, MdQuotationEnum quotationEnum)
+            : base(owner, length)
+        {
+            Data.QuotationEnum = quotationEnum;
+        }
+
+        public MdQuotationEnum QuotationEnum => Data.QuotationEnum;
+
+        public string TextQuotation
+        {
+            get
+            {
+                switch (QuotationEnum)
+                {
+                    case MdQuotationEnum.Single:
+                        return "'";
+                    case MdQuotationEnum.Double:
+                        return "\"";
+                    default:
+                        throw new Exception("Enum unknown!");
+                }
+            }
+        }
+
+        internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
+        {
+            var textChar = text.Char(index);
+            switch (textChar)
+            {
+                case '\'':
+                    new MdQuotation(owner, 1, MdQuotationEnum.Single);
+                    break;
+                case '"':
+                    new MdQuotation(owner, 1, MdQuotationEnum.Double);
+                    break;
+            }
+        }
+    }
+
+    internal enum MdSymbolEnum
+    {
+        None,
+
+        Equal,
+    }
+
+    internal class MdSymbol : MdTokenBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public MdSymbol()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor instance token.
+        /// </summary>
+        public MdSymbol(MdPage owner, int length, MdSymbolEnum symbolEnum)
+            : base(owner, length)
+        {
+            Data.SymbolEnum = symbolEnum;
+        }
+
+        public MdSymbolEnum SymbolEnum => Data.SymbolEnum;
+
+        public string TextSymbol
+        {
+            get
+            {
+                switch (SymbolEnum)
+                {
+                    case MdSymbolEnum.Equal:
+                        return "=";
+                    default:
+                        throw new Exception("Enum unknown!");
+                }
+            }
+        }
+
+        internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
+        {
+            var textChar = text.Char(index);
+            switch (textChar)
+            {
+                case '=':
+                    new MdSymbol(owner, 1, MdSymbolEnum.Equal);
                     break;
             }
         }
@@ -1431,10 +1560,11 @@
                 UtilDoc.Assert(Index(Data.TokenIdBegin) <= Index(Data.TokenIdEnd));
                 if (UtilDoc.IsSubclassOf(typeOwner, typeof(SyntaxBase)))
                 {
-                    UtilDoc.Assert(Index(Data.Owner.TokenIdBegin) <= (Data.TokenIdBegin));
+                    UtilDoc.Assert(Index(Data.Owner.TokenIdBegin) <= Index(Data.TokenIdBegin));
+                    UtilDoc.Assert(Index(Data.Owner.TokenIdEnd) >= Index(Data.TokenIdEnd));
                     if (Data.Index == 0)
                     {
-                        UtilDoc.Assert(Index(Data.TokenIdBegin) == Index(Data.Owner.TokenIdBegin));
+                        UtilDoc.Assert(Index(Data.Owner.TokenIdBegin) == Index(Data.TokenIdBegin));
                     }
                     else
                     {
@@ -1455,6 +1585,25 @@
         public MdTokenBase TokenBegin => (MdTokenBase)Data.Registry.IdList[Data.TokenIdBegin].Component();
 
         public MdTokenBase TokenEnd => (MdTokenBase)Data.Registry.IdList[Data.TokenIdEnd].Component();
+
+        public void TokenEndSet(MdTokenBase tokenEnd)
+        {
+            var index = TokenEnd.Data.Index;
+            var indexNew = tokenEnd.Data.Index;
+            if (index < indexNew)
+            {
+                // Grow
+                var indexOwnerMax = ((SyntaxBase)Owner).TokenEnd.Data.Index;
+                UtilDoc.Assert(indexNew <= indexOwnerMax);
+                Data.TokenIdEnd = tokenEnd.Data.Id;
+                CreateValidate();
+            }
+            if (index > indexNew)
+            {
+                // Shrink
+                throw new Exception("Not implemented!");
+            }
+        }
 
         /// <summary>
         /// Gets Text. This is the text between TokenBegin and TokenEnd.
@@ -1694,7 +1843,11 @@
             switch (ownerEnum)
             {
                 case OwnerEnum.Page:
-                    result = owner.OwnerFind<SyntaxPage>();
+                    result = owner.OwnerFind<SyntaxCustomNote>(); // Paragraph can be inside CustomNote.
+                    if (result == null)
+                    {
+                        result = owner.OwnerFind<SyntaxPage>();
+                    }
                     break;
                 case OwnerEnum.Paragraph:
                     result = owner.OwnerFind<SyntaxFont>();
@@ -1719,7 +1872,11 @@
                         }
                         else
                         {
-                            var page = owner.OwnerFind<SyntaxPage>();
+                            SyntaxBase page = owner.OwnerFind<SyntaxCustomNote>(); // Paragraph can be inside CustomNote.
+                            if (page == null)
+                            {
+                                page = owner.OwnerFind<SyntaxPage>();
+                            }
                             result = new SyntaxParagraph(page, syntax);
                         }
                     }
@@ -2597,7 +2754,7 @@
         {
             var paragraph = new SyntaxParagraph(owner, this);
             ParseTwoMainBreak(owner, paragraph, this, 
-                (syntax) => syntax is not SyntaxTitle && syntax is not SyntaxBullet && syntax is not SyntaxImage && syntax is not SyntaxCode && syntax is not SyntaxParagraph);
+                (syntax) => syntax is not SyntaxTitle && syntax is not SyntaxBullet && syntax is not SyntaxImage && syntax is not SyntaxCode && syntax is not SyntaxParagraph && syntax is not SyntaxCustomNote);
         }
 
         internal override void ParseThree(SyntaxBase owner)
@@ -2727,6 +2884,172 @@
         internal override void ParseHtml(HtmlBase owner)
         {
             // No html
+        }
+    }
+
+    /// <summary>
+    /// Base class for custom syntax. For example (Message Type="Warning")Do not delete!(Message)
+    /// </summary>
+    internal abstract class SyntaxCustomBase : SyntaxBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxCustomBase()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxCustomBase(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo and ParseThree.
+        /// </summary>
+        public SyntaxCustomBase(SyntaxBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        /// <summary>
+        /// Returns true, if custom command starting at new line has been found.
+        /// </summary>
+        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket token, out List<MdTokenBase> ignoreList)
+        {
+            var result = false;
+            ignoreList = null;
+            if (ParseOneIsNewLine(tokenBegin, tokenEnd, out var space, out token))
+            {
+                if (token.TextBracket == "(")
+                {
+                    if (space == null)
+                    {
+                        if (token.Next(tokenEnd) is MdContent content)
+                        {
+                            if (content.Text == commandName)
+                            {
+                                if (content.Next(tokenEnd) is MdBracket bracketEnd)
+                                {
+                                    if (bracketEnd.Text == ")")
+                                    {
+                                        ignoreList = new List<MdTokenBase>();
+                                        ignoreList.Add(content);
+                                        ignoreList.Add(bracketEnd);
+                                        result = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true, if custom command (with end block) starting at new line has been found.
+        /// </summary>
+        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket tokenBlockBegin, out List<MdTokenBase> ignoreBlockBeginList, out MdBracket tokenBlockEnd, out List<MdTokenBase> ignoreBlockEndList)
+        {
+            bool result = false;
+            tokenBlockEnd = null;
+            ignoreBlockEndList = null;
+            if (ParseOneIsCustom(tokenBegin, tokenEnd, commandName, out tokenBlockBegin, out ignoreBlockBeginList))
+            {
+                var next = ignoreBlockBeginList.Last();
+                while (Next(ref next, tokenEnd))
+                {
+                    if (ParseOneIsCustom(next, tokenEnd, commandName, out tokenBlockEnd, out ignoreBlockEndList))
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+    }
+
+    internal class SyntaxCustomNote : SyntaxCustomBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxCustomNote()
+            : base()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxCustomNote(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo and ParseThree.
+        /// </summary>
+        public SyntaxCustomNote(SyntaxBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void ParseOne(SyntaxRegistry registry, SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        {
+            if (ParseOneIsCustom(tokenBegin, tokenEnd, "Note", out var tokenBlockBegin, out var tokenBlockBeginList, out var tokenBlockEnd, out var tokenBlockEndList))
+            {
+                var note = new SyntaxCustomNote(owner, tokenBlockBegin, tokenBlockEnd.Previous(tokenBegin));
+                
+                new SyntaxIgnore(note, tokenBlockBegin);
+                foreach (var item in tokenBlockBeginList)
+                {
+                    new SyntaxIgnore(note, item);
+                }
+
+                ParseOneMain(registry, note);
+
+                note.TokenEndSet(tokenBlockEndList.Last());
+
+                new SyntaxIgnore(note, tokenBlockEnd);
+                foreach (var item in tokenBlockEndList)
+                {
+                    new SyntaxIgnore(note, item);
+                }
+            }
+        }
+
+        internal override void ParseTwo(SyntaxBase owner)
+        {
+            var note = new SyntaxCustomNote(owner, this);
+
+            ParseTwoMain(note, this);
+        }
+
+        internal override void ParseThree(SyntaxBase owner)
+        {
+            var note = new SyntaxCustomNote(owner, this);
+
+            ParseThreeMain(note, this);
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            var note = new HtmlCustomNote(owner, this);
+
+            ParseHtmlMain(note, this);
         }
     }
 
@@ -3122,6 +3445,28 @@
         }
     }
 
+    internal class HtmlCustomNote : HtmlBase
+    {
+        /// <summary>
+        /// Constructor parse html.
+        /// </summary>
+        public HtmlCustomNote(HtmlBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void RenderBegin(StringBuilder result)
+        {
+            result.Append("<article class=\"message is-warning\"><div class=\"message-body\">");
+        }
+
+        internal override void RenderEnd(StringBuilder result)
+        {
+            result.Append("</div></article>");
+        }
+    }
+
     internal class HtmlContent : HtmlBase
     {
         /// <summary>
@@ -3143,12 +3488,11 @@
     {
         public static void Debug()
         {
-            string textMd = @"
+            string textMd = @"(Note)
+D
 
-```cmd
-cd
-```
-";
+E
+(Note)";
 
             // Doc
             var appDoc = new AppDoc();
@@ -3246,8 +3590,8 @@ cd
             result += "\r\n\r\n" + textHtml;
 
             string textMdEscape = textMd.Replace("\r", "\\r").Replace("\n", "\\n");
-            string textHtmlEscape = textHtml.Replace("\"", @"\""");
-            textHtmlEscape = textHtmlEscape.Replace("\r", "\\r").Replace("\n", "\\n");
+            string textHtmlEscape = textHtml?.Replace("\"", @"\""");
+            textHtmlEscape = textHtmlEscape?.Replace("\r", "\\r").Replace("\n", "\\n");
             string textCSharp = string.Format("list.Add(new Item (( TextMd = \"{0}\", TextHtml = \"{1}\" )));", textMdEscape, textHtmlEscape).Replace("((", "{").Replace("))", "}");
 
             result += "\r\n\r\n" + "CSharp:\r\n";
