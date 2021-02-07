@@ -2805,9 +2805,14 @@
         public string TextHtml;
 
         /// <summary>
-        /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml. Html elements such as input are shown.
+        /// Gets or sets IsNoSanatize. If true, Angular does not sanatize TextHtml. Html elements such as input and button are shown and onclick script executed. Html element script is NOT executed. See also property IsNoSanatizeScript.
         /// </summary>
         public bool IsNoSanatize;
+
+        /// <summary>
+        /// Gets or sets IsNoSanatizeScript. Script is executed always after TextHtml has been updated. Used for example for prismjs Prism.highlightAll();
+        /// </summary>
+        public string IsNoSanatizeScript;
 
         /// <summary>
         /// Returns true if user clicked button in this Html json component.

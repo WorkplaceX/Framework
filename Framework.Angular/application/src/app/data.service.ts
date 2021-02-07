@@ -71,6 +71,8 @@ export class Json { // AppJson
   TextHtml: string | undefined;
 
   IsNoSanatize: boolean | undefined;
+  
+  IsNoSanatizeScript: string | undefined;
 
   Key: string | undefined; // BingMap
 
@@ -303,8 +305,10 @@ export class DataService {
         this.fileDownload(jsonResponse);
         this.isScrollToTop(jsonResponse);
         if (this.requestJsonQueue == null) { // Apply response if there is no newer request.
+          // Update UI
           this.json = jsonResponse;
           this.isRequestPending = false;
+          // Set application title
           if (this.json.Title != null) {
             this.titleService.setTitle(this.json.Title);
           }

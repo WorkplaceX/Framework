@@ -1474,7 +1474,7 @@
                         result.Append(token.Text);
                     } while (Next(ref component, tokenEnd));
                 }
-                return result.ToString();
+                return UtilDoc.StringNull(result.ToString());
             }
         }
 
@@ -2844,7 +2844,7 @@
         {
             var result = new StringBuilder();
             Render(result);
-            return result.ToString();
+            return UtilDoc.StringNull(result.ToString());
         }
 
         internal void Render(StringBuilder result)
@@ -3229,7 +3229,7 @@ cd
         {
             StringBuilder result = new StringBuilder();
             TextDebug(component, 0, result);
-            return result.ToString();
+            return StringNull(result.ToString());
         }
 
         public static void TextDebugWriteToFile(AppDoc appDoc, string exceptionText = null)
@@ -3273,6 +3273,11 @@ cd
         public static bool IsSubclassOf(Type type, Type typeBase)
         {
             return type == typeBase || type.IsSubclassOf(typeBase);
+        }
+
+        public static string StringNull(string text)
+        {
+            return text == "" ? null : text;
         }
     }
 }

@@ -75,10 +75,16 @@ export class Html {
 
   textHtml: SafeHtml | undefined;
 
+  textHtmlPrevious: any = false; // Detect also first change if string is null!
+
   ngOnChanges() {
     if (this.json.IsNoSanatize) {
-      if (this.json.TextHtml != null) {
-        this.textHtml = this.sanitizer.bypassSecurityTrustHtml(this.json.TextHtml);
+      if (this.textHtmlPrevious != this.json.TextHtml) { // Change detection
+        this.textHtmlPrevious = this.json.TextHtml;
+        this.textHtml = this.sanitizer.bypassSecurityTrustHtml(this.json.TextHtml ? this.json.TextHtml : "");
+        if (this.json.IsNoSanatizeScript != null) {
+          setTimeout(() => eval(<string>this.json.IsNoSanatizeScript), 0);
+        }
       }
     } else {
       this.textHtml = this.json.TextHtml;
