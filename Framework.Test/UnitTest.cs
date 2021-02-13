@@ -595,6 +595,13 @@
             list.Add(new Item { TextMd = "# T\n(Note)\nHello\n(Note)", TextHtml = "<h1>T</h1><p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article>" });
             list.Add(new Item { TextMd = "\r\n\r\n(Note)\r\nHello\r\n(Note)", TextHtml = "<p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article>" });
             list.Add(new Item { TextMd = "(Note)\r\nD\r\n\r\nE\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)D(/p)</p><p>(p)E(/p)</p></div></article>" });
+            list.Add(new Item { TextMd = "Hello<!-- Comment -->World", TextHtml = "<p>(p)Hello<!-- Comment -->World(/p)</p>" });
+            list.Add(new Item { TextMd = "* Hello<!-- Comment -->World", TextHtml = "<ul><li>Hello<!-- Comment -->World</li></ul>" });
+            list.Add(new Item { TextMd = "(Note)Hello(Note)", TextHtml = "<p>(p)(Note)Hello(Note)(/p)</p>" });
+            list.Add(new Item { TextMd = "(Note)Hello\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article>" });
+            list.Add(new Item { TextMd = "(Note)Hello\r\n\r\nWorld\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p><p>(p)World(/p)</p></div></article>" });
+            list.Add(new Item { TextMd = "Hello<!-- Comment -->", TextHtml = "<p>(p)Hello<!-- Comment -->(/p)</p>" });
+            list.Add(new Item { TextMd = "<!-- Comment -->", TextHtml = "<!-- Comment -->" });
 
             foreach (var item in list)
             {
