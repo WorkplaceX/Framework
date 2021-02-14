@@ -217,6 +217,8 @@
 
         public int? SyntaxDocThreeId { get; set; }
 
+        public int? SyntaxDocFourId { get; set; }
+
         public int? HtmlDocId { get; set; }
 
         public int? SyntaxId { get; set; }
@@ -228,6 +230,8 @@
         public string CodeLanguage { get; set; }
 
         public string CodeText { get; set; }
+
+        public bool IsCreateNew { get; set; }
     }
 
     /// <summary>
@@ -243,7 +247,9 @@
 
         ParseThree = 3,
         
-        ParseHtml = 4,
+        ParseFour = 4,
+        
+        ParseHtml = 5,
     }
 
     /// <summary>
@@ -442,6 +448,14 @@
 
         }
 
+        /// <summary>
+        /// Gets Id. Unique Id in component tree.
+        /// </summary>
+        public int Id => Data.Id;
+
+        /// <summary>
+        /// Gets Owner. This is the components owner in tree.
+        /// </summary>
         public Component Owner => Data.Owner?.Component();
 
         public T OwnerFind<T>() where T : Component
@@ -571,6 +585,7 @@
             SyntaxDocOne = new SyntaxDoc(this);
             SyntaxDocTwo = new SyntaxDoc(this);
             SyntaxDocThree = new SyntaxDoc(this);
+            SyntaxDocFour = new SyntaxDoc(this);
             HtmlDoc = new HtmlDoc(this);
         }
 
@@ -621,6 +636,12 @@
         {
             get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocThreeId);
             set => Data.SyntaxDocThreeId = Registry.ReferenceSet(value);
+        }
+
+        public SyntaxDoc SyntaxDocFour
+        {
+            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocFourId);
+            set => Data.SyntaxDocFourId = Registry.ReferenceSet(value);
         }
 
         public HtmlDoc HtmlDoc
@@ -1511,6 +1532,7 @@
             var syntaxDocOne = appDoc.SyntaxDocOne;
             var syntaxDocTwo = appDoc.SyntaxDocTwo;
             var syntaxDocThree = appDoc.SyntaxDocThree;
+            var syntaxDocFour = appDoc.SyntaxDocFour;
             var htmlDoc = appDoc.HtmlDoc;
 
             // ParseOne
@@ -1534,9 +1556,13 @@
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseThree;
             SyntaxBase.ParseThreeMain(syntaxDocThree, syntaxDocTwo);
 
+            // ParseFour
+            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseFour;
+            SyntaxBase.ParseFourMain(syntaxDocFour, syntaxDocThree);
+
             // ParseHtml
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseHtml;
-            syntaxDocThree.ParseHtml(htmlDoc);
+            syntaxDocFour.ParseHtml(htmlDoc);
         }
     }
 
@@ -1622,13 +1648,15 @@
         public SyntaxBase(SyntaxBase owner, SyntaxBase syntax)
             : base(owner)
         {
-            UtilDoc.Assert(owner.Data.Registry.ParseEnum == ParseEnum.ParseTwo || owner.Data.Registry.ParseEnum == ParseEnum.ParseThree);
+            var parseEnum = owner.Data.Registry.ParseEnum;
+            UtilDoc.Assert(parseEnum == ParseEnum.ParseTwo || parseEnum == ParseEnum.ParseThree || parseEnum == ParseEnum.ParseFour);
 
+            Data.SyntaxId = syntax.Data.Id;
             Data.TokenIdBegin = syntax.TokenBegin.Data.Id;
             Data.TokenIdEnd = syntax.TokenEnd.Data.Id;
 
             // Enable, disable (for debug only) ParseThree validate.
-            if (owner.Data.Registry.ParseEnum == ParseEnum.ParseThree)
+            if (parseEnum == ParseEnum.ParseThree)
             {
                 // Uncomment return to disable ParseThree validate.
                 // No more exceptions but wrong sequence of components in output!
@@ -1734,6 +1762,11 @@
                 return UtilDoc.StringNull(result.ToString());
             }
         }
+
+        /// <summary>
+        /// Gets IsCreateNew. If true, syntax has been inserted by ParseThree.
+        /// </summary>
+        public bool IsCreateNew => Data.IsCreateNew;
 
         /// <summary>
         /// Returns token of currently parsed syntax.
@@ -1900,7 +1933,20 @@
         {
             foreach (SyntaxBase item in syntax.List)
             {
-                item.ParseTwo(owner);
+                item.ParseTwo(ref owner);
+            }
+        }
+
+        /// <summary>
+        /// Move owner up till syntax can be child.
+        /// </summary>
+        private static void ParseTwoMainBreak(ref SyntaxBase owner, SyntaxBase syntax)
+        {
+            var registry = owner.Data.Registry.SyntaxRegistry;
+
+            while (!registry.SchemaTypeList[owner.GetType()].Contains(syntax.GetType()))
+            {
+                owner = (SyntaxBase)owner.Owner;
             }
         }
 
@@ -1908,7 +1954,7 @@
         /// Main entry for ParseTwo with break.
         /// </summary>
         /// <param name="isOwnerNewChild">Returns true, if item is a child of ownerNew. If false, it is a child of owner.</param>
-        internal static void ParseTwoMainBreak(SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
+        internal static void ParseTwoMainBreak(ref SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
         {
             UtilDoc.Assert(ownerNew.Owner.Data == owner.Data);
 
@@ -1923,12 +1969,13 @@
                 if (isOwnerNewChildLocal == false)
                 {
                     // item is not child
-                    item.ParseTwo(owner);
+                    ParseTwoMainBreak(ref owner, item);
+                    item.ParseTwo(ref owner);
                 }
                 else
                 {
                     // item is child
-                    item.ParseTwo(ownerNew);
+                    item.ParseTwo(ref ownerNew);
                 }
             }
         }
@@ -1938,10 +1985,9 @@
         /// </summary>
         internal static void ParseThreeMain(SyntaxBase owner, SyntaxBase syntax)
         {
-            SyntaxBase ownerNew = null; // Create for example new paragraph if content is directly on page.
             foreach (SyntaxBase item in syntax.List)
             {
-                item.ParseThree(owner, ref ownerNew);
+                item.ParseThree(owner);
             }
         }
 
@@ -1954,58 +2000,17 @@
             Paragraph = 2,
         }
 
-        internal static SyntaxBase ParseThreeOwner(SyntaxBase owner, SyntaxBase syntax, OwnerEnum ownerEnum)
+        /// <summary>
+        /// Main entry for ParseFour.
+        /// </summary>
+        internal static void ParseFourMain(SyntaxBase owner, SyntaxBase syntax)
         {
-            var result = owner;
-            switch (ownerEnum)
+            foreach (SyntaxBase item in syntax.List)
             {
-                case OwnerEnum.Page:
-                    result = owner.OwnerFind<SyntaxCustomNote>(); // Paragraph can be inside CustomNote.
-                    if (result == null)
-                    {
-                        result = owner.OwnerFind<SyntaxPage>();
-                    }
-                    break;
-                case OwnerEnum.Paragraph:
-                    result = owner.OwnerFind<SyntaxFont>();
-                    if (result == null)
-                    {
-                        result = owner.OwnerFind<SyntaxParagraph>();
-                    }
-                    if (result == null)
-                    {
-                        result = owner.OwnerFind<SyntaxTitle>();
-                    }
-                    if (result == null)
-                    {
-                        result = owner.OwnerFind<SyntaxBullet>();
-                    }
-                    if (result == null)
-                    {
-                        if (owner.Data.ListCount() > 0 && owner.Data.List.Last().Component() is SyntaxParagraph paragraph)
-                        {
-                            // Last paragraph.
-                            result = paragraph;
-                        }
-                        else
-                        {
-                            SyntaxBase page = owner.OwnerFind<SyntaxCustomNote>(); // Paragraph can be inside CustomNote.
-                            if (page == null)
-                            {
-                                page = owner.OwnerFind<SyntaxPage>();
-                            }
-                            result = new SyntaxParagraph(page, syntax);
-                        }
-                    }
-                    break;
-                default:
-                    throw new Exception("Enum unknown!");
+                item.ParseFour(owner);
             }
-
-            UtilDoc.Assert(result != null);
-
-            return result;
         }
+
 
         /// <summary>
         /// Main entry for ParseHtml.
@@ -2029,12 +2034,12 @@
         /// <summary>
         /// Override this method to custom transform syntax tree ParseOne into ParseTwo.
         /// </summary>
-        internal virtual void ParseTwo(SyntaxBase owner)
+        internal virtual void ParseTwo(ref SyntaxBase owner)
         {
             if (owner.Data.Registry.SyntaxRegistry.SchemaTypeList.TryGetValue(GetType(), out var schemaTypeList))
             {
                 var ownerNew = owner.Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(owner, this);
-                ParseTwoMainBreak(owner, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
+                ParseTwoMainBreak(ref owner, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
             }
             else
             {
@@ -2044,43 +2049,86 @@
         }
 
         /// <summary>
+        /// Returns owner or a new owner (for example paragrpah, if content is directly on page).
+        /// </summary>
+        private static SyntaxBase ParseThreeCreateOwnerNew(SyntaxBase owner, SyntaxBase syntax)
+        {
+            var type = syntax.GetType();
+            List<Type> ownerTypeDefaultList = new List<Type>();
+            do
+            {
+                var ownerTypeList = syntax.Data.Registry.SyntaxRegistry.SchemaOwnerTypeList[type];
+                if (!ownerTypeList.Contains(owner.GetType()))
+                {
+                    var ownerTypeDefault = ownerTypeList.First();
+                    ownerTypeDefaultList.Insert(0, ownerTypeDefault);
+                    type = ownerTypeDefault;
+                }
+                else
+                {
+                    break;
+                }
+            } while (true);
+
+            var result = owner;
+            foreach (var ownerTypeDefault in ownerTypeDefaultList)
+            {
+                result = syntax.Data.Registry.SyntaxRegistry.TypeList[ownerTypeDefault].Create(result, syntax);
+                result.Data.IsCreateNew = true;
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Override this method to custom transform syntax tree ParseTwo into ParseThree.
         /// </summary>
-        /// <param name="ownerNew">Possible previous inserted owner. For example new paragraph.</param>
-        internal virtual void ParseThree(SyntaxBase owner, ref SyntaxBase ownerNew)
+        internal virtual void ParseThree(SyntaxBase owner)
         {
-            var ownerLocal = ownerNew != null ? ownerNew : owner;
-
-            var ownerTypeList = Data.Registry.SyntaxRegistry.SchemaOwnerTypeList[GetType()];
-            if (!ownerTypeList.Contains(ownerLocal.GetType()))
-            {
-                var ownerTypeDefault = ownerTypeList.First();
-
-                bool isLast = false;
-                if (ownerLocal.Data.ListCount() > 0)
-                {
-                    var last = ownerLocal.Data.List.Last().Component();
-                    if (last.GetType() == ownerTypeDefault)
-                    {
-                        // For example last paragrpah.
-                        isLast = true;
-                        ownerNew = (SyntaxBase)last;
-                    }
-                }
-
-                if (!isLast)
-                {
-                    // Create for example new paragraph if content is directly on page.
-                    ownerNew = Data.Registry.SyntaxRegistry.TypeList[ownerTypeDefault].Create(owner, this);
-                }
-            }
-            if (ownerNew != null)
-            {
-                ownerLocal = ownerNew;
-            }
-
+            var ownerLocal = ParseThreeCreateOwnerNew(owner, this);
             var syntax = Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(ownerLocal, this);
             ParseThreeMain(syntax, this);
+        }
+
+
+        /// <summary>
+        /// Override this method to custom transform syntax tree ParseTwo into ParseThree.
+        /// </summary>
+        internal virtual void ParseFour(SyntaxBase owner)
+        {
+            SyntaxBase syntaxLast = null;
+            if (owner.Data.ListCount() > 0)
+            {
+                syntaxLast = (SyntaxBase)owner.Data.List.Last().Component();
+            }
+
+            SyntaxBase syntaxLocal;
+            // For example this paragraph and previous paragraph were both inserted (IsCreateNew).
+            var isPrevious = syntaxLast?.IsCreateNew == true && IsCreateNew && syntaxLast.GetType() == GetType();
+            if (isPrevious)
+            {
+                // Do not create new syntax but take previous one.
+                syntaxLocal = syntaxLast;
+            }
+            else
+            {
+                var ownerLocal = owner;
+                // For example previous paragraph has been inserted (IsCreateNew) and this is comment.
+                isPrevious = syntaxLast?.IsCreateNew == true && IsCreateNew == false && syntaxLast.GetType() != GetType();
+                if (isPrevious)
+                {
+                    // Check if for example this comment can be added to prevois paragraph.
+                    if (Data.Registry.SyntaxRegistry.SchemaOwnerTypeList[GetType()].Contains(syntaxLast.GetType()))
+                    {
+                        ownerLocal = syntaxLast;
+                    }
+                }
+                // Create new syntax
+                syntaxLocal = Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(ownerLocal, this);
+                syntaxLocal.Data.IsCreateNew = IsCreateNew;
+            }
+
+            ParseFourMain(syntaxLocal, this);
         }
 
         /// <summary>
@@ -2139,7 +2187,7 @@
         public SyntaxPage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
-
+            UtilDoc.Assert(owner is SyntaxDoc);
         }
 
         internal override void RegistrySchema(RegistrySchemaResult result)
@@ -2188,6 +2236,7 @@
             result.AddOwner<SyntaxPage>();
             result.AddOwner<SyntaxContent>();
             result.AddOwner<SyntaxBullet>();
+            result.AddOwner<SyntaxTitle>();
         }
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
@@ -2243,7 +2292,7 @@
         public SyntaxTitle(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
-
+            UtilDoc.Assert(owner is SyntaxPage);
         }
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
@@ -2537,6 +2586,8 @@
             result.AddOwner<SyntaxParagraph>();
             result.AddOwner<SyntaxTitle>();
             result.AddOwner<SyntaxBullet>();
+            result.AddOwner<SyntaxPage>(false);
+            result.AddOwner<SyntaxCustomNote>(false);
         }
 
         public MdFontEnum FontEnum => ((MdFont)TokenBegin).FontEnum;
@@ -2875,7 +2926,7 @@
         public SyntaxParagraph(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
-
+            UtilDoc.Assert(owner is SyntaxPage || owner is SyntaxCustomNote);
         }
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
@@ -2886,7 +2937,7 @@
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
             result.AddOwner<SyntaxPage>();
-            result.AddOwner<SyntaxCustomNote>(); // No new paragraph inside note
+            result.AddOwner<SyntaxCustomNote>();
         }
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
@@ -3016,6 +3067,7 @@
             result.AddOwner<SyntaxBullet>();
             result.AddOwner<SyntaxFont>();
             result.AddOwner<SyntaxCustomNote>();
+            result.AddOwner<SyntaxCode>();
         }
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
@@ -3624,13 +3676,21 @@
     {
         public static void Debug()
         {
-            string textMd = @"Hello
-
-World";
-            textMd = "<!-- Comment -->";
+            string textMd = @"(Note)
+# X5
+**Bold**
+(Note)";
+            // textMd = "# Hello<!-- Comment -->World";
+            // textMd = "Hello\r\nWorld\r\n* One\r\n* Two";
             // textMd = "Hello\r\n\r\nWorld";
-            // textMd = "Hello\r\nWorld";
             // textMd = "Hello<!-- Comment -->";
+            //textMd = "Hello<!-- Comment -->World";
+            // textMd = "**Bold**World";
+            // textMd = "(Note)\r\n\r\nA\r\n(Note)";
+            // textMd = "(Note)\r\n\r\n* A\r\n(Note)";
+            // textMd = "(Note)\r\n\r\nHello\r\n\r\n# A\r\n# B\r\n(Note)";
+            // textMd = "(Note)Hello\r\n# A\r\n(Note)";
+            // textMd = "(Note)\r\n\r\n* A\r\n(Note)";
 
             // Doc
             var appDoc = new AppDoc();
@@ -3664,7 +3724,14 @@ World";
             {
                 result.Append("  ");
             }
-            result.Append("-(" + component.GetType().Name + ")");
+
+            string syntaxIdText = null;
+            if (component is SyntaxBase syntaxId && syntaxId.Data.SyntaxId != null)
+            {
+                syntaxIdText = "->" + string.Format("{0:000}", syntaxId.Data.SyntaxId);
+            }
+
+            result.Append("-(" + component.GetType().Name + " " + string.Format("{0:000}", component.Data.Id) + syntaxIdText + ")");
 
             // Token
             if (component is MdTokenBase token)
@@ -3682,16 +3749,24 @@ World";
                     }
                     if (doc.OwnerFind<AppDoc>().SyntaxDocTwo.Data == doc.Data)
                     {
-                        result.Append(" ParseTwo");
+                        result.Append(" ParseTwo (Break)");
                     }
                     if (doc.OwnerFind<AppDoc>().SyntaxDocThree.Data == doc.Data)
                     {
-                        result.Append(" ParseThree");
+                        result.Append(" ParseThree (IsCreateNew Create)");
+                    }
+                    if (doc.OwnerFind<AppDoc>().SyntaxDocFour.Data == doc.Data)
+                    {
+                        result.Append(" ParseFour (IsCreateNew Merge)");
                     }
                 }
                 else
                 {
                     result.Append(" Text=\"" + TextDebug(syntax.Text) + "\";");
+                    if (syntax.IsCreateNew)
+                    {
+                        result.Append(" IsCreateNew;");
+                    }
                 }
             }
             // Html
