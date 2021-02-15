@@ -16,8 +16,8 @@
         {
             // Test Md
             {
-                 UnitTestMd.Run();
-                 // UtilDoc.Debug(); return;
+                UnitTestMd.Run();
+                // UtilDoc.Debug(); return;
             }
             {
                 MyHideComponent component = new MyHideComponent(null);
@@ -606,8 +606,8 @@
             list.Add(new Item { TextMd = "(Note)\r\n**Note:**\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)<strong>Note:</strong>(/p)</p></div></article>" });
             list.Add(new Item { TextMd = "(Note)\r\n\r\nA\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)A(/p)</p></div></article>" });
             list.Add(new Item { TextMd = "(Note)\r\n\r\nHello\r\n\r\n# A\r\n# B\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p><p>(p)(/p)</p></div></article><h1>A</h1><p>(p)(/p)</p><h1>B</h1><p>(p)(/p)</p>" });
-            list.Add(new Item { TextMd = "(Note)\r\n\r\n* A\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)(/p)</p></div></article><ul><li>A</li></ul><p>(p)(/p)</p>" });
-            // list.Add(new Item { TextMd = "(Note)\r\n# X5\r\n**Bold**\r\n(Note)", TextHtml = "" });
+            list.Add(new Item { TextMd = "(Note)\r\n\r\n* A\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)(/p)</p></div></article><ul><li>A</li></ul>" });
+            list.Add(new Item { TextMd = "(Note)\r\n# X5\r\n**Bold**\r\n(Note)", TextHtml = "<article class=\"message is-warning\"><div class=\"message-body\"></div></article><h1>X5</h1><p>(p)<strong>Bold</strong>(/p)</p>" });
 
             foreach (var item in list)
             {

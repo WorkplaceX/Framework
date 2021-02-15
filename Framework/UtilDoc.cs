@@ -52,6 +52,8 @@
 
         MdContent,
 
+        SyntaxOmit,
+        
         SyntaxDoc,
 
         SyntaxPage,
@@ -187,6 +189,8 @@
 
         public string Text { get; set; }
 
+        public bool IsOmit { get; set; }
+
         public int IndexBegin { get; set; }
 
         public int IndexEnd { get; set; }
@@ -281,6 +285,7 @@
             Add(typeof(MdContent));
 
             // Syntax
+            Add(typeof(SyntaxOmit)); // Needs to be first Syntax
             Add(typeof(SyntaxDoc));
             Add(typeof(SyntaxPage));
             Add(typeof(SyntaxComment));
@@ -295,7 +300,7 @@
             Add(typeof(SyntaxParagraph));
             Add(typeof(SyntaxNewLine));
             Add(typeof(SyntaxContent));
-            Add(typeof(SyntaxIgnore)); // This should be the last SyntaX
+            Add(typeof(SyntaxIgnore)); // Needs to be last Syntax
 
             // Html
             Add(typeof(HtmlDoc));
@@ -489,6 +494,36 @@
                 }
                 return result;
             }
+        }
+
+        private static void ListAll(Component component, List<Component> result)
+        {
+            result.Add(component);
+            foreach (var item in component.List)
+            {
+                ListAll(item, result);
+            }
+        }
+
+        /// <summary>
+        /// Returns list of all child components recursive including this.
+        /// </summary>
+        public IReadOnlyList<Component> ListAll()
+        {
+            var result = new List<Component>();
+            ListAll(this, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Remove component from owner. Needs to be last component.
+        /// </summary>
+        public void Remove()
+        {
+            UtilDoc.Assert(Data.Owner != null);
+            UtilDoc.Assert(Data.Owner.List.Last() == Data);
+            Data.Owner.List.Remove(this.Data);
+            Data.Owner = null;
         }
 
         /// <summary>
@@ -780,6 +815,15 @@
             UtilDoc.Assert(index >= 0 && index < Owner.Text.Length, "Index out of range!");
 
             Data.IndexEnd = index;
+        }
+
+        /// <summary>
+        /// Gets or sets IsOmit. See also class SyntaxOmit.
+        /// </summary>
+        public bool IsOmit
+        {
+            get => Data.IsOmit;
+            set => Data.IsOmit = value;
         }
 
         /// <summary>
@@ -1724,12 +1768,12 @@
 
         public void TokenEndSet(MdTokenBase tokenEnd)
         {
-            var index = TokenEnd.Data.Index;
-            var indexNew = tokenEnd.Data.Index;
+            var index = TokenEnd.Data.IndexEnd;
+            var indexNew = tokenEnd.Data.IndexEnd;
             if (index < indexNew)
             {
                 // Grow
-                var indexOwnerMax = ((SyntaxBase)Owner).TokenEnd.Data.Index;
+                var indexOwnerMax = ((SyntaxBase)Owner).TokenEnd.Data.IndexEnd;
                 UtilDoc.Assert(indexNew <= indexOwnerMax);
                 Data.TokenIdEnd = tokenEnd.Data.Id;
                 CreateValidate();
@@ -1933,20 +1977,7 @@
         {
             foreach (SyntaxBase item in syntax.List)
             {
-                item.ParseTwo(ref owner);
-            }
-        }
-
-        /// <summary>
-        /// Move owner up till syntax can be child.
-        /// </summary>
-        private static void ParseTwoMainBreak(ref SyntaxBase owner, SyntaxBase syntax)
-        {
-            var registry = owner.Data.Registry.SyntaxRegistry;
-
-            while (!registry.SchemaTypeList[owner.GetType()].Contains(syntax.GetType()))
-            {
-                owner = (SyntaxBase)owner.Owner;
+                item.ParseTwo(owner);
             }
         }
 
@@ -1954,7 +1985,7 @@
         /// Main entry for ParseTwo with break.
         /// </summary>
         /// <param name="isOwnerNewChild">Returns true, if item is a child of ownerNew. If false, it is a child of owner.</param>
-        internal static void ParseTwoMainBreak(ref SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
+        internal static void ParseTwoMainBreak(SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
         {
             UtilDoc.Assert(ownerNew.Owner.Data == owner.Data);
 
@@ -1969,13 +2000,12 @@
                 if (isOwnerNewChildLocal == false)
                 {
                     // item is not child
-                    ParseTwoMainBreak(ref owner, item);
-                    item.ParseTwo(ref owner);
+                    item.ParseTwo(owner);
                 }
                 else
                 {
                     // item is child
-                    item.ParseTwo(ref ownerNew);
+                    item.ParseTwo(ownerNew);
                 }
             }
         }
@@ -2034,12 +2064,12 @@
         /// <summary>
         /// Override this method to custom transform syntax tree ParseOne into ParseTwo.
         /// </summary>
-        internal virtual void ParseTwo(ref SyntaxBase owner)
+        internal virtual void ParseTwo(SyntaxBase owner)
         {
             if (owner.Data.Registry.SyntaxRegistry.SchemaTypeList.TryGetValue(GetType(), out var schemaTypeList))
             {
                 var ownerNew = owner.Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(owner, this);
-                ParseTwoMainBreak(ref owner, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
+                ParseTwoMainBreak(owner, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
             }
             else
             {
@@ -2049,44 +2079,21 @@
         }
 
         /// <summary>
-        /// Returns owner or a new owner (for example paragrpah, if content is directly on page).
-        /// </summary>
-        private static SyntaxBase ParseThreeCreateOwnerNew(SyntaxBase owner, SyntaxBase syntax)
-        {
-            var type = syntax.GetType();
-            List<Type> ownerTypeDefaultList = new List<Type>();
-            do
-            {
-                var ownerTypeList = syntax.Data.Registry.SyntaxRegistry.SchemaOwnerTypeList[type];
-                if (!ownerTypeList.Contains(owner.GetType()))
-                {
-                    var ownerTypeDefault = ownerTypeList.First();
-                    ownerTypeDefaultList.Insert(0, ownerTypeDefault);
-                    type = ownerTypeDefault;
-                }
-                else
-                {
-                    break;
-                }
-            } while (true);
-
-            var result = owner;
-            foreach (var ownerTypeDefault in ownerTypeDefaultList)
-            {
-                result = syntax.Data.Registry.SyntaxRegistry.TypeList[ownerTypeDefault].Create(result, syntax);
-                result.Data.IsCreateNew = true;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Override this method to custom transform syntax tree ParseTwo into ParseThree.
         /// </summary>
         internal virtual void ParseThree(SyntaxBase owner)
         {
-            var ownerLocal = ParseThreeCreateOwnerNew(owner, this);
-            var syntax = Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(ownerLocal, this);
+            var ownerLocal = owner;
+            var registry = Data.Registry.SyntaxRegistry;
+            var ownerTypeList = registry.SchemaOwnerTypeList[GetType()];
+            if (!ownerTypeList.Contains(owner.GetType()))
+            {
+                // Create new owner paragraph if content (this) is directly on page (owner).
+                var ownerTypeDefault = ownerTypeList.First();
+                ownerLocal = registry.TypeList[ownerTypeDefault].Create(owner, this);
+                ownerLocal.Data.IsCreateNew = true;
+            }
+            var syntax = registry.TypeList[GetType()].Create(ownerLocal, this);
             ParseThreeMain(syntax, this);
         }
 
@@ -3017,6 +3024,68 @@
         }
     }
 
+    internal class SyntaxOmit : SyntaxBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxOmit(Registry registry)
+            : base(registry)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxOmit(SyntaxBase owner, MdTokenBase token)
+            : base(owner, token, token)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxOmit(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo and ParseThree.
+        /// </summary>
+        public SyntaxOmit(SyntaxBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
+        {
+            return new SyntaxOmit(owner, syntax);
+        }
+
+        internal override void RegistrySchema(RegistrySchemaResult result)
+        {
+            result.AddOwner<SyntaxPage>();
+        }
+
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        {
+            if (tokenBegin.IsOmit)
+            {
+                new SyntaxOmit(owner, tokenBegin);
+            }
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            // No html
+        }
+    }
+
     internal class SyntaxIgnore : SyntaxBase
     {
         /// <summary>
@@ -3226,12 +3295,53 @@
 
                 ParseOneMain(note, this);
 
-                note.TokenEndSet(tokenBlockEndList.Last());
-
-                new SyntaxIgnore(note, tokenBlockEnd);
-                foreach (var item in tokenBlockEndList)
+                // Shrink custom note parsed range if it contains invalid syntax like for example bullet.
+                MdTokenBase tokenEndShrink = null;
+                var registry = Data.Registry.SyntaxRegistry;
+                var typeList = registry.SchemaTypeList[note.GetType()];
+                foreach (SyntaxBase item in note.ListAll())
                 {
-                    new SyntaxIgnore(note, item);
+                    if (item.Data != note.Data)
+                    {
+                        if (!typeList.Contains(item.GetType()))
+                        {
+                            var itemPrevious = item.Previous<SyntaxBase>(null);
+                            tokenEndShrink = itemPrevious.TokenEnd;
+                            break;
+                        }
+                    }
+                }
+
+                // Shrink custom note range.
+                if (tokenEndShrink != null)
+                {
+                    note.Remove();
+                    note = new SyntaxCustomNote(owner, tokenBlockBegin, tokenEndShrink);
+
+                    new SyntaxIgnore(note, tokenBlockBegin);
+                    foreach (var item in tokenBlockBeginList)
+                    {
+                        new SyntaxIgnore(note, item);
+                    }
+
+                    // Parse again with new range.
+                    ParseOneMain(note, this);
+
+                    tokenBlockEnd.IsOmit = true;
+                    foreach (var item in tokenBlockEndList)
+                    {
+                        item.IsOmit = true;
+                    }
+                }
+                else
+                {
+                    note.TokenEndSet(tokenBlockEndList.Last());
+
+                    new SyntaxIgnore(note, tokenBlockEnd);
+                    foreach (var item in tokenBlockEndList)
+                    {
+                        new SyntaxIgnore(note, item);
+                    }
                 }
             }
         }
@@ -3676,10 +3786,7 @@
     {
         public static void Debug()
         {
-            string textMd = @"(Note)
-# X5
-**Bold**
-(Note)";
+            string textMd = "(Note)\r\n# X5\r\n**Bold**\r\n(Note)";
             // textMd = "# Hello<!-- Comment -->World";
             // textMd = "Hello\r\nWorld\r\n* One\r\n* Two";
             // textMd = "Hello\r\n\r\nWorld";
