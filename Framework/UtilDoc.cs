@@ -74,7 +74,7 @@
 
         SyntaxCustomNote,
 
-        SyntaxPageBreak,
+        SyntaxCustomPage,
 
         SyntaxParagraph,
 
@@ -296,7 +296,7 @@
             Add(typeof(SyntaxLink));
             Add(typeof(SyntaxImage));
             Add(typeof(SyntaxCustomNote));
-            Add(typeof(SyntaxPageBreak));
+            Add(typeof(SyntaxCustomPage));
             Add(typeof(SyntaxParagraph));
             Add(typeof(SyntaxNewLine));
             Add(typeof(SyntaxContent));
@@ -355,6 +355,11 @@
         /// Gets SyntaxRegistry. Available if one SyntaxRegistry has been created out of this Registry.
         /// </summary>
         public SyntaxRegistry SyntaxRegistry;
+
+        /// <summary>
+        /// Gets or sets IsDebug. If true, for example html is rendered with additional debug information.
+        /// </summary>
+        public bool IsDebug;
 
         /// <summary>
         /// Use in getter for component reference.
@@ -2062,18 +2067,34 @@
         }
 
         /// <summary>
+        /// Returns owner or owner.Owner till syntax is child.
+        /// </summary>
+        private static SyntaxBase ParseTwo(SyntaxBase owner, SyntaxBase syntax)
+        {
+            var result = owner;
+            var registry = syntax.Data.Registry.SyntaxRegistry;
+            while (!registry.SchemaTypeList[result.GetType()].Contains(syntax.GetType()))
+            {
+                result = (SyntaxBase)owner.Owner;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Override this method to custom transform syntax tree ParseOne into ParseTwo.
         /// </summary>
         internal virtual void ParseTwo(SyntaxBase owner)
         {
-            if (owner.Data.Registry.SyntaxRegistry.SchemaTypeList.TryGetValue(GetType(), out var schemaTypeList))
+            var registry = Data.Registry.SyntaxRegistry;
+            if (registry.SchemaTypeList.TryGetValue(GetType(), out var schemaTypeList))
             {
-                var ownerNew = owner.Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(owner, this);
-                ParseTwoMainBreak(owner, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
+                var ownerLocal = ParseTwo(owner, this);
+                var ownerNew = registry.TypeList[GetType()].Create(ownerLocal, this);
+                ParseTwoMainBreak(ownerLocal, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
             }
             else
             {
-                var syntax = Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(owner, this);
+                var syntax = registry.TypeList[GetType()].Create(owner, this);
                 ParseTwoMain(syntax, this);
             }
         }
@@ -2205,6 +2226,13 @@
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
             return new SyntaxPage(owner, syntax);
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            var page = new HtmlPage(owner, this);
+
+            ParseHtmlMain(page, this);
         }
     }
 
@@ -3137,6 +3165,7 @@
             result.AddOwner<SyntaxFont>();
             result.AddOwner<SyntaxCustomNote>();
             result.AddOwner<SyntaxCode>();
+            result.AddOwner<SyntaxPage>();
         }
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
@@ -3186,10 +3215,10 @@
         /// <summary>
         /// Returns true, if custom command starting at new line has been found.
         /// </summary>
-        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket token, out List<MdTokenBase> ignoreList)
+        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket token, out List<MdTokenBase> tokenIgnoreList)
         {
             var result = false;
-            ignoreList = null;
+            tokenIgnoreList = null;
             if (ParseOneIsNewLine(tokenBegin, tokenEnd, out var space, out token))
             {
                 if (token.TextBracket == "(")
@@ -3204,9 +3233,9 @@
                                 {
                                     if (bracketEnd.Text == ")")
                                     {
-                                        ignoreList = new List<MdTokenBase>();
-                                        ignoreList.Add(content);
-                                        ignoreList.Add(bracketEnd);
+                                        tokenIgnoreList = new List<MdTokenBase>();
+                                        tokenIgnoreList.Add(content);
+                                        tokenIgnoreList.Add(bracketEnd);
                                         result = true;
                                     }
                                 }
@@ -3221,17 +3250,17 @@
         /// <summary>
         /// Returns true, if custom command (with end block) starting at new line has been found.
         /// </summary>
-        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket tokenBlockBegin, out List<MdTokenBase> ignoreBlockBeginList, out MdBracket tokenBlockEnd, out List<MdTokenBase> ignoreBlockEndList)
+        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket tokenBlockBegin, out List<MdTokenBase> tokenIgnoreBlockBeginList, out MdBracket tokenBlockEnd, out List<MdTokenBase> tokenIgnoreBlockEndList)
         {
             bool result = false;
             tokenBlockEnd = null;
-            ignoreBlockEndList = null;
-            if (ParseOneIsCustom(tokenBegin, tokenEnd, commandName, out tokenBlockBegin, out ignoreBlockBeginList))
+            tokenIgnoreBlockEndList = null;
+            if (ParseOneIsCustom(tokenBegin, tokenEnd, commandName, out tokenBlockBegin, out tokenIgnoreBlockBeginList))
             {
-                var next = ignoreBlockBeginList.Last();
+                var next = tokenIgnoreBlockBeginList.Last();
                 while (Next(ref next, tokenEnd))
                 {
-                    if (ParseOneIsCustom(next, tokenEnd, commandName, out tokenBlockEnd, out ignoreBlockEndList))
+                    if (ParseOneIsCustom(next, tokenEnd, commandName, out tokenBlockEnd, out tokenIgnoreBlockEndList))
                     {
                         result = true;
                         break;
@@ -3357,12 +3386,12 @@
     /// <summary>
     /// Custom syntax for page break.
     /// </summary>
-    internal class SyntaxPageBreak : SyntaxBase
+    internal class SyntaxCustomPage : SyntaxCustomBase
     {
         /// <summary>
         /// Constructor registry, factory mode.
         /// </summary>
-        public SyntaxPageBreak(Registry registry)
+        public SyntaxCustomPage(Registry registry)
             : base(registry)
         {
 
@@ -3371,7 +3400,7 @@
         /// <summary>
         /// Constructor ParseOne.
         /// </summary>
-        public SyntaxPageBreak(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        public SyntaxCustomPage(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
             : base(owner, tokenBegin, tokenEnd)
         {
 
@@ -3380,7 +3409,7 @@
         /// <summary>
         /// Constructor ParseTwo and ParseThree.
         /// </summary>
-        public SyntaxPageBreak(SyntaxBase owner, SyntaxBase syntax)
+        public SyntaxCustomPage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
 
@@ -3388,7 +3417,7 @@
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
-            return new SyntaxPageBreak(owner, syntax);
+            return new SyntaxCustomPage(owner, syntax);
         }
 
         internal override void RegistrySchema(RegistrySchemaResult result)
@@ -3398,31 +3427,15 @@
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
         {
-            // Detect (Page)
-            if (ParseOneIsNewLine<MdBracket>(tokenBegin, tokenEnd, out var tokenSpace, out var token))
+            if (ParseOneIsCustom(tokenBegin, tokenEnd, "Page", out var token, out var tokenIgnoreList))
             {
-                if (token.TextBracket == "(")
+                var page = new SyntaxPage(owner, token, tokenEnd);
+                new SyntaxIgnore(page, token);
+                foreach (var tokenIgnore in tokenIgnoreList)
                 {
-                    if (token.Next(tokenEnd) is MdContent content && token.Next(tokenEnd)?.Next(tokenEnd) is MdBracket bracketEnd)
-                    {
-                        if (bracketEnd.TextBracket == ")")
-                        {
-                            if (content.Text == "Page")
-                            {
-                                // Ignore leading space
-                                if (tokenSpace != null)
-                                {
-                                    new SyntaxIgnore(owner, tokenSpace);
-                                }
-                                var pageBreak = new SyntaxPageBreak(owner, token, tokenEnd);
-                                new SyntaxIgnore(pageBreak, token);
-                                new SyntaxIgnore(pageBreak, content);
-                                new SyntaxIgnore(pageBreak, bracketEnd);
-                                ParseOneMain(pageBreak, this);
-                            }
-                        }
-                    }
+                    new SyntaxIgnore(page, tokenIgnore);
                 }
+                ParseOneMain(page, this);
             }
         }
 
@@ -3519,12 +3532,18 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
-            // result.Append("<html><head></head><body>");
+            if (Data.Registry.IsDebug)
+            {
+                result.Append("<section>(page)");
+            }
         }
 
         internal override void RenderEnd(StringBuilder result)
         {
-            // result.Append("</body></html>");
+            if (Data.Registry.IsDebug)
+            {
+                result.Append("(/page)</section>");
+            }
         }
     }
 
@@ -3580,12 +3599,20 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
-            result.Append("<p>(p)");
+            result.Append("<p>");
+            if (Data.Registry.IsDebug)
+            {
+                result.Append("(p)");
+            }
         }
 
         internal override void RenderEnd(StringBuilder result)
         {
-            result.Append("(/p)</p>");
+            if (Data.Registry.IsDebug)
+            {
+                result.Append("(/p)");
+            }
+            result.Append("</p>");
         }
     }
 
@@ -3786,7 +3813,8 @@
     {
         public static void Debug()
         {
-            string textMd = "(Note)\r\n# X5\r\n**Bold**\r\n(Note)";
+            string textMd = @"# Title
+(Page)";
             // textMd = "# Hello<!-- Comment -->World";
             // textMd = "Hello\r\nWorld\r\n* One\r\n* Two";
             // textMd = "Hello\r\n\r\nWorld";
@@ -3801,6 +3829,7 @@
 
             // Doc
             var appDoc = new AppDoc();
+            appDoc.Data.Registry.IsDebug = true;
             new MdPage(appDoc.MdDoc, textMd);
             string exceptionText = null;
             try

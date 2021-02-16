@@ -40,7 +40,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.48.53";
+                return "v3.48.54";
             }
         }
 
@@ -63,6 +63,7 @@ namespace Framework
         public static string TextMdToHtml(string textMd)
         {
             var appDoc = new AppDoc();
+            appDoc.Data.Registry.IsDebug = true;
             new MdPage(appDoc.MdDoc, textMd);
             appDoc.Parse();
             var textHtml = appDoc.HtmlDoc.Render();
