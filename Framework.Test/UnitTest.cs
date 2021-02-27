@@ -9,6 +9,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Text;
 
     public static class UnitTest
     {
@@ -16,8 +17,10 @@
         {
             // Test Md
             {
+                // UtilDoc.Debug();
                 UnitTestMd.Run();
-                // UtilDoc.Debug(); return;
+                UnitTestMd.Run(isRun2: true);
+                // UnitTestMd.RunRandom();
             }
             {
                 MyHideComponent component = new MyHideComponent(null);
@@ -565,7 +568,7 @@
 
     public static class UnitTestMd
     {
-        public static void Run()
+        public static void Run(bool isRun2 = false) // TODO
         {
             List<Item> list = new List<Item>();
             list.Add(new Item { TextMd = "Text", TextHtml = "<section>(page)<p>(p)Text(/p)</p>(/page)</section>" });
@@ -620,6 +623,65 @@
                 var textHtml = appDoc.HtmlDoc.Render();
 
                 UtilFramework.Assert(textHtml == item.TextHtml);
+            }
+
+            if (isRun2)
+            {
+                list.Add(new Item { TextMd = "*(*(", TextHtml = "<section>(page)<p>(p)<i>(</i>((/p)</p>(/page)</section>" });
+                list.Add(new Item { TextMd = "# T\r\n(Note)\r\nHello\r\n(Note)\r\nWorld", TextHtml = "<section>(page)<h1>T</h1><p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article><p>(p)World(/p)</p>(/page)</section>" });
+                list.Add(new Item { TextMd = "\r\n\r\nT", TextHtml = "<section>(page)<p>(p)T(/p)</p>(/page)</section>" });
+                list.Add(new Item { TextMd = "(Note)**A**\r\n(Note)", TextHtml = "<section>(page)<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)<strong>A</strong>(/p)</p></div></article>(/page)</section>" });
+
+                var i = 0;
+                foreach (var item in list)
+                {
+                    var appDoc = new AppDoc();
+                    appDoc.Data.Registry.IsDebug = true;
+                    new MdPage(appDoc.MdDoc, item.TextMd);
+                    appDoc.Parse2();
+                    var textHtml = appDoc.HtmlDoc.Render();
+
+                    UtilFramework.Assert(textHtml == item.TextHtml);
+
+                    i += 1;
+                }
+            }
+        }
+
+        public static void RunRandom()
+        {
+            List<string> list = new List<string>();
+            list.Add("\r\n");
+            list.Add("\r\n\r\n");
+            list.Add(" ");
+            list.Add(" ");
+            list.Add("Text");
+            list.Add("![]");
+            list.Add("(");
+            list.Add("#");
+            list.Add("*");
+            list.Add("(Note)");
+            list.Add("```");
+            list.Add("*");
+            list.Add("**");
+            list.Add("(Page)");
+
+            var random = new Random(546);
+
+            for (int i = 0; i < 10000; i++)
+            {
+                var textMd = new StringBuilder();
+
+                for (int c = 0; c < 50; c++)
+                {
+                    textMd.Append(list[random.Next(list.Count - 1)]);
+                }
+
+                var appDoc = new AppDoc();
+                appDoc.Data.Registry.IsDebug = true;
+                new MdPage(appDoc.MdDoc, textMd.ToString());
+                appDoc.Parse2();
+                var textHtml = appDoc.HtmlDoc.Render();
             }
         }
 
