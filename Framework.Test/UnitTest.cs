@@ -19,8 +19,8 @@
             {
                 // UtilDoc.Debug();
                 UnitTestMd.Run();
-                UnitTestMd.Run(isRun2: true);
-                // UnitTestMd.RunRandom();
+                UnitTestMd.RunRandom();
+                return;
             }
             {
                 MyHideComponent component = new MyHideComponent(null);
@@ -568,7 +568,7 @@
 
     public static class UnitTestMd
     {
-        public static void Run(bool isRun2 = false) // TODO
+        public static void Run()
         {
             List<Item> list = new List<Item>();
             list.Add(new Item { TextMd = "Text", TextHtml = "<section>(page)<p>(p)Text(/p)</p>(/page)</section>" });
@@ -613,7 +613,12 @@
             list.Add(new Item { TextMd = "(Note)\r\n# X5\r\n**Bold**\r\n(Note)", TextHtml = "<section>(page)<article class=\"message is-warning\"><div class=\"message-body\"></div></article><h1>X5</h1><p>(p)<strong>Bold</strong>(/p)</p>(/page)</section>" });
             list.Add(new Item { TextMd = "Hello\r\n(Page)World", TextHtml = "<section>(page)<p>(p)Hello(/p)</p>(/page)</section><section>(page)<p>(p)World(/p)</p>(/page)</section>" });
             list.Add(new Item { TextMd = "# Title\r\n(Page)", TextHtml = "<section>(page)<h1>Title</h1><p>(p)(/p)</p>(/page)</section><section>(page)(/page)</section>" });
+            list.Add(new Item { TextMd = "*(*(", TextHtml = "<section>(page)<p>(p)<i>(</i>((/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "# T\r\n(Note)\r\nHello\r\n(Note)\r\nWorld", TextHtml = "<section>(page)<h1>T</h1><p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article><p>(p)World(/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "\r\n\r\nT", TextHtml = "<section>(page)<p>(p)T(/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "(Note)**A**\r\n(Note)", TextHtml = "<section>(page)<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)<strong>A</strong>(/p)</p></div></article>(/page)</section>" });
 
+            var i = 0;
             foreach (var item in list)
             {
                 var appDoc = new AppDoc();
@@ -623,28 +628,8 @@
                 var textHtml = appDoc.HtmlDoc.Render();
 
                 UtilFramework.Assert(textHtml == item.TextHtml);
-            }
 
-            if (isRun2)
-            {
-                list.Add(new Item { TextMd = "*(*(", TextHtml = "<section>(page)<p>(p)<i>(</i>((/p)</p>(/page)</section>" });
-                list.Add(new Item { TextMd = "# T\r\n(Note)\r\nHello\r\n(Note)\r\nWorld", TextHtml = "<section>(page)<h1>T</h1><p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article><p>(p)World(/p)</p>(/page)</section>" });
-                list.Add(new Item { TextMd = "\r\n\r\nT", TextHtml = "<section>(page)<p>(p)T(/p)</p>(/page)</section>" });
-                list.Add(new Item { TextMd = "(Note)**A**\r\n(Note)", TextHtml = "<section>(page)<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)<strong>A</strong>(/p)</p></div></article>(/page)</section>" });
-
-                var i = 0;
-                foreach (var item in list)
-                {
-                    var appDoc = new AppDoc();
-                    appDoc.Data.Registry.IsDebug = true;
-                    new MdPage(appDoc.MdDoc, item.TextMd);
-                    appDoc.Parse2();
-                    var textHtml = appDoc.HtmlDoc.Render();
-
-                    UtilFramework.Assert(textHtml == item.TextHtml);
-
-                    i += 1;
-                }
+                i += 1;
             }
         }
 
@@ -680,7 +665,7 @@
                 var appDoc = new AppDoc();
                 appDoc.Data.Registry.IsDebug = true;
                 new MdPage(appDoc.MdDoc, textMd.ToString());
-                appDoc.Parse2();
+                appDoc.Parse();
                 var textHtml = appDoc.HtmlDoc.Render();
             }
         }

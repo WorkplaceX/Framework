@@ -52,8 +52,6 @@
 
         MdContent,
 
-        SyntaxOmit,
-        
         SyntaxDoc,
 
         SyntaxPage,
@@ -91,7 +89,7 @@
         HtmlComment,
 
         HtmlTitle,
-        
+
         HtmlParagraph,
 
         HtmlBulletList,
@@ -103,7 +101,7 @@
         HtmlLink,
 
         HtmlImage,
-        
+
         HtmlCode,
 
         HtmlCustomNote,
@@ -194,12 +192,6 @@
 
         public string Text { get; set; }
 
-        public bool IsOmit { get; set; }
-
-        public int IndexBegin { get; set; }
-
-        public int IndexEnd { get; set; }
-
         public bool IsCommentEnd { get; set; }
 
         public int TitleLevel { get; set; }
@@ -209,7 +201,7 @@
         public bool IsBracketEnd { get; set; }
 
         public MdQuotationEnum QuotationEnum { get; set; }
-        
+
         public MdSymbolEnum SymbolEnum { get; set; }
 
         public MdFontEnum FontEnum { get; set; }
@@ -218,25 +210,21 @@
 
         public int TokenIdEnd { get; set; }
 
+        public int TokenIndexBegin { get; set; }
+
+        public int TokenIndexEnd { get; set; }
+
         public int? MdDocId { get; set; }
 
         public int? SyntaxDocOneId { get; set; }
 
-        public int? SyntaxDocOne2Id { get; set; }
-
         public int? SyntaxDocTwoId { get; set; }
-
-        public int? SyntaxDocTwo2Id { get; set; }
 
         public int? SyntaxDocThreeId { get; set; }
 
-        public int? SyntaxDocThree2Id { get; set; }
-
         public int? SyntaxDocFourId { get; set; }
 
-        public int? SyntaxDocFour2Id { get; set; }
-
-        public int? SyntaxDocFive2Id { get; set; }
+        public int? SyntaxDocFiveId { get; set; }
 
         public int? HtmlDocId { get; set; }
 
@@ -267,9 +255,9 @@
         ParseTwo = 2,
 
         ParseThree = 3,
-        
+
         ParseFour = 4,
-        
+
         ParseFive = 5,
 
         ParseHtml = 6,
@@ -304,7 +292,6 @@
             Add(typeof(MdContent));
 
             // Syntax
-            Add(typeof(SyntaxOmit)); // Needs to be first Syntax
             Add(typeof(SyntaxDoc));
             Add(typeof(SyntaxPage));
             Add(typeof(SyntaxComment));
@@ -453,7 +440,7 @@
         /// <summary>
         /// Constructor root.
         /// </summary>
-        public Component() 
+        public Component()
             : this(null, null)
         {
 
@@ -471,7 +458,7 @@
         /// <summary>
         /// Constructor registry, factory mode. Root with existing registry.
         /// </summary>
-        public Component(Registry registry) 
+        public Component(Registry registry)
             : this(null, registry)
         {
 
@@ -606,10 +593,9 @@
         /// <summary>
         /// Returns previous component.
         /// </summary>
-        /// <param name="componentBegin">Can be null for no range check.</param>
-        public T Previous<T>(T componentBegin) where T : Component // TODO remove (null).
+        public T Previous<T>() where T : Component
         {
-            var result = Next(componentBegin, offset: -1);
+            var result = Next(null, offset: -1);
             return (T)result;
         }
 
@@ -654,14 +640,10 @@
         {
             MdDoc = new MdDoc(this);
             SyntaxDocOne = new SyntaxDoc(this);
-            SyntaxDocOne2 = new SyntaxDoc(this);
             SyntaxDocTwo = new SyntaxDoc(this);
-            SyntaxDocTwo2 = new SyntaxDoc(this);
             SyntaxDocThree = new SyntaxDoc(this);
-            SyntaxDocThree2 = new SyntaxDoc(this);
             SyntaxDocFour = new SyntaxDoc(this);
-            SyntaxDocFour2 = new SyntaxDoc(this);
-            SyntaxDocFive2 = new SyntaxDoc(this);
+            SyntaxDocFive = new SyntaxDoc(this);
             HtmlDoc = new HtmlDoc(this);
         }
 
@@ -690,31 +672,6 @@
             syntaxRegistry.Parse(this);
         }
 
-        /// <summary>
-        /// Parse md pages.
-        /// </summary>
-        public void Parse2()
-        {
-            // Init registries
-            var mdRegistry = new MdRegistry(Data.Registry);
-            var syntaxRegistry = new SyntaxRegistry(Data.Registry, isParse2: true);
-
-            // Lexer
-            foreach (MdPage page in MdDoc.List)
-            {
-                // Clear token list
-                if (page.Data.ListCount() > 0)
-                {
-                    page.Data.List = new List<DataDoc>();
-                }
-
-                // Lexer
-                mdRegistry.Parse(page);
-            }
-
-            syntaxRegistry.Parse2(this);
-        }
-
         public MdDoc MdDoc
         {
             get => Data.Registry.ReferenceGet<MdDoc>(Data.MdDocId);
@@ -727,22 +684,10 @@
             set => Data.SyntaxDocOneId = Registry.ReferenceSet(value);
         }
 
-        public SyntaxDoc SyntaxDocOne2
-        {
-            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocOne2Id);
-            set => Data.SyntaxDocOne2Id = Registry.ReferenceSet(value);
-        }
-
         public SyntaxDoc SyntaxDocTwo
         {
             get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocTwoId);
             set => Data.SyntaxDocTwoId = Registry.ReferenceSet(value);
-        }
-
-        public SyntaxDoc SyntaxDocTwo2
-        {
-            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocTwo2Id);
-            set => Data.SyntaxDocTwo2Id = Registry.ReferenceSet(value);
         }
 
         public SyntaxDoc SyntaxDocThree
@@ -751,28 +696,16 @@
             set => Data.SyntaxDocThreeId = Registry.ReferenceSet(value);
         }
 
-        public SyntaxDoc SyntaxDocThree2
-        {
-            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocThree2Id);
-            set => Data.SyntaxDocThree2Id = Registry.ReferenceSet(value);
-        }
-
         public SyntaxDoc SyntaxDocFour
         {
             get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocFourId);
             set => Data.SyntaxDocFourId = Registry.ReferenceSet(value);
         }
 
-        public SyntaxDoc SyntaxDocFour2
+        public SyntaxDoc SyntaxDocFive
         {
-            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocFour2Id);
-            set => Data.SyntaxDocFour2Id = Registry.ReferenceSet(value);
-        }
-
-        public SyntaxDoc SyntaxDocFive2
-        {
-            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocFive2Id);
-            set => Data.SyntaxDocFive2Id = Registry.ReferenceSet(value);
+            get => Data.Registry.ReferenceGet<SyntaxDoc>(Data.SyntaxDocFiveId);
+            set => Data.SyntaxDocFiveId = Registry.ReferenceSet(value);
         }
 
         public HtmlDoc HtmlDoc
@@ -889,17 +822,17 @@
                 indexBegin = previous.IndexEnd + 1;
             }
 
-            Data.IndexBegin = indexBegin;
-            Data.IndexEnd = Data.IndexBegin + length - 1;
+            Data.TokenIndexBegin = indexBegin;
+            Data.TokenIndexEnd = Data.TokenIndexBegin + length - 1;
 
-            UtilDoc.Assert(Data.IndexEnd <= owner.Text.Length);
+            UtilDoc.Assert(Data.TokenIndexEnd <= owner.Text.Length);
         }
 
         public new MdPage Owner => (MdPage)base.Owner;
 
-        public int IndexBegin => Data.IndexBegin;
+        public int IndexBegin => Data.TokenIndexBegin;
 
-        public int IndexEnd => Data.IndexEnd;
+        public int IndexEnd => Data.TokenIndexEnd;
 
         public int Length => IndexEnd - IndexBegin + 1;
 
@@ -910,16 +843,7 @@
 
             UtilDoc.Assert(index >= 0 && index < Owner.Text.Length, "Index out of range!");
 
-            Data.IndexEnd = index;
-        }
-
-        /// <summary>
-        /// Gets or sets IsOmit. See also class SyntaxOmit.
-        /// </summary>
-        public bool IsOmit
-        {
-            get => Data.IsOmit;
-            set => Data.IsOmit = value;
+            Data.TokenIndexEnd = index;
         }
 
         /// <summary>
@@ -929,7 +853,7 @@
         {
             get
             {
-                return Owner.Text.Substring(Data.IndexBegin, Data.IndexEnd - Data.IndexBegin + 1);
+                return Owner.Text.Substring(Data.TokenIndexBegin, Data.TokenIndexEnd - Data.TokenIndexBegin + 1);
             }
         }
 
@@ -1614,10 +1538,8 @@
     /// </summary>
     internal class SyntaxRegistry
     {
-        public SyntaxRegistry(Registry registry, bool isParse2 = false)
+        public SyntaxRegistry(Registry registry)
         {
-            IsParse2 = isParse2;
-
             UtilDoc.Assert(registry.SyntaxRegistry == null);
             registry.SyntaxRegistry = this;
 
@@ -1634,7 +1556,7 @@
                 if (type.IsSubclassOf(typeof(SyntaxBase)))
                 {
                     // Create instance for registry, factory mode.
-                    
+
                     // Call new SyntaxBase(registry);
                     var syntaxParser = (SyntaxBase)type.GetConstructor(new Type[] { typeof(Registry) }).Invoke(new object[] { registry }); // Activator
                     List.Add(syntaxParser);
@@ -1686,6 +1608,7 @@
             var syntaxDocTwo = appDoc.SyntaxDocTwo;
             var syntaxDocThree = appDoc.SyntaxDocThree;
             var syntaxDocFour = appDoc.SyntaxDocFour;
+            var syntaxDocFive = appDoc.SyntaxDocFive;
             var htmlDoc = appDoc.HtmlDoc;
 
             // ParseOne
@@ -1697,88 +1620,29 @@
                     var tokenBegin = (MdTokenBase)page.Data.List[0].Component();
                     var tokenEnd = (MdTokenBase)page.Data.List[page.Data.List.Count - 1].Component();
                     var syntaxPage = new SyntaxPage(syntaxDocOne, tokenBegin, tokenEnd);
-                    SyntaxBase.ParseOneMain(syntaxPage, this);
+                    SyntaxBase.ParseOneMain(syntaxPage);
                 }
             }
 
             // ParseTwo
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseTwo;
-            SyntaxBase.ParseTwoMain(syntaxDocTwo, syntaxDocOne);
+            SyntaxBase.ParseMain(syntaxDocTwo, syntaxDocOne);
 
             // ParseThree
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseThree;
-            SyntaxBase.ParseThreeMain(syntaxDocThree, syntaxDocTwo);
+            SyntaxBase.ParseMain(syntaxDocThree, syntaxDocTwo);
 
             // ParseFour
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseFour;
-            SyntaxBase.ParseFourMain(syntaxDocFour, syntaxDocThree);
+            SyntaxBase.ParseMain(syntaxDocFour, syntaxDocThree);
 
-            // ParseHtml
-            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseHtml;
-            syntaxDocFour.ParseHtml(htmlDoc);
-        }
-
-        internal bool IsParse2; // TODO Remove
-
-        public void Parse2(AppDoc appDoc)
-        {
-            var mdDoc = appDoc.MdDoc;
-            var syntaxDocOne = appDoc.SyntaxDocOne;
-            var syntaxDocOne2 = appDoc.SyntaxDocOne2;
-            var syntaxDocTwo = appDoc.SyntaxDocTwo;
-            var syntaxDocTwo2 = appDoc.SyntaxDocTwo2;
-            var syntaxDocThree = appDoc.SyntaxDocThree;
-            var syntaxDocThree2 = appDoc.SyntaxDocThree2;
-            var syntaxDocFour = appDoc.SyntaxDocFour;
-            var syntaxDocFour2 = appDoc.SyntaxDocFour2;
-            var syntaxDocFive2 = appDoc.SyntaxDocFive2;
-            var htmlDoc = appDoc.HtmlDoc;
-
-            // ParseOne
-            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseOne;
-            foreach (MdPage page in mdDoc.List)
-            {
-                if (page.Data.ListCount() > 0)
-                {
-                    var tokenBegin = (MdTokenBase)page.Data.List[0].Component();
-                    var tokenEnd = (MdTokenBase)page.Data.List[page.Data.List.Count - 1].Component();
-                    var syntaxPage = new SyntaxPage(syntaxDocOne, tokenBegin, tokenEnd);
-                    SyntaxBase.ParseOneMain(syntaxPage, this);
-                }
-            }
-
-            // ParseOne2
-            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseOne;
-            foreach (MdPage page in mdDoc.List)
-            {
-                if (page.Data.ListCount() > 0)
-                {
-                    var tokenBegin = (MdTokenBase)page.Data.List[0].Component();
-                    var tokenEnd = (MdTokenBase)page.Data.List[page.Data.List.Count - 1].Component();
-                    var syntaxPage = new SyntaxPage(syntaxDocOne2, tokenBegin, tokenEnd);
-                    SyntaxBase.ParseOne2Main(syntaxPage);
-                }
-            }
-
-            // ParseTwo2
-            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseTwo;
-            SyntaxBase.Parse2Main(syntaxDocTwo2, syntaxDocOne2);
-
-            // ParseThree2
-            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseThree;
-            SyntaxBase.Parse2Main(syntaxDocThree2, syntaxDocTwo2);
-
-            // ParseFour2
-            appDoc.Data.Registry.ParseEnum = ParseEnum.ParseFour;
-            SyntaxBase.Parse2Main(syntaxDocFour2, syntaxDocThree2);
-
-            // ParseFive2
+            // ParseFive
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseFive;
-            SyntaxBase.Parse2Main(syntaxDocFive2, syntaxDocFour2);
+            SyntaxBase.ParseMain(syntaxDocFive, syntaxDocFour);
 
             // ParseHtml
             appDoc.Data.Registry.ParseEnum = ParseEnum.ParseHtml;
-            syntaxDocFive2.ParseHtml(htmlDoc);
+            syntaxDocFive.ParseHtml(htmlDoc);
         }
     }
 
@@ -1860,31 +1724,34 @@
             Data.TokenIdBegin = tokenBegin.Data.Id;
             Data.TokenIdEnd = tokenEnd.Data.Id;
 
+            Data.TokenIndexBegin = tokenBegin.Data.TokenIndexBegin;
+            Data.TokenIndexEnd = tokenEnd.Data.TokenIndexEnd;
+
             CreateValidate();
         }
 
         /// <summary>
-        /// Constructor ParseTwo2.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxBase(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd)
             : base(owner)
         {
             var parseEnum = owner.Data.Registry.ParseEnum;
-            UtilDoc.Assert(parseEnum == ParseEnum.ParseTwo || parseEnum == ParseEnum.ParseThree || parseEnum == ParseEnum.ParseFour || parseEnum == ParseEnum.ParseFive); // TODO
+            UtilDoc.Assert(parseEnum == ParseEnum.ParseTwo || parseEnum == ParseEnum.ParseThree || parseEnum == ParseEnum.ParseFour || parseEnum == ParseEnum.ParseFive);
 
             Data.SyntaxId = syntaxBegin.Data.Id;
             Data.TokenIdBegin = syntaxBegin.TokenBegin.Data.Id;
             Data.TokenIdEnd = syntaxEnd.TokenEnd.Data.Id;
 
-            Data.IndexBegin = syntaxBegin.TokenBegin.Data.IndexBegin;
-            Data.IndexEnd = syntaxEnd.TokenEnd.Data.IndexEnd;
+            Data.TokenIndexBegin = syntaxBegin.TokenBegin.Data.TokenIndexBegin;
+            Data.TokenIndexEnd = syntaxEnd.TokenEnd.Data.TokenIndexEnd;
 
             // Enable, disable (for debug only) ParseThree validate.
             if (parseEnum == ParseEnum.ParseThree)
             {
                 // Uncomment return to disable ParseThree validate.
                 // No more exceptions but wrong sequence of components in output!
-                
+
                 // return;
             }
 
@@ -1901,7 +1768,7 @@
                 {
                     UtilDoc.Assert(next.Owner.List.Last() == next); // Modify TokenIdEnd only on last item
                     next.TokenIdEnd = syntaxEnd.Data.TokenIdEnd; // Modify owner TokenIdEnd
-                    next.IndexEnd = syntaxEnd.TokenEnd.Data.IndexEnd;
+                    next.TokenIndexEnd = syntaxEnd.TokenEnd.Data.TokenIndexEnd;
                     next = next.Owner;
                 }
                 UtilDoc.Assert(Index(owner.Data.TokenIdBegin) <= Index(owner.Data.TokenIdEnd));
@@ -1911,9 +1778,9 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
-        public SyntaxBase(SyntaxBase owner, SyntaxBase syntax) 
+        public SyntaxBase(SyntaxBase owner, SyntaxBase syntax)
             : this(owner, syntax, syntax)
         {
 
@@ -1947,7 +1814,7 @@
             }
         }
 
-        private int Index(int id) // TODO Remove. Replace TokenIdEnd with IndexEnd.
+        private int Index(int id)
         {
             return Data.Registry.IdList[id].Index;
         }
@@ -1955,25 +1822,6 @@
         public MdTokenBase TokenBegin => (MdTokenBase)Data.Registry.IdList[Data.TokenIdBegin].Component();
 
         public MdTokenBase TokenEnd => (MdTokenBase)Data.Registry.IdList[Data.TokenIdEnd].Component();
-
-        public void TokenEndSet(MdTokenBase tokenEnd)
-        {
-            var index = TokenEnd.Data.IndexEnd;
-            var indexNew = tokenEnd.Data.IndexEnd;
-            if (index < indexNew)
-            {
-                // Grow
-                var indexOwnerMax = ((SyntaxBase)Owner).TokenEnd.Data.IndexEnd;
-                UtilDoc.Assert(indexNew <= indexOwnerMax);
-                Data.TokenIdEnd = tokenEnd.Data.Id;
-                CreateValidate();
-            }
-            if (index > indexNew)
-            {
-                // Shrink
-                throw new Exception("Not implemented!");
-            }
-        }
 
         /// <summary>
         /// Gets Text. This is the text between TokenBegin and TokenEnd.
@@ -2019,48 +1867,9 @@
         }
 
         /// <summary>
-        /// Returns true, if tokenBegin is a new line starting with token T.
-        /// </summary>
-        /// <typeparam name="T">Token to search.</typeparam>
-        /// <param name="tokenSpace">Leading space.</param>
-        /// <param name="token">Found token.</param>
-        internal static bool ParseOneIsNewLine<T>(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdSpace tokenSpace, out T token) where T : MdTokenBase // TODO Remove
-        {
-            var result = false;
-
-            bool isStart;
-            tokenSpace = null;
-            token = null;
-
-            Component component = tokenBegin;
-
-            // Leading start or NewLine or Paragraph
-            var previous = tokenBegin.Previous((MdTokenBase)null);
-            isStart = previous == null || previous is MdNewLine || previous is MdParagraph;
-            // Leading Space
-            if (component is MdSpace space)
-            {
-                tokenSpace = space;
-                component = component.Next(tokenEnd);
-            }
-            // Token
-            if (component is T)
-            {
-                token = (T)component;
-            }
-
-            if (isStart && token != null)
-            {
-                result = true;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Returns true, if line starts with token T. Allows leading spaces.
         /// </summary>
-        internal static bool ParseOne2IsNewLine<T>(MdTokenBase token, out T tokenEnd) where T : MdTokenBase
+        internal static bool ParseOneIsNewLine<T>(MdTokenBase token, out T tokenEnd) where T : MdTokenBase
         {
             var result = false;
             tokenEnd = null;
@@ -2069,7 +1878,7 @@
             Component component = token;
 
             // Leading start or NewLine or Paragraph
-            var previous = token.Previous<MdTokenBase>(null);
+            var previous = token.Previous<MdTokenBase>();
             isStart = previous == null || previous is MdNewLine || previous is MdParagraph;
             // Leading Space
             if (component is MdSpace)
@@ -2146,35 +1955,7 @@
         /// <summary>
         /// Main entry for ParseOne.
         /// </summary>
-        internal static void ParseOneMain(SyntaxBase owner, SyntaxRegistry registry)
-        {
-            var tokenEnd = owner.TokenEnd;
-            MdTokenBase tokenBegin;
-            while ((tokenBegin = ParseOneToken(owner)) != null)
-            {
-                bool isFind = false;
-                foreach (var syntaxParser in registry.List)
-                {
-                    var countBefore = owner.Data.ListCount();
-                    syntaxParser.ParseOne(owner, tokenBegin, tokenEnd);
-                    var countAfter = owner.Data.ListCount();
-
-                    UtilDoc.Assert(countBefore <= countAfter);
-
-                    if (countBefore < countAfter)
-                    {
-                        isFind = true;
-                        break;
-                    }
-                }
-                UtilDoc.Assert(isFind, "No syntax parser found!");
-            }
-        }
-
-        /// <summary>
-        /// Main entry for ParseOne2.
-        /// </summary>
-        internal static void ParseOne2Main(SyntaxPage owner)
+        internal static void ParseOneMain(SyntaxPage owner)
         {
             var registry = owner.Data.Registry.SyntaxRegistry;
 
@@ -2185,7 +1966,7 @@
                 foreach (var syntaxParser in registry.List)
                 {
                     var countBefore = owner.Data.ListCount();
-                    syntaxParser.ParseOne2(owner, token);
+                    syntaxParser.ParseOne(owner, token);
                     var countAfter = owner.Data.ListCount();
 
                     UtilDoc.Assert(countBefore <= countAfter);
@@ -2201,70 +1982,40 @@
         }
 
         /// <summary>
-        /// Main entry for ParseOne.
+        /// Main entry for ParseTwo, ParseThree, ParseFour, ParseFive.
         /// </summary>
-        internal static void ParseOneMain(SyntaxBase owner, SyntaxBase syntax)
-        {
-            ParseOneMain(owner, syntax.Data.Registry.SyntaxRegistry);
-        }
-
-        internal static bool ParseTwoIsText(SyntaxBase syntax, bool isAllowLink, bool isAllowNewLine)
-        {
-            var result = syntax is SyntaxContent || syntax is SyntaxFont || syntax is SyntaxIgnore;
-            if (isAllowLink)
-            {
-                result = result || syntax is SyntaxLink;
-            }
-            if (isAllowNewLine)
-            {
-                result = result || syntax is SyntaxNewLine;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Main entry for ParseTwo.
-        /// </summary>
-        internal static void ParseTwoMain(SyntaxBase owner, SyntaxBase syntax)
-        {
-            foreach (SyntaxBase item in syntax.List)
-            {
-                item.ParseTwo(owner);
-            }
-        }
-
-        internal static void Parse2Main(SyntaxBase owner, IReadOnlyList<Component> list)
+        internal static void ParseMain(SyntaxBase owner, IReadOnlyList<Component> list)
         {
             bool isFirst = owner.Data.ListCount() == 0;
             foreach (SyntaxBase item in list)
             {
-                if (item.TokenEnd.IndexEnd <= owner.Data.List?.Last().IndexEnd)
+                if (item.TokenEnd.IndexEnd <= owner.Data.List?.Last().TokenIndexEnd)
                 {
                     continue;
                 }
 
                 var countBefore = owner.Data.ListCount();
-                var indexEndBefore = owner.Data.IndexEnd;
+                var indexEndBefore = owner.Data.TokenIndexEnd;
                 var countOwnerBefore = owner.Data.Owner?.ListCount();
                 switch (owner.Data.Registry.ParseEnum)
                 {
                     case ParseEnum.ParseTwo:
-                        item.ParseTwo2(owner);
+                        item.ParseTwo(owner);
                         break;
                     case ParseEnum.ParseThree:
-                        item.ParseThree2(owner);
+                        item.ParseThree(owner);
                         break;
                     case ParseEnum.ParseFour:
-                        item.ParseFour2(owner);
+                        item.ParseFour(owner);
                         break;
                     case ParseEnum.ParseFive:
-                        item.ParseFive2(owner);
+                        item.ParseFive(owner);
                         break;
                     default:
                         throw new Exception("Enum unknown!");
                 }
                 var countAfter = owner.Data.ListCount();
-                var indexEndAfter = owner.Data.IndexEnd;
+                var indexEndAfter = owner.Data.TokenIndexEnd;
                 var countOwnerAfter = owner.Data.Owner?.ListCount();
 
                 // After first child component has been created IndexEnd is smaller.
@@ -2291,78 +2042,18 @@
                 {
                     var registry = owner.Data.Registry.SyntaxRegistry;
                     var ownerLocal = registry.TypeList[item.GetType()].Create(owner, item);
-                    Parse2Main(ownerLocal, item);
+                    ParseMain(ownerLocal, item);
                 }
 
                 isFirst = false;
             }
         }
-        
-        internal static void Parse2Main(SyntaxBase owner, SyntaxBase syntax)
+
+        internal static void ParseMain(SyntaxBase owner, SyntaxBase syntax)
         {
             if (syntax.Data.ListCount() > 0)
             {
-                Parse2Main(owner, syntax.List);
-            }
-        }
-
-        /// <summary>
-        /// Main entry for ParseTwo with break.
-        /// </summary>
-        /// <param name="isOwnerNewChild">Returns true, if item is a child of ownerNew. If false, it is a child of owner.</param>
-        internal static void ParseTwoMainBreak(SyntaxBase owner, SyntaxBase ownerNew, SyntaxBase syntax, Func<SyntaxBase, bool> isOwnerNewChild)
-        {
-            UtilDoc.Assert(ownerNew.Owner.Data == owner.Data);
-
-            bool isOwnerNewChildLocal = true;
-            foreach (DataDoc data in syntax.Data.ListGet())
-            {
-                SyntaxBase item = (SyntaxBase)data.Component(); 
-                if (isOwnerNewChildLocal && isOwnerNewChild(item) == false)
-                {
-                    isOwnerNewChildLocal = false;
-                }
-                if (isOwnerNewChildLocal == false)
-                {
-                    // item is not child
-                    item.ParseTwo(owner);
-                }
-                else
-                {
-                    // item is child
-                    item.ParseTwo(ownerNew);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Main entry for ParseThree.
-        /// </summary>
-        internal static void ParseThreeMain(SyntaxBase owner, SyntaxBase syntax)
-        {
-            foreach (SyntaxBase item in syntax.List)
-            {
-                item.ParseThree(owner);
-            }
-        }
-
-        internal enum OwnerEnum
-        {
-            None = 0,
-
-            Page = 1,
-             
-            Paragraph = 2,
-        }
-
-        /// <summary>
-        /// Main entry for ParseFour.
-        /// </summary>
-        internal static void ParseFourMain(SyntaxBase owner, SyntaxBase syntax)
-        {
-            foreach (SyntaxBase item in syntax.List)
-            {
-                item.ParseFour(owner);
+                ParseMain(owner, syntax.List);
             }
         }
 
@@ -2380,89 +2071,29 @@
         /// <summary>
         /// Parse md token between tokenBegin and tokenEnd.
         /// </summary>
-        internal virtual void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        internal virtual void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
 
         }
 
         /// <summary>
-        /// Parse md token between tokenBegin and tokenEnd.
+        /// Transform this syntax source to owner dest.
         /// </summary>
-        internal virtual void ParseOne2(SyntaxBase owner, MdTokenBase token)
-        {
-
-        }
-
-        /// <summary>
-        /// Returns owner or owner.Owner till syntax is child.
-        /// </summary>
-        private static SyntaxBase ParseTwo(SyntaxBase owner, SyntaxBase syntax)
-        {
-            var result = owner;
-            var registry = syntax.Data.Registry.SyntaxRegistry;
-            while (!registry.SchemaTypeList[result.GetType()].Contains(syntax.GetType()))
-            {
-                result = (SyntaxBase)owner.Owner;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Override this method to custom transform syntax tree ParseOne into ParseTwo.
-        /// </summary>
+        /// <param name="owner">Owner dest.</param>
         internal virtual void ParseTwo(SyntaxBase owner)
         {
-            var registry = Data.Registry.SyntaxRegistry;
-            if (registry.SchemaTypeList.TryGetValue(GetType(), out var schemaTypeList))
-            {
-                var ownerLocal = ParseTwo(owner, this);
-                var ownerNew = registry.TypeList[GetType()].Create(ownerLocal, this);
-                ParseTwoMainBreak(ownerLocal, ownerNew, this, (syntax) => schemaTypeList.Contains(syntax.GetType()));
-            }
-            else
-            {
-                var syntax = registry.TypeList[GetType()].Create(owner, this);
-                ParseTwoMain(syntax, this);
-            }
+
         }
 
         /// <summary>
         /// Transform this syntax source to owner dest.
         /// </summary>
         /// <param name="owner">Owner dest.</param>
-        internal virtual void ParseTwo2(SyntaxBase owner)
-        {
-
-        }
-
-        /// <summary>
-        /// Override this method to custom transform syntax tree ParseTwo into ParseThree.
-        /// </summary>
         internal virtual void ParseThree(SyntaxBase owner)
-        {
-            var ownerLocal = owner;
-            var registry = Data.Registry.SyntaxRegistry;
-            var ownerTypeList = registry.SchemaOwnerTypeList[GetType()];
-            if (!ownerTypeList.Contains(owner.GetType()))
-            {
-                // Create new owner paragraph if content (this) is directly on page (owner).
-                var ownerTypeDefault = ownerTypeList.First();
-                ownerLocal = registry.TypeList[ownerTypeDefault].Create(owner, this);
-                ownerLocal.Data.IsCreateNew = true;
-            }
-            var syntax = registry.TypeList[GetType()].Create(ownerLocal, this);
-            ParseThreeMain(syntax, this);
-        }
-
-        /// <summary>
-        /// Transform this syntax source to owner dest.
-        /// </summary>
-        /// <param name="owner">Owner dest.</param>
-        internal virtual void ParseThree2(SyntaxBase owner)
         {
             var registry = Data.Registry.SyntaxRegistry;
             var ownerLocal = registry.TypeList[GetType()].Create(owner, this);
-            Parse2Main(ownerLocal, this);
+            ParseMain(ownerLocal, this);
             if (!registry.SchemaTypeIsBlockList[GetType()])
             {
                 var next = Next<SyntaxBase>();
@@ -2475,57 +2106,17 @@
                         new SyntaxIgnore(ownerLocal, this);
                     }
                     var ownerLocalLocal = registry.TypeList[next.GetType()].Create(ownerLocal, next); // CopyAll(ownerLocal, next);
-                    Parse2Main(ownerLocalLocal, next);
+                    ParseMain(ownerLocalLocal, next);
                     next = next.Next<SyntaxBase>();
                 }
             }
         }
 
         /// <summary>
-        /// Override this method to custom transform syntax tree ParseTwo into ParseThree.
-        /// </summary>
-        internal virtual void ParseFour(SyntaxBase owner)
-        {
-            SyntaxBase syntaxLast = null;
-            if (owner.Data.ListCount() > 0)
-            {
-                syntaxLast = (SyntaxBase)owner.Data.List.Last().Component();
-            }
-
-            SyntaxBase syntaxLocal;
-            // For example this paragraph and previous paragraph were both inserted (IsCreateNew).
-            var isPrevious = syntaxLast?.IsCreateNew == true && IsCreateNew && syntaxLast.GetType() == GetType();
-            if (isPrevious)
-            {
-                // Do not create new syntax but take previous one.
-                syntaxLocal = syntaxLast;
-            }
-            else
-            {
-                var ownerLocal = owner;
-                // For example previous paragraph has been inserted (IsCreateNew) and this is comment.
-                isPrevious = syntaxLast?.IsCreateNew == true && IsCreateNew == false && syntaxLast.GetType() != GetType();
-                if (isPrevious)
-                {
-                    // Check if for example this comment can be added to prevois paragraph.
-                    if (Data.Registry.SyntaxRegistry.SchemaOwnerTypeList[GetType()].Contains(syntaxLast.GetType()))
-                    {
-                        ownerLocal = syntaxLast;
-                    }
-                }
-                // Create new syntax
-                syntaxLocal = Data.Registry.SyntaxRegistry.TypeList[GetType()].Create(ownerLocal, this);
-                syntaxLocal.Data.IsCreateNew = IsCreateNew;
-            }
-
-            ParseFourMain(syntaxLocal, this);
-        }
-
-        /// <summary>
         /// Transform this syntax source to owner dest.
         /// </summary>
         /// <param name="owner">Owner dest.</param>
-        internal void ParseFour2(SyntaxBase owner)
+        internal void ParseFour(SyntaxBase owner)
         {
             var registry = Data.Registry.SyntaxRegistry;
             SyntaxBase ownerLocal = owner;
@@ -2563,18 +2154,18 @@
             {
                 foreach (SyntaxBase item in List)
                 {
-                    item.ParseFour2(syntax);
+                    item.ParseFour(syntax);
                 }
             }
         }
 
-        internal void ParseFive2(SyntaxBase owner)
+        internal void ParseFive(SyntaxBase owner)
         {
             var registry = Data.Registry.SyntaxRegistry;
 
             SyntaxBase ownerLocal;
 
-            var previous = Previous<SyntaxBase>(null);
+            var previous = Previous<SyntaxBase>();
 
             if (IsCreateNew && previous?.GetType() == GetType())
             {
@@ -2596,7 +2187,7 @@
             {
                 foreach (SyntaxBase item in List)
                 {
-                    item.ParseFive2(ownerLocal);
+                    item.ParseFive(ownerLocal);
                 }
             }
         }
@@ -2652,7 +2243,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxPage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2699,7 +2290,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxComment(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2708,9 +2299,9 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo2.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
-        public SyntaxComment(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd) 
+        public SyntaxComment(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd)
             : base(owner, syntaxBegin, syntaxEnd)
         {
 
@@ -2718,20 +2309,10 @@
 
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
-            if (Data.Registry.SyntaxRegistry.IsParse2 == false)
-            {
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxPage>();
-                result.AddOwner<SyntaxContent>();
-                result.AddOwner<SyntaxBullet>();
-            }
-            else
-            {
-                result.IsBlock = true;
-                result.AddOwner<SyntaxPage>();
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxBullet>();
-            }
+            result.IsBlock = true;
+            result.AddOwner<SyntaxPage>();
+            result.AddOwner<SyntaxParagraph>();
+            result.AddOwner<SyntaxBullet>();
         }
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
@@ -2739,23 +2320,7 @@
             return new SyntaxComment(owner, syntax);
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            if (tokenBegin is MdComment commentBegin && !commentBegin.IsCommentEnd)
-            {
-                Component component = tokenBegin;
-                while (Next(ref component, tokenEnd))
-                {
-                    if (component is MdComment commentEnd && commentEnd.IsCommentEnd)
-                    {
-                        new SyntaxComment(owner, commentBegin, commentEnd);
-                        break;
-                    }
-                }
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
             if (token is MdComment)
             {
@@ -2763,7 +2328,7 @@
             }
         }
 
-        internal override void ParseTwo2(SyntaxBase owner)
+        internal override void ParseTwo(SyntaxBase owner)
         {
             SyntaxBase next = this;
             do
@@ -2804,7 +2369,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxTitle(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2822,32 +2387,9 @@
             result.AddOwner<SyntaxPage>();
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsNewLine<MdTitle>(tokenBegin, tokenEnd, out MdSpace tokenSpace, out var token))
-            {
-                // Ignore leading space
-                if (tokenSpace != null)
-                {
-                    new SyntaxIgnore(owner, tokenSpace);
-                }
-
-                var title = new SyntaxTitle(owner, token, tokenEnd);
-                new SyntaxIgnore(title, token);
-
-                // Ignore space after title
-                if (token.Next(tokenEnd) is MdSpace space)
-                {
-                    new SyntaxIgnore(title, space);
-                }
-
-                ParseOneMain(title, this);
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
-        {
-            if (ParseOne2IsNewLine<MdTitle>(token, out var tokenEnd))
+            if (ParseOneIsNewLine<MdTitle>(token, out var tokenEnd))
             {
                 new SyntaxTitle(owner, token, tokenEnd);
                 if (tokenEnd.Next() is MdSpace tokenSpace)
@@ -2887,7 +2429,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxBullet(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -2905,36 +2447,9 @@
             result.AddOwner<SyntaxPage>();
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsNewLine<MdBullet>(tokenBegin, tokenEnd, out MdSpace tokenSpace, out var token))
-            {
-                // Space after star
-                if (token.Next(tokenEnd) is MdSpace)
-                {
-                    // Ignore leading space
-                    if (tokenSpace != null)
-                    {
-                        new SyntaxIgnore(owner, tokenSpace);
-                    }
-
-                    var bullet = new SyntaxBullet(owner, token, tokenEnd);
-                    new SyntaxIgnore(bullet, token);
-
-                    // Ignor space after bullet
-                    if (token.Next(tokenEnd) is MdSpace space)
-                    {
-                        new SyntaxIgnore(bullet, space);
-                    }
-
-                    ParseOneMain(bullet, this);
-                }
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
-        {
-            if (ParseOne2IsNewLine<MdBullet>(token, out var tokenEnd))
+            if (ParseOneIsNewLine<MdBullet>(token, out var tokenEnd))
             {
                 new SyntaxBullet(owner, token, tokenEnd);
                 if (tokenEnd.Next() is MdSpace tokenSpace)
@@ -2979,7 +2494,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxCode(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3007,87 +2522,9 @@
             set => Data.CodeText = value;
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsNewLine<MdCode>(tokenBegin, tokenEnd, out MdSpace tokenSpace, out var codeBegin))
-            {
-                MdCode codeEnd = null;
-                MdTokenBase next = codeBegin;
-                while (Next(ref next, tokenEnd))
-                {
-                    if (next is MdCode tokenCode)
-                    {
-                        codeEnd = tokenCode;
-                        break;
-                    }
-                }
-
-                if (codeEnd != null)
-                {
-                    // Code language
-                    MdContent codeLanguage = null;
-                    if (codeBegin.Next(tokenEnd) is MdContent content)
-                    {
-                        codeLanguage = content;
-                    }
-
-                    // Next
-                    next = codeLanguage != null ? codeLanguage : codeBegin;
-
-                    // Code text
-                    MdTokenBase codeTextBegin = null;
-                    MdTokenBase codeTextEnd = null;
-                    while (Next(ref next, tokenEnd))
-                    {
-                        if (next == codeEnd)
-                        {
-                            break;
-                        }
-                        if (codeTextBegin == null)
-                        {
-                            codeTextBegin = next;
-                            codeTextEnd = next;
-                        }
-                        else
-                        {
-                            codeTextEnd = next;
-                        }
-                    }
-
-                    // Code text exists
-                    if (codeTextBegin != null)
-                    {
-                        // Ignore leading space
-                        if (tokenSpace != null)
-                        {
-                            new SyntaxIgnore(owner, tokenSpace);
-                        }
-
-                        // Create code syntax
-                        var code = new SyntaxCode(owner, codeBegin, codeEnd, codeLanguage?.Text);
-
-                        // Ignore code language
-                        new SyntaxIgnore(code, codeBegin);
-                        if (codeLanguage != null)
-                        {
-                            new SyntaxIgnore(code, codeLanguage);
-                        }
-
-                        // Ignore code text
-                        var codeText = new SyntaxIgnore(code, codeTextBegin, codeTextEnd);
-
-                        code.CodeText = codeText.Text;
-
-                        // Ignore code end token
-                        new SyntaxIgnore(code, codeEnd);
-                    }
-                }
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
-        {
-            if (ParseOne2IsNewLine<MdCode>(token, out var tokenEnd))
+            if (ParseOneIsNewLine<MdCode>(token, out var tokenEnd))
             {
                 var next = tokenEnd.Next<MdTokenBase>();
 
@@ -3153,7 +2590,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxFont(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3161,7 +2598,10 @@
 
         }
 
-        public SyntaxFont(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd) 
+        /// <summary>
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
+        /// </summary>
+        public SyntaxFont(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd)
             : base(owner, syntaxBegin, syntaxEnd)
         {
 
@@ -3174,59 +2614,16 @@
 
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
-            if (Data.Registry.SyntaxRegistry.IsParse2 == false)
-            {
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxTitle>();
-                result.AddOwner<SyntaxBullet>();
-                result.AddOwner<SyntaxPage>(false);
-                result.AddOwner<SyntaxCustomNote>(false);
-            }
-            else
-            {
-                result.IsBlock = true;
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxTitle>();
-                result.AddOwner<SyntaxBullet>();
-                result.AddOwner<SyntaxCustomNote>(false);
-            }
+            result.IsBlock = true;
+            result.AddOwner<SyntaxParagraph>();
+            result.AddOwner<SyntaxTitle>();
+            result.AddOwner<SyntaxBullet>();
+            result.AddOwner<SyntaxCustomNote>(false);
         }
 
         public MdFontEnum FontEnum => ((MdFont)TokenBegin).FontEnum;
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            if (tokenBegin is MdFont tokenFontBegin)
-            {
-                var next = tokenBegin;
-                while (Next(ref next, tokenEnd))
-                {
-                    if (next is MdFont || next is MdNewLine)
-                    {
-                        break;
-                    }
-                }
-                if (next != tokenBegin && next is MdFont tokenFontEnd && tokenFontEnd.FontEnum == tokenFontBegin.FontEnum)
-                {
-                    var syntaxFont = new SyntaxFont(owner, tokenBegin, next);
-                    new SyntaxIgnore(syntaxFont, tokenBegin);
-                    ParseOneMain(syntaxFont, this);
-                }
-                else
-                {
-                    if (owner is SyntaxFont syntaxFont)
-                    {
-                        new SyntaxIgnore(syntaxFont, tokenBegin);
-                    }
-                    else
-                    {
-                        new SyntaxContent(owner, tokenBegin, tokenBegin);
-                    }
-                }
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
             if (token is MdFont)
             {
@@ -3234,7 +2631,7 @@
             }
         }
 
-        internal override void ParseTwo2(SyntaxBase owner)
+        internal override void ParseTwo(SyntaxBase owner)
         {
             var registry = Data.Registry.SyntaxRegistry;
 
@@ -3306,7 +2703,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxLink(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3330,49 +2727,6 @@
         public string Link => Data.Link;
 
         public string LinkText => Data.LinkText;
-
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            // For example http://
-            if (tokenBegin is MdLink)
-            {
-                if (ParseOneIsLink(tokenBegin, tokenEnd, out var linkEnd, out string link))
-                {
-                    new SyntaxLink(owner, tokenBegin, linkEnd, link, link);
-                }
-            }
-
-            // For example []()
-            if (tokenBegin is MdBracket bracketSquare && bracketSquare.TextBracket == "[")
-            {
-                var next = tokenBegin.Next(tokenEnd);
-                ParseOneIsLinkText(next, tokenEnd, out var linkTextEnd, out string linkText);
-                if (linkText != null)
-                {
-                    next = linkTextEnd.Next(tokenEnd);
-                }
-                if (next is MdBracket bracketSquareEnd && bracketSquareEnd.TextBracket == "]")
-                {
-                    next = next.Next(tokenEnd);
-                    if (next is MdBracket bracketRound && bracketRound.TextBracket == "(")
-                    {
-                        next = next.Next(tokenEnd);
-                        if (ParseOneIsLinkText(next, tokenEnd, out var linkEnd, out string link))
-                        {
-                            next = linkEnd.Next(tokenEnd);
-                            if (next is MdBracket bracketRoundEnd && bracketRoundEnd.TextBracket == ")")
-                            {
-                                if (linkText == null)
-                                {
-                                    linkText = link;
-                                }
-                                new SyntaxLink(owner, tokenBegin, next, link, linkText);
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         internal override void ParseHtml(HtmlBase owner)
         {
@@ -3402,7 +2756,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxImage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3426,36 +2780,7 @@
 
         public string LinkText => Data.LinkText;
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            // For example ![]()
-            if (tokenBegin is MdImage)
-            {
-                MdTokenBase next = tokenBegin.Next(tokenEnd);
-                ParseOneIsLinkText(next, tokenEnd, out var linkTextEnd, out string linkText);
-                if (linkText != null)
-                {
-                    next = linkTextEnd.Next(tokenEnd);
-                }
-                if (next is MdBracket bracketSquareEnd && bracketSquareEnd.TextBracket == "]")
-                {
-                    next = next.Next(tokenEnd);
-                    if (next is MdBracket bracketRound && bracketRound.TextBracket == "(")
-                    {
-                        next = next.Next(tokenEnd);
-                        if (ParseOneIsLink(next, tokenEnd, out var linkEnd, out var link))
-                        {
-                            if (linkEnd.Next(tokenEnd) is MdBracket bracketRoundEnd && bracketRoundEnd.Text == ")")
-                            {
-                                new SyntaxImage(owner, tokenBegin, bracketRoundEnd, link, linkText != null ? linkText : link);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
             // For example ![]()
             if (token is MdImage)
@@ -3511,7 +2836,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxContent(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3526,62 +2851,14 @@
 
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
-            if (Data.Registry.SyntaxRegistry.IsParse2 == false)
-            {
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxPage>(false);
-                result.AddOwner<SyntaxTitle>();
-                result.AddOwner<SyntaxBullet>();
-                result.AddOwner<SyntaxFont>();
-                result.AddOwner<SyntaxCustomNote>(false);
-            }
-            else
-            {
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxTitle>();
-                result.AddOwner<SyntaxBullet>();
-                result.AddOwner<SyntaxFont>();
-                result.AddOwner<SyntaxCustomNote>(false);
-            }
+            result.AddOwner<SyntaxParagraph>();
+            result.AddOwner<SyntaxTitle>();
+            result.AddOwner<SyntaxBullet>();
+            result.AddOwner<SyntaxFont>();
+            result.AddOwner<SyntaxCustomNote>(false);
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            bool isFind = false;
-            if (tokenBegin is MdContent)
-            {
-                var contentEnd = tokenBegin;
-
-                if (tokenBegin.Next(tokenEnd) is MdSpace)
-                {
-                    var next = tokenBegin.Next(tokenEnd).Next(tokenEnd) as MdContent;
-                    if (next != null)
-                    {
-                        contentEnd = next;
-                    }
-                }
-
-                new SyntaxContent(owner, tokenBegin, contentEnd);
-                isFind = true;
-            }
-
-            if (tokenBegin is MdSpace)
-            {
-                var next = tokenBegin.Next(tokenEnd);
-                if (next is not MdNewLine && next is not MdComment)
-                {
-                    new SyntaxContent(owner, tokenBegin, tokenBegin);
-                    isFind = true;
-                }
-            }
-
-            if (!isFind)
-            {
-                new SyntaxContent(owner, tokenBegin, tokenBegin);
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
             new SyntaxContent(owner, token, token);
         }
@@ -3613,7 +2890,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxParagraph(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3632,18 +2909,7 @@
             result.AddOwner<SyntaxCustomNote>();
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            if (tokenBegin is MdParagraph)
-            {
-                var paragraph = new SyntaxParagraph(owner, tokenBegin, tokenEnd);
-                // Ignore paragrpah token
-                new SyntaxIgnore(paragraph, tokenBegin);
-                ParseOneMain(paragraph, this);
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
             if (token is MdParagraph)
             {
@@ -3680,7 +2946,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxNewLine(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3695,33 +2961,13 @@
 
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
-            if (Data.Registry.SyntaxRegistry.IsParse2 == false)
-            {
-                result.AddOwner<SyntaxParagraph>();
-                result.AddOwner<SyntaxPage>(false);
-                // result.AddOwner<SyntaxTitle>(); // New line in title is the end of title.
-                result.AddOwner<SyntaxBullet>();
-                result.AddOwner<SyntaxCustomNote>();
-            }
-            else
-            {
-                result.AddOwner<SyntaxParagraph>();
-                // result.AddOwner<SyntaxTitle>(); // New line in title is the end of title.
-                result.AddOwner<SyntaxBullet>();
-                result.AddOwner<SyntaxCustomNote>(false);
-            }
+            result.AddOwner<SyntaxParagraph>();
+            // result.AddOwner<SyntaxTitle>(); // New line in title is the end of title.
+            result.AddOwner<SyntaxBullet>();
+            result.AddOwner<SyntaxCustomNote>(false);
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            if (tokenBegin is MdNewLine)
-            {
-                UtilDoc.Assert(tokenBegin.Next(tokenEnd) is not MdNewLine); // Detected by SyntaxParagraph.
-                new SyntaxNewLine(owner, tokenBegin);
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
             if (token is MdNewLine)
             {
@@ -3732,68 +2978,6 @@
         internal override void ParseHtml(HtmlBase owner)
         {
             // No html for NewLine token.
-        }
-    }
-
-    internal class SyntaxOmit : SyntaxBase
-    {
-        /// <summary>
-        /// Constructor registry, factory mode.
-        /// </summary>
-        public SyntaxOmit(Registry registry)
-            : base(registry)
-        {
-
-        }
-
-        /// <summary>
-        /// Constructor ParseOne.
-        /// </summary>
-        public SyntaxOmit(SyntaxBase owner, MdTokenBase token)
-            : base(owner, token, token)
-        {
-
-        }
-
-        /// <summary>
-        /// Constructor ParseOne.
-        /// </summary>
-        public SyntaxOmit(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-            : base(owner, tokenBegin, tokenEnd)
-        {
-
-        }
-
-        /// <summary>
-        /// Constructor ParseTwo and ParseThree.
-        /// </summary>
-        public SyntaxOmit(SyntaxBase owner, SyntaxBase syntax)
-            : base(owner, syntax)
-        {
-
-        }
-
-        protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
-        {
-            return new SyntaxOmit(owner, syntax);
-        }
-
-        internal override void RegistrySchema(RegistrySchemaResult result)
-        {
-            result.AddOwner<SyntaxPage>();
-        }
-
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            if (tokenBegin.IsOmit)
-            {
-                new SyntaxOmit(owner, tokenBegin);
-            }
-        }
-
-        internal override void ParseHtml(HtmlBase owner)
-        {
-            // No html
         }
     }
 
@@ -3818,16 +3002,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseOne.
-        /// </summary>
-        public SyntaxIgnore(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-            : base(owner, tokenBegin, tokenEnd)
-        {
-
-        }
-
-        /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxIgnore(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -3849,12 +3024,6 @@
             result.AddOwner<SyntaxCustomNote>();
             result.AddOwner<SyntaxCode>();
             result.AddOwner<SyntaxPage>();
-        }
-
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
-        {
-            // No parser found for tokenBegin!
-            throw new Exception("Syntax unknown!");
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -3887,60 +3056,28 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
-        public SyntaxCustomBase(SyntaxBase owner, SyntaxBase syntax) // TODO Remove
+        public SyntaxCustomBase(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
 
         }
 
+        /// <summary>
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
+        /// </summary>
         public SyntaxCustomBase(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd)
             : base(owner, syntaxBegin, syntaxEnd)
         {
 
         }
 
-        /// <summary>
-        /// Returns true, if custom command starting at new line has been found.
-        /// </summary>
-        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket token, out List<MdTokenBase> tokenIgnoreList)
-        {
-            var result = false;
-            tokenIgnoreList = null;
-            if (ParseOneIsNewLine(tokenBegin, tokenEnd, out var space, out token))
-            {
-                if (token.TextBracket == "(")
-                {
-                    if (space == null)
-                    {
-                        if (token.Next(tokenEnd) is MdContent content)
-                        {
-                            if (content.Text == commandName)
-                            {
-                                if (content.Next(tokenEnd) is MdBracket bracketEnd)
-                                {
-                                    if (bracketEnd.Text == ")")
-                                    {
-                                        tokenIgnoreList = new List<MdTokenBase>();
-                                        tokenIgnoreList.Add(content);
-                                        tokenIgnoreList.Add(bracketEnd);
-                                        result = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-
-        internal static bool ParseOne2IsCustom(MdTokenBase token, string commandName, out MdTokenBase tokenEnd)
+        internal static bool ParseOneIsCustom(MdTokenBase token, string commandName, out MdTokenBase tokenEnd)
         {
             var result = false;
             tokenEnd = null;
-            if (ParseOne2IsNewLine<MdBracket>(token, out var bracket))
+            if (ParseOneIsNewLine<MdBracket>(token, out var bracket))
             {
                 if (bracket.TextBracket == "(")
                 {
@@ -3957,29 +3094,6 @@
                                 }
                             }
                         }
-                    }
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Returns true, if custom command (with end block) starting at new line has been found.
-        /// </summary>
-        internal static bool ParseOneIsCustom(MdTokenBase tokenBegin, MdTokenBase tokenEnd, string commandName, out MdBracket tokenBlockBegin, out List<MdTokenBase> tokenIgnoreBlockBeginList, out MdBracket tokenBlockEnd, out List<MdTokenBase> tokenIgnoreBlockEndList)
-        {
-            bool result = false;
-            tokenBlockEnd = null;
-            tokenIgnoreBlockEndList = null;
-            if (ParseOneIsCustom(tokenBegin, tokenEnd, commandName, out tokenBlockBegin, out tokenIgnoreBlockBeginList))
-            {
-                var next = tokenIgnoreBlockBeginList.Last();
-                while (Next(ref next, tokenEnd))
-                {
-                    if (ParseOneIsCustom(next, tokenEnd, commandName, out tokenBlockEnd, out tokenIgnoreBlockEndList))
-                    {
-                        result = true;
-                        break;
                     }
                 }
             }
@@ -4008,7 +3122,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxCustomNote(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -4016,6 +3130,9 @@
 
         }
 
+        /// <summary>
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
+        /// </summary>
         public SyntaxCustomNote(SyntaxBase owner, SyntaxBase syntaxBegin, SyntaxBase syntaxEnd)
             : base(owner, syntaxBegin, syntaxEnd)
         {
@@ -4033,74 +3150,9 @@
             result.AddOwner<SyntaxPage>();
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsCustom(tokenBegin, tokenEnd, "Note", out var tokenBlockBegin, out var tokenBlockBeginList, out var tokenBlockEnd, out var tokenBlockEndList))
-            {
-                var note = new SyntaxCustomNote(owner, tokenBlockBegin, tokenBlockEnd.Previous(tokenBegin));
-                
-                new SyntaxIgnore(note, tokenBlockBegin);
-                foreach (var item in tokenBlockBeginList)
-                {
-                    new SyntaxIgnore(note, item);
-                }
-
-                ParseOneMain(note, this);
-
-                // Shrink custom note parsed range if it contains invalid syntax like for example bullet.
-                MdTokenBase tokenEndShrink = null;
-                var registry = Data.Registry.SyntaxRegistry;
-                var typeList = registry.SchemaTypeList[note.GetType()];
-                foreach (SyntaxBase item in note.ListAll())
-                {
-                    if (item.Data != note.Data)
-                    {
-                        if (!typeList.Contains(item.GetType()))
-                        {
-                            var itemPrevious = item.Previous<SyntaxBase>(null);
-                            tokenEndShrink = itemPrevious.TokenEnd;
-                            break;
-                        }
-                    }
-                }
-
-                // Shrink custom note range.
-                if (tokenEndShrink != null)
-                {
-                    note.Remove();
-                    note = new SyntaxCustomNote(owner, tokenBlockBegin, tokenEndShrink);
-
-                    new SyntaxIgnore(note, tokenBlockBegin);
-                    foreach (var item in tokenBlockBeginList)
-                    {
-                        new SyntaxIgnore(note, item);
-                    }
-
-                    // Parse again with new range.
-                    ParseOneMain(note, this);
-
-                    tokenBlockEnd.IsOmit = true;
-                    foreach (var item in tokenBlockEndList)
-                    {
-                        item.IsOmit = true;
-                    }
-                }
-                else
-                {
-                    note.TokenEndSet(tokenBlockEndList.Last());
-
-                    new SyntaxIgnore(note, tokenBlockEnd);
-                    foreach (var item in tokenBlockEndList)
-                    {
-                        new SyntaxIgnore(note, item);
-                    }
-                }
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
-        {
-            if (ParseOne2IsCustom(token, "Note", out var tokenEnd))
+            if (ParseOneIsCustom(token, "Note", out var tokenEnd))
             {
                 new SyntaxCustomNote(owner, token, tokenEnd);
                 if (tokenEnd.Next() is MdNewLine newLine)
@@ -4110,7 +3162,7 @@
             }
         }
 
-        internal override void ParseTwo2(SyntaxBase owner)
+        internal override void ParseTwo(SyntaxBase owner)
         {
             var registry = Data.Registry.SyntaxRegistry;
 
@@ -4124,7 +3176,7 @@
                 {
                     var noteDest = new SyntaxCustomNote(owner, this, noteSource);
                     new SyntaxIgnore(noteDest, this);
-                    Parse2Main(noteDest, contentList);
+                    ParseMain(noteDest, contentList);
                     if (!isEndExceptional)
                     {
                         new SyntaxIgnore(noteDest, noteSource);
@@ -4137,7 +3189,7 @@
                     isFind = true;
                     break;
                 }
-                
+
                 if (!registry.SchemaTypeList[GetType()].Contains(next.GetType()))
                 {
                     isEndExceptional = true;
@@ -4194,7 +3246,7 @@
         }
 
         /// <summary>
-        /// Constructor ParseTwo and ParseThree.
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
         /// </summary>
         public SyntaxCustomPage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
@@ -4213,29 +3265,15 @@
             result.IsBlock = true;
         }
 
-        internal override void ParseOne(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsCustom(tokenBegin, tokenEnd, "Page", out var token, out var tokenIgnoreList))
-            {
-                var page = new SyntaxPage(owner, token, tokenEnd);
-                new SyntaxIgnore(page, token);
-                foreach (var tokenIgnore in tokenIgnoreList)
-                {
-                    new SyntaxIgnore(page, tokenIgnore);
-                }
-                ParseOneMain(page, this);
-            }
-        }
-
-        internal override void ParseOne2(SyntaxBase owner, MdTokenBase token)
-        {
-            if (ParseOne2IsCustom(token, "Page", out var tokenEnd))
+            if (ParseOneIsCustom(token, "Page", out var tokenEnd))
             {
                 new SyntaxCustomPage(owner, token, tokenEnd);
             }
         }
 
-        internal override void ParseTwo2(SyntaxBase owner)
+        internal override void ParseTwo(SyntaxBase owner)
         {
             var next = Next<SyntaxBase>();
             List<SyntaxBase> contentList = new List<SyntaxBase>();
@@ -4245,7 +3283,7 @@
                 {
                     var pageDest = new SyntaxCustomPage(owner, this);
                     new SyntaxIgnore(pageDest, this);
-                    Parse2Main(pageDest, contentList);
+                    ParseMain(pageDest, contentList);
                     break;
                 }
                 contentList.Add(next);
@@ -4253,10 +3291,10 @@
             }
         }
 
-        internal override void ParseThree2(SyntaxBase owner)
+        internal override void ParseThree(SyntaxBase owner)
         {
             var ownerLocal = new SyntaxPage((SyntaxBase)owner.Owner, this);
-            Parse2Main(ownerLocal, this);
+            ParseMain(ownerLocal, this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
@@ -4661,7 +3699,7 @@
             string exceptionText = null;
             try
             {
-                appDoc.Parse2();
+                appDoc.Parse();
             }
             catch (Exception exception)
             {
@@ -4708,39 +3746,23 @@
                 {
                     if (doc.OwnerFind<AppDoc>().SyntaxDocOne.Data == doc.Data)
                     {
-                        result.Append(" ParseOne");
-                    }
-                    if (doc.OwnerFind<AppDoc>().SyntaxDocOne2.Data == doc.Data)
-                    {
-                        result.Append(" ParseOne2 (SyntaxToken)");
+                        result.Append(" ParseOne (SyntaxToken)");
                     }
                     if (doc.OwnerFind<AppDoc>().SyntaxDocTwo.Data == doc.Data)
                     {
-                        result.Append(" ParseTwo (Break)");
-                    }
-                    if (doc.OwnerFind<AppDoc>().SyntaxDocTwo2.Data == doc.Data)
-                    {
-                        result.Append(" ParseTwo2 (Block)");
+                        result.Append(" ParseTwo (Block)");
                     }
                     if (doc.OwnerFind<AppDoc>().SyntaxDocThree.Data == doc.Data)
                     {
-                        result.Append(" ParseThree (IsCreateNew Create)");
-                    }
-                    if (doc.OwnerFind<AppDoc>().SyntaxDocThree2.Data == doc.Data)
-                    {
-                        result.Append(" ParseThree2 (Fold)");
+                        result.Append(" ParseThree (Fold)");
                     }
                     if (doc.OwnerFind<AppDoc>().SyntaxDocFour.Data == doc.Data)
                     {
-                        result.Append(" ParseFour (IsCreateNew Merge)");
+                        result.Append(" ParseFour (Owner Insert)");
                     }
-                    if (doc.OwnerFind<AppDoc>().SyntaxDocFour2.Data == doc.Data)
+                    if (doc.OwnerFind<AppDoc>().SyntaxDocFive.Data == doc.Data)
                     {
-                        result.Append(" ParseFour2 (OwnerInsert)");
-                    }
-                    if (doc.OwnerFind<AppDoc>().SyntaxDocFive2.Data == doc.Data)
-                    {
-                        result.Append(" ParseFive2 (Merge)");
+                        result.Append(" ParseFive (Owner Merge)");
                     }
                 }
                 else
