@@ -1,4 +1,12 @@
-﻿vNext
+﻿Doc
+-Add new website (method InitConfigCli)
+-hosts
+-ConnectionString
+-3rd level domain
+-Sql templates for navigate, user, role, permission
+-Integrate infrastructure
+
+vNext
 -Html snipped
 -Class App.Setting to choose Bulma, Bootstrap for Modal and Alert.
 -Insert ConfigField without ConfigGrid does not give a duplicate error
