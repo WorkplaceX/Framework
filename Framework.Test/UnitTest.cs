@@ -17,10 +17,9 @@
         {
             // Test Md
             {
-                UtilDoc.Debug();
+                // UtilDoc.Debug();
                 UnitTestMd.Run();
-                UnitTestMd.RunRandom();
-                return;
+                // UnitTestMd.RunRandom();
             }
             {
                 MyHideComponent component = new MyHideComponent(null);
