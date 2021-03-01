@@ -71,6 +71,8 @@
         SyntaxImage,
 
         SyntaxCustomNote,
+        
+        SyntaxCustomYoutube,
 
         SyntaxCustomPage,
 
@@ -105,6 +107,8 @@
         HtmlCode,
 
         HtmlCustomNote,
+        
+        HtmlCustomYoutube,
 
         HtmlContent,
     }
@@ -233,6 +237,8 @@
         public string Link { get; set; }
 
         public string LinkText { get; set; }
+        
+        public string PagePath { get; set; }
 
         public string CodeLanguage { get; set; }
 
@@ -250,16 +256,34 @@
     {
         None = 0,
 
+        /// <summary>
+        /// Parse stage one (SyntaxToken). Build syntax token from md token. Not hierarchical like md token.
+        /// </summary>
         ParseOne = 1,
 
+        /// <summary>
+        /// Parse stage two (Block). Build blocks. Detect for example the end of bold font and build a block. Content goes inside.
+        /// </summary>
         ParseTwo = 2,
 
+        /// <summary>
+        /// Parse stage three (Fold). Add following syntax components inside as long as it is valid child. Then break. For example title add following content inside.
+        /// </summary>
         ParseThree = 3,
 
+        /// <summary>
+        /// Parse stage four (Owner Insert). For example insert paragraph (owner) for content directly on page.
+        /// </summary>
         ParseFour = 4,
 
+        /// <summary>
+        /// Parse stage five (Owner Merge). For example merge two inserted paragraphs into one.
+        /// </summary>
         ParseFive = 5,
 
+        /// <summary>
+        /// Parse stage html. Convert syntax component to html component.
+        /// </summary>
         ParseHtml = 6,
     }
 
@@ -302,6 +326,7 @@
             Add(typeof(SyntaxLink));
             Add(typeof(SyntaxImage));
             Add(typeof(SyntaxCustomNote));
+            Add(typeof(SyntaxCustomYoutube));
             Add(typeof(SyntaxCustomPage));
             Add(typeof(SyntaxParagraph));
             Add(typeof(SyntaxNewLine));
@@ -321,6 +346,7 @@
             Add(typeof(HtmlImage));
             Add(typeof(HtmlCode));
             Add(typeof(HtmlCustomNote));
+            Add(typeof(HtmlCustomYoutube));
             Add(typeof(HtmlContent));
         }
 
@@ -765,7 +791,7 @@
         {
             var text = owner.Text.AsSpan();
 
-            while (MdTokenBase.Parse(this, owner, text)) ;
+            while (MdTokenBase.ParseMain(this, owner, text)) ;
         }
     }
 
@@ -858,25 +884,13 @@
         }
 
         /// <summary>
-        /// Returns current text parse index.
+        /// Main entry for parse md.
         /// </summary>
-        public static int ParseIndex(MdPage owner)
-        {
-            var result = 0;
-
-            MdTokenBase token = (MdTokenBase)owner.Data.Last(isOrDefault: true)?.Component();
-            if (token != null)
-            {
-                result = token.IndexEnd + 1;
-            }
-            return result;
-        }
-
-        internal static bool Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, bool isExcludeContent = false)
+        internal static bool ParseMain(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, bool isExcludeContent = false)
         {
             var result = false;
 
-            var index = ParseIndex(owner);
+            var index = UtilParse.ParseIndex(owner);
 
             foreach (var tokenParser in registry.List)
             {
@@ -1512,9 +1526,9 @@
         internal override void Parse(MdRegistry registry, MdPage owner, ReadOnlySpan<char> text, int index)
         {
             MdContent token = null;
-            while (ParseIndex(owner) < text.Length)
+            while (UtilParse.ParseIndex(owner) < text.Length)
             {
-                if (Parse(registry, owner, text, isExcludeContent: true) == false)
+                if (ParseMain(registry, owner, text, isExcludeContent: true) == false)
                 {
                     if (token == null)
                     {
@@ -1587,12 +1601,12 @@
         public Dictionary<Type, SyntaxBase> TypeList = new Dictionary<Type, SyntaxBase>();
 
         /// <summary>
-        /// (Type, Type). Owner type, child type. Contains all possible (and not valid) owner.
+        /// (OwnerType, Type). Owner type, child type. Contains all possible (and not valid) owner. See also property IsChildDirect.
         /// </summary>
         public Dictionary<Type, List<Type>> SchemaTypeList = new Dictionary<Type, List<Type>>();
 
         /// <summary>
-        /// (Type, Type). Child type, owner type. Contains all possible (and valid) owner.
+        /// (Type, OwnerType). Child type, owner type. Contains all possible (and valid) owner. See also property IsChildDirect.
         /// </summary>
         public Dictionary<Type, List<Type>> SchemaOwnerTypeList = new Dictionary<Type, List<Type>>();
 
@@ -1698,7 +1712,7 @@
             }
 
             /// <summary>
-            /// Gets or sets IsBlock. For example true for font and comment. False for title.
+            /// Gets or sets IsBlock. True, if syntax has a corresponding end syntax. For example true for font and comment. False for title.
             /// </summary>
             public bool IsBlock;
 
@@ -1706,7 +1720,7 @@
             /// Register possible owner.
             /// </summary>
             /// <typeparam name="T">This syntax can be a child of owner.</typeparam>
-            /// <param name="isChildDirect">This syntax can be a direct child of owner. Otherwise first owner in list is created in between.</param>
+            /// <param name="isChildDirect">This syntax can be a direct child of owner. Otherwise first owner in list is created in between in ParseFour (Owner Insert).</param>
             public void AddOwner<T>(bool isChildDirect = true) where T : SyntaxBase
             {
                 List.Add(new RegistrySchemaResultItem { OwnerType = typeof(T), IsChild = isChildDirect });
@@ -1851,108 +1865,6 @@
         public bool IsCreateNew => Data.IsCreateNew;
 
         /// <summary>
-        /// Returns token of currently parsed syntax.
-        /// </summary>
-        internal static MdTokenBase ParseOneToken(SyntaxBase syntax)
-        {
-            var result = syntax.TokenBegin;
-            var last = syntax.Data.Last(isOrDefault: true);
-            if (last != null)
-            {
-                var syntaxLast = (SyntaxBase)syntax.Data.Registry.IdList[last.Id].Component();
-                result = syntaxLast.TokenEnd;
-                result = result.Next(syntax.TokenEnd);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Returns true, if line starts with token T. Allows leading spaces.
-        /// </summary>
-        internal static bool ParseOneIsNewLine<T>(MdTokenBase token, out T tokenEnd) where T : MdTokenBase
-        {
-            var result = false;
-            tokenEnd = null;
-
-            bool isStart;
-            Component component = token;
-
-            // Leading start or NewLine or Paragraph
-            var previous = token.Previous<MdTokenBase>();
-            isStart = previous == null || previous is MdNewLine || previous is MdParagraph;
-            // Leading Space
-            if (component is MdSpace)
-            {
-                component = component.Next<MdTokenBase>(null);
-            }
-            // Token
-            if (component is T)
-            {
-                tokenEnd = (T)component;
-            }
-
-            if (isStart && tokenEnd != null)
-            {
-                result = true;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Returns true, if tokenBegin is Link.
-        /// </summary>
-        /// <param name="link">Detected Link.</param>
-        internal static bool ParseOneIsLink(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdTokenBase linkEnd, out string link)
-        {
-            bool result = false;
-            linkEnd = tokenBegin;
-            MdTokenBase next = tokenBegin;
-            link = null;
-            do
-            {
-                if (next is MdLink)
-                {
-                    if (next != tokenBegin)
-                    {
-                        break;
-                    }
-                }
-                if (!(next is MdContent || next is MdLink))
-                {
-                    break;
-                }
-                linkEnd = next;
-                link += next.Text;
-                result = true;
-            } while (Next(ref next, tokenEnd));
-            return result;
-        }
-
-        /// <summary>
-        /// Returns true, if tokenBegin contains LinkText.
-        /// </summary>
-        /// <param name="linkText">Detected LinkText.</param>
-        internal static bool ParseOneIsLinkText(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdTokenBase linkTextEnd, out string linkText)
-        {
-            var result = false;
-            linkTextEnd = tokenBegin;
-            MdTokenBase next = tokenBegin;
-            linkText = null;
-            do
-            {
-                if (!(next is MdContent || next is MdSpace || next is MdLink))
-                {
-                    break;
-                }
-                linkTextEnd = next;
-                linkText += next.Text;
-                result = true;
-            } while (Next(ref next, tokenEnd));
-            return result;
-        }
-
-        /// <summary>
         /// Main entry for ParseOne.
         /// </summary>
         internal static void ParseOneMain(SyntaxPage owner)
@@ -1960,7 +1872,7 @@
             var registry = owner.Data.Registry.SyntaxRegistry;
 
             MdTokenBase token;
-            while ((token = ParseOneToken(owner)) != null)
+            while ((token = UtilParse.ParseOneToken(owner)) != null)
             {
                 bool isFind = false;
                 foreach (var syntaxParser in registry.List)
@@ -2041,7 +1953,7 @@
                 if (!isFind)
                 {
                     var registry = owner.Data.Registry.SyntaxRegistry;
-                    var ownerLocal = registry.TypeList[item.GetType()].Create(owner, item);
+                    var ownerLocal = UtilParse.Create(registry, owner, item);
                     ParseMain(ownerLocal, item);
                 }
 
@@ -2092,7 +2004,7 @@
         internal virtual void ParseThree(SyntaxBase owner)
         {
             var registry = Data.Registry.SyntaxRegistry;
-            var ownerLocal = registry.TypeList[GetType()].Create(owner, this);
+            var ownerLocal = UtilParse.Create(registry, owner, this);
             ParseMain(ownerLocal, this);
             if (!registry.SchemaTypeIsBlockList[GetType()])
             {
@@ -2105,7 +2017,7 @@
                         isIgnore = true;
                         new SyntaxIgnore(ownerLocal, this);
                     }
-                    var ownerLocalLocal = registry.TypeList[next.GetType()].Create(ownerLocal, next); // CopyAll(ownerLocal, next);
+                    var ownerLocalLocal = UtilParse.Create(registry, ownerLocal, next);
                     ParseMain(ownerLocalLocal, next);
                     next = next.Next<SyntaxBase>();
                 }
@@ -2127,7 +2039,7 @@
             {
                 // Owner insert
                 var ownerType = registry.SchemaOwnerTypeList[GetType()].First();
-                ownerLocal = registry.TypeList[ownerType].Create(owner, this);
+                ownerLocal = UtilParse.Create(registry, owner, this, ownerType);
                 ownerLocal.Data.IsCreateNew = true;
                 isOwnerInsert = true;
             }
@@ -2142,14 +2054,14 @@
                     if (registry.SchemaOwnerTypeList[GetType()].Contains(ownerLastType))
                     {
                         // Owner insert
-                        ownerLocal = registry.TypeList[ownerLastType].Create(owner, this);
+                        ownerLocal = UtilParse.Create(registry, owner, this, ownerLastType);
                         ownerLocal.Data.IsCreateNew = true;
                     }
                 }
             }
 
             // Syntax create
-            var syntax = registry.TypeList[GetType()].Create(ownerLocal, this);
+            var syntax = UtilParse.Create(registry, ownerLocal, this);
             if (Data.ListCount() > 0)
             {
                 foreach (SyntaxBase item in List)
@@ -2179,7 +2091,7 @@
             else
             {
                 // Syntax create
-                ownerLocal = registry.TypeList[GetType()].Create(owner, this);
+                ownerLocal = UtilParse.Create(registry, owner, this);
                 ownerLocal.Data.IsCreateNew = IsCreateNew;
             }
 
@@ -2374,7 +2286,7 @@
         public SyntaxTitle(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
-            UtilDoc.Assert(owner is SyntaxPage);
+            UtilDoc.Assert(owner is SyntaxPage || owner is SyntaxCustomPage);
         }
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
@@ -2389,7 +2301,7 @@
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsNewLine<MdTitle>(token, out var tokenEnd))
+            if (UtilParse.ParseOneIsNewLine<MdTitle>(token, out var tokenEnd))
             {
                 new SyntaxTitle(owner, token, tokenEnd);
                 if (tokenEnd.Next() is MdSpace tokenSpace)
@@ -2449,7 +2361,7 @@
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsNewLine<MdBullet>(token, out var tokenEnd))
+            if (UtilParse.ParseOneIsNewLine<MdBullet>(token, out var tokenEnd))
             {
                 new SyntaxBullet(owner, token, tokenEnd);
                 if (tokenEnd.Next() is MdSpace tokenSpace)
@@ -2524,7 +2436,7 @@
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsNewLine<MdCode>(token, out var tokenEnd))
+            if (UtilParse.ParseOneIsNewLine<MdCode>(token, out var tokenEnd))
             {
                 var next = tokenEnd.Next<MdTokenBase>();
 
@@ -2646,7 +2558,7 @@
                     new SyntaxIgnore(fontDest, this);
                     foreach (var item in contentList)
                     {
-                        registry.TypeList[item.GetType()].Create(fontDest, item);
+                        UtilParse.Create(registry, fontDest, item);
                     }
                     new SyntaxIgnore(fontDest, fontSource);
 
@@ -2712,6 +2624,10 @@
             Data.LinkText = ((SyntaxLink)syntax).LinkText;
         }
 
+        public string Link => Data.Link;
+
+        public string LinkText => Data.LinkText;
+
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
             return new SyntaxLink(owner, syntax);
@@ -2719,14 +2635,54 @@
 
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
+            result.IsBlock = true;
             result.AddOwner<SyntaxParagraph>();
             // result.AddOwner<SyntaxTitle>(); // No link in title
             result.AddOwner<SyntaxBullet>();
         }
 
-        public string Link => Data.Link;
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
+        {
+            // For example http://	
+            if (token is MdLink)
+            {
+                if (UtilParse.ParseOneIsLink(token, null, out var linkEnd, out string link))
+                {
+                    new SyntaxLink(owner, token, linkEnd, link, link);
+                }
+            }
 
-        public string LinkText => Data.LinkText;
+            // For example []()	
+            if (token is MdBracket bracketSquare && bracketSquare.TextBracket == "[")
+            {
+                var next = token.Next<MdTokenBase>();
+                UtilParse.ParseOneIsLinkText(next, null, out var linkTextEnd, out string linkText);
+                if (linkText != null)
+                {
+                    next = linkTextEnd.Next<MdTokenBase>();
+                }
+                if (next is MdBracket bracketSquareEnd && bracketSquareEnd.TextBracket == "]")
+                {
+                    next = next.Next<MdTokenBase>();
+                    if (next is MdBracket bracketRound && bracketRound.TextBracket == "(")
+                    {
+                        next = next.Next<MdTokenBase>();
+                        if (UtilParse.ParseOneIsLinkText(next, null, out var linkEnd, out string link))
+                        {
+                            next = linkEnd.Next<MdTokenBase>();
+                            if (next is MdBracket bracketRoundEnd && bracketRoundEnd.TextBracket == ")")
+                            {
+                                if (linkText == null)
+                                {
+                                    linkText = link;
+                                }
+                                new SyntaxLink(owner, token, next, link, linkText);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         internal override void ParseHtml(HtmlBase owner)
         {
@@ -2786,7 +2742,7 @@
             if (token is MdImage)
             {
                 MdTokenBase next = token.Next<MdTokenBase>();
-                ParseOneIsLinkText(next, token, out var linkTextEnd, out string linkText);
+                UtilParse.ParseOneIsLinkText(next, token, out var linkTextEnd, out string linkText);
                 if (linkText != null)
                 {
                     next = linkTextEnd.Next<MdTokenBase>();
@@ -2797,7 +2753,7 @@
                     if (next is MdBracket bracketRound && bracketRound.TextBracket == "(")
                     {
                         next = next.Next<MdTokenBase>();
-                        if (ParseOneIsLink(next, token, out var linkEnd, out var link))
+                        if (UtilParse.ParseOneIsLink(next, token, out var linkEnd, out var link))
                         {
                             if (linkEnd.Next() is MdBracket bracketRoundEnd && bracketRoundEnd.Text == ")")
                             {
@@ -3072,33 +3028,6 @@
         {
 
         }
-
-        internal static bool ParseOneIsCustom(MdTokenBase token, string commandName, out MdTokenBase tokenEnd)
-        {
-            var result = false;
-            tokenEnd = null;
-            if (ParseOneIsNewLine<MdBracket>(token, out var bracket))
-            {
-                if (bracket.TextBracket == "(")
-                {
-                    if (bracket.Next() is MdContent content)
-                    {
-                        if (content.Text == commandName)
-                        {
-                            if (content.Next() is MdBracket bracketEnd)
-                            {
-                                if (bracketEnd.TextBracket == ")")
-                                {
-                                    tokenEnd = bracketEnd;
-                                    result = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return result;
-        }
     }
 
     internal class SyntaxCustomNote : SyntaxCustomBase
@@ -3152,7 +3081,7 @@
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsCustom(token, "Note", out var tokenEnd))
+            if (UtilParse.ParseOneIsCustom(token, "Note", out var tokenEnd, out _))
             {
                 new SyntaxCustomNote(owner, token, tokenEnd);
                 if (tokenEnd.Next() is MdNewLine newLine)
@@ -3223,6 +3152,72 @@
     }
 
     /// <summary>
+    /// For example (Youtube) https://www.youtube.com/embed/bYJTl5axgUY
+    /// </summary>
+    internal class SyntaxCustomYoutube : SyntaxCustomBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxCustomYoutube(Registry registry)
+            : base(registry)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxCustomYoutube(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd, string link)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+            Data.Link = link;
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
+        /// </summary>
+        public SyntaxCustomYoutube(SyntaxBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+            Data.Link = ((SyntaxCustomYoutube)syntax).Link;
+        }
+
+        public string Link => Data.Link;
+
+        protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
+        {
+            return new SyntaxCustomYoutube(owner, syntax);
+        }
+
+        internal override void RegistrySchema(RegistrySchemaResult result)
+        {
+            result.AddOwner<SyntaxPage>();
+        }
+
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
+        {
+            if (UtilParse.ParseOneIsCustom(token, "Youtube", out var tokenEnd, out var paramList))
+            {
+                if (paramList.TryGetValue("Link", out var paramLink))
+                {
+                    if (UtilParse.ParseOneIsLink(paramLink.TokenBegin, paramLink.TokenEnd, out var linkEnd, out string link))
+                    {
+                        new SyntaxCustomYoutube(owner, token, tokenEnd, link);
+                    }
+                }
+            }
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            var note = new HtmlCustomYoutube(owner, this);
+
+            ParseHtmlMain(note, this);
+        }
+    }
+
+    /// <summary>
     /// Custom syntax for page break.
     /// </summary>
     internal class SyntaxCustomPage : SyntaxCustomBase
@@ -3239,10 +3234,10 @@
         /// <summary>
         /// Constructor ParseOne.
         /// </summary>
-        public SyntaxCustomPage(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        public SyntaxCustomPage(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd, string pagePath)
             : base(owner, tokenBegin, tokenEnd)
         {
-
+            Data.PagePath = pagePath;
         }
 
         /// <summary>
@@ -3251,8 +3246,10 @@
         public SyntaxCustomPage(SyntaxBase owner, SyntaxBase syntax)
             : base(owner, syntax)
         {
-
+            Data.PagePath = ((SyntaxCustomPage)syntax).PagePath;
         }
+
+        public string PagePath => Data.PagePath;
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
@@ -3267,9 +3264,10 @@
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
         {
-            if (ParseOneIsCustom(token, "Page", out var tokenEnd))
+            if (UtilParse.ParseOneIsCustom(token, "Page", out var tokenEnd, out var paramList))
             {
-                new SyntaxCustomPage(owner, token, tokenEnd);
+                paramList.TryGetValue("Path", out var pagePath);
+                new SyntaxCustomPage(owner, token, tokenEnd, pagePath?.Text);
             }
         }
 
@@ -3293,7 +3291,16 @@
 
         internal override void ParseThree(SyntaxBase owner)
         {
-            var ownerLocal = new SyntaxPage((SyntaxBase)owner.Owner, this);
+            SyntaxPage ownerLocal;
+            if (owner.Data.ListCount() == 0)
+            {
+                // (Page) is first text. Do not create new page but use existing.
+                ownerLocal = (SyntaxPage)owner;
+            }
+            else
+            {
+                ownerLocal = new SyntaxPage((SyntaxBase)owner.Owner, this);
+            }
             ParseMain(ownerLocal, this);
         }
 
@@ -3650,6 +3657,25 @@
         }
     }
 
+    internal class HtmlCustomYoutube : HtmlBase
+    {
+        /// <summary>
+        /// Constructor parse html.
+        /// </summary>
+        public HtmlCustomYoutube(HtmlBase owner, SyntaxBase syntax) 
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void RenderContent(StringBuilder result)
+        {
+            string link = ((SyntaxCustomYoutube)Syntax).Link;
+            string html = $"<iframe src=\"{link}\"</iframe>";
+            result.Append(html);
+        }
+    }
+
     internal class HtmlContent : HtmlBase
     {
         /// <summary>
@@ -3667,6 +3693,240 @@
         }
     }
 
+    internal static class UtilParse
+    {
+        /// <summary>
+        /// Returns current text parse index.
+        /// </summary>
+        public static int ParseIndex(MdPage owner)
+        {
+            var result = 0;
+
+            MdTokenBase token = (MdTokenBase)owner.Data.Last(isOrDefault: true)?.Component();
+            if (token != null)
+            {
+                result = token.IndexEnd + 1;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Create syntax component of type createType and add it to owner.
+        /// </summary>
+        /// <param name="owner">Tree to add new syntax component.</param>
+        /// <param name="syntax">Syntax component to reference (copy).</param>
+        /// <returns>Returns new syntax component.</returns>
+        internal static SyntaxBase Create(SyntaxRegistry registry, SyntaxBase owner, SyntaxBase syntax, Type createType)
+        {
+            return registry.TypeList[createType].Create(owner, syntax);
+        }
+
+        /// <summary>
+        /// Create new syntax component of type syntax and add it to owner.
+        /// </summary>
+        internal static SyntaxBase Create(SyntaxRegistry registry, SyntaxBase owner, SyntaxBase syntax)
+        {
+            return Create(registry, owner, syntax, syntax.GetType());
+        }
+
+        /// <summary>
+        /// Returns token of currently parsed syntax.
+        /// </summary>
+        internal static MdTokenBase ParseOneToken(SyntaxBase syntax)
+        {
+            var result = syntax.TokenBegin;
+            var last = syntax.Data.Last(isOrDefault: true);
+            if (last != null)
+            {
+                var syntaxLast = (SyntaxBase)syntax.Data.Registry.IdList[last.Id].Component();
+                result = syntaxLast.TokenEnd;
+                result = result.Next(syntax.TokenEnd);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true, if line starts with token T. Allows leading spaces.
+        /// </summary>
+        internal static bool ParseOneIsNewLine<T>(MdTokenBase token, out T tokenEnd) where T : MdTokenBase
+        {
+            var result = false;
+            tokenEnd = null;
+
+            bool isStart;
+            Component component = token;
+
+            // Leading start or NewLine or Paragraph
+            var previous = token.Previous<MdTokenBase>();
+            isStart = previous == null || previous is MdNewLine || previous is MdParagraph;
+            // Leading Space
+            if (component is MdSpace)
+            {
+                component = component.Next<MdTokenBase>(null);
+            }
+            // Token
+            if (component is T)
+            {
+                tokenEnd = (T)component;
+            }
+
+            if (isStart && tokenEnd != null)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true, if tokenBegin is valid Link. For example https://workplacex.org
+        /// </summary>
+        /// <param name="link">Detected Link.</param>
+        internal static bool ParseOneIsLink(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdTokenBase linkEnd, out string link)
+        {
+            bool result = false;
+            linkEnd = tokenBegin;
+            MdTokenBase next = tokenBegin;
+            link = null;
+            do
+            {
+                if (next is MdLink)
+                {
+                    if (next != tokenBegin)
+                    {
+                        break;
+                    }
+                }
+                if (!(next is MdContent || next is MdLink || next is MdSymbol))
+                {
+                    break;
+                }
+                linkEnd = next;
+                link += next.Text;
+                result = true;
+            } while (Component.Next(ref next, tokenEnd));
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true, if tokenBegin contains valid LinkText. For example link description.
+        /// </summary>
+        /// <param name="linkText">Detected LinkText.</param>
+        internal static bool ParseOneIsLinkText(MdTokenBase tokenBegin, MdTokenBase tokenEnd, out MdTokenBase linkTextEnd, out string linkText)
+        {
+            var result = false;
+            linkTextEnd = tokenBegin;
+            MdTokenBase next = tokenBegin;
+            linkText = null;
+            do
+            {
+                if (!(next is MdContent || next is MdSpace || next is MdLink))
+                {
+                    break;
+                }
+                linkTextEnd = next;
+                linkText += next.Text;
+                result = true;
+            } while (Component.Next(ref next, tokenEnd));
+            return result;
+        }
+
+        public class ParseOneIsCustomItem
+        {
+            public MdTokenBase TokenBegin;
+
+            public MdTokenBase TokenEnd;
+
+            public string Text;
+        }
+
+        private static bool ParseOneIsCustom(MdTokenBase token, out MdTokenBase tokenEnd, out Dictionary<string, ParseOneIsCustomItem> paramList)
+        {
+            var result = false;
+            tokenEnd = token;
+            paramList = null;
+            var next = token;
+            while (next is MdContent)
+            {
+                var paramName = next.Text;
+                next = next.Next<MdTokenBase>();
+                if (next is MdSymbol symbol && symbol.SymbolEnum == MdSymbolEnum.Equal)
+                {
+                    next = next.Next<MdTokenBase>();
+                    if (next is MdQuotation quotation && quotation.QuotationEnum == MdQuotationEnum.Double)
+                    {
+                        next = next.Next<MdTokenBase>();
+                        var paramTokenBegin = next;
+                        var paramTokenEnd = next;
+                        StringBuilder value = new StringBuilder();
+                        while (next != null && !(next is MdQuotation quotationEnd && quotationEnd.QuotationEnum == MdQuotationEnum.Double))
+                        {
+                            value.Append(next.Text);
+                            paramTokenEnd = next;
+                            next = next.Next<MdTokenBase>();
+                        }
+                        if (next is MdQuotation)
+                        {
+                            if (paramList == null)
+                            {
+                                paramList = new Dictionary<string, ParseOneIsCustomItem>();
+                            }
+                            paramList[paramName] = new ParseOneIsCustomItem { Text = UtilDoc.StringNull(value.ToString() ), TokenBegin = paramTokenBegin, TokenEnd = paramTokenEnd };
+                            tokenEnd = next;
+                            result = true;
+                        }
+                    }
+                    next = next.Next<MdTokenBase>();
+                    if (next is MdSpace)
+                    {
+                        next = next.Next<MdTokenBase>();
+                    }
+                }
+            }
+            return result;
+        }
+
+        internal static bool ParseOneIsCustom(MdTokenBase token, string commandName, out MdTokenBase tokenEnd, out Dictionary<string, ParseOneIsCustomItem> paramList)
+        {
+            var result = false;
+            tokenEnd = null;
+            paramList = null;
+            if (ParseOneIsNewLine<MdBracket>(token, out var bracket))
+            {
+                if (bracket.TextBracket == "(")
+                {
+                    if (bracket.Next() is MdContent content)
+                    {
+                        if (content.Text == commandName)
+                        {
+                            MdTokenBase next = content.Next<MdTokenBase>();
+                            bool isParamValid = true;
+                            if (next is MdSpace)
+                            {
+                                next = next.Next<MdTokenBase>();
+                                isParamValid = ParseOneIsCustom(next, out var paramEnd, out paramList);
+                                next = paramEnd.Next<MdTokenBase>();
+                            }
+                            if (isParamValid && next is MdBracket bracketEnd)
+                            {
+                                if (bracketEnd.TextBracket == ")")
+                                {
+                                    tokenEnd = bracketEnd;
+                                    if (paramList == null)
+                                    {
+                                        paramList = new Dictionary<string, ParseOneIsCustomItem>();
+                                    }
+                                    result = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+    }
+
     internal static class UtilDoc
     {
         public static void Debug()
@@ -3674,7 +3934,17 @@
             string textMd = @"(Note)**A**
 (Note)";
 
-            textMd = "*(*(";
+            textMd = @"(Page Path='/' Title='Hello')
+# Title".Replace("'", "\"");
+
+            textMd = @"# T
+Hello
+(Youtube Link='https://www.youtube.com/embed/bYJTl5axgUY')
+World
+".Replace("'", "\"");
+
+            textMd = @"Hello
+(Page)World";
 
             // textMd = "# H**e**llo<!-- Comment Xyz -->World One";
             //  textMd = "# Title";
@@ -3684,7 +3954,7 @@
             // textMd = "Hello\r\nWorld\r\n* One\r\n* Two";
             // textMd = "Hello\r\n\r\nWorld";
             // textMd = "Hello<!-- Comment -->";
-            //textMd = "Hello<!-- Comment -->World";
+            // textMd = "Hello<!-- Comment -->World";
             // textMd = "**Bold**World";
             // textMd = "(Note)\r\n\r\nA\r\n(Note)";
             // textMd = "(Note)\r\n\r\n* A\r\n(Note)";
@@ -3812,6 +4082,7 @@
             result += textHtml;
 
             string textMdEscape = textMd.Replace("\r", "\\r").Replace("\n", "\\n");
+            textMdEscape = textMdEscape.Replace("\"", "\\\"");
             string textHtmlEscape = textHtml?.Replace("\"", @"\""");
             textHtmlEscape = textHtmlEscape?.Replace("\r", "\\r").Replace("\n", "\\n");
             string textCSharp = "list.Add(new Item { TextMd = \"" + textMdEscape + "\", TextHtml = \"" + textHtmlEscape + "\" });";

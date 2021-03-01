@@ -17,7 +17,7 @@
         {
             // Test Md
             {
-                // UtilDoc.Debug();
+                UtilDoc.Debug();
                 UnitTestMd.Run();
                 UnitTestMd.RunRandom();
                 return;
@@ -617,6 +617,13 @@
             list.Add(new Item { TextMd = "# T\r\n(Note)\r\nHello\r\n(Note)\r\nWorld", TextHtml = "<section>(page)<h1>T</h1><p>(p)(/p)</p><article class=\"message is-warning\"><div class=\"message-body\"><p>(p)Hello(/p)</p></div></article><p>(p)World(/p)</p>(/page)</section>" });
             list.Add(new Item { TextMd = "\r\n\r\nT", TextHtml = "<section>(page)<p>(p)T(/p)</p>(/page)</section>" });
             list.Add(new Item { TextMd = "(Note)**A**\r\n(Note)", TextHtml = "<section>(page)<article class=\"message is-warning\"><div class=\"message-body\"><p>(p)<strong>A</strong>(/p)</p></div></article>(/page)</section>" });
+            list.Add(new Item { TextMd = "https://my.my", TextHtml = "<section>(page)<p>(p)<a href=\"https://my.my\">https://my.my</a>(/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "https://https://my.my", TextHtml = "<section>(page)<p>(p)<a href=\"https://\">https://</a><a href=\"https://my.my\">https://my.my</a>(/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "https://www.youtube.com/watch?v=bYJTl5axgUY", TextHtml = "<section>(page)<p>(p)<a href=\"https://www.youtube.com/watch?v=bYJTl5axgUY\">https://www.youtube.com/watch?v=bYJTl5axgUY</a>(/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "# T\r\nHello\r\n(Youtube Link=\"https://www.youtube.com/embed/bYJTl5axgUY\")\r\nWorld\r\n", TextHtml = "<section>(page)<h1>T</h1><p>(p)Hello(/p)</p><iframe src=\"https://www.youtube.com/embed/bYJTl5axgUY\"</iframe><p>(p)World(/p)</p>(/page)</section>" }); list.Add(new Item { TextMd = "[](Page)", TextHtml = "<section>(page)<p>(p)<a href=\"Page\">Page</a>(/p)</p>(/page)</section>" });
+            list.Add(new Item { TextMd = "(Page)\r\n# T", TextHtml = "<section>(page)<p>(p)(/p)</p><h1>T</h1>(/page)</section>" });
+            list.Add(new Item { TextMd = "(Page)\r\n# Title", TextHtml = "<section>(page)<p>(p)(/p)</p><h1>Title</h1>(/page)</section>" });
+            list.Add(new Item { TextMd = "(Page Path=\"/\" Title=\"Hello\")\r\n# Title", TextHtml = "<section>(page)<p>(p)(/p)</p><h1>Title</h1>(/page)</section>" });
 
             var i = 0;
             foreach (var item in list)
@@ -640,9 +647,16 @@
             list.Add("\r\n\r\n");
             list.Add(" ");
             list.Add(" ");
+            list.Add("A");
             list.Add("Text");
             list.Add("![]");
+            list.Add("[]()");
+            list.Add("[");
+            list.Add("]");
             list.Add("(");
+            list.Add(")");
+            list.Add("=");
+            list.Add(",");
             list.Add("#");
             list.Add("*");
             list.Add("(Note)");
@@ -650,6 +664,10 @@
             list.Add("*");
             list.Add("**");
             list.Add("(Page)");
+            list.Add("Page");
+            list.Add("(Youtube)");
+            list.Add("Youtube");
+            list.Add("Link=\"");
 
             var random = new Random(546);
 
