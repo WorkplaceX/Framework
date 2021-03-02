@@ -178,16 +178,19 @@
         {
             var configCli = ConfigCli.Load();
 
-            // Clone repo
-            var externalGit = UtilFramework.StringNull(configCli.ExternalGit);
-            if (externalGit != null)
+            foreach (var external in configCli.ExternalList)
             {
-                string externalFolderName = UtilFramework.FolderName + "ExternalGit/";
-                if (!UtilCli.FolderNameExist(externalFolderName))
+                // Clone repo
+                var externalGit = UtilFramework.StringNull(external.ExternalGit);
+                if (externalGit != null)
                 {
-                    Console.WriteLine("Git Clone ExternalGit");
-                    UtilCli.FolderCreate(externalFolderName);
-                    UtilCli.Start(externalFolderName, "git", "clone --recursive -q" + " " + externalGit); // --recursive clone also submodule Framework -q do not write to stderr on linux
+                    string externalFolderName = UtilFramework.FolderName + "ExternalGit/";
+                    if (!UtilCli.FolderNameExist(externalFolderName))
+                    {
+                        Console.WriteLine("Git Clone ExternalGit");
+                        UtilCli.FolderCreate(externalFolderName);
+                        UtilCli.Start(externalFolderName, "git", "clone --recursive -q" + " " + externalGit); // --recursive clone also submodule Framework -q do not write to stderr on linux
+                    }
                 }
             }
         }
@@ -199,16 +202,19 @@
         {
             var configCli = ConfigCli.Load();
 
-            // External git url
-            var externalGit = UtilFramework.StringNull(configCli.ExternalGit);
-
-            // Call command cli external (prebuild script)
-            var externalProjectName = UtilFramework.StringNull(configCli.ExternalProjectName);
-
-            if (externalGit != null && externalProjectName != null)
+            foreach (var external in configCli.ExternalList)
             {
-                string folderName = UtilFramework.FolderName + "ExternalGit/" + externalProjectName + "/" + "Application.Cli";
-                UtilCli.DotNet(folderName, "run -- external");
+                // External git url
+                var externalGit = UtilFramework.StringNull(external.ExternalGit);
+
+                // Call command cli external (prebuild script)
+                var externalProjectName = UtilFramework.StringNull(external.ExternalProjectName);
+
+                if (externalGit != null && externalProjectName != null)
+                {
+                    string folderName = UtilFramework.FolderName + "ExternalGit/" + externalProjectName + "/" + "Application.Cli";
+                    UtilCli.DotNet(folderName, "run -- external");
+                }
             }
         }
 

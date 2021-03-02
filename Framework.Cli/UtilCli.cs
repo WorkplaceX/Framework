@@ -390,7 +390,10 @@
             text = ConsoleWriteLinePasswordHide(text, environment.ConnectionStringFramework);
             text = ConsoleWriteLinePasswordHide(text, environment.ConnectionStringApplication);
             text = ConsoleWriteLinePasswordHide(text, environment.DeployAzureGitUrl);
-            text = ConsoleWriteLinePasswordHide(text, configCli.ExternalGit);
+            foreach (var external in configCli.ExternalList)
+            {
+                text = ConsoleWriteLinePasswordHide(text, external.ExternalGit);
+            }
 
             text = text.Replace("{", "{{").Replace("}", "}}"); // Console.Write("{", ConsoleColor.Green); throws exception "Input string was not in a correct format". // TODO Bug report
 

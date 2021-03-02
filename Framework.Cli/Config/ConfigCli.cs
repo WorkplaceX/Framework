@@ -64,15 +64,9 @@
         public List<ConfigCliWebsite> WebsiteList { get; set; }
 
         /// <summary>
-        /// Gets or sets ExternalGit. For example: https://username:password@dev.azure.com/company/repo/_git/repo.git
-        /// Clones and calls prebuild script in folder External.Prebuild\ in cli build command.
+        /// Gets or sets ExternalList.
         /// </summary>
-        public string ExternalGit { get; set; }
-
-        /// <summary>
-        /// Gets or sets ExternalProjectName. For example MyApp. Used to build ExternalFolderName ExternalGit/MyApp/ Cli build command calls this .NET script.
-        /// </summary>
-        public string ExternalProjectName { get; set; }
+        public List<ConfigCliExternal> ExternalList { get; set; }
 
         /// <summary>
         /// Gets or sets BingMapKey. See also class BingMap.
@@ -220,6 +214,20 @@
         /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
         /// </summary>
         public string DeployAzureGitUrl { get; set; }
+    }
+
+    public class ConfigCliExternal
+    {
+        /// <summary>
+        /// Gets or sets ExternalGit. For example: https://username:password@dev.azure.com/company/repo/_git/repo.git
+        /// Clones and calls prebuild script in folder External.Prebuild\ in cli build command.
+        /// </summary>
+        public string ExternalGit { get; set; }
+
+        /// <summary>
+        /// Gets or sets ExternalProjectName. For example MyApp. Used to build ExternalFolderName ExternalGit/MyApp/ Cli build command calls this .NET script.
+        /// </summary>
+        public string ExternalProjectName { get; set; }
     }
 
     /// <summary>
