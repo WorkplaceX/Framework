@@ -34,6 +34,24 @@
         }
 
         /// <summary>
+        /// Constructor for standalone mode.
+        /// </summary>
+        internal AppCli() 
+        {
+            IsStandaloneMode = true;
+
+            this.commandLineApplication = new CommandLineApplication();
+
+            RegisterCommand();
+            RegisterCommandInit();
+        }
+
+        /// <summary>
+        /// Gets IsStandaloneMode. If true, cli has been started for example with npx to create a new project.
+        /// </summary>
+        internal bool IsStandaloneMode;
+
+        /// <summary>
         /// Gets "Application.Database" assembly. This assembly hosts from database generated rows.
         /// </summary>
         public readonly Assembly AssemblyApplicationDatabase;
@@ -147,17 +165,20 @@
         /// </summary>
         internal virtual void RegisterCommand()
         {
-            new CommandConfig(this);
-            new CommandGenerate(this);
-            new CommandBuild(this);
-            new CommandStart(this);
-            new CommandDeploy(this);
-            new CommandDeployDb(this);
-            new CommandEnvironment(this);
-            new CommandTest(this);
-            if (UtilExternal.IsExternal)
+            if (!IsStandaloneMode)
             {
-                new CommandExternal(this);
+                new CommandConfig(this);
+                new CommandGenerate(this);
+                new CommandBuild(this);
+                new CommandStart(this);
+                new CommandDeploy(this);
+                new CommandDeployDb(this);
+                new CommandEnvironment(this);
+                new CommandTest(this);
+                if (UtilExternal.IsExternal)
+                {
+                    new CommandExternal(this);
+                }
             }
         }
 
@@ -315,14 +336,20 @@
             Title(args);
             try
             {
-                ConfigCli.Init(this);
-                var configCli = ConfigCli.Load();
-                ConfigCli.Save(configCli); // Reset ConfigCli.json
-                ConfigCli.CopyConfigCliToConfigServer();
-                CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
-                CopyConfigCliToConfigServer(isWarning: false); // Copy from ConfigCli.json to ConfigServer.json
+                if (!IsStandaloneMode)
+                {
+                    ConfigCli.Init(this);
+                    var configCli = ConfigCli.Load();
+                    ConfigCli.Save(configCli); // Reset ConfigCli.json
+                    ConfigCli.CopyConfigCliToConfigServer();
+                    CommandEnvironment.ConsoleWriteLineCurrentEnvironment(configCli);
+                    CopyConfigCliToConfigServer(isWarning: false); // Copy from ConfigCli.json to ConfigServer.json
+                }
                 commandLineApplication.Execute(args);
-                CopyConfigCliToConfigServer(isWarning: true); // Copy new values from ConfigCli.json to ConfigServer.json
+                if (!IsStandaloneMode)
+                {
+                    CopyConfigCliToConfigServer(isWarning: true); // Copy new values from ConfigCli.json to ConfigServer.json
+                }
             }
             catch (Exception exception) // For example unrecognized option
             {

@@ -1,0 +1,15 @@
+{
+  "name": "workplacex-cli",
+  "version": "1.0.0",
+  "description": "![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)",
+  "bin": "package.json.cmd",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WorkplaceX/Framework"
+  },
+  "author": "",
+  "license": "MIT"
+}
