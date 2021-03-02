@@ -95,6 +95,7 @@
                 configCli.EnvironmentName = configCli.EnvironmentNameGet();
                 configCli.EnvironmentList = new List<ConfigCliEnvironment>();
                 configCli.WebsiteList = new List<ConfigCliWebsite>();
+                configCli.ExternalList = new List<ConfigCliExternal>();
                 appCli.InitConfigCli(configCli);
 
                 // EnvironmentName defined in WebsiteList
@@ -128,6 +129,10 @@
             if (result.WebsiteList == null)
             {
                 result.WebsiteList = new List<ConfigCliWebsite>();
+            }
+            if (result.ExternalList == null)
+            {
+                result.ExternalList = new List<ConfigCliExternal>();
             }
             foreach (var website in result.WebsiteList)
             {
