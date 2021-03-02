@@ -220,7 +220,7 @@
     {
         /// <summary>
         /// Gets or sets ExternalGit. For example: https://username:password@dev.azure.com/company/repo/_git/repo.git
-        /// Clones and calls prebuild script in folder External.Prebuild\ in cli build command.
+        /// Clones and calls prebuild method AppCli.CommandExternal(); in external cli build command.
         /// </summary>
         public string ExternalGit { get; set; }
 

@@ -53,7 +53,7 @@ namespace Framework
             {
                 // See also: method UtilCli.VersionBuild();
                 // Version tag with commit sha, build pc and time stamp.
-                return "Build (local)"; /* VersionBuild */
+                return "Build (WorkplaceX=v3.49.00; Commit=a0d1b52; Pc=DEVPC; Time=2021-03-02 14:34:12 (UTC);)"; /* VersionBuild */
             }
         }
 

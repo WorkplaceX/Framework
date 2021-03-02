@@ -184,12 +184,15 @@
                 var externalGit = UtilFramework.StringNull(external.ExternalGit);
                 if (externalGit != null)
                 {
-                    string externalFolderName = UtilFramework.FolderName + "ExternalGit/";
+                    string externalFolderName = UtilFramework.FolderName + "ExternalGit/" + external.ExternalProjectName + "/";
                     if (!UtilCli.FolderNameExist(externalFolderName))
                     {
                         Console.WriteLine("Git Clone ExternalGit");
                         UtilCli.FolderCreate(externalFolderName);
+                        externalGit += " ."; // See also: https://stackoverflow.com/questions/6224626/clone-contents-of-a-github-repository-without-the-folder-itself
                         UtilCli.Start(externalFolderName, "git", "clone --recursive -q" + " " + externalGit); // --recursive clone also submodule Framework -q do not write to stderr on linux
+
+                        UtilFramework.Assert(UtilCli.FolderNameExist(externalFolderName), string.Format("Expected folder does not exist after git clone ({0}])!", externalFolderName));
                     }
                 }
             }
