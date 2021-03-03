@@ -132,7 +132,7 @@
                 // Delete dist folder
                 string folderNameDist = UtilFramework.FolderNameParse(website.FolderNameDist);
                 UtilFramework.Assert(folderNameDist != null);
-                UtilCli.FolderDelete(folderNameDist);
+                UtilCli.FolderDelete(UtilFramework.FolderName + folderNameDist);
 
                 // npm run build
                 BuildWebsiteNpm(website);

@@ -40,7 +40,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.49.01";
+                return "v3.49.02";
             }
         }
 
@@ -101,6 +101,8 @@ namespace Framework
 
         /// <summary>
         /// Combines FolderName and path.
+        /// Returns for example "Application.Website/LayoutBulma/dist/". To be used for relative paths only. To build absolut path
+        /// combine with property UtilFramework.FolderName or method UtilServer.FolderNameContentRoot();
         /// </summary>
         /// <param name="folderName">For example "Default/"</param>
         /// <param name="path">For example "/index.html"</param>
@@ -118,6 +120,10 @@ namespace Framework
             return result;
         }
 
+        /// <summary>
+        /// Returns for example "Application.Website/LayoutBulma/dist/". To be used for relative paths only. To build absolut path
+        /// combine with property UtilFramework.FolderName or method UtilServer.FolderNameContentRoot();
+        /// </summary>
         internal static string FolderNameParse(string folderName)
         {
             if (UtilFramework.StringNull(folderName) == null)

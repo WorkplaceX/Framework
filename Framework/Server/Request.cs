@@ -107,7 +107,7 @@
             }
 
             // FileName
-            string fileName = UtilFramework.FolderNameParse(folderName, pathIndexHtml);
+            string fileName = folderName + UtilFramework.FolderNameParse(null, pathIndexHtml);
             if (File.Exists(fileName))
             {
                 if (fileName.EndsWith(".html") && UtilFramework.StringNull(appSelector.AppTypeName) != null)
