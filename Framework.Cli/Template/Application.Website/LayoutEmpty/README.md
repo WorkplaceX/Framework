@@ -4,17 +4,19 @@ Minimal web page with Webpack 4.
 
 Install
 ```cmd
+npx websitedefault
 npm install
-```
-
-Build to "dist/" folder with watch:
-```cmd
-npm run build -- --watch
 ```
 
 Start dev server (with hot reload)
 ```cmd
 npm run start
+```
+Now listening on http://localhost:8080/
+
+Build to "dist/" folder with watch:
+```cmd
+npm run build -- --watch
 ```
 
 ## Packages
