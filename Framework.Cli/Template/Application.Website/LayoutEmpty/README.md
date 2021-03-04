@@ -1,6 +1,10 @@
 # Layout Empty Website
 
-Minimal web page with Webpack 4.
+![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)
+
+[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
+
+Get startet with a minimal web page configured for Webpack 4 and hot reload.
 
 Install
 ```cmd
