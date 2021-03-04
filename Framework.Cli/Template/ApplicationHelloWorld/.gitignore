@@ -1,0 +1,11 @@
+/.vs/
+/ConfigCli.json
+/ConfigServer.json
+
+/ExternalGit/
+/Application/App/ExternalGit/
+/Application.Database/Database/ExternalGit/
+/Application.Cli/App/ExternalGit/
+/Application.Cli/Database/ExternalGit/
+/Application.Cli/DeployDb/ExternalGit/
+/Application.Website/ExternalGit/

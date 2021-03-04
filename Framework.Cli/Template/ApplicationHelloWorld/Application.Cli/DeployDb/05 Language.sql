@@ -1,0 +1,14 @@
+﻿CREATE TABLE Doc.Language
+(
+	Id INT PRIMARY KEY IDENTITY,
+	Name NVARCHAR(256) NOT NULL UNIQUE,
+	TextHtml NVARCHAR(256),
+)
+
+GO
+CREATE VIEW Doc.LanguageIntegrate AS
+SELECT
+    *,
+	Name AS IdName
+FROM
+	Doc.Language
