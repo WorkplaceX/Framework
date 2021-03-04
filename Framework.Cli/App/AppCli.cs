@@ -180,6 +180,10 @@
                     new CommandExternal(this);
                 }
             }
+            else
+            {
+                new CommandNewProject(this);
+            }
         }
 
         /// <summary>
