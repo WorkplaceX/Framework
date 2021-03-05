@@ -9,8 +9,12 @@ Framework to create database applications based on Angular 11, Bootstrap, Bulma,
 Project page: [WorkplaceX.org](http://workplacex.org)
 
 ## Getting started
+Prerequisites for Linux and Windows
+* [Node.js](https://nodejs.org/en/) (LTS Version)
+* [.NET Core SDK](https://dotnet.microsoft.com/download) (Version 5.0)
+* [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express)
 
-Create new project in empty folder (for Windows use ./cli.cmd)
+Create new project in empty folder (for Windows use ./cli.cmd instead of /.cli.sh)
 ```sh
 # Install WorkplaceX cli into an empty folder
 npx workplacex-cli new
@@ -38,9 +42,6 @@ All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime co
 
 ## More templates
 * Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
-
-## SQl-Server
-Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 
 ## Project Folder and File Structure
 * "Application/" (Application with custom business logic in C#)
