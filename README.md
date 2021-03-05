@@ -4,12 +4,14 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Framework to create database applications based on Angular 11 with server side rendering, ASP.NET Core 5.0 and MS-SQL. Project page: [WorkplaceX.org](http://workplacex.org)
+Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server.
+
+Project page: [WorkplaceX.org](http://workplacex.org)
 
 ## Getting started
 
 Create new project in empty folder (for Windows use ./cli.cmd)
-```cmd
+```sh
 # Install WorkplaceX cli into empty folder
 npx workplacex-cli new
 
@@ -37,6 +39,9 @@ npx workplacex-cli new
 * "Framework.Cli/" (C# Command line interface to build and deploy application)
 * "Framework.Doc/" (Documentation images)
 * "Framework.Test/" (Internal C# unit tests)
+
+## SQl-Server
+Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 
 ## Version
 
