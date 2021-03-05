@@ -1,7 +1,7 @@
 {
   "name": "websitedefault",
   "license": "MIT",
-  "version": "1.0.51",
+  "version": "1.0.52",
   "description": "Minimal empty web page with Webpack 4.",
   "bin": "package.json.npx.install.js",
   "scripts": {

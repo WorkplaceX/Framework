@@ -229,20 +229,30 @@
         /// </summary>
         /// <param name="searchPattern">For example: "*.*"</param>
         /// <param name="isAllDirectory">If true, includes subdirectories.</param>
-        internal static void FolderCopy(string folderNameSource, string folderNameDest, string searchPattern, bool isAllDirectory)
+        internal static void FolderCopy(string folderNameSource, string folderNameDest, string searchPattern = "*.*", bool isAllDirectory = true)
         {
             var source = new DirectoryInfo(folderNameSource);
             var dest = new DirectoryInfo(folderNameDest);
+
             SearchOption searchOption = SearchOption.TopDirectoryOnly;
-            if (isAllDirectory)
-            {
-                searchOption = SearchOption.AllDirectories;
-            }
             foreach (FileInfo file in source.GetFiles(searchPattern, searchOption))
             {
                 string fileNameSource = file.FullName;
                 string fileNameDest = Path.Combine(dest.FullName, file.FullName.Substring(source.FullName.Length));
                 FileCopy(fileNameSource, fileNameDest);
+            }
+
+            if (isAllDirectory)
+            {
+                foreach (var folderName in source.GetDirectories())
+                {
+                    if (folderName.Name == "node_modules")
+                    {
+                        // Skip folder node_modules/
+                        continue;
+                    }
+                    FolderCopy(folderNameSource + folderName.Name + "/", folderNameDest + folderName.Name + "/");
+                }
             }
         }
 

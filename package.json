@@ -1,8 +1,8 @@
 {
   "name": "workplacex-cli",
-  "version": "1.0.0",
-  "description": "![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)",
-  "bin": "package.json.cmd",
+  "version": "3.49.12",
+  "description": "Create database applications with Angular 11, ASP.NET Core 5.0 and MS-SQL for Linux and Windows.",
+  "bin": "package.json.npx.install.cmd",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
