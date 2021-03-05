@@ -10,7 +10,7 @@ Framework to create database applications based on Angular 11 with server side r
 
 Create new project in empty folder (for Windows use ./cli.cmd)
 ```cmd
-# Install into empty folder
+# Install WorkplaceX cli into empty folder
 npx workplacex-cli new
 
 # Build everything
@@ -68,29 +68,4 @@ Major  Minor  Patch  PreReleaseLabel BuildLabel
 
 ## Update
 
-* Update Nuget packages
-* Update Angular and website
-
-* Framework.Angular/application/
-```cmd
-ng update
-ng update --all
-```
-
-* Framework.Cli/Template/Application.Website/LayoutBulma/
-* Framework.Cli/Template/Application.Website/LayoutDefault/
-* Framework.Cli/Template/Application.Website/LayoutEmpty/
-```cmd
-npm audit
-npm audit fix
-```
-
-## Update Angular
-```cmd
-npm uninstall -g @angular/cli
-npm cache clean --force
-npm install -g @angular/cli
-ng update
-```
-
-https://update.angular.io/
+Checklist to update framework to latest .NET, Angular, Bootstrap, Bulma: [Update](UPDATE.md)
