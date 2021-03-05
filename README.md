@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server.
+Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Linux and Windows.
 
 Project page: [WorkplaceX.org](http://workplacex.org)
 
@@ -12,7 +12,7 @@ Project page: [WorkplaceX.org](http://workplacex.org)
 
 Create new project in empty folder (for Windows use ./cli.cmd)
 ```sh
-# Install WorkplaceX cli into empty folder
+# Install WorkplaceX cli into an empty folder
 npx workplacex-cli new
 
 # Build everything
@@ -36,6 +36,9 @@ All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime co
 ## More templates
 * Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
 
+## SQl-Server
+Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
+
 ## Project Folder and File Structure
 * "Application/" (Application with custom business logic in C#)
 * "Application.Cli/" (Command line interface to build and deploy in C#)
@@ -51,9 +54,6 @@ All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime co
 * "Framework/Framework.Test/" (Internal C# unit tests)
 * "ConfigCli.json" (Configuration file used by Application.Cli command line interface)
 * "ConfigServer.json" (Generated configuration used by Application.Server web server)
-
-## SQl-Server
-Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 
 ## Version
 
