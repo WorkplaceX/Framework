@@ -1,2 +1,4 @@
 ﻿@charset "utf-8";
-@import "~bulma/bulma";
+@import "~bulma/bulma"; // Or for custom bulma style use: "styleCustom.scss"
+
+@import "../../Shared/frameworkStyle.scss";

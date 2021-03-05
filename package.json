@@ -1,6 +1,6 @@
 {
   "name": "workplacex-cli",
-  "version": "3.49.13",
+  "version": "3.49.14",
   "description": "Create database applications with Angular 11, ASP.NET Core 5.0 and MS-SQL for Linux and Windows.",
   "bin": "package.json.npx.install.cmd",
   "scripts": {
