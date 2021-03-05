@@ -19,7 +19,7 @@ npx workplacex-cli new
 ./cli.sh build
 
 # Set database connection
-./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; Integrated Security=True;"
+./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;"
 
 # Deploy database
 ./cli.sh deploy
@@ -27,7 +27,10 @@ npx workplacex-cli new
 # Start application
 ./cli.sh start
 
-# Open http://localhost:5000/
+# Open browser to http://localhost:5000/
+
+# Stop server on Linux
+killall -g -SIGKILL Application.Server
 ```
 
 ## Config
