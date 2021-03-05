@@ -1,6 +1,6 @@
 {
   "name": "workplacex-cli",
-  "version": "3.49.12",
+  "version": "3.49.13",
   "description": "Create database applications with Angular 11, ASP.NET Core 5.0 and MS-SQL for Linux and Windows.",
   "bin": "package.json.npx.install.cmd",
   "scripts": {
@@ -11,5 +11,20 @@
     "url": "https://github.com/WorkplaceX/Framework"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "databse",
+    "data grid",
+    "ci/cd",
+    "application framework",
+    "angular",
+    "bootstrap",
+    "bulma",
+    "sql",
+    "ERP",
+    "CRM",
+    "CMS",
+    "ASP.NET Core",
+    "WorkplaceX"
+  ]
 }

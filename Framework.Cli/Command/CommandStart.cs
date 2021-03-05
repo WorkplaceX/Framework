@@ -7,7 +7,6 @@
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
-    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -152,7 +151,7 @@
                     // Ubuntu list all running processes: 'ps'
                     // To reboot Ubuntu type on Windows command prompt: 'wsl -t Ubuntu-18.04'
                     // Ubuntu show processes tool: 'htop'
-                    UtilCli.ConsoleWriteLineColor("Warning! Stop server with command 'killall -SIGKILL Application.Server node dotnet'", System.ConsoleColor.Yellow); // Warning
+                    UtilCli.ConsoleWriteLineColor("Info: Stop server with command 'killall -g -SIGKILL Application.Server'", ConsoleColor.Cyan); // Info
                 }
             }
         }
