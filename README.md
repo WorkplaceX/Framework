@@ -4,20 +4,56 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Framework to create database applications based on Angular 11 with server side rendering, ASP.NET Core 5.0 and MS-SQL. This repo contains no business logic. Company business logic typically goes into your private repo which references this framework.
+Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Linux and Windows. Provides CI/CD pipeline.
+
+Project page: [WorkplaceX.org](http://workplacex.org)
 
 ## Getting started
 
-* Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
-* Get started with: [Application](https://github.com/WorkplaceX/Application) (Empty hello world application)
-* Project page: [WorkplaceX.org](http://workplacex.org)
+Create new project in empty folder (for Windows use ./cli.cmd)
+```sh
+# Install WorkplaceX cli into an empty folder
+npx workplacex-cli new
 
-## Project Folder Structure
-* "Framework/" (Framework kernel doing all the heavy work)
-* "Framework.Angular/" (Generic Angular application to render app.json sent by server)
-* "Framework.Cli/" (C# Command line interface to build and deploy application)
-* "Framework.Doc/" (Documentation images)
-* "Framework.Test/" (Internal C# unit tests)
+# Build everything
+./cli.sh build
+
+# Set database connection
+./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; Integrated Security=True;"
+
+# Deploy database
+./cli.sh deploy
+
+# Start application
+./cli.sh start
+
+# Open http://localhost:5000/
+```
+
+## Config
+All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime configuration is automatically extracted and copied into ConfigServer.json.
+
+## More templates
+* Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
+
+## SQl-Server
+Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
+
+## Project Folder and File Structure
+* "Application/" (Application with custom business logic in C#)
+* "Application.Cli/" (Command line interface to build and deploy in C#)
+* "Application.Cli/DeployDb/" (SQL scripts to deploy to SQL server)
+* "Application.Database/" (From database generated C# database dto objects like tables and views)
+* "Application.Doc/" (Documentation images)
+* "Application.Server/" (ASP.NET Core to start application)
+* "Application.Website/" (Custom html and css websites used as masters)
+* "Framework/Framework/" (Framework kernel doing all the heavy work)
+* "Framework/Framework.Angular/" (Generic Angular application to render app.json sent by server)
+* "Framework/Framework.Cli/" (C# Command line interface to build and deploy application)
+* "Framework/Framework.Doc/" (Documentation images)
+* "Framework/Framework.Test/" (Internal C# unit tests)
+* "ConfigCli.json" (Configuration file used by Application.Cli command line interface)
+* "ConfigServer.json" (Generated configuration used by Application.Server web server)
 
 ## Version
 
@@ -49,29 +85,4 @@ Major  Minor  Patch  PreReleaseLabel BuildLabel
 
 ## Update
 
-* Update Nuget packages
-* Update Angular and website
-
-* Framework.Angular/application/
-```cmd
-ng update
-ng update --all
-```
-
-* Framework.Cli/Template/Application.Website/LayoutBulma/
-* Framework.Cli/Template/Application.Website/LayoutDefault/
-* Framework.Cli/Template/Application.Website/LayoutEmpty/
-```cmd
-npm audit
-npm audit fix
-```
-
-## Update Angular
-```cmd
-npm uninstall -g @angular/cli
-npm cache clean --force
-npm install -g @angular/cli
-ng update
-```
-
-https://update.angular.io/
+Checklist to update framework to latest .NET, Angular, Bootstrap, Bulma: [Update](UPDATE.md)
