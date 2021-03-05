@@ -18,7 +18,7 @@ npx workplacex-cli new
 # Build everything
 ./cli.sh build
 
-# Set database connection string
+# Set database connection
 ./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; Integrated Security=True;"
 
 # Deploy database
@@ -30,15 +30,27 @@ npx workplacex-cli new
 # Open http://localhost:5000/
 ```
 
+## Config
+All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime configuration is automatically extracted and copied into ConfigServer.json.
+
 ## More templates
 * Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
 
-## Project Folder Structure
-* "Framework/" (Framework kernel doing all the heavy work)
-* "Framework.Angular/" (Generic Angular application to render app.json sent by server)
-* "Framework.Cli/" (C# Command line interface to build and deploy application)
-* "Framework.Doc/" (Documentation images)
-* "Framework.Test/" (Internal C# unit tests)
+## Project Folder and File Structure
+* "Application/" (Application with custom business logic in C#)
+* "Application.Cli/" (Command line interface to build and deploy in C#)
+* "Application.Cli/DeployDb/" (SQL scripts to deploy to SQL server)
+* "Application.Database/" (From database generated C# database dto objects like tables and views)
+* "Application.Doc/" (Documentation images)
+* "Application.Server/" (ASP.NET Core to start application)
+* "Application.Website/" (Custom html and css websites used as masters)
+* "Framework/Framework/" (Framework kernel doing all the heavy work)
+* "Framework/Framework.Angular/" (Generic Angular application to render app.json sent by server)
+* "Framework/Framework.Cli/" (C# Command line interface to build and deploy application)
+* "Framework/Framework.Doc/" (Documentation images)
+* "Framework/Framework.Test/" (Internal C# unit tests)
+* "ConfigCli.json" (Configuration file used by Application.Cli command line interface)
+* "ConfigServer.json" (Generated configuration used by Application.Server web server)
 
 ## SQl-Server
 Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
