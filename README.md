@@ -1,4 +1,4 @@
-# Framework
+# WorkplaceX Framework
 
 ![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)
 
@@ -9,8 +9,12 @@ Framework to create database applications based on Angular 11, Bootstrap, Bulma,
 Project page: [WorkplaceX.org](http://workplacex.org)
 
 ## Getting started
+Prerequisites for Linux and Windows
+* [Node.js](https://nodejs.org/en/) (LTS Version)
+* [.NET Core SDK](https://dotnet.microsoft.com/download) (Version 5.0)
+* [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express)
 
-Create new project in empty folder (for Windows use ./cli.cmd)
+Create new project in empty folder (for Windows use ./cli.cmd instead of /.cli.sh)
 ```sh
 # Install WorkplaceX cli into an empty folder
 npx workplacex-cli new
@@ -19,7 +23,7 @@ npx workplacex-cli new
 ./cli.sh build
 
 # Set database connection
-./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; Integrated Security=True;"
+./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;"
 
 # Deploy database
 ./cli.sh deploy
@@ -27,7 +31,10 @@ npx workplacex-cli new
 # Start application
 ./cli.sh start
 
-# Open http://localhost:5000/
+# Open browser to http://localhost:5000/
+
+# Stop server on Linux
+killall -g -SIGKILL Application.Server
 ```
 
 ## Config
@@ -35,9 +42,6 @@ All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime co
 
 ## More templates
 * Get started with: [ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo) (Demo CRM and ERP system)
-
-## SQl-Server
-Install SQL-Server for Linux or Windows: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 
 ## Project Folder and File Structure
 * "Application/" (Application with custom business logic in C#)
