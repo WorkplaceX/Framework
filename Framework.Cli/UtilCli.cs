@@ -272,6 +272,10 @@
         {
             FolderCreate(fileNameDest);
             File.Copy(fileNameSource, fileNameDest, true);
+
+            // Keep for example chmod+x for ./cli.sh file for Linux.
+            var attribute = File.GetAttributes(fileNameSource);
+            File.SetAttributes(fileNameDest, attribute);
         }
 
         internal static void FolderDelete(string folderName)

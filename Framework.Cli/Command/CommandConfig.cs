@@ -247,7 +247,7 @@
 
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
-                UtilCli.ConsoleWriteLineColor("ConfigCli=", ConsoleColor.DarkGreen);
+                UtilCli.ConsoleWriteLineColor(configCli.EnvironmentGet().EnvironmentName + " " + "ConfigCli=", ConsoleColor.DarkGreen);
                 UtilCli.ConsoleWriteLineColor(string.Format("\"{0}\"", json), ConsoleColor.DarkGreen);
                 Console.WriteLine();
             }
