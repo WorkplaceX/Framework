@@ -273,9 +273,18 @@
             FolderCreate(fileNameDest);
             File.Copy(fileNameSource, fileNameDest, true);
 
-            // Keep for example chmod+x for ./cli.sh file for Linux.
-            var attribute = File.GetAttributes(fileNameSource);
-            File.SetAttributes(fileNameDest, attribute);
+            // chmod+x for ./cli.sh file for Linux.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (Path.GetExtension(fileNameSource) == "sh")
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "/bin/bash",
+                        Arguments = "-c \"chmod +x " + fileNameDest + "\"",
+                    }).WaitForExit();
+                }
+            }
         }
 
         internal static void FolderDelete(string folderName)
