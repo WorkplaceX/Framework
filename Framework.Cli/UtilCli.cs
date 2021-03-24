@@ -276,12 +276,13 @@
             // chmod+x for ./cli.sh file for Linux.
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                if (Path.GetExtension(fileNameSource) == "sh")
+                if (Path.GetExtension(fileNameSource) == ".sh")
                 {
+                    // Console.WriteLine("chmode +x " + fileNameDest);
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = "/bin/bash",
-                        Arguments = "-c \"chmod +x " + fileNameDest + "\"",
+                        Arguments = "-c \"chmod +x " + fileNameDest,
                     }).WaitForExit();
                 }
             }

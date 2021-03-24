@@ -1,5 +1,5 @@
 {
-  "name": "websitedefault",
+  "name": "layout-empty",
   "license": "MIT",
   "version": "1.0.52",
   "description": "Minimal empty web page with Webpack 4.",
