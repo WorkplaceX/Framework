@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Get startet with a minimal web page configured for Webpack 4 and hot reload.
+Get startet with a minimal web page configured for Webpack 5 and hot reload.
 
 Install
 ```cmd
@@ -25,10 +25,9 @@ npm run build -- --watch
 
 ## Packages
 * webpack webpack-cli (Webpack)
-* html-webpack-plugin html-loader (index.html)
+* html-webpack-plugin (index.html)
 * file-loader (*.png)
-* style-loader css-loader sass-loader node-sass (*.scss) See also: https://webpack.js.org/loaders/sass-loader/
+* sass-loader sass (*.scss) See also: https://webpack.js.org/loaders/sass-loader/
 * mini-css-extract-plugin (Extracts CSS into separate files)
-* clean-webpack-plugin (Clean dist folder)
 * webpack-dev-server (Dev server)
 
