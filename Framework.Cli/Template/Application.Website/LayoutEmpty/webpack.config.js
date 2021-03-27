@@ -18,7 +18,7 @@ module.exports = [{
         ],
       },
 
-      // See also: https://webpack.js.org/loaders/sass-loader/#getting-started
+      // See also: https://webpack.js.org/loaders/sass-loader/#getting-started, https://webpack.js.org/plugins/mini-css-extract-plugin/
       {
         test: /\.s[ac]ss$/i,
         use: [
