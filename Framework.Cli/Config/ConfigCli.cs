@@ -174,6 +174,7 @@
                 configServer.WebsiteList.Add(new ConfigServerWebsite()
                 {
                     FolderNameDist = webSite.FolderNameDist,
+                    FolderNameAngular = webSite.FolderNameAngular,
                     DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
                 });
             }
@@ -249,6 +250,11 @@
         /// Gets or sets FolderNameDist. For example: "Application.Website/LayoutDefault/dist". Content of this folder will be copied to "Application.Server/Framework/Application.Website/Master01".
         /// </summary>
         public string FolderNameDist { get; set; }
+
+        /// <summary>
+        /// Gets or sets FolderNameAngular. This is the Angular folder. The following commands are executed: "npm install", "npm run build:ssr". 
+        /// </summary>
+        public string FolderNameAngular { get; set; }
 
         /// <summary>
         /// Gets DomainNameList. Domains mapped to this layout website.

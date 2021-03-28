@@ -177,6 +177,11 @@
         /// </summary>
         public string FolderNameDist { get; set; }
 
+        /// <summary>
+        /// Gets or sets FolderNameAngular. This is the FolderName when running on the server.
+        /// </summary>
+        public string FolderNameAngular { get; set; }
+
         public List<ConfigServerWebsiteDomain> DomainNameList { get; set; }
     }
 
