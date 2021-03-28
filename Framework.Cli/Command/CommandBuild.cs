@@ -3,6 +3,7 @@
     using Framework.Cli.Config;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
@@ -111,6 +112,21 @@
         }
 
         /// <summary>
+        /// Execute npm build command.
+        /// </summary>
+        private static void BuildWebsiteAngular(ConfigCliWebsite website)
+        {
+            string folderNameAngular = UtilFramework.StringNull(UtilFramework.FolderNameParse(website.FolderNameAngular));
+            if (folderNameAngular != null)
+            {
+                string folderName = UtilFramework.FolderName + folderNameAngular;
+
+                UtilCli.Npm(folderName, "install --loglevel error"); // --loglevel error prevent writing to STDERR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
+                UtilCli.Npm(folderName, "run build:ssr");
+            }
+        }
+
+        /// <summary>
         /// Build all layout Websites. For example: "Application.Website/LayoutDefault"
         /// </summary>
         private void BuildWebsite()
@@ -127,6 +143,11 @@
 
             foreach (var website in configCli.WebsiteList)
             {
+                if (UtilFramework.StringNull(website.FolderNameAngular) == null)
+                {
+                    continue;
+                }
+
                 Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
                 
                 // Delete dist folder
@@ -168,6 +189,44 @@
                 UtilFramework.Assert(UtilCli.FolderNameExist(folderNameDest));
 
                 Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
+            }
+        }
+
+        /// <summary>
+        /// Build all Angular Websites. For example: "Application.Angular/LayoutBootstrap"
+        /// </summary>
+        private void BuildWebsiteAngular()
+        {
+            var configCli = ConfigCli.Load();
+
+            string folderNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Angular/";
+            UtilCli.FolderDelete(folderNameServer);
+
+            var folderNameAngularList = new List<string>();
+            foreach (var website in configCli.WebsiteList)
+            {
+                var folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
+                if (folderNameAngular != null && !folderNameAngularList.Contains(folderNameAngular.ToLower()))
+                {
+                    folderNameAngularList.Add(folderNameAngular.ToLower());
+                    Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
+
+                    folderNameServer = UtilFramework.FolderNameParse("Application.Server/Framework/" + folderNameAngular);
+                    UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Angular/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Angular/'!");
+
+                    // Delete dist folder
+                    string folderNameDist = UtilFramework.FolderName + folderNameAngular + "dist/";
+                    UtilCli.FolderDelete(folderNameDist);
+
+                    // npm build
+                    BuildWebsiteAngular(website);
+
+                    // Copy to server
+                    UtilCli.FolderCreate(UtilFramework.FolderName + folderNameServer);
+                    UtilCli.FolderCopy(folderNameDist + "application/", UtilFramework.FolderName + folderNameServer);
+
+                    Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
+                }
             }
         }
 
@@ -234,6 +293,7 @@
 
             // Build layout Website(s) (npm) includes for example Bootstrap
             BuildWebsite(); // Has to be before dotnet publish! It will copy site to publish/Framework/Application.Website/
+            BuildWebsiteAngular();
 
             // Version tag and build Build Angular and .NET Core server.
             UtilCli.VersionBuild(() => {
