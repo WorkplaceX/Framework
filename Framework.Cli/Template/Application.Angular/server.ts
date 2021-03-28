@@ -11,6 +11,9 @@ import { existsSync } from 'fs';
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
+
+  server.use(express.json()); // Framework: Enable SSR POST 
+
   const distFolder = join(process.cwd(), 'dist/application/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
@@ -31,7 +34,22 @@ export function app(): express.Express {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-    res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
+    res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+  });
+
+  // Framework: Enable SSR POST
+  server.post('*', (req, res) => {
+    res.render(indexHtml,     
+      {
+        req: req,
+        res: res,
+        providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
+          {
+            provide: 'jsonServerSideRendering', useValue: (req.body) // Needs server.use(express.json());
+          }
+        ]
+      },
+    );
   });
 
   return server;

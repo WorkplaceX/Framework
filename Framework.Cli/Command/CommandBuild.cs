@@ -143,7 +143,7 @@
 
             foreach (var website in configCli.WebsiteList)
             {
-                if (UtilFramework.StringNull(website.FolderNameAngular) == null)
+                if (UtilFramework.StringNull(website.FolderNameAngular) != null)
                 {
                     continue;
                 }
@@ -222,8 +222,9 @@
                     BuildWebsiteAngular(website);
 
                     // Copy to server
-                    UtilCli.FolderCreate(UtilFramework.FolderName + folderNameServer);
-                    UtilCli.FolderCopy(folderNameDist + "application/", UtilFramework.FolderName + folderNameServer);
+                    string folderNameDest = UtilFramework.FolderName + folderNameServer + "dist/application/";
+                    UtilCli.FolderCreate(folderNameDest);
+                    UtilCli.FolderCopy(folderNameDist + "application/", folderNameDest);
 
                     Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
                 }

@@ -1,5 +1,6 @@
 ﻿namespace Framework.Server
 {
+    using Framework.Config;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -176,6 +177,48 @@
 
             // Start node with Application.Server/Framework/Framework.Angular/server/main.js
             Process.Start(info);
+
+            StartUniversalServerAngular();
+        }
+
+        /// <summary>
+        /// Start one universal server for every website.
+        /// </summary>
+        public static void StartUniversalServerAngular()
+        {
+            var configServer = ConfigServer.Load();
+            int count = 0;
+            foreach (var website in configServer.WebsiteList)
+            {
+                string folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
+                if (folderNameAngular != null)
+                {
+                    string fileNameServer = UtilFramework.FolderName + folderNameAngular + "dist/application/server/main.js";
+                    if (!File.Exists(fileNameServer))
+                    {
+                        throw new Exception(string.Format("File does not exis! Make sure cli build command did run. ({0})", fileNameServer));
+                    }
+
+                    ProcessStartInfo info = new ProcessStartInfo
+                    {
+                        WorkingDirectory = UtilFramework.FolderName + folderNameAngular,
+                        FileName = "node.exe"
+                    };
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        info.FileName = "node";
+                    }
+                    info.Arguments = UtilFramework.FolderName + folderNameAngular + "dist/application/server/main.js";
+                    info.UseShellExecute = true; // Open additional node window.
+                    info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
+
+                    Environment.SetEnvironmentVariable("PORT", (4000 + count + 1).ToString());
+
+                    // Start node with Application.Server/Framework/Application.Angular/dist/server/main.js
+                    Process.Start(info);
+                }
+                count += 1;
+            }
         }
 
         /// <summary>
