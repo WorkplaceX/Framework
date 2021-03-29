@@ -1,0 +1,14 @@
+// Your variable overrides (Bootstrap)
+$body-color: #888;
+$enable-rounded: false;
+$enable-shadows: true;
+$enable-gradients: true;
+$enable-responsive-font-sizes: true;
+
+@import "~bootstrap/scss/bootstrap";
+
+@import "frameworkStyle.scss";
+
+td {
+    padding: 0;
+}
