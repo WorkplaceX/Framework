@@ -199,7 +199,7 @@
                 if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular != null))
                 {
                     url = context.Request.IsHttps ? "https://" : "http://";
-                    url += context.Request.Host.ToUriComponent() + "/Framework/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngular) + "server/main.js"; // Url of server side rendering when running on IIS Server
+                    url += context.Request.Host.ToUriComponent() + "/Framework/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
                 }
             }
             else
@@ -210,8 +210,7 @@
                 // See also method StartUniversalServerAngular();
                 if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular != null))
                 {
-                    int webSiteIndex = appSelector.ConfigServer.WebsiteList.IndexOf(appSelector.Website);
-                    url = "http://localhost:" + (4000 + 1 + webSiteIndex).ToString() + "/"; // Url of server side rendering when running in Visual Studio
+                    url = "http://localhost:" + (appSelector.Website.FolderNameAngularPort).ToString() + "/"; // Url of server side rendering when running in Visual Studio
                 }
             }
 

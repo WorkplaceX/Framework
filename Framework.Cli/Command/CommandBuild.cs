@@ -211,9 +211,6 @@
                     folderNameAngularList.Add(folderNameAngular.ToLower());
                     Console.WriteLine(string.Format("### Build Website (Begin) - {0}", website.DomainNameListToString()));
 
-                    folderNameServer = UtilFramework.FolderNameParse("Application.Server/Framework/" + folderNameAngular);
-                    UtilFramework.Assert(folderNameServer.StartsWith("Application.Server/Framework/Application.Angular/"), "FolderNameServer has to start with 'Application.Server/Framework/Application.Angular/'!");
-
                     // Delete dist folder
                     string folderNameDist = UtilFramework.FolderName + folderNameAngular + "dist/";
                     UtilCli.FolderDelete(folderNameDist);
@@ -222,7 +219,7 @@
                     BuildWebsiteAngular(website);
 
                     // Copy to server
-                    string folderNameDest = UtilFramework.FolderName + folderNameServer;
+                    string folderNameDest = folderNameServer + website.FolderNameAngularWebsite;
                     UtilCli.FolderCreate(folderNameDest);
                     UtilCli.FolderCopy(folderNameDist + "application/", folderNameDest);
 

@@ -134,11 +134,28 @@
             {
                 result.ExternalList = new List<ConfigCliExternal>();
             }
+            
+            var folderNameAngularList = new Dictionary<string, int>();
+            int folderNameAngularIndex = 0;
             foreach (var website in result.WebsiteList)
             {
+                // Init DomainNameList
                 if (website.DomainNameList == null)
                 {
                     website.DomainNameList = new List<ConfigCliWebsiteDomain>();
+                }
+
+                // Init FolderNameAngularIndex
+                var folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
+                if (folderNameAngularList.ContainsKey(folderNameAngular) == false)
+                {
+                    website.FolderNameAngularIndex = folderNameAngularIndex;
+                    folderNameAngularIndex += 1;
+                }
+                else
+                {
+                    website.FolderNameAngularIsDuplicate = true;
+                    website.FolderNameAngularIndex = folderNameAngularList[folderNameAngular];
                 }
             }
             return result;
@@ -255,6 +272,21 @@
         /// Gets or sets FolderNameAngular. This is the Angular folder. The following commands are executed: "npm install", "npm run build:ssr". 
         /// </summary>
         public string FolderNameAngular { get; set; }
+
+        /// <summary>
+        /// Gets or sets FolderNameAngularIndex. Two websites with same FolderNameAngular get same index.
+        /// </summary>
+        internal int? FolderNameAngularIndex { get; set; }
+
+        /// <summary>
+        /// Gets FolderNameAngularWebsite. For example Website01.
+        /// </summary>
+        internal string FolderNameAngularWebsite => string.Format("Website{0:00}/", FolderNameAngularIndex.GetValueOrDefault() + 1);
+
+        /// <summary>
+        /// Gets or sets FolderNameAngularIsDuplicate. True, if another website has the same FolderNameAngular.
+        /// </summary>
+        internal bool FolderNameAngularIsDuplicate { get; set; }
 
         /// <summary>
         /// Gets DomainNameList. Domains mapped to this layout website.
