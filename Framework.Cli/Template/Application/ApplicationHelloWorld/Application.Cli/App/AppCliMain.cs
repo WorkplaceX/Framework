@@ -32,8 +32,7 @@
             configCli.WebsiteList.Add(new ConfigCliWebsite()
             {
                 DomainNameList = new List<ConfigCliWebsiteDomain>(new ConfigCliWebsiteDomain[] { new ConfigCliWebsiteDomain { EnvironmentName = "DEV", DomainName = "localhost", AppTypeName = appTypeName } }),
-                FolderNameNpmBuild = "Application.Website/LayoutBulma/",
-                FolderNameDist = "Application.Website/LayoutBulma/dist/",
+                FolderNameAngular = "Application.Website/",
             });
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

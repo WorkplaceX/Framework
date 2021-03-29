@@ -27,7 +27,7 @@ namespace Framework.Cli.Command
             Uri baseUri = new Uri(typeof(CommandNewProject).Assembly.Location);
             string folderNameFramework = new Uri(baseUri, "../../../../").AbsolutePath;
 
-            string folderNameApplicationHelloWorld = folderNameFramework + "Framework.Cli/Template/ApplicationHelloWorld/";
+            string folderNameApplicationHelloWorld = folderNameFramework + "Framework.Cli/Template/Application/ApplicationHelloWorld/";
 
             string folderNameSource = folderNameApplicationHelloWorld;
             string folderNameDest = Directory.GetCurrentDirectory().Replace(@"\", "/") + "/";
