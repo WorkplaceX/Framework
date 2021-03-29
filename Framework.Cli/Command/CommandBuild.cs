@@ -122,7 +122,7 @@
                 string folderName = UtilFramework.FolderName + folderNameAngular;
 
                 UtilCli.Npm(folderName, "install --loglevel error"); // --loglevel error prevent writing to STDERR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
-                UtilCli.Npm(folderName, "run build:ssr");
+                UtilCli.Npm(folderName, "run build:ssr", isRedirectStdErr: true); // Build Server-side Rendering (SSR) to folder Framework/Framework.Angular/application/server/dist/ // TODO Bug report Angular build writes to stderr. Repo steps: Delete node_modules and run npm install and then run build:ssr.
             }
         }
 
