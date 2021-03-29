@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
 
-Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Linux and Windows. Provides CI/CD pipeline.
+Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Windows and Linux. Provides CI/CD pipeline.
 
 Project page: [WorkplaceX.org](http://workplacex.org)
 
@@ -14,22 +14,22 @@ Prerequisites for Linux and Windows
 * [.NET Core SDK](https://dotnet.microsoft.com/download) (Version 5.0)
 * [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express)
 
-Create new project in empty folder (for Windows use ./cli.cmd instead of /.cli.sh)
-```sh
+Create new project in empty folder (for Linux use ./cli.sh instead of /.cli.cmd)
+```cmd
 # Install WorkplaceX cli into an empty folder
 npx workplacex-cli new
 
 # Build everything
-./cli.sh build
+./cli.cmd build
 
 # Set database connection
-./cli.sh config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;"
+./cli.cmd config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;"
 
 # Deploy database
-./cli.sh deploy
+./cli.cmd deployDb
 
 # Start application
-./cli.sh start
+./cli.cmd start
 
 # Open browser to http://localhost:5000/
 
