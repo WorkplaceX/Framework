@@ -67,7 +67,7 @@
         }
 
         /// <summary>
-        /// Build all Angular Websites. For example: "Application.Angular/LayoutBootstrap"
+        /// Build all Angular Websites. For example: "Application.Angular/"
         /// </summary>
         private void BuildWebsiteAngular()
         {
