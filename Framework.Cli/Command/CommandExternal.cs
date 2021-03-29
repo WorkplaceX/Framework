@@ -42,14 +42,9 @@
             Console.WriteLine("Delete dest folder CliDatabase/");
             UtilCli.FolderDelete(args.CliDatabaseDestFolderName);
 
-
             // Copy folder CliDeployDb/
             Console.WriteLine("Delete dest folder CliDeployDb/");
             UtilCli.FolderDelete(args.CliDeployDbDestFolderName);
-
-            // Copy folder Application.Website/
-            Console.WriteLine("Delete dest folder Application.Website/");
-            UtilCli.FolderDelete(args.WebsiteDestFolderName);
         }
 
         private void ExecuteCopy()
@@ -86,10 +81,6 @@
             // Copy folder CliDeployDb/
             Console.WriteLine("Copy folder CliDeployDb/");
             args.FolderCopy(args.CliDeployDbSourceFolderName, args.CliDeployDbDestFolderName);
-
-            // Copy folder Application.Website/
-            Console.WriteLine("Copy folder Application.Website/");
-            args.FolderCopy(args.WebsiteSourceFolderName, args.WebsiteDestFolderName);
 
             AppCli.CommandExternal(args);
         }

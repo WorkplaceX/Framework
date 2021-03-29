@@ -902,16 +902,6 @@
             internal string DatabaseDestFolderName { get; set; }
 
             /// <summary>
-            /// Gets WebsiteSourceFolderName. This is folder ExternalGit/ProjectName/Application.Website/
-            /// </summary>
-            public string WebsiteSourceFolderName { get; internal set;  }
-
-            /// <summary>
-            /// Gets WebsiteDestFolderName. This is folder Application.Website/ExternalGit/ProjectName/
-            /// </summary>
-            internal string WebsiteDestFolderName { get; set; }
-
-            /// <summary>
             /// Gets CliAppSourceFolderName. This is folder Application.Cli/App/
             /// </summary>
             internal string CliAppSourceFolderName { get; set; }

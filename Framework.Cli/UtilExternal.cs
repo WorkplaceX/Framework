@@ -152,10 +152,6 @@ namespace Framework.Cli
             string databaseSourceFolderName = UtilFramework.FolderName + "Application.Database/Database/";
             string databaseDestFolderName = UtilExternal.FolderNameExternal + "Application.Database/Database/" + externalGitProjectNamePath;
 
-            // Application.Website/
-            string websiteSourceFolderName = UtilFramework.FolderName + "Application.Website/";
-            string websiteDestFolderName = UtilExternal.FolderNameExternal + "Application.Website/" + externalGitProjectNamePath;
-
             // Application.Cli/App/
             string cliAppSourceFolderName = UtilFramework.FolderName + "Application.Cli/App/";
             string cliAppDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/App/" + externalGitProjectNamePath;
@@ -174,8 +170,6 @@ namespace Framework.Cli
                 AppDestFolderName = appDestFolderName,
                 DatabaseSourceFolderName = databaseSourceFolderName,
                 DatabaseDestFolderName = databaseDestFolderName,
-                WebsiteSourceFolderName = websiteSourceFolderName,
-                WebsiteDestFolderName = websiteDestFolderName,
                 CliAppSourceFolderName = cliAppSourceFolderName,
                 CliAppDestFolderName = cliAppDestFolderName,
                 CliDatabaseSourceFolderName = cliDatabaseSourceFolderName,
