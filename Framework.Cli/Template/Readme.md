@@ -1,3 +1,3 @@
 # Cli Templates
-* Application.Website (Bootstrap, Bulma)
+* Application.Website (Angular for Bootstrap, Bulma)
 * ApplicationHelloWorld (Getting started app)
