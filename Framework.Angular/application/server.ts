@@ -8,27 +8,29 @@ import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 
-import * as url from 'url'; // Framework: Enable SSR POST
-import * as querystring from 'querystring'; // Framework: Enable SSR POST
-import * as bodyParser from 'body-parser'; // Framework: Enable SSR POST
-
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
 
-  server.use(bodyParser.json()); // Framework: Enable SSR POST 
+  server.use(express.json()); // Framework: Enable SSR POST 
 
   var distFolder = join(process.cwd(), 'dist/application/browser');
 
-  // Framework: Enable SSR POST  
-  // Running in Visual Studio
-  const processCwd = process.cwd().split("\\").join("/"); // Rplace all
-  if (processCwd.endsWith("Application.Server/Framework")) {
-    distFolder = ".";
-  } // Running on IIS
-  if (processCwd.endsWith("Framework/Framework.Angular/server")) {
-    distFolder = "../../"
-  }  
+  // Framework: Enable SSR POST
+  var mode = "Console";
+  var folderName = join(process.cwd(), '../').split("\\").join("/"); // Rplace all
+  if (folderName.endsWith("Application.Server/Framework/Application.Angular/")) {
+    // Running in Visual Studio
+    mode = "Visual Studio"
+    distFolder = join(process.cwd(), '../browser/');
+  } else {
+    folderName = join(process.cwd(), '../../').split("\\").join("/"); // Rplace all
+    if (folderName.endsWith("Framework/Application.Angular/")) {
+      // Running on IIS
+      mode = "IIS";
+      distFolder = join(process.cwd(), '../browser/');
+    }
+  }
 
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
@@ -49,25 +51,32 @@ export function app(): express.Express {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-	  res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+    // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+    res.send(
+      "<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2>" + 
+      "<p>" + 
+      "mode=" + mode + ";<br />" +
+      "cwd=" + process.cwd() + ";<br />" + 
+      "distFolder=" + distFolder + ";<br />" + 
+      "</p>"
+      ); 
   });
 
   // Framework: Enable SSR POST
   server.post('*', (req, res) => {
-    let view = querystring.parse(url.parse(req.originalUrl).query || "").view as string;
-    console.log("View=", view);
-    res.render(view,     
+    console.log("Render (SSR)");
+    res.render(indexHtml,     
       {
         req: req,
         res: res,
         providers: [ // See also: https://github.com/Angular-RU/angular-universal-starter/blob/master/server.ts
           {
-            provide: 'jsonServerSideRendering', useValue: (req.body) // Needs app.use(bodyParser.json());
+            provide: 'jsonServerSideRendering', useValue: (req.body) // Needs server.use(express.json());
           }
         ]
       },
     );
-  });  
+  });
 
   return server;
 }

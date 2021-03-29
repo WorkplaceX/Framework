@@ -14,7 +14,24 @@ export function app(): express.Express {
 
   server.use(express.json()); // Framework: Enable SSR POST 
 
-  const distFolder = join(process.cwd(), 'dist/application/browser');
+  var distFolder = join(process.cwd(), 'dist/application/browser');
+
+  // Framework: Enable SSR POST
+  var mode = "Console";
+  var folderName = join(process.cwd(), '../').split("\\").join("/"); // Rplace all
+  if (folderName.endsWith("Application.Server/Framework/Application.Angular/")) {
+    // Running in Visual Studio
+    mode = "Visual Studio"
+    distFolder = join(process.cwd(), '../browser/');
+  } else {
+    folderName = join(process.cwd(), '../../').split("\\").join("/"); // Rplace all
+    if (folderName.endsWith("Framework/Application.Angular/")) {
+      // Running on IIS
+      mode = "IIS";
+      distFolder = join(process.cwd(), '../browser/');
+    }
+  }
+
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -34,11 +51,20 @@ export function app(): express.Express {
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-    res.send("<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2><p>(cwd=" + process.cwd() + "; distFolder=" + distFolder + ";)</p>"); // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+    // res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] }); // Framework: Enable SSR POST
+    res.send(
+      "<h1>Angular Universal Server Side Rendering</h1><h2>Converts json to html. Use POST method.</h2>" + 
+      "<p>" + 
+      "mode=" + mode + ";<br />" +
+      "cwd=" + process.cwd() + ";<br />" + 
+      "distFolder=" + distFolder + ";<br />" + 
+      "</p>"
+      ); 
   });
 
   // Framework: Enable SSR POST
   server.post('*', (req, res) => {
+    console.log("Render (SSR)");
     res.render(indexHtml,     
       {
         req: req,

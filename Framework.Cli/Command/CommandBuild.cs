@@ -222,7 +222,7 @@
                     BuildWebsiteAngular(website);
 
                     // Copy to server
-                    string folderNameDest = UtilFramework.FolderName + folderNameServer + "dist/application/";
+                    string folderNameDest = UtilFramework.FolderName + folderNameServer;
                     UtilCli.FolderCreate(folderNameDest);
                     UtilCli.FolderCopy(folderNameDist + "application/", folderNameDest);
 

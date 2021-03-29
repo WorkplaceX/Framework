@@ -1,5 +1,6 @@
 ﻿namespace Framework.Config
 {
+    using Framework.App;
     using Framework.DataAccessLayer;
     using Framework.Server;
     using Microsoft.Extensions.Configuration;
@@ -164,11 +165,18 @@
         /// <summary>
         /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/LayoutDefault/dist/".
         /// </summary>
-        public string FolderNameServerGet(ConfigServer configServer, string prefixRemove)
+        public string FolderNameServerGet(AppSelector appSelector, string prefixRemove)
         {
             string result = "Application.Server/Framework/" + FolderNameDist;
             UtilFramework.Assert(result.StartsWith(prefixRemove));
             result = result.Substring(prefixRemove.Length);
+
+            if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular) != null)
+            {
+                result = "Application.Server/Framework/" + appSelector.Website.FolderNameAngular + "browser/";
+                result = result.Substring(prefixRemove.Length);
+            }
+
             return result;
         }
 

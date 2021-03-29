@@ -90,7 +90,7 @@
             bool result = false;
 
             // FolderNameServer
-            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/");
+            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/");
 
             // FolderName
             string folderName = UtilServer.FolderNameContentRoot() + folderNameServer;
@@ -195,18 +195,31 @@
                 // Running on IIS Server.
                 url = context.Request.IsHttps ? "https://" : "http://";
                 url += context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server/main.js"; // Url of server side rendering when running on IIS Server
+                
+                if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular != null))
+                {
+                    url = context.Request.IsHttps ? "https://" : "http://";
+                    url += context.Request.Host.ToUriComponent() + "/Framework/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngular) + "server/main.js"; // Url of server side rendering when running on IIS Server
+                }
             }
             else
             {
                 // Running in Visual Studio.
                 url = "http://localhost:4000/"; // Url of server side rendering when running in Visual Studio
+
+                // See also method StartUniversalServerAngular();
+                if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular != null))
+                {
+                    int webSiteIndex = appSelector.ConfigServer.WebsiteList.IndexOf(appSelector.Website);
+                    url = "http://localhost:" + (4000 + 1 + webSiteIndex).ToString() + "/"; // Url of server side rendering when running in Visual Studio
+                }
             }
 
             // Process AppJson
             string jsonClient = await appSelector.ProcessAsync(context, appJson); // Process (For first server side rendering)
 
             // Server side rendering POST.
-            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/Framework/");
+            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/Framework/");
 
             string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
             serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
@@ -222,7 +235,7 @@
             else
             {
                 // index.html serve directly
-                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/"), "/index.html");
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/"), "/index.html");
                 indexHtml = UtilFramework.FileLoad(fileName);
             }
 
@@ -232,10 +245,13 @@
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace); // Send jsonBrowser with index.html to client for both SSR and not SSR.
 
             // Add Angular scripts
-            scriptFind = "</body></html>";
-            scriptReplace = "<script src=\"runtime.js\" defer></script><script src=\"polyfills.js\" defer></script><script src=\"main.js\" defer></script>" +
-                "</body></html>";
-            indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
+            if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular == null))
+            {
+                scriptFind = "</body></html>";
+                scriptReplace = "<script src=\"runtime.js\" defer></script><script src=\"polyfills.js\" defer></script><script src=\"main.js\" defer></script>" +
+                    "</body></html>";
+                indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
+            }
 
             return indexHtml;
         }
@@ -249,7 +265,7 @@
             if (UtilServer.NavigatePathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector.ConfigServer, "Application.Server/"), path);
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/"), path);
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

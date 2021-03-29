@@ -193,7 +193,7 @@
                 string folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
                 if (folderNameAngular != null)
                 {
-                    string fileNameServer = UtilFramework.FolderName + folderNameAngular + "dist/application/server/main.js";
+                    string fileNameServer = UtilFramework.FolderName + "Application.Server/Framework/" + folderNameAngular + "server/main.js";
                     if (!File.Exists(fileNameServer))
                     {
                         throw new Exception(string.Format("File does not exis! Make sure cli build command did run. ({0})", fileNameServer));
@@ -201,14 +201,14 @@
 
                     ProcessStartInfo info = new ProcessStartInfo
                     {
-                        WorkingDirectory = UtilFramework.FolderName + folderNameAngular,
+                        WorkingDirectory = UtilFramework.FolderName + "Application.Server/Framework/" + folderNameAngular + "server/",
                         FileName = "node.exe"
                     };
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {
                         info.FileName = "node";
                     }
-                    info.Arguments = UtilFramework.FolderName + folderNameAngular + "dist/application/server/main.js";
+                    info.Arguments = fileNameServer;
                     info.UseShellExecute = true; // Open additional node window.
                     info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
 
