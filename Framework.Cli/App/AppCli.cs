@@ -942,11 +942,6 @@
             internal string CliDeployDbDestFolderName { get; set; }
 
             /// <summary>
-            /// Gets WebsiteAngularDestFolderName. This is Angular folder Framework/Framework.Angular/application/src/Application.Website/
-            /// </summary>
-            public string WebsiteAngularDestFolderName { get; internal set; }
-
-            /// <summary>
             /// Gets ExternalProjectName. See also file ConfigCli.json of host cli.
             /// </summary>
             internal string ExternalProjectName { get; set; }

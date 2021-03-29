@@ -57,35 +57,10 @@
                 UtilCli.ConsoleWriteLineColor(string.Format("Warning! Type not found! ({0})", appTypeName), ConsoleColor.Yellow); // Warning
             }
 
-            // Input FolderName
-            Console.WriteLine("Enter npm build folder name. Or empty if no build. For example: 'Application.Website/LayoutDefault/'. In this folder ci calls npm install; npm build;");
-            Console.Write(">");
-            string folderNameNpmBuild = Console.ReadLine();
-            folderNameNpmBuild = UtilFramework.FolderNameParse(folderNameNpmBuild);
-
-            string folderNameNpmBuildCheck = UtilFramework.FolderName + folderNameNpmBuild;
-            if (!Directory.Exists(folderNameNpmBuildCheck))
-            {
-                UtilCli.ConsoleWriteLineColor(string.Format("Warning! Folder does not exist! ({0})", folderNameNpmBuild), ConsoleColor.Yellow); // Warning
-            }
-
-            // Input FolderNameDist
-            Console.WriteLine("Enter dist folder name. For example 'Application.Website/LayoutDefault/dist/'. Content of this folder is copied to FolderNameServer");
-            Console.Write(">");
-            string folderNameDist = Console.ReadLine();
-            folderNameDist = UtilFramework.FolderNameParse(folderNameDist);
-            string folderNameDistCheck = UtilFramework.FolderName + folderNameDist;
-            if (!Directory.Exists(folderNameDistCheck))
-            {
-                UtilCli.ConsoleWriteLineColor(string.Format("Warning! Folder does not exist! ({0})", folderNameDist), ConsoleColor.Yellow); // Warning
-            }
-
             // Add Website
             ConfigCliWebsite website = new ConfigCliWebsite();
             website.DomainNameList = new List<ConfigCliWebsiteDomain>();
             website.DomainNameList.Add(new ConfigCliWebsiteDomain() { EnvironmentName = configCli.EnvironmentNameGet(), DomainName = domainName, AppTypeName = appTypeName });
-            website.FolderNameNpmBuild = folderNameNpmBuild;
-            website.FolderNameDist = folderNameDist;
 
             configCli.WebsiteList.Add(website);
 

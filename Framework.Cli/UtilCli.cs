@@ -349,21 +349,21 @@
             // Read UtilFramework.cs
             string fileNameServer = UtilFramework.FolderName + "Framework/Framework/UtilFramework.cs";
             string textServer = UtilFramework.FileLoad(fileNameServer);
-            string fileNameClient = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/app/data.service.ts";
-            string textClient = UtilFramework.FileLoad(fileNameClient);
+            // string fileNameClient = UtilFramework.FolderName + "Framework/Framework.Angular/application/src/app/data.service.ts"; // TODO Tag all Angular sites.
+            // string textClient = UtilFramework.FileLoad(fileNameClient);
 
             string versionBuild = string.Format("Build (WorkplaceX={3}; Commit={0}; Pc={1}; Time={2} (UTC);)", UtilCli.GitCommit(), System.Environment.MachineName, UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime()), UtilFramework.Version);
 
             string findServer = "/* VersionBuild */"; // See also: method CommandBuild.Execute(); and method CommandStart.Execute();
             string replaceServer = string.Format("                return \"{0}\"; /* VersionBuild */", versionBuild);
-            string findClient = "/* VersionBuild */"; // See also: file data.service.ts
-            string replaceClient = string.Format("  public VersionBuild: string = \"{0}\"; /* VersionBuild */", versionBuild);
+            // string findClient = "/* VersionBuild */"; // See also: file data.service.ts
+            // string replaceClient = string.Format("  public VersionBuild: string = \"{0}\"; /* VersionBuild */", versionBuild);
 
             // Write UtilFramework.cs
             string textNewServer = UtilFramework.ReplaceLine(textServer, findServer, replaceServer);
             File.WriteAllText(fileNameServer, textNewServer);
-            string textNewClient = UtilFramework.ReplaceLine(textClient, findClient, replaceClient);
-            File.WriteAllText(fileNameClient, textNewClient);
+            // string textNewClient = UtilFramework.ReplaceLine(textClient, findClient, replaceClient);
+            // File.WriteAllText(fileNameClient, textNewClient);
 
             try
             {
@@ -372,7 +372,7 @@
             finally
             {
                 File.WriteAllText(fileNameServer, textServer); // Back to original text.
-                File.WriteAllText(fileNameClient, textClient); // Back to original text.
+                // File.WriteAllText(fileNameClient, textClient); // Back to original text.
             }
         }
 

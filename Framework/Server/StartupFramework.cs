@@ -38,7 +38,7 @@
                 // Running in Visual Studio environment.
                 if (configServer.IsServerSideRendering)
                 {
-                    UtilServer.StartUniversalServer();
+                    UtilServer.StartUniversalServerAngular();
                 }
             }
 

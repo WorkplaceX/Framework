@@ -3047,7 +3047,6 @@
 
     /// <summary>
     /// Custom component. For example footer component.
-    /// See also file: Application.Website/Shared/CustomComponent/custom01.component.ts
     /// </summary>
     public class Custom01 : ComponentJson
     {

@@ -36,11 +36,11 @@ namespace Framework
                 // npm --version
                 // 6.14.4
 
-                // npm run ng -- --version (Framework/Framework.Angular/application/)
+                // npm run ng -- --version (Application.Angular/)
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.49.25";
+                return "v3.50.0";
             }
         }
 

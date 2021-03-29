@@ -168,9 +168,6 @@ namespace Framework.Cli
             string cliDeployDbSourceFolderName = UtilFramework.FolderName + "Application.Cli/DeployDb/";
             string cliDeployDbDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
 
-            // Angular
-            string websiteAngularDestFolderName = UtilExternal.FolderNameExternal + "Framework/Framework.Angular/application/src/Application.Website/";
-
             var result = new ExternalArgs
             {
                 AppSourceFolderName = appSourceFolderName,
@@ -185,7 +182,6 @@ namespace Framework.Cli
                 CliDatabaseDestFolderName = cliDatabaseDestFolderName,
                 CliDeployDbSourceFolderName = cliDeployDbSourceFolderName,
                 CliDeployDbDestFolderName = cliDeployDbDestFolderName,
-                WebsiteAngularDestFolderName = websiteAngularDestFolderName,
                 ExternalProjectName = UtilExternal.ExternalProjectName(),
             };
 

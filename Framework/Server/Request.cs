@@ -34,20 +34,16 @@
                 // POST app.json
                 if (!await Post(context, path, appSelector))
                 {
-                    // GET index.html from "Application.Server/Framework/Application.Website/" (With server side rendering or serve index.html directly)
+                    // GET index.html from "Application.Server/Framework/Application.Angular/Website01/browser/" (With server side rendering or serve index.html directly)
                     if (!await WebsiteServerSideRenderingAsync(context, path, appSelector, null))
                     {
-                        // GET file from "Application.Server/Framework/Application.Website/"
+                        // GET file from "Application.Server/Framework/Application.Angular/Website01/browser/"
                         if (!await WebsiteFileAsync(context, path, appSelector))
                         {
-                            // GET Angular file from "Application.Server/Framework/Framework.Angular/browser"
-                            if (!await AngularBrowserFileAsync(context, path))
+                            // GET file from database or navigate to subpage.
+                            if (!await FileDownloadAsync(context, path, appSelector))
                             {
-                                // GET file from database or navigate to subpage.
-                                if (!await FileDownloadAsync(context, path, appSelector))
-                                {
-                                    context.Response.StatusCode = StatusCodes.Status404NotFound;
-                                }
+                                context.Response.StatusCode = StatusCodes.Status404NotFound;
                             }
                         }
                     }
@@ -83,7 +79,7 @@
         }
 
         /// <summary>
-        /// Divert request to "Application.Server/Framework/Application.Website/"
+        /// Divert request to "Application.Server/Framework/Application.Angular/Website01/browser/"
         /// </summary>
         private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string navigatePath, AppSelector appSelector, AppJson appJson)
         {
@@ -194,42 +190,23 @@
             {
                 // Running on IIS Server.
                 url = context.Request.IsHttps ? "https://" : "http://";
-                url += context.Request.Host.ToUriComponent() + "/Framework/Framework.Angular/server/main.js"; // Url of server side rendering when running on IIS Server
-                
-                if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular != null))
-                {
-                    url = context.Request.IsHttps ? "https://" : "http://";
-                    url += context.Request.Host.ToUriComponent() + "/Framework/Application.Angular/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
-                }
+                url += context.Request.Host.ToUriComponent() + "/Framework/Application.Angular/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
             }
             else
             {
-                // Running in Visual Studio.
-                url = "http://localhost:4000/"; // Url of server side rendering when running in Visual Studio
-
-                // See also method StartUniversalServerAngular();
-                if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular != null))
-                {
-                    url = "http://localhost:" + (appSelector.Website.FolderNameAngularPort).ToString() + "/"; // Url of server side rendering when running in Visual Studio
-                }
+                // Running in Visual Studio. See also method StartUniversalServerAngular();
+                url = "http://localhost:" + (appSelector.Website.FolderNameAngularPort).ToString() + "/"; // Url of server side rendering when running in Visual Studio
             }
 
             // Process AppJson
             string jsonClient = await appSelector.ProcessAsync(context, appJson); // Process (For first server side rendering)
-
-            // Server side rendering POST.
-            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/Framework/");
-
-            string serverSideRenderView = UtilFramework.FolderNameParse(folderNameServer, "/index.html");
-            serverSideRenderView = HttpUtility.UrlEncode(serverSideRenderView);
-            url += "?view=" + serverSideRenderView;
 
             bool isServerSideRendering = ConfigServer.Load().IsServerSideRendering;
             string indexHtml;
             if (isServerSideRendering)
             {
                 // index.html server side rendering
-                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:5000/Framework/Framework.Angular/server.js?view=Application.Website%2fDefault%2findex.html
+                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:8080/Framework/Application.Angular/Website01/server/main.js
             }
             else
             {
@@ -243,20 +220,11 @@
             string scriptReplace = "</app-root><script>var jsonBrowser = " + jsonClient + "</script>";
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace); // Send jsonBrowser with index.html to client for both SSR and not SSR.
 
-            // Add Angular scripts
-            if (UtilFramework.StringNull(appSelector.Website.FolderNameAngular == null))
-            {
-                scriptFind = "</body></html>";
-                scriptReplace = "<script src=\"runtime.js\" defer></script><script src=\"polyfills.js\" defer></script><script src=\"main.js\" defer></script>" +
-                    "</body></html>";
-                indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace);
-            }
-
             return indexHtml;
         }
 
         /// <summary>
-        /// Returns true, if file found in folder "Application.Server/Framework/Application.Website/"
+        /// Returns true, if file found in folder "Application.Server/Framework/Application.Angular/Website01/browser/"
         /// </summary>
         private async Task<bool> WebsiteFileAsync(HttpContext context, string path, AppSelector appSelector)
         {
@@ -273,28 +241,6 @@
                 }
             }
             return result;
-        }
-
-        /// <summary>
-        /// Returns true, if file found in folder "Application.Server/Framework/Framework.Angular/browser".
-        /// </summary>
-        private async Task<bool> AngularBrowserFileAsync(HttpContext context, string path)
-        {
-            // Fallback Application.Server/Framework/Framework.Angular/browser
-            if (UtilServer.NavigatePathIsFileName(path))
-            {
-                // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + "Framework/Framework.Angular/browser" + path;
-
-                if (File.Exists(fileName))
-                {
-                    context.Response.ContentType = UtilServer.ContentType(fileName);
-                    await context.Response.SendFileAsync(fileName);
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

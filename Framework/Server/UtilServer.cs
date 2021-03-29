@@ -146,46 +146,16 @@
         }
 
         /// <summary>
-        /// Start Universal server.
+        /// Start one universal server for every website.
         /// </summary>
-        public static void StartUniversalServer()
+        public static void StartUniversalServerAngular()
         {
-            string folderName = UtilFramework.FolderName + "Application.Server/Framework/";
-            string fileNameServer = folderName + "Framework.Angular/server/main.js";
-            if (!File.Exists(fileNameServer))
-            {
-                throw new Exception(string.Format("File does not exis! Make sure cli build command did run. ({0})", fileNameServer));
-            }
-            ProcessStartInfo info = new ProcessStartInfo
-            {
-                WorkingDirectory = folderName,
-                FileName = "node.exe"
-            };
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                info.FileName = "node";
-            }
-            info.Arguments = "Framework.Angular/server/main.js";
-            info.UseShellExecute = true; // Open additional node window.
-            info.WindowStyle = ProcessWindowStyle.Minimized; // Show node window minimized.
-
             // Close running node.exe
             foreach (var process in Process.GetProcesses().Where(item => item.MainWindowTitle.EndsWith("node.exe")))
             {
                 process.Kill();
             }
 
-            // Start node with Application.Server/Framework/Framework.Angular/server/main.js
-            Process.Start(info);
-
-            StartUniversalServerAngular();
-        }
-
-        /// <summary>
-        /// Start one universal server for every website.
-        /// </summary>
-        public static void StartUniversalServerAngular()
-        {
             var configServer = ConfigServer.Load();
             foreach (var website in configServer.WebsiteList)
             {
@@ -213,7 +183,7 @@
 
                     Environment.SetEnvironmentVariable("PORT", (website.FolderNameAngularPort).ToString());
 
-                    // Start node with Application.Server/Framework/Application.Angular/dist/server/main.js
+                    // Start node with Application.Server/Framework/Application.Angular/Website01/server/main.js
                     Process.Start(info);
                 }
             }
