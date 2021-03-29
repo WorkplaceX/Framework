@@ -183,11 +183,11 @@
     internal class ConfigServerWebsite
     {
         /// <summary>
-        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Angular/Website01/browser/".
+        /// Returns FolderNameServer. For example: "Application.Server/Framework/Application.Website/Website01/browser/".
         /// </summary>
         public string FolderNameServerGet(AppSelector appSelector, string prefixRemove)
         {
-            string result = "Application.Server/Framework/Application.Angular/" + appSelector.Website.FolderNameAngularWebsite + "browser/";
+            string result = "Application.Server/Framework/Application.Website/" + appSelector.Website.FolderNameAngularWebsite + "browser/";
             result = result.Substring(prefixRemove.Length);
 
             return result;

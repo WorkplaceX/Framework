@@ -162,7 +162,7 @@
                 string folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
                 if (folderNameAngular != null && !website.FolderNameAngularIsDuplicate)
                 {
-                    string fileNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Angular/" + website.FolderNameAngularWebsite + "server/main.js";
+                    string fileNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/" + website.FolderNameAngularWebsite + "server/main.js";
                     if (!File.Exists(fileNameServer))
                     {
                         throw new Exception(string.Format("File does not exis! Make sure cli build command did run. ({0})", fileNameServer));
@@ -170,7 +170,7 @@
 
                     ProcessStartInfo info = new ProcessStartInfo
                     {
-                        WorkingDirectory = UtilFramework.FolderName + "Application.Server/Framework/Application.Angular/" + website.FolderNameAngularWebsite + "server/",
+                        WorkingDirectory = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/" + website.FolderNameAngularWebsite + "server/",
                         FileName = "node.exe"
                     };
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -183,7 +183,7 @@
 
                     Environment.SetEnvironmentVariable("PORT", (website.FolderNameAngularPort).ToString());
 
-                    // Start node with Application.Server/Framework/Application.Angular/Website01/server/main.js
+                    // Start node with Application.Server/Framework/Application.Website/Website01/server/main.js
                     Process.Start(info);
                 }
             }

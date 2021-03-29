@@ -62,18 +62,18 @@
                 string folderName = UtilFramework.FolderName + folderNameAngular;
 
                 UtilCli.Npm(folderName, "install --loglevel error"); // --loglevel error prevent writing to STDERR "npm WARN optional SKIPPING OPTIONAL DEPENDENCY"
-                UtilCli.Npm(folderName, "run build:ssr", isRedirectStdErr: true); // Build Server-side Rendering (SSR) to folder Framework/Application.Angular/Website01/ // TODO Bug report Angular build writes to stderr. Repo steps: Delete node_modules and run npm install and then run build:ssr.
+                UtilCli.Npm(folderName, "run build:ssr", isRedirectStdErr: true); // Build Server-side Rendering (SSR) to folder Framework/Application.Website/Website01/ // TODO Bug report Angular build writes to stderr. Repo steps: Delete node_modules and run npm install and then run build:ssr.
             }
         }
 
         /// <summary>
-        /// Build all Angular Websites. For example: "Application.Angular/"
+        /// Build all Angular Websites. For example: "Application.Website/"
         /// </summary>
         private void BuildWebsiteAngular()
         {
             var configCli = ConfigCli.Load();
 
-            string folderNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Angular/";
+            string folderNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/";
             UtilCli.FolderDelete(folderNameServer);
 
             var folderNameAngularList = new List<string>();

@@ -643,24 +643,24 @@
     {
         /// <summary>
         /// No css framework is used. For example class Alert is not available.
-        /// See also: Framework/Framework.Cli/Template/Application.Angular/
-        /// See also: Application.Angular/ (if applicable)
+        /// See also: Framework/Framework.Cli/Template/Application.Website/
+        /// See also: Application.Website/ (if applicable)
         /// </summary>
         None = 0,
 
         /// <summary>
         /// Bootstrap css framework is used.
         /// See also: https://getbootstrap.com/
-        /// See also: Framework/Framework.Cli/Template/Application.Angular/
-        /// See also: Application.Angular/ (if applicable)
+        /// See also: Framework/Framework.Cli/Template/Application.Website/
+        /// See also: Application.Website/ (if applicable)
         /// </summary>
         Bootstrap = 1,
 
         /// <summary>
         /// Bulma css framework is used.
         /// See also: https://bulma.io/
-        /// See also: Framework/Framework.Cli/Template/Application.Angular/
-        /// See also: Application.Angular/ (if applicable)
+        /// See also: Framework/Framework.Cli/Template/Application.Website/
+        /// See also: Application.Website/ (if applicable)
         /// </summary>
         Bulma = 2
     }

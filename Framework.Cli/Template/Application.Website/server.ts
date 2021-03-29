@@ -19,13 +19,13 @@ export function app(): express.Express {
   // Framework: Enable SSR POST
   var mode = "Console";
   var folderName = join(process.cwd(), '../').split("\\").join("/"); // Rplace all
-  if (folderName.endsWith("Application.Server/Framework/Application.Angular/")) {
+  if (folderName.endsWith("Application.Server/Framework/Application.Website/")) {
     // Running in Visual Studio
     mode = "Visual Studio"
     distFolder = join(process.cwd(), '../browser/');
   } else {
     folderName = join(process.cwd(), '../../').split("\\").join("/"); // Rplace all
-    if (folderName.endsWith("Framework/Application.Angular/")) {
+    if (folderName.endsWith("Framework/Application.Website/")) {
       // Running on IIS
       mode = "IIS";
       distFolder = join(process.cwd(), '../browser/');

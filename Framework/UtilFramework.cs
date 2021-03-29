@@ -36,11 +36,11 @@ namespace Framework
                 // npm --version
                 // 6.14.4
 
-                // npm run ng -- --version (Application.Angular/)
+                // npm run ng -- --version (Application.Website/)
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.50.03";
+                return "v3.50.04";
             }
         }
 
@@ -101,7 +101,7 @@ namespace Framework
 
         /// <summary>
         /// Combines FolderName and path.
-        /// Returns for example "Framework/Application.Angular/Website01/". To be used for relative paths only. To build absolut path
+        /// Returns for example "Framework/Application.Website/Website01/". To be used for relative paths only. To build absolut path
         /// combine with property UtilFramework.FolderName or method UtilServer.FolderNameContentRoot();
         /// </summary>
         /// <param name="folderName">For example "Default/"</param>
@@ -121,7 +121,7 @@ namespace Framework
         }
 
         /// <summary>
-        /// Returns for example "Application.Angular/Website01/". To be used for relative paths only. To build absolut path
+        /// Returns for example "Application.Website/Website01/". To be used for relative paths only. To build absolut path
         /// combine with property UtilFramework.FolderName or method UtilServer.FolderNameContentRoot();
         /// </summary>
         internal static string FolderNameParse(string folderName)

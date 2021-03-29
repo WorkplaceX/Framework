@@ -34,10 +34,10 @@
                 // POST app.json
                 if (!await Post(context, path, appSelector))
                 {
-                    // GET index.html from "Application.Server/Framework/Application.Angular/Website01/browser/" (With server side rendering or serve index.html directly)
+                    // GET index.html from "Application.Server/Framework/Application.Website/Website01/browser/" (With server side rendering or serve index.html directly)
                     if (!await WebsiteServerSideRenderingAsync(context, path, appSelector, null))
                     {
-                        // GET file from "Application.Server/Framework/Application.Angular/Website01/browser/"
+                        // GET file from "Application.Server/Framework/Application.Website/Website01/browser/"
                         if (!await WebsiteFileAsync(context, path, appSelector))
                         {
                             // GET file from database or navigate to subpage.
@@ -79,7 +79,7 @@
         }
 
         /// <summary>
-        /// Divert request to "Application.Server/Framework/Application.Angular/Website01/browser/"
+        /// Divert request to "Application.Server/Framework/Application.Website/Website01/browser/"
         /// </summary>
         private static async Task<bool> WebsiteServerSideRenderingAsync(HttpContext context, string navigatePath, AppSelector appSelector, AppJson appJson)
         {
@@ -190,7 +190,7 @@
             {
                 // Running on IIS Server.
                 url = context.Request.IsHttps ? "https://" : "http://";
-                url += context.Request.Host.ToUriComponent() + "/Framework/Application.Angular/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
+                url += context.Request.Host.ToUriComponent() + "/Framework/Application.Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
             }
             else
             {
@@ -206,7 +206,7 @@
             if (isServerSideRendering)
             {
                 // index.html server side rendering
-                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:8080/Framework/Application.Angular/Website01/server/main.js
+                indexHtml = await UtilServer.WebPost(url, jsonClient); // Server side rendering POST. http://localhost:8080/Framework/Application.Website/Website01/server/main.js
             }
             else
             {
@@ -224,7 +224,7 @@
         }
 
         /// <summary>
-        /// Returns true, if file found in folder "Application.Server/Framework/Application.Angular/Website01/browser/"
+        /// Returns true, if file found in folder "Application.Server/Framework/Application.Website/Website01/browser/"
         /// </summary>
         private async Task<bool> WebsiteFileAsync(HttpContext context, string path, AppSelector appSelector)
         {
