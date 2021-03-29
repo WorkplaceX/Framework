@@ -157,15 +157,18 @@
 
                 // Init FolderNameAngularIndex
                 var folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
-                if (folderNameAngularList.ContainsKey(folderNameAngular) == false)
+                if (folderNameAngular != null)
                 {
-                    website.FolderNameAngularIndex = folderNameAngularIndex;
-                    folderNameAngularIndex += 1;
-                }
-                else
-                {
-                    website.FolderNameAngularIsDuplicate = true;
-                    website.FolderNameAngularIndex = folderNameAngularList[folderNameAngular];
+                    if (folderNameAngularList.ContainsKey(folderNameAngular) == false)
+                    {
+                        website.FolderNameAngularIndex = folderNameAngularIndex;
+                        folderNameAngularIndex += 1;
+                    }
+                    else
+                    {
+                        website.FolderNameAngularIsDuplicate = true;
+                        website.FolderNameAngularIndex = folderNameAngularList[folderNameAngular];
+                    }
                 }
             }
             return result;
