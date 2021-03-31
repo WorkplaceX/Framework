@@ -3046,15 +3046,55 @@
     }
 
     /// <summary>
-    /// Custom component. For example footer component.
+    /// Custom component. For example for footer component.
     /// </summary>
     public class Custom01 : ComponentJson
     {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Custom01(ComponentJson owner) 
+        public Custom01(ComponentJson owner)
             : base(owner, nameof(Custom01))
+        {
+
+        }
+
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
+        public string TextHtml;
+    }
+
+    /// <summary>
+    /// Custom component. For example for footer component.
+    /// </summary>
+    public class Custom02 : ComponentJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Custom02(ComponentJson owner)
+            : base(owner, nameof(Custom02))
+        {
+
+        }
+
+        /// <summary>
+        /// Gets or sets TextHtml. Rendered by Angular as innerHtml.
+        /// </summary>
+        public string TextHtml;
+    }
+
+    /// <summary>
+    /// Custom component. For example for footer component.
+    /// </summary>
+    public class Custom03 : ComponentJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Custom03(ComponentJson owner)
+            : base(owner, nameof(Custom03))
         {
 
         }
