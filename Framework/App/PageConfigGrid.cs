@@ -44,13 +44,18 @@
 
         public override async Task InitAsync()
         {
-            _ = new Html(DivHeader) { TextHtml = "<h1>Config</h1>" };
-            _ = new Html(DivBody) { TextHtml = "<h2>Config Grid</h2>" };
+            new Html(DivHeader) { TextHtml = "<h1>Config</h1>" };
+            new Html(DivBody) { TextHtml = "<h2>Config Grid</h2>" };
             GridConfigGrid = new GridConfigGrid(DivBody);
-            _ = new Html(DivBody) { TextHtml = "<h2>Config Field</h2>" };
+            new Html(DivBody) { TextHtml = "<h2>Config Field</h2>" };
             GridConfigField = new GridConfigField(DivBody);
 
             await GridConfigGrid.LoadAsync();
+            
+            if (GridConfigGrid.RowList.Count == 0)
+            {
+                throw new Exception(string.Format("Grid has no config! Run cli command deployDb to populate. ({0})", TableNameCSharp));
+            }
         }
 
         public GridConfigGrid GridConfigGrid;
@@ -71,10 +76,13 @@
             {
                 foreach (var grid in this.ComponentOwner<AppJson>().ComponentListAll<Grid>())
                 {
-                    string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                    if (TableNameCSharp == tableNameCSharp)
+                    if (grid.TypeRow != null) // Grid has been loaded.
                     {
-                        await UtilGrid.LoadConfigOnlyAsync(grid);
+                        string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
+                        if (TableNameCSharp == tableNameCSharp)
+                        {
+                            await UtilGrid.LoadConfigOnlyAsync(grid);
+                        }
                     }
                 }
             }

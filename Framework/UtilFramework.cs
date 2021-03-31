@@ -40,7 +40,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.50.06";
+                return "v3.50.10";
             }
         }
 
@@ -72,6 +72,39 @@ namespace Framework
             // UtilDoc.TextDebugWriteToFile(appDoc);
 
             return textHtml;
+        }
+
+        /// <summary>
+        /// Convert markdown text to html. If markdown contains SyntaxCustomPage, multiple pages are generated accordingly.
+        /// </summary>
+        /// <param name="textMd"></param>
+        /// <returns></returns>
+        public static List<TextMdToHtmlPage> TextMdToHtmlPageList(string textMd)
+        {
+            var result = new List<TextMdToHtmlPage>();
+            var appDoc = new AppDoc();
+            appDoc.Data.Registry.IsDebug = true;
+
+            new MdPage(appDoc.MdDoc, textMd);
+            appDoc.Parse();
+           
+            foreach (HtmlPage htmlPage in appDoc.HtmlDoc.List)
+            {
+                var html = htmlPage.Render();
+                var pagePath = ((SyntaxPage)htmlPage.Syntax).PagePath;
+                var pageTitleHtml = ((SyntaxPage)htmlPage.Syntax).PageTitleHtml;
+                result.Add(new TextMdToHtmlPage { Html = html, Path = pagePath, TitleHtml = pageTitleHtml });
+            }
+            return result;
+        }
+
+        public class TextMdToHtmlPage
+        {
+            public string Path { get; set; }
+
+            public string TitleHtml { get; set; }
+
+            public string Html { get; set; }
         }
 
         /// <summary>

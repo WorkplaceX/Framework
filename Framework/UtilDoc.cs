@@ -240,6 +240,8 @@
         
         public string PagePath { get; set; }
 
+        public string PageTitleHtml { get; set; }
+
         public string CodeLanguage { get; set; }
 
         public string CodeText { get; set; }
@@ -2161,7 +2163,27 @@
             : base(owner, syntax)
         {
             UtilDoc.Assert(owner is SyntaxDoc);
+            if (syntax is SyntaxCustomPage)
+            {
+                Data.PagePath = ((SyntaxCustomPage)syntax).PagePath;
+                Data.PageTitleHtml = ((SyntaxCustomPage)syntax).PageTitleHtml;
+            }
+            else
+            {
+                Data.PagePath = ((SyntaxPage)syntax).PagePath;
+                Data.PageTitleHtml = ((SyntaxPage)syntax).PageTitleHtml;
+            }
         }
+
+        /// <summary>
+        /// Gets PagePath. Custom parameter of class SyntaxCustomPage.
+        /// </summary>
+        public string PagePath => Data.PagePath;
+
+        /// <summary>
+        /// Gets PageTitleHtml. Custom parameter of class SyntaxCustomPage.
+        /// </summary>
+        public string PageTitleHtml => Data.PageTitleHtml;
 
         internal override void RegistrySchema(RegistrySchemaResult result)
         {
@@ -3234,10 +3256,11 @@
         /// <summary>
         /// Constructor ParseOne.
         /// </summary>
-        public SyntaxCustomPage(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd, string pagePath)
+        public SyntaxCustomPage(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd, string pagePath, string pageTitleHtml)
             : base(owner, tokenBegin, tokenEnd)
         {
             Data.PagePath = pagePath;
+            Data.PageTitleHtml = pageTitleHtml;
         }
 
         /// <summary>
@@ -3247,9 +3270,18 @@
             : base(owner, syntax)
         {
             Data.PagePath = ((SyntaxCustomPage)syntax).PagePath;
+            Data.PageTitleHtml = ((SyntaxCustomPage)syntax).PageTitleHtml;
         }
 
+        /// <summary>
+        /// Gets PagePath. Custom parameter of class SyntaxCustomPage.
+        /// </summary>
         public string PagePath => Data.PagePath;
+
+        /// <summary>
+        /// Gets PageTitleHtml. Custom parameter of class SyntaxCustomPage.
+        /// </summary>
+        public string PageTitleHtml => Data.PageTitleHtml;
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
@@ -3267,7 +3299,8 @@
             if (UtilParse.ParseOneIsCustom(token, "Page", out var tokenEnd, out var paramList))
             {
                 paramList.TryGetValue("Path", out var pagePath);
-                new SyntaxCustomPage(owner, token, tokenEnd, pagePath?.Text);
+                paramList.TryGetValue("Title", out var titleHtml);
+                new SyntaxCustomPage(owner, token, tokenEnd, pagePath?.Text, titleHtml?.Text);
             }
         }
 
@@ -3294,21 +3327,22 @@
             SyntaxPage ownerLocal;
             if (owner.Data.ListCount() == 0)
             {
-                // (Page) is first text. Do not create new page but use existing.
+                // (Page) is first text. Do not create, split new page but use existing.
                 ownerLocal = (SyntaxPage)owner;
             }
             else
             {
+                // Create, split new page,
                 ownerLocal = new SyntaxPage((SyntaxBase)owner.Owner, this);
             }
+            ownerLocal.Data.PagePath = PagePath;
+            ownerLocal.Data.PageTitleHtml = PageTitleHtml;
             ParseMain(ownerLocal, this);
         }
 
         internal override void ParseHtml(HtmlBase owner)
         {
-            var page = new HtmlPage(owner, this);
-
-            ParseHtmlMain(page, this);
+            throw new Exception(); // Should never come here! Create, split new page.
         }
     }
 
