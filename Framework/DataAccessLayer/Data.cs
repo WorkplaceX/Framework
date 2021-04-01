@@ -395,9 +395,8 @@
         }
 
         /// <summary>
-        /// Execute sql statement.
+        /// Execute sql statement. Can contain "GO" batch seperator.
         /// </summary>
-        /// <param name="sql">Sql can have "GO" batch seperator.</param>
         internal static async Task ExecuteNonQueryAsync(string sql, List<(FrameworkTypeEnum FrameworkTypeEnum, SqlParameter SqlParameter)> paramList, bool isFrameworkDb, int? commandTimeout = null, bool isExceptionContinue = false)
         {
             var sqlList = sql.Split(new string[] { "\r\nGO", "\nGO", "GO\r\n", "GO\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -432,6 +431,14 @@
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Execute sql statement. Can contain "GO" batch seperator.
+        /// </summary>
+        public static async Task ExecuteNonQueryAsync(string sql)
+        {
+            await ExecuteNonQueryAsync(sql, null, isFrameworkDb: false);
         }
 
         /// <summary>
