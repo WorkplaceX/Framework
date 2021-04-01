@@ -40,7 +40,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.50.11";
+                return "v3.50.12";
             }
         }
 
@@ -63,7 +63,6 @@ namespace Framework
         public static string TextMdToHtml(string textMd)
         {
             var appDoc = new AppDoc();
-            appDoc.Data.Registry.IsDebug = true;
             new MdPage(appDoc.MdDoc, textMd);
             appDoc.Parse();
             var textHtml = appDoc.HtmlDoc.Render();
@@ -72,46 +71,6 @@ namespace Framework
             // UtilDoc.TextDebugWriteToFile(appDoc);
 
             return textHtml;
-        }
-
-        /// <summary>
-        /// Convert markdown text to html. If markdown contains SyntaxCustomPage, multiple pages are generated accordingly.
-        /// </summary>
-        /// <param name="textMd"></param>
-        public static List<TextMdToHtmlPage> TextMdToHtmlPageList(string textMd)
-        {
-            var result = new List<TextMdToHtmlPage>();
-            var appDoc = new AppDoc();
-
-            new MdPage(appDoc.MdDoc, textMd);
-            appDoc.Parse();
-           
-            foreach (HtmlPage htmlPage in appDoc.HtmlDoc.List)
-            {
-                var html = htmlPage.Render();
-                var pagePath = ((SyntaxPage)htmlPage.Syntax).PagePath;
-                var pageTitleHtml = ((SyntaxPage)htmlPage.Syntax).PageTitleHtml;
-                result.Add(new TextMdToHtmlPage { Html = html, Path = pagePath, TitleHtml = pageTitleHtml });
-            }
-            return result;
-        }
-
-        public class TextMdToHtmlPage
-        {
-            /// <summary>
-            /// Gets Path. For example "product/car/"
-            /// </summary>
-            public string Path { get; internal set; }
-
-            /// <summary>
-            /// Gets TitleHtml. Can for example contain html code for leading icon.
-            /// </summary>
-            public string TitleHtml { get; internal set; }
-
-            /// <summary>
-            /// Gets Html. Page html code.
-            /// </summary>
-            public string Html { get; internal set; }
         }
 
         /// <summary>
