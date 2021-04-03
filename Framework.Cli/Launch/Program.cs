@@ -74,14 +74,20 @@ namespace Launch
         static bool FileWpxExist()
         {
             bool result = false;
-            var envPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
+
+            // Windows, Linux
+            var target = EnvironmentVariableTarget.User;
             string pathSeperator = ";";
             string fileNameWpx = "wpx.exe";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                target = EnvironmentVariableTarget.Process;
                 pathSeperator = ":";
                 fileNameWpx = "wpx";
             }
+
+            // Check for wpx.exe in every path.
+            var envPath = Environment.GetEnvironmentVariable("PATH", target);
             var envPathlist = new List<string>(envPath.Split(pathSeperator));
             foreach (var folderName in envPathlist)
             {
