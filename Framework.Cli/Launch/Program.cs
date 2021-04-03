@@ -60,7 +60,13 @@ namespace Launch
             string arguments = "run --project Application.Cli --";
             foreach (var item in args)
             {
-                arguments += " " + item;
+                var itemLocal = item;
+                int index = itemLocal.IndexOf("=");
+                if (index != -1)
+                {
+                    itemLocal = itemLocal.Insert(index + 1, "\"") + "\""; // For example connectionString="Data Source=localhost;"
+                }
+                arguments += " " + itemLocal;
             }
             processInfo.Arguments = arguments;
 

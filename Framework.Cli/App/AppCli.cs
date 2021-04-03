@@ -143,8 +143,8 @@
                     \_/\_/ \___/|_|  |_|\_\ .__/|_|\__,_|\___\___/_/\_\  \____|_____|___|
                                           |_|                                            
                 ";
-                text = text.Replace("\n                 ", "\n");
-                text = text.Substring(2);
+                text = text.Replace(Environment.NewLine + "                 ", Environment.NewLine);
+                text = text.Substring(Environment.NewLine.Length);
                 var color = Console.ForegroundColor;
                 try
                 {
