@@ -33,7 +33,7 @@ namespace Launch
                     {
                         // Windows
                         var envPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-                        envPath += folderNameExe;
+                        envPath += ";" + folderNameExe;
                         // Add this folder to user environment PATH.
                         Environment.SetEnvironmentVariable("PATH", envPath, EnvironmentVariableTarget.User);
                     }

@@ -2296,10 +2296,10 @@
         /// <summary>
         /// Constructor ParseOne.
         /// </summary>
-        public SyntaxTitle(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd)
+        public SyntaxTitle(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd, int titleLevel)
             : base(owner, tokenBegin, tokenEnd)
         {
-
+            Data.TitleLevel = titleLevel;
         }
 
         /// <summary>
@@ -2309,7 +2309,10 @@
             : base(owner, syntax)
         {
             UtilDoc.Assert(owner is SyntaxPage || owner is SyntaxCustomPage);
+            Data.TitleLevel = ((SyntaxTitle)syntax).TitleLevel;
         }
+
+        public int TitleLevel => Data.TitleLevel;
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
@@ -2325,7 +2328,7 @@
         {
             if (UtilParse.ParseOneIsNewLine<MdTitle>(token, out var tokenEnd))
             {
-                new SyntaxTitle(owner, token, tokenEnd);
+                new SyntaxTitle(owner, token, tokenEnd, tokenEnd.TitleLevel);
                 if (tokenEnd.Next() is MdSpace tokenSpace)
                 {
                     // Trailing space
@@ -2661,6 +2664,7 @@
             result.AddOwner<SyntaxParagraph>();
             // result.AddOwner<SyntaxTitle>(); // No link in title
             result.AddOwner<SyntaxBullet>();
+            result.AddOwner<SyntaxFont>(); // For example bold link
         }
 
         internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
@@ -3473,15 +3477,18 @@
         {
 
         }
+        public new SyntaxTitle Syntax => (SyntaxTitle)base.Syntax;
 
         internal override void RenderBegin(StringBuilder result)
         {
-            result.Append("<h1>");
+            // For example <h1>
+            result.Append("<h" + Syntax.TitleLevel + ">");
         }
 
         internal override void RenderEnd(StringBuilder result)
         {
-            result.Append("</h1>");
+            // For example <h1>
+            result.Append("</h" + Syntax.TitleLevel + ">");
         }
     }
 
@@ -3965,36 +3972,8 @@
     {
         public static void Debug()
         {
-            string textMd = @"(Note)**A**
-(Note)";
-
-            textMd = @"(Page Path='/' Title='Hello')
-# Title".Replace("'", "\"");
-
-            textMd = @"# T
-Hello
-(Youtube Link='https://www.youtube.com/embed/bYJTl5axgUY')
-World
-".Replace("'", "\"");
-
-            textMd = @"Hello
-(Page)World";
-
-            // textMd = "# H**e**llo<!-- Comment Xyz -->World One";
-            //  textMd = "# Title";
-            // textMd = "Hello\r\nWorld";
-
-            // textMd = "Hello\r\n(Note)World";
-            // textMd = "Hello\r\nWorld\r\n* One\r\n* Two";
-            // textMd = "Hello\r\n\r\nWorld";
-            // textMd = "Hello<!-- Comment -->";
-            // textMd = "Hello<!-- Comment -->World";
-            // textMd = "**Bold**World";
-            // textMd = "(Note)\r\n\r\nA\r\n(Note)";
-            // textMd = "(Note)\r\n\r\n* A\r\n(Note)";
-            // textMd = "(Note)\r\n\r\nHello\r\n\r\n# A\r\n# B\r\n(Note)";
-            // textMd = "(Note)Hello\r\n# A\r\n(Note)";
-            // textMd = "(Note)\r\n\r\n* A\r\n(Note)";
+            var textMd = @"# T1
+## T2";
 
             // Doc
             var appDoc = new AppDoc();

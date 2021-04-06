@@ -141,22 +141,19 @@
                   \ \ /\ / / _ \| '__| |/ / '_ \| |/ _` |/ __/ _ \\  /  | |   | |    | | 
                    \ V  V / (_) | |  |   <| |_) | | (_| | (_|  __//  \  | |___| |___ | | 
                     \_/\_/ \___/|_|  |_|\_\ .__/|_|\__,_|\___\___/_/\_\  \____|_____|___|
-                                          |_|                                            
-                ";
+                                          |_|                                            ";
                 text = text.Replace(Environment.NewLine + "                 ", Environment.NewLine);
                 text = text.Substring(Environment.NewLine.Length);
                 var color = Console.ForegroundColor;
                 try
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine(text);
+                    Console.Write(text);
                 }
                 finally
                 {
                     Console.ForegroundColor = color;
                 }
-                Console.WriteLine("WorkplaceX={0};", UtilFramework.Version);
-
                 commandLineApplication.Execute("-h"); // Show list of available commands.
             }
         }
@@ -215,6 +212,7 @@
                 });
             }
             commandLineApplication.HelpOption("-h | --help"); // Command line interface help (to show commands)
+            commandLineApplication.VersionOption("-v | --version", string.Format("WorkplaceX={0};", UtilFramework.Version));
         }
 
         /// <summary>

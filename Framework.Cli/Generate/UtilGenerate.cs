@@ -17,10 +17,15 @@
         private static string NameCSharp(string name)
         {
             StringBuilder result = new StringBuilder();
+            bool isFirst = true;
             foreach (char item in name)
             {
                 if (item >= '0' && item <= '9')
                 {
+                    if (isFirst)
+                    {
+                        result.Append("_"); // If first char is a number 
+                    }
                     result.Append(item);
                 }
                 char itemToUpper = char.ToUpper(item);
@@ -28,6 +33,7 @@
                 {
                     result.Append(item);
                 }
+                isFirst = false;
             }
             return result.ToString();
         }
