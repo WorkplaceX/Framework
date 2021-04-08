@@ -148,7 +148,7 @@
                 try
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(text);
+                    Console.WriteLine(text);
                 }
                 finally
                 {
@@ -212,7 +212,7 @@
                 });
             }
             commandLineApplication.HelpOption("-h | --help"); // Command line interface help (to show commands)
-            commandLineApplication.VersionOption("-v | --version", string.Format("WorkplaceX={0};", UtilFramework.Version));
+            commandLineApplication.VersionOption("-v | --version", string.Format("\b" + "WorkplaceX={0};", UtilFramework.Version)); // Backspace because by default CommandLineApplication adds a space.
         }
 
         /// <summary>

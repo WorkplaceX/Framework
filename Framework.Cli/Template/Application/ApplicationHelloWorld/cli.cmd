@@ -1,1 +1,0 @@
-dotnet run --project "Application.Cli/Application.Cli.csproj" -- %*

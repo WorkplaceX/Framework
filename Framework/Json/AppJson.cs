@@ -1923,7 +1923,7 @@
             public TRow Row { get; internal set; }
 
             /// <summary>
-            /// Gets FileUpload. Contains all data if user sent a file.
+            /// Gets FileUpload. Contains all data if user sent a file. Null if no file has been uploaded with current request.
             /// </summary>
             public FileUpload FileUpload { get; internal set; }
 
@@ -1968,7 +1968,7 @@
             public TRow Row { get; internal set; }
 
             /// <summary>
-            /// Gets FileUpload. Contains all data if user sent a file.
+            /// Gets FileUpload. Contains all data if user sent a file. Null if no file has been uploaded with current request.
             /// </summary>
             public FileUpload FileUpload { get; internal set; }
 
