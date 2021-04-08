@@ -1419,9 +1419,27 @@
 
         }
 
-        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResultInternal result)
+        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
             return Task.FromResult(0);
+        }
+
+        public class FileUpload
+        {
+            /// <summary>
+            /// Gets FieldName. User uploaded a file on this field.
+            /// </summary>
+            public string FieldName { get; internal set; }
+
+            /// <summary>
+            /// Gets Data. Contains data of uploaded file.
+            /// </summary>
+            public byte[] Data { get; internal set; }
+
+            /// <summary>
+            /// Gets FileName. From user uploaded file.
+            /// </summary>
+            public string FileName { get; internal set; }
         }
 
         internal class UpdateResultInternal
@@ -1439,7 +1457,7 @@
             }
         }
 
-        virtual internal Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResultInternal result)
+        virtual internal Task InsertInternalAsync(Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, InsertResultInternal result)
         {
             return Task.FromResult(0);
         }
@@ -1470,16 +1488,6 @@
         }
 
         virtual internal Task CellParseInternalAsync(Row row, string fieldName, string text, ParseResultInternal result)
-        {
-            return Task.FromResult(0);
-        }
-
-        virtual internal void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
-        {
-
-        }
-
-        virtual internal Task CellParseFileUploadInternalAsync(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
         {
             return Task.FromResult(0);
         }
@@ -1882,10 +1890,14 @@
             public TRow Row { get; internal set; }
         }
 
-        internal override async Task UpdateInternalAsync(Row rowOld, Row row, DatabaseEnum databaseEnum, UpdateResultInternal result)
+        internal override async Task UpdateInternalAsync(Row rowOld, Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
             UpdateResult resultLocal = UpdateResultInternal.Convert(result, (TRow)row);
-            await UpdateAsync(new UpdateArgs { RowOld = (TRow)rowOld, Row = (TRow)row, DatabaseEnum = databaseEnum }, resultLocal);
+            if (fileUpload.Data == null)
+            {
+                fileUpload = null;
+            }
+            await UpdateAsync(new UpdateArgs { RowOld = (TRow)rowOld, Row = (TRow)row, FileUpload = fileUpload, DatabaseEnum = databaseEnum }, resultLocal);
             UpdateResultInternal.Convert(resultLocal, ref result);
         }
 
@@ -1910,6 +1922,11 @@
             /// </summary>
             public TRow Row { get; internal set; }
 
+            /// <summary>
+            /// Gets FileUpload. Contains all data if user sent a file.
+            /// </summary>
+            public FileUpload FileUpload { get; internal set; }
+
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
 
@@ -1926,10 +1943,11 @@
             public TRow Row { get; internal set; }
         }
 
-        internal override async Task InsertInternalAsync(Row row, DatabaseEnum databaseEnum, InsertResultInternal result)
+        internal override async Task InsertInternalAsync(Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, InsertResultInternal result)
         {
             InsertResult resultLocal = InsertResultInternal.Convert(result, (TRow)row);
-            await InsertAsync(new InsertArgs { Row = (TRow)row, DatabaseEnum = databaseEnum }, resultLocal);
+            var fileUploadArgs = fileUpload.Data != null ? fileUpload : null;
+            await InsertAsync(new InsertArgs { Row = (TRow)row, FileUpload = fileUploadArgs, DatabaseEnum = databaseEnum }, resultLocal);
             InsertResultInternal.Convert(resultLocal, ref result);
         }
 
@@ -1948,6 +1966,11 @@
             /// Gets Row. Data row to insert. Set new primary key on this row.
             /// </summary>
             public TRow Row { get; internal set; }
+
+            /// <summary>
+            /// Gets FileUpload. Contains all data if user sent a file.
+            /// </summary>
+            public FileUpload FileUpload { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
@@ -2101,72 +2124,6 @@
         protected virtual Task CellParseAsync(ParseArgs args, ParseResult result)
         {
             return Task.FromResult(0);
-        }
-
-        internal override void CellParseFileUploadInternal(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
-        {
-            var resultLocal = ParseResultInternal.Convert(result, (TRow)row);
-            CellParseFileUpload(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data, IsNew = rowEnum == GridRowEnum.New }, resultLocal);
-            ParseResultInternal.Convert(resultLocal, ref result);
-        }
-
-        internal override async Task CellParseFileUploadInternalAsync(GridRowEnum rowEnum, Row row, string fieldName, string fileName, byte[] data, ParseResultInternal result)
-        {
-            var resultLocal = ParseResultInternal.Convert(result, (TRow)row);
-            await CellParseFileUploadAsync(new FileUploadArgs { Row = (TRow)row, FieldName = fieldName, FileName = fileName, Data = data, IsNew = rowEnum == GridRowEnum.New }, resultLocal);
-            ParseResultInternal.Convert(resultLocal, ref result);
-        }
-
-        /// <summary>
-        /// Parse user uploaded file and assign it to field in row.
-        /// </summary>
-        /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual void CellParseFileUpload(FileUploadArgs args, ParseResult result)
-        {
-            var propertyInfo = result.Row.GetType().GetProperty(args.FieldName);
-            if (propertyInfo.PropertyType == args.Data.GetType())
-            {
-                // Property is of type byte[]
-                propertyInfo.SetValue(result.Row, args.Data);
-                result.IsHandled = true;
-            }
-        }
-
-        /// <summary>
-        /// Parse user uploaded file and assign it to field in row.
-        /// </summary>
-        /// <param name="result">Set result.IsHandled to true.</param>
-        protected virtual Task CellParseFileUploadAsync(FileUploadArgs args, ParseResult result)
-        {
-            return Task.FromResult(0);
-        }
-
-        public class FileUploadArgs
-        {
-            /// <summary>
-            /// Gets Row.  Write custom parsed value to row.
-            /// </summary>
-            public TRow Row { get; internal set; }
-
-            /// <summary>
-            /// Gets FieldName. As declared in CSharp code. Data grid column name.
-            /// </summary>
-            public string FieldName { get; internal set; }
-
-            /// <summary>
-            /// Gets FileName. User uploaded file.
-            /// </summary>
-            public string FileName { get; internal set; }
-
-            /// <summary>
-            /// Gets Data. From user uploaded file. It's never null but can be byte[0] for file of size 0 bytes.
-            /// </summary>
-            public byte[] Data { get; internal set; }
-
-            /// <summary>
-            /// Gets IsNew. If true, file upload is for new row.
-            /// </summary>
-            public bool IsNew { get; internal set; }
         }
 
         internal override void CellAnnotationInternal(GridRowEnum rowEnum, Row row, string fieldName, AnnotationResult result)

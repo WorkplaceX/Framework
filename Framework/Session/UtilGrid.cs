@@ -1095,7 +1095,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static async Task ProcessCellIsModifyParseAsync(Grid grid, GridRowEnum rowEnum, Row row, GridColumn column, Field field, GridCell cell, CommandJson commandJson)
+        private static async Task ProcessCellIsModifyParseAsync(Grid grid, GridRowEnum rowEnum, Row row, GridColumn column, Field field, GridCell cell, CommandJson commandJson, FileUpload fileUpload)
         {
             cell.ErrorParse = null;
             // Parse
@@ -1127,16 +1127,11 @@
                     }
                     UtilFramework.Assert(commandJson.GridCellTextBase64.StartsWith(startsWith));
                     var data = System.Convert.FromBase64String(commandJson.GridCellTextBase64.Substring(startsWith.Length));
-                    grid.CellParseFileUploadInternal(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
-                    if (result.IsHandled == false)
-                    {
-                        await grid.CellParseFileUploadInternalAsync(rowEnum, row, column.FieldNameCSharp, commandJson.GridCellTextBase64FileName, data, result);
-                    }
-                    if (result.IsHandled == false)
-                    {
-                        result.IsHandled = true;
-                        result.ErrorParse = "Can not parse binary! Override method CellParseFileUpload();";
-                    }
+                    fileUpload.FieldName = column.FieldNameCSharp;
+                    fileUpload.Data = data;
+                    fileUpload.FileName = commandJson.GridCellTextBase64FileName;
+                    // Is handled in terms of data is available in update and insert args parameter.
+                    result.IsHandled = true;
                 }
                 // Parse default
                 if (!result.IsHandled)
@@ -1185,13 +1180,13 @@
         /// <summary>
         /// Save (Update).
         /// </summary>
-        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row rowOld, Row row, GridCell cell)
+        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row rowOld, Row row, GridCell cell, FileUpload fileUpload)
         {
             // Save
             try
             {
                 Grid.UpdateResultInternal result = new Grid.UpdateResultInternal();
-                await grid.UpdateInternalAsync(rowOld, row, grid.DatabaseEnum, result);
+                await grid.UpdateInternalAsync(rowOld, row, fileUpload, grid.DatabaseEnum, result);
                 if (!result.IsHandled)
                 {
                     await Data.UpdateAsync(rowOld, row, grid.DatabaseEnum);
@@ -1209,14 +1204,14 @@
         /// <summary>
         /// Save (Insert).
         /// </summary>
-        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row row, GridCell cell)
+        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row row, GridCell cell, FileUpload fileUpload)
         {
             // Save
             try
             {
                 // Save custom
                 Grid.InsertResultInternal result = new Grid.InsertResultInternal();
-                await grid.InsertInternalAsync(row, grid.DatabaseEnum, result);
+                await grid.InsertInternalAsync(row, fileUpload, grid.DatabaseEnum, result);
                 if (!result.IsHandled)
                 {
                     // Save default
@@ -1411,6 +1406,8 @@
                     }
                 }
 
+                var fileUpload = new FileUpload();
+
                 // Parse Index
                 if (rowState.RowEnum == GridRowEnum.Index)
                 {
@@ -1423,11 +1420,11 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, commandJson);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, commandJson, fileUpload);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
-                        await ProcessCellIsModifyUpdateAsync(grid, row, rowState.Row, cell);
+                        await ProcessCellIsModifyUpdateAsync(grid, row, rowState.Row, cell, fileUpload);
                         if (cell.ErrorSave == null)
                         {
                             Data.RowCopy(rowState.Row, row); // Copy new Id to 
@@ -1462,11 +1459,11 @@
                     // ErrorSave reset
                     ProcessCellIsModifyErrorSaveReset(grid, cell);
                     // Parse
-                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, commandJson);
+                    await ProcessCellIsModifyParseAsync(grid, rowState.RowEnum, rowState.Row, column, field, cell, commandJson, fileUpload);
                     if (!ProcessCellIsModifyIsErrorParse(grid, cell))
                     {
                         // Save
-                        await ProcessCellIsModifyInsertAsync(grid, rowState.Row, cell);
+                        await ProcessCellIsModifyInsertAsync(grid, rowState.Row, cell, fileUpload);
                         if (cell.ErrorSave == null)
                         {
                             grid.RowListInternal.Add(rowState.Row);
