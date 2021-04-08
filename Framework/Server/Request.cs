@@ -162,9 +162,12 @@
                     if (navigateSessionResult.IsPageNotFound)
                     {
                         context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        result = true;
                     }
-
-                    result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                    else
+                    {
+                        result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                    }
                 }
                 else
                 {
