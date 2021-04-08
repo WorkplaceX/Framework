@@ -55,11 +55,11 @@ namespace Framework.Cli.Command
             UtilCli.ConsoleWriteLineColor("Installation successfull!", ConsoleColor.Green);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                UtilCli.ConsoleWriteLineColor("Start cli now with command .\\cli.cmd", ConsoleColor.DarkGreen);
+                UtilCli.ConsoleWriteLineColor("Start cli now with command .\\wpx.cmd", ConsoleColor.DarkGreen);
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                UtilCli.ConsoleWriteLineColor("Start cli now with command ./cli.sh", ConsoleColor.DarkGreen);
+                UtilCli.ConsoleWriteLineColor("Start cli now with command ./wpx.sh", ConsoleColor.DarkGreen);
             }
         }
     }

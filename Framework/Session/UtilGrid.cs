@@ -1095,7 +1095,7 @@
         /// <summary>
         /// Parse
         /// </summary>
-        private static async Task ProcessCellIsModifyParseAsync(Grid grid, GridRowEnum rowEnum, Row row, GridColumn column, Field field, GridCell cell, CommandJson commandJson, FileUpload fileUpload)
+        private static async Task ProcessCellIsModifyParseAsync(Grid grid, GridRowEnum rowEnum, Row row, GridColumn column, Field field, GridCell cell, CommandJson commandJson, FileUploadArgs fileUpload)
         {
             cell.ErrorParse = null;
             // Parse
@@ -1180,7 +1180,7 @@
         /// <summary>
         /// Save (Update).
         /// </summary>
-        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row rowOld, Row row, GridCell cell, FileUpload fileUpload)
+        private static async Task ProcessCellIsModifyUpdateAsync(Grid grid, Row rowOld, Row row, GridCell cell, FileUploadArgs fileUpload)
         {
             // Save
             try
@@ -1204,7 +1204,7 @@
         /// <summary>
         /// Save (Insert).
         /// </summary>
-        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row row, GridCell cell, FileUpload fileUpload)
+        private static async Task ProcessCellIsModifyInsertAsync(Grid grid, Row row, GridCell cell, FileUploadArgs fileUpload)
         {
             // Save
             try
@@ -1406,7 +1406,7 @@
                     }
                 }
 
-                var fileUpload = new FileUpload();
+                var fileUpload = new FileUploadArgs();
 
                 // Parse Index
                 if (rowState.RowEnum == GridRowEnum.Index)

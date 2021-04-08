@@ -1419,12 +1419,12 @@
 
         }
 
-        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
+        virtual internal Task UpdateInternalAsync(Row rowOld, Row row, FileUploadArgs fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
             return Task.FromResult(0);
         }
 
-        public class FileUpload
+        public class FileUploadArgs
         {
             /// <summary>
             /// Gets FieldName. User uploaded a file on this field.
@@ -1457,7 +1457,7 @@
             }
         }
 
-        virtual internal Task InsertInternalAsync(Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, InsertResultInternal result)
+        virtual internal Task InsertInternalAsync(Row row, FileUploadArgs fileUpload, DatabaseEnum databaseEnum, InsertResultInternal result)
         {
             return Task.FromResult(0);
         }
@@ -1890,7 +1890,7 @@
             public TRow Row { get; internal set; }
         }
 
-        internal override async Task UpdateInternalAsync(Row rowOld, Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
+        internal override async Task UpdateInternalAsync(Row rowOld, Row row, FileUploadArgs fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
             UpdateResult resultLocal = UpdateResultInternal.Convert(result, (TRow)row);
             if (fileUpload.Data == null)
@@ -1925,7 +1925,7 @@
             /// <summary>
             /// Gets FileUpload. Contains all data if user sent a file. Null if no file has been uploaded with current request.
             /// </summary>
-            public FileUpload FileUpload { get; internal set; }
+            public FileUploadArgs FileUpload { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
@@ -1943,7 +1943,7 @@
             public TRow Row { get; internal set; }
         }
 
-        internal override async Task InsertInternalAsync(Row row, FileUpload fileUpload, DatabaseEnum databaseEnum, InsertResultInternal result)
+        internal override async Task InsertInternalAsync(Row row, FileUploadArgs fileUpload, DatabaseEnum databaseEnum, InsertResultInternal result)
         {
             InsertResult resultLocal = InsertResultInternal.Convert(result, (TRow)row);
             var fileUploadArgs = fileUpload.Data != null ? fileUpload : null;
@@ -1970,7 +1970,7 @@
             /// <summary>
             /// Gets FileUpload. Contains all data if user sent a file. Null if no file has been uploaded with current request.
             /// </summary>
-            public FileUpload FileUpload { get; internal set; }
+            public FileUploadArgs FileUpload { get; internal set; }
 
             public DatabaseEnum DatabaseEnum { get; internal set; }
         }
