@@ -359,6 +359,12 @@
             SqlParameter parameter = new SqlParameter(paramName, frameworkType.DbType) { Value = value };
             paramList.Add((frameworkTypeEnum, parameter));
 
+            if (frameworkType.DbType == DbType.Binary)
+            {
+                // Prevent error: Implicit conversion from data type nvarchar to varbinary(max) is not allowed. Use the CONVERT function to run this query
+                paramName = "CONVERT(VARBINARY(MAX), " + paramName + ")";
+            }
+
             return paramName;
         }
 

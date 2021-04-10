@@ -245,6 +245,7 @@ namespace Framework.Json.Bulma
                 // User clicked navbar button
                 if (navbarItem.ItemEnum == BulmaNavbarItemEnum.Text)
                 {
+                    appJson.IsScrollToTop = true; // Because of possible use of css class is-fixed-top.
                     appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickRow, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId });
                 }
 
