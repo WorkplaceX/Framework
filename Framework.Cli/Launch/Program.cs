@@ -14,7 +14,7 @@ namespace Launch
     {
         static void Main(string[] args)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("WorkplaceX Launch...");
             Console.ResetColor();
 
