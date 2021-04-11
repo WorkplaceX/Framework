@@ -14,6 +14,10 @@ namespace Launch
     {
         static void Main(string[] args)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("WorkplaceX Launch...");
+            Console.ResetColor();
+
             var folderName = Directory.GetCurrentDirectory();
             var folderNameExe = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Program)).Location);
             var fileNameCsprojRelative = Path.DirectorySeparatorChar + "Application.Cli" + Path.DirectorySeparatorChar + "Application.Cli.csproj";
@@ -128,13 +132,19 @@ namespace Launch
         /// </summary>
         static void LinuxSetEnvironmentVariable(string path)
         {
-            string argument = "echo 'export PATH=\"$PATH:" + path + "\"' >> $HOME/.bashrc";
-            argument = argument.Replace("\"", "\\\""); // Escape
-            ProcessStartInfo processInfo = new ProcessStartInfo();
-            processInfo.FileName = "/bin/bash";
-            processInfo.Arguments = "-c \"" + argument + "\"";
-            var process = Process.Start(processInfo);
-            process.WaitForExit();
+            void UpdateBash(string fileNameBash)
+            {
+                string argument = "echo 'export PATH=\"$PATH:" + path + "\"' >> $HOME/" + fileNameBash;
+                argument = argument.Replace("\"", "\\\""); // Escape
+                ProcessStartInfo processInfo = new ProcessStartInfo();
+                processInfo.FileName = "/bin/bash";
+                processInfo.Arguments = "-c \"" + argument + "\"";
+                var process = Process.Start(processInfo);
+                process.WaitForExit();
+            }
+
+            UpdateBash(".bashrc"); // Used when opening terminal from GUI
+            UpdateBash(".bash_profile"); // Used when opening terminal from Putty
         }
     }
 }
