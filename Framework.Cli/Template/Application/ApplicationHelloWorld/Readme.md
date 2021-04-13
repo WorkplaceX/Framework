@@ -12,7 +12,7 @@ The following components need to be installed on the machine as a prerequisite (
 * [MS-SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express Edition)
 
 ## Install
-```sh
+```cmd
 ### Git clone (parameter recursive clones also required submodule Framework):
 git clone https://github.com/WorkplaceX/ApplicationDemo.git --recursive
 
