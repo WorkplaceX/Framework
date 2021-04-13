@@ -23,9 +23,9 @@
         protected internal override void Execute()
         {
             // Build angular client
-            var commandBuild = new CommandBuild(AppCli);
-            UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
-            commandBuild.Execute();
+            //var commandBuild = new CommandBuild(AppCli);
+            //UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
+            //commandBuild.Execute();
 
             string folderName = UtilFramework.FolderName + @"Application.Server/";
             // Version tag and build only .NET Core server.
