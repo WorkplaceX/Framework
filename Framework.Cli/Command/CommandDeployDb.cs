@@ -213,6 +213,15 @@
         {
             ConfigCli configCli = ConfigCli.Load();
 
+            if (UtilExternal.IsExternal)
+            {
+                Console.WriteLine("For external run command wpx external and then command wpx deploy an main application (because of shared table FrameworkDeplayDb and FrameworkConfig).");
+                if (UtilCli.ConsoleReadYesNo("Continue anyway?") == false)
+                {
+                    return;
+                }
+            }
+
             if (optionSilent.OptionGet() == false && configCli.EnvironmentNameGet() != "DEV")
             {
                 if (UtilCli.ConsoleReadYesNo(string.Format("Deploy to {0} database?", configCli.EnvironmentName)) == false)
