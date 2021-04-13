@@ -9,7 +9,7 @@ ASP.NET Core application with Angular and MS-SQL Server.
 The following components need to be installed on the machine as a prerequisite (Windows or Linux):
 * [Node.js](https://nodejs.org/en/) (LTS Version)
 * [.NET Core](https://dotnet.microsoft.com/download) (Version 5.0)
-* [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express Edition)
+* [MS-SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express Edition)
 
 ## Install
 ```cmd
@@ -25,6 +25,9 @@ cd ApplicationDemo
 ### From now on just use:
 wpx
 
+### Build
+wpx build # Builds client (Angular) and server (.NET)
+
 ### Set ConnectionString
 wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; Integrated Security=True;" # Example Windows
 wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;" # Example Linux
@@ -36,7 +39,8 @@ wpx deployDb
 wpx start # http://localhost:5000/
 
 ### Stop
-killall -g -SIGKILL Application.Server # Linux Only
+killall -g -SIGKILL -r Application.S # Example Linux. Close group (regular expression for Application.Server)
+sudo netstat -ltp # Show all program listening to port # Example Linux
 ```
 
 ## Project Folder and File Structure
