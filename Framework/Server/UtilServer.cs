@@ -88,13 +88,13 @@
         }
 
         /// <summary>
-        /// Returns client request url. For example: "http://localhost:49323/".
+        /// Returns client request url. For example: "http://localhost:5000/".
         /// </summary>
-        public static string RequestUrl()
+        public static string RequestUrlHost()
         {
             HttpContext context = Context;
             string result = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
-            // result = string.Format("{0}://{1}{2}", context.Request.Scheme, context.Request.Host.Value, context.Request.Path); // Returns also path. For example: "http://localhost:49323/config/data.txt"
+            // result = string.Format("{0}://{1}{2}", context.Request.Scheme, context.Request.Host.Value, context.Request.Path); // Returns also path. For example: "http://localhost:5000/config/data.txt"
             return result;
         }
 
@@ -126,6 +126,7 @@
                 case ".pdf": result = "application/pdf"; break;
                 case ".json": result = "application/json"; break;
                 case ".xlsx": result = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; break;
+                case ".xml": result = "text/xml"; break;
                 default:
                     result = "text/plain"; break; // Type not found!
             }

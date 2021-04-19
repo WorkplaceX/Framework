@@ -34,7 +34,7 @@ export class Json { // AppJson
 
   ResponseCount: number | undefined;
 
-  RequestUrl: string | undefined;
+  RequestUrlHost: string | undefined;
 
   EmbeddedUrl: string | undefined;
 
@@ -228,7 +228,7 @@ export class DataService {
         this.json.EmbeddedUrl = "http://" + window.location.hostname + ":5000/"; // http://localhost:5000/ or http://localhost2:5000/
       } 
       if (window != null) { // Running on client.
-        this.json.RequestUrl = window.location.href;
+        this.json.RequestUrlHost = window.location.href;
         if (typeof jsonBrowser == 'undefined')
         {
           this.update(null); // First request if running on http://localhost:4200
@@ -279,11 +279,11 @@ export class DataService {
       }
       this.json.RequestCount += 1;
       this.isRequestPending = true;
-      let requestUrl;
+      let requestUrlHost;
       if (this.json.EmbeddedUrl != null) {
-        requestUrl = new URL("/app.json", this.json.EmbeddedUrl).href 
+        requestUrlHost = new URL("/app.json", this.json.EmbeddedUrl).href 
       } else {
-        requestUrl = new URL("/app.json", this.json.RequestUrl).href 
+        requestUrlHost = new URL("/app.json", this.json.RequestUrlHost).href 
       }
 
       requestJson.RequestCount = this.json.RequestCount;
@@ -292,7 +292,7 @@ export class DataService {
 
       // app.json POST
       this.httpClient.post<Json>(
-        requestUrl, 
+        requestUrlHost, 
         JSON.stringify(requestJson),
         { withCredentials: true }
       )

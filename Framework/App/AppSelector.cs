@@ -143,7 +143,7 @@
                     appJson = CreateAppJson();
                     isInit = true;
                 }
-                appJson.RequestUrl = UtilServer.RequestUrl();
+                appJson.RequestUrlHost = UtilServer.RequestUrlHost();
                 appJson.IsSessionExpired = isSessionExpired;
 
                 // New RequestJson

@@ -729,7 +729,7 @@
 
         internal async Task<NavigateResult> NavigateInternalAsync(string navigatePath)
         {
-            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query);
+            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query, UtilServer.RequestUrlHost());
             NavigateResult result = new NavigateResult();
             await NavigateAsync(args, result);
             UtilFramework.Assert(!(result.Data != null && result.IsSession), $"Method {nameof(AppJson.NavigateAsync)}(); can not send data and request session at the same time!");
@@ -748,10 +748,11 @@
 
         public class NavigateArgs
         {
-            internal NavigateArgs(string navigatePath, IQueryCollection httpQuery)
+            internal NavigateArgs(string navigatePath, IQueryCollection httpQuery, string requestUrlHost)
             {
                 NavigatePath = navigatePath;
                 HttpQuery = httpQuery;
+                RequestUrlHost = requestUrlHost;
                 if (UtilServer.NavigatePathIsFileName(navigatePath))
                 {
                     FileName = UtilFramework.FolderNameParse(null, navigatePath);
@@ -778,6 +779,11 @@
             /// Gets HttpQuery. Determine for example: "/doc/image.png?thumbnail"
             /// </summary>
             public IQueryCollection HttpQuery { get; private set; }
+
+            /// <summary>
+            /// Gets RequestHostUrl. For example: "http://localhost:5000/".
+            /// </summary>
+            public string RequestUrlHost { get; }
 
             /// <summary>
             /// Returns true, if navigatePath starts with navigatePathPrefix.
@@ -859,7 +865,7 @@
 
         internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string navigatePath, bool isAddHistory)
         {
-            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query);
+            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query, UtilServer.RequestUrlHost());
             var result = new NavigateSessionResult { NavigatePath = args.NavigatePath };
             await NavigateSessionAsync(args, result);
             if (result.IsPage)
@@ -927,6 +933,11 @@
             /// Gets or sets NavigatePath. For example: "/contact/" or "/signin/", if redirected.
             /// </summary>
             public string NavigatePath { get; set; }
+
+            /// <summary>
+            /// Gets or sets RedirectPath. Used to redirect trailing slash. For example redirect "/contact" to "/contact/".
+            /// </summary>
+            public string RedirectPath { get; set; }
         }
 
         /// <summary>
@@ -1057,9 +1068,9 @@
         internal bool IsReload { get; set; }
 
         /// <summary>
-        /// Gets RequestUrl. This value is set by the server. For example: http://localhost:49323/". Used by client for app.json post. See also method <see cref="UtilServer.RequestUrl"/>;
+        /// Gets RequestUrlHost. This value is set by the server. For example: http://localhost:5000/". Used by client for app.json post. See also method <see cref="UtilServer.RequestUrlHost"/>;
         /// </summary>
-        internal string RequestUrl { get; set; }
+        internal string RequestUrlHost { get; set; }
 
         /// <summary>
         /// Gets EmbeddedUrl. Value used by Angular client on first app.json POST to indicate application is embedded and running on other website.

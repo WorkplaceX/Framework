@@ -158,15 +158,25 @@
                 var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(navigatePath, isAddHistory: false);
                 if (navigateSessionResult.IsPage)
                 {
-                    // Send page together with HTTP 404 not found code
-                    if (navigateSessionResult.IsPageNotFound)
+                    if (navigateSessionResult.RedirectPath != null)
                     {
-                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        context.Response.Redirect(navigateSessionResult.RedirectPath);
                         result = true;
                     }
                     else
                     {
-                        result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                        // Send page together with HTTP 404 not found code
+                        if (navigateSessionResult.IsPageNotFound)
+                        {
+                            context.Response.StatusCode = StatusCodes.Status404NotFound;
+                            // Custom error page rendering
+                            await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                            result = true;
+                        }
+                        else
+                        {
+                            result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                        }
                     }
                 }
                 else
