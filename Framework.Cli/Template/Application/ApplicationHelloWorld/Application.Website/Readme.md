@@ -42,6 +42,14 @@ Modify file styles.scss
 @import "~bulma/css/bulma.min.css";
 ´´´
 
+## Add Custom Component
+See also Custom01Component.
+´´´cmd
+ng generate component custom-hero --skip-import --inlineStyle=true --skipTests=true --inline-template
+´´´
+* Add to file app.module.ts
+* Add to file framework.component.ts (class selector)
+
 ## Version Check
 ´´´cmd
 node --version # v12.18.1
@@ -74,16 +82,17 @@ ng run build:ssr
 
 ## Add Framework Component
 ```cmd
-npm run ng -- generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
-npm run ng -- generate component grid --skip-import --inlineStyle=true --skipTests=true
-npm run ng -- generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
-npm run ng -- generate component bulma-navbar --skip-import --inlineStyle=true --skipTests=true
+ng generate component framework --skip-import --inlineTemplate=true --inlineStyle=true --skipTests=true
+ng generate component grid --skip-import --inlineStyle=true --skipTests=true
+ng generate component bootstrapNavbar --skip-import --inlineStyle=true --skipTests=true
+ng generate component bulma-navbar --skip-import --inlineStyle=true --skipTests=true
 ```
 
 ## Modify File package.json
 Add "--outputHashing=none --progress=false"
 
 ## Modify Files
+* angular.json (Add deployUrl) Ensures Angular css and js files start with absolute path /
 * main.ts (Find jsonServerSideRendering)
 * server.ts (Find tag // Framework: Enable SSR POST)
 
