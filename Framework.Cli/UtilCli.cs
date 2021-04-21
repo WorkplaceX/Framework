@@ -311,6 +311,7 @@
                     {
                         // Silent exception.
                         Console.WriteLine(string.Format("Can not delete folder! ({0})", folderName));
+                        UtilFramework.NodeClose();
                     }
                 }
                 count += 1;

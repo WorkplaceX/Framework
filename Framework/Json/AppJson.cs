@@ -1068,6 +1068,11 @@
         internal bool IsReload { get; set; }
 
         /// <summary>
+        /// Gets or sets IsPageNotFound. If true, page is not serialized at the end of request.
+        /// </summary>
+        internal bool IsPageNotFound { get; set; }
+
+        /// <summary>
         /// Gets RequestUrlHost. This value is set by the server. For example: http://localhost:5000/". Used by client for app.json post. See also method <see cref="UtilServer.RequestUrlHost"/>;
         /// </summary>
         internal string RequestUrlHost { get; set; }

@@ -12,7 +12,7 @@
     internal class Request
     {
         /// <summary>
-        /// Every client request goes through here.
+        /// Every request goes through here.
         /// </summary>
         public async Task RunAsync(HttpContext context)
         {
@@ -168,7 +168,11 @@
                         // Send page together with HTTP 404 not found code
                         if (navigateSessionResult.IsPageNotFound)
                         {
+                            // Do not serialize custom error page and reset request, response count
                             context.Response.StatusCode = StatusCodes.Status404NotFound;
+                            appJsonSession.IsPageNotFound = true;
+                            appJsonSession.RequestCount -= 1;
+                            appJsonSession.ResponseCount -= 1;
                             // Custom error page rendering
                             await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
                             result = true;

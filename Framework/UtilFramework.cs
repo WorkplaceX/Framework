@@ -10,6 +10,7 @@ namespace Framework
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -40,7 +41,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.08";
+                return "v3.51.09";
             }
         }
 
@@ -594,6 +595,18 @@ namespace Framework
         {
             var result = StringNull(Path.GetExtension(fileName));
             return result;
+        }
+
+        /// <summary>
+        /// Close all running node.exe
+        /// </summary>
+        internal static void NodeClose()
+        {
+            foreach (var process in Process.GetProcesses().Where(item => item.MainWindowTitle.EndsWith("node.exe")))
+            {
+                Console.WriteLine("Closing node.exe!");
+                process.Kill();
+            }
         }
 
         /// <summary>

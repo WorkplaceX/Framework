@@ -200,6 +200,8 @@
 
         public int TitleLevel { get; set; }
 
+        public string TitleId { get; set; }
+
         public MdBracketEnum BracketEnum { get; set; }
 
         public bool IsBracketEnd { get; set; }
@@ -2310,9 +2312,29 @@
         {
             UtilDoc.Assert(owner is SyntaxPage || owner is SyntaxCustomPage);
             Data.TitleLevel = ((SyntaxTitle)syntax).TitleLevel;
+            Data.TitleId = ((SyntaxTitle)syntax).TitleId;
+            if (Data.Registry.IsDebug == false)
+            {
+                if (TitleId == null)
+                {
+                    var contentList = syntax.List.OfType<SyntaxContent>().ToList();
+                    if (contentList.Count > 0)
+                    {
+                        foreach (var item in contentList)
+                        {
+                            Data.TitleId += item.Text.ToLower().Replace(" ", "-").Replace("\"", "");
+                        }
+                    }
+                }
+            }
         }
 
         public int TitleLevel => Data.TitleLevel;
+
+        /// <summary>
+        /// Gets TitleId. Used for html named anchor.
+        /// </summary>
+        public string TitleId => Data.TitleId;
 
         protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
         {
@@ -3483,6 +3505,11 @@
         {
             // For example <h1>
             result.Append("<h" + Syntax.TitleLevel + ">");
+            if (Syntax.TitleId != null)
+            {
+                var anchor = string.Format("<a id=\"{0}\" class=\"anchor\" aria-hidden=\"true\"></a>", Syntax.TitleId);
+                result.Append(anchor);
+            }
         }
 
         internal override void RenderEnd(StringBuilder result)
@@ -3671,7 +3698,27 @@
         internal override void RenderContent(StringBuilder result)
         {
             result.Append(string.Format("<pre><code class=\"{0}\">", "language-" + Syntax.CodeLanguage));
-            result.Append(Syntax.CodeText);
+            var codeText = Syntax.CodeText;
+            if (Data.Registry.IsDebug == false)
+            {
+                if (codeText.StartsWith("\r"))
+                {
+                    codeText = codeText.Substring(1);
+                }
+                if (codeText.StartsWith("\n"))
+                {
+                    codeText = codeText.Substring(1);
+                }
+                if (codeText.EndsWith("\n"))
+                {
+                    codeText = codeText.Substring(0, codeText.Length - 1);
+                }
+                if (codeText.EndsWith("\r"))
+                {
+                    codeText = codeText.Substring(0, codeText.Length - 1);
+                }
+            }
+            result.Append(codeText);
             result.Append("</code></pre>");
         }
     }

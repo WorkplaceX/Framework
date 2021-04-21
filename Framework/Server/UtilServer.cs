@@ -151,11 +151,7 @@
         /// </summary>
         public static void StartUniversalServerAngular()
         {
-            // Close running node.exe
-            foreach (var process in Process.GetProcesses().Where(item => item.MainWindowTitle.EndsWith("node.exe")))
-            {
-                process.Kill();
-            }
+            UtilFramework.NodeClose();
 
             var configServer = ConfigServer.Load();
             foreach (var website in configServer.WebsiteList)
