@@ -33,7 +33,8 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "deployUrl": "/"
           },
           "configurations": {
             "production": {

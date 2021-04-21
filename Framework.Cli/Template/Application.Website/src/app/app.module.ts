@@ -6,13 +6,16 @@ import { Page, Selector, Button, Html, Div, DivContainer, BingMap } from './fram
 import { BulmaNavbarComponent } from './bulma-navbar/bulma-navbar.component';
 import { GridComponent } from './grid/grid.component';
 import { BootstrapNavbarComponent } from './bootstrap-navbar/bootstrap-navbar.component';
+import { Custom01Component } from './custom01/custom01.component';
 
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { Custom02Component } from './custom02/custom02.component';
+import { Custom03Component } from './custom03/custom03.component';
 
 @NgModule({
   declarations: [
-    AppComponent, Selector, Page, Button, Html, Div, DivContainer, BingMap, BulmaNavbarComponent, GridComponent, BootstrapNavbarComponent
+    AppComponent, Selector, Page, Button, Html, Div, DivContainer, BingMap, BulmaNavbarComponent, GridComponent, BootstrapNavbarComponent, Custom01Component, Custom02Component, Custom03Component
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
