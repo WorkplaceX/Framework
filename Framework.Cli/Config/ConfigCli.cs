@@ -74,6 +74,11 @@
         public string BingMapKey { get; set; }
 
         /// <summary>
+        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4.
+        /// </summary>
+        public string GoogleAnalyticsId { get; set; }
+
+        /// <summary>
         /// Gets ConfigCli.json. Used by CommandBuild. Created with default values if file does not exist.
         /// </summary>
         private static string FileName
@@ -200,6 +205,9 @@
 
             // BingMap key
             configServer.BingMapKey = configCli.BingMapKey;
+
+            // Google Analytics 4
+            configServer.GoogleAnalyticsId = configCli.GoogleAnalyticsId;
 
             ConfigServer.Save(configServer);
         }

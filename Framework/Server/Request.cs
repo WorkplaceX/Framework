@@ -120,6 +120,12 @@
                     // Create page (*.html). Also if SSR is disabled.
                     string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector, appJson);
 
+                    // Google Analytics 4
+                    if (UtilFramework.StringNull(appSelector.ConfigServer.GoogleAnalyticsId) != null)
+                    {
+                        htmlIndex = htmlIndex.Replace("G-XXXXXXXXXX", appSelector.ConfigServer.GoogleAnalyticsId);
+                    }
+
                     await context.Response.WriteAsync(htmlIndex);
                     result = true;
                 }

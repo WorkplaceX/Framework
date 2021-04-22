@@ -50,6 +50,11 @@
         public string BingMapKey { get; set; }
 
         /// <summary>
+        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4. For example G-XXXXXXXXXX
+        /// </summary>
+        public string GoogleAnalyticsId { get; set; }
+
+        /// <summary>
         /// Returns ConnectionString. Used by WebServer  and Cli.
         /// </summary>
         public static string ConnectionString(bool isFrameworkDb)
