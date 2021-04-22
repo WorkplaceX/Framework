@@ -3677,7 +3677,13 @@
             }
             else
             {
-                result.Append($"<img src=\"{ Syntax.Link }\" alt=\"{ Syntax.LinkText }\" />");
+                var fileNameExtension = UtilDoc.StringNull(Path.GetExtension(Syntax.Link));
+                // Render html image tag only if src file name has an extension.
+                // For example the image file name "/" would cause the session to navigate.
+                if (fileNameExtension != null)
+                {
+                    result.Append($"<img src=\"{ Syntax.Link }\" alt=\"{ Syntax.LinkText }\" />");
+                }
             }
         }
     }
@@ -3718,6 +3724,8 @@
                     codeText = codeText.Substring(0, codeText.Length - 1);
                 }
             }
+            // Escape html special chars.
+            codeText = System.Security.SecurityElement.Escape(codeText);
             result.Append(codeText);
             result.Append("</code></pre>");
         }

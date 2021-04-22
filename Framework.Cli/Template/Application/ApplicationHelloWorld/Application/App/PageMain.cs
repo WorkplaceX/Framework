@@ -14,7 +14,7 @@
         public PageMain(ComponentJson owner) 
             : base(owner) 
         {
-            BulmaNavbar = new Navbar(this) { BrandTextHtml = "<b>WorkplaceX</b>.org" };
+            BulmaNavbar = new Navbar(this) { BrandTextHtml = "<b>Hello</b>World" };
 
             new Html(this)
             {
@@ -24,17 +24,16 @@
                   <div class='hero-body'>
                     <div class='container'>
                       <h1 class='title'>
-                        WorkplaceX.org
+                        Hello World
                       </h1>
                       <h2 class='subtitle'>
-                        Boost your Business App
+                        Getting Started
                       </h2>
                     </div>
                   </div>
                 </section>
                 "
             };
-
 
             Container = new Div(this) { CssClass = "container" };
             Content = new Div(Container);
@@ -49,7 +48,7 @@
                 <footer class='footer'>
                   <div class='content has-text-centered'>
                     <p>
-	                  (C) 2021 by WorkplaceX.org " + Util.Version + @"
+	                  (C) 2021 by HelloWorld " + Util.Version + @"
                     </p>
                   </div>
                 </footer>

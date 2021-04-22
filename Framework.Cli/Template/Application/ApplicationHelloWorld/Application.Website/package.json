@@ -25,7 +25,7 @@
     "@angular/platform-server": "~11.2.7",
     "@angular/router": "~11.2.7",
     "@nguniversal/express-engine": "^11.2.1",
-    "bootstrap": "^4.6.0",
+    "bulma": "^0.9.2",
     "express": "^4.15.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",

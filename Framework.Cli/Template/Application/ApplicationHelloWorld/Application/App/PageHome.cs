@@ -6,7 +6,8 @@
     {
         public PageHome(ComponentJson owner) : base(owner) 
         {
-            new Html(this) { TextHtml = "<h1>Home</h1>" };
+            var content = new Div(this) { CssClass = "content" };
+            new Html(content) { TextHtml = "<h1>Home</h1>" };
         }
     }
 }
