@@ -5,8 +5,10 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Rewrite;
     using Microsoft.Extensions.DependencyInjection;
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// ASP.NET Core configuration.
@@ -51,7 +53,34 @@
             applicationBuilder.UseStaticFiles(); // Enable access to files in folder wwwwroot.
             applicationBuilder.UseSession();
 
-            if (configServer.IsUseHttpsRedirection)
+            // IsRedirectWww
+            if (configServer.IsRedirectWww)
+            {
+                // Rewrite for example workplacex.org to www.workplacex.org
+                // Do not rewrite for example demo.workplacex.org
+                // See also: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/url-rewriting?view=aspnetcore-5.0
+                var domainNameList = new List<string>();
+                foreach (var website in configServer.WebsiteList)
+                {
+                    foreach (var domainName in website.DomainNameList)
+                    {
+                        if (domainName.DomainName.StartsWith("www."))
+                        {
+                            domainNameList.Add(domainName.DomainName.Substring("www.".Length));
+                        }
+                    }
+                }
+                var options = new RewriteOptions();
+                if (domainNameList.Count > 0)
+                {
+                    options = options.AddRedirectToWww(domainNameList.ToArray());
+                }
+                // options = options.AddRedirect("(.*[^/])$", "$1/"); // Enforce trailing slash. For example /path becomes /path/ // Be aware! /abc.js becomes /abc.js/
+                applicationBuilder.UseRewriter(options);
+            }
+
+            // IsRedirectHttps
+            if (configServer.IsRedirectHttps)
             {
                 // Enforce HTTPS in ASP.NET Core https://docs.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-5.0&tabs=visual-studio
                 applicationBuilder.UseHsts();

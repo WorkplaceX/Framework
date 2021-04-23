@@ -20,10 +20,13 @@
         }
 
         internal CommandOption OptionClientOnly;
+        
+        internal CommandOption OptionServerOnly;
 
         protected internal override void Register(CommandLineApplication configuration)
         {
-            OptionClientOnly = configuration.Option("-c|--client", "Build website and Angular only.", CommandOptionType.NoValue);
+            OptionClientOnly = configuration.Option("-c|--client", "Build Angular website only.", CommandOptionType.NoValue);
+            OptionServerOnly = configuration.Option("-s|--server", "Build .NET server only.", CommandOptionType.NoValue);
         }
 
         /// <summary>
@@ -160,8 +163,11 @@
             // Run cli external command. Override for example custom components.
             CommandExternal();
 
-            // Build layout Website(s)
-            BuildWebsiteAngular();
+            // Build Angular Website(s)
+            if (OptionServerOnly.OptionGet() == false)
+            {
+                BuildWebsiteAngular();
+            }
 
             // Version tag and build Build Angular and .NET Core server.
             UtilCli.VersionBuild(() => {

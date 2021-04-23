@@ -186,7 +186,8 @@
             // Environment
             configServer.EnvironmentName = configCli.EnvironmentGet().EnvironmentName;
             configServer.IsUseDeveloperExceptionPage = configCli.EnvironmentGet().IsUseDeveloperExceptionPage;
-            configServer.IsUseHttpsRedirection = configCli.EnvironmentGet().IsUseHttpsRedirection;
+            configServer.IsRedirectHttps = configCli.EnvironmentGet().IsRedirectHttps;
+            configServer.IsRedirectWww = configCli.EnvironmentGet().IsRedirectWww;
 
             // ConnectionString
             configServer.ConnectionStringFramework = configCli.EnvironmentGet().ConnectionStringFramework;
@@ -229,9 +230,14 @@
         public bool IsUseDeveloperExceptionPage { get; set; }
 
         /// <summary>
-        /// Gets or sets IsUseHttpsRedirection. If true, http is redirected to https. By default this value is false. Restart web server after value change!
+        /// Gets or sets IsRedirectHttps. If true, http is redirected to https. By default this value is false. Restart web server after value change!
         /// </summary>
-        public bool IsUseHttpsRedirection { get; set; }
+        public bool IsRedirectHttps { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsRedirectWww. If ture, non www is redirected to wwww. For example workplacex.org is redirected to www.workplacex.org.
+        /// </summary>
+        public bool IsRedirectWww { get; set; }
 
         /// <summary>
         /// Gets or sets ConnectionStringFramework. Can be different from ConnectionStringApplication, if framework relevant tables are stored on another database.

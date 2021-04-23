@@ -25,9 +25,14 @@
         public bool IsUseDeveloperExceptionPage { get; set; }
 
         /// <summary>
-        /// Gets or sets IsUseHttpsRedirection. If true, http is redirected to https. By default this value is false. Restart web server after value change!
+        /// Gets or sets IsRedirectHttps. If true, http is redirected to https. By default this value is false. Restart web server after value change!
         /// </summary>
-        public bool IsUseHttpsRedirection { get; set; }
+        public bool IsRedirectHttps { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsRedirectWww. If ture, non www is redirected to wwww. For example workplacex.org is redirected to www.workplacex.org.
+        /// </summary>
+        public bool IsRedirectWww { get; set; }
 
         /// <summary>
         /// Gets or sets IsServerSideRendering. By default this value is true. Can be changed on the deployed server for trouble shooting.
