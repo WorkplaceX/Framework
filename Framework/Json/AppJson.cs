@@ -1089,7 +1089,7 @@
         internal string DownloadData;
 
         /// <summary>
-        /// Gets or sets NavigatePathAddHistory. This navigatePath is added by the browser to the navigate history. For example: "/contact/" or "/signin/", if redirected.
+        /// Gets or sets NavigatePathAddHistory. This path is added by the browser to the navigate history. For example: "/contact/" or "/signin/", if redirected.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
         internal string NavigatePathAddHistory;
