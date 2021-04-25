@@ -6,7 +6,7 @@
 
 Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Windows and Linux. Provides CI/CD pipeline.
 
-Project page: [WorkplaceX.org](http://workplacex.org)
+Project page: [WorkplaceX.org](https://www.workplacex.org)
 
 ## Getting started
 Prerequisites for Linux and Windows
