@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { CommandJson, DataService, Json } from '../data.service';
 
 @Component({
@@ -18,6 +18,9 @@ export class BulmaNavbarComponent implements OnInit {
   @ViewChild('burgerTarget')
   burgerTarget: ElementRef | undefined;
 
+  @ViewChildren('dropDown') 
+  dropDownList:QueryList<ElementRef> | undefined;
+
   ngOnInit(): void {
   }
 
@@ -32,15 +35,29 @@ export class BulmaNavbarComponent implements OnInit {
     (<HTMLElement>this.burgerTarget?.nativeElement).classList.toggle("is-active");
   }
 
-  click(navbarItem: any, event: MouseEvent | null) {
-    if (event != null) {
-      // Drop down does not close if level 1 item has a href attribute.
-      (<HTMLElement>event.currentTarget).blur();
-    }
+  click(navbarItem: any) {
     navbarItem.IsShowSpinner = true;
     this.dataService.update(<CommandJson> { CommandEnum: 18, ComponentId: this.json.Id, BulmaNavbarItemId: navbarItem.Id });
     return false;
   }
+
+  ngOnChanges() {
+    // Called when after every dataService.update(); See also: @Input() json!: Json
+    if (this.dropDownList != undefined) {
+      let dropDownListLocal = this.dropDownList.toArray();
+      // Close drop down
+      dropDownListLocal.forEach(item => (<HTMLElement>item.nativeElement).classList.remove("is-hoverable"));
+      setTimeout(() => {
+        // Restore css class
+        dropDownListLocal.forEach(item => (<HTMLElement>item.nativeElement).classList.add("is-hoverable"));
+      }, 100);
+    }
+    // Close burger
+    if (this.burger != undefined && this.burgerTarget != undefined) {
+      (<HTMLElement>this.burger.nativeElement).classList.remove("is-active");
+      (<HTMLElement>this.burgerTarget.nativeElement).classList.remove("is-active");
+    }
+  }  
 
   filterTextChange(navbarItem: any) {
     navbarItem.IsShowSpinner = true;
