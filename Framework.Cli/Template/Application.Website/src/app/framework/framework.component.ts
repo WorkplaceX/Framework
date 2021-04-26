@@ -13,6 +13,7 @@ import { CommandJson, DataService, Json } from '../data.service';
     <div data-Div [ngClass]="json.CssClass!" *ngSwitchCase="'Div'" [json]=json></div>
     <div data-DivContainer [ngClass]="json.CssClass!" *ngSwitchCase="'DivContainer'" [json]=json></div>
     <div data-BingMap [ngClass]="json.CssClass!" *ngSwitchCase="'BingMap'" [json]=json></div>
+    <div data-Dialpad *ngSwitchCase="'Dialpad'" [json]=json></div>
     <div data-BulmaNavbar [ngClass]="json.CssClass!" *ngSwitchCase="'BulmaNavbar'" [json]=json></div>
     <div data-BootstrapNavbar [ngClass]="json.CssClass!" *ngSwitchCase="'BootstrapNavbar'" [json]=json></div>  
     <div data-Grid [ngClass]="json.CssClass!" *ngSwitchCase="'Grid'" [json]=json></div>
@@ -225,4 +226,45 @@ export class BingMap {
     scriptApi.defer = true;
     this.dataService.renderer.appendChild(this.dataService.document.head, scriptApi);
   }
+}
+
+/* Dialpad */
+@Component({
+  selector: '[data-Dialpad]',
+  template: `
+  <div class='dialpad'>
+    <div class='row'>
+      <button [ngClass]="json.CssClass!" (click)="click('1');">1<sub>&nbsp;</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('2');">2<sub>(ABC)</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('3');">3<sub>(DEF)</sub></button>
+    </div>
+    <div class='row'>
+      <button [ngClass]="json.CssClass!" (click)="click('4');">4<sub>(GHI)</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('5');">5<sub>(JKL)</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('6');">6<sub>(MNO)</sub></button>
+    </div>
+    <div class='row'>
+      <button [ngClass]="json.CssClass!" (click)="click('7');">7<sub>(PQRS)</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('8');">8<sub>(TUV)</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('9');">9<sub>(WXYZ)</sub></button>
+    </div>
+    <div class='row'>
+      <button [ngClass]="json.CssClass!" (click)="click('*');">*<sub>&nbsp;</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('0');">0<sub>(+)</sub></button>
+      <button [ngClass]="json.CssClass!" (click)="click('#');">#<sub>&nbsp;</sub></button>
+    </div>
+    <i *ngIf="json.IsShowSpinner" class="fas fa-spinner fa-spin"></i>
+  </div>
+  `
+})
+export class Dialpad {
+  constructor(private dataService: DataService){
+  }
+
+  @Input() json!: Json
+
+  click(text: string){
+    this.json.IsShowSpinner = true;
+    this.dataService.update(<CommandJson> { CommandEnum: 21, ComponentId: this.json.Id, DialpadText: text });
+  } 
 }

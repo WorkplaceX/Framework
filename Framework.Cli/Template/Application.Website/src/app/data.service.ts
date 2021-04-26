@@ -113,6 +113,8 @@ export class CommandJson {
   ResizeColumnIndex: number | undefined;
 
   ResizeColumnWidthValue: number | undefined;
+
+  DialpadText: string | undefined;
 }
 
 export class RequestJson {

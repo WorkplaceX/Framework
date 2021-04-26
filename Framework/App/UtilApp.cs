@@ -25,6 +25,17 @@
         }
 
         /// <summary>
+        /// User clicked number on dialpad.
+        /// </summary>
+        public static void ProcessDialpadIsClick(AppJson appJson)
+        {
+            if (UtilSession.Request(appJson, CommandEnum.Dialpad, out CommandJson commandJson, out Dialpad dialpad))
+            {
+                dialpad.Text += commandJson.DialpadText;
+            }
+        }
+
+        /// <summary>
         /// User clicked internal link or user clicked backward or forward button in browser. Instead of GET and download Angular again a POST command is sent.
         /// </summary>
         public static async Task ProcessNavigatePostAsync(AppJson appJson)

@@ -1,5 +1,3 @@
-/* To modify this file live use cli command start --watch */
-
 /*
 body {
   background: yellow;
@@ -175,4 +173,41 @@ input::-ms-clear {
 
 .gridClick {
   margin-bottom: 2em;
+}
+
+app-root .dialpad .row {
+  display: flex;
+}
+
+app-root .dialpad .row button {
+  width: 100%;
+  height: 8rem;
+  margin: 0.5rem;
+
+	box-shadow: 3px 4px 0px 0px #1564ad;
+	background:linear-gradient(to bottom, #79bbff 5%, #378de5 100%);
+	background-color:#79bbff;
+	border-radius:5px;
+	border:1px solid #337bc4;
+	cursor:pointer;
+	color:white;
+	font-size:2rem;
+	font-weight:bold;
+}
+
+app-root .dialpad .row button sub {
+  display: block;
+	font-size:1rem;
+  font-weight: normal;
+  letter-spacing: 0.1rem;
+}
+
+app-root .dialpad .row button:hover {
+	background:linear-gradient(to bottom, #378de5 5%, #79bbff 100%);
+	background-color:#378de5;  
+}
+
+app-root .dialpad .row button:active {
+	position:relative;
+	top:1px;
 }

@@ -75,6 +75,11 @@
         /// User resized column width.
         /// </summary>
         StyleColumnWidth = 20,
+
+        /// <summary>
+        /// User clicked number on dialpad.
+        /// </summary>
+        Dialpad = 21,
     }
 
     /// <summary>
@@ -160,6 +165,11 @@
         /// Gets or sets ResizeColumnWidthValue. This is the new column width.
         /// </summary>
         public double ResizeColumnWidthValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets DialpadText. This is the number sent by dialpad.
+        /// </summary>
+        public string DialpadText { get; set; }
     }
 
     /// <summary>
@@ -548,9 +558,12 @@
         {
             if (component != null)
             {
-                component.Owner?.ListInternal.Remove(component);
-                component.Owner = null;
-                component.IsRemoved = true;
+                foreach (var item in component.ComponentListAll())
+                {
+                    item.Owner?.ListInternal.Remove(item);
+                    item.Owner = null;
+                    item.IsRemoved = true;
+                }
             }
         }
 
@@ -1007,8 +1020,9 @@
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
                 BulmaNavbar.ProcessAsync(appJson);
+                UtilApp.ProcessDialpadIsClick(appJson);
 
-                // ProcessAsync
+                // Page ProcessAsync
                 foreach (var item in this.ComponentListAll())
                 {
                     if (item is Page page)
@@ -3016,6 +3030,26 @@
             }
             return base.ProcessAsync();
         }
+    }
+
+    /// <summary>
+    /// Dialpad with numbers.
+    /// </summary>
+    public class Dialpad : ComponentJson
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Dialpad(ComponentJson owner) 
+            : base(owner, nameof(Dialpad))
+        {
+
+        }
+
+        /// <summary>
+        /// Gets or sets Text. This is the numbers entered by user.
+        /// </summary>
+        public string Text;
     }
 
     /// <summary>
