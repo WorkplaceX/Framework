@@ -1,8 +1,8 @@
 # WorkplaceX Framework
 
-![Build Status](https://github.com/WorkplaceX/ApplicationDoc/workflows/CI/badge.svg) (ApplicationDoc; github actions;)
+![Build Status](https://github.com/WorkplaceX/ApplicationDoc/workflows/CI/badge.svg) (github actions)
 
-[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDoc.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDoc) (ApplicationDoc; travis;)
+[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDoc.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDoc) (travis)
 
 Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Windows and Linux. Provides CI/CD pipeline.
 
