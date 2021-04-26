@@ -1,8 +1,8 @@
 # WorkplaceX Framework
 
-![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)
+![Build Status](https://github.com/WorkplaceX/ApplicationDoc/workflows/CI/badge.svg) (ApplicationDoc; github actions;)
 
-[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
+[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDoc.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDoc) (ApplicationDoc; travis;)
 
 Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Windows and Linux. Provides CI/CD pipeline.
 
@@ -23,7 +23,7 @@ npx workplacex-cli new
 ./cli.cmd build
 
 # Set database connection
-./cli.cmd config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;"
+./cli.cmd config connectionString="Data Source=localhost; Initial Catalog=ApplicationDoc; User Id=SA; Password=MyPassword;"
 
 # Deploy database
 ./cli.cmd deployDb
