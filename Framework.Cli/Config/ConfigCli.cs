@@ -250,6 +250,15 @@
         public string ConnectionStringApplication { get; set; }
 
         /// <summary>
+        /// Set ConnectionString for Framework and Application.
+        /// </summary>
+        public void ConnectionStringSet(string connectionString)
+        {
+            ConnectionStringFramework = connectionString;
+            ConnectionStringApplication = connectionString;
+        }
+
+        /// <summary>
         /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
         /// </summary>
         public string DeployAzureGitUrl { get; set; }

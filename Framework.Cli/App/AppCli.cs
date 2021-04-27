@@ -728,7 +728,7 @@
             internal readonly Dictionary<Type, string[]> ResultKey = new Dictionary<Type, string[]>();
 
             /// <summary>
-            /// (TypeRow (Integrate), FieldNameCSharp, FileNameExtension)
+            /// (TypeRow, FieldNameCSharp, FileName)
             /// </summary>
             internal readonly Dictionary<Type, Dictionary<string, Func<Row, string>>> ResultBlob = new Dictionary<Type, Dictionary<string, Func<Row, string>>>();
 
@@ -784,16 +784,15 @@
             /// <summary>
             /// Store field value not in CSharp code. Store value in an external file in folder Blob/. Will be applied for cli data and for type byte[] and string.
             /// </summary>
-            /// <typeparam name="TRow">Row (Integrate).</typeparam>
-            /// <param name="fieldName">For example "Data".</param>
-            /// <param name="fileNameExtension">For example ".jpg"</param>
-            public void AddBlob<TRow>(string fieldName, Func<TRow, string> fileNameExtension = null) where TRow : Row
+            /// <typeparam name="TRow">Data row.</typeparam>
+            /// <param name="fieldName">For example binary field "Data".</param>
+            /// <param name="fileName">Unique file name. For example "abc.jpg". It will be prefixed by framework with database schema name and table name. For Integrate table typically use IdName.</param>
+            public void AddBlob<TRow>(string fieldName, Func<TRow, string> fileName) where TRow : Row
             {
                 Type typeRow = typeof(TRow);
 
-                // Assert table name ends with Integrate
-                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
-                UtilFramework.Assert(tableNameCSharp.EndsWith("Integrate"), string.Format("Integrate table expected! ({0})", tableNameCSharp));
+                // Assert method Add(); has been called before.
+                UtilFramework.Assert(Result.Where(item => item.TypeRow == typeRow).Any(), string.Format("No query defined yet! Use first method Add(); ({0})", typeRow.Name));
 
                 // Assert field exists
                 var fieldNameCSharpList = UtilDalType.TypeRowToFieldList(typeRow).Select(item => item.FieldNameCSharp).ToList();
@@ -804,7 +803,7 @@
                 {
                     ResultBlob.Add(typeRow, new Dictionary<string, Func<Row, string>>());
                 }
-                ResultBlob[typeRow].Add(fieldName, fileNameExtension != null ? (row) => fileNameExtension((TRow)row) : null);
+                ResultBlob[typeRow].Add(fieldName, (row) => fileName((TRow)row));
             }
 
             /// <summary>

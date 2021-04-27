@@ -188,24 +188,18 @@
                     }
 
                     // Blob FileName
-                    string fileNameBlob = null;
-                    string fileNameBlobExtension = null;
+                    string fileName = null;
                     if (integrateItem.Owner.ResultBlob.ContainsKey(row.GetType()))
                     {
-                        if (integrateItem.Owner.ResultBlob[row.GetType()].TryGetValue(field.FieldNameCSharp, out var fileNameExtension))
+                        if (integrateItem.Owner.ResultBlob[row.GetType()].TryGetValue(field.FieldNameCSharp, out var fileNameFunc))
                         {
-                            var fieldIdName = fieldList.Where(item => item.FieldNameCSharp == "IdName").Single();
-                            var idName = fieldIdName.PropertyInfo.GetValue(row);
-                            fileNameBlob = string.Format("{0}.{1}.{2}", integrateItem.SchemaNameCSharp, integrateItem.TableNameCSharp, idName);
-                            if (fileNameExtension != null)
-                            {
-                                fileNameBlobExtension = fileNameExtension(row);
-                            }
+                            fileName = fileNameFunc(row);
+                            fileName = string.Format("{0}.{1}.{2}", integrateItem.SchemaNameCSharp, integrateItem.TableNameCSharp, fileName);
                         }
                     }
 
                     // Generate field
-                    GenerateCSharpRowIntegrateField(field, value, fileNameBlob, fileNameBlobExtension, integrateItem.IsApplication, result);
+                    GenerateCSharpRowIntegrateField(field, value, fileName, integrateItem.IsApplication, result);
                 }
                 result.Append(" },");
                 result.AppendLine();
@@ -215,7 +209,7 @@
         /// <summary>
         /// Generate CSharp property with value.
         /// </summary>
-        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, string fileNameBlob, string fileNameBlobExtension, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, string fileName, bool isApplication, StringBuilder result)
         {
             string fieldNameCSharp = field.FieldNameCSharp;
             FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum);
@@ -230,24 +224,20 @@
             }
 
             // Blob write
-            if (fileNameBlob != null && !isApplication && (value is byte[] || value is string))
+            if (fileName != null && !isApplication && (value is byte[] || value is string))
             {
                 var folderName = UtilFramework.FolderName + "Application.Cli/Database/Blob/";
                 UtilCli.FolderCreate(folderName);
-                if (fileNameBlobExtension != null && !fileNameBlobExtension.StartsWith("."))
-                {
-                    fileNameBlobExtension = "." + fileNameBlobExtension;
-                }
-                var fileName = folderName + fileNameBlob + fileNameBlobExtension;
+                var fileNameFull = folderName + fileName;
                 if (value is byte[])
                 {
-                    File.WriteAllBytes(fileName, (byte[])value);
-                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadData(\"{ fileNameBlob + fileNameBlobExtension }\")";
+                    File.WriteAllBytes(fileNameFull, (byte[])value);
+                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadData(\"{ fileName }\")";
                 }
                 if (value is string)
                 {
-                    File.WriteAllText(fileName, (string)value);
-                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadText(\"{ fileNameBlob + fileNameBlobExtension }\")";
+                    File.WriteAllText(fileNameFull, (string)value);
+                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadText(\"{ fileName }\")";
                 }
             }
             
