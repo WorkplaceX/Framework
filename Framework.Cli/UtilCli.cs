@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace Framework.Cli
 {
@@ -18,12 +20,42 @@ namespace Framework.Cli
         }
 
         /// <summary>
+        /// Returns FileNameFull for blob file. Searches also in ExternalGit.
+        /// </summary>
+        private static string BlobReadFileNameFull(string fileName)
+        {
+            string result = null;
+
+            var list = new List<string>();
+            list.Add(UtilFramework.FolderName + "Application.Cli/Database/Blob/" + fileName);
+            foreach (var item in Config.ConfigCli.Load().ExternalList)
+            {
+                list.Add(UtilFramework.FolderName + "Application.Cli/Database/ExternalGit/" + item.ExternalProjectName + "/Blob/" + fileName);
+            }
+            int count = 0;
+            foreach (var item in list)
+            {
+                if (File.Exists(item))
+                {
+                    result = item;
+                    count += 1;
+                }
+            }
+
+            // Assert found once
+            UtilFramework.Assert(count == 1, string.Format("File not found or multiple times! ({0})", fileName));
+
+            return result;
+        }
+    
+
+        /// <summary>
         /// Returns text from blob.
         /// Used only by generated file Application.Cli/Database/DatabaseIntegrate.cs
         /// </summary>
         public static string BlobReadText(string fileName)
         {
-            var fileNameFull = UtilFramework.FolderName + "Application.Cli/Database/Blob/" + fileName;
+            var fileNameFull = BlobReadFileNameFull(fileName);
             return File.ReadAllText(fileNameFull);
         }
 
@@ -33,7 +65,7 @@ namespace Framework.Cli
         /// </summary>
         public static byte[] BlobReadData(string fileName)
         {
-            var fileNameFull = UtilFramework.FolderName + "Application.Cli/Database/Blob/" + fileName;
+            var fileNameFull = BlobReadFileNameFull(fileName);
             return File.ReadAllBytes(fileNameFull);
         }
     }
