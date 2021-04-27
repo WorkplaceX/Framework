@@ -242,10 +242,12 @@
                 if (value is byte[])
                 {
                     File.WriteAllBytes(fileName, (byte[])value);
+                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadData(\"{ fileNameBlob + fileNameBlobExtension }\")";
                 }
                 if (value is string)
                 {
                     File.WriteAllText(fileName, (string)value);
+                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadText(\"{ fileNameBlob + fileNameBlobExtension }\")";
                 }
             }
             

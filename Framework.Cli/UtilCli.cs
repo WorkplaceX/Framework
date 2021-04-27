@@ -316,7 +316,7 @@
                 }
                 count += 1;
             } while (UtilCli.FolderNameExist(folderName) && count <= 3);
-            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Can not delete folder! Make sure server.ts and node.exe is not running. ({0}", folderName));
+            UtilFramework.Assert(!UtilCli.FolderNameExist(folderName), string.Format("Can not delete folder! Make sure it is not locked by another program. For example by a running server.ts or node.exe. ({0}", folderName));
         }
 
         internal static bool FolderNameExist(string folderName)
