@@ -2,6 +2,7 @@
 {
     using Framework.DataAccessLayer;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using static Framework.Cli.AppCli;
@@ -185,7 +186,26 @@
                         // Unlike IdName, Id can change from database to database.
                         value = 0;
                     }
-                    GenerateCSharpRowIntegrateField(field, value, result);
+
+                    // Blob FileName
+                    string fileNameBlob = null;
+                    string fileNameBlobExtension = null;
+                    if (integrateItem.Owner.ResultBlob.ContainsKey(row.GetType()))
+                    {
+                        if (integrateItem.Owner.ResultBlob[row.GetType()].TryGetValue(field.FieldNameCSharp, out var fileNameExtension))
+                        {
+                            var fieldIdName = fieldList.Where(item => item.FieldNameCSharp == "IdName").Single();
+                            var idName = fieldIdName.PropertyInfo.GetValue(row);
+                            fileNameBlob = string.Format("{0}.{1}.{2}", integrateItem.SchemaNameCSharp, integrateItem.TableNameCSharp, idName);
+                            if (fileNameExtension != null)
+                            {
+                                fileNameBlobExtension = fileNameExtension(row);
+                            }
+                        }
+                    }
+
+                    // Generate field
+                    GenerateCSharpRowIntegrateField(field, value, fileNameBlob, fileNameBlobExtension, integrateItem.IsApplication, result);
                 }
                 result.Append(" },");
                 result.AppendLine();
@@ -195,7 +215,7 @@
         /// <summary>
         /// Generate CSharp property with value.
         /// </summary>
-        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, StringBuilder result)
+        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, string fileNameBlob, string fileNameBlobExtension, bool isApplication, StringBuilder result)
         {
             string fieldNameCSharp = field.FieldNameCSharp;
             FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum);
@@ -208,6 +228,27 @@
             {
                 valueCSharp = frameworkType.ValueToCSharp(value);
             }
+
+            // Blob write
+            if (fileNameBlob != null && !isApplication && (value is byte[] || value is string))
+            {
+                var folderName = UtilFramework.FolderName + "Application.Cli/Database/Blob/";
+                UtilCli.FolderCreate(folderName);
+                if (fileNameBlobExtension != null && !fileNameBlobExtension.StartsWith("."))
+                {
+                    fileNameBlobExtension = "." + fileNameBlobExtension;
+                }
+                var fileName = folderName + fileNameBlob + fileNameBlobExtension;
+                if (value is byte[])
+                {
+                    File.WriteAllBytes(fileName, (byte[])value);
+                }
+                if (value is string)
+                {
+                    File.WriteAllText(fileName, (string)value);
+                }
+            }
+            
             result.Append(string.Format("{0} = {1}", fieldNameCSharp, valueCSharp));
         }
 

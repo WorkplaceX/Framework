@@ -727,6 +727,11 @@
             /// </summary>
             internal readonly Dictionary<Type, string[]> ResultKey = new Dictionary<Type, string[]>();
 
+            /// <summary>
+            /// (TypeRow (Integrate), FieldNameCSharp, FileNameExtension)
+            /// </summary>
+            internal readonly Dictionary<Type, Dictionary<string, Func<Row, string>>> ResultBlob = new Dictionary<Type, Dictionary<string, Func<Row, string>>>();
+
             private void ResultAdd(GenerateIntegrateItem value)
             {
                 Result.Add(value);
@@ -755,11 +760,11 @@
             {
                 Type typeRow = typeof(TRow);
 
-                // Asser table name ends with Integrate
+                // Assert table name ends with Integrate
                 string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
                 UtilFramework.Assert(!tableNameCSharp.EndsWith("Integrate"), string.Format("Do not add Integrate. Use underlying sql table! ({0})", tableNameCSharp));
 
-                // Asser field exists
+                // Assert field exists
                 var fieldNameCSharpList = UtilDalType.TypeRowToFieldList(typeRow).Select(item => item.FieldNameCSharp).ToList();
                 foreach (var fieldNameCSharp in fieldNameKeyList)
                 {
@@ -774,6 +779,32 @@
                 {
                     ResultKey.Add(typeRow, fieldNameKeyList);
                 }
+            }
+
+            /// <summary>
+            /// Store field value not in CSharp code. Store value in an external file in folder Blob/. Will be applied for cli data and for type byte[] and string.
+            /// </summary>
+            /// <typeparam name="TRow">Row (Integrate).</typeparam>
+            /// <param name="fieldName">For example "Data".</param>
+            /// <param name="fileNameExtension">For example ".jpg"</param>
+            public void AddBlob<TRow>(string fieldName, Func<TRow, string> fileNameExtension = null) where TRow : Row
+            {
+                Type typeRow = typeof(TRow);
+
+                // Assert table name ends with Integrate
+                string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(typeRow);
+                UtilFramework.Assert(tableNameCSharp.EndsWith("Integrate"), string.Format("Integrate table expected! ({0})", tableNameCSharp));
+
+                // Assert field exists
+                var fieldNameCSharpList = UtilDalType.TypeRowToFieldList(typeRow).Select(item => item.FieldNameCSharp).ToList();
+                UtilFramework.Assert(fieldNameCSharpList.Contains(fieldName), string.Format("Field not found! ({0})", fieldName));
+
+                // ResultBlob
+                if (!ResultBlob.ContainsKey(typeRow))
+                {
+                    ResultBlob.Add(typeRow, new Dictionary<string, Func<Row, string>>());
+                }
+                ResultBlob[typeRow].Add(fieldName, fileNameExtension != null ? (row) => fileNameExtension((TRow)row) : null);
             }
 
             /// <summary>

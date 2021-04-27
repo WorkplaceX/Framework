@@ -71,6 +71,7 @@
             if (generateIntegrateResult != null)
             {
                 Run(generateIntegrateResult);
+                UtilCli.FolderDelete(UtilFramework.FolderName + "Application.Cli/Database/Blob/");
                 new GenerateCSharpIntegrate().Run(out string cSharpCli, isFrameworkDb, isApplication: false, integrateList: generateIntegrateResult.Result);
                 new GenerateCSharpIntegrate().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, integrateList: generateIntegrateResult.Result);
                 if (isFrameworkDb == false)
