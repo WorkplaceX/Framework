@@ -203,7 +203,7 @@
                     command.Register(configuration);
                     configuration.OnExecute(() =>
                     {
-                        UtilCli.ConsoleWriteLineColor($"Execute Framework Command Cli ({command.Name})", ConsoleColor.Green);
+                        UtilCliInternal.ConsoleWriteLineColor($"Execute Framework Command Cli ({command.Name})", ConsoleColor.Green);
                         command.Execute();
                         return 0;
                     });
@@ -326,7 +326,7 @@
             {
                 if (isWarning)
                 {
-                    UtilCli.ConsoleWriteLineColor(string.Format("Warning! No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow); // Warning
+                    UtilCliInternal.ConsoleWriteLineColor(string.Format("Warning! No ConnectionString for {0}! Set it with command cli config connectionString.", environment.EnvironmentName), ConsoleColor.Yellow); // Warning
                 }
             }
         }
@@ -356,7 +356,7 @@
             }
             catch (Exception exception) // For example unrecognized option
             {
-                UtilCli.ConsoleWriteLineError(exception);
+                UtilCliInternal.ConsoleWriteLineError(exception);
                 Environment.ExitCode = 1; // echo %errorlevel%
             }
         }
@@ -970,7 +970,7 @@
             /// </summary>
             public void FileCopy(string fileNameSource, string fileNameDest)
             {
-                UtilCli.FileCopy(fileNameSource, fileNameDest);
+                UtilCliInternal.FileCopy(fileNameSource, fileNameDest);
             }
 
             /// <summary>
@@ -978,8 +978,8 @@
             /// </summary>
             internal void FolderCopy(string folderNameSource, string folderNameDest)
             {
-                UtilCli.FolderDelete(folderNameDest);
-                UtilCli.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+                UtilCliInternal.FolderDelete(folderNameDest);
+                UtilCliInternal.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
             }
 
             /// <summary>

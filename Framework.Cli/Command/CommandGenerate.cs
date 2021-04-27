@@ -32,7 +32,7 @@
 
             if (optionSilent.OptionGet() == false && configCli.EnvironmentNameGet() != "DEV")
             {
-                if (UtilCli.ConsoleReadYesNo(string.Format("Generate CSharp code from {0} database?", configCli.EnvironmentName)) == false)
+                if (UtilCliInternal.ConsoleReadYesNo(string.Format("Generate CSharp code from {0} database?", configCli.EnvironmentName)) == false)
                 {
                     return;
                 }
@@ -41,7 +41,7 @@
             bool isFrameworkDb = optionFramework.OptionGet();
             if (Script.Run(isFrameworkDb, AppCli))
             {
-                UtilCli.ConsoleWriteLineColor("Generate successful!", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("Generate successful!", ConsoleColor.Green);
             }
         }
     }

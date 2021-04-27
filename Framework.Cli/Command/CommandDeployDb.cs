@@ -106,7 +106,7 @@
                 }
                 catch
                 {
-                    UtilCli.ConsoleWriteLineColor("Warning! Already dropped or drop failed!", ConsoleColor.Yellow); // Warning
+                    UtilCliInternal.ConsoleWriteLineColor("Warning! Already dropped or drop failed!", ConsoleColor.Yellow); // Warning
                 }
             }
         }
@@ -196,16 +196,16 @@
             List<Assembly> assemblyList = AppCli.AssemblyList(isIncludeApp: true, isIncludeFrameworkCli: true);
 
             // Populate sql tables FrameworkTable, FrameworkField.
-            UtilCli.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
+            UtilCliInternal.ConsoleWriteLineColor("Update FrameworkTable, FrameworkField tables", ConsoleColor.Green);
             Meta(deployDbResult);
             IntegrateReseed(deployDbResult.Result, reseed, assemblyList);
             UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList).Wait();
 
             // Populate sql Integrate tables.
-            UtilCli.ConsoleWriteLineColor("Update Integrate tables ", ConsoleColor.Green, isLine: false);
+            UtilCliInternal.ConsoleWriteLineColor("Update Integrate tables ", ConsoleColor.Green, isLine: false);
             AppCli.CommandDeployDbIntegrateInternal(deployDbResult);
             IntegrateReseed(deployDbResult.Result, reseed, assemblyList);
-            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList, (typeRow) => UtilCli.ConsoleWriteLineColor(".", ConsoleColor.Green, isLine: false)).Wait(); // See also property IsDeploy
+            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList, (typeRow) => UtilCliInternal.ConsoleWriteLineColor(".", ConsoleColor.Green, isLine: false)).Wait(); // See also property IsDeploy
             Console.WriteLine();
         }
 
@@ -216,7 +216,7 @@
             if (UtilExternal.IsExternal)
             {
                 Console.WriteLine("For external run command wpx external and then command wpx deploy an main application (because of shared table FrameworkDeplayDb and FrameworkConfig).");
-                if (UtilCli.ConsoleReadYesNo("Continue anyway?") == false)
+                if (UtilCliInternal.ConsoleReadYesNo("Continue anyway?") == false)
                 {
                     return;
                 }
@@ -224,7 +224,7 @@
 
             if (optionSilent.OptionGet() == false && configCli.EnvironmentNameGet() != "DEV")
             {
-                if (UtilCli.ConsoleReadYesNo(string.Format("Deploy to {0} database?", configCli.EnvironmentName)) == false)
+                if (UtilCliInternal.ConsoleReadYesNo(string.Format("Deploy to {0} database?", configCli.EnvironmentName)) == false)
                 {
                     return;
                 }
@@ -240,7 +240,7 @@
                 DeployDbDropExecute(folderNameDeployDbApplication, isFrameworkDb: false);
                 DeployDbDropExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
 
-                UtilCli.ConsoleWriteLineColor("DeployDb drop successful!", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("DeployDb drop successful!", ConsoleColor.Green);
             }
             else
             {
@@ -254,20 +254,20 @@
                 Data.ExecuteNonQueryAsync(sqlInit, null, isFrameworkDb: true).Wait();
 
                 // (*.sql)
-                UtilCli.ConsoleWriteLineColor("DeployDb run (*.sql) scripts", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("DeployDb run (*.sql) scripts", ConsoleColor.Green);
                 DeployDbExecute(folderNameDeployDbFramework, isFrameworkDb: true); // Uses ConnectionString in ConfigServer.json
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
-                UtilCli.ConsoleWriteLineColor("DeployDb run (*.sql) scripts successful!", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("DeployDb run (*.sql) scripts successful!", ConsoleColor.Green);
 
                 // Integrate
-                UtilCli.ConsoleWriteLineColor("DeployDb run Integrate", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("DeployDb run Integrate", ConsoleColor.Green);
                 int? reseed = null;
                 if (optionReseed.OptionGet())
                 {
                     reseed = 1000;
                 }
                 Integrate(reseed);
-                UtilCli.ConsoleWriteLineColor("DeployDb run Integrate successful!", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("DeployDb run Integrate successful!", ConsoleColor.Green);
             }
         }
     }

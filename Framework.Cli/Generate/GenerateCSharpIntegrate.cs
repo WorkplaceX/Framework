@@ -216,7 +216,7 @@
             string valueCSharp;
             if (value is string)
             {
-                valueCSharp = UtilCli.EscapeCSharpString(value.ToString());
+                valueCSharp = UtilCliInternal.EscapeCSharpString(value.ToString());
             }
             else
             {
@@ -227,17 +227,17 @@
             if (fileName != null && !isApplication && (value is byte[] || value is string))
             {
                 var folderName = UtilFramework.FolderName + "Application.Cli/Database/Blob/";
-                UtilCli.FolderCreate(folderName);
+                UtilCliInternal.FolderCreate(folderName);
                 var fileNameFull = folderName + fileName;
                 if (value is byte[])
                 {
                     File.WriteAllBytes(fileNameFull, (byte[])value);
-                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadData(\"{ fileName }\")";
+                    valueCSharp = $"Framework.Cli.UtilCli.BlobReadData(\"{ fileName }\")";
                 }
                 if (value is string)
                 {
                     File.WriteAllText(fileNameFull, (string)value);
-                    valueCSharp = $"Framework.Cli.UtilCliBlob.ReadText(\"{ fileName }\")";
+                    valueCSharp = $"Framework.Cli.UtilCli.BlobReadText(\"{ fileName }\")";
                 }
             }
             

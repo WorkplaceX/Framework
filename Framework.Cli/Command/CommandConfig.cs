@@ -54,7 +54,7 @@
             string appTypeName = Console.ReadLine();
             if (Type.GetType(appTypeName) == null)
             {
-                UtilCli.ConsoleWriteLineColor(string.Format("Warning! Type not found! ({0})", appTypeName), ConsoleColor.Yellow); // Warning
+                UtilCliInternal.ConsoleWriteLineColor(string.Format("Warning! Type not found! ({0})", appTypeName), ConsoleColor.Yellow); // Warning
             }
 
             // Add Website
@@ -73,7 +73,7 @@
         private void ArgumentConnectionString()
         {
             ConfigCli configCli = ConfigCli.Load();
-            if (UtilCli.ArgumentValue(this, argumentConnectionString, out string connectionString))
+            if (UtilCliInternal.ArgumentValue(this, argumentConnectionString, out string connectionString))
             {
                 // Write
                 configCli.EnvironmentGet().ConnectionStringFramework = connectionString;
@@ -88,7 +88,7 @@
         private void ArgumentConnectionStringFramework()
         {
             ConfigCli configCli = ConfigCli.Load();
-            if (UtilCli.ArgumentValue(this, argumentConnectionStringFramework, out string connectionString))
+            if (UtilCliInternal.ArgumentValue(this, argumentConnectionStringFramework, out string connectionString))
             {
                 // Write
                 configCli.EnvironmentGet().ConnectionStringFramework = connectionString;
@@ -97,7 +97,7 @@
             else
             {
                 // Read
-                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringFramework.Name + "=" + configCli.EnvironmentGet().ConnectionStringFramework);
+                UtilCliInternal.ConsoleWriteLinePassword(argumentConnectionStringFramework.Name + "=" + configCli.EnvironmentGet().ConnectionStringFramework);
             }
         }
 
@@ -107,7 +107,7 @@
         private void ArgumentConnectionStringApplication()
         {
             ConfigCli configCli = ConfigCli.Load();
-            if (UtilCli.ArgumentValue(this, argumentConnectionStringApplication, out string connectionString))
+            if (UtilCliInternal.ArgumentValue(this, argumentConnectionStringApplication, out string connectionString))
             {
                 // Write
                 configCli.EnvironmentGet().ConnectionStringApplication = connectionString;
@@ -116,7 +116,7 @@
             else
             {
                 // Read
-                UtilCli.ConsoleWriteLinePassword(argumentConnectionStringApplication.Name + "=" + configCli.EnvironmentGet().ConnectionStringApplication);
+                UtilCliInternal.ConsoleWriteLinePassword(argumentConnectionStringApplication.Name + "=" + configCli.EnvironmentGet().ConnectionStringApplication);
             }
         }
 
@@ -140,9 +140,9 @@
             ConfigCli configCli = ConfigCli.Load();
 
             // Command "json"
-            if (UtilCli.ArgumentValueIsDelete(this, argumentJson))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentJson))
             {
-                if (UtilCli.ArgumentValue(this, argumentJson, out string json))
+                if (UtilCliInternal.ArgumentValue(this, argumentJson, out string json))
                 {
                     // Set ConfigCli.json with command: ".\cli.cmd config json='{}'"
                     json = json.Trim('\"'); // Remove quotation marks at the begin and end. 
@@ -161,9 +161,9 @@
             }
 
             // Command "deployAzureGitUrl"
-            if (UtilCli.ArgumentValueIsDelete(this, argumentDeployAzureGitUrl))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentDeployAzureGitUrl))
             {
-                if (UtilCli.ArgumentValue(this, argumentDeployAzureGitUrl, out string value))
+                if (UtilCliInternal.ArgumentValue(this, argumentDeployAzureGitUrl, out string value))
                 {
                     // Write
                     configCli.EnvironmentGet().DeployAzureGitUrl = value;
@@ -178,28 +178,28 @@
             }
 
             // Command "connectionString"
-            if (UtilCli.ArgumentValueIsDelete(this, argumentConnectionString))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentConnectionString))
             {
                 ArgumentConnectionString();
                 return;
             }
 
             // Command "connectionStringFramework"
-            if (UtilCli.ArgumentValueIsDelete(this, argumentConnectionStringFramework))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentConnectionStringFramework))
             {
                 ArgumentConnectionStringFramework();
                 return;
             }
 
             // Command "connectionStringApplication"
-            if (UtilCli.ArgumentValueIsDelete(this, argumentConnectionStringApplication))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentConnectionStringApplication))
             {
                 ArgumentConnectionStringApplication();
                 return;
             }
 
             // Command "website"
-            if (UtilCli.ArgumentValueIsDelete(this, argumentWebsite))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentWebsite))
             {
                 ArgumentWebsite();
                 return;
@@ -209,12 +209,12 @@
             {
                 configCli = ConfigCli.Load();
                 Console.WriteLine();
-                UtilCli.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("Add the following environment variable to ci build server: (Value including double quotation marks!)", ConsoleColor.Green);
 
                 // Remove ConnectionString
-                if (UtilCli.ArgumentValueIsDelete(this, argumentJson) == false) // No user interaction when json argument used.
+                if (UtilCliInternal.ArgumentValueIsDelete(this, argumentJson) == false) // No user interaction when json argument used.
                 {
-                    if (UtilCli.ConsoleReadYesNo("Include ConnectionString? (CI Server does not need it if managed by WebServer)") == false)
+                    if (UtilCliInternal.ConsoleReadYesNo("Include ConnectionString? (CI Server does not need it if managed by WebServer)") == false)
                     {
                         ConnectionStringRemove(configCli);
                     }
@@ -222,8 +222,8 @@
 
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
-                UtilCli.ConsoleWriteLineColor(configCli.EnvironmentGet().EnvironmentName + " " + "ConfigCli=", ConsoleColor.DarkGreen);
-                UtilCli.ConsoleWriteLineColor(string.Format("\"{0}\"", json), ConsoleColor.DarkGreen);
+                UtilCliInternal.ConsoleWriteLineColor(configCli.EnvironmentGet().EnvironmentName + " " + "ConfigCli=", ConsoleColor.DarkGreen);
+                UtilCliInternal.ConsoleWriteLineColor(string.Format("\"{0}\"", json), ConsoleColor.DarkGreen);
                 Console.WriteLine();
             }
         }

@@ -34,7 +34,7 @@
             MetaCSharp metaCSharp = new MetaCSharp(list);
 
             // Generate CSharp classes from database schema and save (*.cs) files.
-            UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files", ConsoleColor.Green);
+            UtilCliInternal.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files", ConsoleColor.Green);
             new CSharpGenerate(metaCSharp).Run(isFrameworkDb, out string cSharp);
             if (isFrameworkDb == false)
             {
@@ -44,10 +44,10 @@
             {
                 UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/Database.cs", cSharp);
             }
-            UtilCli.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
+            UtilCliInternal.ConsoleWriteLineColor("Generate CSharp classes from database schema and write (*.cs) files succsesful!", ConsoleColor.Green);
 
             // Read Integrate data from database and save (*.cs) files.
-            UtilCli.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files", ConsoleColor.Green);
+            UtilCliInternal.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files", ConsoleColor.Green);
             GenerateIntegrateResult generateIntegrateResult = null;
             try
             {
@@ -66,12 +66,12 @@
             {
                 isSuccessful = false;
                 string message = string.Format("Error! Read Integrate data from database failed! This can happen after an sql schema change. Try to run generate script again! ({0})", exception.Message);
-                UtilCli.ConsoleWriteLineColor(message, ConsoleColor.Red); // Error
+                UtilCliInternal.ConsoleWriteLineColor(message, ConsoleColor.Red); // Error
             }
             if (generateIntegrateResult != null)
             {
                 Run(generateIntegrateResult);
-                UtilCli.FolderDelete(UtilFramework.FolderName + "Application.Cli/Database/Blob/");
+                UtilCliInternal.FolderDelete(UtilFramework.FolderName + "Application.Cli/Database/Blob/");
                 new GenerateCSharpIntegrate().Run(out string cSharpCli, isFrameworkDb, isApplication: false, integrateList: generateIntegrateResult.Result);
                 new GenerateCSharpIntegrate().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, integrateList: generateIntegrateResult.Result);
                 if (isFrameworkDb == false)
@@ -84,7 +84,7 @@
                     UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework.Cli/Database/DatabaseIntegrate.cs", cSharpCli);
                     UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/DatabaseIntegrate.cs", cSharpApplication);
                 }
-                UtilCli.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files successful!", ConsoleColor.Green);
+                UtilCliInternal.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files successful!", ConsoleColor.Green);
             }
 
             return isSuccessful;

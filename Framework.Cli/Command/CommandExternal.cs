@@ -27,24 +27,24 @@
 
             // Delete folder App/
             Console.WriteLine("Delete dest folder App/");
-            UtilCli.FolderDelete(args.AppDestFolderName);
+            UtilCliInternal.FolderDelete(args.AppDestFolderName);
 
             // Copy folder Database/
             Console.WriteLine("Delete dest folder App/");
-            UtilCli.FolderDelete(args.DatabaseDestFolderName);
+            UtilCliInternal.FolderDelete(args.DatabaseDestFolderName);
 
             // Copy folder CliApp/
             Console.WriteLine("Delete dest folder CliApp/");
-            UtilCli.FolderDelete(args.CliAppDestFolderName);
+            UtilCliInternal.FolderDelete(args.CliAppDestFolderName);
 
 
             // Copy folder CliDatabase/
             Console.WriteLine("Delete dest folder CliDatabase/");
-            UtilCli.FolderDelete(args.CliDatabaseDestFolderName);
+            UtilCliInternal.FolderDelete(args.CliDatabaseDestFolderName);
 
             // Copy folder CliDeployDb/
             Console.WriteLine("Delete dest folder CliDeployDb/");
-            UtilCli.FolderDelete(args.CliDeployDbDestFolderName);
+            UtilCliInternal.FolderDelete(args.CliDeployDbDestFolderName);
         }
 
         private void ExecuteCopy()

@@ -29,21 +29,21 @@
 
             string folderName = UtilFramework.FolderName + @"Application.Server/";
             // Version tag and build only .NET Core server.
-            UtilCli.VersionBuild(() =>
+            UtilCliInternal.VersionBuild(() =>
             {
-                UtilCli.DotNet(folderName, "build");
+                UtilCliInternal.DotNet(folderName, "build");
             });
-            UtilCli.DotNet(folderName, "run --no-build", false);
+            UtilCliInternal.DotNet(folderName, "run --no-build", false);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                UtilCli.OpenWebBrowser("http://localhost:5000/"); // For port setting see also: Application.Server\Properties\launchSettings.json (applicationUrl, sslPort)
+                UtilCliInternal.OpenWebBrowser("http://localhost:5000/"); // For port setting see also: Application.Server\Properties\launchSettings.json (applicationUrl, sslPort)
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // Ubuntu list all running processes: 'ps'
                 // To reboot Ubuntu type on Windows command prompt: 'wsl -t Ubuntu-18.04'
                 // Ubuntu show processes tool: 'htop'
-                UtilCli.ConsoleWriteLineColor("Info: Stop server with command 'killall -g -SIGKILL Application.Server'", ConsoleColor.Cyan); // Info
+                UtilCliInternal.ConsoleWriteLineColor("Info: Stop server with command 'killall -g -SIGKILL Application.Server'", ConsoleColor.Cyan); // Info
             }
         }
     }

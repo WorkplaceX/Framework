@@ -27,13 +27,13 @@
             ConfigCli configCli = ConfigCli.Load();
             string environmentNameOld = configCli.EnvironmentName;
 
-            if (UtilCli.ArgumentValueIsDelete(this, argumentName))
+            if (UtilCliInternal.ArgumentValueIsDelete(this, argumentName))
             {
-                if (UtilCli.ArgumentValue(this, argumentName, out string name))
+                if (UtilCliInternal.ArgumentValue(this, argumentName, out string name))
                 {
                     if (configCli.EnvironmentGet(name?.ToUpper()) == null)
                     {
-                        if (UtilCli.ConsoleReadYesNo(string.Format("Environment does not exist. Add to config? (Name={0})", name?.ToUpper())) == false)
+                        if (UtilCliInternal.ConsoleReadYesNo(string.Format("Environment does not exist. Add to config? (Name={0})", name?.ToUpper())) == false)
                         {
                             return;
                         }
@@ -54,7 +54,7 @@
 
         public static void ConsoleWriteLineCurrentEnvironment(ConfigCli configCli)
         {
-            UtilCli.ConsoleWriteLineColor(string.Format("Current Environment (Name={0})", configCli.EnvironmentNameGet()), ConsoleColor.Green);
+            UtilCliInternal.ConsoleWriteLineColor(string.Format("Current Environment (Name={0})", configCli.EnvironmentNameGet()), ConsoleColor.Green);
         }
     }
 }

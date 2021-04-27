@@ -14,7 +14,7 @@
         protected internal override void Execute()
         {
             string folderName = UtilFramework.FolderName + "Framework/Framework.Test/";
-            UtilCli.DotNet(folderName, "run");
+            UtilCliInternal.DotNet(folderName, "run");
         }
     }
 }

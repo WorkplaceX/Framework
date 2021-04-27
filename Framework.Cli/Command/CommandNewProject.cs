@@ -21,7 +21,7 @@ namespace Framework.Cli.Command
         {
             // Copy ApplicationHelloWorld template
             // Console.WriteLine(string.Format("Copy {0} to {1}", folderNameSource, folderNameDest));
-            UtilCli.FolderCopy(folderNameSource, folderNameDest);
+            UtilCliInternal.FolderCopy(folderNameSource, folderNameDest);
         }
 
         protected internal override void Execute()
@@ -42,11 +42,11 @@ namespace Framework.Cli.Command
             var isGitOnly = list.Length == 1 && list[0] == folderNameDest + ".git"; // Empty git folder
             if (list.Length > 0 && !isGitOnly)
             {
-                UtilCli.ConsoleWriteLineColor("This folder needs to be empty!", ConsoleColor.Red);
+                UtilCliInternal.ConsoleWriteLineColor("This folder needs to be empty!", ConsoleColor.Red);
                 return;
             }
 
-            var isSubmodule = UtilCli.ConsoleReadYesNo("For Framework use Submodule?");
+            var isSubmodule = UtilCliInternal.ConsoleReadYesNo("For Framework use Submodule?");
 
             Console.WriteLine("Installing...");
 
@@ -66,19 +66,19 @@ namespace Framework.Cli.Command
             else
             {
                 // Copy Framework
-                UtilCli.FolderCreate(folderNameDest + "Framework/");
+                UtilCliInternal.FolderCreate(folderNameDest + "Framework/");
                 FolderCopy(folderNameFramework, folderNameDest + "Framework/");
             }
 
             // Start new cli
-            UtilCli.ConsoleWriteLineColor("Installation successfull!", ConsoleColor.Green);
+            UtilCliInternal.ConsoleWriteLineColor("Installation successfull!", ConsoleColor.Green);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                UtilCli.ConsoleWriteLineColor("Start cli now with command .\\wpx.cmd", ConsoleColor.DarkGreen);
+                UtilCliInternal.ConsoleWriteLineColor("Start cli now with command .\\wpx.cmd", ConsoleColor.DarkGreen);
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                UtilCli.ConsoleWriteLineColor("Start cli now with command ./wpx.sh", ConsoleColor.DarkGreen);
+                UtilCliInternal.ConsoleWriteLineColor("Start cli now with command ./wpx.sh", ConsoleColor.DarkGreen);
             }
         }
     }

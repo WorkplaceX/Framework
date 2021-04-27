@@ -162,7 +162,7 @@
                     string fileNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/" + website.FolderNameAngularWebsite + "server/main.js";
                     if (!File.Exists(fileNameServer))
                     {
-                        throw new Exception(string.Format("File does not exis! Make sure cli build command did run. ({0})", fileNameServer));
+                        throw new Exception(string.Format("File does not exis! Make sure cli command build --client did run. ({0})", fileNameServer));
                     }
 
                     ProcessStartInfo info = new ProcessStartInfo
