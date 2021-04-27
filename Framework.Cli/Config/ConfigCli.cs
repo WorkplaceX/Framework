@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text.Json.Serialization;
 
     /// <summary>
     /// Configuration used by all command cli. Values are stored in file ConfigCli.json. See also method ConfigCli.CopyConfigCliToConfigServer();
@@ -250,12 +251,20 @@
         public string ConnectionStringApplication { get; set; }
 
         /// <summary>
-        /// Set ConnectionString for Framework and Application.
+        /// Gets or sets ConnectionString for Framework and Application.
         /// </summary>
-        public void ConnectionStringSet(string connectionString)
+        [JsonIgnore]
+        public string ConnectionString
         {
-            ConnectionStringFramework = connectionString;
-            ConnectionStringApplication = connectionString;
+            get
+            {
+                return ConnectionStringApplication;
+            }
+            set
+            {
+                ConnectionStringFramework = value;
+                ConnectionStringApplication = value;
+            }
         }
 
         /// <summary>
