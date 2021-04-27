@@ -60,12 +60,12 @@
             args.FolderCopy(args.DatabaseSourceFolderName, args.DatabaseDestFolderName);
 
             // Copy folder CliApp/
-            args.FolderCopy(args.CliAppSourceFolderName, args.CliAppDestFolderName);
             Console.WriteLine("Copy folder CliApp/");
+            args.FolderCopy(args.CliAppSourceFolderName, args.CliAppDestFolderName);
 
             // Copy folder CliDatabase/
-            args.FolderCopy(args.CliDatabaseSourceFolderName, args.CliDatabaseDestFolderName);
             Console.WriteLine("Copy folder CliDatabase/");
+            args.FolderCopy(args.CliDatabaseSourceFolderName, args.CliDatabaseDestFolderName);
 
             Console.WriteLine("Update file DatabaseIntegrate.cs");
             args.FileReplaceLine(

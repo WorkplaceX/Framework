@@ -974,7 +974,7 @@
             }
 
             /// <summary>
-            /// Copy folder.
+            /// Copy folder. Delete before copy.
             /// </summary>
             internal void FolderCopy(string folderNameSource, string folderNameDest)
             {
