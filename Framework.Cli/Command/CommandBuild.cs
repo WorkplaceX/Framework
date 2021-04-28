@@ -133,7 +133,7 @@
         }
 
         /// <summary>
-        /// Run method AppCli.CommandExternal(); on ExternalGit/ProjectName/
+        /// Run method AppCli.CommandExternalGit(); on ExternalGit/ProjectName/
         /// </summary>
         private static void CommandExternal()
         {
@@ -150,7 +150,7 @@
                 if (externalGit != null && externalProjectName != null)
                 {
                     string folderName = UtilFramework.FolderName + "ExternalGit/" + externalProjectName + "/" + "Application.Cli";
-                    UtilCliInternal.DotNet(folderName, "run -- external");
+                    UtilCliInternal.DotNet(folderName, "run -- externalGit");
                 }
             }
         }

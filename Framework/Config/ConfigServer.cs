@@ -31,6 +31,7 @@
 
         /// <summary>
         /// Gets or sets IsRedirectWww. If ture, non www is redirected to wwww. For example workplacex.org is redirected to www.workplacex.org.
+        /// Does not work for loacalhost!
         /// </summary>
         public bool IsRedirectWww { get; set; }
 
@@ -48,16 +49,6 @@
         /// Gets or sets ConnectionStringApplication. This value is copied from CliConfig.ConnectionStringApplication by cli build command.
         /// </summary>
         public string ConnectionStringApplication { get; set; }
-
-        /// <summary>
-        /// Gets or sets BingMapKey. See also class BingMap.
-        /// </summary>
-        public string BingMapKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4. For example G-XXXXXXXXXX
-        /// </summary>
-        public string GoogleAnalyticsId { get; set; }
 
         /// <summary>
         /// Returns ConnectionString. Used by WebServer  and Cli.
@@ -197,7 +188,7 @@
         /// </summary>
         public string FolderNameServerGet(AppSelector appSelector, string prefixRemove)
         {
-            string result = "Application.Server/Framework/Application.Website/" + appSelector.Website.FolderNameAngularWebsite + "browser/";
+            string result = "Application.Server/Framework/Application.Website/" + appSelector.ConfigWebsite.FolderNameAngularWebsite + "browser/";
             result = result.Substring(prefixRemove.Length);
 
             return result;
@@ -242,5 +233,20 @@
         /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
         /// </summary>
         public string AppTypeName { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsRedirectHttps. If true, it redirects on website level. See also property ConfigCliEnvironment.IsRedirectHttps.
+        /// </summary>
+        public bool IsRedirectHttps { get; set; }
+
+        /// <summary>
+        /// Gets or sets BingMapKey. See also class BingMap.
+        /// </summary>
+        public string BingMapKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4.
+        /// </summary>
+        public string GoogleAnalyticsId { get; set; }
     }
 }

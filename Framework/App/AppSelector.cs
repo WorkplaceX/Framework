@@ -46,8 +46,9 @@
                 throw new Exception(string.Format("More than one website found! See also: ConfigServer.json ({0})", requestDomainName));
             }
 
-            this.Website = result.Single();
-            this.AppTypeName = Website.DomainNameList.Where(item => item.DomainName == requestDomainName).Single().AppTypeName;
+            this.ConfigWebsite = result.Single();
+            this.ConfigDomain = ConfigWebsite.DomainNameList.Where(item => item.DomainName == requestDomainName).Single();
+            this.AppTypeName = ConfigDomain.AppTypeName;
         }
 
         /// <summary>
@@ -56,9 +57,14 @@
         public readonly ConfigServer ConfigServer;
 
         /// <summary>
-        /// Gets Website. This is the currently requested Website.
+        /// Gets ConfigWebsite. This is the currently requested Website.
         /// </summary>
-        public readonly ConfigServerWebsite Website;
+        public readonly ConfigServerWebsite ConfigWebsite;
+
+        /// <summary>
+        /// Gets ConfigDomain. This is the currently requested domain.
+        /// </summary>
+        public readonly ConfigServerWebsiteDomain ConfigDomain;
 
         /// <summary>
         /// Gets AppTypeName. This is the currently requested App.

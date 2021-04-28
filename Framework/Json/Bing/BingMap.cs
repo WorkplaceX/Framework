@@ -1,4 +1,4 @@
-﻿using Framework.Config;
+﻿using Framework.App;
 
 namespace Framework.Json.Bing
 {
@@ -11,7 +11,7 @@ namespace Framework.Json.Bing
         public BingMap(ComponentJson owner)
             : base(owner, nameof(BingMap))
         {
-            Key = UtilFramework.StringNull(ConfigServer.Load().BingMapKey);
+            Key = UtilFramework.StringNull(new AppSelector().ConfigDomain.BingMapKey);
         }
 
         public string Long;

@@ -30,20 +30,30 @@
 
                 // Get current website request from "ConfigServer.json"
                 AppSelector appSelector = new AppSelector();
+                var isRedirectHttps = appSelector.ConfigDomain.IsRedirectHttps && !context.Request.IsHttps;
 
-                // POST app.json
-                if (!await Post(context, path, appSelector))
+                if (isRedirectHttps)
                 {
-                    // GET index.html from "Application.Server/Framework/Application.Website/Website01/browser/" (With server side rendering or serve index.html directly)
-                    if (!await WebsiteServerSideRenderingAsync(context, path, appSelector, null))
+                    // RedirectHttps on website level. Not on server middleware level.
+                    string url = "https://" + context.Request.Host + context.Request.Path + context.Request.QueryString;
+                    context.Response.Redirect(url);
+                }
+                else
+                {
+                    // POST app.json
+                    if (!await Post(context, path, appSelector))
                     {
-                        // GET file from "Application.Server/Framework/Application.Website/Website01/browser/"
-                        if (!await WebsiteFileAsync(context, path, appSelector))
+                        // GET index.html from "Application.Server/Framework/Application.Website/Website01/browser/" (With server side rendering or serve index.html directly)
+                        if (!await WebsiteServerSideRenderingAsync(context, path, appSelector, null))
                         {
-                            // GET file from database or navigate to subpage.
-                            if (!await FileDownloadAsync(context, path, appSelector))
+                            // GET file from "Application.Server/Framework/Application.Website/Website01/browser/"
+                            if (!await WebsiteFileAsync(context, path, appSelector))
                             {
-                                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                                // GET file from database or navigate to subpage.
+                                if (!await FileDownloadAsync(context, path, appSelector))
+                                {
+                                    context.Response.StatusCode = StatusCodes.Status404NotFound;
+                                }
                             }
                         }
                     }
@@ -86,7 +96,7 @@
             bool result = false;
 
             // FolderNameServer
-            string folderNameServer = appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/");
+            string folderNameServer = appSelector.ConfigWebsite.FolderNameServerGet(appSelector, "Application.Server/");
 
             // FolderName
             string folderName = UtilServer.FolderNameContentRoot() + folderNameServer;
@@ -121,9 +131,9 @@
                     string htmlIndex = await WebsiteServerSideRenderingAsync(context, appSelector, appJson);
 
                     // Google Analytics 4
-                    if (UtilFramework.StringNull(appSelector.ConfigServer.GoogleAnalyticsId) != null)
+                    if (UtilFramework.StringNull(appSelector.ConfigDomain.GoogleAnalyticsId) != null)
                     {
-                        htmlIndex = htmlIndex.Replace("G-XXXXXXXXXX", appSelector.ConfigServer.GoogleAnalyticsId);
+                        htmlIndex = htmlIndex.Replace("G-XXXXXXXXXX", appSelector.ConfigDomain.GoogleAnalyticsId);
                     }
 
                     await context.Response.WriteAsync(htmlIndex);
@@ -213,12 +223,12 @@
             {
                 // Running on IIS Server.
                 url = context.Request.IsHttps ? "https://" : "http://";
-                url += context.Request.Host.ToUriComponent() + "/Framework/Application.Website/" + UtilFramework.FolderNameParse(appSelector.Website.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
+                url += context.Request.Host.ToUriComponent() + "/Framework/Application.Website/" + UtilFramework.FolderNameParse(appSelector.ConfigWebsite.FolderNameAngularWebsite) + "server/main.js"; // Url of server side rendering when running on IIS Server
             }
             else
             {
                 // Running in Visual Studio. See also method StartUniversalServerAngular();
-                url = "http://localhost:" + (appSelector.Website.FolderNameAngularPort).ToString() + "/"; // Url of server side rendering when running in Visual Studio
+                url = "http://localhost:" + (appSelector.ConfigWebsite.FolderNameAngularPort).ToString() + "/"; // Url of server side rendering when running in Visual Studio
             }
 
             // Process AppJson
@@ -234,7 +244,7 @@
             else
             {
                 // index.html serve directly
-                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/"), "/index.html");
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.ConfigWebsite.FolderNameServerGet(appSelector, "Application.Server/"), "/index.html");
                 indexHtml = UtilFramework.FileLoad(fileName);
             }
 
@@ -255,7 +265,7 @@
             if (UtilServer.NavigatePathIsFileName(path))
             {
                 // Serve fileName
-                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.Website.FolderNameServerGet(appSelector, "Application.Server/"), path);
+                string fileName = UtilServer.FolderNameContentRoot() + UtilFramework.FolderNameParse(appSelector.ConfigWebsite.FolderNameServerGet(appSelector, "Application.Server/"), path);
                 if (File.Exists(fileName))
                 {
                     context.Response.ContentType = UtilServer.ContentType(fileName);

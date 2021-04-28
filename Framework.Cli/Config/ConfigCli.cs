@@ -70,16 +70,6 @@
         public List<ConfigCliExternal> ExternalGitList { get; set; }
 
         /// <summary>
-        /// Gets or sets BingMapKey. See also class BingMap.
-        /// </summary>
-        public string BingMapKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4.
-        /// </summary>
-        public string GoogleAnalyticsId { get; set; }
-
-        /// <summary>
         /// Gets ConfigCli.json. Used by CommandBuild. Created with default values if file does not exist.
         /// </summary>
         private static string FileName
@@ -201,15 +191,16 @@
                 configServer.WebsiteList.Add(new ConfigServerWebsite()
                 {
                     FolderNameAngular = webSite.FolderNameAngular,
-                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(item => new ConfigServerWebsiteDomain { DomainName = item.DomainName, AppTypeName = item.AppTypeName }).ToList()
+                    DomainNameList = webSite.DomainNameList.Where(item => item.EnvironmentName == configCli.EnvironmentGet().EnvironmentName).Select(
+                        // Copy config website values from Cli to Server
+                        item => new ConfigServerWebsiteDomain { 
+                            DomainName = item.DomainName, 
+                            AppTypeName = item.AppTypeName, 
+                            IsRedirectHttps = item.IsRedirectHttps, 
+                            BingMapKey = item.BingMapKey, 
+                            GoogleAnalyticsId = item.GoogleAnalyticsId }).ToList()
                 });
             }
-
-            // BingMap key
-            configServer.BingMapKey = configCli.BingMapKey;
-
-            // Google Analytics 4
-            configServer.GoogleAnalyticsId = configCli.GoogleAnalyticsId;
 
             ConfigServer.Save(configServer);
         }
@@ -232,6 +223,7 @@
 
         /// <summary>
         /// Gets or sets IsRedirectHttps. If true, http is redirected to https. By default this value is false. Restart web server after value change!
+        /// If true, server middelware redirects to https for all websites.
         /// </summary>
         public bool IsRedirectHttps { get; set; }
 
@@ -363,5 +355,20 @@
         /// Gets or sets AppTypeName. Needs to derrive from AppJson. For example: "Application.AppJson, Application". If null, index.html is rendered without server side rendering.
         /// </summary>
         public string AppTypeName { get; set; }
+
+        /// <summary>
+        /// Gets or sets IsRedirectHttps. If true, it redirects on website level. See also property ConfigCliEnvironment.IsRedirectHttps.
+        /// </summary>
+        public bool IsRedirectHttps { get; set; }
+
+        /// <summary>
+        /// Gets or sets BingMapKey. See also class BingMap.
+        /// </summary>
+        public string BingMapKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4.
+        /// </summary>
+        public string GoogleAnalyticsId { get; set; }
     }
 }
