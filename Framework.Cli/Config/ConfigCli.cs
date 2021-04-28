@@ -65,9 +65,9 @@
         public List<ConfigCliWebsite> WebsiteList { get; set; }
 
         /// <summary>
-        /// Gets or sets ExternalList.
+        /// Gets or sets ExternalGitList.
         /// </summary>
-        public List<ConfigCliExternal> ExternalList { get; set; }
+        public List<ConfigCliExternal> ExternalGitList { get; set; }
 
         /// <summary>
         /// Gets or sets BingMapKey. See also class BingMap.
@@ -101,7 +101,7 @@
                 configCli.EnvironmentName = configCli.EnvironmentNameGet();
                 configCli.EnvironmentList = new List<ConfigCliEnvironment>();
                 configCli.WebsiteList = new List<ConfigCliWebsite>();
-                configCli.ExternalList = new List<ConfigCliExternal>();
+                configCli.ExternalGitList = new List<ConfigCliExternal>();
                 appCli.InitConfigCli(configCli);
 
                 // EnvironmentName defined in WebsiteList
@@ -136,9 +136,9 @@
             {
                 result.WebsiteList = new List<ConfigCliWebsite>();
             }
-            if (result.ExternalList == null)
+            if (result.ExternalGitList == null)
             {
-                result.ExternalList = new List<ConfigCliExternal>();
+                result.ExternalGitList = new List<ConfigCliExternal>();
             }
             
             var folderNameAngularList = new Dictionary<string, int>();

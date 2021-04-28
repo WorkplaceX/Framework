@@ -28,7 +28,7 @@ namespace Framework.Cli
 
             var list = new List<string>();
             list.Add(UtilFramework.FolderName + "Application.Cli/Database/Blob/" + fileName);
-            foreach (var item in Config.ConfigCli.Load().ExternalList)
+            foreach (var item in Config.ConfigCli.Load().ExternalGitList)
             {
                 list.Add(UtilFramework.FolderName + "Application.Cli/Database/ExternalGit/" + item.ExternalProjectName + "/Blob/" + fileName);
             }

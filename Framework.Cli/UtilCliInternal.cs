@@ -415,7 +415,7 @@
             text = ConsoleWriteLinePasswordHide(text, environment.ConnectionStringFramework);
             text = ConsoleWriteLinePasswordHide(text, environment.ConnectionStringApplication);
             text = ConsoleWriteLinePasswordHide(text, environment.DeployAzureGitUrl);
-            foreach (var external in configCli.ExternalList)
+            foreach (var external in configCli.ExternalGitList)
             {
                 text = ConsoleWriteLinePasswordHide(text, external.ExternalGit);
             }

@@ -112,7 +112,7 @@
         {
             var configCli = ConfigCli.Load();
 
-            foreach (var external in configCli.ExternalList)
+            foreach (var external in configCli.ExternalGitList)
             {
                 // Clone repo
                 var externalGit = UtilFramework.StringNull(external.ExternalGit);
@@ -139,7 +139,7 @@
         {
             var configCli = ConfigCli.Load();
 
-            foreach (var external in configCli.ExternalList)
+            foreach (var external in configCli.ExternalGitList)
             {
                 // External git url
                 var externalGit = UtilFramework.StringNull(external.ExternalGit);
