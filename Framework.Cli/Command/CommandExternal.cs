@@ -6,24 +6,31 @@
     /// <summary>
     /// Cli external command.
     /// </summary>
-    internal class CommandExternal : CommandBase
+    internal class CommandExternalGit : CommandBase
     {
-        public CommandExternal(AppCli appCli)
-            : base(appCli, "external", "Copy ExternalGit folders.")
+        public CommandExternalGit(AppCli appCli)
+            : base(appCli, "externalGit", "Copy ExternalGit folders.")
         {
 
         }
 
         private CommandOption optionDelete;
 
+        private CommandOption optionDeleteAll;
+
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionDelete = configuration.Option("--delete", "Delete ExternalGit dest folders.", CommandOptionType.NoValue);
+            optionDeleteAll = configuration.Option("--deleteAll", "Delete all ExternalGit dest folders.", CommandOptionType.NoValue);
         }
 
-        private void ExecuteDelete()
+        /// <summary>
+        /// Delete folder ExternalGit/ExternalProjectName/
+        /// </summary>
+        /// <param name="isDeleteAll">If true, delete folder ExternalGit/</param>
+        private void ExecuteDelete(bool isDeleteAll = false)
         {
-            var args = UtilExternal.ExternalArgs();
+            var args = UtilExternalGit.ExternalArgs(!isDeleteAll);
 
             // Delete folder App/
             Console.WriteLine("Delete dest folder App/");
@@ -49,7 +56,7 @@
 
         private void ExecuteCopy()
         {
-            var args = UtilExternal.ExternalArgs();
+            var args = UtilExternalGit.ExternalArgs();
 
             // Copy folder App/
             Console.WriteLine("Copy folder App/");
@@ -90,13 +97,21 @@
         {
             if (optionDelete.OptionGet())
             {
-                // Delete ExternalGit
+                // Delete folder ExternalGit/ExternalProjectName/
                 ExecuteDelete();
             }
             else
             {
-                // Copy ExternalGit
-                ExecuteCopy();
+                if (optionDeleteAll.OptionGet())
+                {
+                    // Delete folder ExternalGit/
+                    ExecuteDelete(true);
+                }
+                else
+                {
+                    // Copy folder ExternalGit/ExternalProjectName/
+                    ExecuteCopy();
+                }
             }
         }
     }

@@ -173,9 +173,9 @@
                 new CommandDeployDb(this);
                 new CommandEnvironment(this);
                 new CommandTest(this);
-                if (UtilExternal.IsExternal)
+                if (UtilExternalGit.IsExternalGit)
                 {
-                    new CommandExternal(this);
+                    new CommandExternalGit(this);
                 }
             }
             else
@@ -387,7 +387,7 @@
                 rowList.AddRange(rowApplicationCliList);
 
                 // Collect rowList from external FrameworkConfigGridIntegrateAppCli (ConfigGrid).
-                UtilExternal.CommandDeployDbIntegrate(this, rowList);
+                UtilExternalGit.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
             }
@@ -405,7 +405,7 @@
                 rowList.AddRange(rowApplicationCliList);
 
                 // Collect rowList from external FrameworkConfigFieldIntegrateAppCli (ConfigField).
-                UtilExternal.CommandDeployDbIntegrate(this, rowList);
+                UtilExternalGit.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
             }
@@ -414,7 +414,7 @@
             CommandDeployDbIntegrate(result);
 
             // Call method CommandDeployDbIntegrate(); on external AppCli.
-            UtilExternal.CommandDeployDbIntegrate(this, result);
+            UtilExternalGit.CommandDeployDbIntegrate(this, result);
         }
 
         public class DeployDbIntegrateResult
@@ -596,7 +596,7 @@
             // Call method CommandGenerateIntegrate(); on external AppCli for deployDb only. Not for cli generate command.
             if (isDeployDb)
             {
-                UtilExternal.CommandGenerateIntegrate(this, result);
+                UtilExternalGit.CommandGenerateIntegrate(this, result);
             }
 
             return result;

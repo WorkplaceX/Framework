@@ -213,7 +213,7 @@
         {
             ConfigCli configCli = ConfigCli.Load();
 
-            if (UtilExternal.IsExternal)
+            if (UtilExternalGit.IsExternalGit)
             {
                 Console.WriteLine("For external run command wpx external and then command wpx deploy an main application (because of shared table FrameworkDeplayDb and FrameworkConfig).");
                 if (UtilCliInternal.ConsoleReadYesNo("Continue anyway?") == false)

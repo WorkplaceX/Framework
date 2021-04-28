@@ -9,7 +9,7 @@ namespace Framework.Cli
     /// <summary>
     /// Util for cli external command.
     /// </summary>
-    internal static class UtilExternal
+    internal static class UtilExternalGit
     {
         /// <summary>
         /// Gets FolderNameExternal. This is the root folder name of the parent application, if this application is cloned into parents ExternalGit/ folder.
@@ -18,7 +18,7 @@ namespace Framework.Cli
         {
             get
             {
-                if (!IsExternal)
+                if (!IsExternalGit)
                 {
                     throw new Exception("This Application is not cloned into ExternalGit/ folder!");
                 }
@@ -29,7 +29,7 @@ namespace Framework.Cli
         /// <summary>
         /// Gets IsExternalGit. Returns true if this application is cloned into ExternalGit/ folder.
         /// </summary>
-        public static bool IsExternal
+        public static bool IsExternalGit
         {
             get
             {
@@ -43,12 +43,12 @@ namespace Framework.Cli
         /// </summary>
         public static string ExternalProjectName()
         {
-            UtilFramework.Assert(IsExternal);
+            UtilFramework.Assert(IsExternalGit);
 
-            UtilFramework.Assert(UtilFramework.FolderName.StartsWith(UtilExternal.FolderNameExternal));
+            UtilFramework.Assert(UtilFramework.FolderName.StartsWith(UtilExternalGit.FolderNameExternal));
 
             // ExternalGit/ProjectName/
-            string externalGitProjectNamePath = UtilFramework.FolderName.Substring(UtilExternal.FolderNameExternal.Length);
+            string externalGitProjectNamePath = UtilFramework.FolderName.Substring(UtilExternalGit.FolderNameExternal.Length);
 
             UtilFramework.Assert(externalGitProjectNamePath.StartsWith("ExternalGit/"));
             UtilFramework.Assert(externalGitProjectNamePath.EndsWith("/"));
@@ -139,30 +139,35 @@ namespace Framework.Cli
         /// <summary>
         /// Returns ExternalArgs.
         /// </summary>
-        public static ExternalArgs ExternalArgs()
+        /// <param name="isProjectName">Include project name into FolderName.</param>
+        public static ExternalArgs ExternalArgs(bool isProjectName = true)
         {
             // ExternalGit/ProjectName/
-            string externalGitProjectNamePath = "ExternalGit/" + UtilExternal.ExternalProjectName() + "/";
+            string externalGitProjectNamePath = "ExternalGit/";
+            if (isProjectName)
+            {
+                externalGitProjectNamePath += UtilExternalGit.ExternalProjectName() + "/";
+            }
 
             // Application/App/
             string appSourceFolderName = UtilFramework.FolderName + "Application/App/";
-            string appDestFolderName = UtilExternal.FolderNameExternal + "Application/App/" + externalGitProjectNamePath;
+            string appDestFolderName = UtilExternalGit.FolderNameExternal + "Application/App/" + externalGitProjectNamePath;
 
             // Application.Database/Database/
             string databaseSourceFolderName = UtilFramework.FolderName + "Application.Database/Database/";
-            string databaseDestFolderName = UtilExternal.FolderNameExternal + "Application.Database/Database/" + externalGitProjectNamePath;
+            string databaseDestFolderName = UtilExternalGit.FolderNameExternal + "Application.Database/Database/" + externalGitProjectNamePath;
 
             // Application.Cli/App/
             string cliAppSourceFolderName = UtilFramework.FolderName + "Application.Cli/App/";
-            string cliAppDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/App/" + externalGitProjectNamePath;
+            string cliAppDestFolderName = UtilExternalGit.FolderNameExternal + "Application.Cli/App/" + externalGitProjectNamePath;
 
             // Application.Cli/App/
             string cliDatabaseSourceFolderName = UtilFramework.FolderName + "Application.Cli/Database/";
-            string cliDatabaseDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/Database/" + externalGitProjectNamePath;
+            string cliDatabaseDestFolderName = UtilExternalGit.FolderNameExternal + "Application.Cli/Database/" + externalGitProjectNamePath;
 
             // Application.Cli/DeployDb/
             string cliDeployDbSourceFolderName = UtilFramework.FolderName + "Application.Cli/DeployDb/";
-            string cliDeployDbDestFolderName = UtilExternal.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
+            string cliDeployDbDestFolderName = UtilExternalGit.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
 
             var result = new ExternalArgs
             {
@@ -176,7 +181,7 @@ namespace Framework.Cli
                 CliDatabaseDestFolderName = cliDatabaseDestFolderName,
                 CliDeployDbSourceFolderName = cliDeployDbSourceFolderName,
                 CliDeployDbDestFolderName = cliDeployDbDestFolderName,
-                ExternalProjectName = UtilExternal.ExternalProjectName(),
+                ExternalProjectName = UtilExternalGit.ExternalProjectName(),
             };
 
             return result;
