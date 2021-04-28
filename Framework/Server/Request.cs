@@ -136,6 +136,12 @@
                         htmlIndex = htmlIndex.Replace("G-XXXXXXXXXX", appSelector.ConfigDomain.GoogleAnalyticsId);
                     }
 
+                    // Google AdSense
+                    if (UtilFramework.StringNull(appSelector.ConfigDomain.GoogleAdSenseId) != null)
+                    {
+                        htmlIndex = htmlIndex.Replace("ca-pub-XXXXXXXXXXXXXXXX", appSelector.ConfigDomain.GoogleAdSenseId);
+                    }
+
                     await context.Response.WriteAsync(htmlIndex);
                     result = true;
                 }

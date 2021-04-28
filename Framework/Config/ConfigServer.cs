@@ -251,8 +251,13 @@
         public string BingMapKey { get; set; }
 
         /// <summary>
-        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4.
+        /// Gets or sets GoogleAnalyticsId. This id is for Google Analytics 4. For example "G-XXXXXXXXXX".
         /// </summary>
         public string GoogleAnalyticsId { get; set; }
+
+        /// <summary>
+        /// Gets or sets GoogleAdSenseId. For example "ca-pub-XXXXXXXXXXXXXXXX".
+        /// </summary>
+        public string GoogleAdSenseId { get; set; }
     }
 }
