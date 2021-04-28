@@ -15,6 +15,11 @@
     internal class ConfigServer
     {
         /// <summary>
+        /// Gets or sets Comment. Comment to display text: "Do not modify this file ConfigServer.json! Values are copied and extracted from file ConfigCli.json on every wpx command".
+        /// </summary>
+        public string Comment { get; set; }
+
+        /// <summary>
         /// Gets or sets EnvironmentName. For example DEV, TEST or PROD.
         /// </summary>
         public string EnvironmentName { get; set; }
@@ -177,6 +182,7 @@
 
         internal static void Save(ConfigServer configServer)
         {
+            configServer.Comment = "Do not modify this file ConfigServer.json! Values are copied and extracted from file ConfigCli.json on every wpx command!";
             UtilFramework.ConfigSave(configServer, FileName);
         }
     }
