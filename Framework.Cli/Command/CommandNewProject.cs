@@ -47,6 +47,7 @@ namespace Framework.Cli.Command
                 return;
             }
 
+            Console.WriteLine("For details on how to answer see: https://www.workplacex.org/feature-new-application/");
             var isCopyFramework = UtilCliInternal.ConsoleReadYesNo("Copy folder Framework? - (Otherwise git submodule is used)");
             var isCopyApplicationWebsite = UtilCliInternal.ConsoleReadYesNo("Copy folder Application.Website? - (otherwise framework website is used)");
 

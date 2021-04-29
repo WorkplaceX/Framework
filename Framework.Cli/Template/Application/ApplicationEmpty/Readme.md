@@ -33,6 +33,7 @@ wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationD
 wpx deployDb
 
 ### Start
+wpx build
 wpx start # http://localhost:5000/
 
 ### Stop
@@ -44,7 +45,6 @@ killall -g -SIGKILL Application.Server # Linux Only
 * "Application.Cli/" (Command line interface to build and deploy)
 * "Application.Cli/DeployDb/" (SQL scripts to deploy to SQL server)
 * "Application.Database/" (From database generated database dto objects like tables and views)
-* "Application.Doc/" (Documentation images)
 * "Application.Server/" (ASP.NET Core to start application)
 * "Application.Website/" (Custom html and css in Angular)
 * "Framework/" (External WorkplaceX framework)
