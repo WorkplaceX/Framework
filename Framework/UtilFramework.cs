@@ -41,7 +41,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.40";
+                return "v3.51.41";
             }
         }
 
@@ -85,7 +85,8 @@ namespace Framework
         }
 
         /// <summary>
-        /// Gets FolderName. This is the root folder name. Throws exception if running on IIS server. See also method: UtilServer.FolderNameContentRoot();
+        /// Gets FolderName. This is the root folder where file Application.sln is located.
+        /// Throws exception if running on IIS server. See also method: UtilServer.FolderNameContentRoot();
         /// </summary>
         internal static string FolderName
         {

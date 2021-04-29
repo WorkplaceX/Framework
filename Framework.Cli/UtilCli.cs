@@ -20,6 +20,17 @@ namespace Framework.Cli
         }
 
         /// <summary>
+        /// Gets FolderName. This is the root folder where file Application.sln is located.
+        /// </summary>
+        public static string FolderName
+        {
+            get
+            {
+                return UtilFramework.FolderName;
+            }
+        }
+
+        /// <summary>
         /// Returns FileNameFull for blob file. Searches also in ExternalGit.
         /// </summary>
         private static string BlobReadFileNameFull(string fileName)

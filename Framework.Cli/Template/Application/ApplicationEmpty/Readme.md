@@ -1,22 +1,22 @@
-# Application Demo
+# Application Doc
 ASP.NET Core application with Angular and MS-SQL Server.
 
-![Build Status](https://github.com/WorkplaceX/ApplicationDemo/workflows/CI/badge.svg) (ApplicationDemo; github actions;)
+![Build Status](https://github.com/WorkplaceX/ApplicationDoc/workflows/CI/badge.svg) (github actions;)
 
-[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDemo.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDemo) (ApplicationDemo; travis;)
+[![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDoc.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDoc) (travis;)
 
 # Getting Started
 The following components need to be installed on the machine as a prerequisite (Windows or Linux):
 * [Node.js](https://nodejs.org/en/) (LTS Version)
 * [.NET Core](https://dotnet.microsoft.com/download) (Version 5.0)
-* [MS-SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express Edition)
+* [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express Edition)
 
 ## Install
 ```cmd
 ### Git clone (parameter recursive clones also required submodule Framework):
-git clone https://github.com/WorkplaceX/ApplicationDemo.git --recursive
+git clone https://github.com/WorkplaceX/ApplicationDoc.git --recursive
 
-cd ApplicationDemo
+cd ApplicationDoc
 
 ### On first launch it will ask to register wpx command in environment path:
 ./wpx.cmd # For Windows
@@ -25,12 +25,9 @@ cd ApplicationDemo
 ### From now on just use:
 wpx
 
-### Build
-wpx build # Builds client (Angular) and server (.NET)
-
 ### Set ConnectionString
-wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; Integrated Security=True;" # Example Windows
-wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationDemo; User Id=SA; Password=MyPassword;" # Example Linux
+wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationDoc; Integrated Security=True;" # Example Windows
+wpx config connectionString="Data Source=localhost; Initial Catalog=ApplicationDoc; User Id=SA; Password=MyPassword;" # Example Linux
 
 ### Deploy Database
 wpx deployDb
@@ -39,8 +36,7 @@ wpx deployDb
 wpx start # http://localhost:5000/
 
 ### Stop
-killall -g -SIGKILL -r Application.S # Example Linux. Close group (regular expression for Application.Server)
-sudo netstat -ltp # Show all program listening to port # Example Linux
+killall -g -SIGKILL Application.Server # Linux Only
 ```
 
 ## Project Folder and File Structure
