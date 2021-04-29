@@ -11,6 +11,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
+    using System.Text.Json;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -740,12 +741,12 @@
             return new NamingConvention();
         }
 
-        internal async Task<NavigateResult> NavigateInternalAsync(string navigatePath)
+        internal async Task<NavigateResult> NavigateInternalAsync(string navigatePath, AppSelector appSelector)
         {
-            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query, UtilServer.RequestUrlHost());
+            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query, UtilServer.RequestUrlHost(), appSelector.ConfigDomain.Custom);
             NavigateResult result = new NavigateResult();
             await NavigateAsync(args, result);
-            UtilFramework.Assert(!(result.Data != null && result.IsSession), $"Method {nameof(AppJson.NavigateAsync)}(); can not send data and request session at the same time!");
+            UtilFramework.Assert(!(result.Data != null && result.IsSession), $"Method {nameof(AppJson.NavigateAsync)}(); can not send data and request server session deserialization at the same time!");
             return result;
         }
 
@@ -761,11 +762,12 @@
 
         public class NavigateArgs
         {
-            internal NavigateArgs(string navigatePath, IQueryCollection httpQuery, string requestUrlHost)
+            internal NavigateArgs(string navigatePath, IQueryCollection httpQuery, string requestUrlHost, object configCustom)
             {
                 NavigatePath = navigatePath;
                 HttpQuery = httpQuery;
                 RequestUrlHost = requestUrlHost;
+                ConfigCustom = configCustom;
                 if (UtilServer.NavigatePathIsFileName(navigatePath))
                 {
                     FileName = UtilFramework.FolderNameParse(null, navigatePath);
@@ -797,6 +799,11 @@
             /// Gets RequestHostUrl. For example: "http://localhost:5000/".
             /// </summary>
             public string RequestUrlHost { get; }
+
+            /// <summary>
+            /// Gets ConfigCustom. This is domain custom configuration data from file ConfigServer.json.
+            /// </summary>
+            public object ConfigCustom { get; }
 
             /// <summary>
             /// Returns true, if navigatePath starts with navigatePathPrefix.
@@ -876,9 +883,9 @@
             public byte[] Data;
         }
 
-        internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string navigatePath, bool isAddHistory)
+        internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string navigatePath, bool isAddHistory, AppSelector appSelector)
         {
-            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query, UtilServer.RequestUrlHost());
+            var args = new NavigateArgs(navigatePath, UtilServer.Context.Request.Query, UtilServer.RequestUrlHost(), (JsonElement?)appSelector.ConfigDomain.Custom);
             var result = new NavigateSessionResult { NavigatePath = args.NavigatePath };
             await NavigateSessionAsync(args, result);
             if (result.IsPage)
@@ -1010,13 +1017,13 @@
             UtilServer.Session.SetString("Main", string.Format("App start: {0}", UtilFramework.DateTimeToString(DateTime.Now.ToUniversalTime())));
         }
 
-        internal async Task ProcessInternalAsync(AppJson appJson)
+        internal async Task ProcessInternalAsync(AppJson appJson, AppSelector appSelector)
         {
             UtilStopwatch.TimeStart("Process");
             while (appJson.RequestJson.CommandGet() != null)
             {
                 await UtilApp.ProcessHomeIsClickAsync(appJson);
-                await UtilApp.ProcessNavigatePostAsync(appJson); // Link POST instead of GET.
+                await UtilApp.ProcessNavigatePostAsync(appJson, appSelector); // Link POST instead of GET.
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
                 BulmaNavbar.ProcessAsync(appJson);

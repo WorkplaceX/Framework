@@ -259,5 +259,10 @@
         /// Gets or sets GoogleAdSenseId. For example "ca-pub-XXXXXXXXXXXXXXXX".
         /// </summary>
         public string GoogleAdSenseId { get; set; }
+
+        /// <summary>
+        /// Gets or sets Custom.
+        /// </summary>
+        public object Custom { get; set; }
     }
 }

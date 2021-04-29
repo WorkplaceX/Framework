@@ -199,7 +199,9 @@
                             IsRedirectHttps = item.IsRedirectHttps, 
                             BingMapKey = item.BingMapKey, 
                             GoogleAnalyticsId = item.GoogleAnalyticsId,
-                            GoogleAdSenseId = item.GoogleAdSenseId}).ToList()
+                            GoogleAdSenseId = item.GoogleAdSenseId,
+                            Custom = item.Custom,
+                        }).ToList()
                 });
             }
 
@@ -377,5 +379,10 @@
         /// Gets or sets GoogleAdSenseId. For example "ca-pub-XXXXXXXXXXXXXXXX".
         /// </summary>
         public string GoogleAdSenseId { get; set; }
+
+        /// <summary>
+        /// Gets or sets Custom.
+        /// </summary>
+        public object Custom { get; set; }
     }
 }

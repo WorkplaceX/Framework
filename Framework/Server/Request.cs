@@ -173,11 +173,11 @@
         {
             bool result;
             var appJson = appSelector.CreateAppJson(); // Without deserialize session.
-            var navigateResult = await appJson.NavigateInternalAsync(navigatePath);
+            var navigateResult = await appJson.NavigateInternalAsync(navigatePath, appSelector);
             if (navigateResult.IsSession)
             {
                 var appJsonSession = await appSelector.CreateAppJsonSession(context); // With deserialize session.
-                var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(navigatePath, isAddHistory: false);
+                var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(navigatePath, isAddHistory: false, appSelector);
                 if (navigateSessionResult.IsPage)
                 {
                     if (navigateSessionResult.RedirectPath != null)

@@ -85,7 +85,7 @@
             // Process
             try
             {
-                await appJson.ProcessInternalAsync(appJson);
+                await appJson.ProcessInternalAsync(appJson, this);
             }
             catch (Exception exception)
             {

@@ -38,18 +38,18 @@
         /// <summary>
         /// User clicked internal link or user clicked backward or forward button in browser. Instead of GET and download Angular again a POST command is sent.
         /// </summary>
-        public static async Task ProcessNavigatePostAsync(AppJson appJson)
+        public static async Task ProcessNavigatePostAsync(AppJson appJson, AppSelector appSelector)
         {
             // User clicked internal link.
             if (UtilSession.Request(appJson, CommandEnum.NavigatePost, out CommandJson commandJson, out ComponentJson _))
             {
-                await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
+                await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory, appSelector);
             }
             
             // User clicked backward or forward button in browser.
             if (UtilSession.Request(appJson, CommandEnum.NavigateBackwardForward, out commandJson, out ComponentJson _))
             {
-                await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory);
+                await appJson.NavigateSessionInternalAsync(commandJson.NavigatePath, commandJson.NavigatePathIsAddHistory, appSelector);
             }
         }
 
