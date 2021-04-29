@@ -7,7 +7,7 @@ namespace Framework.Cli.Command
 {
     /// <summary>
     /// Cli command to create a new project from template.
-    /// For debug run in an empty folder: "dotnet run --project C:\Temp\GitHub\ApplicationDoc\ExternalGit\ApplicationDoc\Framework\Framework.Cli -- new".
+    /// For debug run in an empty folder: "dotnet run --project C:\Temp\GitHub\ApplicationDoc\Framework\Framework.Cli -- new".
     /// </summary>
     internal class CommandNewProject : CommandBase
     {
@@ -29,7 +29,8 @@ namespace Framework.Cli.Command
             Uri baseUri = new Uri(typeof(CommandNewProject).Assembly.Location);
             string folderNameFramework = new Uri(baseUri, "../../../../").AbsolutePath;
 
-            string folderNameApplication = folderNameFramework + "Framework.Cli/Template/Application/ApplicationHelloWorld/";
+            string folderNameApplication = folderNameFramework + "Framework.Cli/Template/Application/ApplicationEmpty/";
+            string folderNameApplicationWebsite = folderNameFramework + "Framework.Cli/Template/Application.Website/";
 
             string folderNameSource = folderNameApplication;
             string folderNameDest = Directory.GetCurrentDirectory().Replace(@"\", "/") + "/";
@@ -46,17 +47,34 @@ namespace Framework.Cli.Command
                 return;
             }
 
-            var isSubmodule = UtilCliInternal.ConsoleReadYesNo("For Framework use Submodule?");
-            var isApplicationWebsite = UtilCliInternal.ConsoleReadYesNo("Copy folder Application.WebSite?");
+            var isCopyFramework = UtilCliInternal.ConsoleReadYesNo("Copy folder Framework? - (Otherwise git submodule is used)");
+            var isCopyApplicationWebsite = UtilCliInternal.ConsoleReadYesNo("Copy folder Application.Website? - (otherwise framework website is used)");
 
             Console.WriteLine("Installing...");
 
             // Copy Application
             FolderCopy(folderNameSource, folderNameDest);
 
-            if (isSubmodule)
+            if (isCopyFramework)
             {
+                // Copy Framework
+                FolderCopy(folderNameFramework, folderNameDest + "Framework/");
+            }
+            else
+            {
+                // Git Init
+                Console.WriteLine("git init");
                 var info = new ProcessStartInfo
+                {
+                    WorkingDirectory = folderNameDest,
+                    FileName = "git",
+                    Arguments = "init"
+                };
+                Process.Start(info).WaitForExit();
+
+                // Git Submodule Add
+                Console.WriteLine("git submodule add https://github.com/WorkplaceX/Framework.git");
+                info = new ProcessStartInfo
                 {
                     WorkingDirectory = folderNameDest,
                     FileName = "git",
@@ -64,11 +82,11 @@ namespace Framework.Cli.Command
                 };
                 Process.Start(info).WaitForExit();
             }
-            else
+
+            if (isCopyApplicationWebsite)
             {
-                // Copy Framework
-                UtilCliInternal.FolderCreate(folderNameDest + "Framework/");
-                FolderCopy(folderNameFramework, folderNameDest + "Framework/");
+                // Copy Application.Website
+                FolderCopy(folderNameApplicationWebsite, folderNameDest + "Application.Website/");
             }
 
             // Start new cli

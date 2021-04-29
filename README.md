@@ -20,16 +20,16 @@ Create new project in empty folder (for Linux use ./cli.sh instead of /.cli.cmd)
 npx workplacex-cli new
 
 # Build everything
-./cli.cmd build
+./wpx.cmd build
 
 # Set database connection
-./cli.cmd config connectionString="Data Source=localhost; Initial Catalog=ApplicationDoc; User Id=SA; Password=MyPassword;"
+./wpx.cmd config connectionString="Data Source=localhost; Initial Catalog=ApplicationDoc; User Id=SA; Password=MyPassword;"
 
 # Deploy database
-./cli.cmd deployDb
+./wpx.cmd deployDb
 
 # Start application
-./cli.cmd start
+./wpx.cmd start
 
 # Open browser to http://localhost:5000/
 
