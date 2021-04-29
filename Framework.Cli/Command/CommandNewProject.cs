@@ -7,7 +7,7 @@ namespace Framework.Cli.Command
 {
     /// <summary>
     /// Cli command to create a new project from template.
-    /// For debug run in an empty folder: "dotnet run --project C:\Temp\GitHub\ApplicationDemo\ExternalGit\ApplicationDoc\Framework\Framework.Cli -- new".
+    /// For debug run in an empty folder: "dotnet run --project C:\Temp\GitHub\ApplicationDoc\ExternalGit\ApplicationDoc\Framework\Framework.Cli -- new".
     /// </summary>
     internal class CommandNewProject : CommandBase
     {
@@ -19,7 +19,7 @@ namespace Framework.Cli.Command
 
         private static void FolderCopy(string folderNameSource, string folderNameDest)
         {
-            // Copy ApplicationHelloWorld template
+            // Copy Application template
             // Console.WriteLine(string.Format("Copy {0} to {1}", folderNameSource, folderNameDest));
             UtilCliInternal.FolderCopy(folderNameSource, folderNameDest);
         }
@@ -29,9 +29,9 @@ namespace Framework.Cli.Command
             Uri baseUri = new Uri(typeof(CommandNewProject).Assembly.Location);
             string folderNameFramework = new Uri(baseUri, "../../../../").AbsolutePath;
 
-            string folderNameApplicationHelloWorld = folderNameFramework + "Framework.Cli/Template/Application/ApplicationHelloWorld/";
+            string folderNameApplication = folderNameFramework + "Framework.Cli/Template/Application/ApplicationHelloWorld/";
 
-            string folderNameSource = folderNameApplicationHelloWorld;
+            string folderNameSource = folderNameApplication;
             string folderNameDest = Directory.GetCurrentDirectory().Replace(@"\", "/") + "/";
 
             // Console.WriteLine("Source=" + folderNameSource);
@@ -47,10 +47,11 @@ namespace Framework.Cli.Command
             }
 
             var isSubmodule = UtilCliInternal.ConsoleReadYesNo("For Framework use Submodule?");
+            var isApplicationWebsite = UtilCliInternal.ConsoleReadYesNo("Copy folder Application.WebSite?");
 
             Console.WriteLine("Installing...");
 
-            // Copy ApplicationHelloWorld
+            // Copy Application
             FolderCopy(folderNameSource, folderNameDest);
 
             if (isSubmodule)
