@@ -605,7 +605,7 @@ namespace Framework
         {
             foreach (var process in Process.GetProcesses().Where(item => item.MainWindowTitle.EndsWith("node.exe")))
             {
-                Console.WriteLine("Closing node.exe!");
+                Console.WriteLine("Close node.exe");
                 process.Kill();
             }
         }

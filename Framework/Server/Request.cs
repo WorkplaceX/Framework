@@ -174,47 +174,55 @@
             bool result;
             var appJson = appSelector.CreateAppJson(); // Without deserialize session.
             var navigateResult = await appJson.NavigateInternalAsync(navigatePath, appSelector);
-            if (navigateResult.IsSession)
+            if (navigateResult.RedirectPath != null)
             {
-                var appJsonSession = await appSelector.CreateAppJsonSession(context); // With deserialize session.
-                var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(navigatePath, isAddHistory: false, appSelector);
-                if (navigateSessionResult.IsPage)
+                context.Response.Redirect(navigateResult.RedirectPath);
+                result = true;
+            }
+            else
+            {
+                if (navigateResult.IsSession)
                 {
-                    if (navigateSessionResult.RedirectPath != null)
+                    var appJsonSession = await appSelector.CreateAppJsonSession(context); // With deserialize session.
+                    var navigateSessionResult = await appJsonSession.NavigateSessionInternalAsync(navigatePath, isAddHistory: false, appSelector);
+                    if (navigateSessionResult.IsPage)
                     {
-                        context.Response.Redirect(navigateSessionResult.RedirectPath);
-                        result = true;
-                    }
-                    else
-                    {
-                        // Send page together with HTTP 404 not found code
-                        if (navigateSessionResult.IsPageNotFound)
+                        if (navigateSessionResult.RedirectPath != null)
                         {
-                            // Do not serialize custom error page and reset request, response count
-                            context.Response.StatusCode = StatusCodes.Status404NotFound;
-                            appJsonSession.IsPageNotFound = true;
-                            appJsonSession.RequestCount -= 1;
-                            appJsonSession.ResponseCount -= 1;
-                            // Custom error page rendering
-                            await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                            context.Response.Redirect(navigateSessionResult.RedirectPath);
                             result = true;
                         }
                         else
                         {
-                            result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                            // Send page together with HTTP 404 not found code
+                            if (navigateSessionResult.IsPageNotFound)
+                            {
+                                // Do not serialize custom error page and reset request, response count
+                                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                                appJsonSession.IsPageNotFound = true;
+                                appJsonSession.RequestCount -= 1;
+                                appJsonSession.ResponseCount -= 1;
+                                // Custom error page rendering
+                                await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                                result = true;
+                            }
+                            else
+                            {
+                                result = await WebsiteServerSideRenderingAsync(context, "/", appSelector, appJsonSession);
+                            }
                         }
+                    }
+                    else
+                    {
+                        // File download with session
+                        result = await FileDownloadAsync(context, navigatePath, navigateSessionResult.Data);
                     }
                 }
                 else
                 {
-                    // File download with session
-                    result = await FileDownloadAsync(context, navigatePath, navigateSessionResult.Data);
+                    // File download without session
+                    result = await FileDownloadAsync(context, navigatePath, navigateResult.Data);
                 }
-            }
-            else
-            {
-                // File download without session
-                result = await FileDownloadAsync(context, navigatePath, navigateResult.Data);
             }
             return result;
         }

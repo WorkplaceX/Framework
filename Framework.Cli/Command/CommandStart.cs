@@ -27,6 +27,8 @@
             //UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
             //commandBuild.Execute();
 
+            UtilFramework.NodeClose();
+
             string folderName = UtilFramework.FolderName + @"Application.Server/";
             // Version tag and build only .NET Core server.
             UtilCliInternal.VersionBuild(() =>

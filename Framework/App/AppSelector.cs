@@ -10,6 +10,7 @@
     using Framework.Config;
     using System.Collections.Generic;
     using System.Text.Json;
+    using System.IO;
 
     /// <summary>
     /// Create AppJson or deserialize from server session. Process request. Serialize AppJson to server session and angular client.
@@ -38,12 +39,17 @@
             // Make sure Website has been found
             if (result.Count == 0)
             {
+                if (!File.Exists(ConfigServer.FileName))
+                {
+                    throw new Exception("File ConfigServer.json not found! Make sure cli (wpx) did run at least once.");
+                }
+
                 // Run command cli env name=dev
-                throw new Exception(string.Format("Website not found! See also: ConfigServer.json (Domain={0}; Environment={1};)", requestDomainName, this.ConfigServer.EnvironmentName));
+                throw new Exception(string.Format("Website not found! See also file: ConfigServer.json (Domain={0}; Environment={1};)", requestDomainName, this.ConfigServer.EnvironmentName));
             }
             if (result.Count > 1)
             {
-                throw new Exception(string.Format("More than one website found! See also: ConfigServer.json ({0})", requestDomainName));
+                throw new Exception(string.Format("More than one website found! See also file: ConfigServer.json ({0})", requestDomainName));
             }
 
             this.ConfigWebsite = result.Single();

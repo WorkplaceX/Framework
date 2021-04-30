@@ -3744,7 +3744,7 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
-            result.Append("<article class=\"message is-warning\"><div class=\"message-body\">");
+            result.Append("<article class=\"message is-info\"><div class=\"message-body\">");
         }
 
         internal override void RenderEnd(StringBuilder result)

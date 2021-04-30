@@ -873,7 +873,8 @@
         public class NavigateResult
         {
             /// <summary>
-            /// Gets or sets IsSession. If true, session is data deserialized and method NavigateSessionAsync(); is called next.
+            /// Gets or sets IsSession. If true, session data is deserialized and method NavigateSessionAsync(); is called next.
+            /// If false, a (HTTP 404) page not found is sent to the client.
             /// </summary>
             public bool IsSession { get; set; }
 
@@ -881,6 +882,12 @@
             /// Gets or sets Data. If not null, this is the file data sent to the browser to download.
             /// </summary>
             public byte[] Data;
+
+            /// <summary>
+            /// Gets or sets RedirectPath. Used to redirect trailing slash. For example redirect "/contact" to "/contact/".
+            /// Sends a redirect response (HTTP 302) to the client.
+            /// </summary>
+            public string RedirectPath { get; set; }
         }
 
         internal async Task<NavigateSessionResult> NavigateSessionInternalAsync(string navigatePath, bool isAddHistory, AppSelector appSelector)
@@ -950,12 +957,13 @@
             public bool IsPageNotFound { get; set; }
 
             /// <summary>
-            /// Gets or sets NavigatePath. For example: "/contact/" or "/signin/", if redirected.
+            /// Gets or sets NavigatePath. For example: "/contact/" or "/signin/", if redirected. Used for example in single page application (SPA) if user clicked a button to navigate to a page.
             /// </summary>
             public string NavigatePath { get; set; }
 
             /// <summary>
             /// Gets or sets RedirectPath. Used to redirect trailing slash. For example redirect "/contact" to "/contact/".
+            /// Sends a redirect response (HTTP 302) to the client.
             /// </summary>
             public string RedirectPath { get; set; }
         }

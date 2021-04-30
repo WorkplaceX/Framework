@@ -41,12 +41,14 @@
             {
                 EnvironmentList = new List<ConfigCliEnvironment>();
             }
-            var result = EnvironmentGet(EnvironmentNameGet());
+            var environmentName = EnvironmentNameGet();
+
+            var result = EnvironmentGet(environmentName);
             if (result == null)
             {
-                result = new ConfigCliEnvironment { EnvironmentName = EnvironmentNameGet() };
+                result = new ConfigCliEnvironment { EnvironmentName = environmentName, IsUseDeveloperExceptionPage = environmentName == "DEV" };
                 EnvironmentList.Add(result);
-                EnvironmentName = EnvironmentNameGet();
+                EnvironmentName = environmentName;
             }
             return result;
         }

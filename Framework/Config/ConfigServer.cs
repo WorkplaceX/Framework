@@ -108,7 +108,7 @@
         /// <summary>
         /// Gets ConfigServer.json. Created und updated by CommandBuild. See also publish folder.
         /// </summary>
-        private static string FileName
+        internal static string FileName
         {
             get
             {
