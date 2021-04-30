@@ -8,6 +8,13 @@ namespace Framework.Cli.Command
     /// <summary>
     /// Cli command to create a new project from template.
     /// For debug run in an empty folder: "dotnet run --project C:\Temp\GitHub\ApplicationDoc\Framework\Framework.Cli -- new".
+    /// Npm does not package file .gitignore. Copy all .gitignore to .gitignore.txt
+    ///   1) Update version in file package.json
+    ///   2) git commit
+    ///   3) forfiles /S /M .gitignore /C "cmd /c copy @file @file.txt"
+    ///   4) npm publish
+    ///   5) git add .
+    ///   6) git reset --hard
     /// </summary>
     internal class CommandNewProject : CommandBase
     {
@@ -88,6 +95,26 @@ namespace Framework.Cli.Command
             {
                 // Copy Application.Website
                 FolderCopy(folderNameApplicationWebsite, folderNameDest + "Application.Website/");
+            }
+
+            // Rename all file .gitignore.txt to .gitignore
+            var fileList = Directory.GetFiles(folderNameDest, ".gitignore.txt", SearchOption.AllDirectories);
+            if (fileList.Length == 0)
+            {
+                throw new Exception("File .gitignore.txt not found!"); // Run 'forfiles /S /M .gitignore /C "cmd /c copy @file @file.txt"' before npm publish! npm does not publish .gitignore files!
+            }
+            foreach (var item in fileList)
+            {
+                var fileNameSource = item;
+                var fileNameDest = fileNameSource.Substring(0, fileNameSource.Length - ".txt".Length);
+                if (!File.Exists(fileNameDest))
+                {
+                    File.Move(fileNameSource, fileNameDest);
+                }
+                else
+                {
+                    File.Delete(fileNameSource);
+                }
             }
 
             // Start new cli
