@@ -22,10 +22,14 @@
 
         protected internal override void Execute()
         {
-            // Build angular client
-            //var commandBuild = new CommandBuild(AppCli);
-            //UtilCli.OptionSet(ref commandBuild.OptionClientOnly, true);
-            //commandBuild.Execute();
+            ConfigCli configCli = ConfigCli.Load();
+            if (configCli.EnvironmentNameGet() != "DEV")
+            {
+                if (UtilCliInternal.ConsoleReadYesNo(string.Format("Start with {0} database?", configCli.EnvironmentName)) == false)
+                {
+                    return;
+                }
+            }
 
             UtilFramework.NodeClose();
 
