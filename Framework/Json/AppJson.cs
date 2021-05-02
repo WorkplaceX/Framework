@@ -2812,7 +2812,7 @@
         public bool IsNoSanatize;
 
         /// <summary>
-        /// Gets or sets IsNoSanatizeScript. Script is executed always after TextHtml has been updated. Used for example for prismjs Prism.highlightAll();
+        /// Gets or sets IsNoSanatizeScript. This property contains an html script. This script is executed always after TextHtml has been updated. Used for example for prismjs Prism.highlightAll();
         /// </summary>
         public string IsNoSanatizeScript;
 

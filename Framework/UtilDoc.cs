@@ -3767,8 +3767,7 @@
         internal override void RenderContent(StringBuilder result)
         {
             string link = ((SyntaxCustomYoutube)Syntax).Link;
-            // See also: https://bulma.io/documentation/elements/image/#arbitrary-ratios-with-any-element
-            string html = $"<figure class=\"image is-16by9\"><iframe class=\"has-ratio\" width=\"640\" height=\"360\" src=\"{ link }\" frameborder=\"0\" allowfullscreen></iframe></figure>";
+            string html = $"<iframe class=\"has-ratio\" width=\"640\" height=\"360\" src=\"{ link }\" frameborder=\"0\" allowfullscreen></iframe>";
             result.Append(html);
         }
     }

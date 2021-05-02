@@ -6,6 +6,7 @@ namespace Framework
 {
     using Database.dbo;
     using Framework.Doc;
+    using Framework.Json;
     using Framework.Server;
     using System;
     using System.Collections.Concurrent;
@@ -41,7 +42,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.45";
+                return "v3.51.46";
             }
         }
 
@@ -61,12 +62,19 @@ namespace Framework
         /// <summary>
         /// Convert markdown text to html.
         /// </summary>
-        public static string TextMdToHtml(string textMd)
+        public static string TextMdToHtml(string textMd, CssFrameworkEnum cssFrameworkEnum = CssFrameworkEnum.Bootstrap)
         {
             var appDoc = new AppDoc();
             new MdPage(appDoc.MdDoc, textMd);
             appDoc.Parse();
             var textHtml = appDoc.HtmlDoc.Render();
+
+            if (cssFrameworkEnum == CssFrameworkEnum.Bulma)
+            {
+                // See also: https://bulma.io/documentation/elements/image/#arbitrary-ratios-with-any-element
+                textHtml = textHtml?.Replace("<iframe ", "<figure class=\"image is-16by9\"><iframe ");
+                textHtml = textHtml?.Replace("</iframe>", "</iframe></figure>");
+            }
 
             // Debug
             // UtilDoc.TextDebugWriteToFile(appDoc);

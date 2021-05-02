@@ -8,7 +8,6 @@
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Net.Http;
     using System.Runtime.InteropServices;
     using System.Text;
@@ -154,6 +153,7 @@
             UtilFramework.NodeClose();
 
             var configServer = ConfigServer.Load();
+            bool isFirst = true; // See also class CommandBuild option --first
             foreach (var website in configServer.WebsiteList)
             {
                 string folderNameAngular = UtilFramework.FolderNameParse(website.FolderNameAngular);
@@ -162,9 +162,14 @@
                     string fileNameServer = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/" + website.FolderNameAngularWebsite + "server/main.js";
                     if (!File.Exists(fileNameServer))
                     {
+                        if (isFirst == false)
+                        {
+                            break; // See also
+                        }
                         throw new Exception(string.Format("File does not exis! Make sure cli command build --client did run. ({0})", fileNameServer));
                     }
-
+                    isFirst = false;
+                    
                     ProcessStartInfo info = new ProcessStartInfo
                     {
                         WorkingDirectory = UtilFramework.FolderName + "Application.Server/Framework/Application.Website/" + website.FolderNameAngularWebsite + "server/",

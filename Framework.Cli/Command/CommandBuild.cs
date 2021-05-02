@@ -5,8 +5,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
-    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Cli build command.
@@ -19,14 +17,26 @@
 
         }
 
+        /// <summary>
+        /// Build Angular client only.
+        /// </summary>
         internal CommandOption OptionClientOnly;
-        
+
+        /// <summary>
+        /// Build only first Angular client from WebsiteList.
+        /// </summary>
+        internal CommandOption OptionClientOnlyFirst; // Exclude further ExternalGit
+
         internal CommandOption OptionServerOnly;
 
         protected internal override void Register(CommandLineApplication configuration)
         {
             OptionClientOnly = configuration.Option("-c|--client", "Build Angular website only.", CommandOptionType.NoValue);
             OptionServerOnly = configuration.Option("-s|--server", "Build .NET server only.", CommandOptionType.NoValue);
+            if (Directory.Exists(UtilFramework.FolderName + "ExternalGit"))
+            {
+                OptionClientOnlyFirst = configuration.Option("-f|--first", "Build Angular website first only.", CommandOptionType.NoValue);
+            }
         }
 
         /// <summary>
@@ -102,6 +112,11 @@
 
                     Console.WriteLine(string.Format("### Build Website (End) - {0}", website.DomainNameListToString()));
                 }
+
+                if (OptionClientOnlyFirst.OptionGet())
+                {
+                    break;
+                }
             }
         }
 
@@ -161,7 +176,10 @@
             ExternalGit();
 
             // Run cli external command. Override for example custom components.
-            CommandExternal();
+            if (!OptionClientOnlyFirst.OptionGet())
+            {
+                CommandExternal();
+            }
 
             // Build Angular Website(s)
             if (OptionServerOnly.OptionGet() == false)
