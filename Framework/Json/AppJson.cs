@@ -1477,7 +1477,7 @@
             public string FieldName { get; internal set; }
 
             /// <summary>
-            /// Gets Data. Contains data of uploaded file.
+            /// Gets Data. Contains data of uploaded file. Is null if no file has been uploaded.
             /// </summary>
             public byte[] Data { get; internal set; }
 
@@ -1938,10 +1938,6 @@
         internal override async Task UpdateInternalAsync(Row rowOld, Row row, FileUploadArgs fileUpload, DatabaseEnum databaseEnum, UpdateResultInternal result)
         {
             UpdateResult resultLocal = UpdateResultInternal.Convert(result, (TRow)row);
-            if (fileUpload.Data == null)
-            {
-                fileUpload = null;
-            }
             await UpdateAsync(new UpdateArgs { RowOld = (TRow)rowOld, Row = (TRow)row, FileUpload = fileUpload, DatabaseEnum = databaseEnum }, resultLocal);
             UpdateResultInternal.Convert(resultLocal, ref result);
         }
@@ -2857,7 +2853,7 @@
         }
 
         /// <summary>
-        /// Calle once a lifetime when page is created.
+        /// Called once a lifetime when page is created.
         /// </summary>
         public virtual Task InitAsync()
         {

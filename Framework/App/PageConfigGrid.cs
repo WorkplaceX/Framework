@@ -54,7 +54,7 @@
             
             if (GridConfigGrid.RowList.Count == 0)
             {
-                throw new Exception(string.Format("Grid has no config! Run cli command deployDb to populate. ({0})", TableNameCSharp));
+                throw new Exception(string.Format("Grid has no entry in table FrameworkTable! Run cli command deployDb to register for config. ({0})", TableNameCSharp));
             }
         }
 
