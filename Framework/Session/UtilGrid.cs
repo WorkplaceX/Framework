@@ -1437,9 +1437,15 @@
                         await ProcessGridLookupOpenAsync(grid, rowState, column, cell);
                     }
 
-                    // Do not set Cell.TextLeave if user clicked lookup row.
+                    // Do not set Cell.TextLeave on response if user clicked lookup row.
                     bool isTextLeave = true;
                     if (commandJson.GridCellTextIsLookup)
+                    {
+                        isTextLeave = false;
+                    }
+
+                    // Do not set Cell.TextLeave on response if user did not enter text but clicked the file upload button.
+                    if (commandJson.GridCellTextBase64 != null)
                     {
                         isTextLeave = false;
                     }

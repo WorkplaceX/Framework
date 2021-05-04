@@ -3532,6 +3532,12 @@
 
         internal override void RenderBegin(StringBuilder result)
         {
+            if (!Data.Registry.IsDebug && List.Count == 0)
+            {
+                // Do not render empty paragraph
+                return;
+            }
+
             result.Append("<p>");
             if (Data.Registry.IsDebug)
             {
@@ -3541,6 +3547,12 @@
 
         internal override void RenderEnd(StringBuilder result)
         {
+            if (!Data.Registry.IsDebug && List.Count == 0)
+            {
+                // Do not render empty paragraph
+                return;
+            }
+
             if (Data.Registry.IsDebug)
             {
                 result.Append("(/p)");
@@ -3767,7 +3779,7 @@
         internal override void RenderContent(StringBuilder result)
         {
             string link = ((SyntaxCustomYoutube)Syntax).Link;
-            string html = $"<iframe class=\"has-ratio\" width=\"640\" height=\"360\" src=\"{ link }\" frameborder=\"0\" allowfullscreen></iframe>";
+            string html = $"<iframe src=\"{ link }\"></iframe>";
             result.Append(html);
         }
     }

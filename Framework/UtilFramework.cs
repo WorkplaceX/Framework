@@ -42,7 +42,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.50";
+                return "v3.51.51";
             }
         }
 
@@ -72,8 +72,8 @@ namespace Framework
             if (cssFrameworkEnum == CssFrameworkEnum.Bulma)
             {
                 // See also: https://bulma.io/documentation/elements/image/#arbitrary-ratios-with-any-element
-                textHtml = textHtml?.Replace("<iframe ", "<figure class=\"image is-16by9\"><iframe ");
-                textHtml = textHtml?.Replace("</iframe>", "</iframe></figure>");
+                textHtml = textHtml?.Replace("<iframe ", "<figure class=\"image is-16by9\"><iframe class=\"has-ratio\" width=\"640\" height=\"360\"");
+                textHtml = textHtml?.Replace("</iframe>", "frameborder=\"0\" allowfullscreen </iframe></figure>");
             }
 
             // Debug
