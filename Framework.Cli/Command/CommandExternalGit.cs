@@ -4,7 +4,7 @@
     using System;
 
     /// <summary>
-    /// Cli external command.
+    /// Cli ExternalGit command.
     /// </summary>
     internal class CommandExternalGit : CommandBase
     {
@@ -78,18 +78,18 @@
             args.FileReplaceLine(
                 args.CliDatabaseDestFolderName + "DatabaseIntegrate.cs",
                 "    public static class FrameworkConfigGridIntegrateAppCli",
-                "    public static class FrameworkConfigGridIntegrateAppCli" + "External" + args.ExternalProjectName);
+                "    public static class FrameworkConfigGridIntegrateAppCli" + "ExternalGit" + args.ExternalProjectName);
 
             args.FileReplaceLine(
                 args.CliDatabaseDestFolderName + "DatabaseIntegrate.cs",
                 "    public static class FrameworkConfigFieldIntegrateAppCli",
-                "    public static class FrameworkConfigFieldIntegrateAppCli" + "External" + args.ExternalProjectName);
+                "    public static class FrameworkConfigFieldIntegrateAppCli" + "ExternalGit" + args.ExternalProjectName);
 
             // Copy folder CliDeployDb/
             Console.WriteLine("Copy folder CliDeployDb/");
             args.FolderCopy(args.CliDeployDbSourceFolderName, args.CliDeployDbDestFolderName);
 
-            AppCli.CommandExternal(args);
+            AppCli.CommandExternalGit(args);
         }
 
 

@@ -29,11 +29,14 @@
 
         private CommandOption optionReseed;
 
+        private CommandOption optionOnly;
+
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionDrop = configuration.Option("-d|--drop", "Drop sql tables and views.", CommandOptionType.NoValue);
             optionSilent = configuration.Option("-s|--silent", "No command line user interaction.", CommandOptionType.NoValue);
             optionReseed = configuration.Option("-r|--reseed", "Reseed Integrate records.", CommandOptionType.NoValue);
+            optionOnly = configuration.Option("-o|--only", "Do not run integrate program.", CommandOptionType.NoValue);
         }
 
         /// <summary>
@@ -215,7 +218,7 @@
 
             if (UtilExternalGit.IsExternalGit)
             {
-                Console.WriteLine("For external run command wpx external and then command wpx deploy an main application (because of shared table FrameworkDeplayDb and FrameworkConfig).");
+                Console.WriteLine("For ExternalGit run command wpx ExternalGit and then command wpx deploy on main application (because of shared table FrameworkDeplayDb and FrameworkConfig).");
                 if (UtilCliInternal.ConsoleReadYesNo("Continue anyway?") == false)
                 {
                     return;
@@ -259,15 +262,18 @@
                 DeployDbExecute(folderNameDeployDbApplication, isFrameworkDb: false);
                 UtilCliInternal.ConsoleWriteLineColor("DeployDb run (*.sql) scripts successful!", ConsoleColor.Green);
 
-                // Integrate
-                UtilCliInternal.ConsoleWriteLineColor("DeployDb run Integrate", ConsoleColor.Green);
-                int? reseed = null;
-                if (optionReseed.OptionGet())
+                if (!optionOnly.OptionGet())
                 {
-                    reseed = 1000;
+                    // Integrate
+                    UtilCliInternal.ConsoleWriteLineColor("DeployDb run Integrate", ConsoleColor.Green);
+                    int? reseed = null;
+                    if (optionReseed.OptionGet())
+                    {
+                        reseed = 1000;
+                    }
+                    Integrate(reseed);
+                    UtilCliInternal.ConsoleWriteLineColor("DeployDb run Integrate successful!", ConsoleColor.Green);
                 }
-                Integrate(reseed);
-                UtilCliInternal.ConsoleWriteLineColor("DeployDb run Integrate successful!", ConsoleColor.Green);
             }
         }
     }

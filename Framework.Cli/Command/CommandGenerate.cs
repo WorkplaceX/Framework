@@ -19,11 +19,14 @@
         private CommandOption optionFramework;
 
         private CommandOption optionSilent;
+        
+        private CommandOption optionOnly;
 
         protected internal override void Register(CommandLineApplication configuration)
         {
             optionFramework = configuration.Option("-f|--framework", "Generate CSharp code for framework (internal use only)", CommandOptionType.NoValue);
             optionSilent = configuration.Option("-s|--silent", "No command line user interaction.", CommandOptionType.NoValue);
+            optionOnly = configuration.Option("-o|--only", "Do not run integrate program.", CommandOptionType.NoValue);
         }
 
         protected internal override void Execute()
@@ -39,7 +42,7 @@
             }
 
             bool isFrameworkDb = optionFramework.OptionGet();
-            if (Script.Run(isFrameworkDb, AppCli))
+            if (Script.Run(isFrameworkDb, AppCli, optionOnly.OptionGet()))
             {
                 UtilCliInternal.ConsoleWriteLineColor("Generate successful!", ConsoleColor.Green);
             }

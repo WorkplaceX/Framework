@@ -7,7 +7,7 @@ using static Framework.Cli.AppCli;
 namespace Framework.Cli
 {
     /// <summary>
-    /// Util for cli external command.
+    /// Util for cli ExternalGit command.
     /// </summary>
     internal static class UtilExternalGit
     {
@@ -39,7 +39,7 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Returns ExternalProjectName without reading file ConfigCli. json. External file Config.Cli.json does not contain this value. See also file ConfigCli.json of host cli.
+        /// Returns ExternalProjectName without reading file ConfigCli.json. ExternalGit file Config.Cli.json does not contain this value. See also file ConfigCli.json of host cli.
         /// </summary>
         public static string ExternalProjectName()
         {
@@ -60,7 +60,7 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Call method CommandGenerateIntegrate(); on external AppCli.
+        /// Call method CommandGenerateIntegrate(); on ExternalGit AppCli.
         /// </summary>
         public static void CommandGenerateIntegrate(AppCli appCli, GenerateIntegrateResult result)
         {
@@ -70,15 +70,15 @@ namespace Framework.Cli
                 {
                     if (type != appCli.GetType())
                     {
-                        var appCliExternal = (AppCli)Activator.CreateInstance(type);
-                        appCliExternal.CommandGenerateIntegrate(result);
+                        var appCliExternalGit = (AppCli)Activator.CreateInstance(type);
+                        appCliExternalGit.CommandGenerateIntegrate(result);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Call method CommandDeployDbIntegrate(); on external AppCli.
+        /// Call method CommandDeployDbIntegrate(); on ExternalGit AppCli.
         /// </summary>
         public static void CommandDeployDbIntegrate(AppCli appCli, DeployDbIntegrateResult result)
         {
@@ -88,8 +88,8 @@ namespace Framework.Cli
                 {
                     if (type != appCli.GetType())
                     {
-                        var appCliExternal = (AppCli)Activator.CreateInstance(type);
-                        appCliExternal.CommandDeployDbIntegrate(result);
+                        var appCliExternalGit = (AppCli)Activator.CreateInstance(type);
+                        appCliExternalGit.CommandDeployDbIntegrate(result);
                     }
                 }
             }
@@ -97,7 +97,7 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Collect rowList from external FrameworkConfigGridIntegrateAppCli (ConfigGrid).
+        /// Collect rowList from ExternalGit FrameworkConfigGridIntegrateAppCli (ConfigGrid).
         /// </summary>
         public static void CommandDeployDbIntegrate(AppCli appCli, List<FrameworkConfigGridIntegrate> rowList)
         {
@@ -107,8 +107,8 @@ namespace Framework.Cli
                 {
                     if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli")
                     {
-                        var typeCliExternal = appCli.AssemblyApplicationCli.GetType(type.FullName);
-                        var propertyInfo = typeCliExternal.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
+                        var typeCliExternalGit = appCli.AssemblyApplicationCli.GetType(type.FullName);
+                        var propertyInfo = typeCliExternalGit.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
                         var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
                         rowList.AddRange(rowApplicationCliList);
                     }
@@ -117,7 +117,7 @@ namespace Framework.Cli
         }
 
         /// <summary>
-        /// Collect rowList from external FrameworkConfigFieldIntegrateAppCli (ConfigField).
+        /// Collect rowList from ExternalGit FrameworkConfigFieldIntegrateAppCli (ConfigField).
         /// </summary>
         public static void CommandDeployDbIntegrate(AppCli appCli, List<FrameworkConfigFieldIntegrate> rowList)
         {
@@ -127,8 +127,8 @@ namespace Framework.Cli
                 {
                     if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigFieldIntegrateAppCli")
                     {
-                        var typeCliExternal = appCli.AssemblyApplicationCli.GetType(type.FullName);
-                        var propertyInfo = typeCliExternal.GetProperty(nameof(FrameworkConfigFieldIntegrateFrameworkCli.RowList));
+                        var typeCliExternalGit = appCli.AssemblyApplicationCli.GetType(type.FullName);
+                        var propertyInfo = typeCliExternalGit.GetProperty(nameof(FrameworkConfigFieldIntegrateFrameworkCli.RowList));
                         var rowApplicationCliList = (List<FrameworkConfigFieldIntegrate>)propertyInfo.GetValue(null);
                         rowList.AddRange(rowApplicationCliList);
                     }
@@ -140,7 +140,7 @@ namespace Framework.Cli
         /// Returns ExternalArgs.
         /// </summary>
         /// <param name="isProjectName">Include project name into FolderName.</param>
-        public static ExternalArgs ExternalArgs(bool isProjectName = true)
+        public static ExternalGitArgs ExternalArgs(bool isProjectName = true)
         {
             // ExternalGit/ProjectName/
             string externalGitProjectNamePath = "ExternalGit/";
@@ -169,7 +169,7 @@ namespace Framework.Cli
             string cliDeployDbSourceFolderName = UtilFramework.FolderName + "Application.Cli/DeployDb/";
             string cliDeployDbDestFolderName = UtilExternalGit.FolderNameExternal + "Application.Cli/DeployDb/" + externalGitProjectNamePath;
 
-            var result = new ExternalArgs
+            var result = new ExternalGitArgs
             {
                 AppSourceFolderName = appSourceFolderName,
                 AppDestFolderName = appDestFolderName,

@@ -374,6 +374,9 @@
         /// </summary>
         internal void CommandDeployDbIntegrateInternal(DeployDbIntegrateResult result)
         {
+            // FrameworkTable
+            var tableNameCSharpList = result.Result[0].RowList.Select(item => (((FrameworkTable)item).TableNameCSharp)).ToArray();
+
             // FrameworkConfigGridIntegrate
             {
                 var rowList = FrameworkConfigGridIntegrateFramework.RowList;
@@ -384,9 +387,11 @@
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
                 var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
+                // Filter out records on FrameworkConfigGrid which do not exist on FrameworkTable (because class row has been removed in CSharp code)
+                rowApplicationCliList = rowApplicationCliList.Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList();
                 rowList.AddRange(rowApplicationCliList);
 
-                // Collect rowList from external FrameworkConfigGridIntegrateAppCli (ConfigGrid).
+                // Collect rowList from ExternalGit FrameworkConfigGridIntegrateAppCli (ConfigGrid).
                 UtilExternalGit.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
@@ -402,9 +407,11 @@
                 UtilFramework.Assert(typeCli != null, string.Format("Type not found! See also method GenerateCSharpTableNameClass(); ({0})", nameCli));
                 PropertyInfo propertyInfo = typeCli.GetProperty(nameof(FrameworkConfigFieldIntegrateFrameworkCli.RowList));
                 var rowApplicationCliList = (List<FrameworkConfigFieldIntegrate>)propertyInfo.GetValue(null);
+                // Filter out records on FrameworkConfigField which do not exist on FrameworkTable (because class row has been removed in CSharp code)
+                rowApplicationCliList = rowApplicationCliList.Where(item => tableNameCSharpList.Contains(item.TableNameCSharp)).ToList();
                 rowList.AddRange(rowApplicationCliList);
 
-                // Collect rowList from external FrameworkConfigFieldIntegrateAppCli (ConfigField).
+                // Collect rowList from ExternalGit FrameworkConfigFieldIntegrateAppCli (ConfigField).
                 UtilExternalGit.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
@@ -413,7 +420,7 @@
             // Add application (custom) Integrate data rows to deploy to database
             CommandDeployDbIntegrate(result);
 
-            // Call method CommandDeployDbIntegrate(); on external AppCli.
+            // Call method CommandDeployDbIntegrate(); on ExternalGit AppCli.
             UtilExternalGit.CommandDeployDbIntegrate(this, result);
         }
 
@@ -593,7 +600,7 @@
             // Application (custom) Integrate data rows to generate CSharp code from.
             CommandGenerateIntegrate(result);
 
-            // Call method CommandGenerateIntegrate(); on external AppCli for deployDb only. Not for cli generate command.
+            // Call method CommandGenerateIntegrate(); on ExternalGit AppCli for deployDb only. Not for cli generate command.
             if (isDeployDb)
             {
                 UtilExternalGit.CommandGenerateIntegrate(this, result);
@@ -897,18 +904,18 @@
         }
 
         /// <summary>
-        /// Override if this application is cloned into ExternalGit/ folder. See also command cli external.
+        /// Override if this application is cloned into ExternalGit/ folder. See also command cli ExternalGit.
         /// </summary>
         /// <param name="args">Some utils for example to copy files.</param>
-        protected virtual internal void CommandExternal(ExternalArgs args)
+        protected virtual internal void CommandExternalGit(ExternalGitArgs args)
         {
 
         }
 
         /// <summary>
-        /// Args for cli external command.
+        /// Args for cli ExternalGit command.
         /// </summary>
-        public class ExternalArgs
+        public class ExternalGitArgs
         {
             /// <summary>
             /// Gets AppSourceFolderName. This is folder ExternalGit/ProjectName/Application/App/

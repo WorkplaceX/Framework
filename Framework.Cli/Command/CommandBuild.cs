@@ -121,19 +121,19 @@
         }
 
         /// <summary>
-        /// Clone external git repo and call prebuild script.
+        /// Clone ExternalGit repo and call prebuild script.
         /// </summary>
         private static void ExternalGit()
         {
             var configCli = ConfigCli.Load();
 
-            foreach (var external in configCli.ExternalGitList)
+            foreach (var item in configCli.ExternalGitList)
             {
                 // Clone repo
-                var externalGit = UtilFramework.StringNull(external.ExternalGit);
+                var externalGit = UtilFramework.StringNull(item.ExternalGit);
                 if (externalGit != null)
                 {
-                    string externalFolderName = UtilFramework.FolderName + "ExternalGit/" + external.ExternalProjectName + "/";
+                    string externalFolderName = UtilFramework.FolderName + "ExternalGit/" + item.ExternalProjectName + "/";
                     if (!UtilCliInternal.FolderNameExist(externalFolderName))
                     {
                         Console.WriteLine("Git Clone ExternalGit");
@@ -150,17 +150,17 @@
         /// <summary>
         /// Run method AppCli.CommandExternalGit(); on ExternalGit/ProjectName/
         /// </summary>
-        private static void CommandExternal()
+        private static void CommandExternalGit()
         {
             var configCli = ConfigCli.Load();
 
-            foreach (var external in configCli.ExternalGitList)
+            foreach (var item in configCli.ExternalGitList)
             {
-                // External git url
-                var externalGit = UtilFramework.StringNull(external.ExternalGit);
+                // ExternalGit url
+                var externalGit = UtilFramework.StringNull(item.ExternalGit);
 
-                // Call command cli external (prebuild script)
-                var externalProjectName = UtilFramework.StringNull(external.ExternalProjectName);
+                // Call cli command ExternalGit (prebuild script)
+                var externalProjectName = UtilFramework.StringNull(item.ExternalProjectName);
 
                 if (externalGit != null && externalProjectName != null)
                 {
@@ -172,13 +172,13 @@
 
         protected internal override void Execute()
         {
-            // Clone external repo
+            // Clone ExternalGit repo
             ExternalGit();
 
-            // Run cli external command. Override for example custom components.
+            // Run cli ExternalGit command. Override for example custom components.
             if (!OptionClientOnlyFirst.OptionGet())
             {
-                CommandExternal();
+                CommandExternalGit();
             }
 
             // Build Angular Website(s)
