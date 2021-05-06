@@ -1311,6 +1311,19 @@
         [Serialize(SerializeEnum.Session)]
         internal List<GridColumn> ColumnList;
 
+        /// <summary>
+        /// Returns column width total starting at offset.
+        /// </summary>
+        public double ColumnWidthTotal(int offset)
+        {
+            double result = 0;
+            for (int i = offset; i < ColumnList.Count; i++)
+            {
+                result += ColumnList[i].Width;
+            }
+            return result;
+        }
+
         [Serialize(SerializeEnum.Session)]
         internal List<GridRowState> RowStateList;
 
@@ -2485,6 +2498,11 @@
         /// Gets or sets IsReadOnly.
         /// </summary>
         public bool IsReadOnly;
+
+        /// <summary>
+        /// Gets or sets Width. Value is By default 1.
+        /// </summary>
+        public double Width;
 
         /// <summary>
         /// Gets or sets IsMultiline.

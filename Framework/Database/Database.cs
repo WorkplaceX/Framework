@@ -32,6 +32,9 @@ namespace Database.dbo
         [SqlField("IsReadOnly", FrameworkTypeEnum.Bit)]
         public bool? IsReadOnly { get; set; }
 
+        [SqlField("Width", FrameworkTypeEnum.Float)]
+        public double? Width { get; set; }
+
         [SqlField("IsMultiline", FrameworkTypeEnum.Bit)]
         public bool? IsMultiline { get; set; }
 
@@ -105,6 +108,9 @@ namespace Database.dbo
         [SqlField("ConfigFieldIsReadOnly", FrameworkTypeEnum.Bit)]
         public bool? ConfigFieldIsReadOnly { get; set; }
 
+        [SqlField("ConfigFieldWidth", FrameworkTypeEnum.Float)]
+        public double? ConfigFieldWidth { get; set; }
+
         [SqlField("ConfigFieldIsMultiline", FrameworkTypeEnum.Bit)]
         public bool? ConfigFieldIsMultiline { get; set; }
 
@@ -154,6 +160,9 @@ namespace Database.dbo
         [SqlField("IsReadOnly", FrameworkTypeEnum.Bit)]
         public bool? IsReadOnly { get; set; }
 
+        [SqlField("Width", FrameworkTypeEnum.Float)]
+        public double? Width { get; set; }
+
         [SqlField("IsMultiline", FrameworkTypeEnum.Bit)]
         public bool? IsMultiline { get; set; }
 
@@ -178,6 +187,9 @@ namespace Database.dbo
 
         [SqlField("RowCountMax", FrameworkTypeEnum.Int)]
         public int? RowCountMax { get; set; }
+
+        [SqlField("WidthMax", FrameworkTypeEnum.Float)]
+        public double? WidthMax { get; set; }
 
         [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
         public bool? IsAllowInsert { get; set; }
@@ -212,6 +224,9 @@ namespace Database.dbo
 
         [SqlField("RowCountMax", FrameworkTypeEnum.Int)]
         public int? RowCountMax { get; set; }
+
+        [SqlField("WidthMax", FrameworkTypeEnum.Float)]
+        public double? WidthMax { get; set; }
 
         [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
         public bool? IsAllowInsert { get; set; }
@@ -249,6 +264,9 @@ namespace Database.dbo
 
         [SqlField("RowCountMax", FrameworkTypeEnum.Int)]
         public int? RowCountMax { get; set; }
+
+        [SqlField("WidthMax", FrameworkTypeEnum.Float)]
+        public double? WidthMax { get; set; }
 
         [SqlField("IsAllowInsert", FrameworkTypeEnum.Bit)]
         public bool? IsAllowInsert { get; set; }

@@ -48,6 +48,7 @@ CREATE TABLE FrameworkConfigGrid
 	TableId INT FOREIGN KEY REFERENCES FrameworkTable(Id) NOT NULL ,
 	ConfigName NVARCHAR(256),
 	RowCountMax INT,
+	WidthMax FLOAT, -- Default 5
 	IsAllowInsert BIT,
 	IsShowHeader BIT,
 	IsShowPagination BIT,
@@ -66,6 +67,7 @@ SELECT
 	(SELECT FrameworkTable.TableNameCSharp FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameCSharp,
 	ConfigGrid.ConfigName,
 	ConfigGrid.RowCountMax,
+	ConfigGrid.WidthMax,
 	ConfigGrid.IsAllowInsert,
 	ConfigGrid.IsShowHeader,
 	ConfigGrid.IsShowPagination,
@@ -84,6 +86,7 @@ CREATE TABLE FrameworkConfigField
 	Description NVARCHAR(256), -- Column header description.
 	IsVisible BIT,
 	IsReadOnly BIT,
+	Width FLOAT, -- Default 1
 	IsMultiline BIT,
 	Sort FLOAT,
 	IsDelete BIT NOT NULL
@@ -110,6 +113,7 @@ SELECT
 	ConfigField.Description,
 	ConfigField.IsVisible,
 	ConfigField.IsReadOnly,
+	ConfigField.Width,
 	ConfigField.IsMultiline,
 	ConfigField.Sort,
 	ConfigField.IsDelete
@@ -126,6 +130,7 @@ SELECT
 	(SELECT FrameworkTable.TableNameSql FROM FrameworkTable FrameworkTable WHERE FrameworkTable.Id = ConfigGrid.TableId) AS TableNameSql,
 	ConfigGrid.ConfigName AS ConfigName,
 	ConfigGrid.RowCountMax AS RowCountMax,
+	ConfigGrid.WidthMax AS WidthMax,
 	ConfigGrid.IsAllowInsert AS IsAllowInsert,
 	ConfigGrid.IsShowHeader AS IsShowHeader,
 	ConfigGrid.IsShowPagination AS IsShowPagination,
@@ -140,6 +145,7 @@ SELECT
 	FrameworkTable.TableNameSql,
 	NULL AS ConfigName,
 	NULL AS RowCountMax,
+	NULL AS WidthMax,
 	NULL AS IsAllowInsert,
 	NULL AS IsShowHeader,
 	NULL AS IsShowPagination,
@@ -199,6 +205,7 @@ SELECT
 	ConfigField.Description AS ConfigFieldDescription,
 	ConfigField.IsVisible AS ConfigFieldIsVisible,
 	ConfigField.IsReadOnly AS ConfigFieldIsReadOnly,
+	ConfigField.Width AS ConfigFieldWidth,
 	ConfigField.IsMultiline AS ConfigFieldIsMultiline,
 	ConfigField.Sort AS ConfigFieldSort
 FROM

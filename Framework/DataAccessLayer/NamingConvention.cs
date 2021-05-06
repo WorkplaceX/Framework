@@ -40,6 +40,18 @@
             return result;
         }
 
+        /// <summary>
+        /// Override this method for custom column Width.
+        /// </summary>
+        protected virtual double ColumnWidth(Type typeRow, string fieldName, double widthDefault, double? widthConfig)
+        {
+            double result = widthDefault;
+            if (widthConfig != null)
+            {
+                result = widthConfig.Value;
+            }
+            return result;
+        }
 
         /// <summary>
         /// Override this method for custom column IsMultiline.
@@ -58,6 +70,13 @@
         {
             bool isReadOnlyDefault = isReadOnlyConfig.GetValueOrDefault(false);
             var result = ColumnIsReadOnly(typeRow, fieldName, isReadOnlyDefault, isReadOnlyConfig);
+            return result;
+        }
+
+        internal double ColumnWidthInternal(Type typeRow, string fieldName, double? widthConfig)
+        {
+            double isMultilineDefault = widthConfig.GetValueOrDefault(1);
+            var result = ColumnWidth(typeRow, fieldName, isMultilineDefault, widthConfig);
             return result;
         }
 

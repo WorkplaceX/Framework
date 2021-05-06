@@ -71,6 +71,7 @@
                     string columnText = namingConvention.ColumnTextInternal(grid.TypeRow, propertyInfo.Name, configField?.Text);
                     bool isVisible = namingConvention.ColumnIsVisibleInternal(grid.TypeRow, propertyInfo.Name, configField?.IsVisible);
                     bool isReadOnly = namingConvention.ColumnIsReadOnlyInternal(grid.TypeRow, propertyInfo.Name, configField?.IsReadOnly);
+                    double width = namingConvention.ColumnWidthInternal(grid.TypeRow, propertyInfo.Name, configField?.Width);
                     bool isMultiline = namingConvention.ColumnIsMultilineInternal(grid.TypeRow, propertyInfo.Name, configField?.IsMultiline);
                     double sort = namingConvention.ColumnSortInternal(grid.TypeRow, propertyInfo.Name, field, configField?.Sort);
                     result.Add(new GridColumn
@@ -80,6 +81,7 @@
                         Description = configField?.Description,
                         IsVisible = isVisible,
                         IsReadOnly = isReadOnly,
+                        Width = width,
                         IsMultiline = isMultiline,
                         Sort = sort,
                         SortField = field.Sort
@@ -541,12 +543,28 @@
 
             // IsVisibleScroll
             int count = 0;
-            foreach (var column in grid.ColumnList)
+            double widthMax = ConfigWidthMax(configGrid);
+            double width = 0;
+            bool isFirst = true;
+            foreach (var column in grid.ColumnList) // Contains visible columns only.
             {
                 count += 1;
-                column.IsVisibleScroll = count - 1 >= grid.OffsetColumn && count - 1 < grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid));
+                column.IsVisibleScroll = count - 1 >= grid.OffsetColumn && (width + column.Width <= widthMax || isFirst);
+                if (column.IsVisibleScroll)
+                {
+                    width += column.Width;
+                    isFirst = false;
+                }
             }
             var columnList = grid.ColumnList.Where(item => item.IsVisibleScroll).ToList();
+            // Column width
+            foreach (var item in columnList)
+            {
+                if (item.WidthValue == null) // User might have changed column width with mouse
+                {
+                    item.WidthValue = Math.Round(100 / width * item.Width);
+                }
+            }
             foreach (var rowState in grid.RowStateList)
             {
                 rowState.IsVisibleScroll = true;
@@ -895,6 +913,14 @@
         private static int ConfigRowCountMax(FrameworkConfigGridIntegrate configGrid)
         {
             return configGrid?.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
+        }
+
+        /// <summary>
+        /// Returns ColumnCountMax of columns to render.
+        /// </summary>
+        private static double ConfigWidthMax(FrameworkConfigGridIntegrate configGrid)
+        {
+            return configGrid?.WidthMax == null ? 5 : configGrid.WidthMax.Value;
         }
 
         /// <summary>
@@ -1607,7 +1633,10 @@
                 // Grid page right
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.PageRight)
                 {
-                    if (grid.OffsetColumn + ConfigColumnCountMax(ConfigGrid(grid)) < grid.ColumnList.Count)
+                    var configGrid = ConfigGrid(grid);
+                    double widthTotal = grid.ColumnWidthTotal(grid.OffsetColumn);
+                    double widthMax = ConfigWidthMax(configGrid);
+                    if (widthTotal > widthMax && !(grid.OffsetColumn == grid.ColumnList.Count - 1))
                     {
                         grid.OffsetColumn += 1;
                         Render(grid);
