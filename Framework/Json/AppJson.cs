@@ -693,6 +693,11 @@
         public string Title { get; set; }
 
         /// <summary>
+        /// Gets or sets Description. This is the html meta description.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
         /// Gets or sets CssFrameworkEnum. Switch between Bootstrap and Bulma framework.
         /// </summary>
         public CssFrameworkEnum CssFrameworkEnum { get; set; }

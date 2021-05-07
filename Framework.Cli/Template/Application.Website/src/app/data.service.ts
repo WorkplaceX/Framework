@@ -1,7 +1,7 @@
 import { DOCUMENT, Location } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+import { Meta, Title } from '@angular/platform-browser';
 
 // See also https://angular.io/guide/http
 import { throwError } from 'rxjs';
@@ -53,6 +53,8 @@ export class Json { // AppJson
   NavigatePathAddHistory: string | undefined;
 
   Title: string | undefined;
+  
+  Description: string | undefined;
 
   CellList: Cell[] | undefined;
 
@@ -206,7 +208,8 @@ export class DataService {
     @Inject(DOCUMENT) public document: Document, 
     rendererFactory: RendererFactory2, 
     private location: Location,
-    private titleService: Title)  
+    private titleService: Title,
+    private metaTagService: Meta)  
   { 
     this.renderer = rendererFactory.createRenderer(null, null);
     if (this.jsonServerSideRendering != null) {
@@ -215,6 +218,9 @@ export class DataService {
       this.json.IsServerSideRendering = true;
       if (this.json.Title != null) {
         this.titleService.setTitle(this.json.Title);
+      }
+      if (this.json.Description != null) {
+        this.metaTagService.updateTag({ name: 'description', content: this.json.Description });
       }
     } else {
       // Render in browser
