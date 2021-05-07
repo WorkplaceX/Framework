@@ -539,7 +539,7 @@
         {
             UtilFramework.LogDebug(string.Format("RENDER ({0}) IsCell={1};", grid.TypeRow?.Name, cell != null));
 
-            var configGrid = UtilGrid.ConfigGrid(grid);
+            var configGrid = grid.ConfigGrid;
 
             // IsVisibleScroll
             int count = 0;
@@ -651,14 +651,13 @@
             grid.Mode = queryConfigResult.GridMode;
 
             // Load config grid
-            grid.ConfigGridList = new List<FrameworkConfigGridIntegrate>();
             if (queryConfigResult.ConfigGridQuery != null)
             {
-                grid.ConfigGridList = await queryConfigResult.ConfigGridQuery.QueryExecuteAsync();
+                var configGridList = await queryConfigResult.ConfigGridQuery.QueryExecuteAsync();
                 // In memory ConfigName filter
-                grid.ConfigGridList = grid.ConfigGridList.Where(item => item.ConfigName == queryConfigResult.ConfigName).ToList();
+                grid.ConfigGrid = configGridList.Where(item => item.ConfigName == queryConfigResult.ConfigName).SingleOrDefault();
             }
-            var configGrid = ConfigGrid(grid);
+            var configGrid = grid.ConfigGrid;
 
             // Load row
             if (query != null)
@@ -709,7 +708,7 @@
         /// </summary>
         private static async Task LoadReloadAsync(Grid grid, IQueryable query)
         {
-            var configGrid = ConfigGrid(grid);
+            var configGrid = grid.ConfigGrid;
 
             // Filter
             if (grid.FilterValueList != null)
@@ -899,15 +898,6 @@
         }
 
         /// <summary>
-        /// Returns one data grid configuration record.
-        /// </summary>
-        private static FrameworkConfigGridIntegrate ConfigGrid(Grid grid)
-        {
-            var result = grid.ConfigGridList.SingleOrDefault(); // LINQ to memory
-            return result;
-        }
-
-        /// <summary>
         /// Returns RowCountMax rows to load.
         /// </summary>
         private static int ConfigRowCountMax(FrameworkConfigGridIntegrate configGrid)
@@ -1043,8 +1033,7 @@
                     Page page = grid.ComponentOwner<Page>();
 
                     string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                    string configName = null; // Never show data grid header column config in developer config (mode).
-                    var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp, configName);
+                    var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp, grid.ConfigGrid?.ConfigName, isDeveloper: false); // Never show data grid header column config in developer config (mode).
                     await pageConfigGrid.InitAsync();
                 }
             }
@@ -1569,15 +1558,10 @@
                         Page page = grid.ComponentOwner<Page>();
 
                         // Show data grid config in developer config (mode) if user clicked developer button.
-                        string configName = null;
-                        if (commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper)
-                        {
-                            // Gets Strongly typed name "Developer"
-                            configName = FrameworkConfigGridIntegrateFramework.IdEnum.dboFrameworkConfigFieldDisplayDeveloper.Row().ConfigName;
-                        }
+                        bool isDeveloper = commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper;
 
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, configName);
+                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, grid?.ConfigGrid.ConfigName, isDeveloper);
                         await pageConfigGrid.InitAsync();
                     }
                 }
@@ -1597,7 +1581,7 @@
                 // Grid page up
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.PageUp)
                 {
-                    var configGrid = ConfigGrid(grid);
+                    var configGrid = grid.ConfigGrid;
                     grid.OffsetRow -= ConfigRowCountMax(configGrid);
                     if (grid.OffsetRow < 0)
                     {
@@ -1609,7 +1593,7 @@
                 // Grid page down
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.PageDown)
                 {
-                    var configGrid = ConfigGrid(grid);
+                    var configGrid = grid.ConfigGrid;
                     int rowCount = grid.RowListInternal.Count;
                     int rowCountMax = ConfigRowCountMax(configGrid);
                     if (rowCount == rowCountMax) // Page down further on full grid only.
@@ -1633,7 +1617,7 @@
                 // Grid page right
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.PageRight)
                 {
-                    var configGrid = ConfigGrid(grid);
+                    var configGrid = grid.ConfigGrid;
                     double widthTotal = grid.ColumnWidthTotal(grid.OffsetColumn);
                     double widthMax = ConfigWidthMax(configGrid);
                     if (widthTotal > widthMax && !(grid.OffsetColumn == grid.ColumnList.Count - 1))

@@ -1277,10 +1277,10 @@
         }
 
         /// <summary>
-        /// Gets or sets ConfigGridList. Can contain multiple configurations. See also property ConfigName.
+        /// Gets or sets ConfigGrid. This is the current data grid configuration.
         /// </summary>
         [Serialize(SerializeEnum.Session)]
-        internal List<FrameworkConfigGridIntegrate> ConfigGridList;
+        internal FrameworkConfigGridIntegrate ConfigGrid;
 
         /// <summary>
         /// Gets or sets ConfigFieldList. Can contain multiple configurations. See also property ConfigName.
@@ -1406,12 +1406,15 @@
             get
             {
                 Row result = null;
-                foreach (var rowState in RowStateList)
+                if (RowStateList != null)
                 {
-                    if (rowState.IsSelect && rowState.RowEnum == GridRowEnum.Index)
+                    foreach (var rowState in RowStateList)
                     {
-                        result = RowListInternal[rowState.RowId.Value - 1];
-                        break;
+                        if (rowState.IsSelect && rowState.RowEnum == GridRowEnum.Index)
+                        {
+                            result = RowListInternal[rowState.RowId.Value - 1];
+                            break;
+                        }
                     }
                 }
                 return result;
@@ -3016,7 +3019,7 @@
                         // See also: https://bulma.io/documentation/elements/notification/
                         var divModal = new DivContainer(this) { CssClass = "modal is-active" };
                         new Div(divModal) { CssClass = "modal-background" };
-                        var divCard = new Div(divModal) { CssClass = "modal-card" };
+                        var divCard = new Div(divModal) { CssClass = "modal-card modal-bulma-framework" }; // Override Bulma modal window width.
                         var divHeaderLocal = new DivContainer(divCard) { CssClass = "modal-card-head" };
                         DivHeader = new Div(divHeaderLocal) { CssClass = "modal-card-title" };
                         ButtonClose = new Button(new Div(divHeaderLocal)) { CssClass = "delete" };

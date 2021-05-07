@@ -13,12 +13,20 @@
     /// </summary>
     internal class PageConfigGrid : PageModal
     {
-        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp, string configName)
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="tableNameCSharp">Table to configure.</param>
+        /// <param name="fieldNameCSharp">If to configure. If null all fiels are shown.</param>
+        /// <param name="configName">Config row to select.</param>
+        /// <param name="isDeveloper">User clicked developer (coffee icon).</param>
+        public PageConfigGrid(ComponentJson owner, string tableNameCSharp, string fieldNameCSharp, string configName, bool isDeveloper)
             : base(owner)
         {
             TableNameCSharp = tableNameCSharp;
             FieldNameCSharp = fieldNameCSharp;
             ConfigName = configName;
+            IsDeveloper = isDeveloper;
             ConfigNameDeveloper = FrameworkConfigGridIntegrateFramework.IdEnum.dboFrameworkConfigFieldDisplayDeveloper.Row().ConfigName;
         }
 
@@ -38,9 +46,22 @@
         public string ConfigName { get; }
 
         /// <summary>
+        /// Gets or sets IsDeveloper. If ture, user clicked developer (coffee icon). Show config data grid in developer config (mode).
+        /// </summary>
+        public bool IsDeveloper { get; }
+
+        /// <summary>
         /// Gets ConfigNameDeveloper. This is strongly typed Developer.
         /// </summary>
         public string ConfigNameDeveloper { get; }
+
+        /// <summary>
+        /// Returns null or "Developer".
+        /// </summary>
+        public string ConfigNameDeveloperGet()
+        {
+            return !IsDeveloper ? null : ConfigNameDeveloper;
+        }
 
         public override async Task InitAsync()
         {
@@ -56,6 +77,10 @@
             {
                 throw new Exception(string.Format("Grid has no entry in table FrameworkTable! Run cli command deployDb to register for config. ({0})", TableNameCSharp));
             }
+
+            // Select grid config row
+            var rowSelect = GridConfigGrid.RowList.SingleOrDefault(item => item.ConfigName == ConfigName);
+            GridConfigGrid.RowSelect = rowSelect;
         }
 
         public GridConfigGrid GridConfigGrid;
@@ -116,12 +141,16 @@
             if (TableNameCSharp != null)
             {
                 result.Query = Data.Query<FrameworkConfigGridDisplay>().Where(item => item.TableNameCSharp == TableNameCSharp);
+                if (RowSelect == null)
+                {
+                    result.IsRowSelectFirst = false;
+                }
             }
         }
 
         protected override void QueryConfig(QueryConfigArgs args, QueryConfigResult result)
         {
-            result.ConfigName = this.ComponentOwner<PageConfigGrid>().ConfigName;
+            result.ConfigName = this.ComponentOwner<PageConfigGrid>().ConfigNameDeveloperGet();
         }
 
         /// <summary>
@@ -231,7 +260,7 @@
 
         protected override void QueryConfig(QueryConfigArgs args, QueryConfigResult result)
         {
-            result.ConfigName = this.ComponentOwner<PageConfigGrid>().ConfigName;
+            result.ConfigName = this.ComponentOwner<PageConfigGrid>().ConfigNameDeveloperGet();
         }
 
         protected override async Task UpdateAsync(UpdateArgs args, UpdateResult result)
@@ -281,7 +310,7 @@
         protected override void CellAnnotation(AnnotationArgs args, AnnotationResult result)
         {
             var pageConfigGrid = this.ComponentOwner<PageConfigGrid>();
-            if (pageConfigGrid.ConfigName != pageConfigGrid.ConfigNameDeveloper)
+            if (pageConfigGrid.IsDeveloper)
             {
                 // User needs flag SettingResult.GridIsShowConfigDeveloper and (coffee icon) button clicked to modify developer config.
                 result.IsReadOnly = args.Row.ConfigGridConfigName == pageConfigGrid.ConfigNameDeveloper;

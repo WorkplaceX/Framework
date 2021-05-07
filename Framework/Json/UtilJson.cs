@@ -29,7 +29,7 @@ namespace Framework.Json
         None = 0,
 
         /// <summary>
-        /// Store property or field in session.
+        /// Store property or field value in session on server.
         /// </summary>
         Session = 1,
 
