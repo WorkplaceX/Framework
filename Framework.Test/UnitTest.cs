@@ -625,6 +625,7 @@
             list.Add(new Item { TextMd = "(Page Path=\"/\" Title=\"Hello\")\r\n# Title", TextHtml = "<section>(page)<p>(p)(/p)</p><h1>Title</h1>(/page)</section>" });
             list.Add(new Item { TextMd = "GitHub: **[ApplicationDemo](https://github.com/WorkplaceX/ApplicationDemo)**", TextHtml = "<section>(page)<p>(p)GitHub: <strong><a href=\"https://github.com/WorkplaceX/ApplicationDemo\">ApplicationDemo</a></strong>(/p)</p>(/page)</section>" });
             list.Add(new Item { TextMd = "# T1\r\n## T2", TextHtml = "<section>(page)<h1>T1</h1><p>(p)(/p)</p><h2>T2</h2>(/page)</section>" });
+            list.Add(new Item { TextMd = "(Note A=\"", TextHtml = "<section>(page)<p>(p)(Note A=\"(/p)</p>(/page)</section>" });
 
             var i = 0;
             foreach (var item in list)

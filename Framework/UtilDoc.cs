@@ -3984,7 +3984,7 @@
                             result = true;
                         }
                     }
-                    next = next.Next<MdTokenBase>();
+                    next = next?.Next<MdTokenBase>();
                     if (next is MdSpace)
                     {
                         next = next.Next<MdTokenBase>();
@@ -4039,8 +4039,7 @@
     {
         public static void Debug()
         {
-            var textMd = @"# T1
-## T2";
+            var textMd = "(Note A=\"";
 
             // Doc
             var appDoc = new AppDoc();
