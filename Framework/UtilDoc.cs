@@ -2324,6 +2324,16 @@
                         {
                             Data.TitleId += item.Text.ToLower().Replace(" ", "-").Replace("\"", "");
                         }
+                        // Title contains html. For example: <i class="fas fa-info-circle"></i>
+                        var index = Data.TitleId.IndexOf("<");
+                        if (index != -1)
+                        {
+                            Data.TitleId = Data.TitleId.Substring(0, index);
+                        }
+                        while (Data.TitleId.EndsWith("-"))
+                        {
+                            Data.TitleId = Data.TitleId.Substring(0, Data.TitleId.Length - 1);
+                        }
                     }
                 }
             }
@@ -3507,7 +3517,7 @@
             result.Append("<h" + Syntax.TitleLevel + ">");
             if (Syntax.TitleId != null)
             {
-                var anchor = string.Format("<a id=\"{0}\" class=\"anchor\" aria-hidden=\"true\"></a>", Syntax.TitleId);
+                var anchor = string.Format("<a id=\"{0}\" class=\"anchor\" aria-hidden=\"true\" href=\"#{0}\"></a>", Syntax.TitleId);
                 result.Append(anchor);
             }
         }
