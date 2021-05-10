@@ -265,9 +265,14 @@
         }
 
         /// <summary>
-        /// Gets or sets DeployAzureGitUrl. Used by CommandDeploy.
+        /// Gets or sets DeployAzureGitUrl. Used by class ommandDeploy to deploy (publish) application to Azure cloud.
         /// </summary>
         public string DeployAzureGitUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets DeployLocalFolderName. Used by class CommandDeploy to deploy application to local folder. Typically an IIS server folder.
+        /// </summary>
+        public string DeployLocalFolderName { get; set; }
     }
 
     public class ConfigCliExternal

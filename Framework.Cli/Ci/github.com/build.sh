@@ -43,7 +43,7 @@ function Main
 	echo "### Build.sh (Deploy)"
 	cd $FolderName
 	cd Application.Cli
-	dotnet run --no-build -- deploy
+	dotnet run --no-build -- deploy --azure
 	ErrorCheck
 }
 
