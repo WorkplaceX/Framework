@@ -73,6 +73,8 @@
         SyntaxCustomNote,
         
         SyntaxCustomYoutube,
+        
+        SyntaxCustomImage,
 
         SyntaxCustomPage,
 
@@ -109,6 +111,8 @@
         HtmlCustomNote,
         
         HtmlCustomYoutube,
+        
+        HtmlCustomImage,
 
         HtmlContent,
     }
@@ -237,6 +241,14 @@
         public int? SyntaxId { get; set; }
 
         public string Link { get; set; }
+        
+        public string Src { get; set; }
+
+        public string Href { get; set; }
+
+        public string Title { get; set; }
+
+        public string Description { get; set; }
 
         public string LinkText { get; set; }
         
@@ -331,6 +343,7 @@
             Add(typeof(SyntaxImage));
             Add(typeof(SyntaxCustomNote));
             Add(typeof(SyntaxCustomYoutube));
+            Add(typeof(SyntaxCustomImage));
             Add(typeof(SyntaxCustomPage));
             Add(typeof(SyntaxParagraph));
             Add(typeof(SyntaxNewLine));
@@ -351,6 +364,7 @@
             Add(typeof(HtmlCode));
             Add(typeof(HtmlCustomNote));
             Add(typeof(HtmlCustomYoutube));
+            Add(typeof(HtmlCustomImage));
             Add(typeof(HtmlContent));
         }
 
@@ -627,6 +641,14 @@
         {
             var result = Next(null, offset: -1);
             return (T)result;
+        }
+
+        /// <summary>
+        /// Returns previous component.
+        /// </summary>
+        public Component Previous()
+        {
+            return Previous<Component>();
         }
 
         public void Serialize(out string json)
@@ -2324,7 +2346,7 @@
                         {
                             Data.TitleId += item.Text.ToLower().Replace(" ", "-").Replace("\"", "");
                         }
-                        // Title contains html. For example: <i class="fas fa-info-circle"></i>
+                        // Title contains html. For example: <i class="fas fa-info-circle"></i> // TODO parse html, xml tag.
                         var index = Data.TitleId.IndexOf("<");
                         if (index != -1)
                         {
@@ -3276,6 +3298,102 @@
     }
 
     /// <summary>
+    /// Custom Image.
+    /// </summary>
+    internal class SyntaxCustomImage : SyntaxCustomBase
+    {
+        /// <summary>
+        /// Constructor registry, factory mode.
+        /// </summary>
+        public SyntaxCustomImage(Registry registry)
+            : base(registry)
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor ParseOne.
+        /// </summary>
+        public SyntaxCustomImage(SyntaxBase owner, MdTokenBase tokenBegin, MdTokenBase tokenEnd, string src, string href, string title, string description)
+            : base(owner, tokenBegin, tokenEnd)
+        {
+            Data.Src = src;
+            Data.Href = href;
+            Data.Title = title;
+            Data.Description = description;
+        }
+
+        /// <summary>
+        /// Constructor ParseTwo, ParseThree, ParseFour and ParseFive.
+        /// </summary>
+        public SyntaxCustomImage(SyntaxBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+            Data.Src = ((SyntaxCustomImage)syntax).Src;
+            Data.Href = ((SyntaxCustomImage)syntax).Href;
+            Data.Title = ((SyntaxCustomImage)syntax).Title;
+            Data.Description = ((SyntaxCustomImage)syntax).Description;
+        }
+
+        public string Src => Data.Src;
+        
+        public string Href => Data.Href;
+        
+        public string Title => Data.Title;
+        
+        public string Description => Data.Description;
+
+        protected internal override SyntaxBase Create(SyntaxBase owner, SyntaxBase syntax)
+        {
+            return new SyntaxCustomImage(owner, syntax);
+        }
+
+        internal override void RegistrySchema(RegistrySchemaResult result)
+        {
+            result.AddOwner<SyntaxPage>();
+        }
+
+        internal override void ParseOne(SyntaxBase owner, MdTokenBase token)
+        {
+            if (UtilParse.ParseOneIsCustom(token, "Image", out var tokenEnd, out var paramList))
+            {
+                if (paramList.TryGetValue("Src", out var paramSrc))
+                {
+                    if (UtilParse.ParseOneIsLink(paramSrc.TokenBegin, paramSrc.TokenEnd, out _, out string src))
+                    {
+                        string href = null;
+                        string title = null;
+                        string description = null;
+                        if (paramList.TryGetValue("Href", out var paramHref))
+                        {
+                            if (UtilParse.ParseOneIsLink(paramHref.TokenBegin, paramHref.TokenEnd, out _, out string hrefLocal))
+                            {
+                                href = hrefLocal;
+                            }
+                        }
+                        if (paramList.TryGetValue("Title", out var paramTitle))
+                        {
+                            title = paramTitle.Text;
+                        }
+                        if (paramList.TryGetValue("Description", out var paramDescription))
+                        {
+                            description = paramDescription.Text;
+                        }
+                        new SyntaxCustomImage(owner, token, tokenEnd, src, href, title, description);
+                    }
+                }
+            }
+        }
+
+        internal override void ParseHtml(HtmlBase owner)
+        {
+            var note = new HtmlCustomImage(owner, this);
+
+            ParseHtmlMain(note, this);
+        }
+    }
+
+    /// <summary>
     /// Custom syntax for page break.
     /// </summary>
     internal class SyntaxCustomPage : SyntaxCustomBase
@@ -3790,6 +3908,76 @@
         {
             string link = ((SyntaxCustomYoutube)Syntax).Link;
             string html = $"<iframe src=\"{ link }\"></iframe>";
+            result.Append(html);
+        }
+    }
+
+    internal class HtmlCustomImage : HtmlBase
+    {
+        /// <summary>
+        /// Constructor parse html.
+        /// </summary>
+        public HtmlCustomImage(HtmlBase owner, SyntaxBase syntax)
+            : base(owner, syntax)
+        {
+
+        }
+
+        internal override void RenderContent(StringBuilder result)
+        {
+            var syntax = ((SyntaxCustomImage)Syntax);
+
+            bool isFirst = true; // First image of a series.
+            bool isLast = true; // Last image of a series.
+
+            var previous = syntax.Previous<Component>();
+            if (previous is SyntaxParagraph previousParagraph)
+            {
+                if (previousParagraph.List.Count == 1 && previousParagraph.List.First() is SyntaxNewLine)
+                {
+                    if (previous.Previous() is SyntaxCustomImage)
+                    {
+                        isFirst = false;
+                    }
+                }
+            }
+            var next = syntax.Next<Component>();
+            if (next is SyntaxParagraph nextParagraph)
+            {
+                if (nextParagraph.List.Count == 1 && nextParagraph.List.First() is SyntaxNewLine)
+                {
+                    if (next.Next() is SyntaxCustomImage)
+                    {
+                        isLast = false;
+                    }
+                }
+            }
+
+            string html = $"<img src=\"{ syntax.Src }\">";
+            if (syntax.Title != null)
+            {
+                html += $"<h1>{ syntax.Title }</h1>";
+            }
+            if (syntax.Description != null)
+            {
+                html += $"<p>{ syntax.Description }</p>";
+            }
+            if (syntax.Href != null)
+            {
+                html = $"<a href=\"{ syntax.Href }\">{ html }</a>";
+            }
+            html = $"<div class=\"column is-one-third-desktop is-half-tablet\">{ html }</div>";
+
+            if (isFirst)
+            {
+                html = "<div class=\"framework-image columns is-multiline\">" + html;
+            }
+
+            if (isLast)
+            {
+                html = html + "<!-- framework-image --></div>";
+            }
+
             result.Append(html);
         }
     }
