@@ -15,6 +15,8 @@
     /// </summary>
     public static class StartupFramework
     {
+        internal const string CookieName = "FrameworkSession"; // Session cookie.
+
         public static void ConfigureServices(IServiceCollection services)
         {
             // Dependency Injection DI. See also https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1
@@ -24,7 +26,7 @@
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                options.Cookie.Name = "FrameworkSession";
+                options.Cookie.Name = CookieName;
                 options.IdleTimeout = TimeSpan.FromSeconds(5 * 60); // Session expire 5 minutes
             });
         }

@@ -84,6 +84,8 @@ export class Json { // AppJson
 
   ItemEndList: any;
 
+  ItemList: any;
+
   ButtonList: any;
 }
 

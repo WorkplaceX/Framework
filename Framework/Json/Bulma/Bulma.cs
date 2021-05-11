@@ -6,7 +6,7 @@ using System.Linq;
 namespace Framework.Json.Bulma
 {
     /// <summary>
-    /// See also: https://bulma.io/documentation/components/navbar/
+    /// Horizontal top navbar level 0 and level 1. See also: https://bulma.io/documentation/components/navbar/
     /// </summary>
     public class BulmaNavbar : ComponentJson
     {
@@ -61,7 +61,7 @@ namespace Framework.Json.Bulma
         /// </summary>
         internal List<BulmaNavbarItem> ItemEndList = new List<BulmaNavbarItem>();
 
-        private void ItemListAll(List<BulmaNavbarItem> itemList, List<BulmaNavbarItem> result)
+        private static void ItemListAll(List<BulmaNavbarItem> itemList, List<BulmaNavbarItem> result)
         {
             if (itemList != null)
             {
@@ -81,6 +81,16 @@ namespace Framework.Json.Bulma
             var result = new List<BulmaNavbarItem>();
             ItemListAll(ItemStartList, result);
             ItemListAll(ItemEndList, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns ItemStartList and ItemEndList recursive.
+        /// </summary>
+        private static List<BulmaNavbarItem> ItemListAll(BulmaNavbarMenu bulmaNavbarMenu)
+        {
+            var result = new List<BulmaNavbarItem>();
+            ItemListAll(bulmaNavbarMenu.ItemList, result);
             return result;
         }
 
@@ -109,7 +119,7 @@ namespace Framework.Json.Bulma
             RowMap(args, result, nameof(result.Sort));
         }
 
-        private static void Render(BulmaNavbar navbar, BulmaNavbarGrid navbarGrid, ref int navbarItemId)
+        private static void Render(BulmaNavbar navbar, BulmaNavbarGrid navbarGrid, BulmaNavbarMenu navbarMenu, ref int navbarItemId)
         {
             Grid grid = navbarGrid.Grid;
 
@@ -147,6 +157,16 @@ namespace Framework.Json.Bulma
                 }
             }
 
+            // Select Path
+            var selectRowMapIdPathList = new List<int>();
+            var selectRowMap = rowMapList.SingleOrDefault(item => item.IsSelect);
+            while (selectRowMap != null)
+            {
+                selectRowMapIdPathList.Add(selectRowMap.Id);
+                selectRowMap = rowMapList.SingleOrDefault(item => item.Id == selectRowMap.ParentId);
+            }
+            selectRowMapIdPathList.Reverse(); // Row id of Level 0, Level 1, Level 2 ...
+
             // Level 0
             Dictionary<int, BulmaNavbarItem> level0List = new Dictionary<int, BulmaNavbarItem>();
             foreach (var rowMap in rowMapList)
@@ -174,13 +194,14 @@ namespace Framework.Json.Bulma
             }
 
             // Level 1
+            Dictionary<int, BulmaNavbarItem> level1List = new Dictionary<int, BulmaNavbarItem>();
             foreach (var rowMap in rowMapList)
             {
                 if (rowMap.ParentId != null)
                 {
                     if (level0List.TryGetValue(rowMap.ParentId.Value, out var navbarItemParent))
                     {
-                        navbarItemParent.ItemEnum = BulmaNavbarItemEnum.Parent;
+                        navbarItemParent.ItemEnum = BulmaNavbarItemEnum.Parent; // Item has children
 
                         BulmaNavbarItemEnum itemEnum = BulmaNavbarItemEnum.Text;
                         if (rowMap.IsDivider)
@@ -189,7 +210,57 @@ namespace Framework.Json.Bulma
                         }
                         // Level 1
                         var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, NavigatePath = rowMap.NavigatePath, IsActive = rowMap.IsSelect };
+                        level1List.Add(rowMap.Id, navbarItem);
                         navbarItemParent.ItemList.Add(navbarItem);
+                    }
+                }
+            }
+
+            if (navbarMenu != null)
+            {
+                // Level 2
+                navbarMenu.ItemList.Clear();
+                Dictionary<int, BulmaNavbarItem> level2List = new Dictionary<int, BulmaNavbarItem>();
+                foreach (var rowMap in rowMapList)
+                {
+                    if (selectRowMapIdPathList.Count >= 2 && selectRowMapIdPathList[1] == rowMap.ParentId) // Filter Level 2 items to what is selected in navigation.
+                    {
+                        if (rowMap.ParentId != null)
+                        {
+                            if (level1List.TryGetValue(rowMap.ParentId.Value, out var navbarItemParent))
+                            {
+                                BulmaNavbarItemEnum itemEnum = BulmaNavbarItemEnum.Text;
+                                if (rowMap.IsDivider)
+                                {
+                                    itemEnum = BulmaNavbarItemEnum.Divider;
+                                }
+                                // Level 2
+                                var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, NavigatePath = rowMap.NavigatePath, IsActive = rowMap.IsSelect };
+                                level2List.Add(rowMap.Id, navbarItem);
+                                navbarMenu.ItemList.Add(navbarItem);
+                            }
+                        }
+                    }
+                }
+
+                // Level 3
+                foreach (var rowMap in rowMapList)
+                {
+                    if (rowMap.ParentId != null)
+                    {
+                        if (level2List.TryGetValue(rowMap.ParentId.Value, out var navbarItemParent))
+                        {
+                            navbarItemParent.ItemEnum = BulmaNavbarItemEnum.Parent; // Item has children
+
+                            BulmaNavbarItemEnum itemEnum = BulmaNavbarItemEnum.Text;
+                            if (rowMap.IsDivider)
+                            {
+                                itemEnum = BulmaNavbarItemEnum.Divider;
+                            }
+                            // Level 3
+                            var navbarItem = new BulmaNavbarItem { Id = navbarItemId += 1, ItemEnum = itemEnum, Grid = grid, RowStateId = rowMap.RowStateId, TextHtml = rowMap.TextHtml, NavigatePath = rowMap.NavigatePath, IsActive = rowMap.IsSelect };
+                            navbarItemParent.ItemList.Add(navbarItem);
+                        }
                     }
                 }
             }
@@ -198,7 +269,9 @@ namespace Framework.Json.Bulma
         internal static void Render(AppJson appJson)
         {
             int navbarItemId = 0;
-            foreach (BulmaNavbar navbar in appJson.ComponentListAll().OfType<BulmaNavbar>())
+            var componentListAll = appJson.ComponentListAll();
+            var navbarMenuList = componentListAll.OfType<BulmaNavbarMenu>();
+            foreach (BulmaNavbar navbar in componentListAll.OfType<BulmaNavbar>())
             {
                 // ItemList clear
                 navbar.ItemStartList.Clear();
@@ -207,7 +280,8 @@ namespace Framework.Json.Bulma
                 // Add level 0 and level 1 to navbar
                 foreach (var navbarGrid in navbar.GridList)
                 {
-                    Render(navbar, navbarGrid, ref navbarItemId);
+                    var navbarMenu = navbarMenuList.Where(item => item.Grid == navbarGrid.Grid).SingleOrDefault();
+                    Render(navbar, navbarGrid, navbarMenu, ref navbarItemId);
                 }
 
                 // Add data grid filter (input text) to navbar
@@ -237,6 +311,7 @@ namespace Framework.Json.Bulma
 
         internal static void ProcessAsync(AppJson appJson)
         {
+            // User clicked item in BulmaNavbar
             if (UtilSession.Request(appJson, CommandEnum.BulmaNavbarItemIsClick, out CommandJson commandJson, out BulmaNavbar navbar))
             {
                 var navbarItem = navbar.ItemListAll().Single(item => item.Id == commandJson.BulmaNavbarItemId);
@@ -261,7 +336,46 @@ namespace Framework.Json.Bulma
                     appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridCellIsModify, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId, GridCellId = cell.Id, GridCellText = filterText });
                 }
             }
+
+            // User clicked item in vertical BulmaNavbarMenu
+            if (UtilSession.Request(appJson, CommandEnum.BulmaNavbarMenuItemIsClick, out commandJson, out BulmaNavbarMenu navbarMenu))
+            {
+                var navbarItem = BulmaNavbar.ItemListAll(navbarMenu).Single(item => item.Id == commandJson.BulmaNavbarItemId);
+                Grid grid = navbarMenu.Grid;
+
+                // User clicked navbar button
+                if (navbarItem.ItemEnum == BulmaNavbarItemEnum.Text || navbarItem.ItemEnum == BulmaNavbarItemEnum.Parent)
+                {
+                    appJson.IsScrollToTop = true; // Because of possible use of css class is-fixed-top.
+                    appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickRow, ComponentId = grid.Id, RowStateId = navbarItem.RowStateId });
+                }
+            }
         }
+    }
+
+    /// <summary>
+    /// Vertical left navbar level 2. See alose: https://bulma.io/documentation/components/menu/
+    /// </summary>
+    public class BulmaNavbarMenu : ComponentJson
+    {
+        /// <summary>
+        /// Constructor for vertial navbar menu.
+        /// </summary>
+        public BulmaNavbarMenu(ComponentJson owner)
+            : base(owner, nameof(BulmaNavbarMenu))
+        {
+
+        }
+
+        /// <summary>
+        /// Gets or sets Grid.
+        /// </summary>
+        public Grid Grid;
+
+        /// <summary>
+        /// Gets ItemList. Vertical items on left hand side in menu.
+        /// </summary>
+        internal List<BulmaNavbarItem> ItemList = new List<BulmaNavbarItem>();
     }
 
     internal class BulmaNavbarGrid
@@ -298,11 +412,11 @@ namespace Framework.Json.Bulma
         /// </summary>
         Filter = 3,
 
-        Parent = 4
+        Parent = 4,
     }
 
     /// <summary>
-    /// Dto for Angular bulma link or input html element.
+    /// Hierarchical dto representing menu items for Angular. Rendered as Bulma link or input html element.
     /// </summary>
     internal class BulmaNavbarItem
     {

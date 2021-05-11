@@ -97,6 +97,7 @@
             {
                 new Alert(appJson, UtilFramework.ExceptionToString(exception), AlertEnum.Error);
                 appJson.IsReload = true;
+                context.Response.Cookies.Delete(StartupFramework.CookieName); // Delete session cookie to request new session.
             }
 
             // Version tag

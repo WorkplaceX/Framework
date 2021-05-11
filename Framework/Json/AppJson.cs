@@ -68,6 +68,11 @@
         BulmaNavbarItemIsClick = 18,
 
         /// <summary>
+        /// User clicked button on bulma navbar.
+        /// </summary>
+        BulmaNavbarMenuItemIsClick = 22,
+
+        /// <summary>
         /// User clicked button on Html json component.
         /// </summary>
         HtmlButtonIsClick = 19,
@@ -81,6 +86,8 @@
         /// User clicked number on dialpad.
         /// </summary>
         Dialpad = 21,
+
+        // Next = 23,
     }
 
     /// <summary>
@@ -703,6 +710,19 @@
         public CssFrameworkEnum CssFrameworkEnum { get; set; }
 
         /// <summary>
+        /// Gets or sets AlertContainer. Can be used for class Alert to display messages at the right place. For example if there is a stick top navigation bar.
+        /// </summary>
+        public ComponentJson AlertContainer { get; set; }
+
+        /// <summary>
+        /// Returns AlertContainer or AppJson.
+        /// </summary>
+        public ComponentJson AlertContainerGet()
+        {
+            return AlertContainer != null ? AlertContainer : this;
+        }
+
+        /// <summary>
         /// Returns settings for currently logged in user. Used for example by class Grid to determine if developer is logged in to configure data grid.
         /// </summary>
         protected virtual void Setting(SettingArgs args, SettingResult result)
@@ -1099,6 +1119,7 @@
         /// <summary>
         /// Gets or sets IsReload. If true, client reloads page. This appens after exception has been thrown.
         /// </summary>
+        [Serialize(SerializeEnum.Client)]
         internal bool IsReload { get; set; }
 
         /// <summary>
@@ -1154,7 +1175,7 @@
         /// Gets or sets IsScrollToTop. Used for example for session expired.
         /// </summary>
         [Serialize(SerializeEnum.Client)]
-        public bool IsScrollToTop;
+        internal bool IsScrollToTop;
     }
 
     /// <summary>
@@ -1214,6 +1235,7 @@
 
     /// <summary>
     /// Renders div with child divs without Angular selector div in between. Used for example for css flexbox, css grid and Bootstrap row.
+    /// Children have to be of type Div.
     /// </summary>
     public class DivContainer : Div
     {
@@ -2913,7 +2935,7 @@
     /// </summary>
     public class Alert : Html
     {
-        public Alert(ComponentJson owner, string textHtml, AlertEnum alertEnum, int? index = 0)
+        private Alert(ComponentJson owner, string textHtml, AlertEnum alertEnum, int index)
             : base(owner)
         {
             var settingEnum = this.ComponentOwner<AppJson>().CssFrameworkEnum;
@@ -2978,10 +3000,16 @@
             }
 
             // Move to top
-            if (index != null)
-            {
-                this.ComponentMove(index.Value);
-            }
+            this.ComponentMove(index);
+        }
+
+        /// <summary>
+        /// Constructor. Shows message and scrolls browser to top.
+        /// </summary>
+        public Alert(AppJson appJson, string textHtml, AlertEnum alertEnum) 
+            : this(appJson.AlertContainerGet(), textHtml, alertEnum, 0)
+        {
+            appJson.IsScrollToTop = true;
         }
 
         protected internal override Task ProcessAsync()

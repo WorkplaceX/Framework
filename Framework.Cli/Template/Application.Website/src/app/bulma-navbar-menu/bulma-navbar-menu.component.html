@@ -1,0 +1,18 @@
+<aside class="menu">
+  <ul class="menu-list">
+    <li *ngFor="let item of json.ItemList; trackBy trackBy">
+      <a [ngClass]="{'is-active':item.IsActive}" href="{{item.NavigatePath}}" (click)="click(item)">
+        <span [innerHtml]="item.TextHtml"></span>
+        <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
+      </a>
+      <ul *ngIf="item.ItemEnum == 4">
+        <li *ngFor="let item of item.ItemList; trackBy trackBy">
+          <a [ngClass]="{'is-active':item.IsActive}" href="{{item.NavigatePath}}" (click)="click(item)">
+            <span [innerHtml]="item.TextHtml"></span>
+            <span *ngIf="item.IsShowSpinner">&nbsp;<i class="fas fa-spinner fa-spin"></i></span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>

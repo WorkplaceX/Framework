@@ -3966,7 +3966,7 @@
             {
                 html = $"<a href=\"{ syntax.Href }\">{ html }</a>";
             }
-            html = $"<div class=\"column is-one-third-desktop is-half-tablet\">{ html }</div>";
+            html = $"<div class=\"column is-one-third-desktop is-half-tablet\">{ html }</div>"; // TODO new class Render
 
             if (isFirst)
             {
