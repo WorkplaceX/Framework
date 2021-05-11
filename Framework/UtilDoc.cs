@@ -3953,7 +3953,20 @@
                 }
             }
 
-            string html = $"<img src=\"{ syntax.Src }\">";
+            string alt = null;
+            if (syntax.Title != null)
+            {
+                alt = syntax.Title;
+            }
+            else
+            {
+                if (syntax.Description != null)
+                {
+                    alt = syntax.Description;
+                }
+            }
+
+            string html = $"<img src=\"{ syntax.Src }\" alt=\"{ alt }\">";
             if (syntax.Title != null)
             {
                 html += $"<h1>{ syntax.Title }</h1>";
