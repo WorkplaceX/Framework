@@ -419,6 +419,26 @@
         /// </summary>
         public string CssClass;
 
+        /// <summary>
+        /// Add css class.
+        /// </summary>
+        public void CssClassAdd(string value)
+        {
+            if (CssClass?.Length > 0)
+            {
+                CssClass += " ";
+            }
+            CssClass += value;
+        }
+
+        /// <summary>
+        /// Remove css class.
+        /// </summary>
+        public void CssClassRemove(string value)
+        {
+            CssClass = UtilFramework.StringNull((" " + CssClass + " ").Replace(" " + value + " ", null).Trim());
+        }
+
         [Serialize(SerializeEnum.None)]
         internal List<ComponentJson> ListInternal = new List<ComponentJson>(); // Empty list is removed by json serializer.
 
@@ -2614,7 +2634,7 @@
         HeaderRow = 5,
 
         /// <summary>
-        /// Separator label in stack mode.
+        /// Separator label in stack mode. Nonfunctional empty cell.
         /// </summary>
         Separator = 6,
     }

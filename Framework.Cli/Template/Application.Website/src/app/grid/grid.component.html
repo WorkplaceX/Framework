@@ -55,6 +55,10 @@
             <i *ngIf="cell.IsFileUpload" class="fas fa-file-upload colorBlack" style="cursor:pointer;" (click)="clickFileUpload(cell, $event);"></i>
           </div>
         </div>
+
+        <!-- Seperator Cell -->
+        <div *ngIf="cell.CellEnum==6" class="grid-seperator">
+        </div>
   
         <!-- Lookup -->
         <div *ngIf="cell.GridLookup" style="position:relative;">
@@ -78,7 +82,9 @@
       &nbsp;
       <i class="fas fa-grip-horizontal colorBlueHover pointer" title="Table" (click)="clickGrid(7, $event);"></i>
       <i class="fas fa-grip-vertical colorBlueHover pointer" title="Stack" (click)="clickGrid(8, $event);"></i>
+      <!--
       <i class="fas fa-th-large colorBlueHover pointer" title="Form" (click)="clickGrid(9, $event);"></i>
+      -->
       &nbsp;
       <i class="fas fa-file-download colorBlueHover pointer" title="Excel Download" (click)="clickGrid(10, $event);"></i>
       <i class="fas fa-file-upload colorBlueHover pointer" title="Excel Upload" (click)="clickGrid(11, $event);"></i>

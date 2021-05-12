@@ -211,6 +211,24 @@
         }
 
         /// <summary>
+        /// Render cell with seperator (nonfunctional empty cell)
+        /// </summary>
+        private static GridCell RenderCellSeperator(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList)
+        {
+            var result = cellList.GetOrAdd((column.Id, rowState.Id, GridCellEnum.Separator), (key) => new GridCell
+            {
+                ColumnId = key.Item1,
+                RowStateId = key.Item2,
+                CellEnum = key.Item3,
+                ColumnText = column.ColumnText,
+            });
+            grid.CellList.Add(result);
+            result.IsVisibleScroll = true;
+
+            return result;
+        }
+
+        /// <summary>
         /// Render Filter (search) value.
         /// </summary>
         private static GridCell RenderCellFilterValue(Grid grid, GridRowState rowState, GridColumn column, Dictionary<(int, int, GridCellEnum), GridCell> cellList, Dictionary<string, GridFilterValue> filterValueList)
@@ -391,7 +409,7 @@
                         grid.StyleRowList.Add(new GridStyleRow()); // Cell value
                         break;
                     case GridRowEnum.New:
-                        if ((configGrid?.IsAllowInsert).GetValueOrDefault(true))
+                        if (ConfigIsAllowInsert(configGrid, grid))
                         {
                             grid.StyleRowList.Add(new GridStyleRow()); // Cell value
                         }
@@ -430,7 +448,7 @@
                 }
 
                 // Render New
-                if (rowState.RowEnum == GridRowEnum.New && (configGrid?.IsAllowInsert).GetValueOrDefault(true))
+                if (rowState.RowEnum == GridRowEnum.New && ConfigIsAllowInsert(configGrid, grid))
                 {
                     foreach (var column in columnList)
                     {
@@ -462,17 +480,20 @@
                             {
                                 grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderColumn
                                 grid.StyleRowList.Add(new GridStyleRow()); // Filter value
+                                grid.StyleRowList.Add(new GridStyleRow()); // Cell with seperator
                             }
                             break;
                         case GridRowEnum.Index:
                             grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderRow
                             grid.StyleRowList.Add(new GridStyleRow()); // Cell value
+                            grid.StyleRowList.Add(new GridStyleRow()); // Cell with seperator
                             break;
                         case GridRowEnum.New:
-                            if ((configGrid?.IsAllowInsert).GetValueOrDefault(true))
+                            if (ConfigIsAllowInsert(configGrid, grid))
                             {
                                 grid.StyleRowList.Add(new GridStyleRow()); // See also enum GridCellEnum.HeaderRow
                                 grid.StyleRowList.Add(new GridStyleRow()); // Cell value
+                                grid.StyleRowList.Add(new GridStyleRow()); // Cell with seperator
                             }
                             break;
                     }
@@ -500,6 +521,9 @@
 
                         // Filter Value
                         RenderCellFilterValue(grid, rowState, column, cellList, filterValueList);
+
+                        // Cell with seperator
+                        RenderCellSeperator(grid, rowState, column, cellList).IsOdd = count % 2 == 1;
                     }
                 }
 
@@ -513,11 +537,14 @@
 
                         // Index
                         RenderCellIndex(grid, rowState, column, cellList, fieldList, cell, isTextLeave).IsOdd = count % 2 == 1;
+
+                        // Cell with seperator
+                        RenderCellSeperator(grid, rowState, column, cellList).IsOdd = count % 2 == 1;
                     }
                 }
 
                 // Render New
-                if (rowState.RowEnum == GridRowEnum.New && (configGrid?.IsAllowInsert).GetValueOrDefault(true))
+                if (rowState.RowEnum == GridRowEnum.New && ConfigIsAllowInsert(configGrid, grid))
                 {
                     foreach (var column in columnList)
                     {
@@ -526,6 +553,9 @@
 
                         // Index
                         RenderCellNew(grid, rowState, column, cellList);
+
+                        // Cell with seperator
+                        RenderCellSeperator(grid, rowState, column, cellList).IsOdd = count % 2 == 1;
                     }
                 }
             }
@@ -579,6 +609,7 @@
                 cellLocal.IsVisibleScroll = false;
             }
 
+            grid.CssClassRemove("grid-stack");
             if (grid.Mode == GridMode.Table)
             {
                 RenderModeTable(grid, configGrid, columnList, rowStateList, cellList, cell, isTextLeave);
@@ -586,6 +617,7 @@
             else
             {
                 RenderModeStack(grid, configGrid, columnList, rowStateList, cellList, cell, isTextLeave);
+                grid.CssClassAdd("grid-stack");
             }
 
             // IsHidePagination
@@ -662,7 +694,7 @@
             // Load row
             if (query != null)
             {
-                query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid));
+                query = Data.QuerySkipTake(query, 0, ConfigRowCountMax(configGrid, grid));
             }
 
             // Load config field (Task)
@@ -746,7 +778,7 @@
             }
 
             // Skip, Take
-            query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid));
+            query = Data.QuerySkipTake(query, grid.OffsetRow, ConfigRowCountMax(configGrid, grid));
 
             // Load row
             grid.RowListInternal = await query.QueryExecuteAsync();
@@ -900,9 +932,24 @@
         /// <summary>
         /// Returns RowCountMax rows to load.
         /// </summary>
-        private static int ConfigRowCountMax(FrameworkConfigGridIntegrate configGrid)
+        private static int ConfigRowCountMax(FrameworkConfigGridIntegrate configGrid, Grid grid)
         {
-            return configGrid?.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
+            var result = configGrid?.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
+            if (grid.Mode == GridMode.Stack)
+            {
+                result = 1; // For grid stack mode show only one row.
+            }
+            return result;
+        }
+
+        private static bool ConfigIsAllowInsert(FrameworkConfigGridIntegrate configGrid, Grid grid)
+        {
+            var result = (configGrid?.IsAllowInsert).GetValueOrDefault(true);
+            if (grid.Mode == GridMode.Stack)
+            {
+                result = false; // Never show new row in stack mode
+            }
+            return result;
         }
 
         /// <summary>
@@ -911,14 +958,6 @@
         private static double ConfigWidthMax(FrameworkConfigGridIntegrate configGrid)
         {
             return configGrid?.WidthMax == null ? 5 : configGrid.WidthMax.Value;
-        }
-
-        /// <summary>
-        /// Returns ColumnCountMax of columns to render.
-        /// </summary>
-        private static int ConfigColumnCountMax(FrameworkConfigGridIntegrate configGrid)
-        {
-            return 5;
         }
 
         /// <summary>
@@ -1582,7 +1621,7 @@
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.PageUp)
                 {
                     var configGrid = grid.ConfigGrid;
-                    grid.OffsetRow -= ConfigRowCountMax(configGrid);
+                    grid.OffsetRow -= ConfigRowCountMax(configGrid, grid);
                     if (grid.OffsetRow < 0)
                     {
                         grid.OffsetRow = 0;
@@ -1595,7 +1634,7 @@
                 {
                     var configGrid = grid.ConfigGrid;
                     int rowCount = grid.RowListInternal.Count;
-                    int rowCountMax = ConfigRowCountMax(configGrid);
+                    int rowCountMax = ConfigRowCountMax(configGrid, grid);
                     if (rowCount == rowCountMax) // Page down further on full grid only.
                     {
                         grid.OffsetRow += rowCountMax;
@@ -1630,15 +1669,21 @@
                 // Grid mode table
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.ModeTable)
                 {
-                    grid.Mode = GridMode.Table;
-                    Render(grid);
+                    if (grid.Mode != GridMode.Table)
+                    {
+                        grid.Mode = GridMode.Table;
+                        await LoadAsync(grid); // Reload multiple rows (stack mode shows only one row) and render.
+                    }
                 }
 
                 // Grid mode stack
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.ModeStack)
                 {
-                    grid.Mode = GridMode.Stack;
-                    Render(grid);
+                    if (grid.Mode != GridMode.Stack)
+                    {
+                        grid.Mode = GridMode.Stack;
+                        await LoadAsync(grid); // Reload with one row and render.
+                    }
                 }
 
                 // Excel
