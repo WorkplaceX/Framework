@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Framework
 {
     using Database.dbo;
+    using Framework.App;
     using Framework.Doc;
     using Framework.Json;
     using Framework.Server;
@@ -16,6 +17,7 @@ namespace Framework
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Text.Json;
     using System.Web;
@@ -42,7 +44,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.90";
+                return "v3.51.100";
             }
         }
 
@@ -737,6 +739,103 @@ namespace Framework
             public readonly string Text;
 
             public readonly List<string> TextList;
+        }
+
+        /// <summary>
+        /// Returns hash and salt of password.
+        /// </summary>
+        /// <param name="password">User password</param>
+        /// <param name="passwordHash">Returns password hash as 128 text hex characters.</param>
+        /// <param name="passwordSalt">Returns password salt as 128 text hex characters.</param>
+        /// <param name="passwordSaltConfig">Application configuration salt as 128 text hex characters.</param>
+        /// <param name="count">Number of calculation (time).</param>
+        private static void PasswordHash(string password, out string passwordHash, out string passwordSalt, string passwordSaltConfig = null, int count = 100000)
+        {
+            // Salt
+            var saltArray = new byte[64];
+            using (var random = RNGCryptoServiceProvider.Create())
+            {
+                random.GetBytes(saltArray);
+            }
+            passwordSalt = BitConverter.ToString(saltArray).Replace("-", "");
+            // Password
+            password = BitConverter.ToString(Encoding.Unicode.GetBytes(password)).Replace("-", "");
+            // Password + Salt
+            var saltAndPasswordText = passwordSalt + password + passwordSaltConfig;
+            // Hash
+            passwordHash = null;
+            using (var sha = SHA512.Create())
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    passwordHash = BitConverter.ToString(sha.ComputeHash(Encoding.Unicode.GetBytes(saltAndPasswordText))).Replace("-", "");
+                    saltAndPasswordText = passwordSalt + passwordHash;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns hash and salt of password.
+        /// </summary>
+        /// <param name="password">User password</param>
+        /// <param name="passwordHash">Returns password hash as 128 text hex characters.</param>
+        /// <param name="passwordSalt">Returns password salt as 128 text hex characters.</param>
+        public static void PasswordHash(string password, out string passwordHash, out string passwordSalt)
+        {
+            string passwordSaltConfig = new AppSelector().ConfigDomain.PasswordSalt;
+            PasswordHash(password, out passwordHash, out passwordSalt, passwordSaltConfig);
+        }
+
+        /// <summary>
+        /// Returns true, if password is correct.
+        /// </summary>
+        /// <param name="password">User entered password.</param>
+        /// <param name="passwordHash">Password hash as 128 text hex characters.</param>
+        /// <param name="passwordSalt">Password salt as 128 text hex characters.</param>
+        /// <param name="passwordSaltConfig">Application configuration salt as 128 text hex characters.</param>
+        /// <param name="count">Number of calculation (time).</param>
+        private static bool PasswordIsValid(string password, string passwordHash, string passwordSalt, string passwordSaltConfig = null, int count = 100000)
+        {
+            // Password
+            password = BitConverter.ToString(Encoding.Unicode.GetBytes(password == null ? "" : password)).Replace("-", "");
+            // Password + Salt
+            var saltAndPasswordText = passwordSalt + password + passwordSaltConfig;
+            // Hash
+            string hashNew = null;
+            using (var sha = SHA512.Create())
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    hashNew = BitConverter.ToString(sha.ComputeHash(Encoding.Unicode.GetBytes(saltAndPasswordText))).Replace("-", "");
+                    saltAndPasswordText = passwordSalt + hashNew;
+                }
+            }
+            return passwordHash == hashNew;
+        }
+
+        /// <summary>
+        /// Returns true, if password is correct.
+        /// </summary>
+        /// <param name="password">User entered password.</param>
+        /// <param name="passwordHash">Password hash as 128 text hex characters.</param>
+        /// <param name="passwordSalt">Password salt as 128 text hex characters.</param>
+        public static bool PasswordIsValid(string password, string passwordHash, string passwordSalt)
+        {
+            string passwordSaltConfig = new AppSelector().ConfigDomain.PasswordSalt;
+            return PasswordIsValid(password, passwordHash, passwordSalt, passwordSaltConfig);
+        }
+
+        /// <summary>
+        /// Returns a salt as 128 text hex characters for the application config file.
+        /// </summary>
+        public static string PasswordSaltConfigCreate()
+        {
+            var saltArray = new byte[64];
+            using (var random = RNGCryptoServiceProvider.Create())
+            {
+                random.GetBytes(saltArray);
+            }
+            return BitConverter.ToString(saltArray).Replace("-", "");
         }
     }
 }

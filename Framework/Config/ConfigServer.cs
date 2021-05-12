@@ -264,5 +264,10 @@
         /// Gets or sets Custom.
         /// </summary>
         public object Custom { get; set; }
+
+        /// <summary>
+        /// Gets or sets PasswordSalt. Additional salt value for each website to validate passwords.
+        /// </summary>
+        public string PasswordSalt { get; set; }
     }
 }

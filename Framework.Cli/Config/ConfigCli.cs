@@ -203,6 +203,7 @@
                             GoogleAnalyticsId = item.GoogleAnalyticsId,
                             GoogleAdSenseId = item.GoogleAdSenseId,
                             Custom = item.Custom,
+                            PasswordSalt = item.PasswordSalt,
                         }).ToList()
                 });
             }
@@ -391,5 +392,10 @@
         /// Gets or sets Custom.
         /// </summary>
         public object Custom { get; set; }
+
+        /// <summary>
+        /// Gets or sets PasswordSalt. Additional salt value for each website to validate passwords. See method UtilFramework.PasswordSaltConfigCreate(); to create a new key.
+        /// </summary>
+        public string PasswordSalt { get; set; }
     }
 }
