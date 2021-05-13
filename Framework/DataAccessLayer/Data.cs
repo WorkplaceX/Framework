@@ -697,21 +697,21 @@
             return ((IQueryable)query).QueryExecuteAsync().ContinueWith(list => list.Result.Cast<TRow>().ToList());
         }
 
-        internal static IQueryable QueryFilter(IQueryable query, string fieldName, object filterValue, FilterOperator filterOperator)
+        internal static IQueryable QueryFilter(IQueryable query, string fieldName, object filterValue, FilterOperatorEnum filterOperatorEnum)
         {
             string predicate = fieldName;
-            switch (filterOperator)
+            switch (filterOperatorEnum)
             {
-                case FilterOperator.Equal:
+                case FilterOperatorEnum.Equal:
                     predicate += " = @0";
                     break;
-                case FilterOperator.Smaller:
+                case FilterOperatorEnum.Smaller:
                     predicate += " <= @0";
                     break;
-                case FilterOperator.Greater:
+                case FilterOperatorEnum.Greater:
                     predicate += " >= @0";
                     break;
-                case FilterOperator.Like:
+                case FilterOperatorEnum.Like:
                     predicate += ".Contains(@0)";
                     break;
                 default:
@@ -931,16 +931,16 @@
         {
             errorParse = null;
             object filterValue = CellTextParse(field, text);
-            FilterOperator filterOperator = FilterOperator.Equal;
+            FilterOperatorEnum filterOperatorEnum = FilterOperatorEnum.Equal;
             if (field.PropertyInfo.PropertyType == typeof(string))
             {
-                filterOperator = FilterOperator.Like;
+                filterOperatorEnum = FilterOperatorEnum.Like;
             }
-            filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperator, text, isClear: text == null);
+            filter.ValueSet(field.PropertyInfo.Name, filterValue, filterOperatorEnum, text, isClear: text == null);
         }
     }
 
-    public enum FilterOperator
+    public enum FilterOperatorEnum
     {
         None = 0,
         Equal = 1,

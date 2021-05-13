@@ -1300,7 +1300,7 @@
         public Grid(ComponentJson owner) 
             : base(owner, nameof(Grid))
         {
-            this.Mode = GridMode.Table;
+            this.ModeEnum = GridModeEnum.Table;
         }
 
         /// <summary>
@@ -1493,7 +1493,7 @@
         }
 
         [Serialize(SerializeEnum.Session)]
-        internal GridMode Mode;
+        internal GridModeEnum ModeEnum;
 
         /// <summary>
         /// Returns query to load data grid. Override this method to define sql query.
@@ -1750,7 +1750,7 @@
             /// <summary>
             /// Gets or sets GridMode. This is the data grid display mode to start with. User can still switch later on.
             /// </summary>
-            public GridMode GridMode { get; set; }
+            public GridModeEnum GridModeEnum { get; set; }
         }
 
         /// <summary>
@@ -1759,7 +1759,7 @@
         /// <param name="tableNameCSharp">TableName as declared in CSharp code. Type of row to load.</param>
         internal QueryConfigResult QueryConfigInternal(string tableNameCSharp)
         {
-            var result = new QueryConfigResult { GridMode = GridMode.Table }; // Display table by default
+            var result = new QueryConfigResult { GridModeEnum = GridModeEnum.Table }; // Display table by default
             var args = new QueryConfigArgs { TableName = tableNameCSharp };
 
             QueryConfig(args, result);
@@ -2349,7 +2349,7 @@
     /// <summary>
     /// Data grid display mode.
     /// </summary>
-    public enum GridMode
+    public enum GridModeEnum
     {
         None = 0,
 
@@ -2399,11 +2399,11 @@
         /// Set filter value on a column. If text is not equal to text user entered, it will appear as soon as user leves field.
         /// </summary>
         /// <param name="isClear">If true, filter is not applied.</param>
-        public void ValueSet(string fieldNameCSharp, object filterValue, FilterOperator filterOperator, string text, bool isClear = false)
+        public void ValueSet(string fieldNameCSharp, object filterValue, FilterOperatorEnum filterOperatorEnum, string text, bool isClear = false)
         {
             GridFilterValue result = FilterValue(fieldNameCSharp);
             result.FilterValue = filterValue;
-            result.FilterOperator = filterOperator;
+            result.FilterOperatorEnum = filterOperatorEnum;
             if (result.IsFocus == false)
             {
                 result.Text = text;
@@ -2452,7 +2452,7 @@
 
         public readonly string FieldNameCSharp;
 
-        public FilterOperator FilterOperator;
+        public FilterOperatorEnum FilterOperatorEnum;
 
         /// <summary>
         /// Gets or sets FilterValue. This is the successfully parsed user input value.

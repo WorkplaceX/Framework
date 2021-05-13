@@ -610,7 +610,7 @@
             }
 
             grid.CssClassRemove("grid-stack");
-            if (grid.Mode == GridMode.Table)
+            if (grid.ModeEnum == GridModeEnum.Table)
             {
                 RenderModeTable(grid, configGrid, columnList, rowStateList, cellList, cell, isTextLeave);
             }
@@ -680,7 +680,7 @@
             }
 
             // Display grid mode
-            grid.Mode = queryConfigResult.GridMode;
+            grid.ModeEnum = queryConfigResult.GridModeEnum;
 
             // Load config grid
             if (queryConfigResult.ConfigGridQuery != null)
@@ -747,9 +747,9 @@
             {
                 foreach (var filter in grid.FilterValueList)
                 {
-                    if (!filter.IsClear && !(filter.FilterOperator == FilterOperator.None))
+                    if (!filter.IsClear && !(filter.FilterOperatorEnum == FilterOperatorEnum.None))
                     {
-                        query = Data.QueryFilter(query, filter.FieldNameCSharp, filter.FilterValue, filter.FilterOperator);
+                        query = Data.QueryFilter(query, filter.FieldNameCSharp, filter.FilterValue, filter.FilterOperatorEnum);
                     }
                 }
             }
@@ -935,7 +935,7 @@
         private static int ConfigRowCountMax(FrameworkConfigGridIntegrate configGrid, Grid grid)
         {
             var result = configGrid?.RowCountMax == null ? 10 : configGrid.RowCountMax.Value; // By default load 10 rows.
-            if (grid.Mode == GridMode.Stack)
+            if (grid.ModeEnum == GridModeEnum.Stack)
             {
                 result = 1; // For grid stack mode show only one row.
             }
@@ -945,7 +945,7 @@
         private static bool ConfigIsAllowInsert(FrameworkConfigGridIntegrate configGrid, Grid grid)
         {
             var result = (configGrid?.IsAllowInsert).GetValueOrDefault(true);
-            if (grid.Mode == GridMode.Stack)
+            if (grid.ModeEnum == GridModeEnum.Stack)
             {
                 result = false; // Never show new row in stack mode
             }
@@ -1669,9 +1669,9 @@
                 // Grid mode table
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.ModeTable)
                 {
-                    if (grid.Mode != GridMode.Table)
+                    if (grid.ModeEnum != GridModeEnum.Table)
                     {
-                        grid.Mode = GridMode.Table;
+                        grid.ModeEnum = GridModeEnum.Table;
                         await LoadAsync(grid); // Reload multiple rows (stack mode shows only one row) and render.
                     }
                 }
@@ -1679,9 +1679,9 @@
                 // Grid mode stack
                 if (commandJson.GridIsClickEnum == GridIsClickEnum.ModeStack)
                 {
-                    if (grid.Mode != GridMode.Stack)
+                    if (grid.ModeEnum != GridModeEnum.Stack)
                     {
-                        grid.Mode = GridMode.Stack;
+                        grid.ModeEnum = GridModeEnum.Stack;
                         await LoadAsync(grid); // Reload with one row and render.
                     }
                 }
