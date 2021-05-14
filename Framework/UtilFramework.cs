@@ -113,7 +113,7 @@ namespace Framework
         {
             get
             {
-                return UtilFramework.FolderName + "log.csv";
+                return UtilServer.FolderNameContentRoot() + "log.csv";
             }
         }
 
