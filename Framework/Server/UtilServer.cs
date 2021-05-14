@@ -126,6 +126,7 @@
                 case ".json": result = "application/json"; break;
                 case ".xlsx": result = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; break;
                 case ".xml": result = "text/xml"; break;
+                case ".csv": result = "text/csv"; break;
                 default:
                     result = "text/plain"; break; // Type not found!
             }

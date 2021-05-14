@@ -5,6 +5,7 @@
     using Framework.Json;
     using Microsoft.AspNetCore.Http;
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
     using System.Web;
@@ -17,6 +18,11 @@
         public async Task RunAsync(HttpContext context)
         {
             // await Task.Delay(500); // Simulate slow network.
+
+            // Log
+            var logTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mmm:ss.fff");
+            var logStopwatch = new Stopwatch();
+            logStopwatch.Start();
 
             UtilStopwatch.RequestBind();
             try
@@ -67,6 +73,23 @@
             finally
             {
                 UtilStopwatch.RequestRelease();
+            }
+
+            // Log
+            {
+                logStopwatch.Stop();
+                string logEscape(string value)
+                {
+                    return value.Replace("\r", "").Replace("\n", "").Replace(";", "").Replace(",", "").Replace("\"", "");
+                }
+                var logIp = context.Connection.RemoteIpAddress.ToString();
+                var logUserAgent = logEscape(context.Request.Headers["User-Agent"].ToString());
+                var logTimeDelta = (logStopwatch.ElapsedMilliseconds / 1000.0f).ToString();
+                var logMethod = context.Request.Method;
+                var logHost = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
+                var logNavigatePath = logEscape(context.Request.Path + context.Request.QueryString.ToString());
+                var logText = $"=\"{ logTime }\"; { logTimeDelta }; { logIp }; { logMethod }; { logHost }{ logNavigatePath.Substring(1) }; { logUserAgent };";
+                File.AppendAllText(UtilFramework.FileNameLog, logText + Environment.NewLine);
             }
         }
 
