@@ -78,6 +78,11 @@
         public readonly string AppTypeName;
 
         /// <summary>
+        /// Gets JsonSessionLength. This is the length of last serialized session data by method ProcessAsync();
+        /// </summary>
+        public int JsonSessionLength { get; private set; }
+
+        /// <summary>
         /// Returns JsonClient. Create AppJson and process request.
         /// </summary>
         internal async Task<string> ProcessAsync(HttpContext context, AppJson appJson)
@@ -110,7 +115,8 @@
             appJson.ResponseCount += 1;
 
             // SerializeSession, SerializeClient
-            UtilSession.Serialize(appJson, out string jsonClientResponse);
+            UtilSession.Serialize(appJson, out string jsonClientResponse, out int jsonSessionLength);
+            this.JsonSessionLength = jsonSessionLength;
 
             return jsonClientResponse;
         }

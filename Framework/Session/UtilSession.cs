@@ -10,7 +10,7 @@
         /// <summary>
         /// Serialize session state.
         /// </summary>
-        public static void Serialize(AppJson appJson, out string jsonClient)
+        public static void Serialize(AppJson appJson, out string jsonClient, out int jsonSessionLength)
         {
             appJson.RequestJson = null;
 
@@ -22,6 +22,7 @@
                 UtilServer.Session.SetString("AppInternal", jsonSession);
             }
 
+            jsonSessionLength = jsonSession.Length;
             UtilStopwatch.Log(string.Format("JsonSession.Length={0:n0}; JsonClient.Length={1:n0};", jsonSession.Length, jsonClient.Length));
         }
 
