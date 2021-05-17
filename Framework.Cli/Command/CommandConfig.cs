@@ -135,6 +135,42 @@
             }
         }
 
+        /// <summary>
+        /// Removes not by environment selected Environment and DomainName.
+        /// </summary>
+        private static void EnvironmentRemove(ConfigCli configCli)
+        {
+            var environmentName = configCli.EnvironmentName;
+
+            if (configCli.EnvironmentList != null)
+            {
+                foreach (var environment in configCli.EnvironmentList.ToArray())
+                {
+                    if (environment.EnvironmentName != environmentName)
+                    {
+                        configCli.EnvironmentList.Remove(environment);
+                    }
+                }
+            }
+
+            if (configCli.WebsiteList != null)
+            {
+                foreach (var website in configCli.WebsiteList)
+                {
+                    if (website.DomainNameList != null)
+                    {
+                        foreach (var domainName in website.DomainNameList.ToArray())
+                        {
+                            if (domainName.EnvironmentName != environmentName)
+                            {
+                                website.DomainNameList.Remove(domainName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         protected internal override void Execute()
         {
             ConfigCli configCli = ConfigCli.Load();
@@ -219,6 +255,9 @@
                         ConnectionStringRemove(configCli);
                     }
                 }
+
+                // Remove for example DomainName localhost from DEV environment if PROD environment is selected.
+                EnvironmentRemove(configCli);
 
                 string json = UtilFramework.ConfigToJson(configCli, isIndented: false);
                 json = json.Replace("\"", "'"); // To use it in command prompt.
