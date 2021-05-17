@@ -23,7 +23,9 @@
             var logStopwatch = new Stopwatch();
             logStopwatch.Start();
             var logSessionLength = 0;
+            string logCommandEnum = null;
             string logException = null;
+            string logNavigatePathAddHistory = null;
 
             UtilStopwatch.RequestBind();
             try
@@ -66,7 +68,10 @@
                     }
                 }
 
-                logSessionLength = appSelector.JsonSessionLength;
+                // Log
+                logSessionLength = appSelector.LogJsonSessionLength;
+                logCommandEnum = appSelector.LogCommandEnum;
+                logNavigatePathAddHistory = appSelector.LogNavigatePathAddHistory;
 
                 // Total time for one request.
                 UtilStopwatch.TimeStop(name: "Request");
@@ -95,8 +100,9 @@
                 var logMethod = context.Request.Method;
                 var logHost = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
                 var logNavigatePath = logEscape(context.Request.Path + context.Request.QueryString.ToString());
+                var logStatusCode = context.Response.StatusCode;
                 logException = logEscape(logException);
-                var logText = $"{ UtilFramework.Version },=\"{ logTime }\",{ logTimeDelta },{ logIp },{ logMethod },{ logHost },{ logHost }{ logNavigatePath.Substring(1) },{logSessionLength},{ logUserAgent },{logException}";
+                var logText = $"{ UtilFramework.Version },=\"{ logTime }\",{ logTimeDelta },{ logIp },{ logMethod },{ logHost },{ logHost }{ logNavigatePath.Substring(1) },{ logStatusCode },{ logSessionLength },{ logCommandEnum },{ logNavigatePathAddHistory },{ logUserAgent },{ logException }";
                 File.AppendAllText(UtilFramework.FileNameLog, logText + Environment.NewLine);
             }
         }

@@ -78,9 +78,19 @@
         public readonly string AppTypeName;
 
         /// <summary>
-        /// Gets JsonSessionLength. This is the length of last serialized session data by method ProcessAsync();
+        /// Gets LogJsonSessionLength. This is the length of last serialized session data by method ProcessAsync();
         /// </summary>
-        public int JsonSessionLength { get; private set; }
+        public int LogJsonSessionLength { get; private set; }
+
+        /// <summary>
+        /// Gets LogCommandEnum. This is the POST request body payload first CommandEnum.
+        /// </summary>
+        public string LogCommandEnum { get; private set; }
+
+        /// <summary>
+        /// Gets LogNavigatePathAddHistory. This is the new virtual NavigatePath.
+        /// </summary>
+        public string LogNavigatePathAddHistory { get; private set; }
 
         /// <summary>
         /// Returns JsonClient. Create AppJson and process request.
@@ -116,7 +126,10 @@
 
             // SerializeSession, SerializeClient
             UtilSession.Serialize(appJson, out string jsonClientResponse, out int jsonSessionLength);
-            this.JsonSessionLength = jsonSessionLength;
+            
+            // Log
+            LogJsonSessionLength = jsonSessionLength;
+            LogNavigatePathAddHistory = appJson.NavigatePathAddHistory;
 
             return jsonClientResponse;
         }
@@ -142,6 +155,9 @@
             {
                 requestJson = new RequestJson(null) { RequestCount = 1 };
             }
+
+            // Log
+            LogCommandEnum = string.Format("{0}", requestJson.CommandList.FirstOrDefault()?.CommandEnum);
 
             // Deserialize AppJson (Session) or init
             var appJson = UtilSession.Deserialize();
