@@ -103,7 +103,8 @@
                 var logStatusCode = context.Response.StatusCode;
                 logException = logEscape(logException);
                 var logText = $"{ UtilFramework.Version },=\"{ logTime }\",{ logTimeDelta },{ logIp },{ logMethod },{ logHost },{ logHost }{ logNavigatePath.Substring(1) },{ logStatusCode },{ logSessionLength },{ logCommandEnum },{ logNavigatePathAddHistory },{ logUserAgent },{ logException }";
-                File.AppendAllText(UtilFramework.FileNameLog, logText + Environment.NewLine);
+                var service = (BackgroundFrameworkService)context.RequestServices.GetService(typeof(BackgroundFrameworkService));
+                service.LogText(logText);
             }
         }
 

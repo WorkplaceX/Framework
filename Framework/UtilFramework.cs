@@ -44,7 +44,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.121";
+                return "v3.51.122";
             }
         }
 
@@ -92,6 +92,17 @@ namespace Framework
             get
             {
                 return UtilServer.Context.Connection.RemoteIpAddress.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets BackgroundServiceTimeHeartbeat. This is the last heartbeat of the background service.
+        /// </summary>
+        public static string BackgroundServiceTimeHeartbeat
+        {
+            get
+            {
+                return ((BackgroundFrameworkService)UtilServer.Context.RequestServices.GetService(typeof(BackgroundFrameworkService))).TimeHeartbeat;
             }
         }
 

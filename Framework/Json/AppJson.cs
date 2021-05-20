@@ -232,7 +232,7 @@
                 string result;
                 if (Origin == RequestOrigin.Server)
                 {
-                    UtilFramework.Assert(UtilServer.Context.Request.Method == "GET");
+                    UtilFramework.Assert(UtilServer.Context.Request.Method == "GET" || UtilServer.Context.Request.Method == "HEAD");
                     result = UtilServer.Context.Request.Path; // Browser refresh
                 }
                 else

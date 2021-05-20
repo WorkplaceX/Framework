@@ -262,6 +262,11 @@
         public readonly IServiceProvider ServiceProvider;
 
         /// <summary>
+        /// Gets TimeHeartbeat. Last heartbeat of BackgroundService.
+        /// </summary>
+        public string TimeHeartbeat { get; private set; }
+
+        /// <summary>
         /// Data loaded from database.
         /// </summary>
         private List<FrameworkTranslate> TranslateList = new List<FrameworkTranslate>();
@@ -326,24 +331,55 @@
             return result;
         }
 
+        /// <summary>
+        /// Gets LogTextList. Contains log entries.
+        /// </summary>
+        private StringBuilder LogTextList = new StringBuilder();
+
+        /// <summary>
+        /// Log to file log.csv
+        /// </summary>
+        public void LogText(string text)
+        {
+            LogTextList.AppendLine(text);
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            UtilServer.ServiceProvider = ServiceProvider;
-
-            // Load language translate table.
-            TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
-            TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>(TranslateList.ToDictionary(item => (item.AppTypeName, item.Name)));
-
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                await Task.Delay(1000);
-                if (TranslateUpsertList.Count > 0)
+                // Load language translate table.
+                UtilServer.ServiceProvider = ServiceProvider; // Make sure method FolderNameContentRoot(); is available.
+                TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
+                TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>(TranslateList.ToDictionary(item => (item.AppTypeName, item.Name)));
+
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    Logger.LogInformation("Update sql table FrameworkTranslate. ({0} Rows)", TranslateUpsertList.Count);
-                    UtilServer.ServiceProvider = ServiceProvider;
-                    await UtilDalUpsert.UpsertAsync(TranslateUpsertList, new string[] { nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name) });
-                    TranslateUpsertList.Clear();
+                    TimeHeartbeat = DateTime.UtcNow.ToString("HH:mmm:ss");
+                    await Task.Delay(1000);
+
+                    // Translate
+                    if (TranslateUpsertList.Count > 0)
+                    {
+                        Logger.LogInformation("Update sql table FrameworkTranslate. ({0} Rows)", TranslateUpsertList.Count);
+                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method FolderNameContentRoot(); is available.
+                        await UtilDalUpsert.UpsertAsync(TranslateUpsertList, new string[] { nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name) });
+                        TranslateUpsertList.Clear();
+                    }
+
+                    // Log
+                    if (LogTextList.Length > 0)
+                    {
+                        string logText = LogTextList.ToString();
+                        LogTextList.Clear();
+                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method FolderNameContentRoot(); is available.
+                        File.AppendAllText(UtilFramework.FileNameLog, logText);
+                    }
                 }
+            }
+            catch
+            {
+                // Silent exception. No more TimeHeartbeat.
             }
         }
     }
