@@ -1,4 +1,6 @@
 ﻿/* Framework */
+DROP TABLE FrameworkTranslate
+
 DROP VIEW FrameworkConfigFieldDisplay
 DROP VIEW FrameworkConfigGridDisplay
 DROP VIEW FrameworkConfigFieldIntegrate

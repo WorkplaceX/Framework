@@ -182,7 +182,7 @@
                 ColumnId = key.Item1,
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
-                ColumnText = column.ColumnText,
+                ColumnText = UtilFramework.TranslateGridColumnText(grid, column.FieldNameCSharp, column.ColumnText),
                 Description = column.Description,
             });
             grid.CellList.Add(result);
@@ -202,7 +202,7 @@
                 ColumnId = key.Item1,
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
-                ColumnText = column.ColumnText,
+                ColumnText = UtilFramework.TranslateGridColumnText(grid, column.FieldNameCSharp, column.ColumnText),
             });
             grid.CellList.Add(result);
             result.IsVisibleScroll = true;
@@ -565,7 +565,7 @@
         /// Render Grid.CellList.
         /// </summary>
         /// <param name="cell">If not null, method GridCellText(); is called for all cells on this data row.</param>
-        private static void Render(Grid grid, GridCell cell = null, bool isTextLeave = true)
+        public static void Render(Grid grid, GridCell cell = null, bool isTextLeave = true)
         {
             UtilFramework.LogDebug(string.Format("RENDER ({0}) IsCell={1};", grid.TypeRow?.Name, cell != null));
 
@@ -624,7 +624,7 @@
             grid.IsHidePagination = !(configGrid?.IsShowPagination).GetValueOrDefault(true);
 
             // IsShowConfig
-            var settingResult = AppJson.SettingInternal(grid, new AppJson.SettingArgs { Grid = grid });
+            var settingResult = grid.ComponentOwner<AppJson>().SettingInternal(new AppJson.SettingArgs { Grid = grid });
             grid.IsShowConfig = settingResult.GridIsShowConfig;
             grid.IsShowConfigDeveloper = settingResult.GridIsShowConfigDeveloper;
 
@@ -1357,6 +1357,14 @@
         }
 
         /// <summary>
+        /// Queue application ReRender command.
+        /// </summary>
+        public static void QueueRerender(Grid grid)
+        {
+            grid.ComponentOwner<AppJson>().RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.Rerender, ComponentId = grid.Id });
+        }
+
+        /// <summary>
         /// User selected data row.
         /// </summary>
         private static async Task ProcessRowIsClickAsync(AppJson appJson)
@@ -1401,6 +1409,10 @@
                         if (rowSelect != rowSelectLocal)
                         {
                             await grid.RowSelectAsync(); // Load detail data grid
+                            if (grid.ComponentOwner<AppJson>().SettingInternal(new AppJson.SettingArgs { Grid = grid }).GridIsRowSelectRerender)
+                            {
+                                UtilGrid.QueueRerender(grid);
+                            }
                         }
                     }
                     else

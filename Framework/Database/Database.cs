@@ -369,4 +369,32 @@ namespace Database.dbo
         [SqlField("IdName", FrameworkTypeEnum.Nvarcahr)]
         public string IdName { get; set; }
     }
+
+    [SqlTable("dbo", "FrameworkTranslate")]
+    public class FrameworkTranslate : Row
+    {
+        [SqlField("Id", true, FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("Name", FrameworkTypeEnum.Nvarcahr)]
+        public string Name { get; set; }
+
+        [SqlField("Text", FrameworkTypeEnum.Nvarcahr)]
+        public string Text { get; set; }
+
+        [SqlField("TextLanguage01", FrameworkTypeEnum.Nvarcahr)]
+        public string TextLanguage01 { get; set; }
+
+        [SqlField("TextLanguage02", FrameworkTypeEnum.Nvarcahr)]
+        public string TextLanguage02 { get; set; }
+
+        [SqlField("TextLanguage03", FrameworkTypeEnum.Nvarcahr)]
+        public string TextLanguage03 { get; set; }
+
+        [SqlField("TextLanguage04", FrameworkTypeEnum.Nvarcahr)]
+        public string TextLanguage04 { get; set; }
+    }
 }

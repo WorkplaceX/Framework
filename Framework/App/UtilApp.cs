@@ -92,6 +92,20 @@
         }
 
         /// <summary>
+        /// Rerender application for example after language change.
+        /// </summary>
+        public static void ProcessRerender(AppJson appJson)
+        {
+            if (UtilSession.Request(appJson, CommandEnum.Rerender, out CommandJson commandJson, out Grid grid))
+            {
+                foreach (var gridLocal in appJson.ComponentListAll<Grid>())
+                {
+                    UtilGrid.Render(gridLocal);
+                }
+            }
+        }
+
+        /// <summary>
         /// Add BootstrapNavbarButton.
         /// </summary>
         /// <param name="buttonList">List to add buttons.</param>

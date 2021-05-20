@@ -1032,6 +1032,11 @@
 
         internal static async Task UpsertAsync(Type typeRow, List<Row> rowList, string[] fieldNameKeyList)
         {
+            if (rowList.Count == 0)
+            {
+                return;
+            }
+
             string tableNameWithSchemaSql = UtilDalType.TypeRowToTableNameWithSchemaSql(typeRow);
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
             var fieldNameSqlList = UtilDalType.TypeRowToFieldList(typeRow).Where(item => item.IsPrimaryKey == false).Select(item => item.FieldNameSql).ToArray();

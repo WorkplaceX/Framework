@@ -1,16 +1,23 @@
 ﻿namespace Framework.Server
 {
+    using Database.dbo;
     using Framework.Config;
+    using Framework.DataAccessLayer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net.Http;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
 
     internal class UtilServer
@@ -237,6 +244,102 @@
             }
             string result = await response.Content.ReadAsStringAsync();
             return result;
+        }
+    }
+
+    /// <summary>
+    /// Background service to write to file and database.
+    /// </summary>
+    internal class BackgroundFrameworkService : BackgroundService
+    {
+        public BackgroundFrameworkService(ILoggerFactory loggerFactory)
+        {
+            Logger = loggerFactory.CreateLogger(typeof(BackgroundFrameworkService));
+        }
+
+        public readonly ILogger Logger;
+
+        /// <summary>
+        /// Data loaded from database.
+        /// </summary>
+        private List<FrameworkTranslate> TranslateList = new List<FrameworkTranslate>();
+
+        /// <summary>
+        /// Data to be added to database.
+        /// </summary>
+        private List<FrameworkTranslate> TranslateUpsertList = new List<FrameworkTranslate>();
+
+        /// <summary>
+        /// (AppTypeName, Name, FrameworkTranslate).
+        /// </summary>
+        private ConcurrentDictionary<(string, string), FrameworkTranslate> TranslateNameList;
+
+        /// <summary>
+        /// Translate text into a different language.
+        /// </summary>
+        /// <param name="name">Dictionary key for text.</param>
+        /// <param name="text">Default text.</param>
+        /// <param name="languageId">Language into which to translate to.</param>
+        /// <returns>Returns into languageId translated text. If no translation entry is found text is returned.</returns>
+        public string Translate(string appTypeName, string name, string text, int languageId)
+        {
+            var result = text;
+            string textLanguage = null;
+            var translateRow = TranslateNameList.GetOrAdd((appTypeName, name), (key) =>
+            {
+                var row = new FrameworkTranslate { AppTypeName = key.Item1, Name = key.Item2, Text = text };
+                TranslateList.Add(row);
+                TranslateUpsertList.Add(row);
+                return row;
+            });
+
+            switch (languageId)
+            {
+                case 1:
+                    textLanguage = translateRow.TextLanguage01;
+                    break;
+                case 2:
+                    textLanguage = translateRow.TextLanguage02;
+                    break;
+                case 3:
+                    textLanguage = translateRow.TextLanguage03;
+                    break;
+                case 4:
+                    textLanguage = translateRow.TextLanguage04;
+                    break;
+                default:
+                    break;
+            }
+            
+            if (translateRow.Text != text)
+            {
+                translateRow.Text = text; // Default text changed.
+                TranslateUpsertList.Add(translateRow);
+            }
+            
+            if (textLanguage != null)
+            {
+                result = textLanguage;
+            }
+            return result;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            // Load language translate table.
+            TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
+            TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>(TranslateList.ToDictionary(item => (item.AppTypeName, item.Name)));
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(1000);
+                if (TranslateUpsertList.Count > 0)
+                {
+                    Logger.LogInformation("Update sql table FrameworkTranslate. ({0} Rows)", TranslateUpsertList.Count);
+                    await UtilDalUpsert.UpsertAsync(TranslateUpsertList, new string[] { nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name) });
+                    TranslateUpsertList.Clear();
+                }
+            }
         }
     }
 

@@ -6,6 +6,7 @@
     using Framework.Cli.Config;
     using Framework.Cli.Generate;
     using Framework.DataAccessLayer;
+    using Framework.Json;
     using Microsoft.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
@@ -60,6 +61,14 @@
         /// Gets "Application" assembly. This assembly hosts business logic.
         /// </summary>
         public readonly Assembly AssemblyApplication;
+
+        /// <summary>
+        /// Returns list of AppType in AssemblyApplication.
+        /// </summary>
+        public Type[] AssemblyApplicationAppTypeList()
+        {
+            return AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).ToArray();
+        }
 
         /// <summary>
         /// Gets "Framework" assembly.
@@ -417,6 +426,17 @@
                 result.Add(rowList);
             }
 
+            // FrameworkTranslate
+            {
+                // Read FrameworkTranslateAppCli.List from Application.Cli project.
+                string nameCli = "DatabaseIntegrate.dbo.FrameworkTranslateAppCli";
+                var typeCli = AssemblyApplicationCli.GetType(nameCli);
+                UtilFramework.Assert(typeCli != null, string.Format("Type not found! ({0})", nameCli));
+                PropertyInfo propertyInfo = typeCli.GetProperty("RowList");
+                var rowList = (List<FrameworkTranslate>)propertyInfo.GetValue(null);
+                result.Add(rowList);
+            }
+
             // Add application (custom) Integrate data rows to deploy to database
             CommandDeployDbIntegrate(result);
 
@@ -595,6 +615,18 @@
                 result.AddKey<FrameworkConfigField>(nameof(FrameworkConfigField.ConfigGridId), nameof(FrameworkConfigField.FieldId), nameof(FrameworkConfigField.InstanceName));
                 result.AddReference<FrameworkConfigField, FrameworkConfigGrid>(nameof(FrameworkConfigField.ConfigGridId));
                 result.AddReference<FrameworkConfigField, FrameworkField>(nameof(FrameworkConfigField.FieldId));
+            }
+
+            // FrameworkTranslateIntegrate
+            {
+                var appTypeNameList = AssemblyApplicationAppTypeList().Select(item => item.FullName).ToArray();
+                var rowList = Data.Query<FrameworkTranslate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
+                result.Add(
+                    isFrameworkDb: false,
+                    isApplication: false,
+                    typeRow: typeof(FrameworkTranslate),
+                    query: rowList);
+                result.AddKey<FrameworkTranslate>(nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name));
             }
 
             // Application (custom) Integrate data rows to generate CSharp code from.

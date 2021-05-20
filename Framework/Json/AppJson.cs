@@ -87,7 +87,12 @@
         /// </summary>
         Dialpad = 21,
 
-        // Next = 23,
+        /// <summary>
+        /// Application rerender. For example after language change.
+        /// </summary>
+        Rerender = 24,
+
+        // Next = 25,
     }
 
     /// <summary>
@@ -769,12 +774,39 @@
             /// Gets or sets GridIsShowConfigDeveloper. If true, grid shows config developer (coffee icon) button.
             /// </summary>
             public bool GridIsShowConfigDeveloper { get; set; }
+
+            /// <summary>
+            /// Gets or sets GridIsRowSelectRerender. If true, application gets rerendered after another row is selected. For example after language change.
+            /// </summary>
+            public bool GridIsRowSelectRerender { get; set; }
+
+            /// <summary>
+            /// Gets or sets LanguageId. Grid relevant data such as ColumnText is displayed in currently selected language.
+            /// </summary>
+            public int? GridLanguageId { get; set; }
         }
 
-        internal static SettingResult SettingInternal(ComponentJson component, SettingArgs args)
+        /// <summary>
+        /// Prevent method Setting(); multiple times for same data grid.
+        /// </summary>
+        private Dictionary<Grid, SettingResult> settingInternalCache;
+
+        internal SettingResult SettingInternal(SettingArgs args)
         {
-            var result = new SettingResult();
-            component.ComponentOwner<AppJson>()?.Setting(args, result);
+            SettingResult result = null;
+            lock (this) // Two data grid might be loaded in parallel. For example: await Task.WhenAll(GridNavigate.LoadAsync(), GridLanguage.LoadAsync());
+            {
+                if (settingInternalCache == null || !settingInternalCache.TryGetValue(args.Grid, out result))
+                {
+                    result = new SettingResult();
+                    Setting(args, result);
+                    if (settingInternalCache == null)
+                    {
+                        settingInternalCache = new Dictionary<Grid, SettingResult>();
+                    }
+                    settingInternalCache[args.Grid] = result;
+                }
+            }
             return result;
         }
 
@@ -1080,6 +1112,7 @@
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
                 await UtilApp.ProcessBootstrapNavbarAsync(appJson);
                 BulmaNavbar.ProcessAsync(appJson);
+                UtilApp.ProcessRerender(appJson);
                 UtilApp.ProcessDialpadIsClick(appJson);
 
                 // Page ProcessAsync

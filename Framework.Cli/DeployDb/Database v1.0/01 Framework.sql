@@ -217,3 +217,17 @@ OUTER APPLY
 	SELECT * FROM FrameworkConfigField ConfigField WHERE ConfigField.ConfigGridId = ConfigGrid.Id AND ConfigField.FieldId = Field.Id
 ) ConfigField
 GO
+
+GO
+CREATE TABLE FrameworkTranslate
+(
+	Id INT PRIMARY KEY IDENTITY,
+	AppTypeName NVARCHAR(256) NOT NULL, -- Key
+	Name NVARCHAR(512) NOT NULL, -- Key
+	Text NVARCHAR(512), -- Text default
+	TextLanguage01 NVARCHAR(512), -- Text translated in language
+	TextLanguage02 NVARCHAR(512), -- Text translated in language
+	TextLanguage03 NVARCHAR(512), -- Text translated in language
+	TextLanguage04 NVARCHAR(512), -- Text translated in language
+	INDEX IX_FrameworkTranslate UNIQUE (AppTypeName, Name)
+)

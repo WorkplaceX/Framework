@@ -44,7 +44,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.113";
+                return "v3.51.120";
             }
         }
 
@@ -847,6 +847,68 @@ namespace Framework
                 random.GetBytes(saltArray);
             }
             return BitConverter.ToString(saltArray).Replace("-", "");
+        }
+
+        /// <summary>
+        /// Translate text into a different language.
+        /// </summary>
+        /// <param name="appJson">Application for which this text is for. (See also feature ExternalGit).</param>
+        /// <param name="name">Dictionary key for text.</param>
+        /// <param name="text">Default text.</param>
+        /// <param name="languageId">Language to translate to. See also sql table FrameworkTranslate.</param>
+        /// <returns>Returns into languageId translated text. If no translation entry is found text is returned.</returns>
+        internal static string Translate(AppJson appJson, string name, string text, int? languageId)
+        {
+            var result = text;
+            if (languageId != null)
+            {
+                var service = (BackgroundFrameworkService)UtilServer.Context.RequestServices.GetService(typeof(BackgroundFrameworkService));
+                result = service.Translate(appJson.GetType().FullName, name, text, languageId.Value);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Translate text into a different language. Data grid related translation.
+        /// </summary>
+        /// <param name="grid">Translation for this data grid.</param>
+        /// <param name="name">Dictionary key for text.</param>
+        /// <param name="text">Default text.</param>
+        /// <returns>Returns translated text. If no translation entry is found text is returned.</returns>
+        private static string TranslateGrid(Grid grid, string name, string text)
+        {
+            var result = text;
+            if (grid.TypeRow.Assembly != typeof(UtilFramework).Assembly) // Do not translate Framework data grid.
+            {
+                var appJson = grid.ComponentOwner<AppJson>();
+                var settingResult = appJson.SettingInternal(new AppJson.SettingArgs { Grid = grid }); // Get LanguageId.
+                result = Translate(appJson, grid.TypeRow.FullName + "." + name, text, settingResult.GridLanguageId);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Translate data grid cell text into a different language.
+        /// </summary>
+        /// <param name="grid">Translation for this data grid.</param>
+        /// <param name="fieldNameCSharp">Translation for this column.</param>
+        /// <param name="text">Default text.</param>
+        /// <returns></returns>
+        internal static string TranslateGridCellText(Grid grid, string fieldNameCSharp, string text)
+        {
+            return TranslateGrid(grid, fieldNameCSharp + ".CellText(" + text + ")", text);
+        }
+
+        /// <summary>
+        /// Translate data grid column text into a different language.
+        /// </summary>
+        /// <param name="grid">Translation for this data grid.</param>
+        /// <param name="fieldNameCSharp">Translation for this column.</param>
+        /// <param name="text">Default text.</param>
+        /// <returns>Returns translated text. If no translation entry is found text is returned.</returns>
+        internal static string TranslateGridColumnText(Grid grid, string fieldNameCSharp, string text)
+        {
+            return TranslateGrid(grid, fieldNameCSharp + ".ColumnText()", text);
         }
     }
 }

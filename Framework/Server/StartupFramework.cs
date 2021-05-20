@@ -29,6 +29,9 @@
                 options.Cookie.Name = CookieName;
                 options.IdleTimeout = TimeSpan.FromSeconds(5 * 60); // Session expire 5 minutes
             });
+
+            services.AddSingleton<BackgroundFrameworkService>();
+            services.AddHostedService(provider => provider.GetService<BackgroundFrameworkService>());
         }
 
         public static void Configure(IApplicationBuilder applicationBuilder)
