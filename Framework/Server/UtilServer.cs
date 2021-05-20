@@ -3,7 +3,6 @@
     using Database.dbo;
     using Framework.Config;
     using Framework.DataAccessLayer;
-    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Hosting;
@@ -33,7 +32,7 @@
         }
 
         [ThreadStatic]
-        public static IApplicationBuilder ApplicationBuilder;
+        public static IServiceProvider ServiceProvider;
 
         public static IWebHostEnvironment HostingEnvironment
         {
@@ -47,9 +46,9 @@
                 }
                 else
                 {
-                    if (ApplicationBuilder != null)
+                    if (ServiceProvider != null)
                     {
-                        result = (IWebHostEnvironment)ApplicationBuilder.ApplicationServices.GetService(typeof(IWebHostEnvironment));
+                        result = (IWebHostEnvironment)ServiceProvider.GetService(typeof(IWebHostEnvironment));
                     }
                 }
                 return result;
@@ -252,12 +251,15 @@
     /// </summary>
     internal class BackgroundFrameworkService : BackgroundService
     {
-        public BackgroundFrameworkService(ILoggerFactory loggerFactory)
+        public BackgroundFrameworkService(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             Logger = loggerFactory.CreateLogger(typeof(BackgroundFrameworkService));
+            ServiceProvider = serviceProvider;
         }
 
         public readonly ILogger Logger;
+
+        public readonly IServiceProvider ServiceProvider;
 
         /// <summary>
         /// Data loaded from database.
@@ -326,6 +328,8 @@
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            UtilServer.ServiceProvider = ServiceProvider;
+
             // Load language translate table.
             TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
             TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>(TranslateList.ToDictionary(item => (item.AppTypeName, item.Name)));
@@ -336,6 +340,7 @@
                 if (TranslateUpsertList.Count > 0)
                 {
                     Logger.LogInformation("Update sql table FrameworkTranslate. ({0} Rows)", TranslateUpsertList.Count);
+                    UtilServer.ServiceProvider = ServiceProvider;
                     await UtilDalUpsert.UpsertAsync(TranslateUpsertList, new string[] { nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name) });
                     TranslateUpsertList.Clear();
                 }

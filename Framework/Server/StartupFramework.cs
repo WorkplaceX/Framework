@@ -36,7 +36,7 @@
 
         public static void Configure(IApplicationBuilder applicationBuilder)
         {
-            UtilServer.ApplicationBuilder = applicationBuilder;
+            UtilServer.ServiceProvider = applicationBuilder.ApplicationServices;
 
             var configServer = ConfigServer.Load();
 
