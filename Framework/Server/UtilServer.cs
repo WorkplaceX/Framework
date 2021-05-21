@@ -38,16 +38,17 @@
             get
             {
                 IWebHostEnvironment result = null;
-                HttpContext context = Context;
-                if (context != null)
+                if (ServiceProvider != null)
                 {
-                    result = (IWebHostEnvironment)context.RequestServices.GetService(typeof(IWebHostEnvironment));
+                    result = (IWebHostEnvironment)ServiceProvider.GetService(typeof(IWebHostEnvironment));
                 }
                 else
                 {
-                    if (ServiceProvider != null)
+                    // Fallback
+                    HttpContext context = Context;
+                    if (context != null)
                     {
-                        result = (IWebHostEnvironment)ServiceProvider.GetService(typeof(IWebHostEnvironment));
+                        result = (IWebHostEnvironment)context.RequestServices.GetService(typeof(IWebHostEnvironment));
                     }
                 }
                 return result;
