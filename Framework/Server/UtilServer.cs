@@ -41,13 +41,21 @@
         /// </summary>
         public static T ServiceGet<T>()
         {
+            var result = default(T);
+
             var serviceProvider = ServiceProvider;
             if (serviceProvider == null && Context != null)
             {
                 // Fallback
                 serviceProvider = Context.RequestServices;
             }
-            return (T)serviceProvider.GetService(typeof(T));
+
+            if (serviceProvider != null) // Otherwise running as cli
+            {
+                result = (T)serviceProvider.GetService(typeof(T));
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -275,7 +283,7 @@
         /// <summary>
         /// (AppTypeName, Name, FrameworkTranslate).
         /// </summary>
-        private ConcurrentDictionary<(string, string), FrameworkTranslate> TranslateNameList;
+        private ConcurrentDictionary<(string, string), FrameworkTranslate> TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>();
 
         /// <summary>
         /// Translate text into a different language.
@@ -347,16 +355,12 @@
             LogTextList.AppendLine(text);
         }
 
-        public override Task StartAsync(CancellationToken cancellationToken)
-        {
-            Logger.LogInformation("Service start");
-            return base.StartAsync(cancellationToken);
-        }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
+                Logger.LogInformation("Service start");
+
                 // Load language translate table.
                 UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
                 TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
@@ -365,6 +369,8 @@
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     TimeHeartbeat = DateTime.UtcNow.ToString("HH:mmm:ss");
+                    Logger.LogInformation(TimeHeartbeat);
+
                     await Task.Delay(1000);
 
                     // Translate

@@ -63,10 +63,11 @@
             string connectionStringApplication = null;
             string connectionStringFramework = null;
 
+            var configuration = UtilServer.ServiceGet<IConfiguration>();
+
             // Application running on WebServer? (or cli)
-            if (UtilServer.Context != null)
+            if (configuration != null)
             {
-                var configuration = UtilServer.ServiceGet<IConfiguration>();
 
                 // ConnectionString defined in file appsettings.json (or Azure) has higher priority than file ConfigServer.json.
                 // Typically this is used on a PROD WebServer only. No ConnectionString on CI server is needed in ConfigCli secret.
