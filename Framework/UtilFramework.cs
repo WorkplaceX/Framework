@@ -45,7 +45,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.124";
+                return "v3.51.125";
             }
         }
 
@@ -103,7 +103,7 @@ namespace Framework
         {
             get
             {
-                return ((BackgroundFrameworkService)UtilServer.Context.RequestServices.GetService(typeof(BackgroundFrameworkService))).TimeHeartbeat;
+                return UtilServer.ServiceGet <BackgroundFrameworkService>().TimeHeartbeat;
             }
         }
 
@@ -662,7 +662,7 @@ namespace Framework
             ILogger logger = null;
             if (UtilServer.ServiceProvider != null)
             {
-                var loggerFactory = (ILoggerFactory)UtilServer.ServiceProvider.GetService(typeof(ILoggerFactory));
+                var loggerFactory = UtilServer.ServiceGet<ILoggerFactory>();
                 logger = loggerFactory.CreateLogger(typeof(UtilFramework));
             }
 
@@ -891,7 +891,7 @@ namespace Framework
             var result = text;
             if (languageId != null)
             {
-                var service = (BackgroundFrameworkService)UtilServer.Context.RequestServices.GetService(typeof(BackgroundFrameworkService));
+                var service = UtilServer.ServiceGet<BackgroundFrameworkService>();
                 result = service.Translate(appJson.GetType().FullName, name, text, languageId.Value);
             }
             return result;

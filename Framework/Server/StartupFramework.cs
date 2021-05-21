@@ -36,7 +36,7 @@
 
         public static void Configure(IApplicationBuilder applicationBuilder)
         {
-            UtilServer.ServiceProvider = applicationBuilder.ApplicationServices;
+            UtilServer.ServiceProvider = applicationBuilder.ApplicationServices; // Make sure method ServiceGet(); is available.
 
             var configServer = ConfigServer.Load();
 

@@ -31,28 +31,23 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets ServiceProvider. Allows method ServiceGet(); to be called outside http context request. For example by background service.
+        /// </summary>
         public static IServiceProvider ServiceProvider;
 
-        public static IWebHostEnvironment HostingEnvironment
+        /// <summary>
+        /// Returns service. Can be called from a background service or within a http context request.
+        /// </summary>
+        public static T ServiceGet<T>()
         {
-            get
+            var serviceProvider = ServiceProvider;
+            if (serviceProvider == null && Context != null)
             {
-                IWebHostEnvironment result = null;
-                if (ServiceProvider != null)
-                {
-                    result = (IWebHostEnvironment)ServiceProvider.GetService(typeof(IWebHostEnvironment));
-                }
-                else
-                {
-                    // Fallback
-                    HttpContext context = Context;
-                    if (context != null)
-                    {
-                        result = (IWebHostEnvironment)context.RequestServices.GetService(typeof(IWebHostEnvironment));
-                    }
-                }
-                return result;
+                // Fallback
+                serviceProvider = Context.RequestServices;
             }
+            return (T)serviceProvider.GetService(typeof(T));
         }
 
         /// <summary>
@@ -60,7 +55,7 @@
         /// </summary>
         public static ILogger Logger(string categoryName)
         {
-            var loggerFactory = (ILoggerFactory)Context.RequestServices.GetService(typeof(ILoggerFactory));
+            var loggerFactory = UtilServer.ServiceGet<ILoggerFactory>();
             var result = loggerFactory.CreateLogger(categoryName);
             return (ILogger)result;
         }
@@ -89,7 +84,8 @@
         /// </summary>
         public static string FolderNameContentRoot()
         {
-            return new Uri(HostingEnvironment.ContentRootPath).AbsolutePath + "/";
+            var webHostEnvironment = UtilServer.ServiceGet<IWebHostEnvironment>();
+            return new Uri(webHostEnvironment.ContentRootPath).AbsolutePath + "/";
         }
 
         /// <summary>
@@ -291,42 +287,49 @@
         public string Translate(string appTypeName, string name, string text, int languageId)
         {
             var result = text;
-            string textLanguage = null;
-            var translateRow = TranslateNameList.GetOrAdd((appTypeName, name), (key) =>
+            try
             {
-                var row = new FrameworkTranslate { AppTypeName = key.Item1, Name = key.Item2, Text = text };
-                TranslateList.Add(row);
-                TranslateUpsertList.Add(row);
-                return row;
-            });
+                string textLanguage = null;
+                var translateRow = TranslateNameList.GetOrAdd((appTypeName, name), (key) =>
+                {
+                    var row = new FrameworkTranslate { AppTypeName = key.Item1, Name = key.Item2, Text = text };
+                    TranslateList.Add(row);
+                    TranslateUpsertList.Add(row);
+                    return row;
+                });
 
-            switch (languageId)
-            {
-                case 1:
-                    textLanguage = translateRow.TextLanguage01;
-                    break;
-                case 2:
-                    textLanguage = translateRow.TextLanguage02;
-                    break;
-                case 3:
-                    textLanguage = translateRow.TextLanguage03;
-                    break;
-                case 4:
-                    textLanguage = translateRow.TextLanguage04;
-                    break;
-                default:
-                    break;
+                switch (languageId)
+                {
+                    case 1:
+                        textLanguage = translateRow.TextLanguage01;
+                        break;
+                    case 2:
+                        textLanguage = translateRow.TextLanguage02;
+                        break;
+                    case 3:
+                        textLanguage = translateRow.TextLanguage03;
+                        break;
+                    case 4:
+                        textLanguage = translateRow.TextLanguage04;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (translateRow.Text != text)
+                {
+                    translateRow.Text = text; // Default text changed.
+                    TranslateUpsertList.Add(translateRow);
+                }
+
+                if (textLanguage != null)
+                {
+                    result = textLanguage;
+                }
             }
-            
-            if (translateRow.Text != text)
+            catch (Exception exception)
             {
-                translateRow.Text = text; // Default text changed.
-                TranslateUpsertList.Add(translateRow);
-            }
-            
-            if (textLanguage != null)
-            {
-                result = textLanguage;
+                Logger.LogError("{0} {1}", nameof(BackgroundFrameworkService), exception.ToString());
             }
             return result;
         }
@@ -344,12 +347,18 @@
             LogTextList.AppendLine(text);
         }
 
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            Logger.LogInformation("Service start");
+            return base.StartAsync(cancellationToken);
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
                 // Load language translate table.
-                UtilServer.ServiceProvider = ServiceProvider; // Make sure method FolderNameContentRoot(); is available.
+                UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
                 TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
                 TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>(TranslateList.ToDictionary(item => (item.AppTypeName, item.Name)));
 
@@ -362,7 +371,7 @@
                     if (TranslateUpsertList.Count > 0)
                     {
                         Logger.LogInformation("Update sql table FrameworkTranslate. ({0} Rows)", TranslateUpsertList.Count);
-                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method FolderNameContentRoot(); is available.
+                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
                         await UtilDalUpsert.UpsertAsync(TranslateUpsertList, new string[] { nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name) });
                         TranslateUpsertList.Clear();
                     }
@@ -372,15 +381,21 @@
                     {
                         string logText = LogTextList.ToString();
                         LogTextList.Clear();
-                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method FolderNameContentRoot(); is available.
+                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
                         File.AppendAllText(UtilFramework.FileNameLog, logText);
                     }
                 }
             }
-            catch
+            catch (Exception exception)
             {
-                // Silent exception. No more TimeHeartbeat.
+                Logger.LogError(exception.ToString());
             }
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            Logger.LogInformation("Service stop");
+            return base.StopAsync(cancellationToken);
         }
     }
 

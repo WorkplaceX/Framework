@@ -67,7 +67,7 @@
         {
             get
             {
-                return (DatabaseMemoryInternal)UtilServer.Context.RequestServices.GetService(typeof(DatabaseMemoryInternal)); // See also method ConfigureServices();
+                return UtilServer.ServiceGet<DatabaseMemoryInternal>(); // See also method ConfigureServices();
             }
         }
 
