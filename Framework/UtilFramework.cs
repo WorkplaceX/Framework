@@ -9,6 +9,7 @@ namespace Framework
     using Framework.Doc;
     using Framework.Json;
     using Framework.Server;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.51.122";
+                return "v3.51.123";
             }
         }
 
@@ -657,9 +658,26 @@ namespace Framework
         /// </summary>
         internal static void NodeClose()
         {
+            // Log
+            ILogger logger = null;
+            if (UtilServer.ServiceProvider != null)
+            {
+                var loggerFactory = (ILoggerFactory)UtilServer.ServiceProvider.GetService(typeof(ILoggerFactory));
+                logger = loggerFactory.CreateLogger(typeof(UtilFramework));
+            }
+
+            // Close node.exe
             foreach (var process in Process.GetProcesses().Where(item => item.MainWindowTitle.EndsWith("node.exe")))
             {
-                Console.WriteLine("Close node.exe");
+                var logText = $"Close node.exe ({ process.Id })";
+                if (logger != null)
+                {
+                    logger.LogInformation(logText);
+                }
+                else
+                {
+                    Console.WriteLine(logText);
+                }
                 process.Kill();
             }
         }

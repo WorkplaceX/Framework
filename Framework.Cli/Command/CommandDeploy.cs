@@ -17,7 +17,7 @@
         protected internal override void Register(CommandLineApplication configuration)
         {
             OptionAzure = configuration.Option("-a|--azure", "Deploy to Azure.", CommandOptionType.NoValue);
-            OptionLocal = configuration.Option("-l|--local", "Deploy to local folder.", CommandOptionType.NoValue);
+            OptionLocal = configuration.Option("-l|--folder", "Deploy to local folder.", CommandOptionType.NoValue);
         }
 
         internal CommandOption OptionAzure;

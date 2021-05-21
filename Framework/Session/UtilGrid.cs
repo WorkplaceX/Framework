@@ -1,7 +1,6 @@
 ﻿namespace Framework.Session
 {
     using Database.dbo;
-    using DatabaseIntegrate.dbo;
     using Framework.DataAccessLayer;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
@@ -9,7 +8,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
     using static Framework.Json.Grid;
@@ -182,7 +180,7 @@
                 ColumnId = key.Item1,
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
-                ColumnText = UtilFramework.TranslateGridColumnText(grid, column.FieldNameCSharp, column.ColumnText),
+                ColumnText = column.ColumnText,
                 Description = column.Description,
             });
             grid.CellList.Add(result);
@@ -202,7 +200,7 @@
                 ColumnId = key.Item1,
                 RowStateId = key.Item2,
                 CellEnum = key.Item3,
-                ColumnText = UtilFramework.TranslateGridColumnText(grid, column.FieldNameCSharp, column.ColumnText),
+                ColumnText = column.ColumnText,
             });
             grid.CellList.Add(result);
             result.IsVisibleScroll = true;
@@ -618,6 +616,18 @@
             {
                 RenderModeStack(grid, configGrid, columnList, rowStateList, cellList, cell, isTextLeave);
                 grid.CssClassAdd("grid-stack");
+            }
+
+            // Translate language
+            foreach (var item in cellList)
+            {
+                if (item.Key.CellEnum == GridCellEnum.HeaderColumn || item.Key.CellEnum == GridCellEnum.HeaderRow)
+                {
+                    var column = columnList[item.Key.ColumnId - 1];
+                    var fieldNameCSharp = column.FieldNameCSharp;
+
+                    item.Value.ColumnText = UtilFramework.TranslateGridColumnText(grid, column.FieldNameCSharp, column.ColumnText);
+                }
             }
 
             // IsHidePagination

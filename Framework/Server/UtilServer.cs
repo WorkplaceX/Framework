@@ -31,7 +31,6 @@
             }
         }
 
-        [ThreadStatic]
         public static IServiceProvider ServiceProvider;
 
         public static IWebHostEnvironment HostingEnvironment
