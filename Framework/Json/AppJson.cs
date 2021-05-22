@@ -232,13 +232,13 @@
                 string result;
                 if (Origin == RequestOrigin.Server)
                 {
-                    UtilFramework.Assert(UtilServer.Context.Request.Method == "GET" || UtilServer.Context.Request.Method == "HEAD");
+                    UtilFramework.Assert(UtilServer.RequestMethodIsGet());
                     result = UtilServer.Context.Request.Path; // Browser refresh
                 }
                 else
                 {
                     UtilFramework.Assert(Origin == RequestOrigin.Browser);
-                    UtilFramework.Assert(UtilServer.Context.Request.Method == "POST");
+                    UtilFramework.Assert(UtilServer.RequestMethodIsPost());
                     UtilFramework.Assert(BrowserNavigatePathPost != null);
                     result = new Uri(BrowserNavigatePathPost).AbsolutePath; // Browser back
                 }
@@ -974,7 +974,7 @@
             await NavigateSessionAsync(args, result);
             if (result.IsPage)
             {
-                if (UtilServer.Context.Request.Method == "GET")
+                if (UtilServer.RequestMethodIsGet())
                 {
                     // Do not add history entry for any GET
                     isAddHistory = false;
@@ -1045,6 +1045,18 @@
             public string RedirectPath { get; set; }
         }
 
+        [Serialize(SerializeEnum.None)]
+        internal AppJson AppJsonPrevious;
+
+        /// <summary>
+        /// Returns true, if user clicked reload button in browser. Used for example to preserve login user and selected langugae.
+        /// </summary>
+        public bool IsNavigateReload<T>(out T appJsonPrevious) where T : AppJson
+        {
+            appJsonPrevious = (T)AppJsonPrevious;
+            return appJsonPrevious != null;
+        }
+
         /// <summary>
         /// Add navigate command to queue.
         /// </summary>
@@ -1107,6 +1119,8 @@
             UtilStopwatch.TimeStart("Process");
             while (appJson.RequestJson.CommandGet() != null)
             {
+                appJson.settingInternalCache?.Clear(); // For example language might have changed on previous process step
+
                 await UtilApp.ProcessHomeIsClickAsync(appJson);
                 await UtilApp.ProcessNavigatePostAsync(appJson, appSelector); // Link POST instead of GET.
                 await UtilGrid.ProcessAsync(appJson); // Process data grid.
@@ -1532,11 +1546,11 @@
         /// Returns query to load data grid. Override this method to define sql query.
         /// </summary>
         /// <param name="query">If return value is null, grid has no header columns and no rows. If value is equal to method Data.QueryEmpty(); grid has header columns but no data rows.</param>
-        /// <param name="isRowSelectFirst">If return value is true, first row is selected after data grid load.</param>
-        internal virtual void QueryInternal(out IQueryable query, out bool isRowSelectFirst)
+        /// <param name="rowSelect">Row to select after data grid load.</param>
+        internal virtual void QueryInternal(out IQueryable query, out Func<Row> rowSelect)
         {
             query = null;
-            isRowSelectFirst = false;
+            rowSelect = null;
         }
 
         /// <summary>
@@ -1946,10 +1960,10 @@
 
         }
 
-        internal override void QueryInternal(out IQueryable query, out bool isRowSelectFirst)
+        internal override void QueryInternal(out IQueryable query, out Func<Row> rowSelect)
         {
             QueryArgs args = new QueryArgs();
-            QueryResult result = new QueryResult { IsRowSelectFirst = true };
+            QueryResult result = new QueryResult { RowSelect = (rowList) => rowList.FirstOrDefault() };
 
             // Custom query
             Query(args, result);
@@ -1961,7 +1975,7 @@
             }
 
             query = result.Query;
-            isRowSelectFirst = result.IsRowSelectFirst;
+            rowSelect = result.RowSelect == null ? null : () => result.RowSelect(RowList);
         }
 
         /// <summary>
@@ -2002,9 +2016,9 @@
             public IQueryable<TRow> Query { get; set; }
 
             /// <summary>
-            /// Gets or sets IsRowSelectFirst. If true, first row is selected after data grid load.
+            /// Gets or sets RowSelect. This is the row to select after data grid load. If null, no row is selected. By default first row gets selected.
             /// </summary>
-            public bool IsRowSelectFirst { get; set; }
+            public Func<IReadOnlyList<TRow>, TRow> RowSelect { get; set; }
         }
 
         internal override void TruncateInternal(List<Row> rowList)

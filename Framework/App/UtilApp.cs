@@ -8,6 +8,7 @@
     using Framework.DataAccessLayer;
     using System.Collections.Generic;
     using Framework.Json.Bootstrap;
+    using Framework.Json.Bulma;
 
     internal static class UtilApp
     {
@@ -102,6 +103,7 @@
                 {
                     UtilGrid.Render(gridLocal);
                 }
+                BulmaNavbar.Render(appJson);
             }
         }
 

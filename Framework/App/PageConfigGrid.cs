@@ -143,7 +143,7 @@
                 result.Query = Data.Query<FrameworkConfigGridDisplay>().Where(item => item.TableNameCSharp == TableNameCSharp);
                 if (RowSelect == null)
                 {
-                    result.IsRowSelectFirst = false;
+                    result.RowSelect = null;
                 }
             }
         }

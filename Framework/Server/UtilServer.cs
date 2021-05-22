@@ -79,6 +79,25 @@
             }
         }
 
+        /// <summary>
+        /// Returns true, if http request method is GET or HEAD.
+        /// </summary>
+        /// <returns></returns>
+        public static bool RequestMethodIsGet()
+        {
+            var context = Context;
+            return context.Request.Method == "GET" || context.Request.Method == "HEAD";
+        }
+
+        /// <summary>
+        /// Returns true, if http request method is POST.
+        /// </summary>
+        /// <returns></returns>
+        public static bool RequestMethodIsPost()
+        {
+            return Context.Request.Method == "POST";
+        }
+
         public static ISession Session
         {
             get

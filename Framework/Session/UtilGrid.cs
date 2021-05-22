@@ -801,7 +801,7 @@
         /// <summary>
         /// Load or reload data grid. Also first load for lookup.
         /// </summary>
-        private static async Task LoadAsync(Grid grid, IQueryable query, bool isRowSelectFirst)
+        private static async Task LoadAsync(Grid grid, IQueryable query, Func<Row> rowSelect)
         {
             Type typeRowOld = grid.TypeRow;
             grid.TypeRow = query?.ElementType;
@@ -833,10 +833,15 @@
             // RowStateList
             grid.RowStateList = LoadRowStateList(grid);
 
-            // Select first row on data grid. But not on lookup grid.
-            if (grid.IsGridLookup == false && isRowSelectFirst) 
+            // Select row on data grid after load. But not on lookup grid.
+            if (grid.IsGridLookup == false && rowSelect != null && rowSelect() is Row rowSelectLocal)
             {
-                await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowEnum == GridRowEnum.Index).FirstOrDefault());
+                // Select specific row. Typically first.
+                var rowId = grid.RowListInternal.IndexOf(rowSelectLocal) + 1;
+                if (rowId > 0)
+                {
+                    await RowSelectAsync(grid, grid.RowStateList.Where(item => item.RowId == rowId).Single());
+                }
             }
 
             grid.CellList = new List<GridCell>();
@@ -850,17 +855,17 @@
         public static async Task LoadAsync(Grid grid)
         {
             IQueryable query;
-            bool isRowSelectFirst = false;
+            Func<Row> rowSelect = null;
             if (grid.IsGridLookup == false)
             {
-                grid.QueryInternal(out query, out isRowSelectFirst);
+                grid.QueryInternal(out query, out rowSelect);
             }
             else
             {
                 GridLookupToGridDest(grid, out var gridDest, out var rowDest, out string fieldNameCSharpDest, out var cellDest);
                 query = gridDest.LookupQueryInternal(rowDest, fieldNameCSharpDest, cellDest.Text);
             }
-            await LoadAsync(grid, query, isRowSelectFirst);
+            await LoadAsync(grid, query, rowSelect);
         }
 
         /// <summary>
@@ -1019,7 +1024,7 @@
             if (query != null)
             {
                 GridLookupOpen(grid, rowState, column.FieldNameCSharp, cell);
-                await LoadAsync(grid.GridLookup, query, isRowSelectFirst: false);
+                await LoadAsync(grid.GridLookup, query, null);
             }
         }
 

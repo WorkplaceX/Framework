@@ -158,9 +158,13 @@
 
             // Log
             LogCommandEnum = string.Format("{0}", requestJson.CommandList.FirstOrDefault()?.CommandEnum);
-
-            // Deserialize AppJson (Session) or init
-            var appJson = UtilSession.Deserialize();
+            
+            AppJson appJson = null;
+            if (UtilServer.RequestMethodIsGet() == false) // No session deserialize for GET. See also method CreateAppJson(); on how to preserve for example selected language.
+            {
+                // Deserialize AppJson (Session)
+                appJson = UtilSession.Deserialize();
+            }
 
             // IsExpired
             bool isSessionExpired = appJson == null && requestJson.RequestCount > 1;
@@ -173,7 +177,7 @@
             {
                 // New AppJson (Session)
                 bool isInit = false;
-                if (appJson == null || UtilServer.Context.Request.Method == "GET")
+                if (appJson == null || UtilServer.RequestMethodIsGet())
                 {
                     appJson = CreateAppJson();
                     isInit = true;
@@ -187,7 +191,7 @@
                 appJson.RequestJson = requestJson;
 
                 // Add navigate command to queue
-                if (UtilServer.Context.Request.Method == "POST" || browserNavigatePath == "/")
+                if (UtilServer.RequestMethodIsPost() || browserNavigatePath == "/")
                 {
                     appJson.Navigate(browserNavigatePath, isAddHistory: false); // User clicked backward or forward button in browser.
                 }
@@ -225,6 +229,17 @@
             }
 
             AppJson result = (AppJson)Activator.CreateInstance(type);
+
+            // Preserve for example login user and selected language.
+            if (UtilServer.RequestMethodIsGet())
+            {
+                var appJsonPrevious = UtilSession.Deserialize();
+                if (appJsonPrevious != null)
+                {
+                    result.AppJsonPrevious = appJsonPrevious;
+                }
+            }
+
             return result;
         }
 

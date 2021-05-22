@@ -80,26 +80,6 @@
                 UtilStopwatch.TimeStop(name: "Request");
                 // One log entry for one request.
                 UtilStopwatch.TimeLog();
-
-                // Log
-                {
-                    logStopwatch.Stop();
-                    string logEscape(string value)
-                    {
-                        return value?.Replace("\r", "(new line)").Replace("\n", "(new line)").Replace(";", "(semicolon)").Replace(",", "(comma)").Replace("\"", "(double quote)").Replace("'", "(quote)");
-                    }
-                    var logIp = context.Connection.RemoteIpAddress.ToString();
-                    var logUserAgent = logEscape(context.Request.Headers["User-Agent"].ToString());
-                    var logTimeDelta = (logStopwatch.ElapsedMilliseconds / 1000.0f).ToString();
-                    var logMethod = context.Request.Method;
-                    var logHost = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
-                    var logNavigatePath = logEscape(context.Request.Path + context.Request.QueryString.ToString());
-                    var logStatusCode = context.Response.StatusCode;
-                    logException = logEscape(logException);
-                    var logText = $"{ UtilFramework.Version },=\"{ logTime }\",{ logTimeDelta },{ logIp },{ logMethod },{ logHost },{ logHost }{ logNavigatePath.Substring(1) },{ logStatusCode },{ logSessionLength },{ logCommandEnum },{ logNavigatePathAddHistory },{ logUserAgent },{ logException }";
-                    var service = UtilServer.ServiceGet<BackgroundFrameworkService>();
-                    service.LogText(logText);
-                }
             }
             catch (Exception exception)
             {
@@ -109,6 +89,26 @@
             finally
             {
                 UtilStopwatch.RequestRelease();
+            }
+
+            // Log
+            {
+                logStopwatch.Stop();
+                string logEscape(string value)
+                {
+                    return value?.Replace("\r", "(new line)").Replace("\n", "(new line)").Replace(";", "(semicolon)").Replace(",", "(comma)").Replace("\"", "(double quote)").Replace("'", "(quote)");
+                }
+                var logIp = context.Connection.RemoteIpAddress.ToString();
+                var logUserAgent = logEscape(context.Request.Headers["User-Agent"].ToString());
+                var logTimeDelta = (logStopwatch.ElapsedMilliseconds / 1000.0f).ToString();
+                var logMethod = context.Request.Method;
+                var logHost = string.Format("{0}://{1}/", context.Request.Scheme, context.Request.Host.Value);
+                var logNavigatePath = logEscape(context.Request.Path + context.Request.QueryString.ToString());
+                var logStatusCode = context.Response.StatusCode;
+                logException = logEscape(logException);
+                var logText = $"{ UtilFramework.Version },=\"{ logTime }\",{ logTimeDelta },{ logIp },{ logMethod },{ logHost },{ logHost }{ logNavigatePath.Substring(1) },{ logStatusCode },{ logSessionLength },{ logCommandEnum },{ logNavigatePathAddHistory },{ logUserAgent },{ logException }";
+                var service = UtilServer.ServiceGet<BackgroundFrameworkService>();
+                service.LogText(logText);
             }
         }
 
