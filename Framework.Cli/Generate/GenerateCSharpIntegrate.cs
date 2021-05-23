@@ -22,7 +22,7 @@
         /// </summary>
         /// <param name="isFrameworkDb">If true, generate CSharp code for Framework library (internal use only) otherwise generate code for Application.</param>
         /// <param name="isApplication">If false, generate CSharp code for cli. If true, generate code for Application or Framework.</param>
-        private static void GenerateCSharpSchemaName(List<GenerateIntegrateItem> integrateList, bool isFrameworkDb, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpSchemaName(List<GenerateIntegrateItem> integrateList, bool isFrameworkDb, bool isApplication, string folderNameBlob, StringBuilder result)
         {
             integrateList = integrateList.Where(item => item.IsFrameworkDb == isFrameworkDb && item.IsApplication == isApplication).ToList();
             var schemaNameCSharpList = integrateList.GroupBy(item => item.SchemaNameCSharp, (key, group) => key);
@@ -51,7 +51,7 @@
                 }
                 result.AppendLine(string.Format("    using Database.{0};", schemaNameCSharp));
                 result.AppendLine();
-                GenerateCSharpTableNameClass(integrateList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, result);
+                GenerateCSharpTableNameClass(integrateList.Where(item => item.SchemaNameCSharp == schemaNameCSharp).ToList(), isFrameworkDb, isApplication, folderNameBlob, result);
                 result.AppendLine(string.Format("}}"));
             }
         }
@@ -59,7 +59,7 @@
         /// <summary>
         /// Generate static CSharp class for every database table.
         /// </summary>
-        private static void GenerateCSharpTableNameClass(List<GenerateIntegrateItem> integrateList, bool isFrameworkDb, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpTableNameClass(List<GenerateIntegrateItem> integrateList, bool isFrameworkDb, bool isApplication, string folderNameBlob, StringBuilder result)
         {
             bool isFirst = true;
             foreach (var integrate in integrateList)
@@ -108,7 +108,7 @@
                 result.AppendLine(string.Format("            {{"));
                 result.AppendLine(string.Format("                var result = new List<{0}>", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("                {{", integrate.TableNameCSharp));
-                GenerateCSharpRowIntegrate(integrate, result);
+                GenerateCSharpRowIntegrate(integrate, folderNameBlob, result);
                 result.AppendLine(string.Format("                }};", integrate.TableNameCSharp));
                 result.AppendLine(string.Format("                return result;"));
                 result.AppendLine(string.Format("            }}"));
@@ -159,7 +159,7 @@
             }
         }
 
-        private static void GenerateCSharpRowIntegrate(GenerateIntegrateItem integrateItem, StringBuilder result)
+        private static void GenerateCSharpRowIntegrate(GenerateIntegrateItem integrateItem, string folderNameBlob, StringBuilder result)
         {
             var fieldNameIdCSharpReferenceList = integrateItem.Owner.ResultReference.Where(item => item.TypeRowIntegrate == integrateItem.TypeRow).Select(item => item.FieldNameIdCSharp).ToList();
             var fieldList = UtilDalType.TypeRowToFieldList(integrateItem.TypeRow);
@@ -199,7 +199,7 @@
                     }
 
                     // Generate field
-                    GenerateCSharpRowIntegrateField(field, value, fileName, integrateItem.IsApplication, result);
+                    GenerateCSharpRowIntegrateField(field, value, fileName, integrateItem.IsApplication, folderNameBlob, result);
                 }
                 result.Append(" },");
                 result.AppendLine();
@@ -209,7 +209,7 @@
         /// <summary>
         /// Generate CSharp property with value.
         /// </summary>
-        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, string fileName, bool isApplication, StringBuilder result)
+        private static void GenerateCSharpRowIntegrateField(UtilDalType.Field field, object value, string fileName, bool isApplication, string folderNameBlob, StringBuilder result)
         {
             string fieldNameCSharp = field.FieldNameCSharp;
             FrameworkType frameworkType = UtilDalType.FrameworkTypeFromEnum(field.FrameworkTypeEnum);
@@ -226,9 +226,8 @@
             // Blob write
             if (fileName != null && !isApplication && (value is byte[] || value is string))
             {
-                var folderName = UtilFramework.FolderName + "Application.Cli/Database/Blob/";
-                UtilCliInternal.FolderCreate(folderName);
-                var fileNameFull = folderName + fileName;
+                UtilCliInternal.FolderCreate(folderNameBlob);
+                var fileNameFull = folderNameBlob + fileName;
                 if (value is byte[])
                 {
                     File.WriteAllBytes(fileNameFull, (byte[])value);
@@ -248,12 +247,12 @@
         /// Generate CSharp code for file DatabaseIntegrate.cs
         /// </summary>
         /// <param name="isApplication">If false, generate code for cli. If true, generate code for Application.</param>
-        public void Run(out string cSharp, bool isFrameworkDb, bool isApplication, List<GenerateIntegrateItem> integrateList)
+        public void Run(out string cSharp, bool isFrameworkDb, bool isApplication, List<GenerateIntegrateItem> integrateList, string folderNameBlob)
         {
             StringBuilder result = new StringBuilder();
             result.AppendLine("// Do not modify this file. It's generated by Framework.Cli generate command."); // File DatabaseIntegrate.cs
             result.AppendLine();
-            GenerateCSharpSchemaName(integrateList, isFrameworkDb, isApplication, result);
+            GenerateCSharpSchemaName(integrateList, isFrameworkDb, isApplication, folderNameBlob, result);
             cSharp = result.ToString();
         }
     }

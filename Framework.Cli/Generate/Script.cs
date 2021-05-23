@@ -6,6 +6,7 @@
     using static Framework.Cli.AppCli;
     using Framework.DataAccessLayer;
     using System.Linq;
+    using System.IO;
 
     /// <summary>
     /// Generate CSharp code for database tables.
@@ -74,12 +75,9 @@
                 if (generateIntegrateResult != null)
                 {
                     Run(generateIntegrateResult);
-                    if (isFrameworkDb == false)
-                    {
-                        UtilCliInternal.FolderDelete(UtilFramework.FolderName + "Application.Cli/Database/Blob/");
-                    }
-                    new GenerateCSharpIntegrate().Run(out string cSharpCli, isFrameworkDb, isApplication: false, integrateList: generateIntegrateResult.Result);
-                    new GenerateCSharpIntegrate().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, integrateList: generateIntegrateResult.Result);
+                    string folderNameBlobTemp = new Uri(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + "/.")).AbsolutePath;
+                    new GenerateCSharpIntegrate().Run(out string cSharpCli, isFrameworkDb, isApplication: false, integrateList: generateIntegrateResult.Result, folderNameBlobTemp);
+                    new GenerateCSharpIntegrate().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, integrateList: generateIntegrateResult.Result, folderNameBlobTemp);
                     if (isFrameworkDb == false)
                     {
                         UtilFramework.FileSave(UtilFramework.FolderName + "Application.Cli/Database/DatabaseIntegrate.cs", cSharpCli);
@@ -90,6 +88,16 @@
                         UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework.Cli/Database/DatabaseIntegrate.cs", cSharpCli);
                         UtilFramework.FileSave(UtilFramework.FolderName + "Framework/Framework/Database/DatabaseIntegrate.cs", cSharpApplication);
                     }
+
+                    // Blob folder update
+                    if (isFrameworkDb == false)
+                    {
+                        var folderNameBlob = UtilFramework.FolderName + "Application.Cli/Database/Blob/";
+                        UtilCliInternal.FolderDelete(folderNameBlob);
+                        UtilCliInternal.FolderCopy(folderNameBlobTemp, folderNameBlob);
+                        UtilCliInternal.FolderDelete(folderNameBlobTemp);
+                    }
+
                     UtilCliInternal.ConsoleWriteLineColor("Generate CSharp code for Integrate data and write to (*.cs) files successful!", ConsoleColor.Green);
                 }
 

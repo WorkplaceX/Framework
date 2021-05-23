@@ -1349,8 +1349,7 @@
         /// <param name="typeRowDest">Type underlying sql table.</param>
         /// <param name="rowList">Records to update.</param>
         /// <param name="fieldNameSqlKeyList">Key fields for record identification.</param>
-        /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        private static async Task UpsertAsync(Type typeRow, Type typeRowDest, List<Row> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList, List<Assembly> assemblyList)
+        private static async Task UpsertAsync(Type typeRow, Type typeRowDest, List<Row> rowList, string[] fieldNameSqlKeyList, List<Reference> referenceList)
         {
             bool isFrameworkDb = UtilDalType.TypeRowIsFrameworkDb(typeRow);
 
@@ -1497,7 +1496,7 @@
                 {
                     Type typeRowDest = itemUpsert.TypeRowDest(assemblyList);
                     progressBar?.Invoke(typeRowDest);
-                    await UpsertAsync(itemUpsert.TypeRow, typeRowDest, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList, assemblyList);
+                    await UpsertAsync(itemUpsert.TypeRow, typeRowDest, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList);
                 }
             }
 
