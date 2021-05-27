@@ -41,6 +41,11 @@
         GridIsClickConfig = 12,
 
         /// <summary>
+        /// User clicked data grid header column language button.
+        /// </summary>
+        GridIsClickLanguage = 25,
+
+        /// <summary>
         /// Inform server about text leave event.
         /// </summary>
         GridIsTextLeave = 13,
@@ -92,7 +97,7 @@
         /// </summary>
         Rerender = 24,
 
-        // Next = 25,
+        // Next = 26,
     }
 
     /// <summary>
@@ -776,14 +781,19 @@
             public bool GridIsShowConfigDeveloper { get; set; }
 
             /// <summary>
+            /// Gets or sets GridIsShowLanguage. If true, language translate button is shown.
+            /// </summary>
+            public bool GridIsShowLanguage { get; set; }
+
+            /// <summary>
             /// Gets or sets GridIsRowSelectRerender. If true, application gets rerendered after another row is selected. For example after language change.
             /// </summary>
             public bool GridIsRowSelectRerender { get; set; }
 
             /// <summary>
-            /// Gets or sets LanguageId. Grid relevant data such as ColumnText is displayed in currently selected language.
+            /// Gets or sets GridLanguageName. Grid relevant data such as ColumnText is displayed and translated into this currently selected language.
             /// </summary>
-            public int? GridLanguageId { get; set; }
+            public string GridLanguageName { get; set; }
         }
 
         /// <summary>
@@ -800,6 +810,7 @@
                 {
                     result = new SettingResult();
                     Setting(args, result);
+                    result.GridLanguageName = UtilFramework.StringNull(result.GridLanguageName);
                     if (settingInternalCache == null)
                     {
                         settingInternalCache = new Dictionary<Grid, SettingResult>();
@@ -1462,6 +1473,11 @@
         /// Gets or sets IsShowConfigDeveloper. If true, config developer button (coffee icon) is shown to configure data grid.
         /// </summary>
         internal bool IsShowConfigDeveloper;
+
+        /// <summary>
+        /// Gets or sets IsShowLanguage. If true, language translate button is show on each column.
+        /// </summary>
+        internal bool IsShowLanguage;
 
         /// <summary>
         /// Gets or sets IsGridLookup. If true, this grid is a lookup data grid.

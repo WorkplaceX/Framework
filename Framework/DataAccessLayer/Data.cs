@@ -1468,7 +1468,7 @@
         /// </summary>
         /// <param name="upsertList">List of rows to insert or update.</param>
         /// <param name="assemblyList">Assemblies in which to search reference tables.</param>
-        internal static async Task UpsertAsync(List<UpsertItem> upsertList, List<Assembly> assemblyList, Action<Type> progressBar = null)
+        internal static async Task UpsertAsync(List<UpsertItem> upsertList, List<Assembly> assemblyList, Action<Type> progressBar = null, bool isExceptionContinue = false)
         {
             upsertList = upsertList.Where(item => item.IsDeploy == false).ToList();
 
@@ -1487,16 +1487,31 @@
             {
                 Type typeRow = item.Key;
                 List<Row> rowList = item.Value;
-         
-                // IsDeleteSet
-                IsDeleteSet(typeRow, rowList); // One call for hierarchical Integrate which needs multiple upsert.
 
-                // Upsert
-                foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
+                try
                 {
-                    Type typeRowDest = itemUpsert.TypeRowDest(assemblyList);
-                    progressBar?.Invoke(typeRowDest);
-                    await UpsertAsync(itemUpsert.TypeRow, typeRowDest, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList);
+                    // IsDeleteSet
+                    IsDeleteSet(typeRow, rowList); // One call for hierarchical Integrate which needs multiple upsert.
+
+                    // Upsert
+                    foreach (var itemUpsert in upsertList.Where(item => item.TypeRow == typeRow))
+                    {
+                        Type typeRowDest = itemUpsert.TypeRowDest(assemblyList);
+                        progressBar?.Invoke(typeRowDest);
+                        await UpsertAsync(itemUpsert.TypeRow, typeRowDest, itemUpsert.RowList, itemUpsert.FieldNameSqlKeyList, itemUpsert.ReferenceList);
+                    }
+                }
+                catch
+                {
+                    if (isExceptionContinue)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(string.Format("Upsert failed! ({0})", typeRow.Name));
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
 

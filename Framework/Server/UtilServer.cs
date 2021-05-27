@@ -290,75 +290,76 @@
         public string TimeHeartbeat { get; private set; }
 
         /// <summary>
-        /// Data loaded from database.
+        /// Data to be added to database by service.
         /// </summary>
-        private List<FrameworkTranslate> TranslateList = new List<FrameworkTranslate>();
+        private List<FrameworkLanguageItem> LanguageItemUpsertList = new List<FrameworkLanguageItem>();
 
         /// <summary>
-        /// Data to be added to database.
+        /// (AppTypeName, LanguageName, ItemName)
         /// </summary>
-        private List<FrameworkTranslate> TranslateUpsertList = new List<FrameworkTranslate>();
+        private ConcurrentDictionary<(string, string, string), FrameworkLanguageApp> LanguageAppList = new ConcurrentDictionary<(string, string, string), FrameworkLanguageApp>();
 
         /// <summary>
-        /// (AppTypeName, Name, FrameworkTranslate).
+        /// Gets or sets LanguageAppIsLoad. If true, LanguageAppList gets loaded or reloaded.
         /// </summary>
-        private ConcurrentDictionary<(string, string), FrameworkTranslate> TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>();
+        public bool LanguageAppIsLoad = true;
 
         /// <summary>
         /// Translate text into a different language.
         /// </summary>
-        /// <param name="name">Dictionary key for text.</param>
-        /// <param name="text">Default text.</param>
-        /// <param name="languageId">Language into which to translate to.</param>
-        /// <returns>Returns into languageId translated text. If no translation entry is found text is returned.</returns>
-        public string Translate(string appTypeName, string name, string text, int languageId)
+        /// <param name="appTypeName">Translation belongs to this app.</param>
+        /// <param name="languageName">Destination language. Can be null for no selected language.</param>
+        /// <param name="itemName">Dixtionary key for this text.</param>
+        /// <param name="textDefault">Default text.</param>
+        /// <returns>Returns into languageName translated text. If no translation entry is found text is returned.</returns>
+        public string Language(string appTypeName, string languageName, string itemName, string textDefault)
         {
-            var result = text;
+            var result = textDefault;
             try
             {
-                string textLanguage = null;
-                var translateRow = TranslateNameList.GetOrAdd((appTypeName, name), (key) =>
+                var row = LanguageAppList.GetOrAdd((appTypeName, languageName, itemName), (key) =>
                 {
-                    var row = new FrameworkTranslate { AppTypeName = key.Item1, Name = key.Item2, Text = text };
-                    TranslateList.Add(row);
-                    TranslateUpsertList.Add(row);
-                    return row;
+                    var rowNew = new FrameworkLanguageApp { LanguageAppTypeName = appTypeName, LanguageName = languageName, ItemName = itemName, ItemTextDefault = textDefault };
+                    var rowApp = new FrameworkLanguageItem { AppTypeName = appTypeName, Name = itemName, TextDefault = textDefault };
+                    LanguageItemUpsertList.Add(rowApp);
+                    return rowNew;
                 });
 
-                switch (languageId)
+                // TextDefault changed
+                if (textDefault != row.ItemTextDefault)
                 {
-                    case 1:
-                        textLanguage = translateRow.TextLanguage01;
-                        break;
-                    case 2:
-                        textLanguage = translateRow.TextLanguage02;
-                        break;
-                    case 3:
-                        textLanguage = translateRow.TextLanguage03;
-                        break;
-                    case 4:
-                        textLanguage = translateRow.TextLanguage04;
-                        break;
-                    default:
-                        break;
+                    var rowApp = new FrameworkLanguageItem { AppTypeName = appTypeName, Name = itemName, TextDefault = textDefault };
+                    LanguageItemUpsertList.Add(rowApp);
+                    var find = (appTypeName, itemName);
+                    foreach (var item in LanguageAppList)
+                    {
+                        if ((item.Key.Item1, item.Key.Item3) == find) // (AppTypeName, ItemName), no LanguageName
+                        {
+                            item.Value.ItemTextDefault = textDefault;
+                        }
+                    }
                 }
 
-                if (translateRow.Text != text)
+                if (row.TextText != null)
                 {
-                    translateRow.Text = text; // Default text changed.
-                    TranslateUpsertList.Add(translateRow);
-                }
-
-                if (textLanguage != null)
-                {
-                    result = textLanguage;
+                    result = row.TextText;
                 }
             }
             catch (Exception exception)
             {
-                Logger.LogError("{0} {1}", nameof(BackgroundFrameworkService), exception.ToString());
+                var errorText = string.Format("{0} {1}", nameof(BackgroundFrameworkService), exception.ToString());
+                Logger.LogError(errorText);
+                LogText(errorText, isRequestContext: false);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Update language translate in memory dictionary.
+        /// </summary>
+        public void LanguageUpdate(string appTypeName, string languageName, string itemName, string textDefault, string text)
+        {
+            LanguageAppList[(appTypeName, languageName, itemName)] = new FrameworkLanguageApp { LanguageAppTypeName = appTypeName, LanguageName = languageName, ItemName = itemName, ItemTextDefault = textDefault, TextText = text };
         }
 
         /// <summary>
@@ -369,57 +370,81 @@
         /// <summary>
         /// Log to file log.csv
         /// </summary>
-        public void LogText(string text)
+        public void LogText(string text, bool isRequestContext = true)
         {
-            LogTextList.AppendLine(text);
+            if (isRequestContext)
+            {
+                LogTextList.AppendLine(text);
+            }
+            else
+            {
+                LogTextList.AppendLine(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mmm:ss.fff") + "," + text);
+            }
+        }
+
+        /// <summary>
+        /// Write to file log.csv
+        /// </summary>
+        public void LogTextFlush()
+        {
+            if (LogTextList.Length > 0)
+            {
+                string logText = LogTextList.ToString();
+                LogTextList.Clear();
+                UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
+                File.AppendAllText(UtilFramework.FileNameLog, logText);
+            }
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            try
+            Logger.LogInformation("Service start");
+            LogText("Service start", isRequestContext: false);
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                Logger.LogInformation("Service start");
-
-                // Load language translate table.
-                UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
-                TranslateList = (await Data.Query<FrameworkTranslate>().QueryExecuteAsync()).ToList();
-                TranslateNameList = new ConcurrentDictionary<(string, string), FrameworkTranslate>(TranslateList.ToDictionary(item => (item.AppTypeName, item.Name)));
-
-                while (!stoppingToken.IsCancellationRequested)
+                try
                 {
+                    if (LanguageAppIsLoad)
+                    {
+                        LanguageAppIsLoad = false;
+                        // Load sql table FrameworkLanguageApp.
+                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
+                        var languageAppList = (await Data.Query<FrameworkLanguageApp>().QueryExecuteAsync()).ToList();
+                        LanguageAppList = new ConcurrentDictionary<(string, string, string), FrameworkLanguageApp>(languageAppList.ToDictionary(item => (item.LanguageAppTypeName, item.LanguageName, item.ItemName)));
+                    }
+
+                    await Task.Delay(1000);
                     TimeHeartbeat = DateTime.UtcNow.ToString("HH:mmm:ss");
                     Logger.LogInformation(TimeHeartbeat);
 
-                    await Task.Delay(1000);
-
-                    // Translate
-                    if (TranslateUpsertList.Count > 0)
+                    // Language
+                    if (LanguageItemUpsertList.Count > 0)
                     {
-                        Logger.LogInformation("Update sql table FrameworkTranslate. ({0} Rows)", TranslateUpsertList.Count);
+                        Logger.LogInformation("Update sql table FrameworkLanguageItem. ({0} Rows)", LanguageItemUpsertList.Count);
                         UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
-                        await UtilDalUpsert.UpsertAsync(TranslateUpsertList, new string[] { nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name) });
-                        TranslateUpsertList.Clear();
+                        await UtilDalUpsert.UpsertAsync(LanguageItemUpsertList, new string[] { nameof(FrameworkLanguageItem.AppTypeName), nameof(FrameworkLanguageItem.Name) });
+                        LanguageItemUpsertList.Clear();
                     }
 
                     // Log
-                    if (LogTextList.Length > 0)
-                    {
-                        string logText = LogTextList.ToString();
-                        LogTextList.Clear();
-                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
-                        File.AppendAllText(UtilFramework.FileNameLog, logText);
-                    }
+                    LogTextFlush();
                 }
-            }
-            catch (Exception exception)
-            {
-                Logger.LogError(exception.ToString());
+                catch (Exception exception)
+                {
+                    var logText = exception.ToString();
+                    Logger.LogError(logText);
+                    LogText(logText, isRequestContext: false);
+                }
             }
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            Logger.LogInformation("Service stop");
+            var logText = "Service stop";
+            Logger.LogInformation(logText);
+            LogText(logText, isRequestContext: false);
+            LogTextFlush();
             return base.StopAsync(cancellationToken);
         }
     }

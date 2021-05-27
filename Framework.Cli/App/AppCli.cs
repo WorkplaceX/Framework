@@ -65,9 +65,9 @@
         /// <summary>
         /// Returns list of AppType in AssemblyApplication.
         /// </summary>
-        public Type[] AssemblyApplicationAppTypeList()
+        public string[] AppTypeNameList()
         {
-            return AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).ToArray();
+            return AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).Select(item => item.FullName).ToArray();
         }
 
         /// <summary>
@@ -379,6 +379,23 @@
         }
 
         /// <summary>
+        /// Use reflection to get value from Application assemblies.
+        /// </summary>
+        internal List<T> CommandDeployDbIntegrateInternalRowListGet<T>(string typeName) where T : Row
+        {
+            var assembly = AssemblyApplicationCli;
+            if (!typeName.EndsWith("Cli"))
+            {
+                assembly = AssemblyApplicationDatabase;
+            }
+            var typeCli = assembly.GetType(typeName);
+            UtilFramework.Assert(typeCli != null, string.Format("Type not found! ({0})", typeName));
+            PropertyInfo propertyInfo = typeCli.GetProperty("RowList");
+            var rowList = (List<T>)propertyInfo.GetValue(null);
+            return rowList;
+        }
+
+        /// <summary>
         /// Returns Integrate rows to deploy to sql database.
         /// </summary>
         internal void CommandDeployDbIntegrateInternal(DeployDbIntegrateResult result)
@@ -426,15 +443,14 @@
                 result.Add(rowList);
             }
 
-            // FrameworkTranslate
+            // FrameworkLanguage
             {
-                // Read FrameworkTranslateAppCli.List from Application.Cli project.
-                string nameCli = "DatabaseIntegrate.dbo.FrameworkTranslateAppCli";
-                var typeCli = AssemblyApplicationCli.GetType(nameCli);
-                UtilFramework.Assert(typeCli != null, string.Format("Type not found! ({0})", nameCli));
-                PropertyInfo propertyInfo = typeCli.GetProperty("RowList");
-                var rowList = (List<FrameworkTranslate>)propertyInfo.GetValue(null);
-                result.Add(rowList);
+                var rowLanguageList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp");
+                result.Add(rowLanguageList);
+                var rowItemList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli");
+                result.Add(rowItemList);
+                var rowTextList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli");
+                result.Add(rowTextList);
             }
 
             // Add application (custom) Integrate data rows to deploy to database
@@ -617,16 +633,32 @@
                 result.AddReference<FrameworkConfigField, FrameworkField>(nameof(FrameworkConfigField.FieldId));
             }
 
-            // FrameworkTranslateIntegrate
+            // FrameworkLanguage
             {
-                var appTypeNameList = AssemblyApplicationAppTypeList().Select(item => item.FullName).ToArray();
-                var rowList = Data.Query<FrameworkTranslate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
+                var appTypeNameList = AppTypeNameList();
+                var rowLanguageList = Data.Query<FrameworkLanguageIntegrate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
+                result.Add(
+                    isFrameworkDb: false,
+                    isApplication: true,
+                    typeRow: typeof(FrameworkLanguageIntegrate),
+                    query: rowLanguageList);
+                result.AddKey<FrameworkLanguage>(nameof(FrameworkLanguage.AppTypeName), nameof(FrameworkLanguage.Name));
+
+                var rowLanguageItemList = Data.Query<FrameworkLanguageItem>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
                 result.Add(
                     isFrameworkDb: false,
                     isApplication: false,
-                    typeRow: typeof(FrameworkTranslate),
-                    query: rowList);
-                result.AddKey<FrameworkTranslate>(nameof(FrameworkTranslate.AppTypeName), nameof(FrameworkTranslate.Name));
+                    typeRow: typeof(FrameworkLanguageItem),
+                    query: rowLanguageItemList);
+                result.AddKey<FrameworkLanguageItem>(nameof(FrameworkLanguageItem.AppTypeName), nameof(FrameworkLanguageItem.Name));
+
+                var rowLanguageTextList = Data.Query<FrameworkLanguageTextIntegrate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.LanguageIdName).ThenBy(item => item.ItemIdName);
+                result.Add(
+                    isFrameworkDb: false,
+                    isApplication: false,
+                    typeRow: typeof(FrameworkLanguageTextIntegrate),
+                    query: rowLanguageTextList);
+                result.AddKey<FrameworkLanguageText>(nameof(FrameworkLanguageText.AppTypeName), nameof(FrameworkLanguageText.LanguageId), nameof(FrameworkLanguageText.ItemId));
             }
 
             // Application (custom) Integrate data rows to generate CSharp code from.
@@ -778,6 +810,7 @@
 
             internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
             {
+                UtilFramework.Assert(query.ElementType == typeRow); // TODO remove parameter typeRow
                 var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query);
                 ResultAdd(result);
             }

@@ -344,6 +344,176 @@ namespace Database.dbo
         public bool IsDelete { get; set; }
     }
 
+    [SqlTable("dbo", "FrameworkLanguage")]
+    public class FrameworkLanguage : Row
+    {
+        [SqlField("Id", true, FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("Name", FrameworkTypeEnum.Nvarcahr)]
+        public string Name { get; set; }
+
+        [SqlField("TextHtml", FrameworkTypeEnum.Nvarcahr)]
+        public string TextHtml { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageApp")]
+    public class FrameworkLanguageApp : Row
+    {
+        [SqlField("LanguageId", FrameworkTypeEnum.Int)]
+        public int LanguageId { get; set; }
+
+        [SqlField("LanguageAppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string LanguageAppTypeName { get; set; }
+
+        [SqlField("LanguageName", FrameworkTypeEnum.Nvarcahr)]
+        public string LanguageName { get; set; }
+
+        [SqlField("ItemId", FrameworkTypeEnum.Int)]
+        public int ItemId { get; set; }
+
+        [SqlField("ItemName", FrameworkTypeEnum.Nvarcahr)]
+        public string ItemName { get; set; }
+
+        [SqlField("ItemTextDefault", FrameworkTypeEnum.Nvarcahr)]
+        public string ItemTextDefault { get; set; }
+
+        [SqlField("TextId", FrameworkTypeEnum.Int)]
+        public int TextId { get; set; }
+
+        [SqlField("TextText", FrameworkTypeEnum.Nvarcahr)]
+        public string TextText { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageDisplay")]
+    public class FrameworkLanguageDisplay : Row
+    {
+        [SqlField("LanguageId", FrameworkTypeEnum.Int)]
+        public int LanguageId { get; set; }
+
+        [SqlField("LanguageAppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string LanguageAppTypeName { get; set; }
+
+        [SqlField("LanguageName", FrameworkTypeEnum.Nvarcahr)]
+        public string LanguageName { get; set; }
+
+        [SqlField("ItemId", FrameworkTypeEnum.Int)]
+        public int ItemId { get; set; }
+
+        [SqlField("ItemName", FrameworkTypeEnum.Nvarcahr)]
+        public string ItemName { get; set; }
+
+        [SqlField("ItemTextDefault", FrameworkTypeEnum.Nvarcahr)]
+        public string ItemTextDefault { get; set; }
+
+        [SqlField("TextId", FrameworkTypeEnum.Int)]
+        public int? TextId { get; set; }
+
+        [SqlField("TextText", FrameworkTypeEnum.Nvarcahr)]
+        public string TextText { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageIntegrate")]
+    public class FrameworkLanguageIntegrate : Row
+    {
+        [SqlField("Id", FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("Name", FrameworkTypeEnum.Nvarcahr)]
+        public string Name { get; set; }
+
+        [SqlField("TextHtml", FrameworkTypeEnum.Nvarcahr)]
+        public string TextHtml { get; set; }
+
+        [SqlField("IdName", FrameworkTypeEnum.Nvarcahr)]
+        public string IdName { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageItem")]
+    public class FrameworkLanguageItem : Row
+    {
+        [SqlField("Id", true, FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("Name", FrameworkTypeEnum.Nvarcahr)]
+        public string Name { get; set; }
+
+        [SqlField("TextDefault", FrameworkTypeEnum.Nvarcahr)]
+        public string TextDefault { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageItemIntegrate")]
+    public class FrameworkLanguageItemIntegrate : Row
+    {
+        [SqlField("Id", FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("Name", FrameworkTypeEnum.Nvarcahr)]
+        public string Name { get; set; }
+
+        [SqlField("TextDefault", FrameworkTypeEnum.Nvarcahr)]
+        public string TextDefault { get; set; }
+
+        [SqlField("IdName", FrameworkTypeEnum.Nvarcahr)]
+        public string IdName { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageText")]
+    public class FrameworkLanguageText : Row
+    {
+        [SqlField("Id", true, FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("LanguageId", FrameworkTypeEnum.Int)]
+        public int LanguageId { get; set; }
+
+        [SqlField("ItemId", FrameworkTypeEnum.Int)]
+        public int ItemId { get; set; }
+
+        [SqlField("Text", FrameworkTypeEnum.Nvarcahr)]
+        public string Text { get; set; }
+    }
+
+    [SqlTable("dbo", "FrameworkLanguageTextIntegrate")]
+    public class FrameworkLanguageTextIntegrate : Row
+    {
+        [SqlField("Id", FrameworkTypeEnum.Int)]
+        public int Id { get; set; }
+
+        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
+        public string AppTypeName { get; set; }
+
+        [SqlField("LanguageId", FrameworkTypeEnum.Int)]
+        public int LanguageId { get; set; }
+
+        [SqlField("ItemId", FrameworkTypeEnum.Int)]
+        public int ItemId { get; set; }
+
+        [SqlField("Text", FrameworkTypeEnum.Nvarcahr)]
+        public string Text { get; set; }
+
+        [SqlField("LanguageIdName", FrameworkTypeEnum.Nvarcahr)]
+        public string LanguageIdName { get; set; }
+
+        [SqlField("ItemIdName", FrameworkTypeEnum.Nvarcahr)]
+        public string ItemIdName { get; set; }
+    }
+
     [SqlTable("dbo", "FrameworkTable")]
     public class FrameworkTable : Row
     {
@@ -368,33 +538,5 @@ namespace Database.dbo
 
         [SqlField("IdName", FrameworkTypeEnum.Nvarcahr)]
         public string IdName { get; set; }
-    }
-
-    [SqlTable("dbo", "FrameworkTranslate")]
-    public class FrameworkTranslate : Row
-    {
-        [SqlField("Id", true, FrameworkTypeEnum.Int)]
-        public int Id { get; set; }
-
-        [SqlField("AppTypeName", FrameworkTypeEnum.Nvarcahr)]
-        public string AppTypeName { get; set; }
-
-        [SqlField("Name", FrameworkTypeEnum.Nvarcahr)]
-        public string Name { get; set; }
-
-        [SqlField("Text", FrameworkTypeEnum.Nvarcahr)]
-        public string Text { get; set; }
-
-        [SqlField("TextLanguage01", FrameworkTypeEnum.Nvarcahr)]
-        public string TextLanguage01 { get; set; }
-
-        [SqlField("TextLanguage02", FrameworkTypeEnum.Nvarcahr)]
-        public string TextLanguage02 { get; set; }
-
-        [SqlField("TextLanguage03", FrameworkTypeEnum.Nvarcahr)]
-        public string TextLanguage03 { get; set; }
-
-        [SqlField("TextLanguage04", FrameworkTypeEnum.Nvarcahr)]
-        public string TextLanguage04 { get; set; }
     }
 }

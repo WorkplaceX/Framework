@@ -12,7 +12,7 @@ namespace DatabaseIntegrate.dbo
 
     public static class FrameworkConfigGridIntegrateFramework
     {
-        public enum IdEnum { [IdEnum(null)]None = 0, [IdEnum("dbo.FrameworkConfigFieldDisplay; ")]dboFrameworkConfigFieldDisplay = -1, [IdEnum("dbo.FrameworkConfigFieldDisplay; Developer")]dboFrameworkConfigFieldDisplayDeveloper = -2, [IdEnum("dbo.FrameworkConfigGridDisplay; ")]dboFrameworkConfigGridDisplay = -3, [IdEnum("dbo.FrameworkConfigGridDisplay; Developer")]dboFrameworkConfigGridDisplayDeveloper = -4 }
+        public enum IdEnum { [IdEnum(null)]None = 0, [IdEnum("dbo.FrameworkConfigFieldDisplay; ")]dboFrameworkConfigFieldDisplay = -1, [IdEnum("dbo.FrameworkConfigFieldDisplay; Developer")]dboFrameworkConfigFieldDisplayDeveloper = -2, [IdEnum("dbo.FrameworkConfigGridDisplay; ")]dboFrameworkConfigGridDisplay = -3, [IdEnum("dbo.FrameworkConfigGridDisplay; Developer")]dboFrameworkConfigGridDisplayDeveloper = -4, [IdEnum("dbo.FrameworkLanguage; ")]dboFrameworkLanguage = -5, [IdEnum("dbo.FrameworkLanguageDisplay; ")]dboFrameworkLanguageDisplay = -6 }
 
         public static FrameworkConfigGridIntegrate Row(this IdEnum value)
         {
@@ -44,6 +44,8 @@ namespace DatabaseIntegrate.dbo
                     new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigFieldDisplay; Developer", TableId = 0, TableIdName = "dbo.FrameworkConfigFieldDisplay", TableNameCSharp = "dbo.FrameworkConfigFieldDisplay", ConfigName = "Developer", RowCountMax = null, WidthMax = 10, IsAllowInsert = false, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
                     new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigGridDisplay; ", TableId = 0, TableIdName = "dbo.FrameworkConfigGridDisplay", TableNameCSharp = "dbo.FrameworkConfigGridDisplay", ConfigName = null, RowCountMax = null, WidthMax = null, IsAllowInsert = false, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
                     new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkConfigGridDisplay; Developer", TableId = 0, TableIdName = "dbo.FrameworkConfigGridDisplay", TableNameCSharp = "dbo.FrameworkConfigGridDisplay", ConfigName = "Developer", RowCountMax = null, WidthMax = 8, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
+                    new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkLanguage; ", TableId = 0, TableIdName = "dbo.FrameworkLanguage", TableNameCSharp = "dbo.FrameworkLanguage", ConfigName = null, RowCountMax = null, WidthMax = null, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
+                    new FrameworkConfigGridIntegrate { Id = 0, IdName = "dbo.FrameworkLanguageDisplay; ", TableId = 0, TableIdName = "dbo.FrameworkLanguageDisplay", TableNameCSharp = "dbo.FrameworkLanguageDisplay", ConfigName = null, RowCountMax = null, WidthMax = null, IsAllowInsert = null, IsShowHeader = null, IsShowPagination = null, IsDelete = false },
                 };
                 return result;
             }

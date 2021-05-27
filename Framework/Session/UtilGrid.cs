@@ -626,7 +626,7 @@
                     var column = columnList[item.Key.ColumnId - 1];
                     var fieldNameCSharp = column.FieldNameCSharp;
 
-                    item.Value.ColumnText = UtilFramework.TranslateGridColumnText(grid, column.FieldNameCSharp, column.ColumnText);
+                    item.Value.ColumnText = UtilFramework.LanguageGridColumnText(grid, column.FieldNameCSharp, column.ColumnText);
                 }
             }
 
@@ -637,6 +637,7 @@
             var settingResult = grid.ComponentOwner<AppJson>().SettingInternal(new AppJson.SettingArgs { Grid = grid });
             grid.IsShowConfig = settingResult.GridIsShowConfig;
             grid.IsShowConfigDeveloper = settingResult.GridIsShowConfigDeveloper;
+            grid.IsShowLanguage = settingResult.GridIsShowLanguage;
 
             // Preserve cell in ErrorParse or ErrorSave state
             foreach (var cellLocal in cellList.Values)
@@ -1048,6 +1049,9 @@
             // IsClickConfig (user clicked column configuration button)
             await ProcessIsClickConfigAsync(appJson);
 
+            // IsClickLanguage (user clicked column language translate button)
+            await ProcessIsClickLanguageAsync(appJson);
+
             // IsTextLeave (user clicked tab button to leave cell)
             ProcessIsTextLeave(appJson);
 
@@ -1081,7 +1085,6 @@
             {
                 if (grid.IsShowConfig || grid.IsShowConfigDeveloper)
                 {
-
                     GridCell cell = grid.CellList[commandJson.GridCellId - 1];
                     GridColumn column = grid.ColumnList[cell.ColumnId - 1];
                     Page page = grid.ComponentOwner<Page>();
@@ -1089,6 +1092,24 @@
                     string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
                     var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, column.FieldNameCSharp, grid.ConfigGrid?.ConfigName, isDeveloper: false); // Never show data grid header column config in developer config (mode).
                     await pageConfigGrid.InitAsync();
+                }
+            }
+        }
+
+        /// <summary>
+        /// User clicked column header language translate icon.
+        /// </summary>
+        private static async Task ProcessIsClickLanguageAsync(AppJson appJson)
+        {
+            if (UtilSession.Request(appJson, CommandEnum.GridIsClickLanguage, out CommandJson commandJson, out Grid grid))
+            {
+                if (grid.IsShowLanguage)
+                {
+                    GridCell cell = grid.CellList[commandJson.GridCellId - 1];
+                    GridColumn column = grid.ColumnList[cell.ColumnId - 1];
+                    Page page = grid.ComponentOwner<Page>();
+
+                    await new PageLanguage(page, grid.TypeRow, column.FieldNameCSharp).InitAsync();
                 }
             }
         }
@@ -1627,7 +1648,7 @@
                         bool isDeveloper = commandJson.GridIsClickEnum == GridIsClickEnum.ConfigDeveloper;
 
                         string tableNameCSharp = UtilDalType.TypeRowToTableNameCSharp(grid.TypeRow);
-                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, grid?.ConfigGrid.ConfigName, isDeveloper);
+                        var pageConfigGrid = new PageConfigGrid(page, tableNameCSharp, null, grid?.ConfigGrid?.ConfigName, isDeveloper);
                         await pageConfigGrid.InitAsync();
                     }
                 }

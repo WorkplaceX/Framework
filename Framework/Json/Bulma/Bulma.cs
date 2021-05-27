@@ -134,7 +134,7 @@ namespace Framework.Json.Bulma
                     navbar.RowMap(rowMapArgs, rowMapResult);
                     if (rowMapResult.IsHide == false)
                     {
-                        rowMapResult.TextHtml = UtilFramework.TranslateGridCellText(grid, nameof(rowMapResult.TextHtml), rowMapResult.TextHtml);
+                        rowMapResult.TextHtml = UtilFramework.LanguageGridCellText(grid, nameof(rowMapResult.TextHtml), rowMapResult.TextHtml);
                         rowMapList.Add(rowMapResult);
                     }
                 }

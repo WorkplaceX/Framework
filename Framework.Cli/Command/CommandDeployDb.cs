@@ -208,7 +208,7 @@
             UtilCliInternal.ConsoleWriteLineColor("Update Integrate tables ", ConsoleColor.Green, isLine: false);
             AppCli.CommandDeployDbIntegrateInternal(deployDbResult);
             IntegrateReseed(deployDbResult.Result, reseed, assemblyList);
-            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList, (typeRow) => UtilCliInternal.ConsoleWriteLineColor(".", ConsoleColor.Green, isLine: false)).Wait(); // See also property IsDeploy
+            UtilDalUpsertIntegrate.UpsertAsync(deployDbResult.Result, assemblyList, (typeRow) => UtilCliInternal.ConsoleWriteLineColor(".", ConsoleColor.Green, isLine: false), isExceptionContinue: true).Wait(); // See also property IsDeploy
             Console.WriteLine();
         }
 
