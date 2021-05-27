@@ -378,7 +378,8 @@
             }
             else
             {
-                LogTextList.AppendLine(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mmm:ss.fff") + "," + text);
+                var logTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mmm:ss.fff");
+                LogTextList.AppendLine($"{ UtilFramework.Version },=\"{ logTime }\",{ text }");
             }
         }
 

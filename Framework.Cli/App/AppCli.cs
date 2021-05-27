@@ -582,7 +582,6 @@
                     result.Add(
                         isFrameworkDb: true,
                         isApplication: true, // Make FrameworkConfigGrid available in application insted of cli. Enum can be used for example to get strongly typed ConfigName.
-                        typeRow: typeof(FrameworkConfigGridIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -593,7 +592,6 @@
                     result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigGridIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -612,7 +610,6 @@
                     result.Add(
                         isFrameworkDb: true,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigFieldIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -624,7 +621,6 @@
                     result.Add(
                         isFrameworkDb: false,
                         isApplication: false,
-                        typeRow: typeof(FrameworkConfigFieldIntegrate),
                         query: rowFilterList
                     );
                 }
@@ -640,7 +636,6 @@
                 result.Add(
                     isFrameworkDb: false,
                     isApplication: true,
-                    typeRow: typeof(FrameworkLanguageIntegrate),
                     query: rowLanguageList);
                 result.AddKey<FrameworkLanguage>(nameof(FrameworkLanguage.AppTypeName), nameof(FrameworkLanguage.Name));
 
@@ -648,7 +643,6 @@
                 result.Add(
                     isFrameworkDb: false,
                     isApplication: false,
-                    typeRow: typeof(FrameworkLanguageItem),
                     query: rowLanguageItemList);
                 result.AddKey<FrameworkLanguageItem>(nameof(FrameworkLanguageItem.AppTypeName), nameof(FrameworkLanguageItem.Name));
 
@@ -656,9 +650,10 @@
                 result.Add(
                     isFrameworkDb: false,
                     isApplication: false,
-                    typeRow: typeof(FrameworkLanguageTextIntegrate),
                     query: rowLanguageTextList);
                 result.AddKey<FrameworkLanguageText>(nameof(FrameworkLanguageText.AppTypeName), nameof(FrameworkLanguageText.LanguageId), nameof(FrameworkLanguageText.ItemId));
+                result.AddReference<FrameworkLanguageText, FrameworkLanguage>(nameof(FrameworkLanguageText.LanguageId));
+                result.AddReference<FrameworkLanguageText, FrameworkLanguageItem>(nameof(FrameworkLanguageText.ItemId));
             }
 
             // Application (custom) Integrate data rows to generate CSharp code from.
@@ -808,9 +803,9 @@
                 Result.Add(value);
             }
 
-            internal void Add(bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
+            internal void Add(bool isFrameworkDb, bool isApplication, IQueryable<Row> query)
             {
-                UtilFramework.Assert(query.ElementType == typeRow); // TODO remove parameter typeRow
+                var typeRow = query.ElementType;
                 var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query);
                 ResultAdd(result);
             }
