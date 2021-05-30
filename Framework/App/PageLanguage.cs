@@ -45,6 +45,22 @@
         {
             if (ButtonClose.IsClick)
             {
+                // Grid Language reload
+                var appJson = this.ComponentOwner<AppJson>();
+                var gridList = appJson.ComponentListAll<Grid>();
+                foreach (var grid in gridList)
+                {
+                    if (grid != GridLanguage) // Do not reload local grid
+                    {
+                        if (appJson.SettingInternal(grid).GridIsLanguage)
+                        {
+                            // Queue reload
+                            appJson.RequestJson.CommandAdd(new CommandJson { CommandEnum = CommandEnum.GridIsClickEnum, ComponentId = grid.Id, GridIsClickEnum = GridIsClickEnum.Reload });
+                        }
+                    }
+                }
+
+                // Queue rerender. Used for example for navbar.
                 Session.UtilGrid.QueueRerender(GridLanguageDisplay);
             }
             if (ButtonShowAll.IsClick)
@@ -69,7 +85,7 @@
         {
             // Select row with currently selected language
             var appJson = this.ComponentOwner<AppJson>();
-            var languageName = appJson.SettingInternal(new AppJson.SettingArgs { Grid = this }).GridLanguageName;
+            var languageName = appJson.SettingInternal(this).GridLanguageName;
             if (languageName != null)
             {
                 result.RowSelect = (rowList) => rowList.SingleOrDefault(item => item.Name == languageName);

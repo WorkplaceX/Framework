@@ -45,7 +45,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.52.01";
+                return "v3.52.02";
             }
         }
 
@@ -910,7 +910,7 @@ namespace Framework
             if (grid.TypeRow.Assembly != typeof(UtilFramework).Assembly) // Do not translate Framework data grid.
             {
                 var appJson = grid.ComponentOwner<AppJson>();
-                var settingResult = appJson.SettingInternal(new AppJson.SettingArgs { Grid = grid }); // Get LanguageId.
+                var settingResult = appJson.SettingInternal(grid); // Get GridLanguageName.
                 result = Language(appJson, grid.TypeRow.FullName + "." + itemName, text, settingResult.GridLanguageName);
             }
             return result;

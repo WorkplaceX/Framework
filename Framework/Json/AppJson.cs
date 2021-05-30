@@ -786,6 +786,11 @@
             public bool GridIsShowLanguage { get; set; }
 
             /// <summary>
+            /// Gets or sets GridIsLanguage. If true, grid gets reloaded after PageLanguage close. A new language might have been added.
+            /// </summary>
+            public bool GridIsLanguage { get; set; }
+
+            /// <summary>
             /// Gets or sets GridIsRowSelectRerender. If true, application gets rerendered after another row is selected. For example after language change.
             /// </summary>
             public bool GridIsRowSelectRerender { get; set; }
@@ -801,14 +806,15 @@
         /// </summary>
         private Dictionary<Grid, SettingResult> settingInternalCache;
 
-        internal SettingResult SettingInternal(SettingArgs args)
+        internal SettingResult SettingInternal(Grid grid)
         {
+            SettingArgs args = new SettingArgs { Grid = grid };
             SettingResult result = null;
             lock (this) // Two data grid might be loaded in parallel. For example: await Task.WhenAll(GridNavigate.LoadAsync(), GridLanguage.LoadAsync());
             {
                 if (settingInternalCache == null || !settingInternalCache.TryGetValue(args.Grid, out result))
                 {
-                    result = new SettingResult();
+                    result = new SettingResult { GridIsLanguage = args.Grid.TypeRow == typeof(FrameworkLanguage) };
                     Setting(args, result);
                     result.GridLanguageName = UtilFramework.StringNull(result.GridLanguageName);
                     if (settingInternalCache == null)

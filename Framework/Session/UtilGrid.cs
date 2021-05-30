@@ -634,7 +634,7 @@
             grid.IsHidePagination = !(configGrid?.IsShowPagination).GetValueOrDefault(true);
 
             // IsShowConfig
-            var settingResult = grid.ComponentOwner<AppJson>().SettingInternal(new AppJson.SettingArgs { Grid = grid });
+            var settingResult = grid.ComponentOwner<AppJson>().SettingInternal(grid);
             grid.IsShowConfig = settingResult.GridIsShowConfig;
             grid.IsShowConfigDeveloper = settingResult.GridIsShowConfigDeveloper;
             grid.IsShowLanguage = settingResult.GridIsShowLanguage;
@@ -1445,7 +1445,7 @@
                         if (rowSelect != rowSelectLocal)
                         {
                             await grid.RowSelectAsync(); // Load detail data grid
-                            if (grid.ComponentOwner<AppJson>().SettingInternal(new AppJson.SettingArgs { Grid = grid }).GridIsRowSelectRerender)
+                            if (grid.ComponentOwner<AppJson>().SettingInternal(grid).GridIsRowSelectRerender)
                             {
                                 UtilGrid.QueueRerender(grid);
                             }

@@ -406,6 +406,10 @@
             {
                 try
                 {
+                    TimeHeartbeat = DateTime.UtcNow.ToString("HH:mmm:ss");
+                    // Logger.LogInformation(TimeHeartbeat);
+
+                    // Load Language
                     if (LanguageAppIsLoad)
                     {
                         LanguageAppIsLoad = false;
@@ -416,10 +420,8 @@
                     }
 
                     await Task.Delay(1000);
-                    TimeHeartbeat = DateTime.UtcNow.ToString("HH:mmm:ss");
-                    Logger.LogInformation(TimeHeartbeat);
 
-                    // Language
+                    // Update Language
                     if (LanguageItemUpsertList.Count > 0)
                     {
                         Logger.LogInformation("Update sql table FrameworkLanguageItem. ({0} Rows)", LanguageItemUpsertList.Count);
@@ -428,7 +430,7 @@
                         LanguageItemUpsertList.Clear();
                     }
 
-                    // Log
+                    // Update Log
                     LogTextFlush();
                 }
                 catch (Exception exception)
