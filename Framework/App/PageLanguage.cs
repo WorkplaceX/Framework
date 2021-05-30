@@ -108,6 +108,13 @@
         protected override async Task UpdateAsync(UpdateArgs args, UpdateResult result)
         {
             await Data.UpdateAsync(args.Row);
+
+            // Update detail language name
+            foreach (var item in this.ComponentOwner<PageLanguage>().GridLanguageDisplay.RowList)
+            {
+                item.LanguageName = args.Row.Name;
+            }
+
             result.IsHandled = true;
         }
     }
