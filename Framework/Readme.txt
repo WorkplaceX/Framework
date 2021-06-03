@@ -1,4 +1,11 @@
-﻿Doc
+﻿Video
+-https://voicegenerator.io/
+-https://freesound.org/
+
+Ico
+-https://redketchup.io/icon-editor
+
+Doc
 -Add new website (method InitConfigCli)
 -hosts
 -ConnectionString
