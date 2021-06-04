@@ -319,7 +319,7 @@
             string connectionString = ConfigServer.ConnectionString(typeRow);
             if (connectionString == null)
             {
-                throw new Exception("ConnectionString is null! (See also file: ConfigServer.json)"); // Run command ".\cli.cmd config ConnectionString=..."
+                throw new Exception("ConnectionString is null! (See also file: ConfigServer.json)"); // Run command ".\wpx.cmd config ConnectionString=..."
             }
 
             if (UtilDalType.TypeRowIsTableNameSql(typeRow) == false)

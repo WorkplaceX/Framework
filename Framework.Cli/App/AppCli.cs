@@ -575,7 +575,7 @@
             {
                 var rowList = Data.Query<FrameworkConfigGridIntegrate>();
                 
-                // Framework (.\cli.cmd generate -f)
+                // Framework (.\wpx.cmd generate -f)
                 {
                     var rowFilterList = rowList.Where(item => tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter Framework.
                     rowFilterList = rowFilterList.OrderBy(item => item.IdName);
@@ -585,7 +585,7 @@
                         query: rowFilterList
                     );
                 }
-                // Application (.\cli.cmd generate)
+                // Application (.\wpx.cmd generate)
                 {
                     var rowFilterList = rowList.Where(item => !tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp) && tableNameCSharpApplicationList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter (not Framework and Application).
                     rowFilterList = rowFilterList.OrderBy(item => item.IdName);
@@ -602,7 +602,7 @@
             // FrameworkConfigFieldIntegrate
             {
                 var rowList = Data.Query<FrameworkConfigFieldIntegrate>();
-                // Framework (.\cli.cmd generate -f)
+                // Framework (.\wpx.cmd generate -f)
                 {
                     var rowFilterList = rowList.Where(item => tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter FrameworkDb.
                     rowFilterList = rowList.Where(item => fieldNameCSharpFrameworkNoTupleList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Framework assembly.
@@ -613,7 +613,7 @@
                         query: rowFilterList
                     );
                 }
-                // Application (.\cli.cmd generate)
+                // Application (.\wpx.cmd generate)
                 {
                     var rowFilterList = rowList.Where(item => !tableNameCSharpFrameworkList.Values.ToArray().Contains(item.TableNameCSharp) && tableNameCSharpApplicationList.Values.ToArray().Contains(item.TableNameCSharp)); // Filter (not Framework and Application).
                     rowFilterList = rowList.Where(item => fieldNameCSharpApplicationNoTupleList.Contains(item.TableNameCSharp + "/" + item.FieldNameCSharp)); // Filter FieldNameCSharp declared in Application assembly.

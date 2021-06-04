@@ -180,7 +180,7 @@
             {
                 if (UtilCliInternal.ArgumentValue(this, argumentJson, out string json))
                 {
-                    // Set ConfigCli.json with command: ".\cli.cmd config json='{}'"
+                    // Set ConfigCli.json with command: ".\wpx.cmd config json='{}'"
                     json = json.Trim('\"'); // Remove quotation marks at the begin and end. 
                     json = json.Replace("'", "\""); // To use it in command prompt.
                     // Write

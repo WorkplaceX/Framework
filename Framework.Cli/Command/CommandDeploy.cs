@@ -32,9 +32,12 @@
             UtilCliInternal.ConsoleWriteLineColor("Information! Always run build command first in order to deploy latest version.", System.ConsoleColor.Cyan); // Information
             string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/net5.0/publish/";
 
+            var isDeploy = false;
+
             // Deploy Azure
             if (OptionAzure.OptionGet())
             {
+                isDeploy = true;
                 string deployAzureGitUrl = UtilFramework.StringNull(configCli.EnvironmentGet().DeployAzureGitUrl); // For example: "https://MyUsername:MyPassword@my22.scm.azurewebsites.net:443/my22.git"
                 if (deployAzureGitUrl == null)
                 {
@@ -59,6 +62,7 @@
             // Deploy local folder
             if (OptionLocal.OptionGet())
             {
+                isDeploy = true;
                 string deployLocalFolderName = UtilFramework.StringNull(configCli.EnvironmentGet().DeployLocalFolderName); // For example: "C:\Temp\Publish\"
                 if (deployLocalFolderName == null)
                 {
@@ -69,6 +73,11 @@
                     UtilCliInternal.FolderDelete(deployLocalFolderName);
                     UtilCliInternal.FolderCopy(folderNamePublish, deployLocalFolderName);
                 }
+            }
+
+            if (!isDeploy)
+            {
+                UtilCliInternal.ConsoleWriteLineColor("Warning! Use destination option --azure or --folder", System.ConsoleColor.Yellow); // Warning
             }
         }
     }
