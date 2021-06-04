@@ -253,18 +253,19 @@
         /// </summary>
         public static async Task<string> WebPost(string url, string json)
         {
-            using HttpClient client = new HttpClient();
-            HttpResponseMessage response;
+            string result;
             try
             {
-                response = await client.PostAsync(url, new StringContent(json, Encoding.Unicode, "application/json")); // Make sure Universal server is running.
+                using var client = new HttpClient();
+                using var stringContent = new StringContent(json, Encoding.Unicode, "application/json");
+                using var response = await client.PostAsync(url, stringContent); // Make sure Universal server is running.
                 response.EnsureSuccessStatusCode();
+                result = await response.Content.ReadAsStringAsync();
             }
             catch (HttpRequestException exception)
             {
-                throw new Exception(string.Format("Http request failed! Make sure cli build command did run. Close node.exe ({0})", url), exception);
+                throw new Exception(string.Format("Http POST request failed! Make sure cli build command did run. Close node.exe ({0})", url), exception);
             }
-            string result = await response.Content.ReadAsStringAsync();
             return result;
         }
     }
