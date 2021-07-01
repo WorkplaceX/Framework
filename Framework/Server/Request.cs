@@ -309,6 +309,14 @@
             string scriptReplace = "</app-root><script>var jsonBrowser = " + jsonClient + "</script>";
             indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace); // Send jsonBrowser with index.html to client for both SSR and not SSR.
 
+            // Disable SSR inline critical css (First Contentful Paint). Performance for big styles.scss
+            scriptFind = " media=\"print\" onload=\"this.media='all'\">";
+            if (indexHtml.Contains(scriptFind)) // Angular 12
+            {
+                scriptReplace = "";
+                indexHtml = UtilFramework.Replace(indexHtml, scriptFind, scriptReplace); // Prevent css flicker. See also server.ts "inlineCriticalCss: false" (First Contentful Paint)
+            }
+
             return indexHtml;
         }
 
