@@ -65,6 +65,8 @@ export class Json { // AppJson
   IsHidePagination: boolean | undefined;
 
   IsShowConfig: boolean | undefined;
+  
+  IsShowLanguage: boolean | undefined;
 
   IsShowConfigDeveloper: boolean | undefined;
 

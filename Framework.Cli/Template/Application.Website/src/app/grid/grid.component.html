@@ -8,7 +8,7 @@
       <td *ngFor="let cell of json.CellList | slice : rowIndex * json.StyleColumnList!.length : (rowIndex + 1) * json.StyleColumnList!.length; index as columnIndex; trackBy trackBy;" class="grid-td">
         <!-- HeaderColumn -->
         <div *ngIf="cell.CellEnum==4" class="grid-div th" (click)="clickSort(cell, $event);">
-          <div style="flex:1; overflow:hidden;" title="{{cell.ColumnText}}">
+          <div style="flex:1; overflow:hidden;">
             <i *ngIf="cell.IsSort==false" class="fas fa-caret-up colorWhite"></i>
             <i *ngIf="cell.IsSort==true" class="fas fa-caret-down colorWhite"></i>
             {{ cell.ColumnText }}
@@ -17,6 +17,7 @@
             <i *ngIf="cell.IsShowSpinner" class="fas fa-spinner fa-spin colorWhite"></i>
             <i *ngIf="cell.Description!=null" class="fas fa-info-circle colorWhite" title="{{ cell.Description }}"></i>
             <i *ngIf="json.IsShowConfig" class="fas fa-cog colorWhite colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
+            <i *ngIf="json.IsShowLanguage" class="fas fa-globe colorWhite colorBlueHover pointer" title="Language translate data grid column" (click)="clickLanguage(cell, $event);"></i>
           </div>
   
           <div class="gridSplitter" style="width:5px;" (click)="click($event)" (mousedown)="mouseDown(columnIndex, $event)">
@@ -27,6 +28,10 @@
         <div *ngIf="cell.CellEnum==5" class="grid-div">
           <div style="flex:1; overflow:hidden;">
             <label class="label">{{ cell.ColumnText }}</label>
+          </div>
+          <div>
+            <i *ngIf="json.IsShowConfig" class="fas fa-cog colorBlue colorBlueHover pointer" title="Config data grid column" (click)="clickConfig(cell, $event);"></i>
+            <i *ngIf="json.IsShowLanguage" class="fas fa-globe colorBlue colorBlueHover pointer" title="Language translate data grid column" (click)="clickLanguage(cell, $event);"></i>
           </div>
         </div>
   

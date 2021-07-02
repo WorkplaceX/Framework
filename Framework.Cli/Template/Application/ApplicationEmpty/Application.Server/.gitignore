@@ -3,3 +3,5 @@
 /Framework/Application.Website/
 /Properties/PublishProfiles/
 /*.user
+
+/log.csv

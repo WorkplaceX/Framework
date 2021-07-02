@@ -49,6 +49,12 @@ export class GridComponent implements OnInit {
     this.dataService.update(<CommandJson> { CommandEnum: 12, ComponentId: this.json.Id, GridCellId: cell.Id });
   }
 
+  clickLanguage(cell: any, event: MouseEvent) {
+    event.stopPropagation(); // Prevent underlying Grid to fire click event. (Lookup grid)
+    cell.IsShowSpinner = true;
+    this.dataService.update(<CommandJson> { CommandEnum: 25, ComponentId: this.json.Id, GridCellId: cell.Id });
+  }
+
   private cellFileUpload: any;
 
   clickFileUpload(cell: any, event: MouseEvent) {
