@@ -76,6 +76,7 @@
                 {
                     Run(generateIntegrateResult);
                     string folderNameBlobTemp = new Uri(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + "/.")).AbsolutePath;
+                    UtilCliInternal.FolderCreate(folderNameBlobTemp);
                     new GenerateCSharpIntegrate().Run(out string cSharpCli, isFrameworkDb, isApplication: false, integrateList: generateIntegrateResult.Result, folderNameBlobTemp);
                     new GenerateCSharpIntegrate().Run(out string cSharpApplication, isFrameworkDb, isApplication: true, integrateList: generateIntegrateResult.Result, folderNameBlobTemp);
                     if (isFrameworkDb == false)

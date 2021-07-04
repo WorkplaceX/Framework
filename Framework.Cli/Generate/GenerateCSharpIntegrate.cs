@@ -226,7 +226,6 @@
             // Blob write
             if (fileName != null && !isApplication && (value is byte[] || value is string))
             {
-                UtilCliInternal.FolderCreate(folderNameBlob);
                 var fileNameFull = folderNameBlob + fileName;
                 if (value is byte[])
                 {
