@@ -96,7 +96,18 @@
                     classNameExtension += "Cli";
                 }
 
-                result.AppendLine(string.Format("    public static class {0}{1}", integrate.TableNameCSharp, classNameExtension));
+                // Integrate comment
+                string commentAppTypeName = null;
+                if (integrate.AppTypeName != null)
+                {
+                    commentAppTypeName = "AppTypeName=" + integrate.AppTypeName + "; ";
+                }
+                string comment = string.Format("Integrate Sql={0}; {2}Assembly={1};", integrate.TableNameSql, isApplication ? "App" : "Cli", commentAppTypeName);
+
+                result.AppendLine(string.Format("    /// <summary>"));
+                result.AppendLine(string.Format("    /// {0}", comment));
+                result.AppendLine(string.Format("    /// </summary>"));
+                result.AppendLine(string.Format("    public static class {0}{1}{2}", integrate.TableNameCSharp, classNameExtension, integrate.AppTypeName?.Replace(".", "")));
                 result.AppendLine(string.Format("    {{"));
                 if (isApplication)
                 {

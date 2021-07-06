@@ -7,6 +7,9 @@ namespace DatabaseIntegrate.dbo
     using System.Globalization;
     using Database.dbo;
 
+    /// <summary>
+    /// Integrate Sql=[dbo].[FrameworkConfigFieldIntegrate]; Assembly=Cli;
+    /// </summary>
     public static class FrameworkConfigFieldIntegrateFrameworkCli
     {
         public static List<FrameworkConfigFieldIntegrate> RowList

@@ -10,6 +10,9 @@ namespace DatabaseIntegrate.dbo
     using Framework.DataAccessLayer;
     using Database.dbo;
 
+    /// <summary>
+    /// Integrate Sql=[dbo].[FrameworkConfigGridIntegrate]; Assembly=App;
+    /// </summary>
     public static class FrameworkConfigGridIntegrateFramework
     {
         public enum IdEnum { [IdEnum(null)]None = 0, [IdEnum("dbo.FrameworkConfigFieldDisplay; ")]dboFrameworkConfigFieldDisplay = -1, [IdEnum("dbo.FrameworkConfigFieldDisplay; Developer")]dboFrameworkConfigFieldDisplayDeveloper = -2, [IdEnum("dbo.FrameworkConfigGridDisplay; ")]dboFrameworkConfigGridDisplay = -3, [IdEnum("dbo.FrameworkConfigGridDisplay; Developer")]dboFrameworkConfigGridDisplayDeveloper = -4, [IdEnum("dbo.FrameworkLanguage; ")]dboFrameworkLanguage = -5, [IdEnum("dbo.FrameworkLanguageDisplay; ")]dboFrameworkLanguageDisplay = -6 }

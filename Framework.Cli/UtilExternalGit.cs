@@ -103,15 +103,12 @@ namespace Framework.Cli
         {
             foreach (var type in appCli.AssemblyApplicationCli.GetTypes())
             {
-                if (type.FullName.StartsWith("DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli"))
+                if (type.FullName.StartsWith("DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli" + "ExternalGit"))
                 {
-                    if (type.FullName != "DatabaseIntegrate.dbo.FrameworkConfigGridIntegrateAppCli")
-                    {
-                        var typeCliExternalGit = appCli.AssemblyApplicationCli.GetType(type.FullName);
-                        var propertyInfo = typeCliExternalGit.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
-                        var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
-                        rowList.AddRange(rowApplicationCliList);
-                    }
+                    var typeCliExternalGit = appCli.AssemblyApplicationCli.GetType(type.FullName);
+                    var propertyInfo = typeCliExternalGit.GetProperty(nameof(FrameworkConfigGridIntegrateFramework.RowList));
+                    var rowApplicationCliList = (List<FrameworkConfigGridIntegrate>)propertyInfo.GetValue(null);
+                    rowList.AddRange(rowApplicationCliList);
                 }
             }
         }

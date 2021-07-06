@@ -384,7 +384,7 @@
         internal List<T> CommandDeployDbIntegrateInternalRowListGet<T>(string typeName) where T : Row
         {
             var assembly = AssemblyApplicationCli;
-            if (!typeName.EndsWith("Cli"))
+            if (!typeName.Contains("AppCli"))
             {
                 assembly = AssemblyApplicationDatabase;
             }
@@ -445,11 +445,20 @@
 
             // FrameworkLanguage
             {
-                var rowLanguageList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp");
+                var rowLanguageList = new List<FrameworkLanguageIntegrate>();
+                var rowItemList = new List<FrameworkLanguageIntegrate>();
+                var rowTextList = new List<FrameworkLanguageIntegrate>();
+                foreach (var appTypeName in AppTypeNameList())
+                {
+                    var rowLanguageLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp" + appTypeName.Replace(".", ""));
+                    rowLanguageList.AddRange(rowLanguageLocalList);
+                    var rowItemLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli" + appTypeName.Replace(".", ""));
+                    rowItemList.AddRange(rowItemList);
+                    var rowTextLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli" + appTypeName.Replace(".", ""));
+                    rowTextList.AddRange(rowTextList);
+                }
                 result.Add(rowLanguageList);
-                var rowItemList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli");
                 result.Add(rowItemList);
-                var rowTextList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli");
                 result.Add(rowTextList);
             }
 
@@ -631,26 +640,33 @@
 
             // FrameworkLanguage
             {
+                // See also method CommandDeployDbIntegrateInternal();
                 var appTypeNameList = AppTypeNameList();
-                var rowLanguageList = Data.Query<FrameworkLanguageIntegrate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
-                result.Add(
-                    isFrameworkDb: false,
-                    isApplication: true,
-                    query: rowLanguageList);
+                foreach (var appTypeName in appTypeNameList)
+                {
+                    var rowLanguageList = Data.Query<FrameworkLanguageIntegrate>().Where(item => item.AppTypeName == appTypeName).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
+                    result.Add(
+                        isFrameworkDb: false,
+                        isApplication: true,
+                        query: rowLanguageList,
+                        appTypeName: appTypeName);
+
+                    var rowLanguageItemList = Data.Query<FrameworkLanguageItem>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
+                    result.Add(
+                        isFrameworkDb: false,
+                        isApplication: false,
+                        query: rowLanguageItemList,
+                        appTypeName: appTypeName);
+
+                    var rowLanguageTextList = Data.Query<FrameworkLanguageTextIntegrate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.LanguageIdName).ThenBy(item => item.ItemIdName);
+                    result.Add(
+                        isFrameworkDb: false,
+                        isApplication: false,
+                        query: rowLanguageTextList,
+                        appTypeName: appTypeName);
+                }
                 result.AddKey<FrameworkLanguage>(nameof(FrameworkLanguage.AppTypeName), nameof(FrameworkLanguage.Name));
-
-                var rowLanguageItemList = Data.Query<FrameworkLanguageItem>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
-                result.Add(
-                    isFrameworkDb: false,
-                    isApplication: false,
-                    query: rowLanguageItemList);
                 result.AddKey<FrameworkLanguageItem>(nameof(FrameworkLanguageItem.AppTypeName), nameof(FrameworkLanguageItem.Name));
-
-                var rowLanguageTextList = Data.Query<FrameworkLanguageTextIntegrate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.LanguageIdName).ThenBy(item => item.ItemIdName);
-                result.Add(
-                    isFrameworkDb: false,
-                    isApplication: false,
-                    query: rowLanguageTextList);
                 result.AddKey<FrameworkLanguageText>(nameof(FrameworkLanguageText.AppTypeName), nameof(FrameworkLanguageText.LanguageId), nameof(FrameworkLanguageText.ItemId));
                 result.AddReference<FrameworkLanguageText, FrameworkLanguage>(nameof(FrameworkLanguageText.LanguageId));
                 result.AddReference<FrameworkLanguageText, FrameworkLanguageItem>(nameof(FrameworkLanguageText.ItemId));
@@ -686,15 +702,17 @@
             /// <summary>
             /// Constructor for Framework and Application.
             /// </summary>
-            internal GenerateIntegrateItem(GenerateIntegrateResult owner, bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
+            internal GenerateIntegrateItem(GenerateIntegrateResult owner, bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query, string appTypeName)
             {
                 this.Owner = owner;
                 this.IsFrameworkDb = isFrameworkDb;
                 this.IsApplication = isApplication;
                 this.TypeRow = typeRow;
                 this.Query = query;
+                this.AppTypeName = appTypeName;
                 UtilDalType.TypeRowToTableNameSql(TypeRow, out _, out _);
                 this.SchemaNameCSharp = UtilDalType.TypeRowToSchemaNameCSharp(TypeRow);
+                this.TableNameSql = UtilDalType.TypeRowToTableNameWithSchemaSql(TypeRow);
                 this.TableNameCSharp = UtilDalType.TypeRowToTableNameCSharpWithoutSchema(TypeRow);
             }
 
@@ -702,7 +720,7 @@
             /// Constructor for Application.
             /// </summary>
             private GenerateIntegrateItem(GenerateIntegrateResult owner, bool isApplication, Type typeRow, IQueryable<Row> query) 
-                : this(owner, false, isApplication, typeRow, query)
+                : this(owner, false, isApplication, typeRow, query, null)
             {
 
             }
@@ -742,6 +760,11 @@
             public readonly string SchemaNameCSharp;
 
             /// <summary>
+            /// Gets TableNameSql. Includes sql schema.
+            /// </summary>
+            public readonly string TableNameSql;
+
+            /// <summary>
             /// Gets TableNameCSharp. Without schema.
             /// </summary>
             public readonly string TableNameCSharp;
@@ -750,6 +773,11 @@
             /// Gets Query. Items need to be all of same TypeRow.
             /// </summary>
             public readonly IQueryable<Row> Query;
+
+            /// <summary>
+            /// Gets AppTypeName. If not null, AppTypeName is used as suffix. Used to split sql table with AppTypeName column into multiple different classes for each app.
+            /// </summary>
+            public readonly string AppTypeName;
 
             /// <summary>
             /// Gets RowList. Items need to be all of same TypeRow.
@@ -803,10 +831,10 @@
                 Result.Add(value);
             }
 
-            internal void Add(bool isFrameworkDb, bool isApplication, IQueryable<Row> query)
+            internal void Add(bool isFrameworkDb, bool isApplication, IQueryable<Row> query, string appTypeName = null)
             {
                 var typeRow = query.ElementType;
-                var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query);
+                var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query, appTypeName);
                 ResultAdd(result);
             }
 
