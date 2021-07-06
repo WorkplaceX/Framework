@@ -63,11 +63,16 @@
         public readonly Assembly AssemblyApplication;
 
         /// <summary>
-        /// Returns list of AppType in AssemblyApplication.
+        /// Returns list of AppType declared in AssemblyApplication.
         /// </summary>
         public string[] AppTypeNameList()
         {
-            return AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).Select(item => item.FullName).ToArray();
+            var appJsonTypeList = AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).ToList();
+
+            // Exclude ExternalGit
+            var appJsonTypeFilterList = appJsonTypeList.Where(item => item.GetCustomAttributes<UtilFramework.ExternalGitAttribute>().Count() == 0).ToList();
+
+            return appJsonTypeFilterList.Select(item => item.FullName).ToArray();
         }
 
         /// <summary>
@@ -1075,6 +1080,15 @@
             {
                 UtilCliInternal.FolderDelete(folderNameDest);
                 UtilCliInternal.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
+            }
+
+            /// <summary>
+            /// Returns files in folder and subfolders.
+            /// </summary>
+            /// <param name="searchPattern">For example "*.*"</param>
+            internal List<string> FileNameList(string folderName, string searchPattern)
+            {
+                return UtilCliInternal.FileNameList(folderName, searchPattern);
             }
 
             /// <summary>

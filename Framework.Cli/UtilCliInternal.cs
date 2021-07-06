@@ -6,6 +6,7 @@
     using System;
     using System.CodeDom;
     using System.CodeDom.Compiler;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
@@ -254,6 +255,46 @@
                     FolderCopy(folderNameSource + folderName.Name + "/", folderNameDest + folderName.Name + "/");
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns list of files in folder.
+        /// </summary>
+        private static void FileNameList(string folderName, string searchPattern, bool isAllDirectory, List<string> result)
+        {
+            var directoryInfo = new DirectoryInfo(folderName);
+            SearchOption searchOption = SearchOption.TopDirectoryOnly;
+            foreach (FileInfo file in directoryInfo.GetFiles(searchPattern, searchOption))
+            {
+                string fileName = file.FullName;
+                result.Add(fileName);
+            }
+
+            if (isAllDirectory)
+            {
+                foreach (var folderNameSub in directoryInfo.GetDirectories())
+                {
+                    if (folderNameSub.Name == "node_modules")
+                    {
+                        // Skip folder node_modules/
+                        continue;
+                    }
+                    FileNameList(folderNameSub.FullName, searchPattern, isAllDirectory, result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns list of files in folder.
+        /// </summary>
+        /// <param name="folderName"></param>
+        /// <param name="searchPattern">For example: "*.*"</param>
+        /// <param name="isAllDirectory">If true, includes subdirectories.</param>
+        internal static List<string> FileNameList(string folderName, string searchPattern = "*.*", bool isAllDirectory = true)
+        {
+            var result = new List<string>();
+            FileNameList(folderName, searchPattern, isAllDirectory, result);
+            return result;
         }
 
         /// <summary>

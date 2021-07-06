@@ -45,7 +45,7 @@ namespace Framework
                 // Angular CLI: 11.0.1
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.52.13";
+                return "v3.52.14";
             }
         }
 
@@ -938,6 +938,15 @@ namespace Framework
         internal static string LanguageGridColumnText(Grid grid, string fieldNameCSharp, string text)
         {
             return LanguageGrid(grid, fieldNameCSharp + ".ColumnText()", text);
+        }
+
+        /// <summary>
+        /// See also cli command externalGit method ExecuteCopy();
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Class)]
+        public class ExternalGitAttribute : Attribute
+        {
+
         }
     }
 }

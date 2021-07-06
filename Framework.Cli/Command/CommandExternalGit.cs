@@ -62,6 +62,15 @@
             Console.WriteLine("Copy folder App/");
             args.FolderCopy(args.AppSourceFolderName, args.AppDestFolderName);
 
+            // ExternalGit attribute for all external classes
+            var fileNameCSharpList = args.FileNameList(args.AppDestFolderName, "*.cs");
+            foreach (var fileNameCSharp in fileNameCSharpList)
+            {
+                var text = UtilFramework.FileLoad(fileNameCSharp);
+                text = text.Replace("public class ", "[Framework.UtilFramework.ExternalGit] public class ");
+                UtilFramework.FileSave(fileNameCSharp, text);
+            }
+
             // Copy folder Database/
             Console.WriteLine("Copy folder Database/");
             args.FolderCopy(args.DatabaseSourceFolderName, args.DatabaseDestFolderName);
