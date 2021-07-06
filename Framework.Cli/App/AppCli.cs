@@ -65,14 +65,18 @@
         /// <summary>
         /// Returns list of AppType declared in AssemblyApplication.
         /// </summary>
-        public string[] AppTypeNameList()
+        /// <param name="isExternalGit">If true, AppType in ExternalGit are included.</param>
+        public string[] AppTypeNameList(bool isExternalGit)
         {
             var appJsonTypeList = AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).ToList();
 
-            // Exclude ExternalGit
-            var appJsonTypeFilterList = appJsonTypeList.Where(item => item.GetCustomAttributes<UtilFramework.ExternalGitAttribute>().Count() == 0).ToList();
+            if (!isExternalGit)
+            {
+                // Exclude ExternalGit
+                appJsonTypeList = appJsonTypeList.Where(item => item.GetCustomAttributes<UtilFramework.ExternalGitAttribute>().Count() == 0).ToList();
+            }
 
-            return appJsonTypeFilterList.Select(item => item.FullName).ToArray();
+            return appJsonTypeList.Select(item => item.FullName).ToArray();
         }
 
         /// <summary>
@@ -453,7 +457,7 @@
                 var rowLanguageList = new List<FrameworkLanguageIntegrate>();
                 var rowItemList = new List<FrameworkLanguageIntegrate>();
                 var rowTextList = new List<FrameworkLanguageIntegrate>();
-                foreach (var appTypeName in AppTypeNameList())
+                foreach (var appTypeName in AppTypeNameList(isExternalGit: true))
                 {
                     var rowLanguageLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp" + appTypeName.Replace(".", ""));
                     rowLanguageList.AddRange(rowLanguageLocalList);
@@ -646,7 +650,7 @@
             // FrameworkLanguage
             {
                 // See also method CommandDeployDbIntegrateInternal();
-                var appTypeNameList = AppTypeNameList();
+                var appTypeNameList = AppTypeNameList(isExternalGit: false);
                 foreach (var appTypeName in appTypeNameList)
                 {
                     var rowLanguageList = Data.Query<FrameworkLanguageIntegrate>().Where(item => item.AppTypeName == appTypeName).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
