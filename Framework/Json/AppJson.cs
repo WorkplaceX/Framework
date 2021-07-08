@@ -786,11 +786,6 @@
             public bool GridIsShowLanguage { get; set; }
 
             /// <summary>
-            /// Gets or sets GridIsLanguage. If true, grid gets reloaded after PageLanguage close. A new language might have been added.
-            /// </summary>
-            public bool GridIsLanguage { get; set; }
-
-            /// <summary>
             /// Gets or sets GridIsRowSelectRerender. If true, application gets rerendered after another row is selected. For example after language change.
             /// </summary>
             public bool GridIsRowSelectRerender { get; set; }
@@ -814,7 +809,7 @@
             {
                 if (settingInternalCache == null || !settingInternalCache.TryGetValue(args.Grid, out result))
                 {
-                    result = new SettingResult { GridIsLanguage = args.Grid.TypeRow == typeof(FrameworkLanguage) };
+                    result = new SettingResult();
                     Setting(args, result);
                     result.GridLanguageName = UtilFramework.StringNull(result.GridLanguageName);
                     if (settingInternalCache == null)

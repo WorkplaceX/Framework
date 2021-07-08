@@ -65,18 +65,10 @@
         /// <summary>
         /// Returns list of AppType declared in AssemblyApplication.
         /// </summary>
-        /// <param name="isExternalGit">If true, AppType in ExternalGit are included.</param>
-        public string[] AppTypeNameList(bool isExternalGit)
+        public List<string> AppTypeNameList()
         {
             var appJsonTypeList = AssemblyApplication.GetTypes().Where(item => item.IsSubclassOf(typeof(AppJson))).ToList();
-
-            if (!isExternalGit)
-            {
-                // Exclude ExternalGit
-                appJsonTypeList = appJsonTypeList.Where(item => item.GetCustomAttributes<UtilFramework.ExternalGitAttribute>().Count() == 0).ToList();
-            }
-
-            return appJsonTypeList.Select(item => item.FullName).ToArray();
+            return appJsonTypeList.Select(item => item.FullName).ToList();
         }
 
         /// <summary>
@@ -393,7 +385,7 @@
         internal List<T> CommandDeployDbIntegrateInternalRowListGet<T>(string typeName) where T : Row
         {
             var assembly = AssemblyApplicationCli;
-            if (!typeName.Contains("AppCli"))
+            if (!typeName.EndsWith("AppCli"))
             {
                 assembly = AssemblyApplicationDatabase;
             }
@@ -409,10 +401,10 @@
         /// </summary>
         internal void CommandDeployDbIntegrateInternal(DeployDbIntegrateResult result)
         {
-            // FrameworkTable
+            // FrameworkTable (Deploay)
             var tableNameCSharpList = result.Result[0].RowList.Select(item => (((FrameworkTable)item).TableNameCSharp)).ToArray();
 
-            // FrameworkConfigGridIntegrate
+            // FrameworkConfigGridIntegrate (Deploy)
             {
                 var rowList = FrameworkConfigGridIntegrateFramework.RowList;
 
@@ -432,7 +424,7 @@
                 result.Add(rowList);
             }
 
-            // FrameworkConfigFieldIntegrate
+            // FrameworkConfigFieldIntegrate (Deploy)
             {
                 var rowList = FrameworkConfigFieldIntegrateFrameworkCli.RowList;
 
@@ -450,25 +442,6 @@
                 UtilExternalGit.CommandDeployDbIntegrate(this, rowList);
 
                 result.Add(rowList);
-            }
-
-            // FrameworkLanguage
-            {
-                var rowLanguageList = new List<FrameworkLanguageIntegrate>();
-                var rowItemList = new List<FrameworkLanguageIntegrate>();
-                var rowTextList = new List<FrameworkLanguageIntegrate>();
-                foreach (var appTypeName in AppTypeNameList(isExternalGit: true))
-                {
-                    var rowLanguageLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp" + appTypeName.Replace(".", ""));
-                    rowLanguageList.AddRange(rowLanguageLocalList);
-                    var rowItemLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli" + appTypeName.Replace(".", ""));
-                    rowItemList.AddRange(rowItemList);
-                    var rowTextLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli" + appTypeName.Replace(".", ""));
-                    rowTextList.AddRange(rowTextList);
-                }
-                result.Add(rowLanguageList);
-                result.Add(rowItemList);
-                result.Add(rowTextList);
             }
 
             // Add application (custom) Integrate data rows to deploy to database
@@ -589,7 +562,7 @@
             var fieldNameCSharpFrameworkNoTupleList = fieldNameCSharpFrameworkList.Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp);
             var fieldNameCSharpApplicationNoTupleList = fieldNameCSharpApplicationList.Select(item => item.TableNameCSharp + "/" + item.FieldNameCSharp);
 
-            // FrameworkConfigGridIntegrate
+            // FrameworkConfigGridIntegrate (Generate)
             {
                 var rowList = Data.Query<FrameworkConfigGridIntegrate>();
                 
@@ -617,7 +590,7 @@
                 result.AddReference<FrameworkConfigGrid, FrameworkTable>(nameof(FrameworkConfigGrid.TableId));
             }
 
-            // FrameworkConfigFieldIntegrate
+            // FrameworkConfigFieldIntegrate (Generate)
             {
                 var rowList = Data.Query<FrameworkConfigFieldIntegrate>();
                 // Framework (.\wpx.cmd generate -f)
@@ -645,40 +618,6 @@
                 result.AddKey<FrameworkConfigField>(nameof(FrameworkConfigField.ConfigGridId), nameof(FrameworkConfigField.FieldId), nameof(FrameworkConfigField.InstanceName));
                 result.AddReference<FrameworkConfigField, FrameworkConfigGrid>(nameof(FrameworkConfigField.ConfigGridId));
                 result.AddReference<FrameworkConfigField, FrameworkField>(nameof(FrameworkConfigField.FieldId));
-            }
-
-            // FrameworkLanguage
-            {
-                // See also method CommandDeployDbIntegrateInternal();
-                var appTypeNameList = AppTypeNameList(isExternalGit: false);
-                foreach (var appTypeName in appTypeNameList)
-                {
-                    var rowLanguageList = Data.Query<FrameworkLanguageIntegrate>().Where(item => item.AppTypeName == appTypeName).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
-                    result.Add(
-                        isFrameworkDb: false,
-                        isApplication: true,
-                        query: rowLanguageList,
-                        appTypeName: appTypeName);
-
-                    var rowLanguageItemList = Data.Query<FrameworkLanguageItem>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.Name);
-                    result.Add(
-                        isFrameworkDb: false,
-                        isApplication: false,
-                        query: rowLanguageItemList,
-                        appTypeName: appTypeName);
-
-                    var rowLanguageTextList = Data.Query<FrameworkLanguageTextIntegrate>().Where(item => appTypeNameList.Contains(item.AppTypeName)).OrderBy(item => item.AppTypeName).ThenBy(item => item.LanguageIdName).ThenBy(item => item.ItemIdName);
-                    result.Add(
-                        isFrameworkDb: false,
-                        isApplication: false,
-                        query: rowLanguageTextList,
-                        appTypeName: appTypeName);
-                }
-                result.AddKey<FrameworkLanguage>(nameof(FrameworkLanguage.AppTypeName), nameof(FrameworkLanguage.Name));
-                result.AddKey<FrameworkLanguageItem>(nameof(FrameworkLanguageItem.AppTypeName), nameof(FrameworkLanguageItem.Name));
-                result.AddKey<FrameworkLanguageText>(nameof(FrameworkLanguageText.AppTypeName), nameof(FrameworkLanguageText.LanguageId), nameof(FrameworkLanguageText.ItemId));
-                result.AddReference<FrameworkLanguageText, FrameworkLanguage>(nameof(FrameworkLanguageText.LanguageId));
-                result.AddReference<FrameworkLanguageText, FrameworkLanguageItem>(nameof(FrameworkLanguageText.ItemId));
             }
 
             // Application (custom) Integrate data rows to generate CSharp code from.
@@ -711,14 +650,13 @@
             /// <summary>
             /// Constructor for Framework and Application.
             /// </summary>
-            internal GenerateIntegrateItem(GenerateIntegrateResult owner, bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query, string appTypeName)
+            internal GenerateIntegrateItem(GenerateIntegrateResult owner, bool isFrameworkDb, bool isApplication, Type typeRow, IQueryable<Row> query)
             {
                 this.Owner = owner;
                 this.IsFrameworkDb = isFrameworkDb;
                 this.IsApplication = isApplication;
                 this.TypeRow = typeRow;
                 this.Query = query;
-                this.AppTypeName = appTypeName;
                 UtilDalType.TypeRowToTableNameSql(TypeRow, out _, out _);
                 this.SchemaNameCSharp = UtilDalType.TypeRowToSchemaNameCSharp(TypeRow);
                 this.TableNameSql = UtilDalType.TypeRowToTableNameWithSchemaSql(TypeRow);
@@ -729,7 +667,7 @@
             /// Constructor for Application.
             /// </summary>
             private GenerateIntegrateItem(GenerateIntegrateResult owner, bool isApplication, Type typeRow, IQueryable<Row> query) 
-                : this(owner, false, isApplication, typeRow, query, null)
+                : this(owner, false, isApplication, typeRow, query)
             {
 
             }
@@ -769,7 +707,7 @@
             public readonly string SchemaNameCSharp;
 
             /// <summary>
-            /// Gets TableNameSql. Includes sql schema.
+            /// Gets TableNameSql. Includes sql schema. Used for generate comment.
             /// </summary>
             public readonly string TableNameSql;
 
@@ -782,11 +720,6 @@
             /// Gets Query. Items need to be all of same TypeRow.
             /// </summary>
             public readonly IQueryable<Row> Query;
-
-            /// <summary>
-            /// Gets AppTypeName. If not null, AppTypeName is used as suffix. Used to split sql table with AppTypeName column into multiple different classes for each app.
-            /// </summary>
-            public readonly string AppTypeName;
 
             /// <summary>
             /// Gets RowList. Items need to be all of same TypeRow.
@@ -840,10 +773,10 @@
                 Result.Add(value);
             }
 
-            internal void Add(bool isFrameworkDb, bool isApplication, IQueryable<Row> query, string appTypeName = null)
+            internal void Add(bool isFrameworkDb, bool isApplication, IQueryable<Row> query)
             {
                 var typeRow = query.ElementType;
-                var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query, appTypeName);
+                var result = new GenerateIntegrateItem(this, isFrameworkDb, isApplication, typeRow, query);
                 ResultAdd(result);
             }
 
@@ -1084,15 +1017,6 @@
             {
                 UtilCliInternal.FolderDelete(folderNameDest);
                 UtilCliInternal.FolderCopy(folderNameSource, folderNameDest, "*.*", true);
-            }
-
-            /// <summary>
-            /// Returns files in folder and subfolders.
-            /// </summary>
-            /// <param name="searchPattern">For example "*.*"</param>
-            internal List<string> FileNameList(string folderName, string searchPattern)
-            {
-                return UtilCliInternal.FileNameList(folderName, searchPattern);
             }
 
             /// <summary>

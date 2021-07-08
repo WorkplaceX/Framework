@@ -291,16 +291,6 @@
         public string TimeHeartbeat { get; private set; }
 
         /// <summary>
-        /// Data to be added to database by service.
-        /// </summary>
-        private List<FrameworkLanguageItem> LanguageItemUpsertList = new List<FrameworkLanguageItem>();
-
-        /// <summary>
-        /// (AppTypeName, LanguageName, ItemName)
-        /// </summary>
-        private ConcurrentDictionary<(string, string, string), FrameworkLanguageApp> LanguageAppList = new ConcurrentDictionary<(string, string, string), FrameworkLanguageApp>();
-
-        /// <summary>
         /// Gets or sets LanguageAppIsLoad. If true, LanguageAppList gets loaded or reloaded.
         /// </summary>
         public bool LanguageAppIsLoad = true;
@@ -318,33 +308,7 @@
             var result = textDefault;
             try
             {
-                var row = LanguageAppList.GetOrAdd((appTypeName, languageName, itemName), (key) =>
-                {
-                    var rowNew = new FrameworkLanguageApp { LanguageAppTypeName = appTypeName, LanguageName = languageName, ItemName = itemName, ItemTextDefault = textDefault };
-                    var rowApp = new FrameworkLanguageItem { AppTypeName = appTypeName, Name = itemName, TextDefault = textDefault };
-                    LanguageItemUpsertList.Add(rowApp);
-                    return rowNew;
-                });
-
-                // TextDefault changed
-                if (textDefault != row.ItemTextDefault)
-                {
-                    var rowApp = new FrameworkLanguageItem { AppTypeName = appTypeName, Name = itemName, TextDefault = textDefault };
-                    LanguageItemUpsertList.Add(rowApp);
-                    var find = (appTypeName, itemName);
-                    foreach (var item in LanguageAppList)
-                    {
-                        if ((item.Key.Item1, item.Key.Item3) == find) // (AppTypeName, ItemName), no LanguageName
-                        {
-                            item.Value.ItemTextDefault = textDefault;
-                        }
-                    }
-                }
-
-                if (row.TextText != null)
-                {
-                    result = row.TextText;
-                }
+                // TODO Language
             }
             catch (Exception exception)
             {
@@ -353,14 +317,6 @@
                 LogText(errorText, isRequestContext: false);
             }
             return result;
-        }
-
-        /// <summary>
-        /// Update language translate in memory dictionary.
-        /// </summary>
-        public void LanguageUpdate(string appTypeName, string languageName, string itemName, string textDefault, string text)
-        {
-            LanguageAppList[(appTypeName, languageName, itemName)] = new FrameworkLanguageApp { LanguageAppTypeName = appTypeName, LanguageName = languageName, ItemName = itemName, ItemTextDefault = textDefault, TextText = text };
         }
 
         /// <summary>
@@ -410,26 +366,11 @@
                     TimeHeartbeat = DateTime.UtcNow.ToString("HH:mmm:ss");
                     // Logger.LogInformation(TimeHeartbeat);
 
-                    // Load Language
-                    if (LanguageAppIsLoad)
-                    {
-                        LanguageAppIsLoad = false;
-                        // Load sql table FrameworkLanguageApp.
-                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
-                        var languageAppList = (await Data.Query<FrameworkLanguageApp>().QueryExecuteAsync()).ToList();
-                        LanguageAppList = new ConcurrentDictionary<(string, string, string), FrameworkLanguageApp>(languageAppList.ToDictionary(item => (item.LanguageAppTypeName, item.LanguageName, item.ItemName)));
-                    }
+                    // TODO Language load
 
                     await Task.Delay(1000);
 
-                    // Update Language
-                    if (LanguageItemUpsertList.Count > 0)
-                    {
-                        Logger.LogInformation("Update sql table FrameworkLanguageItem. ({0} Rows)", LanguageItemUpsertList.Count);
-                        UtilServer.ServiceProvider = ServiceProvider; // Make sure method ServiceGet(); is available.
-                        await UtilDalUpsert.UpsertAsync(LanguageItemUpsertList, new string[] { nameof(FrameworkLanguageItem.AppTypeName), nameof(FrameworkLanguageItem.Name) });
-                        LanguageItemUpsertList.Clear();
-                    }
+                    // TODO Language update
 
                     // Update Log
                     LogTextFlush();

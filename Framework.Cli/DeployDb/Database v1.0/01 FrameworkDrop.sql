@@ -1,14 +1,4 @@
-﻿/* Framework Language */
-DROP VIEW FrameworkLanguageDisplay
-DROP VIEW FrameworkLanguageApp
-DROP VIEW FrameworkLanguageTextIntegrate
-DROP TABLE FrameworkLanguageText
-DROP VIEW FrameworkLanguageItemIntegrate
-DROP TABLE FrameworkLanguageItem
-DROP VIEW FrameworkLanguageIntegrate
-DROP TABLE FrameworkLanguage
-
-/* Framework Config */
+﻿/* Framework Config */
 DROP VIEW FrameworkConfigFieldDisplay
 DROP VIEW FrameworkConfigGridDisplay
 DROP VIEW FrameworkConfigFieldIntegrate

@@ -1097,7 +1097,7 @@
         }
 
         /// <summary>
-        /// User clicked column header language translate icon.
+        /// User clicked column header language translate globe icon.
         /// </summary>
         private static async Task ProcessIsClickLanguageAsync(AppJson appJson)
         {
@@ -1109,7 +1109,7 @@
                     GridColumn column = grid.ColumnList[cell.ColumnId - 1];
                     Page page = grid.ComponentOwner<Page>();
 
-                    await new PageLanguage(page, grid.TypeRow, column.FieldNameCSharp).InitAsync();
+                    // TODO Language await new PageLanguage(page, grid.TypeRow, column.FieldNameCSharp).InitAsync();
                 }
             }
         }
