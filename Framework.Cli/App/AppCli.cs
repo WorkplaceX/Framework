@@ -459,12 +459,12 @@
                 var rowTextList = new List<FrameworkLanguageIntegrate>();
                 foreach (var appTypeName in AppTypeNameList(isExternalGit: true))
                 {
-                    var rowLanguageLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp" + appTypeName.Replace(".", ""));
-                    rowLanguageList.AddRange(rowLanguageLocalList);
-                    var rowItemLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli" + appTypeName.Replace(".", ""));
-                    rowItemList.AddRange(rowItemList);
-                    var rowTextLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli" + appTypeName.Replace(".", ""));
-                    rowTextList.AddRange(rowTextList);
+                    // var rowLanguageLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp" + appTypeName.Replace(".", ""));
+                    // rowLanguageList.AddRange(rowLanguageLocalList);
+                    // var rowItemLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli" + appTypeName.Replace(".", ""));
+                    // rowItemList.AddRange(rowItemList);
+                    // var rowTextLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli" + appTypeName.Replace(".", ""));
+                    // rowTextList.AddRange(rowTextList);
                 }
                 result.Add(rowLanguageList);
                 result.Add(rowItemList);

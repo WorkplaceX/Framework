@@ -3,13 +3,10 @@
     using Framework.Config;
     using Framework.DataAccessLayer.DatabaseMemory;
     using Framework.Json;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Data;
-    using Microsoft.Data.SqlClient;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Reflection;
@@ -17,6 +14,9 @@
     using System.Threading.Tasks;
     using static Framework.DataAccessLayer.UtilDalType;
     using System.Globalization;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Data.SqlClient;
 
     /// <summary>
     /// Linq to database or linq to memory.

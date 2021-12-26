@@ -33,19 +33,19 @@ namespace Framework
             get
             {
                 // dotnet --version
-                // 5.0.100
+                // 6.0.101
 
                 // node --version
-                // v12.18.1
+                // v16.13.1
 
                 // npm --version
-                // 6.14.4
+                // 8.1.2
 
-                // npm run ng -- --version (Application.Website/)
-                // Angular CLI: 11.0.1
+                // npm run ng -- --version (run inside folder Application.Website/)
+                // Angular CLI: 13.1.2
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.52.15";
+                return "v3.52.2";
             }
         }
 
