@@ -30,7 +30,7 @@
 
             ConfigCli configCli = ConfigCli.Load();
             UtilCliInternal.ConsoleWriteLineColor("Information! Always run build command first in order to deploy latest version.", System.ConsoleColor.Cyan); // Information
-            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/net5.0/publish/";
+            string folderNamePublish = UtilFramework.FolderName + "Application.Server/bin/Debug/net6.0/publish/";
 
             var isDeploy = false;
 
