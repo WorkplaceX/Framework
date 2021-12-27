@@ -1,4 +1,4 @@
-# Angular 12 Client Application
+# Angular 13 Client Application
 Provides an empty template to start develop a web application with WorkplaceX. Add Bootstrap or Bulma as following:
 
 ## Add Bootstrap (Used by Default)
@@ -52,15 +52,15 @@ ng generate component custom-hero --skip-import --inlineStyle=true --skipTests=t
 
 ## Version Check
 ```cmd
-node --version # v12.18.1
-npm --version # 6.14.5
-ng --version Angular CLI: 11.2.6
+node --version # v16.13.1
+npm --version # 8.1.2
+ng --version Angular CLI: 13.1.2
 npm list -g --depth 0 # List globally installed packages
 ```
 
 ## Version Check Azure
 Set node version in App Service Application Settings
-* WEBSITE_NODE_DEFAULT_VERSION 12.18.0
+* WEBSITE_NODE_DEFAULT_VERSION 16.13.0
 For available node versions go to App Service Advanced Tools (Kudu). Got to CMD. Type CD .. Go to D:\Program Files\nodejs
 
 ## Setup Angular CLI (Global)

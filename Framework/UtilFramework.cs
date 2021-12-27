@@ -45,7 +45,7 @@ namespace Framework
                 // Angular CLI: 13.1.2
 
                 // Semantic versioning. v3.(Changes that break backward compatibility).(Backward compatible new features)(Backward compatible bug fixes) See also: https://docs.npmjs.com/about-semantic-versioning
-                return "v3.52.2";
+                return "v3.52.21";
             }
         }
 
