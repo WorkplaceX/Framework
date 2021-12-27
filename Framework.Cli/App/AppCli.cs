@@ -455,16 +455,16 @@
             // FrameworkLanguage
             {
                 var rowLanguageList = new List<FrameworkLanguageIntegrate>();
-                var rowItemList = new List<FrameworkLanguageIntegrate>();
-                var rowTextList = new List<FrameworkLanguageIntegrate>();
+                var rowItemList = new List<FrameworkLanguageItem>();
+                var rowTextList = new List<FrameworkLanguageTextIntegrate>();
                 foreach (var appTypeName in AppTypeNameList(isExternalGit: true))
                 {
                     var rowLanguageLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageIntegrateApp" + appTypeName.Replace(".", ""));
                     rowLanguageList.AddRange(rowLanguageLocalList);
                     var rowItemLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageItem>("DatabaseIntegrate.dbo.FrameworkLanguageItemAppCli" + appTypeName.Replace(".", ""));
-                    rowItemList.AddRange(rowItemList);
+                    rowItemList.AddRange(rowItemLocalList);
                     var rowTextLocalList = CommandDeployDbIntegrateInternalRowListGet<FrameworkLanguageTextIntegrate>("DatabaseIntegrate.dbo.FrameworkLanguageTextIntegrateAppCli" + appTypeName.Replace(".", ""));
-                    rowTextList.AddRange(rowTextList);
+                    rowTextList.AddRange(rowTextLocalList);
                 }
                 result.Add(rowLanguageList);
                 result.Add(rowItemList);

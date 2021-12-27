@@ -16,7 +16,7 @@ jobs:
         submodules: recursive
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.100'
+        dotnet-version: '6.0.101'
     - name: Install script
       run: ./Framework/Framework.Cli/Ci/github.com/install.sh
     - name: Build script
