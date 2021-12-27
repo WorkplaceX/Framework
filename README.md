@@ -4,14 +4,14 @@
 
 [![Build Status](https://travis-ci.org/WorkplaceX/ApplicationDoc.svg?branch=master)](https://travis-ci.org/WorkplaceX/ApplicationDoc) (travis)
 
-Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 5.0 and SQL Server. Runs on Windows and Linux. Provides CI/CD pipeline.
+Framework to create database applications based on Angular 11, Bootstrap, Bulma, ASP.NET Core 6.0 and SQL Server. Runs on Windows and Linux. Provides CI/CD pipeline.
 
 Project page: [WorkplaceX.org](https://www.workplacex.org)
 
 ## Getting started
 Prerequisites for Linux and Windows
 * [Node.js](https://nodejs.org/en/) (LTS Version)
-* [.NET Core SDK](https://dotnet.microsoft.com/download) (Version 5.0)
+* [.NET Core SDK](https://dotnet.microsoft.com/download) (Version 6.0)
 * [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Free Express)
 
 Create new project in empty folder (for Linux use ./cli.sh instead of /.cli.cmd)
@@ -63,22 +63,22 @@ All configuration (DEV, TEST, PROD) is stored in file ConfigCli.json. Runtime co
 Some versions to check:
 ```cmd
 node --version
-v12.18.1
+v16.13.1
 
 npm --version
-6.14.5
+8.1.2
 
 dotnet --version
-5.0.101
+6.0.101
 
 ng --version
-Angular CLI: 11.0.3
+Angular CLI: 13.1.2
 ```
 
 For Windows:
 ```cmd
 git --version
-git version 2.29.2.windows.2
+git version 2.34.1.windows.1
 
 $PSVersionTable.PSVersion
 Major  Minor  Patch  PreReleaseLabel BuildLabel
