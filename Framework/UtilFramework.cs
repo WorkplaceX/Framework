@@ -793,7 +793,7 @@ namespace Framework
         {
             // Salt
             var saltArray = new byte[64];
-            using (var random = RNGCryptoServiceProvider.Create())
+            using (var random = RandomNumberGenerator.Create())
             {
                 random.GetBytes(saltArray);
             }
@@ -871,7 +871,7 @@ namespace Framework
         public static string PasswordSaltConfigCreate()
         {
             var saltArray = new byte[64];
-            using (var random = RNGCryptoServiceProvider.Create())
+            using (var random = RandomNumberGenerator.Create())
             {
                 random.GetBytes(saltArray);
             }
